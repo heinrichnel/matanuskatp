@@ -129,10 +129,10 @@ const TripReport: React.FC<TripReportProps> = ({ trip }) => {
             )}
           </div>
 
-          {trip.tripDescription && (
+          {trip.description && (
             <div className="mb-4">
               <p className="text-sm text-gray-500">Description</p>
-              <p className="text-gray-900">{trip.tripDescription}</p>
+              <p className="text-gray-900">{trip.description}</p>
             </div>
           )}
 

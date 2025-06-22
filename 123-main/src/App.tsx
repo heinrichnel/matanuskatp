@@ -13,8 +13,9 @@ import ActiveTrips from "./components/trips/ActiveTrips";
 import CompletedTrips from "./components/trips/CompletedTrips";
 import FlagsInvestigations from "./components/flags/FlagsInvestigations";
 import CurrencyFleetReport from "./components/reports/CurrencyFleetReport";
-import SystemCostConfiguration from "./components/admin/SystemCostConfiguration";
+// import SystemCostConfiguration from "./components/admin/SystemCostConfiguration";
 import InvoiceAgingDashboard from "./components/invoicing/InvoiceAgingDashboard";
+// import SystemCostConfiguration from "./components/cost/indirect/SystemCostConfiguration";
 import CustomerRetentionDashboard from "./components/performance/CustomerRetentionDashboard";
 import MissedLoadsTracker from "./components/trips/MissedLoadsTracker";
 import DieselDashboard from "./components/diesel/DieselDashboard";
@@ -24,7 +25,7 @@ import TripDetails from "./components/trips/TripDetails";
 import TripForm from "./components/trips/TripForm";
 
 // Utilities & Types
-import { Trip, MissedLoad } from "./types";
+import { MissedLoad, Trip } from "./types";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
 
@@ -37,7 +38,7 @@ const AppContent: React.FC = () => {
   // const { isAuthenticated, isLoading } = useReplitAuth();
   const { 
     trips, setTrips, missedLoads, addMissedLoad, updateMissedLoad, deleteMissedLoad,
-    updateTrip, deleteTrip, completeTrip, systemCostRates, updateSystemCostRates
+    updateTrip, deleteTrip, completeTrip
   } = useAppContext();
 
   // Remove or replace with your actual auth logic
@@ -89,14 +90,25 @@ const AppContent: React.FC = () => {
   // Update Trip handler
   const handleUpdateTrip = (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     if (editingTrip) {
-      const updatedTrip = {
+      const updatedTrip: Trip = {
         ...editingTrip,
         ...tripData,
+        id: editingTrip.id,
         costs: editingTrip.costs,
         status: editingTrip.status,
         additionalCosts: editingTrip.additionalCosts || [],
         delayReasons: editingTrip.delayReasons || [],
         followUpHistory: editingTrip.followUpHistory || [],
+        fleetNumber: editingTrip.fleetNumber,
+        route: editingTrip.route,
+        driverName: editingTrip.driverName,
+        clientName: editingTrip.clientName,
+        clientType: editingTrip.clientType,
+        startDate: editingTrip.startDate,
+        endDate: editingTrip.endDate,
+        // revenue: editingTrip.revenue, // Remove, not in Trip type
+        // distance: editingTrip.distance, // Remove, not in Trip type
+        // Add any other required Trip properties here if missing
       };
       updateTrip(updatedTrip);
       setEditingTrip(undefined);
@@ -166,15 +178,15 @@ const AppContent: React.FC = () => {
       case "dashboard":
         return <Dashboard trips={trips} />;
       case "active-trips":
-        return <ActiveTrips trips={trips.filter((t) => t.status === "active")} onEdit={handleEditTrip} onDelete={handleDeleteTrip} onView={handleViewTrip} />;
+        return <ActiveTrips trips={trips.filter((t) => t.status === "active")} onEdit={handleEditTrip} onDelete={handleDeleteTrip} onView={handleViewTrip} onCompleteTrip={completeTrip} />;
       case "completed-trips":
         return <CompletedTrips trips={trips.filter((t) => ["completed", "invoiced", "paid"].includes(t.status))} onView={setSelectedTrip} />;
       case "flags":
         return <FlagsInvestigations trips={trips} />;
       case "reports":
         return <CurrencyFleetReport trips={trips} />;
-      case "system-costs":
-        return <SystemCostConfiguration currentRates={systemCostRates} onUpdateRates={updateSystemCostRates} userRole="admin" />;
+      // case "system-costs":
+      //   return <SystemCostConfiguration currentRates={systemCostRates} onUpdateRates={updateSystemCostRates} userRole="admin" />;
       case "invoice-aging":
         return <InvoiceAgingDashboard trips={trips} onViewTrip={setSelectedTrip} />;
       case "customer-retention":
@@ -223,15 +235,3 @@ const App: React.FC = () => (
 );
 
 export default App;
-
-export interface Trip {
-  route: ReactNode;
-  id: string;
-  fleetNumber: string;
-  status: string;
-  costs: any[]; // Replace with actual cost type
-  additionalCosts?: any[];
-  delayReasons?: any[];
-  followUpHistory?: any[];
-  // ...other properties as needed
-}

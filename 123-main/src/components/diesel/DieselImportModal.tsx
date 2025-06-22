@@ -94,7 +94,7 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
   const parseCSV = (text: string) => {
     const lines = text.split('\n');
     const headers = lines[0].split(',').map(h => h.trim());
-    const data = [];
+    const data: any[] = [];
     
     for (let i = 1; i < lines.length; i++) {
       if (lines[i].trim()) {

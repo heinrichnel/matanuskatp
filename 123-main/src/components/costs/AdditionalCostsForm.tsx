@@ -8,6 +8,7 @@ import { AdditionalCost, ADDITIONAL_COST_TYPES } from '../../types/index';
 import Button from '../ui/Button';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import { Input, Select, TextArea } from '../ui/FormElements';
+import FileUpload from '../ui/FileUpload';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import { DollarSign, Plus, Upload, X } from 'lucide-react';
@@ -172,7 +173,7 @@ const AdditionalCostsForm: React.FC<AdditionalCostsFormProps> = ({
                 <Select
                   label="Cost Type *"
                   value={formData.costType}
-                  onChange={(e) => handleChange('costType', e.target.value)}
+                  onChange={(e: any) => handleChange('costType', typeof e === 'string' ? e : e?.target?.value || '')}
                   options={[
                     { label: 'Select cost type...', value: '' },
                     ...ADDITIONAL_COST_TYPES
@@ -182,7 +183,7 @@ const AdditionalCostsForm: React.FC<AdditionalCostsFormProps> = ({
                 <Select
                   label="Currency *"
                   value={formData.currency}
-                  onChange={(e) => handleChange('currency', e.target.value)}
+                  onChange={(e: any) => handleChange('currency', typeof e === 'string' ? e : e?.target?.value || '')}
                   options={[
                     { label: 'ZAR (R)', value: 'ZAR' },
                     { label: 'USD ($)', value: 'USD' }
@@ -194,7 +195,7 @@ const AdditionalCostsForm: React.FC<AdditionalCostsFormProps> = ({
                   step="0.01"
                   min="0.01"
                   value={formData.amount}
-                  onChange={(e) => handleChange('amount', e.target.value)}
+                  onChange={(e: any) => handleChange('amount', typeof e === 'string' ? e : e?.target?.value || '')}
                   placeholder="0.00"
                   error={errors.amount}
                 />
@@ -203,7 +204,7 @@ const AdditionalCostsForm: React.FC<AdditionalCostsFormProps> = ({
               <TextArea
                 label="Notes (Optional)"
                 value={formData.notes || ''}
-                onChange={e => handleChange('notes', typeof e === 'string' ? e : e.target?.value || '')}
+                onChange={e => handleChange('notes', typeof e === 'string' ? e : (e as any)?.target?.value || '')}
                 placeholder="Additional notes about this cost..."
                 rows={3}
               />

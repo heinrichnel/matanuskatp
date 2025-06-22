@@ -1,12 +1,10 @@
-<<<<<<< HEAD
-// ─── React & State ───────────────────────────────────────────────
 import React, { useState, useMemo } from 'react';
 
 // ─── Types & Constants ───────────────────────────────────────────
 import { Trip, CLIENTS, DRIVERS, FLEET_NUMBERS } from '../../types';
 
 // ─── UI Components ───────────────────────────────────────────────
-import { Input, Select, TextArea } from '../ui/FormElements';
+import { Select, TextArea } from '../ui/FormElements';
 import Button from '../ui/Button';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import { Edit, Trash2, Eye, AlertTriangle, Upload, Filter, Calendar, CheckSquare, Square, CheckCheck, Truck, CheckCircle } from 'lucide-react';
@@ -15,15 +13,10 @@ import LoadImportModal from './LoadImportModal';
 import TripStatusUpdateModal from './TripStatusUpdateModal';
 import { useAppContext } from '../../context/AppContext';
 
-=======
-import React from "react";
-import * as types from "../../App.tsx";
->>>>>>> 26992b5f0a3b081be38f1bd0501c447ccf1bbf89
-
 interface ActiveTripsProps {
-  trips: types.Trip[];
-  onView: (trip: types.Trip) => void;
-  onEdit: (trip: types.Trip) => void;
+  trips: Trip[];
+  onView: (trip: Trip) => void;
+  onEdit: (trip: Trip) => void;
   onDelete: (id: string) => void;
   onCompleteTrip: (tripId: string) => void;
 }
@@ -130,7 +123,6 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
   }, [filteredTrips]);
 
   return (
-<<<<<<< HEAD
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
@@ -153,46 +145,14 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
             {selectMode ? 'Exit Selection' : 'Select Trips'}
           </Button>
           {selectMode && selectedTripIds.length > 0 && (
-            <Button 
-              variant="danger" 
-              onClick={handleBulkDelete}
-              icon={<Trash2 className="w-4 h-4" />}
-=======
-    <div>
-      {trips.map((trip) => {
-        const unresolvedFlags = trip.costs?.some(
-          (cost) => cost.isFlagged && cost.investigationStatus !== "resolved"
-        );
-        const canComplete = !unresolvedFlags;
-
-        return (
-          <div key={trip.id} className="trip-card p-4 border rounded mb-4">
-            className="font-semibold"{">"}{trip.fleetNumber}
-            <p>{trip.route}</p>
-
-            <button onClick={() => onView(trip)}>View</button>
-            <button onClick={() => onEdit(trip)}>Edit</button>
-            <button onClick={() => onDelete(trip.id)}>Delete</button>
-
-            <button
-              disabled={!canComplete}
-              onClick={() => {
-                if (canComplete) {
-                  onCompleteTrip(trip.id);
-                } else {
-                  alert("Cannot complete trip: Resolve all flagged costs first.");
-                }
-              }}
-              className={`ml-2 px-3 py-1 rounded ${
-                canComplete
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-400 text-gray-700 cursor-not-allowed"
-              }`}
->>>>>>> 26992b5f0a3b081be38f1bd0501c447ccf1bbf89
-            >
-              Delete Selected ({selectedTripIds.length})
-            </Button>
-          )}
+  <Button 
+    variant="danger" 
+    onClick={handleBulkDelete}
+    icon={<Trash2 className="w-4 h-4" />}
+  >
+    Delete Selected ({selectedTripIds.length})
+  </Button>
+)}
           <Button icon={<Upload className="w-4 h-4" />} onClick={openImportModal}>
             Import Trips
           </Button>
