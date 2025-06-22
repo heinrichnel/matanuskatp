@@ -7,18 +7,16 @@ import { Trip, CustomerPerformance } from '../../types';
 // ─── UI Components ───────────────────────────────────────────────
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import { Input, Select } from '../ui/FormElements';
+import { Select } from '../ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
   AlertTriangle,
   Award,
-  Calendar,
   Clock,
   DollarSign,
   Download,
   Filter,
-  TrendingDown,
   TrendingUp,
   Users
 } from 'lucide-react';

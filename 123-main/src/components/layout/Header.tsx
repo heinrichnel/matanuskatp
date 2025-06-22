@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import { FC } from 'react';
 import {
   Activity,
   BarChart3,
@@ -11,23 +11,18 @@ import {
   Settings,
   Shield,
   Target,
-  TrendingDown,
   Truck,
   Upload,
   Users,
-  Wifi,
-  WifiOff,
-  User as UserRound,
-  Bell
+  Bell,
+  UserRound
 } from 'lucide-react';
-import { useAppContext } from '../../context/AppContext';
 import Button from '../ui/Button';
 
 interface HeaderProps {
   currentView: string;
   onNavigate: (view: string) => void;
   onNewTrip: () => void;
-  title?: string;
   userName?: string;
   onProfileClick?: () => void;
   onNotificationsClick?: () => void;
@@ -38,13 +33,11 @@ const Header: FC<HeaderProps> = ({
   currentView,
   onNavigate,
   onNewTrip,
-  title = "Transport Management System",
   userName = "Current User",
   onProfileClick,
   onNotificationsClick,
   onSettingsClick
 }) => {
-  const { connectionStatus } = useAppContext();
   const navItems = [
     { id: 'ytd-kpis', label: 'YTD KPIs', icon: Target },
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
@@ -84,7 +77,27 @@ const Header: FC<HeaderProps> = ({
       <div className="px-6 py-4 border-t flex items-center gap-3">
         <UserRound className="w-5 h-5 text-gray-400" />
         <span className="text-sm text-gray-700">{userName}</span>
-        {/* Add notification/settings/profile icons as needed */}
+        <button
+          className="ml-auto p-2 rounded-full hover:bg-gray-100 focus:outline-none"
+          onClick={onNotificationsClick}
+          aria-label="Notifications"
+        >
+          <Bell className="w-5 h-5 text-gray-400" />
+        </button>
+        <button
+          className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
+          onClick={onSettingsClick}
+          aria-label="Settings"
+        >
+          <Settings className="w-5 h-5 text-gray-400" />
+        </button>
+        <button
+          className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
+          onClick={onProfileClick}
+          aria-label="Profile"
+        >
+          <Shield className="w-5 h-5 text-gray-400" />
+        </button>
       </div>
     </aside>
   );

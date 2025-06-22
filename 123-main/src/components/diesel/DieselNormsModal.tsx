@@ -17,13 +17,11 @@ import {
   AlertTriangle,
   Plus,
   Trash2,
-  History,
-  Clock
+  History
 } from 'lucide-react';
 
 // ─── Constants / Types ───────────────────────────────────────────
 import { FLEET_NUMBERS } from '../../types';
-import { formatCurrency } from '../../utils/currency'; // Example utility for formatting currency
 
 // Define which fleets have probes
 const FLEETS_WITH_PROBES = ['22H', '23H', '24H', '26H', '28H', '31H', '30H'];

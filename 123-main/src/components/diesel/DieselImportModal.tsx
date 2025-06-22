@@ -124,8 +124,6 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
       // Convert to diesel records
       const dieselRecords: ImportedDieselRecord[] = data.map((row: any) => {
         const isReeferUnit = row.isReeferUnit === 'true' || row.isReeferUnit === true || ['4F', '5F', '6F', '7F', '8F'].includes(row.fleetNumber);
-        // const hasProbe = FLEETS_WITH_PROBES.includes(row.fleetNumber);
-        const hasProbe = false; // Set to false or implement your own logic if needed
         
         return {
           id: `diesel-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -330,7 +328,7 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
                   <tbody>
                     {previewData.map((row, rowIndex) => (
                       <tr key={rowIndex} className="border-b">
-                        {Object.entries(row).slice(0, 6).map(([key, value], colIndex) => (
+                        {Object.entries(row).slice(0, 6).map(([, value], colIndex) => (
                           <td key={`${rowIndex}-${colIndex}`} className="px-2 py-1 text-gray-600">
                             {String(value)}
                           </td>
