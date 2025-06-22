@@ -196,7 +196,7 @@ interface PaymentHistoryRecord {
 }
 
 // NEW: Truck Performance with Utilization
-interface TruckPerformance {
+export interface TruckPerformance {
   fleetNumber: string;
   totalKilometers: number;
   totalTrips: number;
@@ -481,19 +481,12 @@ export interface TripDeletionRecord {
 }
 
 // User Permission Types
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'manager' | 'operator';
-  permissions: UserPermission[];
-}
 
-interface UserPermission {
+export interface UserPermission {
   action: 'create_trip' | 'edit_trip' | 'delete_trip' | 'complete_trip' | 'edit_completed_trip' | 'delete_completed_trip' | 'manage_investigations' | 'view_reports' | 'manage_system_costs';
   granted: boolean;
 }
-
+export type NoUserPermissionAllowed = never;
 // Constants for form options
 export const CLIENTS = [
   'Teralco', 'SPF', 'Deep Catch', 'DS Healthcare', 'HFR', 'Aspen', 'DP World', 'FX Logistics',
@@ -558,13 +551,7 @@ export const DELAY_REASON_TYPES = [
 ];
 
 // NEW: Contact Methods
-const CONTACT_METHODS = [
-  { value: 'call', label: 'Phone Call' },
-  { value: 'email', label: 'Email' },
-  { value: 'whatsapp', label: 'WhatsApp' },
-  { value: 'in_person', label: 'In Person' },
-  { value: 'sms', label: 'SMS' }
-];
+// (Removed unused CONTACT_METHODS to resolve compile error)
 
 // NEW: Enhanced Missed Load Reasons
 export const MISSED_LOAD_REASONS = [

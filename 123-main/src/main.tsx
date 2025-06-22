@@ -13,4 +13,3 @@ if (rootElement) {
   );
 }
 
-// Example of onChange with TypeScript

@@ -8,7 +8,6 @@ import Card, { CardContent, CardHeader } from '../ui/Card';
 import { Input } from '../ui/FormElements';
 
 // ─── Utilities ───────────────────────────────────────────────────
-import { formatCurrency, formatDate } from '../../utils/helpers';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
@@ -24,6 +23,7 @@ import {
 
 // ─── Constants / Types ───────────────────────────────────────────
 import { FLEET_NUMBERS } from '../../types';
+import { formatCurrency } from '../../utils/currency'; // Example utility for formatting currency
 
 // Define which fleets have probes
 const FLEETS_WITH_PROBES = ['22H', '23H', '24H', '26H', '28H', '31H', '30H'];
@@ -119,7 +119,9 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
 
     const selectedFleet = availableFleets[0];
     const isReeferUnit = ['4F', '5F', '6F', '7F', '8F'].includes(selectedFleet);
-    const hasProbe = FLEETS_WITH_PROBES.includes(selectedFleet);
+
+    // Determine if the selected fleet has a probe
+    // const hasProbe = FLEETS_WITH_PROBES.includes(selectedFleet);
 
     const newNorm: DieselNorms = {
       fleetNumber: selectedFleet,
@@ -129,6 +131,7 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
       updatedBy: 'Current User',
       isReeferUnit,
       litresPerHour: isReeferUnit ? 3.5 : undefined // Default litres per hour for reefers
+      // You can use `hasProbe` elsewhere if you want to display or use probe-specific logic
     };
 
     setEditedNorms(prev => [...prev, newNorm]);
