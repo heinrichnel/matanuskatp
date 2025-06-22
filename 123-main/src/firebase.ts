@@ -8,27 +8,35 @@ import {
   doc, 
   onSnapshot, 
   query, 
-  where, 
   orderBy,
   serverTimestamp,
   enableNetwork,
-  disableNetwork,
-  connectFirestoreEmulator
-} from 'firebase/firestore';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
+  disableNetwork} from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { getAnalytics } from 'firebase/analytics';
 import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport } from './types';
 
 // Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDSvvlVBiZ_QL-FVkjFrQBKIajkIhXNZgE",
-  authDomain: "matanuska-491ad.firebaseapp.com",
-  databaseURL: "https://matanuska-491ad-default-rtdb.firebaseio.com",
-  projectId: "matanuska-491ad",
-  storageBucket: "matanuska-491ad.firebasestorage.app",
-  messagingSenderId: "801621513780",
-  appId: "1:801621513780:web:e78dc5bc75d846932e1c61",
-  measurementId: "G-52ZKDP6J7Q"
+interface FirebaseConfig {
+  apiKey: string;
+  authDomain: string;
+  databaseURL: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+  measurementId: string;
+}
+
+const firebaseConfig: FirebaseConfig = {
+  apiKey: "AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g",
+  authDomain: "mat1-9e6b3.firebaseapp.com",
+  databaseURL: "https://mat1-9e6b3-default-rtdb.firebaseio.com",
+  projectId: "mat1-9e6b3",
+  storageBucket: "mat1-9e6b3.firebasestorage.app",
+  messagingSenderId: "250085264089",
+  appId: "1:250085264089:web:51c2b209e0265e7d04ccc8",
+  measurementId: "G-YHQHSJN5CQ"
 };
 
 // Initialize Firebase
@@ -39,7 +47,7 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // Initialize Analytics (only in production)
-let analytics;
+let analytics: ReturnType<typeof getAnalytics> | undefined;
 if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
   analytics = getAnalytics(app);
 }
