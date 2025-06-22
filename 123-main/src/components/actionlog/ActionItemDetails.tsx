@@ -1,52 +1,20 @@
-<<<<<<< HEAD
-// ─── React & Context ─────────────────────────────────────────────
-import React, { useState } from 'react';
-import { useAppContext } from '../../context/AppContext';
-
-// ─── Types ───────────────────────────────────────────────────────
-import { ActionItem } from '../../types/index';
-
-// ─── UI Components ───────────────────────────────────────────────
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Input, Textarea } from '../ui/FormElements';
-
-// ─── Icons ───────────────────────────────────────────────────────
-import {
-  AlertTriangle,
-  Calendar,
-  CheckCircle,
-  Clock,
-  FileUp,
-  MessageSquare,
-  Send,
-  User,
-  X
-} from 'lucide-react';
-
-// ─── Utilities ───────────────────────────────────────────────────
-import { formatDate, formatDateTime } from '../../utils/helpers';
-
-=======
 import React, { useState } from "react";
+import { useAppContext } from "../../context/AppContext";
 import { ActionItem } from "../../types/index";
-import Modal from "../ui/Modal.tsx";
-import Button from "../ui/Button.tsx";
-import { TextArea } from "../ui/FormElements.tsx";
+import Modal from "../ui/Modal";
+import Button from "../ui/Button";
+import { TextArea } from "../ui/FormElements";
 import {
   CheckCircle,
   Clock,
   Calendar,
   User,
-  MessageSquare,
   Send,
   FileUp,
   AlertTriangle,
   X,
 } from "lucide-react";
-import { formatDate, formatDateTime } from "../../utils/helpers.ts";
-import { useAppContext } from "../../context/AppContext";
->>>>>>> 26992b5f0a3b081be38f1bd0501c447ccf1bbf89
+import { formatDate, formatDateTime } from "../../utils/helpers";
 
 interface ActionItemDetailsProps {
   isOpen: boolean;
@@ -261,9 +229,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
               <TextArea
                 label="Reason for Delay *"
                 value={overdueReason}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                  setOverdueReason(e.target.value)
-                }
+                onChange={setOverdueReason}
                 placeholder="Explain why this action item is overdue..."
                 rows={2}
               />
@@ -345,7 +311,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
           <div className="flex space-x-2">
             <TextArea
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={setComment}
               placeholder="Add a comment..."
               rows={2}
               className="flex-1"

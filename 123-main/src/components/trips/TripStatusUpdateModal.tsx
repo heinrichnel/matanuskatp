@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { TextArea } from '../ui/FormElements';
-import { Trip } from '../../types';
 import { formatDate } from '../../utils/helpers';
 import { Truck, Calendar, MapPin, User, Send, X, Clock, CheckCircle } from 'lucide-react';
 
@@ -157,3 +156,14 @@ const TripStatusUpdateModal: React.FC<TripStatusUpdateModalProps> = ({
 };
 
 export default TripStatusUpdateModal;
+
+export interface Trip {
+  id: string;
+  fleetNumber: string;
+  driverName: string;
+  route: string;
+  startDate: string;
+  endDate: string;
+  shippedAt?: string; // ISO date string or undefined if not shipped yet
+  // add other properties as needed
+}

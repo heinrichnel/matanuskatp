@@ -162,13 +162,13 @@ const InvoiceFollowUpModal: React.FC<InvoiceFollowUpModalProps> = ({
               label="Follow-up Date *"
               type="date"
               value={formData.followUpDate}
-              onChange={(e) => handleChange('followUpDate', e.target.value)}
+              onChange={(value: string) => handleChange('followUpDate', value)}
               error={errors.followUpDate}
             />
             <Select
               label="Contact Method *"
               value={formData.contactMethod}
-              onChange={(e) => handleChange('contactMethod', e.target.value)}
+              onChange={(value: string) => handleChange('contactMethod', value)}
               options={[
                 { label: 'Phone Call', value: 'call' },
                 { label: 'Email', value: 'email' },
@@ -182,15 +182,15 @@ const InvoiceFollowUpModal: React.FC<InvoiceFollowUpModalProps> = ({
           <Input
             label="Staff Member *"
             value={formData.responsibleStaff}
-            onChange={(e) => handleChange('responsibleStaff', e.target.value)}
+            onChange={(value: string) => handleChange('responsibleStaff', value)}
             placeholder="Name of person who conducted follow-up"
             error={errors.responsibleStaff}
           />
 
-          <TextArea
+          <Textarea
             label="Follow-up Summary *"
             value={formData.responseSummary}
-            onChange={(e) => handleChange('responseSummary', e.target.value)}
+            onChange={(value: string) => handleChange('responseSummary', value)}
             placeholder="Describe the conversation, customer response, and any commitments made..."
             rows={4}
             error={errors.responseSummary}
@@ -200,7 +200,7 @@ const InvoiceFollowUpModal: React.FC<InvoiceFollowUpModalProps> = ({
             <Select
               label="Priority"
               value={formData.priority}
-              onChange={(e) => handleChange('priority', e.target.value)}
+              onChange={(value: string) => handleChange('priority', value)}
               options={[
                 { label: 'Low', value: 'low' },
                 { label: 'Medium', value: 'medium' },
@@ -211,7 +211,7 @@ const InvoiceFollowUpModal: React.FC<InvoiceFollowUpModalProps> = ({
             <Select
               label="Status"
               value={formData.status}
-              onChange={(e) => handleChange('status', e.target.value)}
+              onChange={(value: string) => handleChange('status', value)}
               options={[
                 { label: 'Completed', value: 'completed' },
                 { label: 'Pending', value: 'pending' },
@@ -221,7 +221,7 @@ const InvoiceFollowUpModal: React.FC<InvoiceFollowUpModalProps> = ({
             <Select
               label="Outcome"
               value={formData.outcome}
-              onChange={(e) => handleChange('outcome', e.target.value)}
+              onChange={(value: string) => handleChange('outcome', value)}
               options={[
                 { label: 'No Response', value: 'no_response' },
                 { label: 'Promised Payment', value: 'promised_payment' },
@@ -236,7 +236,7 @@ const InvoiceFollowUpModal: React.FC<InvoiceFollowUpModalProps> = ({
             label="Next Follow-up Date"
             type="date"
             value={formData.nextFollowUpDate}
-            onChange={(e) => handleChange('nextFollowUpDate', e.target.value)}
+            onChange={(value: string) => handleChange('nextFollowUpDate', value)}
             min={new Date().toISOString().split('T')[0]}
           />
         </div>

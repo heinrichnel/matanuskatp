@@ -26,13 +26,9 @@ const SystemCostGenerator: React.FC<SystemCostGeneratorProps> = ({
   const [systemRates, setSystemRates] = useState<Record<'USD' | 'ZAR', SystemCostRates>>(DEFAULT_SYSTEM_COST_RATES);
   
   // Get the latest system cost rates from the admin configuration
-  const { systemCostRates } = useAppContext();
+  const { } = useAppContext();
   
   useEffect(() => {
-    if (systemCostRates) {
-      setSystemRates(systemCostRates);
-    }
-    
     // Also check localStorage for saved rates
     const savedRates = localStorage.getItem('systemCostRates');
     if (savedRates) {
@@ -45,7 +41,7 @@ const SystemCostGenerator: React.FC<SystemCostGeneratorProps> = ({
         console.error("Error parsing saved system cost rates:", error);
       }
     }
-  }, [systemCostRates]);
+  }, [systemRates]);
   
   // Use effective date logic to determine which rates to apply
   const getApplicableRates = (currency: 'USD' | 'ZAR'): SystemCostRates => {

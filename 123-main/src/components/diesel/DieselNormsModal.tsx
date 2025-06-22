@@ -242,7 +242,9 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
                     onClick={() => removeFleetNorm(norm.fleetNumber)}
                     icon={<Trash2 className="w-3 h-3" />}
                     className="p-1"
-                  />
+                  >
+                    <span className="sr-only">Remove</span>
+                  </Button>
                 }
               />
               <CardContent className="space-y-4">
@@ -252,12 +254,10 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
                     type="number"
                     step="0.1"
                     min="0.1"
-                    max="10"
                     value={norm.expectedKmPerLitre.toString()}
-                    onChange={e => {
-                      // Robustly handle both event and value
+                    onChange={(e: React.ChangeEvent<HTMLInputElement> | string) => {
                       let value = '';
-                      if (e && typeof e === 'object' && 'target' in e && e.target && typeof e.target.value === 'string') {
+                      if (typeof e === 'object' && 'target' in e && e.target && typeof e.target.value === 'string') {
                         value = e.target.value;
                       } else if (typeof e === 'string') {
                         value = e;
@@ -279,19 +279,16 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
                       type="number"
                       step="0.1"
                       min="0.1"
-                      max="10"
                       value={(norm.litresPerHour || 3.5).toString()}
-                      onChange={e => {
-                        // Robustly handle both event and value
+                      onChange={(e: React.ChangeEvent<HTMLInputElement> | string) => {
                         let value = '';
-                        if (e && typeof e === 'object' && 'target' in e && e.target && typeof e.target.value === 'string') {
+                        if (typeof e === 'object' && 'target' in e && e.target && typeof e.target.value === 'string') {
                           value = e.target.value;
                         } else if (typeof e === 'string') {
                           value = e;
                         }
                         handleNormChange(norm.fleetNumber, 'litresPerHour', value);
                       }}
-                      error={errors[`${norm.fleetNumber}-litresPerHour`]}
                     />
                   </div>
                 )}
@@ -300,12 +297,10 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
                   type="number"
                   step="1"
                   min="1"
-                  max="50"
                   value={norm.tolerancePercentage.toString()}
-                  onChange={e => {
-                    // Robustly handle both event and value
+                  onChange={(e: React.ChangeEvent<HTMLInputElement> | string) => {
                     let value = '';
-                    if (e && typeof e === 'object' && 'target' in e && e.target && typeof e.target.value === 'string') {
+                    if (typeof e === 'object' && 'target' in e && e.target && typeof e.target.value === 'string') {
                       value = e.target.value;
                     } else if (typeof e === 'string') {
                       value = e;
