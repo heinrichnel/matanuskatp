@@ -9,6 +9,7 @@ import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 import { Input } from '../ui/FormElements';
+import { Tooltip } from '../ui/Tooltip';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
@@ -347,98 +348,68 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = ({ trips }) => {
     const isGoodChange = title.includes('Operational') ? isNegative : isPositive;
 
     return (
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 rounded-lg bg-gray-50">
-                <Icon className={`w-6 h-6 ${colorClass}`} />
-              </div>
-              <h3 className="text-sm font-medium text-gray-600">{title}</h3>
-            </div>
+      <Card className="flex flex-col justify-between">
+        <CardHeader
+          title={<span className="flex items-center gap-2"><Icon className={`w-5 h-5 ${colorClass}`} />{title}</span>}
+          subtitle={<span className="text-xs text-gray-500">2025 YTD</span>}
+        />
+        <CardContent>
+          <div className="text-3xl font-bold text-gray-900">
+            {formatValue(current)}
+            {suffix}
           </div>
-
-          <div className="space-y-3">
-            {/* 2025 Current */}
-            <div>
-              <div className="flex items-baseline space-x-2">
-                <span className="text-2xl font-bold text-gray-900">
-                  {formatValue(current)}
-                  {suffix}
+          <div className="text-sm text-gray-500">{formatValue(previous)} 2024 YTD</div>
+          <div className="flex items-center gap-2 mt-2">
+            {change.percentage !== 0 && (
+              <>
+                {isGoodChange ? (
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-red-600" />
+                )}
+                <span className={`text-sm font-medium ${isGoodChange ? 'text-green-600' : 'text-red-600'}`}>
+                  {change.percentage > 0 ? '+' : ''}
+                  {change.percentage.toFixed(1)}%
                 </span>
-                <span className="text-sm text-gray-500">2025 YTD</span>
-              </div>
-            </div>
-
-            {/* 2024 Previous */}
-            <div>
-              <div className="flex items-baseline space-x-2">
-                <span className="text-lg font-medium text-gray-600">
-                  {formatValue(previous)}
-                  {suffix}
-                </span>
-                <span className="text-sm text-gray-500">2024 YTD</span>
-              </div>
-            </div>
-
-            {/* Change Indicator */}
-            <div className="flex items-center space-x-2">
-              {change.percentage !== 0 && (
-                <>
-                  {isGoodChange ? (
-                    <TrendingUp className="w-4 h-4 text-green-600" />
-                  ) : (
-                    <TrendingDown className="w-4 h-4 text-red-600" />
-                  )}
-                  <span className={`text-sm font-medium ${isGoodChange ? 'text-green-600' : 'text-red-600'}`}>
-                    {change.percentage > 0 ? '+' : ''}
-                    {change.percentage.toFixed(1)}%
-                  </span>
-                  <span className="text-xs text-gray-500">vs 2024</span>
-                </>
-              )}
-            </div>
+                <Tooltip text="Compared to previous year" />
+              </>
+            )}
           </div>
         </CardContent>
       </Card>
     );
   };
 
+  const [expandedWeek, setExpandedWeek] = useState<string | null>(null);
+
+  // Map trips to weeks for detailed view
+  const weeklyTripsMap = useMemo(() => {
+    const map: Record<string, Trip[]> = {};
+    trips.forEach(trip => {
+      const offloadDate = trip.finalOffloadDateTime || trip.actualOffloadDateTime || trip.endDate;
+      if (!offloadDate) return;
+      const date = new Date(offloadDate);
+      const monday = new Date(date);
+      monday.setDate(date.getDate() - ((date.getDay() + 6) % 7));
+      const weekKey = `${monday.getFullYear()}-W${getWeekNumber(monday)}-${trip.revenueCurrency}`;
+      if (!map[weekKey]) map[weekKey] = [];
+      map[weekKey].push(trip);
+    });
+    return map;
+  }, [trips]);
+
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      {/* Info Banner */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-3 mb-6">
+        <BarChart3 className="w-6 h-6 text-blue-500" />
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">YTD KPIs</h1>
-          <p className="text-lg text-gray-600 mt-2">Matanuska Transport Performance Dashboard</p>
-          <p className="text-sm text-gray-500 mt-1">
-            Last updated: {new Date(current2025.lastUpdated).toLocaleDateString()} by {current2025.updatedBy}
-          </p>
-        </div>
-        <div className="flex space-x-3">
-          <Button variant="outline" onClick={() => handleEdit(2024)} icon={<Edit className="w-4 h-4" />}>
-            Edit 2024 Data
-          </Button>
-          <Button onClick={() => handleEdit(2025)} icon={<Edit className="w-4 h-4" />}>
-            Edit 2025 Data
-          </Button>
+          <div className="font-semibold text-blue-800">Monthly Update Schedule</div>
+          <div className="text-blue-700 text-sm">YTD metrics are updated manually on the 15th of every month. Data is independent of trip-based calculations and maintained separately for strategic reporting.</div>
         </div>
       </div>
 
-      {/* Update Schedule Notice */}
-      <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-        <div className="flex items-start space-x-3">
-          <Calendar className="w-5 h-5 text-blue-600 mt-0.5" />
-          <div>
-            <h4 className="text-sm font-medium text-blue-800">Monthly Update Schedule</h4>
-            <p className="text-sm text-blue-700 mt-1">
-              YTD metrics are updated manually on the 15th of every month. Data is independent of trip-based calculations and maintained separately for strategic reporting.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* KPI Cards */}
+      {/* KPI Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <MetricCard
           title="Total Kilometers"
@@ -498,6 +469,16 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = ({ trips }) => {
           icon={Award}
           colorClass="text-green-600"
         />
+
+        {/* Edit buttons for both years */}
+        <div className="flex justify-end col-span-full mb-2 gap-2">
+          <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => handleEdit(2025)}>
+            Edit 2025 Metrics
+          </Button>
+          <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => handleEdit(2024)}>
+            Edit 2024 Metrics
+          </Button>
+        </div>
       </div>
 
       {/* Margin & Return Metrics */}
@@ -591,21 +572,90 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = ({ trips }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {weeklyMetrics.slice(0, 6).map((week, index) => (
-                    <tr key={`${week.weekStart}-${week.weekNumber}-${week.currency}`} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-3 text-sm font-medium text-gray-900">Week {week.weekNumber}</td>
-                      <td className="py-3 text-sm text-gray-900">{new Date(week.weekStart).toLocaleDateString()} - {new Date(week.weekEnd).toLocaleDateString()}</td>
-                      <td className="py-3 text-sm text-gray-900 text-right">{week.tripCount}</td>
-                      <td className="py-3 text-sm font-medium text-green-600 text-right">{formatCurrency(week.totalRevenue, week.currency)}</td>
-                      <td className="py-3 text-sm text-gray-900 text-center">{week.currency}</td>
-                      <td className="py-3 text-sm font-medium text-red-600 text-right">{formatCurrency(week.totalCosts, week.currency)}</td>
-                      <td className={`py-3 text-sm font-medium text-right ${week.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>{formatCurrency(week.grossProfit, week.currency)}</td>
-                      <td className={`py-3 text-sm font-medium text-right ${week.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>{week.profitMargin.toFixed(1)}%</td>
-                      <td className="py-3 text-sm text-gray-900 text-right">{week.totalKilometers.toLocaleString()}</td>
-                      <td className="py-3 text-sm text-gray-900 text-right">{formatCurrency(week.ipk, week.currency)}</td>
-                      <td className="py-3 text-sm text-gray-900 text-right">{formatCurrency(week.cpk, week.currency)}</td>
-                    </tr>
-                  ))}
+                  {weeklyMetrics.slice(0, 6).map(week => {
+                    const weekKey = `${week.weekStart.slice(0, 4)}-W${week.weekNumber}-${week.currency}`;
+                    const isExpanded = expandedWeek === weekKey;
+                    return (
+                      <React.Fragment key={`${week.weekStart}-${week.weekNumber}-${week.currency}`}>
+                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 text-sm font-medium text-gray-900 flex items-center gap-2">
+                            <button
+                              className="focus:outline-none"
+                              aria-label={isExpanded ? 'Collapse week details' : 'Expand week details'}
+                              onClick={() => setExpandedWeek(isExpanded ? null : weekKey)}
+                            >
+                              {isExpanded ? (
+                                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" /></svg>
+                              ) : (
+                                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                              )}
+                            </button>
+                            Week {week.weekNumber}
+                          </td>
+                          <td className="py-3 text-sm text-gray-900">{new Date(week.weekStart).toLocaleDateString()} - {new Date(week.weekEnd).toLocaleDateString()}</td>
+                          <td className="py-3 text-sm text-gray-900 text-right">{week.tripCount}</td>
+                          <td className="py-3 text-sm font-medium text-green-600 text-right">{formatCurrency(week.totalRevenue, week.currency)}</td>
+                          <td className="py-3 text-sm text-gray-900 text-center">{week.currency}</td>
+                          <td className="py-3 text-sm font-medium text-red-600 text-right">{formatCurrency(week.totalCosts, week.currency)}</td>
+                          <td className={`py-3 text-sm font-medium text-right ${week.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>{formatCurrency(week.grossProfit, week.currency)}</td>
+                          <td className={`py-3 text-sm font-medium text-right ${week.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>{week.profitMargin.toFixed(1)}%</td>
+                          <td className="py-3 text-sm text-gray-900 text-right">{week.totalKilometers.toLocaleString()}</td>
+                          <td className="py-3 text-sm text-gray-900 text-right">{formatCurrency(week.ipk, week.currency)}</td>
+                          <td className="py-3 text-sm text-gray-900 text-right">{formatCurrency(week.cpk, week.currency)}</td>
+                        </tr>
+                        {isExpanded && (
+                          <tr className="bg-blue-50">
+                            <td colSpan={11} className="p-4">
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-xs">
+                                  <thead>
+                                    <tr className="border-b border-blue-200">
+                                      <th className="text-left py-2 font-medium text-blue-700">Trip ID</th>
+                                      <th className="text-left py-2 font-medium text-blue-700">Customer</th>
+                                      <th className="text-left py-2 font-medium text-blue-700">Offload Date</th>
+                                      <th className="text-right py-2 font-medium text-blue-700">Revenue</th>
+                                      <th className="text-right py-2 font-medium text-blue-700">Costs</th>
+                                      <th className="text-right py-2 font-medium text-blue-700">Profit</th>
+                                      <th className="text-right py-2 font-medium text-blue-700">Margin %</th>
+                                      <th className="text-right py-2 font-medium text-blue-700">KM</th>
+                                      <th className="text-right py-2 font-medium text-blue-700">IPK</th>
+                                      <th className="text-right py-2 font-medium text-blue-700">CPK</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(weeklyTripsMap[weekKey] || []).map(trip => {
+                                      const offloadDate = trip.finalOffloadDateTime || trip.actualOffloadDateTime || trip.endDate;
+                                      const tripCosts = calculateTotalCosts(trip.costs);
+                                      const additionalCosts = trip.additionalCosts?.reduce((sum, cost) => sum + cost.amount, 0) || 0;
+                                      const totalTripCosts = tripCosts + additionalCosts;
+                                      const grossProfit = trip.baseRevenue - totalTripCosts;
+                                      const margin = trip.baseRevenue > 0 ? (grossProfit / trip.baseRevenue) * 100 : 0;
+                                      const ipk = (trip.distanceKm && trip.distanceKm > 0) ? trip.baseRevenue / trip.distanceKm : 0;
+                                      const cpk = (trip.distanceKm && trip.distanceKm > 0) ? totalTripCosts / trip.distanceKm : 0;
+                                      return (
+                                        <tr key={trip.id} className="border-b border-blue-100 hover:bg-blue-100/50">
+                                          <td className="py-2 text-blue-900">{trip.id}</td>
+                                          <td className="py-2 text-blue-900">{trip.clientName || '-'}</td>
+                                          <td className="py-2 text-blue-900">{offloadDate ? new Date(offloadDate).toLocaleDateString() : '-'}</td>
+                                          <td className="py-2 text-right text-green-700">{formatCurrency(trip.baseRevenue, trip.revenueCurrency)}</td>
+                                          <td className="py-2 text-right text-red-700">{formatCurrency(totalTripCosts, trip.revenueCurrency)}</td>
+                                          <td className={`py-2 text-right ${grossProfit >= 0 ? 'text-green-700' : 'text-red-700'}`}>{formatCurrency(grossProfit, trip.revenueCurrency)}</td>
+                                          <td className={`py-2 text-right ${margin >= 0 ? 'text-green-700' : 'text-red-700'}`}>{margin.toFixed(1)}%</td>
+                                          <td className="py-2 text-right">{trip.distanceKm?.toLocaleString() || '-'}</td>
+                                          <td className="py-2 text-right">{formatCurrency(ipk, trip.revenueCurrency)}</td>
+                                          <td className="py-2 text-right">{formatCurrency(cpk, trip.revenueCurrency)}</td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

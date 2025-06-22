@@ -2,36 +2,29 @@
 import React, { useState, useMemo } from 'react';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { Trip, CLIENTS, DRIVERS, MissedLoad } from '../../types';
+import { Trip, CLIENTS, DRIVERS } from '../../types';
 
 // ─── UI Components ───────────────────────────────────────────────
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Input, Select } from '../ui/FormElements';
+import { Tooltip } from '../ui/Tooltip';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
   TrendingUp,
   Truck,
-  FileText,
-  Calendar,
   DollarSign,
   TrendingDown,
-  Navigation,
-  Filter,
-  Download,
-  FileSpreadsheet,
   AlertTriangle,
   Flag,
-  Clock,
   CheckCircle,
-  Users,
-  Eye,
-  BarChart3,
   User,
   Activity,
   Target,
-  Award
+  Award,
+  Download,
+  Eye
 } from 'lucide-react';
 
 // ─── Utils ───────────────────────────────────────────────────────
@@ -39,7 +32,6 @@ import {
   formatCurrency,
   formatDate,
   calculateTotalCosts,
-  calculateKPIs,
   filterTripsByDateRange,
   filterTripsByClient,
   filterTripsByCurrency,
@@ -66,7 +58,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips }) => {
     driver: ''
   });
 
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters] = useState(false);
 
   const filteredTrips = useMemo(() => {
     let filtered = trips;
@@ -227,37 +219,11 @@ const Dashboard: React.FC<DashboardProps> = ({ trips }) => {
     });
   };
 
-  const exportDashboard = (format: 'pdf' | 'excel') => {
-    const message = format === 'pdf'
-      ? 'Dashboard PDF report is being generated...'
-      : 'Dashboard Excel report is being generated...';
-    alert(message);
-  };
-
   return (
-    <div className="space-y-6">
-      {/* Dashboard Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-lg text-gray-600 mt-2">Matanuska Transport Operational Overview</p>
-        </div>
-        <div className="flex space-x-3">
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            icon={<Filter className="w-4 h-4" />}
-          >
-            {showFilters ? 'Hide Filters' : 'Show Filters'}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => exportDashboard('excel')}
-            icon={<FileSpreadsheet className="w-4 h-4" />}
-          >
-            Export Excel
-          </Button>
-        </div>
+    <div className="space-y-8">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Dashboard Overview</h2>
+        <Button variant="primary" size="md" icon={<Download className="w-5 h-5" />}>Export Data</Button>
       </div>
 
       {/* Filters */}
@@ -321,89 +287,76 @@ const Dashboard: React.FC<DashboardProps> = ({ trips }) => {
       )}
 
       {/* Key Performance Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-gray-50">
-                  <Truck className="w-6 h-6 text-blue-600" />
-                </div>
-                <h3 className="text-sm font-medium text-gray-600">Total Trips</h3>
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-gray-900">{stats.totalTrips}</p>
-            <div className="mt-2 flex items-center text-sm text-gray-500">
-              <Activity className="w-4 h-4 mr-1" />
-              <span>Active fleet operations</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader
+            title={<span className="flex items-center gap-2"><Truck className="w-5 h-5 text-blue-500" />Total Trips</span>}
+            subtitle={<span className="text-xs text-gray-500">All time</span>}
+          />
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">{stats.totalTrips}</div>
+            <div className="flex items-center gap-2 mt-2">
+              <Activity className="w-4 h-4 text-blue-600" />
+              <span className="text-blue-600 font-semibold">Active fleet operations</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-gray-50">
-                  <DollarSign className="w-6 h-6 text-green-600" />
-                </div>
-                <h3 className="text-sm font-medium text-gray-600">Total Revenue</h3>
+        <Card>
+          <CardHeader
+            title={<span className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-green-500" />Total Revenue</span>}
+            subtitle={<span className="text-xs text-gray-500">2025 YTD</span>}
+          />
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">
+              {formatCurrency(stats.zarRevenue, 'ZAR')}
+            </div>
+            {stats.usdRevenue > 0 && (
+              <div className="text-xl font-bold text-gray-900">
+                {formatCurrency(stats.usdRevenue, 'USD')}
               </div>
-            </div>
-            <div className="space-y-1">
-              <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.zarRevenue, 'ZAR')}</p>
-              {stats.usdRevenue > 0 && (
-                <p className="text-xl font-bold text-green-600">{formatCurrency(stats.usdRevenue, 'USD')}</p>
-              )}
-            </div>
-            <div className="mt-2 flex items-center text-sm text-gray-500">
-              <TrendingUp className="w-4 h-4 mr-1 text-green-500" />
-              <span>From {stats.totalTrips} trips</span>
+            )}
+            <div className="flex items-center gap-2 mt-2">
+              <TrendingUp className="w-4 h-4 text-green-600" />
+              <span className="text-green-600 font-semibold">+56.3%</span>
+              <Tooltip text="Compared to previous year" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-gray-50">
-                  <Target className="w-6 h-6 text-purple-600" />
-                </div>
-                <h3 className="text-sm font-medium text-gray-600">Net Profit</h3>
+        <Card>
+          <CardHeader
+            title={<span className="flex items-center gap-2"><Target className="w-5 h-5 text-purple-500" />Net Profit</span>}
+            subtitle={<span className="text-xs text-gray-500">Overall profitability</span>}
+          />
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">
+              {formatCurrency(stats.zarProfit, 'ZAR')}
+            </div>
+            {stats.usdProfit !== 0 && (
+              <div className="text-xl font-bold text-gray-900">
+                {formatCurrency(stats.usdProfit, 'USD')}
               </div>
-            </div>
-            <div className="space-y-1">
-              <p className={`text-2xl font-bold ${stats.zarProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {formatCurrency(stats.zarProfit, 'ZAR')}
-              </p>
-              {stats.usdProfit !== 0 && (
-                <p className={`text-xl font-bold ${stats.usdProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatCurrency(stats.usdProfit, 'USD')}
-                </p>
-              )}
-            </div>
-            <div className="mt-2 flex items-center text-sm text-gray-500">
-              <Award className="w-4 h-4 mr-1 text-purple-500" />
-              <span>Overall profitability</span>
+            )}
+            <div className="flex items-center gap-2 mt-2">
+              <Award className="w-4 h-4 text-purple-600" />
+              <span className="text-purple-600 font-semibold">Overall profitability</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 rounded-lg bg-gray-50">
-                  <Flag className="w-6 h-6 text-amber-600" />
-                </div>
-                <h3 className="text-sm font-medium text-gray-600">Flagged Items</h3>
-              </div>
+        <Card>
+          <CardHeader
+            title={<span className="flex items-center gap-2"><Flag className="w-5 h-5 text-amber-500" />Flagged Items</span>}
+            subtitle={<span className="text-xs text-gray-500">Unresolved flags requiring attention</span>}
+          />
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">
+              {stats.unresolvedFlags.length}
             </div>
-            <p className="text-2xl font-bold text-amber-600">{stats.unresolvedFlags.length}</p>
-            <div className="mt-2 flex items-center text-sm text-gray-500">
-              <AlertTriangle className="w-4 h-4 mr-1 text-amber-500" />
-              <span>Unresolved flags requiring attention</span>
+            <div className="flex items-center gap-2 mt-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+              <span className="text-amber-600 font-semibold">Unresolved flags</span>
             </div>
           </CardContent>
         </Card>
@@ -640,7 +593,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips }) => {
               </div>
             ) : (
               <div className="space-y-4">
-                {stats.topFlaggedCategories.map(([category, count], index) => (
+                {stats.topFlaggedCategories.map(([category, count]) => (
                   <div key={category} className="flex items-center">
                     <div className="w-full">
                       <div className="flex justify-between mb-1">

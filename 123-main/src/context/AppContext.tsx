@@ -1,14 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Trip, CostEntry, Attachment, AdditionalCost, DelayReason, MissedLoad, DieselConsumptionRecord, DriverBehaviorEvent, ActionItem, CARReport } from '../types';
-import { v4 as uuidv4 } from 'uuid';
 import { 
-  db, 
-  tripsCollection, 
-  dieselCollection, 
-  missedLoadsCollection,
-  driverBehaviorCollection,
-  actionItemsCollection,
-  carReportsCollection,
   listenToTrips,
   listenToDieselRecords,
   listenToMissedLoads,
@@ -37,7 +29,6 @@ import {
   enableFirestoreNetwork,
   disableFirestoreNetwork
 } from '../firebase';
-import { doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, collection } from 'firebase/firestore';
 import { generateTripId, shouldAutoCompleteTrip, isOnline } from '../utils/helpers';
 
 interface AppContextType {

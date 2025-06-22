@@ -100,7 +100,8 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
     onSave(updatedTrip, editRecord);
     // Create edit records for each change
     changes.forEach(change => {
-      const editRecord: Omit<TripEditRecord, 'id'> = {
+      const editRecord: TripEditRecord = {
+        id: crypto.randomUUID(), // Generate a unique id for the edit record
         tripId: trip.id,
         editedBy: 'Current User', // In real app, use actual user
         editedAt: new Date().toISOString(),
@@ -142,7 +143,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
           <Select
             label="Reason for Edit *"
             value={editReason}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEditReason(e.target.value)}
+            onChange={setEditReason}
             options={[
               { label: 'Select reason for editing...', value: '' },
               ...TRIP_EDIT_REASONS.map(reason => ({ label: reason, value: reason }))
