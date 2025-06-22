@@ -704,11 +704,6 @@ export const TRIP_EDIT_REASONS = [
   'Client type classification update', 'Other (specify in comments)'
 ];
 
-const COST_EDIT_REASONS = [
-  'Correction of amount entry error', 'Updated receipt information', 'Category reclassification',
-  'Currency correction', 'Reference number update', 'Investigation outcome update',
-  'Flag status change', 'Document upload after initial entry', 'Other (specify in comments)'
-];
 
 export const TRIP_DELETION_REASONS = [
   'Duplicate entry', 'Trip cancelled before execution', 'Data entry error - trip never occurred',
@@ -739,19 +734,10 @@ export const FOLLOW_UP_THRESHOLDS = {
 };
 
 // NEW: Timeline Validation Statuses
-const TIMELINE_VALIDATION_STATUSES = [
-  { value: 'pending', label: 'Pending Validation', color: 'yellow' },
-  { value: 'validated', label: 'Validated', color: 'green' },
-  { value: 'discrepancy', label: 'Has Discrepancies', color: 'red' }
-];
+// (Removed unused TIMELINE_VALIDATION_STATUSES to resolve compile error)
 
 // NEW: Invoice Submission Statuses
-const INVOICE_SUBMISSION_STATUSES = [
-  { value: 'draft', label: 'Draft', color: 'gray' },
-  { value: 'submitted', label: 'Submitted', color: 'blue' },
-  { value: 'approved', label: 'Approved', color: 'green' },
-  { value: 'rejected', label: 'Rejected', color: 'red' }
-];
+// (Removed unused INVOICE_SUBMISSION_STATUSES to resolve compile error)
 
 export const FLEETS_WITH_PROBES = [
   // Add your fleet numbers that have probes here, e.g.:
@@ -764,9 +750,9 @@ export const FUEL_STATIONS = [
   "Kwa Nokeng Francistown",
   "Engen Francistown",
   "Tswana Fuel Francistown",
-  "Kwa Nokeng – Kazungula",
+  "Kwa Nokeng Kazungula",
   "Engen Kazungula",
-  "Tswana Fuel – Kazungula",
+  "Tswana Fuel Kazungula",
   "African Truck Stop",
   "Quest Beaufort West",
   "Fuel 1 Retail BElville",
@@ -774,22 +760,22 @@ export const FUEL_STATIONS = [
   "Engen Truck Stop Beaufort West",
   "Alliance Fuel Louis Trichardt",
   "Stadler Beaufort West",
-  "Industry Petroleum (Pty) Ltd – Musina",
-  "Black Rock Fuels – Modimolle",
+  "Industry Petroleum (Pty) Ltd Musina",
+  "Black Rock Fuels Modimolle",
   "Ipex Filling Station (PTY)",
-  "Royale Energy – Polokwane",
-  "BF Filling Station – Polokwane",
-  "OILCO – Musina",
-  "MOJ Petroleum – Musina",
+  "Royale Energy Polokwane",
+  "BF Filling StationPolokwane",
+  "OILCO Musina",
+  "MOJ Petroleum Musina",
   "Comar",
   "Lesedi",
-  "Shell Ultra City Limpopo – Musina",
-  "Whelson Harare Zimbabwe – Supergroup SA",
+  "Shell Ultra City Limpopo Musina",
+  "Whelson Harare Zimbabwe Supergroup SA",
   "Harare Truck Stop",
   "RAM Petroleum Harare",
-  "Whelson Chirundu Zimbabwe – Supergroup SA",
+  "Whelson Chirundu Zimbabwe Supergroup SA",
   "Clix Auto Logistics Bulawayo",
-  "Karan Investments LDA – Bulawayo – ZIM",
+  "Karan Investments LDA Bulawayo",
   "ACM Petroleum Chirundu",
   "Red Range",
   "Mutare Depot",
