@@ -10,7 +10,7 @@ import Button from '../ui/Button';
 import { Input, Select, Textarea } from '../ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
-import { Save, X, Phone, Calendar, User } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 
 // ─── Utils ───────────────────────────────────────────────────────
 import { formatCurrency, formatDate } from '../../utils/helpers';

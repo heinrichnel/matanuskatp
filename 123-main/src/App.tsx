@@ -207,7 +207,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Header currentView={currentView} onNavigate={setCurrentView} onNewTrip={handleNewTrip} />
-      <main className="flex-1 p-8 ml-64 w-full">
+      <main className="flex-1 p-8 ml-64 w-full bg-gray-50 min-h-screen">
         {renderContent()}
       </main>
       <Modal
