@@ -2,33 +2,24 @@
 import React, { useState } from 'react';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { DieselConsumptionRecord } from '../../types';
 
 // ─── UI Components ───────────────────────────────────────────────
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import Card, { CardContent, CardHeader } from '../ui/Card';
+import Card, { CardContent } from '../ui/Card';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
-  X,
   AlertTriangle,
   TrendingDown,
-  TrendingUp,
   FileText,
-  Download,
   Flag,
   CheckCircle,
   Fuel,
-  Printer,
-  Calendar,
-  User,
-  FileSignature,
-  Clock
-} from 'lucide-react';
+  Printer} from 'lucide-react';
 
 // ─── Utilities ───────────────────────────────────────────────────
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import { formatDate } from '../../utils/helpers';
 import jsPDF from 'jspdf';
 
 
@@ -79,7 +70,6 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
   isOpen,
   onClose,
   records,
-  norms,
 }) => {
   const [debriefNotes, setDebriefNotes] = useState<Record<string, string>>({});
   const [debriefDates, setDebriefDates] = useState<Record<string, string>>({});

@@ -127,7 +127,7 @@ export interface DelayReason {
   delayType: 'border_delays' | 'breakdown' | 'customer_not_ready' | 'paperwork_issues' | 'weather_conditions' | 'traffic' | 'other';
   description: string;
   delayDuration: number; // in hours
-  severity: 'minor' | 'moderate' | 'major'; // Impact level
+  severity: 'minor' | 'moderate' | 'major' | 'critical'; // Impact level
   reportedAt: string;
   reportedBy: string;
   resolvedAt?: string;
@@ -751,4 +751,60 @@ const INVOICE_SUBMISSION_STATUSES = [
   { value: 'submitted', label: 'Submitted', color: 'blue' },
   { value: 'approved', label: 'Approved', color: 'green' },
   { value: 'rejected', label: 'Rejected', color: 'red' }
+];
+
+export const FLEETS_WITH_PROBES = [
+  // Add your fleet numbers that have probes here, e.g.:
+  '21H', '23H', '24H', '26H', '28H', '30H', '31H'
+];
+
+export const FUEL_STATIONS = [
+  "Kwa Nokeng Martins Drift",
+  "MBT Groblersbrug",
+  "Kwa Nokeng Francistown",
+  "Engen Francistown",
+  "Tswana Fuel Francistown",
+  "Kwa Nokeng – Kazungula",
+  "Engen Kazungula",
+  "Tswana Fuel – Kazungula",
+  "African Truck Stop",
+  "Quest Beaufort West",
+  "Fuel 1 Retail BElville",
+  "Fuel 1 Kraaifontein",
+  "Engen Truck Stop Beaufort West",
+  "Alliance Fuel Louis Trichardt",
+  "Stadler Beaufort West",
+  "Industry Petroleum (Pty) Ltd – Musina",
+  "Black Rock Fuels – Modimolle",
+  "Ipex Filling Station (PTY)",
+  "Royale Energy – Polokwane",
+  "BF Filling Station – Polokwane",
+  "OILCO – Musina",
+  "MOJ Petroleum – Musina",
+  "Comar",
+  "Lesedi",
+  "Shell Ultra City Limpopo – Musina",
+  "Whelson Harare Zimbabwe – Supergroup SA",
+  "Harare Truck Stop",
+  "RAM Petroleum Harare",
+  "Whelson Chirundu Zimbabwe – Supergroup SA",
+  "Clix Auto Logistics Bulawayo",
+  "Karan Investments LDA – Bulawayo – ZIM",
+  "ACM Petroleum Chirundu",
+  "Red Range",
+  "Mutare Depot",
+  "Nyamagay Depot",
+  "Burma Valey",
+  "Lake Petroleum Kabwe",
+  "Lake Petroleum Ndola",
+  "Lake Petroleum Kitwe",
+  "Lake Petroleum Chililabombwe",
+  "Lake Petroleum Lusaka",
+  "Korridor Truck Stops (Zambia)",
+  "Korridor Kapiri Mposhi Truck Stop",
+  "Korridor Chingola Truck Stop",
+  "Korridor Kafue Truck Stop",
+  "Korridor Livingstone Truck Stop",
+  "Korridor Lusaka Truck Stop",
+  "HASS Petroleum Kasumbalesa"
 ];
