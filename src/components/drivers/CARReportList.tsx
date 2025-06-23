@@ -42,7 +42,7 @@ const CARReportList: React.FC = () => {
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<CARReport | null>(null);
+  const [selectedReport, setSelectedReport] = useState<CARReport | undefined>(undefined);
   const [filters, setFilters] = useState({
     status: '',
     severity: '',
@@ -55,8 +55,8 @@ const CARReportList: React.FC = () => {
     if (filters.status && report.status !== filters.status) return false;
     if (filters.severity && report.severity !== filters.severity) return false;
     if (filters.responsiblePerson && report.responsiblePerson !== filters.responsiblePerson) return false;
-    if (filters.dateRange.start && report.incidentDate < filters.dateRange.start) return false;
-    if (filters.dateRange.end && report.incidentDate > filters.dateRange.end) return false;
+    if (filters.dateRange.start && report.dateDue < filters.dateRange.start) return false;
+    if (filters.dateRange.end && report.dateDue > filters.dateRange.end) return false;
     return true;
   });
   
@@ -164,7 +164,7 @@ const CARReportList: React.FC = () => {
         </div>
         <Button
           onClick={() => {
-            setSelectedReport(null);
+            setSelectedReport(undefined);
             setShowAddModal(true);
           }}
           icon={<Plus className="w-4 h-4" />}
@@ -314,7 +314,7 @@ const CARReportList: React.FC = () => {
             <Button
               size="sm"
               onClick={() => {
-                setSelectedReport(null);
+                setSelectedReport(undefined);
                 setShowAddModal(true);
               }}
               icon={<Plus className="w-4 h-4" />}
@@ -337,7 +337,7 @@ const CARReportList: React.FC = () => {
                 <div className="mt-4">
                   <Button
                     onClick={() => {
-                      setSelectedReport(null);
+                      setSelectedReport(undefined);
                       setShowAddModal(true);
                     }}
                     icon={<Plus className="w-4 h-4" />}
@@ -392,7 +392,7 @@ const CARReportList: React.FC = () => {
                             <Calendar className="w-4 h-4 text-gray-400" />
                             <div>
                               <p className="text-sm text-gray-500">Incident Date</p>
-                              <p className="font-medium">{formatDate(report.incidentDate)}</p>
+                              <p className="font-medium">{formatDate(report.dateOfIncident || report.dateDue)}</p>
                             </div>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -408,7 +408,7 @@ const CARReportList: React.FC = () => {
                         
                         <div className="mb-3">
                           <p className="text-sm text-gray-500">Problem</p>
-                          <p className="text-sm line-clamp-2">{report.description || report.problemIdentification}</p>
+                          <p className="text-sm line-clamp-2">{report.problemIdentification}</p>
                         </div>
                         
                         {report.completedAt && (
@@ -481,7 +481,7 @@ const CARReportList: React.FC = () => {
       <CARReportForm
         isOpen={showAddModal}
         onClose={() => {
-          setSelectedReport(null);
+          setSelectedReport(undefined);
           setShowAddModal(false);
         }}
         existingReport={selectedReport}
@@ -492,7 +492,7 @@ const CARReportList: React.FC = () => {
         <CARReportDetails
           isOpen={showDetailsModal}
           onClose={() => {
-            setSelectedReport(null);
+            setSelectedReport(undefined);
             setShowDetailsModal(false);
           }}
           report={selectedReport}

@@ -12,7 +12,6 @@ import FileUpload from '../ui/FileUpload';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
-  Save,
   X,
   Upload,
   CheckCircle,

@@ -30,6 +30,7 @@ import {
   disableFirestoreNetwork
 } from '../firebase';
 import { generateTripId, shouldAutoCompleteTrip, isOnline } from '../utils/helpers';
+import { fetchTripsFromWebhook } from '../utils/webhook';
 
 interface AppContextType {
   trips: Trip[];
@@ -70,6 +71,7 @@ interface AppContextType {
 
   // CSV Import functions
   importTripsFromCSV: (trips: Omit<Trip, 'id' | 'costs' | 'status'>[]) => void;
+  importTripsFromWebhook: () => Promise<{ imported: number; skipped: number }>; // ADDED
   importCostsFromCSV: (costs: Omit<CostEntry, 'id' | 'attachments'>[]) => void;
   
   // Diesel consumption management
@@ -574,20 +576,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const importTripsFromCSV = (importedTrips: Omit<Trip, 'id' | 'costs' | 'status'>[]): void => {
-    // Process each imported trip
-    importedTrips.forEach(tripData => {
-      addTrip(tripData);
+  // CSV Import
+  const importTripsFromCSV = (tripsToImport: Omit<Trip, 'id' | 'costs' | 'status'>[]) => {
+    let imported = 0;
+    tripsToImport.forEach(tripData => {
+      // Only import if required fields are present
+      if (tripData.fleetNumber && tripData.clientName && tripData.route && tripData.baseRevenue && tripData.startDate && tripData.endDate) {
+        addTrip(tripData);
+        imported++;
+      }
     });
+    console.log(`Imported ${imported} trips from CSV`);
   };
 
-  const importCostsFromCSV = (importedCosts: Omit<CostEntry, 'id' | 'attachments'>[]): void => {
-    // Process each imported cost
-    importedCosts.forEach(costData => {
-      addCostEntry(costData);
+  // Costs Import
+  const importCostsFromCSV = (costsToImport: Omit<CostEntry, 'id' | 'attachments'>[]) => {
+    let imported = 0;
+    costsToImport.forEach(costData => {
+      // Only import if required fields are present
+      if (costData.tripId && costData.category && costData.amount && costData.date) {
+        addCostEntry(costData);
+        imported++;
+      }
     });
+    console.log(`Imported ${imported} cost entries from CSV`);
   };
 
+  // Webhook Import
+  const importTripsFromWebhook = async () => {
+    try {
+      const trips = await fetchTripsFromWebhook();
+      let imported = 0;
+      let skipped = 0;
+      trips.forEach(tripData => {
+        if (tripData.fleetNumber && tripData.clientName && tripData.route && tripData.baseRevenue && tripData.startDate && tripData.endDate) {
+          addTrip(tripData);
+          imported++;
+        } else {
+          skipped++;
+        }
+      });
+      return { imported, skipped };
+    } catch (error) {
+      console.error('Webhook import failed:', error);
+      throw error;
+    }
+  };
+  
   // Diesel consumption management
   const addDieselRecord = (recordData: Omit<DieselConsumptionRecord, 'id'>): string => {
     const newId = `D${Date.now()}`;
@@ -1044,6 +1079,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteMissedLoad,
     updateInvoicePayment,
     importTripsFromCSV,
+    importTripsFromWebhook, // ADDED
     importCostsFromCSV,
     dieselRecords,
     addDieselRecord,

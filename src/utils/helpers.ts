@@ -213,8 +213,7 @@ export const downloadTripPDF = async (trip: Trip) => {
       ['Distance (KM)', String(trip.distanceKm)],
       ['Base Revenue', String(trip.baseRevenue)],
       ['Revenue Currency', trip.revenueCurrency],
-      ['Trip Description', trip.tripDescription || ''],
-      ['Trip Notes', trip.tripNotes || '']
+      ['Trip Description', trip.description || '']
     ];
     let y = 20;
     fields.forEach(([label, value]) => {
@@ -244,8 +243,8 @@ export const downloadTripExcel = async (trip: Trip) => {
         trip.distanceKm,
         trip.baseRevenue,
         trip.revenueCurrency,
-        trip.tripDescription || '',
-        trip.tripNotes || ''
+        trip.description || '',
+        trip.description || ''
       ]
     ];
     const ws = XLSX.utils.aoa_to_sheet(wsData);
