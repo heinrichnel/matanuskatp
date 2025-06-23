@@ -14,5 +14,30 @@
         "npm --prefix \"$RESOURCE_DIR\" run build"
       ]
     }
-  ]
+  ],
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true,
+    "database": {
+      "port": 9000
+    },
+    "storage": {
+      "port": 9199
+    },
+    "dataconnect": {
+      "port": 9399,
+      "dataDir": "dataconnect/.dataconnect/pgliteData"
+    },
+    "tasks": {
+      "port": 9499
+    }
+  }
 }
