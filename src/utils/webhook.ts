@@ -4,7 +4,7 @@ import { Trip } from '../types';
 // Example: fetch trips from a webhook endpoint (Google Apps Script, etc.)
 export async function fetchTripsFromWebhook(): Promise<Omit<Trip, 'id' | 'costs' | 'status'>[]> {
   // Replace with your actual webhook URL
-  const WEBHOOK_URL = process.env.WEBHOOK_URL || 'https://your-webhook-url.com/trips';
+  const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL || 'https://your-webhook-url.com/trips';
   const response = await fetch(WEBHOOK_URL);
   if (!response.ok) throw new Error('Failed to fetch trips from webhook');
   const data = await response.json();
