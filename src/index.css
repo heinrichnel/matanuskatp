@@ -1,6 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
 /* Make sure content is readable with the background */
 #root {
   min-height: 100vh;
