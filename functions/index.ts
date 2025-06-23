@@ -2,19 +2,11 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 admin.initializeApp();
 
-// Webhook to import trips from Google Sheet (web book)
+// This endpoint receives filtered/validated trips data from your Apps Script as JSON
 export const importTripsFromWebBook = functions.https.onRequest(async (req, res) => {
   try {
-    // URL of your published Google Apps Script web app
-    const WEB_BOOK_URL = 'https://docs.google.com/spreadsheets/d/1vFV3gzb-85PmPTqEgsgXwVZxei_XDpAaWPJVUguioYQ/edit?gid=166024345#gid=166024345';
-    const response = await fetch(WEB_BOOK_URL);
-    if (!response.ok) throw new Error('Failed to fetch web book data');
-    const data = await response.json();
-
-    // Column mapping
-    // A: Fleet Number, B: Driver Name, C: Client Type, D: Client Name, E: Load Reference (Unique Key),
-    // F: Route, G: SHIPPED Status, H: SHIPPED Date, J: DELIVERED Status, K: DELIVERED Date
-    const trips = Array.isArray(data) ? data : [];
+    // Expect an array of trips (each trip as an array in the expected order)
+    const trips = Array.isArray(req.body) ? req.body : [];
     type Trip = {
       fleetNumber: any;
       driverName: any;
@@ -33,33 +25,36 @@ export const importTripsFromWebBook = functions.https.onRequest(async (req, res)
     const db = admin.firestore();
 
     for (const row of trips) {
-      const [fleetNumber, driverName, clientType, clientName, loadRef, route, shippedStatus, shippedDate, , deliveredStatus, deliveredDate] = row;
-      // Import rules
-      if (
-        shippedStatus === 'SHIPPED' &&
-        shippedDate && !isNaN(Date.parse(shippedDate)) &&
-        deliveredStatus === 'DELIVERED' &&
-        deliveredDate && !isNaN(Date.parse(deliveredDate)) &&
-        loadRef
-      ) {
-        // Check for duplicate by Load Reference
-        const existing = await db.collection('trips').where('loadRef', '==', loadRef).get();
-        if (existing.empty) {
-          validTrips.push({
-            fleetNumber,
-            driverName,
-            clientType,
-            clientName,
-            loadRef,
-            route,
-            shippedStatus,
-            shippedDate,
-            deliveredStatus,
-            deliveredDate,
-            status: 'active',
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-        }
+      const [
+        fleetNumber,
+        driverName,
+        clientType,
+        clientName,
+        loadRef,
+        route,
+        shippedStatus,
+        shippedDate,
+        deliveredStatus,
+        deliveredDate
+      ] = row;
+
+      // Duplikate voorkom: Net as loadRef NIE reeds bestaan nie
+      const existing = await db.collection('trips').where('loadRef', '==', loadRef).get();
+      if (existing.empty && loadRef) {
+        validTrips.push({
+          fleetNumber,
+          driverName,
+          clientType,
+          clientName,
+          loadRef,
+          route,
+          shippedStatus,
+          shippedDate,
+          deliveredStatus,
+          deliveredDate,
+          status: 'active',
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
       }
     }
 
@@ -72,7 +67,7 @@ export const importTripsFromWebBook = functions.https.onRequest(async (req, res)
     await batch.commit();
 
     res.status(200).json({ imported: validTrips.length });
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
     res.status(500).json({ error: error.message });
   }
