@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
+import App from './App'; // Remove .tsx extension for compatibility
 import './index.css';
 
 // ✅ Mount the app to the root div
