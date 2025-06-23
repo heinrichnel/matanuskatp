@@ -77,7 +77,7 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={`CAR Report: ${report.reportNumber}`}
-      maxWidth="4xl"
+      maxWidth="2xl"
     >
       <div className="space-y-6">
         {/* Report Header */}

@@ -466,7 +466,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
                         <div className="mb-3">
                           <p className="text-sm text-gray-500">Reason</p>
                           <p className="font-medium">
-                            {MISSED_LOAD_REASONS.find((r: string) => r === load.reason)?.label || load.reason}
+                            {MISSED_LOAD_REASONS.find((r: { value: string; label: string }) => r.value === load.reason)?.label || load.reason}
                           </p>
                           {load.reasonDescription && (
                             <p className="text-sm text-gray-600 mt-1">{load.reasonDescription}</p>
@@ -747,7 +747,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
                 <p><strong>Customer:</strong> {resolvingLoad.customerName}</p>
                 <p><strong>Route:</strong> {resolvingLoad.route}</p>
                 <p><strong>Estimated Revenue:</strong> {formatCurrency(resolvingLoad.estimatedRevenue, resolvingLoad.currency)}</p>
-                <p><strong>Reason:</strong> {MISSED_LOAD_REASONS.find((r: string) => r === resolvingLoad.reason)?.label || resolvingLoad.reason}</p>
+                <p><strong>Reason:</strong> {MISSED_LOAD_REASONS.find((r: { value: string; label: string }) => r.value === resolvingLoad.reason)?.label || resolvingLoad.reason}</p>
               </div>
             </div>
 

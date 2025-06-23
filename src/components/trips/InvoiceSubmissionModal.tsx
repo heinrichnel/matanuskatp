@@ -222,8 +222,10 @@ const InvoiceSubmissionModal: React.FC<InvoiceSubmissionModalProps> = ({
             multiple={true}
             onFileSelect={setProofOfDelivery}
             className="max-w-lg"
-            error={errors.proofOfDelivery}
           />
+          {errors.proofOfDelivery && (
+            <div className="text-red-600 text-sm mt-1">{errors.proofOfDelivery}</div>
+          )}
           <FileUpload
             label="Upload Signed Invoice (optional)"
             accept="image/*,application/pdf"
