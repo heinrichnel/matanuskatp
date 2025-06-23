@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { Trip, DRIVERS, FUEL_STATIONS, FLEET_NUMBERS, DieselConsumptionRecord, FLEETS_WITH_PROBES } from '../../types';
+import { DRIVERS, FUEL_STATIONS, FLEET_NUMBERS, DieselConsumptionRecord, FLEETS_WITH_PROBES } from '../../types';
 
 // ─── UI Components ───────────────────────────────────────────────
 import Modal from '../ui/Modal';
@@ -14,7 +14,6 @@ import { Input, Select, TextArea } from '../ui/FormElements';
 import { 
   Save, 
   X, 
-  Plus, 
   Calculator,
   AlertTriangle,
   Fuel,
@@ -277,12 +276,6 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
     const hours = Number(formData.hoursOperated) || 0;
     return hours > 0 ? litres / hours : 0;
   };
-
-  // Check if the selected fleet is a reefer unit
-  const isReeferUnit = ['4F', '5F', '6F', '7F', '8F'].includes(formData.fleetNumber);
-  
-  // Check if the selected fleet has a probe
-  const hasProbe = FLEETS_WITH_PROBES.includes(formData.fleetNumber);
 
   // Update isReeferUnit when fleet number changes
   useEffect(() => {

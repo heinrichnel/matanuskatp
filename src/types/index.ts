@@ -265,6 +265,11 @@ export interface DieselConsumptionRecord {
   probeVerifiedAt?: string;
   probeVerifiedBy?: string;
   updatedAt?: string;
+  // --- Reefer/horse fields ---
+  isReeferUnit?: boolean;
+  hoursOperated?: number;
+  linkedHorseId?: string;
+  currency?: 'USD' | 'ZAR';
 }
 
 // NEW: Driver Behavior Event Types
