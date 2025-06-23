@@ -1,24 +1,13 @@
-// AppContext.tsx
-import { createContext, useContext, ReactNode } from "react";
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import { AppProvider } from "./context/AppContext";
+import "./index.css";
 
-type AppContextType = {
-  // definieer jou context waardes hier
-};
-
-const AppContext = createContext<AppContextType | undefined>(undefined);
-
-export const AppProvider = ({ children }: { children: ReactNode }) => {
-  // jou state/logika hier
-  return (
-    <AppContext.Provider value={{ /* jou waardes */ }}>
-      {children}
-    </AppContext.Provider>
-  );
-};
-
-// (optioneel) jou useAppContext hook:
-export const useAppContext = () => {
-  const context = useContext(AppContext);
-  if (!context) throw new Error("useAppContext moet binne AppProvider gebruik word");
-  return context;
-};
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <AppProvider>
+      <App />
+    </AppProvider>
+  </React.StrictMode>
+);
