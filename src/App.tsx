@@ -38,7 +38,7 @@ const AppContent: React.FC = () => {
   // const { isAuthenticated, isLoading } = useReplitAuth();
   const { 
     trips, setTrips, missedLoads, addMissedLoad, updateMissedLoad, deleteMissedLoad,
-    updateTrip, deleteTrip, completeTrip
+    updateTrip, deleteTrip, completeTrip, addTrip
   } = useAppContext();
 
   // Remove or replace with your actual auth logic
@@ -75,9 +75,8 @@ const AppContent: React.FC = () => {
   // Add Trip handler
   const handleAddTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     try {
-      // You must implement addTrip in your context and return the new trip id
-      // @ts-ignore
-      const tripId = await addMissedLoad(tripData); // Replace with addTrip if available
+      // Use addTrip from context to add to the correct collection
+      const tripId = await addTrip(tripData);
       setShowTripForm(false);
       setEditingTrip(undefined);
       alert(`Trip created successfully!\n\nFleet: ${tripData.fleetNumber}\nDriver: ${tripData.driverName}\nRoute: ${tripData.route}\n\nTrip ID: ${tripId}`);

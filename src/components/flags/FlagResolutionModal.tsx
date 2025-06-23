@@ -7,7 +7,7 @@ import { CostEntry } from '../../types';
 // ─── UI Components ───────────────────────────────────────────────
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { Input, Select, TextArea } from '../ui/FormElements';
+import { Input, TextArea } from '../ui/FormElements';
 import FileUpload from '../ui/FileUpload';
 
 // ─── Icons ───────────────────────────────────────────────────────

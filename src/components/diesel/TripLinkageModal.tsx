@@ -23,6 +23,9 @@ import {
 // ─── Utilities ───────────────────────────────────────────────────
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
+// ─── Types ───────────────────────────────────────────────────────
+import type { DieselConsumptionRecord } from '../../types/diesel';
+
 
 interface TripLinkageModalProps {
   isOpen: boolean;
@@ -30,14 +33,20 @@ interface TripLinkageModalProps {
   dieselRecordId: string;
 }
 
+// Extend DieselConsumptionRecord to include linkedHorseId for type safety
+type DieselConsumptionRecordWithHorse = DieselConsumptionRecord & {
+  linkedHorseId?: string;
+  isReeferUnit?: boolean;
+};
+
 const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
   isOpen,
   onClose,
   dieselRecordId
 }) => {
   const { trips, dieselRecords, allocateDieselToTrip, removeDieselFromTrip, updateDieselRecord, deleteCostEntry } = useAppContext();
-  const [selectedTripId, setSelectedTripId] = useState<string>('');
-  const [selectedHorseId, setSelectedHorseId] = useState<string>('');
+  const dieselRecord = dieselRecords.find(r => r.id === dieselRecordId) as DieselConsumptionRecordWithHorse | undefined;
+  if (!dieselRecord) return null;
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,7 +55,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
   if (!dieselRecord) return null;
 
   // Check if it's a reefer unit
-  const isReeferUnit = dieselRecord.isReeferUnit || ['4F', '5F', '6F', '7F', '8F'].includes(dieselRecord.fleetNumber);
+  const isReeferUnit = (dieselRecord as any).isReeferUnit || ['4F', '5F', '6F', '7F', '8F'].includes(dieselRecord.fleetNumber);
 
   // Get available trips for the selected fleet (for non-reefer units)
   const availableTrips = !isReeferUnit ? trips.filter(trip => 
@@ -56,7 +65,8 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
 
   // Get available horse diesel records (for reefer units)
   const availableHorses = isReeferUnit ? dieselRecords.filter(record => 
-    !record.isReeferUnit && 
+    // If 'isReeferUnit' is not present, treat as false (i.e., it's a horse)
+    !('isReeferUnit' in record && (record as any).isReeferUnit) &&
     ['4H', '6H', '21H', '22H', '23H', '24H', '26H', '28H', '29H', '30H', '31H', '32H', '33H', 'UD'].includes(record.fleetNumber)
   ) : [];
 
@@ -483,3 +493,6 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
 };
 
 export default TripLinkageModal;
+// State for selected trip and horse
+const [selectedTripId, setSelectedTripId] = useState<string>('');
+const [selectedHorseId, setSelectedHorseId] = useState<string>('');

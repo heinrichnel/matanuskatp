@@ -8,7 +8,7 @@ import { formatCurrency, calculateTotalCosts } from '../../utils/helpers';
 // ─── UI Components ───────────────────────────────────────────────
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { Input, Select, TextArea } from '../ui/FormElements';
+import { Select, TextArea } from '../ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import { Trash2, X, AlertTriangle, Shield } from 'lucide-react';
@@ -150,7 +150,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
           <Select
             label="Reason for Deletion *"
             value={deletionReason}
-            onChange={(e) => setDeletionReason(e.target.value)}
+            onChange={setDeletionReason}
             options={[
               { label: 'Select reason for deletion...', value: '' },
               ...TRIP_DELETION_REASONS.map(reason => ({ label: reason, value: reason }))
@@ -162,7 +162,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
             <TextArea
               label="Specify Reason *"
               value={customReason}
-              onChange={(e) => setCustomReason(e.target.value)}
+              onChange={setCustomReason}
               placeholder="Please provide a detailed reason for deleting this completed trip..."
               rows={3}
               error={errors.customReason}
