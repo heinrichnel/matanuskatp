@@ -1,42 +1,32 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import { DriverBehaviorEvent, DRIVER_BEHAVIOR_EVENT_TYPES, DRIVERS, FLEET_NUMBERS } from '../../types';
+import { DriverBehaviorEvent, DRIVER_BEHAVIOR_EVENT_TYPES, DRIVERS } from '../../types';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import { Input, Select, TextArea } from '../ui/FormElements';
-import Modal from '../ui/Modal';
-import { User as UserRound, AlertTriangle, CheckCircle, Filter, Plus, X, Save, Eye, Edit, Trash2, Shield, Clock, MapPin, FileUp } from 'lucide-react';
+import { Input, Select } from '../ui/FormElements';
+import { User as UserRound, AlertTriangle, CheckCircle, Plus, RefreshCw, Shield, Clock, Eye, Edit } from 'lucide-react';
 import { formatDate, formatDateTime } from '../../utils/helpers';
 
-const DriverPerformanceOverview: React.FC = () => {
-  const { driverBehaviorEvents, addDriverBehaviorEvent, updateDriverBehaviorEvent, deleteDriverBehaviorEvent, getAllDriversPerformance } = useAppContext();
+interface DriverPerformanceOverviewProps {
+  onAddEvent: () => void;
+  onViewEvent: (event: DriverBehaviorEvent) => void;
+  onEditEvent: (event: DriverBehaviorEvent) => void;
+  onSyncNow?: () => void;
+}
+
+const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
+  onAddEvent,
+  onViewEvent,
+  onEditEvent,
+  onSyncNow
+}) => {
+  const { driverBehaviorEvents, getAllDriversPerformance } = useAppContext();
   
-  const [showAddEventModal, setShowAddEventModal] = useState(false);
-  const [showEventDetailsModal, setShowEventDetailsModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<DriverBehaviorEvent | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<string>('');
   const [selectedEventType, setSelectedEventType] = useState<string>('');
   const [selectedSeverity, setSelectedSeverity] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  
-  // Form state for adding/editing events
-  const [eventForm, setEventForm] = useState({
-    driverName: '',
-    fleetNumber: '',
-    eventDate: new Date().toISOString().split('T')[0],
-    eventTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
-    eventType: '' as DriverBehaviorEvent['eventType'],
-    description: '',
-    location: '',
-    severity: 'medium' as 'low' | 'medium' | 'high' | 'critical',
-    status: 'pending' as 'pending' | 'acknowledged' | 'resolved' | 'disputed',
-    actionTaken: '',
-    points: 0
-  });
-  
-  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   
   // Get all driver performance data
   const driversPerformance = useMemo(() => {
@@ -111,144 +101,6 @@ const DriverPerformanceOverview: React.FC = () => {
     };
   }, [filteredEvents, driversPerformance]);
   
-  // Handle form changes
-  const handleFormChange = (field: string, value: any) => {
-    setEventForm(prev => {
-      const updated = { ...prev, [field]: value };
-      
-      // Auto-calculate points based on event type
-      if (field === 'eventType') {
-        const eventType = DRIVER_BEHAVIOR_EVENT_TYPES.find(t => t.value === value);
-        if (eventType) {
-          updated.points = eventType.points;
-        }
-      }
-      
-      return updated;
-    });
-    
-    // Clear error for this field
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
-  
-  // Validate form
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!eventForm.driverName) newErrors.driverName = 'Driver name is required';
-    if (!eventForm.fleetNumber) newErrors.fleetNumber = 'Fleet number is required';
-    if (!eventForm.eventDate) newErrors.eventDate = 'Event date is required';
-    if (!eventForm.eventTime) newErrors.eventTime = 'Event time is required';
-    if (!eventForm.eventType) newErrors.eventType = 'Event type is required';
-    if (!eventForm.description) newErrors.description = 'Description is required';
-    if (!eventForm.severity) newErrors.severity = 'Severity is required';
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  
-  // Handle form submission
-  const handleSubmit = () => {
-    if (!validateForm()) return;
-    
-    const eventData: Omit<DriverBehaviorEvent, 'id'> = {
-      driverName: eventForm.driverName,
-      fleetNumber: eventForm.fleetNumber,
-      eventDate: eventForm.eventDate,
-      eventTime: eventForm.eventTime,
-      eventType: eventForm.eventType,
-      description: eventForm.description,
-      location: eventForm.location,
-      severity: eventForm.severity,
-      reportedBy: 'Current User', // In a real app, use the logged-in user
-      reportedAt: new Date().toISOString(),
-      status: eventForm.status,
-      actionTaken: eventForm.actionTaken,
-      points: eventForm.points
-    };
-    
-    if (selectedEvent) {
-      // Update existing event
-      updateDriverBehaviorEvent({
-        ...selectedEvent,
-        ...eventData
-      });
-      alert('Driver behavior event updated successfully');
-    } else {
-      // Add new event
-      addDriverBehaviorEvent(eventData, selectedFiles || undefined);
-      alert('Driver behavior event recorded successfully');
-    }
-    
-    // Reset form and close modal
-    resetForm();
-    setShowAddEventModal(false);
-  };
-  
-  // Reset form
-  const resetForm = () => {
-    setEventForm({
-      driverName: '',
-      fleetNumber: '',
-      eventDate: new Date().toISOString().split('T')[0],
-      eventTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
-      eventType: '' as DriverBehaviorEvent['eventType'],
-      description: '',
-      location: '',
-      severity: 'medium',
-      status: 'pending',
-      actionTaken: '',
-      points: 0
-    });
-    setSelectedFiles(null);
-    setErrors({});
-    setSelectedEvent(null);
-  };
-  
-  // Handle edit event
-  const handleEditEvent = (event: DriverBehaviorEvent) => {
-    setSelectedEvent(event);
-    setEventForm({
-      driverName: event.driverName,
-      fleetNumber: event.fleetNumber,
-      eventDate: event.eventDate,
-      eventTime: event.eventTime,
-      eventType: event.eventType,
-      description: event.description,
-      location: event.location || '',
-      severity: event.severity,
-      status: event.status,
-      actionTaken: event.actionTaken || '',
-      points: event.points
-    });
-    setShowAddEventModal(true);
-  };
-  
-  // Handle view event details
-  const handleViewEventDetails = (event: DriverBehaviorEvent) => {
-    setSelectedEvent(event);
-    setShowEventDetailsModal(true);
-  };
-  
-  // Handle delete event
-  const handleDeleteEvent = (id: string) => {
-    if (confirm('Are you sure you want to delete this driver behavior event? This action cannot be undone.')) {
-      deleteDriverBehaviorEvent(id);
-      alert('Driver behavior event deleted successfully');
-    }
-  };
-  
-  // Clear filters
-  const clearFilters = () => {
-    setSelectedDriver('');
-    setSelectedEventType('');
-    setSelectedSeverity('');
-    setSelectedStatus('');
-    setDateRange({ start: '', end: '' });
-  };
-  
   // Get severity class
   const getSeverityClass = (severity: string) => {
     switch (severity) {
@@ -261,7 +113,7 @@ const DriverPerformanceOverview: React.FC = () => {
   };
   
   // Get status class
-  const getStatusClass = (status: string) => {
+  const getStatusClass = (status: string | undefined) => {
     switch (status) {
       case 'resolved': return 'bg-green-100 text-green-800';
       case 'acknowledged': return 'bg-blue-100 text-blue-800';
@@ -278,15 +130,23 @@ const DriverPerformanceOverview: React.FC = () => {
           <h2 className="text-2xl font-bold text-gray-900">Driver Performance Overview</h2>
           <p className="text-gray-600">Monitor driver behavior and identify high-risk drivers</p>
         </div>
-        <Button
-          onClick={() => {
-            resetForm();
-            setShowAddEventModal(true);
-          }}
-          icon={<Plus className="w-4 h-4" />}
-        >
-          Record Behavior Event
-        </Button>
+        <div className="flex space-x-2">
+          <Button
+            onClick={onAddEvent}
+            icon={<Plus className="w-4 h-4" />}
+          >
+            Record Behavior Event
+          </Button>
+          {onSyncNow && (
+            <Button
+              onClick={onSyncNow}
+              icon={<RefreshCw className="w-4 h-4 animate-spin" />}
+              variant="outline"
+            >
+              Sync Now
+            </Button>
+          )}
+        </div>
       </div>
       
       {/* Summary Cards */}
@@ -348,23 +208,13 @@ const DriverPerformanceOverview: React.FC = () => {
       <Card>
         <CardHeader 
           title="Filter Events" 
-          action={
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={clearFilters}
-              icon={<Filter className="w-4 h-4" />}
-            >
-              Clear Filters
-            </Button>
-          }
         />
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
             <Select
               label="Driver"
               value={selectedDriver}
-              onChange={(e) => setSelectedDriver(e.target.value)}
+              onChange={(value: string) => setSelectedDriver(value)}
               options={[
                 { label: 'All Drivers', value: '' },
                 ...DRIVERS.map(driver => ({ label: driver, value: driver }))
@@ -374,7 +224,7 @@ const DriverPerformanceOverview: React.FC = () => {
             <Select
               label="Event Type"
               value={selectedEventType}
-              onChange={(e) => setSelectedEventType(e.target.value)}
+              onChange={(value: string) => setSelectedEventType(value)}
               options={[
                 { label: 'All Event Types', value: '' },
                 ...DRIVER_BEHAVIOR_EVENT_TYPES.map(type => ({ label: type.label, value: type.value }))
@@ -384,7 +234,7 @@ const DriverPerformanceOverview: React.FC = () => {
             <Select
               label="Severity"
               value={selectedSeverity}
-              onChange={(e) => setSelectedSeverity(e.target.value)}
+              onChange={(value: string) => setSelectedSeverity(value)}
               options={[
                 { label: 'All Severities', value: '' },
                 { label: 'Critical', value: 'critical' },
@@ -397,7 +247,7 @@ const DriverPerformanceOverview: React.FC = () => {
             <Select
               label="Status"
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
+              onChange={(value: string) => setSelectedStatus(value)}
               options={[
                 { label: 'All Statuses', value: '' },
                 { label: 'Pending', value: 'pending' },
@@ -412,13 +262,13 @@ const DriverPerformanceOverview: React.FC = () => {
                 label="From Date"
                 type="date"
                 value={dateRange.start}
-                onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                onChange={(value: string) => setDateRange(prev => ({ ...prev, start: value }))}
               />
               <Input
                 label="To Date"
                 type="date"
                 value={dateRange.end}
-                onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                onChange={(value: string) => setDateRange(prev => ({ ...prev, end: value }))}
               />
             </div>
           </div>
@@ -529,10 +379,7 @@ const DriverPerformanceOverview: React.FC = () => {
           action={
             <Button
               size="sm"
-              onClick={() => {
-                resetForm();
-                setShowAddEventModal(true);
-              }}
+              onClick={onAddEvent}
               icon={<Plus className="w-4 h-4" />}
             >
               Record Event
@@ -567,7 +414,7 @@ const DriverPerformanceOverview: React.FC = () => {
                           {event.severity.toUpperCase()}
                         </span>
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(event.status)}`}>
-                          {event.status.toUpperCase()}
+                          {event.status?.toUpperCase()}
                         </span>
                       </div>
                       
@@ -622,7 +469,7 @@ const DriverPerformanceOverview: React.FC = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleViewEventDetails(event)}
+                        onClick={() => onViewEvent(event)}
                         icon={<Eye className="w-3 h-3" />}
                       >
                         View
@@ -630,18 +477,10 @@ const DriverPerformanceOverview: React.FC = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleEditEvent(event)}
+                        onClick={() => onEditEvent(event)}
                         icon={<Edit className="w-3 h-3" />}
                       >
                         Edit
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        onClick={() => handleDeleteEvent(event.id)}
-                        icon={<Trash2 className="w-3 h-3" />}
-                      >
-                        Delete
                       </Button>
                     </div>
                   </div>
@@ -651,356 +490,6 @@ const DriverPerformanceOverview: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      
-      {/* Add/Edit Event Modal */}
-      <Modal
-        isOpen={showAddEventModal}
-        onClose={() => {
-          resetForm();
-          setShowAddEventModal(false);
-        }}
-        title={selectedEvent ? "Edit Driver Behavior Event" : "Record Driver Behavior Event"}
-        maxWidth="lg"
-      >
-        <div className="space-y-6">
-          {/* Form Instructions */}
-          <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-            <div className="flex items-start space-x-3">
-              <UserRound className="w-5 h-5 text-blue-600 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-medium text-blue-800">Driver Behavior Reporting</h4>
-                <p className="text-sm text-blue-700 mt-1">
-                  Record driver behavior events to track performance and identify training needs. 
-                  Each event type has associated demerit points that affect the driver's overall risk score.
-                </p>
-              </div>
-            </div>
-          </div>
-          
-          {/* Form Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Select
-              label="Driver *"
-              value={eventForm.driverName}
-              onChange={(e) => handleFormChange('driverName', e.target.value)}
-              options={[
-                { label: 'Select driver...', value: '' },
-                ...DRIVERS.map(driver => ({ label: driver, value: driver }))
-              ]}
-              error={errors.driverName}
-            />
-            
-            <Select
-              label="Fleet Number *"
-              value={eventForm.fleetNumber}
-              onChange={(e) => handleFormChange('fleetNumber', e.target.value)}
-              options={[
-                { label: 'Select fleet...', value: '' },
-                ...FLEET_NUMBERS.map(fleet => ({ label: fleet, value: fleet }))
-              ]}
-              error={errors.fleetNumber}
-            />
-            
-            <Input
-              label="Event Date *"
-              type="date"
-              value={eventForm.eventDate}
-              onChange={(e) => handleFormChange('eventDate', e.target.value)}
-              error={errors.eventDate}
-            />
-            
-            <Input
-              label="Event Time *"
-              type="time"
-              value={eventForm.eventTime}
-              onChange={(e) => handleFormChange('eventTime', e.target.value)}
-              error={errors.eventTime}
-            />
-            
-            <Select
-              label="Event Type *"
-              value={eventForm.eventType}
-              onChange={(e) => handleFormChange('eventType', e.target.value)}
-              options={[
-                { label: 'Select event type...', value: '' },
-                ...DRIVER_BEHAVIOR_EVENT_TYPES.map(type => ({ label: type.label, value: type.value }))
-              ]}
-              error={errors.eventType}
-            />
-            
-            <Select
-              label="Severity *"
-              value={eventForm.severity}
-              onChange={(e) => handleFormChange('severity', e.target.value)}
-              options={[
-                { label: 'Critical', value: 'critical' },
-                { label: 'High', value: 'high' },
-                { label: 'Medium', value: 'medium' },
-                { label: 'Low', value: 'low' }
-              ]}
-              error={errors.severity}
-            />
-            
-            <Input
-              label="Location"
-              value={eventForm.location}
-              onChange={(e) => handleFormChange('location', e.target.value)}
-              placeholder="e.g., Highway A1, Kilometer 45"
-            />
-            
-            <Select
-              label="Status"
-              value={eventForm.status}
-              onChange={(e) => handleFormChange('status', e.target.value)}
-              options={[
-                { label: 'Pending', value: 'pending' },
-                { label: 'Acknowledged', value: 'acknowledged' },
-                { label: 'Resolved', value: 'resolved' },
-                { label: 'Disputed', value: 'disputed' }
-              ]}
-            />
-          </div>
-          
-          <TextArea
-            label="Description *"
-            value={eventForm.description}
-            onChange={(e) => handleFormChange('description', e.target.value)}
-            placeholder="Provide details about the behavior event..."
-            rows={3}
-            error={errors.description}
-          />
-          
-          <TextArea
-            label="Action Taken"
-            value={eventForm.actionTaken}
-            onChange={(e) => handleFormChange('actionTaken', e.target.value)}
-            placeholder="Describe any actions taken to address this behavior..."
-            rows={2}
-          />
-          
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-            <div className="flex items-center space-x-2">
-              <Shield className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">Demerit Points</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Input
-                type="number"
-                min="0"
-                max="25"
-                value={eventForm.points.toString()}
-                onChange={(e) => handleFormChange('points', parseInt(e.target.value))}
-                className="w-20"
-              />
-              <span className="text-sm text-gray-500">points</span>
-            </div>
-          </div>
-          
-          {/* Supporting Documents */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Supporting Documents (Optional)
-            </label>
-            <input
-              type="file"
-              multiple
-              onChange={(e) => setSelectedFiles(e.target.files)}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
-                file:rounded-md file:border-0 file:text-sm file:font-medium 
-                file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
-                file:cursor-pointer cursor-pointer"
-            />
-            {selectedFiles && selectedFiles.length > 0 && (
-              <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                <p className="font-medium text-blue-800">
-                  Selected {selectedFiles.length} file(s)
-                </p>
-              </div>
-            )}
-          </div>
-          
-          {/* Form Actions */}
-          <div className="flex justify-end space-x-3 pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={() => {
-                resetForm();
-                setShowAddEventModal(false);
-              }}
-              icon={<X className="w-4 h-4" />}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              icon={<Save className="w-4 h-4" />}
-            >
-              {selectedEvent ? 'Update Event' : 'Record Event'}
-            </Button>
-          </div>
-        </div>
-      </Modal>
-      
-      {/* Event Details Modal */}
-      <Modal
-        isOpen={showEventDetailsModal}
-        onClose={() => {
-          setSelectedEvent(null);
-          setShowEventDetailsModal(false);
-        }}
-        title="Driver Behavior Event Details"
-        maxWidth="lg"
-      >
-        {selectedEvent && (
-          <div className="space-y-6">
-            {/* Event Header */}
-            <div className={`p-4 rounded-lg ${
-              selectedEvent.severity === 'critical' ? 'bg-red-50 border border-red-200' :
-              selectedEvent.severity === 'high' ? 'bg-orange-50 border border-orange-200' :
-              selectedEvent.severity === 'medium' ? 'bg-yellow-50 border border-yellow-200' :
-              'bg-green-50 border border-green-200'
-            }`}>
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">{selectedEvent.driverName}</h3>
-                  <p className="text-sm text-gray-600">Fleet {selectedEvent.fleetNumber}</p>
-                </div>
-                <div className="flex space-x-2">
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getSeverityClass(selectedEvent.severity)}`}>
-                    {selectedEvent.severity.toUpperCase()}
-                  </span>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(selectedEvent.status)}`}>
-                    {selectedEvent.status.toUpperCase()}
-                  </span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Event Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Event Type</h4>
-                  <p className="font-medium text-gray-900">
-                    {DRIVER_BEHAVIOR_EVENT_TYPES.find(t => t.value === selectedEvent.eventType)?.label || selectedEvent.eventType}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Date & Time</h4>
-                  <p className="font-medium text-gray-900">
-                    {formatDate(selectedEvent.eventDate)} at {selectedEvent.eventTime}
-                  </p>
-                </div>
-                
-                {selectedEvent.location && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500">Location</h4>
-                    <div className="flex items-center space-x-2">
-                      <MapPin className="w-4 h-4 text-gray-400" />
-                      <p className="font-medium text-gray-900">{selectedEvent.location}</p>
-                    </div>
-                  </div>
-                )}
-                
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Demerit Points</h4>
-                  <p className="font-medium text-red-600">{selectedEvent.points} points</p>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-500">Reported By</h4>
-                  <p className="font-medium text-gray-900">{selectedEvent.reportedBy}</p>
-                  <p className="text-xs text-gray-500">{formatDateTime(selectedEvent.reportedAt)}</p>
-                </div>
-                
-                {selectedEvent.resolvedAt && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-500">Resolved By</h4>
-                    <p className="font-medium text-gray-900">{selectedEvent.resolvedBy}</p>
-                    <p className="text-xs text-gray-500">{formatDateTime(selectedEvent.resolvedAt)}</p>
-                  </div>
-                )}
-                
-                {selectedEvent.status === 'resolved' && !selectedEvent.resolvedAt && (
-                  <div className="p-2 bg-yellow-50 border border-yellow-200 rounded">
-                    <p className="text-sm text-yellow-700">
-                      This event is marked as resolved but missing resolution details.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-            
-            {/* Description */}
-            <div>
-              <h4 className="text-sm font-medium text-gray-500 mb-2">Description</h4>
-              <div className="p-3 bg-gray-50 rounded-md border border-gray-200">
-                <p className="text-gray-900">{selectedEvent.description}</p>
-              </div>
-            </div>
-            
-            {/* Action Taken */}
-            {selectedEvent.actionTaken && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-500 mb-2">Action Taken</h4>
-                <div className="p-3 bg-blue-50 rounded-md border border-blue-200">
-                  <p className="text-blue-900">{selectedEvent.actionTaken}</p>
-                </div>
-              </div>
-            )}
-            
-            {/* Attachments */}
-            {selectedEvent.attachments && selectedEvent.attachments.length > 0 && (
-              <div>
-                <h4 className="text-sm font-medium text-gray-500 mb-2">Supporting Documents</h4>
-                <div className="space-y-2">
-                  {selectedEvent.attachments.map((attachment) => (
-                    <div key={attachment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200">
-                      <div className="flex items-center space-x-2">
-                        <FileUp className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-900">{attachment.filename}</span>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => window.open(attachment.fileUrl, '_blank')}
-                      >
-                        View
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {/* Actions */}
-            <div className="flex justify-end space-x-3 pt-4 border-t">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSelectedEvent(null);
-                  setShowEventDetailsModal(false);
-                }}
-              >
-                Close
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowEventDetailsModal(false);
-                  handleEditEvent(selectedEvent);
-                }}
-                icon={<Edit className="w-4 h-4" />}
-              >
-                Edit Event
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
     </div>
   );
 };

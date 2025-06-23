@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { useAppContext } from '../context/AppContext';
 import { DriverBehaviorEvent } from '../types';
-import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import DriverPerformanceOverview from '../components/drivers/DriverPerformanceOverview';
 import DriverBehaviorEventForm from '../components/drivers/DriverBehaviorEventForm';
@@ -22,6 +20,12 @@ const DriverBehaviorPage: React.FC = () => {
   const handleInitiateCAR = (event: DriverBehaviorEvent) => {
     setSelectedEvent(event);
     setShowCARForm(true);
+  };
+  
+  // Manual sync handler
+  const handleSyncNow = async () => {
+    // Fallback: just alert for now, or implement actual sync logic if available
+    alert('Manual sync not yet implemented.');
   };
   
   return (
@@ -62,15 +66,15 @@ const DriverBehaviorPage: React.FC = () => {
               setSelectedEvent(null);
               setShowEventForm(true);
             }}
-            onViewEvent={(event) => {
+            onViewEvent={(event: DriverBehaviorEvent) => {
               setSelectedEvent(event);
               setShowEventDetails(true);
             }}
-            onEditEvent={(event) => {
+            onEditEvent={(event: DriverBehaviorEvent) => {
               setSelectedEvent(event);
               setShowEventForm(true);
             }}
-            onInitiateCAR={handleInitiateCAR}
+            onSyncNow={handleSyncNow}
           />
         </TabsContent>
         
@@ -86,7 +90,7 @@ const DriverBehaviorPage: React.FC = () => {
           setSelectedEvent(null);
           setShowEventForm(false);
         }}
-        event={selectedEvent}
+        event={selectedEvent ?? undefined}
         onInitiateCAR={handleInitiateCAR}
       />
       
@@ -117,7 +121,7 @@ const DriverBehaviorPage: React.FC = () => {
           setSelectedEvent(null);
           setShowCARForm(false);
         }}
-        linkedEvent={selectedEvent}
+        linkedEvent={selectedEvent ?? undefined}
       />
     </div>
   );

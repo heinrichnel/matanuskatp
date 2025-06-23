@@ -257,6 +257,14 @@ export interface DieselConsumptionRecord {
   debriefNotes?: string;
   debriefSignedBy?: string;
   debriefSignedAt?: string;
+  // --- Probe Verification Fields ---
+  probeReading?: number; // For probe verification
+  probeDiscrepancy?: number; // Difference between filled and probe
+  probeVerified?: boolean;
+  probeVerificationNotes?: string;
+  probeVerifiedAt?: string;
+  probeVerifiedBy?: string;
+  updatedAt?: string;
 }
 
 // NEW: Driver Behavior Event Types
@@ -288,6 +296,8 @@ export interface DriverBehaviorEvent {
   // ADDED: points for scoring and carReportId for linkage
   points?: number;
   carReportId?: string;
+  // ADDED: status for event workflow (for UI and logic)
+  status?: 'pending' | 'acknowledged' | 'resolved' | 'disputed';
 }
 
 // NEW: Action Item Types

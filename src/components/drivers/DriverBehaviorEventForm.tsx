@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 // ─── Types ───────────────────────────────────────────────────────
 import {
   DriverBehaviorEvent,
-  DriverBehaviorEventType,
   DRIVER_BEHAVIOR_EVENT_TYPES,
   DRIVERS,
   FLEET_NUMBERS
@@ -31,7 +30,6 @@ import {
 } from 'lucide-react';
 
 // ─── Utilities ───────────────────────────────────────────────────
-import { formatDate } from '../../utils/helpers';
 
 
 interface DriverBehaviorEventFormProps {
@@ -50,17 +48,19 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
   const { addDriverBehaviorEvent, updateDriverBehaviorEvent } = useAppContext();
   
   const [formData, setFormData] = useState({
+    driverId: '',
     driverName: '',
     fleetNumber: '',
     eventDate: new Date().toISOString().split('T')[0],
     eventTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
-    eventType: '' as DriverBehaviorEventType,
+    eventType: '' as any, // use string union
     description: '',
     location: '',
     severity: 'medium' as 'low' | 'medium' | 'high' | 'critical',
     status: 'pending' as 'pending' | 'acknowledged' | 'resolved' | 'disputed',
     actionTaken: '',
-    points: 0
+    points: 0,
+    followUpRequired: false
   });
   
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
@@ -70,9 +70,10 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
   useEffect(() => {
     if (event) {
       setFormData({
+        driverId: event.driverId || '',
         driverName: event.driverName,
         fleetNumber: event.fleetNumber,
-        eventDate: event.eventDate || event.date?.split('T')[0] || new Date().toISOString().split('T')[0],
+        eventDate: event.eventDate || new Date().toISOString().split('T')[0],
         eventTime: event.eventTime || '00:00',
         eventType: event.eventType,
         description: event.description,
@@ -80,22 +81,25 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
         severity: event.severity || 'medium',
         status: event.status || 'pending',
         actionTaken: event.actionTaken || '',
-        points: event.points || 0
+        points: event.points || 0,
+        followUpRequired: event.followUpRequired ?? false
       });
     } else {
       // Reset form for new event
       setFormData({
+        driverId: '',
         driverName: '',
         fleetNumber: '',
         eventDate: new Date().toISOString().split('T')[0],
         eventTime: new Date().toTimeString().split(' ')[0].substring(0, 5),
-        eventType: '' as DriverBehaviorEventType,
+        eventType: '' as any,
         description: '',
         location: '',
         severity: 'medium',
         status: 'pending',
         actionTaken: '',
-        points: 0
+        points: 0,
+        followUpRequired: false
       });
     }
     
@@ -147,6 +151,7 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
     if (!validateForm()) return;
     
     const eventData: Omit<DriverBehaviorEvent, 'id'> = {
+      driverId: formData.driverId,
       driverName: formData.driverName,
       fleetNumber: formData.fleetNumber,
       eventDate: formData.eventDate,
@@ -160,7 +165,7 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
       status: formData.status,
       actionTaken: formData.actionTaken,
       points: formData.points,
-      date: new Date().toISOString() // For compatibility
+      followUpRequired: formData.followUpRequired
     };
     
     if (event) {
@@ -236,8 +241,9 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
             error={errors.fleetNumber}
           />
           
+          {/* Use Calendar and Clock icons in the form for date and time fields */}
           <Input
-            label="Event Date *"
+            label={<span className="flex items-center gap-1"><Calendar className="w-4 h-4 text-blue-500" /> Event Date *</span>}
             type="date"
             value={formData.eventDate}
             onChange={(value) => handleChange('eventDate', value)}
@@ -245,7 +251,7 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
           />
           
           <Input
-            label="Event Time *"
+            label={<span className="flex items-center gap-1"><Clock className="w-4 h-4 text-blue-500" /> Event Time *</span>}
             type="time"
             value={formData.eventTime}
             onChange={(value) => handleChange('eventTime', value)}
@@ -276,8 +282,9 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
             error={errors.severity}
           />
           
+          {/* Use MapPin icon in location field */}
           <Input
-            label="Location"
+            label={<span className="flex items-center gap-1"><MapPin className="w-4 h-4 text-blue-500" /> Location</span>}
             value={formData.location}
             onChange={(value) => handleChange('location', value)}
             placeholder="e.g., Highway A1, Kilometer 45"
@@ -320,9 +327,9 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
           </div>
           <div className="flex items-center space-x-2">
             <Input
+              label="Demerit Points"
               type="number"
               min="0"
-              max="25"
               value={formData.points.toString()}
               onChange={(value) => handleChange('points', parseInt(value))}
               className="w-20"
@@ -333,8 +340,9 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
         
         {/* Supporting Documents */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Supporting Documents (Optional)
+          {/* Use FileUp icon in file upload section */}
+          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+            <FileUp className="w-4 h-4 text-blue-500" /> Supporting Documents (Optional)
           </label>
           <input
             type="file"

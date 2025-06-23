@@ -14,8 +14,6 @@ import { Input, Select, Textarea } from '../ui/FormElements';
 import {
   Save,
   X,
-  DollarSign,
-  Calendar,
   CheckCircle,
   AlertTriangle
 } from 'lucide-react';
@@ -175,7 +173,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
           <Select
             label="Payment Status *"
             value={formData.paymentStatus}
-            onChange={(e) => handleChange('paymentStatus', e.target.value)}
+            onChange={(value: string) => handleChange('paymentStatus', value)}
             options={[
               { label: 'Unpaid', value: 'unpaid' },
               { label: 'Partial Payment', value: 'partial' },
@@ -191,9 +189,8 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
                   type="number"
                   step="0.01"
                   min="0.01"
-                  max={trip.baseRevenue}
                   value={formData.paymentAmount}
-                  onChange={(e) => handleChange('paymentAmount', e.target.value)}
+                  onChange={(value: string) => handleChange('paymentAmount', value)}
                   placeholder="0.00"
                   error={errors.paymentAmount}
                 />
@@ -201,8 +198,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
                   label="Payment Received Date *"
                   type="date"
                   value={formData.paymentReceivedDate}
-                  onChange={(e) => handleChange('paymentReceivedDate', e.target.value)}
-                  max={new Date().toISOString().split('T')[0]}
+                  onChange={(value: string) => handleChange('paymentReceivedDate', value)}
                   error={errors.paymentReceivedDate}
                 />
               </div>
@@ -211,7 +207,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
                 <Select
                   label="Payment Method *"
                   value={formData.paymentMethod}
-                  onChange={(e) => handleChange('paymentMethod', e.target.value)}
+                  onChange={(value: string) => handleChange('paymentMethod', value)}
                   options={[
                     { label: 'Bank Transfer', value: 'bank_transfer' },
                     { label: 'Cash', value: 'cash' },
@@ -224,7 +220,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
                 <Input
                   label="Bank Reference / Transaction ID"
                   value={formData.bankReference}
-                  onChange={(e) => handleChange('bankReference', e.target.value)}
+                  onChange={(value: string) => handleChange('bankReference', value)}
                   placeholder="e.g., TXN123456789"
                 />
               </div>
@@ -279,10 +275,10 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
             </>
           )}
 
-          <TextArea
+          <Textarea
             label="Payment Notes"
             value={formData.paymentNotes}
-            onChange={(e) => handleChange('paymentNotes', e.target.value)}
+            onChange={(value: string) => handleChange('paymentNotes', value)}
             placeholder="Add any notes about this payment (e.g., late payment reason, payment terms, etc.)..."
             rows={3}
           />

@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface InputProps {
-  label: string;
+  label: React.ReactNode;
   value: string | number;
   onChange: (value: string) => void;
   type?: string;
@@ -51,11 +51,11 @@ export const Input: React.FC<InputProps> = ({
 
 interface SelectOption {
   value: string;
-  label: string;
+  label: React.ReactNode;
 }
 
 interface SelectProps {
-  label: string;
+  label: React.ReactNode;
   value: string;
   onChange: (value: string) => void;
   options: SelectOption[];
@@ -89,11 +89,8 @@ export const Select: React.FC<SelectProps> = ({
       disabled={disabled}
       className={`w-full border rounded px-3 py-2 ${error ? 'border-red-500' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} ${className}`}
     >
-      <option value="">Select...</option>
-      {options.map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
+      {options.map((option, idx) => (
+        <option key={idx} value={option.value}>{option.label}</option>
       ))}
     </select>
     {error && <div className="text-red-500 text-xs mt-1">{error}</div>}

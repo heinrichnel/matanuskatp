@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { Trip, FlaggedCost } from '../../types';
+import { Trip, FlaggedCost, CostEntry } from '../../types';
 
 // ─── Context ─────────────────────────────────────────────────────
 import { useAppContext } from '../../context/AppContext';
@@ -10,7 +10,7 @@ import { useAppContext } from '../../context/AppContext';
 // ─── UI Components ───────────────────────────────────────────────
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import { Input, Select } from '../ui/FormElements';
+import { Select } from '../ui/FormElements';
 import FlagResolutionModal from './FlagResolutionModal';
 
 // ─── Icons ───────────────────────────────────────────────────────
@@ -60,7 +60,9 @@ const FlagsInvestigations: React.FC<FlagsInvestigationsProps> = ({ trips }) => {
 
     if (unresolvedFlagsForTrip.length === 0) {
       completeTrip(updatedCost.tripId);
-      alert(`All flags for Trip ${updatedCost.tripFleetNumber} are resolved. Trip marked as completed.`);
+      // Find the trip to get the fleet number for the alert
+      const trip = trips.find(t => t.id === updatedCost.tripId);
+      alert(`All flags for Trip ${trip ? trip.fleetNumber : updatedCost.tripId} are resolved. Trip marked as completed.`);
     }
   };
 
@@ -175,7 +177,7 @@ const FlagsInvestigations: React.FC<FlagsInvestigationsProps> = ({ trips }) => {
             <Select
               label="Investigation Status"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={setStatusFilter}
               options={[
                 { label: 'All Statuses', value: '' },
                 { label: 'Pending', value: 'pending' },
@@ -186,7 +188,7 @@ const FlagsInvestigations: React.FC<FlagsInvestigationsProps> = ({ trips }) => {
             <Select
               label="Driver"
               value={driverFilter}
-              onChange={(e) => setDriverFilter(e.target.value)}
+              onChange={setDriverFilter}
               options={[
                 { label: 'All Drivers', value: '' },
                 ...uniqueDrivers.map(d => ({ label: d, value: d }))
@@ -292,6 +294,9 @@ const FlagsInvestigations: React.FC<FlagsInvestigationsProps> = ({ trips }) => {
                       </div>
 
                       <div className="flex justify-end space-x-2">
+                        <Button size="sm" variant="outline" icon={<Eye className="w-3 h-3" />} onClick={() => alert(`Viewing details for cost: ${cost.referenceNumber}`)}>
+                          View
+                        </Button>
                         {canResolve ? (
                           <Button size="sm" onClick={() => handleOpenResolution(cost)} icon={<Edit className="w-3 h-3" />}>
                             Resolve Flag

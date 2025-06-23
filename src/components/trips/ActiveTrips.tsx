@@ -80,10 +80,12 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
         </Button>
       </div>
       {/* Info Banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center gap-3 mb-6">
-        <Truck className="w-6 h-6 text-blue-500" />
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 mb-6">
+        <CheckCircle className="w-6 h-6 text-green-500" />
         <div>
-          <div className="font-semibold text-blue-800">Active trips are displayed below. Use filters to narrow results or select multiple trips for bulk actions.</div>
+          <div className="font-semibold text-green-800">
+            All trips imported via CSV, webhook, or added manually will appear here as active trips. You can view, edit, or delete any trip.
+          </div>
         </div>
       </div>
       {/* Filters Section */}

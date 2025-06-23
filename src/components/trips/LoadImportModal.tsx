@@ -5,10 +5,9 @@ import { useAppContext } from '../../context/AppContext';
 // ─── UI Components ───────────────────────────────────────────────
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { Input } from '../ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
-import { Upload, X, AlertTriangle, Wifi, WifiOff } from 'lucide-react';
+import { Upload, X, Wifi, WifiOff } from 'lucide-react';
 
 
 interface LoadImportModalProps {
@@ -78,7 +77,12 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         driverName: row.driverName || row.driver || '',
         distanceKm: parseFloat(row.distanceKm || row.distance || '0'),
         clientType: row.clientType || 'external',
-        description: row.description || ''
+        description: row.description || '',
+        paymentStatus: (['unpaid', 'partial', 'paid'].includes((row.paymentStatus || '').toLowerCase())
+          ? (row.paymentStatus || '').toLowerCase()
+          : 'unpaid') as 'unpaid' | 'partial' | 'paid',
+        additionalCosts: [],
+        followUpHistory: [],
       }));
 
       await importTripsFromCSV(trips);
@@ -114,6 +118,46 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
     setIsProcessing(false);
     setPreviewData([]);
     onClose();
+  };
+
+  // Add CSV template download helper
+  const handleDownloadTemplate = () => {
+    const headers = [
+      'fleetNumber',
+      'driverName',
+      'clientName',
+      'route',
+      'baseRevenue',
+      'revenueCurrency',
+      'startDate',
+      'endDate',
+      'distanceKm',
+      'clientType',
+      'description',
+      'paymentStatus',
+    ];
+    const example = [
+      '6H',
+      'John Doe',
+      'Acme Corp',
+      'Cape Town - Durban',
+      '12000',
+      'ZAR',
+      '2025-06-01',
+      '2025-06-03',
+      '1600',
+      'external',
+      'General cargo',
+      'unpaid',
+    ];
+    const csv = `${headers.join(',')}\n${example.join(',')}`;
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'trip_import_template.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -176,10 +220,65 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
               <li><strong>distanceKm</strong> - Distance in kilometers (optional)</li>
               <li><strong>clientType</strong> - "internal" or "external" (optional)</li>
             </ul>
+            <Button
+              onClick={handleDownloadTemplate}
+              variant="outline"
+              className="mt-3"
+            >
+              Download CSV Template
+            </Button>
           </div>
         </div>
 
         <div className="space-y-4">
+          {/* Download CSV Template Button */}
+          <div>
+            <Button
+              variant="outline"
+              className="mb-2"
+              onClick={() => {
+                const headers = [
+                  'fleetNumber',
+                  'driverName',
+                  'clientName',
+                  'route',
+                  'baseRevenue',
+                  'revenueCurrency',
+                  'startDate',
+                  'endDate',
+                  'distanceKm',
+                  'clientType',
+                  'description',
+                  'paymentStatus'
+                ];
+                const sample = [
+                  '6H',
+                  'John Doe',
+                  'Acme Corp',
+                  'JHB-DBN',
+                  '12000',
+                  'ZAR',
+                  '2025-06-01',
+                  '2025-06-03',
+                  '600',
+                  'external',
+                  'Sample trip',
+                  'unpaid'
+                ];
+                const csv = `${headers.join(',')}\n${sample.join(',')}`;
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'trip_import_template.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              Download CSV Template
+            </Button>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Select CSV File
@@ -230,7 +329,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
                   <tbody>
                     {previewData.map((row, rowIndex) => (
                       <tr key={rowIndex} className="border-b">
-                        {Object.entries(row).slice(0, 5).map(([key, value], colIndex) => (
+                        {Object.entries(row).slice(0, 5).map(([_, value], colIndex) => (
                           <td key={`${rowIndex}-${colIndex}`} className="px-2 py-1 text-gray-600">
                             {String(value)}
                           </td>

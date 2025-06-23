@@ -136,12 +136,12 @@ const ProbeVerificationModal: React.FC<ProbeVerificationModalProps> = ({
             <div>
               <p><strong>Litres Filled:</strong> {record.litresFilled}</p>
               <p><strong>Cost:</strong> {formatCurrency(record.totalCost, 'ZAR')}</p>
-                <p><strong>Station:</strong> {record.fuelStation}</p>
-                <p>
+              <p><strong>Station:</strong> {record.fuelStation}</p>
+              <p>
                 <strong>Cost:</strong> {formatCurrency(record.totalCost, 'ZAR')}
                 {" / "}
                 {formatCurrency(record.totalCost / 18, 'USD')}
-                </p></p>
+              </p>
             </div>
           </div>
         </div>
@@ -221,6 +221,7 @@ const ProbeVerificationModal: React.FC<ProbeVerificationModalProps> = ({
             Verify Probe Reading
           </Button>
         </div>
+      </div>
     </Modal>
   );
 };

@@ -13,20 +13,15 @@ import { Input, Select } from '../ui/FormElements';
 import {
   AlertTriangle,
   Building,
-  Calendar,
   DollarSign,
   FileSpreadsheet,
   Filter,
-  TrendingDown,
-  TrendingUp,
   Users
 } from 'lucide-react';
 
 // ─── Helper Functions ────────────────────────────────────────────
 import {
-  formatDate,
   formatCurrency,
-  calculateTotalCosts,
   generateCurrencyFleetReport,
   downloadCurrencyFleetReport
 } from '../../utils/helpers';
