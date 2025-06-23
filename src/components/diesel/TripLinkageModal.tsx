@@ -113,6 +113,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
           tripId: selectedTripId,
           updatedAt: new Date().toISOString(),
           ...getRequiredDieselFields(dieselRecord),
+          currency: (dieselRecord.currency === 'USD' || dieselRecord.currency === 'ZAR' ? dieselRecord.currency : undefined) as "USD" | "ZAR" | undefined,
         };
         await updateDieselRecord(updatedRecord);
         await allocateDieselToTrip(dieselRecordId, selectedTripId);
@@ -131,6 +132,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
           linkedHorseId: selectedHorseId,
           updatedAt: new Date().toISOString(),
           ...getRequiredDieselFields(dieselRecord),
+          currency: (dieselRecord.currency === 'USD' || dieselRecord.currency === 'ZAR' ? dieselRecord.currency : undefined) as "USD" | "ZAR" | undefined,
         };
         await updateDieselRecord(updatedReeferRecord);
         // If the horse is linked to a trip, create a cost entry for the reefer diesel
@@ -167,6 +169,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
           linkedHorseId: undefined,
           updatedAt: new Date().toISOString(),
           ...getRequiredDieselFields(dieselRecord),
+          currency: (dieselRecord.currency === 'USD' || dieselRecord.currency === 'ZAR' ? dieselRecord.currency : undefined) as "USD" | "ZAR" | undefined,
         };
         await updateDieselRecord(updatedRecord);
         // If the horse is linked to a trip, remove the cost entry

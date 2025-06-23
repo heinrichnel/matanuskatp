@@ -115,7 +115,6 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
       newErrors.category = 'System costs are automatically generated and cannot be manually added';
     }
     const hasFiles = selectedFiles && selectedFiles.length > 0;
-    const hasExistingAttachments = cost && cost.attachments && cost.attachments.length > 0;
     const hasNoDocumentReason = String(formData.noDocumentReason ?? '').trim().length > 0;
     if (!cost && !hasFiles && !hasNoDocumentReason) {
       newErrors.documents = 'Either attach a receipt/document OR provide a reason for missing documentation';

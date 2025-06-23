@@ -20,15 +20,12 @@ import {
   CheckCircle,
   Clock,
   Plus,
-  Edit,
   Eye,
   Trash2,
   X,
   Save,
-  History,
   User,
   Calendar,
-  Flag,
   MessageSquare,
   FileUp
 } from 'lucide-react';
@@ -170,7 +167,7 @@ const ActionLog: React.FC = () => {
     };
     
     // Add action item
-    const newId = addActionItem(actionItemData);
+    addActionItem(actionItemData);
     
     // Reset form and close modal
     resetForm();
