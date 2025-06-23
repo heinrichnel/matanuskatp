@@ -166,13 +166,10 @@ const DieselDashboard: React.FC = () => {
     const toleranceRange = tolerance;
     const isWithinTolerance = Math.abs(efficiencyVariance) <= toleranceRange;
     const performanceStatus: "normal" | "poor" | "excellent" =
-      isReeferUnit
-        ? "normal"
-        : isWithinTolerance
-        ? "normal"
-        : efficiencyVariance < -toleranceRange
-        ? "poor"
-        : "excellent";
+      isReeferUnit ? "normal"
+      : isWithinTolerance ? "normal"
+      : efficiencyVariance < -toleranceRange ? "poor"
+      : "excellent";
     
     // Flag for debrief if outside tolerance and not a reefer unit
     const requiresDebrief = !isReeferUnit && !isWithinTolerance;
@@ -291,6 +288,9 @@ const DieselDashboard: React.FC = () => {
       const distanceTravelled = !isReeferUnit && previousKmReading !== undefined ? kmReading - previousKmReading : record.distanceTravelled;
       const kmPerLitre = !isReeferUnit && distanceTravelled && litresFilled > 0 ? distanceTravelled / litresFilled : undefined;
       const costPerLitre = litresFilled > 0 ? totalCost / litresFilled : 0;
+      
+      // Calculate litres per hour for reefer units
+      const litresPerHour = isReeferUnit && hoursOperated && hoursOperated > 0 ? litresFilled / hoursOperated : undefined;
       
       // Calculate probe discrepancy if applicable
       const probeDiscrepancy = probeReading !== undefined ? litresFilled - probeReading : undefined;
@@ -431,11 +431,10 @@ const DieselDashboard: React.FC = () => {
 
   const averageKmPerLitre = fleetSummary.totalLitres > 0 && fleetSummary.totalDistance > 0 ? 
     fleetSummary.totalDistance / fleetSummary.totalLitres : 0;
-
-  // Calculate average litres per hour for reefer units
-  const averageLitresPerHour = fleetSummary.totalReeferHours > 0
-    ? fleetSummary.totalLitres / fleetSummary.totalReeferHours
-    : 0;
+  const averageCostPerKm = fleetSummary.totalDistance > 0 ? 
+    fleetSummary.totalCost / fleetSummary.totalDistance : 0;
+  const averageLitresPerHour = fleetSummary.totalReeferHours > 0 ?
+    fleetSummary.totalLitres / fleetSummary.totalReeferHours : 0;
 
   // Get unique drivers and fleets for filters
   const uniqueFleets = [...new Set(enhancedRecords.map(r => r.fleetNumber))].sort();
@@ -602,7 +601,7 @@ const DieselDashboard: React.FC = () => {
             <Select
               label="Fleet"
               value={filterFleet}
-              onChange={(value) => setFilterFleet(value)}
+              onChange={setFilterFleet}
               options={[
                 { label: 'All Fleets', value: '' },
                 ...uniqueFleets.map(fleet => ({ 
@@ -614,7 +613,7 @@ const DieselDashboard: React.FC = () => {
             <Select
               label="Driver"
               value={filterDriver}
-              onChange={(value) => setFilterDriver(value)}
+              onChange={setFilterDriver}
               options={[
                 { label: 'All Drivers', value: '' },
                 ...uniqueDrivers.map(driver => ({ label: driver, value: driver }))
@@ -623,7 +622,7 @@ const DieselDashboard: React.FC = () => {
             <Select
               label="Date"
               value={filterDate}
-              onChange={(value) => setFilterDate(value)}
+              onChange={setFilterDate}
               options={[
                 { label: 'All Dates', value: '' },
                 ...uniqueDates.map(date => ({ 
@@ -635,7 +634,7 @@ const DieselDashboard: React.FC = () => {
             <Select
               label="Currency"
               value={filterCurrency}
-              onChange={(value) => setFilterCurrency(value)}
+              onChange={setFilterCurrency}
               options={[
                 { label: 'All Currencies', value: '' },
                 { label: 'ZAR (R)', value: 'ZAR' },
@@ -645,7 +644,7 @@ const DieselDashboard: React.FC = () => {
             <Select
               label="Probe Status"
               value={filterProbeStatus}
-              onChange={(value) => setFilterProbeStatus(value)}
+              onChange={setFilterProbeStatus}
               options={[
                 { label: 'All Records', value: '' },
                 { label: 'Has Probe', value: 'has-probe' },
@@ -737,6 +736,7 @@ const DieselDashboard: React.FC = () => {
         <div className="grid gap-4">
           {filteredRecords.map((record) => {
             const isReeferUnit = ['4F', '5F', '6F', '7F', '8F'].includes(record.fleetNumber);
+            
             return (
               <Card key={record.id} className={`hover:shadow-md transition-shadow ${
                 record.needsProbeVerification ? 'border-l-4 border-l-red-400' :
@@ -1086,48 +1086,51 @@ const DieselDashboard: React.FC = () => {
       )}
 
       {/* Modals */}
-      <>
-        <DieselImportModal 
-          isOpen={isImportModalOpen} 
-          onClose={() => setIsImportModalOpen(false)} 
-        />
-        <ManualDieselEntryModal
-          isOpen={isManualEntryModalOpen}
-          onClose={() => setIsManualEntryModalOpen(false)}
-        />
-        <DieselDebriefModal 
-          isOpen={isDebriefModalOpen} 
-          onClose={() => setIsDebriefModalOpen(false)}
-          records={enhancedRecords.filter((r: any) => r.requiresDebrief)}
-          norms={dieselNorms}
-        />
-        <DieselNormsModal
-          isOpen={isNormsModalOpen}
-          onClose={() => setIsNormsModalOpen(false)}
-          norms={dieselNorms}
-          onUpdateNorms={updateNorms}
-        />
-        {selectedDieselId && (
-          <>
-            <TripLinkageModal
-              isOpen={isTripLinkageModalOpen}
-              onClose={() => {
-                setIsTripLinkageModalOpen(false);
-                setSelectedDieselId('');
-              }}
-              dieselRecordId={selectedDieselId}
-            />
-            <ProbeVerificationModal
-              isOpen={isProbeVerificationModalOpen}
-              onClose={() => {
-                setIsProbeVerificationModalOpen(false);
-                setSelectedDieselId('');
-              }}
-              dieselRecordId={selectedDieselId}
-            />
-          </>
-        )}
-      </>
+      <DieselImportModal 
+        isOpen={isImportModalOpen} 
+        onClose={() => setIsImportModalOpen(false)} 
+      />
+      
+      <ManualDieselEntryModal
+        isOpen={isManualEntryModalOpen}
+        onClose={() => setIsManualEntryModalOpen(false)}
+      />
+      
+      <DieselDebriefModal 
+        isOpen={isDebriefModalOpen} 
+        onClose={() => setIsDebriefModalOpen(false)}
+        records={enhancedRecords.filter(r => r.requiresDebrief)}
+        norms={dieselNorms}
+      />
+      
+      <DieselNormsModal
+        isOpen={isNormsModalOpen}
+        onClose={() => setIsNormsModalOpen(false)}
+        norms={dieselNorms}
+        onUpdateNorms={updateNorms}
+      />
+      
+      {selectedDieselId && (
+        <>
+          <TripLinkageModal
+            isOpen={isTripLinkageModalOpen}
+            onClose={() => {
+              setIsTripLinkageModalOpen(false);
+              setSelectedDieselId('');
+            }}
+            dieselRecordId={selectedDieselId}
+          />
+          
+          <ProbeVerificationModal
+            isOpen={isProbeVerificationModalOpen}
+            onClose={() => {
+              setIsProbeVerificationModalOpen(false);
+              setSelectedDieselId('');
+            }}
+            dieselRecordId={selectedDieselId}
+          />
+        </>
+      )}
     </div>
   );
 };

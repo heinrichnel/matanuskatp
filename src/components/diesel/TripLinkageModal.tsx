@@ -23,9 +23,6 @@ import {
 // ─── Utilities ───────────────────────────────────────────────────
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
-// ─── Types ───────────────────────────────────────────────────────
-import type { DieselConsumptionRecord } from '../../types/diesel';
-
 
 interface TripLinkageModalProps {
   isOpen: boolean;
@@ -33,25 +30,23 @@ interface TripLinkageModalProps {
   dieselRecordId: string;
 }
 
-// Extend DieselConsumptionRecord to include linkedHorseId for type safety
-type DieselConsumptionRecordWithHorse = DieselConsumptionRecord & {
-  linkedHorseId?: string;
-  isReeferUnit?: boolean;
-};
-
 const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
   isOpen,
   onClose,
   dieselRecordId
 }) => {
   const { trips, dieselRecords, allocateDieselToTrip, removeDieselFromTrip, updateDieselRecord, deleteCostEntry } = useAppContext();
-  const dieselRecord = dieselRecords.find(r => r.id === dieselRecordId) as DieselConsumptionRecordWithHorse | undefined;
-  if (!dieselRecord) return null;
+  const [selectedTripId, setSelectedTripId] = useState<string>('');
+  const [selectedHorseId, setSelectedHorseId] = useState<string>('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Get the diesel record
+  const dieselRecord = dieselRecords.find(r => r.id === dieselRecordId);
+  if (!dieselRecord) return null;
+
   // Check if it's a reefer unit
-  const isReeferUnit = (dieselRecord as any).isReeferUnit || ['4F', '5F', '6F', '7F', '8F'].includes(dieselRecord.fleetNumber);
+  const isReeferUnit = dieselRecord.isReeferUnit || ['4F', '5F', '6F', '7F', '8F'].includes(dieselRecord.fleetNumber);
 
   // Get available trips for the selected fleet (for non-reefer units)
   const availableTrips = !isReeferUnit ? trips.filter(trip => 
@@ -61,8 +56,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
 
   // Get available horse diesel records (for reefer units)
   const availableHorses = isReeferUnit ? dieselRecords.filter(record => 
-    // If 'isReeferUnit' is not present, treat as false (i.e., it's a horse)
-    !('isReeferUnit' in record && (record as any).isReeferUnit) &&
+    !record.isReeferUnit && 
     ['4H', '6H', '21H', '22H', '23H', '24H', '26H', '28H', '29H', '30H', '31H', '32H', '33H', 'UD'].includes(record.fleetNumber)
   ) : [];
 
@@ -91,15 +85,10 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
     setErrors({});
   };
 
-  // Helper to get required fields for DieselConsumptionRecord
-  const getRequiredDieselFields = (record: DieselConsumptionRecordWithHorse) => ({
-    kmReading: 'kmReading' in record && typeof record.kmReading === 'number' ? record.kmReading : 0,
-    costPerLitre: 'costPerLitre' in record && typeof record.costPerLitre === 'number' ? record.costPerLitre : 0,
-  });
-
   const handleSave = async () => {
     try {
       setIsSubmitting(true);
+      
       if (!isReeferUnit) {
         // Regular diesel record - link to trip
         if (!selectedTripId) {
@@ -107,16 +96,9 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
           setIsSubmitting(false);
           return;
         }
-        // Ensure all required fields are present for updateDieselRecord
-        const updatedRecord = {
-          ...dieselRecord,
-          tripId: selectedTripId,
-          updatedAt: new Date().toISOString(),
-          ...getRequiredDieselFields(dieselRecord),
-          currency: (dieselRecord.currency === 'USD' || dieselRecord.currency === 'ZAR' ? dieselRecord.currency : undefined) as "USD" | "ZAR" | undefined,
-        };
-        await updateDieselRecord(updatedRecord);
+
         await allocateDieselToTrip(dieselRecordId, selectedTripId);
+        
         const trip = trips.find(t => t.id === selectedTripId);
         alert(`Diesel record successfully linked to trip!\n\nTrip: ${trip?.route}\nDates: ${trip?.startDate} to ${trip?.endDate}\n\nA cost entry has been automatically created in the trip's expenses.`);
       } else {
@@ -126,25 +108,27 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
           setIsSubmitting(false);
           return;
         }
-        // Update the reefer diesel record with the linked horse ID
-        const updatedReeferRecord = {
+
+        // Update the diesel record with the linked horse ID
+        const updatedRecord = {
           ...dieselRecord,
           linkedHorseId: selectedHorseId,
-          updatedAt: new Date().toISOString(),
-          ...getRequiredDieselFields(dieselRecord),
-          currency: (dieselRecord.currency === 'USD' || dieselRecord.currency === 'ZAR' ? dieselRecord.currency : undefined) as "USD" | "ZAR" | undefined,
+          updatedAt: new Date().toISOString()
         };
-        await updateDieselRecord(updatedReeferRecord);
-        // If the horse is linked to a trip, create a cost entry for the reefer diesel
+        
+        await updateDieselRecord(updatedRecord);
+        
+        // If the horse is linked to a trip, create a cost entry
         const horseRecord = dieselRecords.find(r => r.id === selectedHorseId);
         if (horseRecord?.tripId) {
-          await allocateDieselToTrip(dieselRecordId, horseRecord.tripId); // Add reefer diesel as cost to the trip
           const trip = trips.find(t => t.id === horseRecord.tripId);
+          
           alert(`Reefer diesel record successfully linked to horse ${horseRecord.fleetNumber}!\n\n${trip ? `Trip: ${trip.route}\nDates: ${trip.startDate} to ${trip.endDate}\n\nA cost entry has been automatically created in the trip's expenses.` : 'No active trip found for this horse.'}`);
         } else {
           alert(`Reefer diesel record successfully linked to horse ${horseRecord?.fleetNumber || selectedHorseId}!\n\nNo active trip found for this horse. When the horse is linked to a trip, the reefer diesel cost will be automatically added.`);
         }
       }
+      
       onClose();
     } catch (error) {
       console.error("Error linking diesel record:", error);
@@ -157,21 +141,23 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
   const handleRemoveLinkage = async () => {
     try {
       setIsSubmitting(true);
+      
       if (!isReeferUnit && dieselRecord.tripId) {
         // Remove trip linkage
         await removeDieselFromTrip(dieselRecordId);
         alert('Diesel record has been unlinked from the trip and the cost entry has been removed.');
       } else if (isReeferUnit && dieselRecord.linkedHorseId) {
         const horseRecord = dieselRecords.find(r => r.id === dieselRecord.linkedHorseId);
+        
         // Update the diesel record to remove the linked horse ID
         const updatedRecord = {
           ...dieselRecord,
           linkedHorseId: undefined,
-          updatedAt: new Date().toISOString(),
-          ...getRequiredDieselFields(dieselRecord),
-          currency: (dieselRecord.currency === 'USD' || dieselRecord.currency === 'ZAR' ? dieselRecord.currency : undefined) as "USD" | "ZAR" | undefined,
+          updatedAt: new Date().toISOString()
         };
+        
         await updateDieselRecord(updatedRecord);
+        
         // If the horse is linked to a trip, remove the cost entry
         if (horseRecord?.tripId) {
           const trip = trips.find(t => t.id === horseRecord.tripId);
@@ -179,13 +165,16 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
             const costEntry = trip.costs.find(c => 
               c.referenceNumber === `REEFER-DIESEL-${dieselRecordId}`
             );
+            
             if (costEntry) {
               await deleteCostEntry(costEntry.id);
             }
           }
         }
+        
         alert('Reefer diesel record has been unlinked from the horse and any associated cost entries have been removed.');
       }
+      
       onClose();
     } catch (error) {
       console.error("Error removing linkage:", error);
@@ -214,7 +203,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
             </div>
             <div>
               <p><strong>Litres:</strong> {dieselRecord.litresFilled}</p>
-              <p><strong>Cost:</strong> {formatCurrency(dieselRecord.totalCost, (dieselRecord.currency === 'USD' || dieselRecord.currency === 'ZAR') ? dieselRecord.currency : 'ZAR')}</p>
+              <p><strong>Cost:</strong> {formatCurrency(dieselRecord.totalCost, dieselRecord.currency || 'ZAR')}</p>
               <p><strong>Station:</strong> {dieselRecord.fuelStation}</p>
             </div>
           </div>
@@ -494,6 +483,3 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
 };
 
 export default TripLinkageModal;
-// State for selected trip and horse
-const [selectedTripId, setSelectedTripId] = useState<string>('');
-const [selectedHorseId, setSelectedHorseId] = useState<string>('');
