@@ -6,7 +6,7 @@ admin.initializeApp();
 export const importTripsFromWebBook = functions.https.onRequest(async (req, res) => {
   try {
     // URL of your published Google Apps Script web app
-    const WEB_BOOK_URL = 'https://script.google.com/macros/s/AKfycbxWt9XUjNLKwoT38iWuFh-h8Qs7PxCu2I-KGiJqspIm-jVxiSFeZ-KPOqeVoxxEbhv8/exec';
+    const WEB_BOOK_URL = 'https://docs.google.com/spreadsheets/d/1vFV3gzb-85PmPTqEgsgXwVZxei_XDpAaWPJVUguioYQ/edit?gid=166024345#gid=166024345';
     const response = await fetch(WEB_BOOK_URL);
     if (!response.ok) throw new Error('Failed to fetch web book data');
     const data = await response.json();
@@ -15,7 +15,21 @@ export const importTripsFromWebBook = functions.https.onRequest(async (req, res)
     // A: Fleet Number, B: Driver Name, C: Client Type, D: Client Name, E: Load Reference (Unique Key),
     // F: Route, G: SHIPPED Status, H: SHIPPED Date, J: DELIVERED Status, K: DELIVERED Date
     const trips = Array.isArray(data) ? data : [];
-    const validTrips = [];
+    type Trip = {
+      fleetNumber: any;
+      driverName: any;
+      clientType: any;
+      clientName: any;
+      loadRef: any;
+      route: any;
+      shippedStatus: any;
+      shippedDate: any;
+      deliveredStatus: any;
+      deliveredDate: any;
+      status: string;
+      createdAt: admin.firestore.FieldValue;
+    };
+    const validTrips: Trip[] = [];
     const db = admin.firestore();
 
     for (const row of trips) {
