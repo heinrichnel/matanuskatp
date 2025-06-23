@@ -1,5 +1,3 @@
-// src/firebaseConfig.ts
-
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
