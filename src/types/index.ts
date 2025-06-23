@@ -249,6 +249,7 @@ export interface DieselConsumptionRecord {
   fuelStation: string;
   driverName: string;
   kmPerLitre?: number;
+  litresPerHour?: number;
   notes?: string;
   previousKmReading?: number;
   distanceTravelled?: number;

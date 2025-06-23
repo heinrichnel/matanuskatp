@@ -14,5 +14,7 @@ export interface DieselConsumptionRecord {
   probeVerificationNotes?: string;
   probeVerifiedAt?: string;
   probeVerifiedBy?: string;
+  hoursOperated?: number;
+  litresPerHour?: number;
   // Add other fields as needed based on your usage
 }

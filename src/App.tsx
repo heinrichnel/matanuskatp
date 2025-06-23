@@ -4,7 +4,6 @@ import ErrorBoundary from './components/ErrorBoundary';
 
 // UI Components
 import Header from "./components/layout/Header";
-import Modal from "./components/ui/Modal";
 
 // Feature Components
 import Dashboard from "./components/dashboard/Dashboard";
@@ -13,9 +12,7 @@ import ActiveTrips from "./components/trips/ActiveTrips";
 import CompletedTrips from "./components/trips/CompletedTrips";
 import FlagsInvestigations from "./components/flags/FlagsInvestigations";
 import CurrencyFleetReport from "./components/reports/CurrencyFleetReport";
-// import SystemCostConfiguration from "./components/admin/SystemCostConfiguration";
 import InvoiceAgingDashboard from "./components/invoicing/InvoiceAgingDashboard";
-// import SystemCostConfiguration from "./components/cost/indirect/SystemCostConfiguration";
 import CustomerRetentionDashboard from "./components/performance/CustomerRetentionDashboard";
 import MissedLoadsTracker from "./components/trips/MissedLoadsTracker";
 import DieselDashboard from "./components/diesel/DieselDashboard";
@@ -25,42 +22,21 @@ import TripDetails from "./components/trips/TripDetails";
 import TripForm from "./components/trips/TripForm";
 
 // Utilities & Types
-import { MissedLoad, Trip } from "./types";
+import { Trip } from "./types";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
 
-// If LoginPage or ConnectionStatus do not exist, comment these out or provide fallback
-// import LoginPage from "./components/auth/LoginPage";
-// import ConnectionStatus from "./components/ui/ConnectionStatus";
-
 const AppContent: React.FC = () => {
-  // Replace with your actual authentication logic or remove if not needed
-  // const { isAuthenticated, isLoading } = useReplitAuth();
   const { 
     trips, setTrips, missedLoads, addMissedLoad, updateMissedLoad, deleteMissedLoad,
-    updateTrip, deleteTrip, completeTrip, addTrip
+    updateTrip, addTrip, deleteTrip, completeTrip
   } = useAppContext();
-
-  // Remove or replace with your actual auth logic
-  // if (isLoading) return <div>Loading...</div>;
-  // if (!isAuthenticated) return <LoginPage />;
 
   const [currentView, setCurrentView] = useState("ytd-kpis");
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [showTripForm, setShowTripForm] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | undefined>();
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Initial load detection
-  useEffect(() => {
-    if (trips.length > 0 && isInitialLoad) setIsInitialLoad(false);
-    const timer = setTimeout(() => {
-      if (isInitialLoad) setIsInitialLoad(false);
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [trips, isInitialLoad]);
-
-  // Real-time Firestore listener for trips
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "trips"), (snapshot) => {
       const tripsData = snapshot.docs.map((doc) => ({
@@ -72,10 +48,8 @@ const AppContent: React.FC = () => {
     return () => unsub();
   }, [setTrips]);
 
-  // Add Trip handler
   const handleAddTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     try {
-      // Use addTrip from context to add to the correct collection
       const tripId = await addTrip(tripData);
       setShowTripForm(false);
       setEditingTrip(undefined);
@@ -86,7 +60,6 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // Update Trip handler
   const handleUpdateTrip = (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     if (editingTrip) {
       const updatedTrip: Trip = {
@@ -98,22 +71,15 @@ const AppContent: React.FC = () => {
         additionalCosts: editingTrip.additionalCosts || [],
         delayReasons: editingTrip.delayReasons || [],
         followUpHistory: editingTrip.followUpHistory || [],
-        fleetNumber: editingTrip.fleetNumber,
-        route: editingTrip.route,
-        driverName: editingTrip.driverName,
-        clientName: editingTrip.clientName,
-        clientType: editingTrip.clientType,
-        startDate: editingTrip.startDate,
-        endDate: editingTrip.endDate,
-        // revenue: editingTrip.revenue, // Remove, not in Trip type
-        // distance: editingTrip.distance, // Remove, not in Trip type
-        // Add any other required Trip properties here if missing
       };
       updateTrip(updatedTrip);
-      setEditingTrip(undefined);
       setShowTripForm(false);
-      alert("Trip updated successfully!");
+      setEditingTrip(undefined);
     }
+  };
+
+  const handleShowTripDetails = (trip: Trip) => {
+    setSelectedTrip(trip);
   };
 
   const handleEditTrip = (trip: Trip) => {
@@ -121,77 +87,26 @@ const AppContent: React.FC = () => {
     setShowTripForm(true);
   };
 
-  const handleDeleteTrip = (id: string) => {
-    const trip = trips.find((t) => t.id === id);
-    if (trip && confirm(`Delete trip for fleet ${trip.fleetNumber}? This cannot be undone.`)) {
-      deleteTrip(id);
-      if (selectedTrip?.id === id) setSelectedTrip(null);
-      alert("Trip deleted successfully.");
-    }
-  };
-
-  const handleViewTrip = (trip: Trip) => setSelectedTrip(trip);
-
-  const handleNewTrip = () => {
-    setEditingTrip(undefined);
-    setShowTripForm(true);
-  };
-
-  const handleCloseTripForm = () => {
-    setShowTripForm(false);
-    setEditingTrip(undefined);
-  };
-
-  // MissedLoadsTracker expects async handlers, so wrap context methods in async wrappers
-  const handleAddMissedLoad = async (missedLoad: Omit<MissedLoad, 'id'>) => {
-    return Promise.resolve(addMissedLoad(missedLoad));
-  };
-  const handleUpdateMissedLoad = async (missedLoad: MissedLoad) => {
-    updateMissedLoad(missedLoad);
-    return Promise.resolve();
-  };
-  const handleDeleteMissedLoad = async (id: string) => {
-    deleteMissedLoad(id);
-    return Promise.resolve();
-  };
-
-  // Main view switch
-  const renderContent = () => {
-    if (isInitialLoad) {
-      return (
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-lg font-medium text-gray-700">Loading data...</p>
-            <p className="text-sm text-gray-500 mt-2">Connecting to Firestore database</p>
-          </div>
-        </div>
-      );
-    }
-    if (selectedTrip) {
-      return <TripDetails trip={selectedTrip} onBack={() => setSelectedTrip(null)} />;
-    }
+  const renderView = () => {
     switch (currentView) {
       case "ytd-kpis":
         return <YearToDateKPIs trips={trips} />;
       case "dashboard":
         return <Dashboard trips={trips} />;
       case "active-trips":
-        return <ActiveTrips trips={trips.filter((t) => t.status === "active")} onEdit={handleEditTrip} onDelete={handleDeleteTrip} onView={handleViewTrip} onCompleteTrip={completeTrip} />;
+        return <ActiveTrips trips={trips.filter(t => t.status === 'active')} onView={handleShowTripDetails} onEdit={handleEditTrip} onDelete={deleteTrip} onCompleteTrip={completeTrip} />;
       case "completed-trips":
-        return <CompletedTrips trips={trips.filter((t) => ["completed", "invoiced", "paid"].includes(t.status))} onView={setSelectedTrip} />;
+        return <CompletedTrips trips={trips.filter(t => t.status === 'completed')} onView={handleShowTripDetails} />;
       case "flags":
         return <FlagsInvestigations trips={trips} />;
       case "reports":
         return <CurrencyFleetReport trips={trips} />;
-      // case "system-costs":
-      //   return <SystemCostConfiguration currentRates={systemCostRates} onUpdateRates={updateSystemCostRates} userRole="admin" />;
       case "invoice-aging":
-        return <InvoiceAgingDashboard trips={trips} onViewTrip={setSelectedTrip} />;
+        return <InvoiceAgingDashboard trips={trips} onViewTrip={handleShowTripDetails} />;
       case "customer-retention":
         return <CustomerRetentionDashboard trips={trips} />;
       case "missed-loads":
-        return <MissedLoadsTracker missedLoads={missedLoads} onAddMissedLoad={handleAddMissedLoad} onUpdateMissedLoad={handleUpdateMissedLoad} onDeleteMissedLoad={handleDeleteMissedLoad} />;
+        return <MissedLoadsTracker missedLoads={missedLoads} onAddMissedLoad={addMissedLoad} onUpdateMissedLoad={updateMissedLoad} onDeleteMissedLoad={deleteMissedLoad} />;
       case "diesel-dashboard":
         return <DieselDashboard />;
       case "driver-behavior":
@@ -204,38 +119,54 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <Header currentView={currentView} onNavigate={setCurrentView} onNewTrip={handleNewTrip} />
-      <main className="flex-1 p-8 ml-64 w-full bg-gray-50 min-h-screen">
-        {renderContent()}
+    <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
+      <Header 
+        currentView={currentView} 
+        onNavigate={setCurrentView} 
+        onNewTrip={() => {
+          setEditingTrip(undefined);
+          setShowTripForm(true);
+        }} 
+      />
+      <main className="ml-64 p-4">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+            Fleet Management Dashboard
+          </h1>
+        </div>
+
+        {renderView()}
+
+        {selectedTrip && (
+          <TripDetails
+            trip={selectedTrip}
+            onBack={() => setSelectedTrip(null)}
+          />
+        )}
+
+        {showTripForm && (
+          <TripForm
+            onSubmit={editingTrip ? handleUpdateTrip : handleAddTrip}
+            onCancel={() => {
+              setShowTripForm(false);
+              setEditingTrip(undefined);
+            }}
+            trip={editingTrip}
+          />
+        )}
       </main>
-      <Modal
-        isOpen={showTripForm}
-        onClose={handleCloseTripForm}
-        title={editingTrip ? "Edit Trip" : "Create New Trip"}
-        maxWidth="lg"
-      >
-        <TripForm
-          trip={editingTrip}
-          onSubmit={editingTrip ? handleUpdateTrip : handleAddTrip}
-          onCancel={handleCloseTripForm}
-        />
-      </Modal>
     </div>
   );
 };
 
-const App: React.FC = () => (
-  <>
+const App: React.FC = () => {
+  return (
     <ErrorBoundary>
       <AppProvider>
         <AppContent />
       </AppProvider>
     </ErrorBoundary>
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>
-      <span style={{ color: '#1a202c' }}>AppProvider and Context are working!</span>
-    </div>
-  </>
-);
+  );
+};
 
 export default App;

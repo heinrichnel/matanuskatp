@@ -309,7 +309,8 @@ const DieselDashboard: React.FC = () => {
         probeReading,
         probeDiscrepancy,
         probeVerified: probeReading !== undefined,
-        hoursOperated
+        hoursOperated,
+        litresPerHour
       });
     }
     setEditingId(null);
@@ -382,9 +383,18 @@ const DieselDashboard: React.FC = () => {
     acc.totalRecords++;
     acc.totalLitres += record.litresFilled;
     acc.totalCost += record.totalCost;
-    if (!record.isReeferUnit) {
+
+    if (record.isReeferUnit) {
+      acc.reeferUnits++;
+      acc.totalReeferLitres += record.litresFilled;
+      if (record.hoursOperated) {
+        acc.totalReeferHours += record.hoursOperated;
+      }
+    } else {
       acc.totalDistance += record.distanceTravelled || 0;
+      acc.totalNonReeferCost += record.totalCost;
     }
+
     if (record.requiresDebrief) acc.recordsRequiringDebrief++;
     if (record.performanceStatus === 'poor') acc.poorPerformanceRecords++;
     if (record.performanceStatus === 'excellent') acc.excellentPerformanceRecords++;
@@ -392,7 +402,6 @@ const DieselDashboard: React.FC = () => {
     if (record.hasProbe) acc.recordsWithProbe++;
     if (record.needsProbeVerification) acc.recordsNeedingProbeVerification++;
     if (record.probeVerified) acc.recordsWithVerifiedProbe++;
-    if (record.isReeferUnit) acc.reeferUnits++;
     
     // Track by currency
     if (record.currency === 'USD') {
@@ -401,11 +410,6 @@ const DieselDashboard: React.FC = () => {
     } else {
       acc.zarRecords++;
       acc.zarTotalCost += record.totalCost;
-    }
-    
-    // Track total hours for reefer units
-    if (record.isReeferUnit && record.hoursOperated) {
-      acc.totalReeferHours += record.hoursOperated;
     }
     
     return acc;
@@ -426,15 +430,15 @@ const DieselDashboard: React.FC = () => {
     usdTotalCost: 0,
     zarTotalCost: 0,
     reeferUnits: 0,
-    totalReeferHours: 0
+    totalReeferHours: 0,
+    totalReeferLitres: 0,
+    totalNonReeferCost: 0,
   });
 
-  const averageKmPerLitre = fleetSummary.totalLitres > 0 && fleetSummary.totalDistance > 0 ? 
-    fleetSummary.totalDistance / fleetSummary.totalLitres : 0;
-  const averageCostPerKm = fleetSummary.totalDistance > 0 ? 
-    fleetSummary.totalCost / fleetSummary.totalDistance : 0;
+  const averageKmPerLitre = (fleetSummary.totalLitres - fleetSummary.totalReeferLitres) > 0 && fleetSummary.totalDistance > 0 ? 
+    fleetSummary.totalDistance / (fleetSummary.totalLitres - fleetSummary.totalReeferLitres) : 0;
   const averageLitresPerHour = fleetSummary.totalReeferHours > 0 ?
-    fleetSummary.totalLitres / fleetSummary.totalReeferHours : 0;
+    fleetSummary.totalReeferLitres / fleetSummary.totalReeferHours : 0;
 
   // Get unique drivers and fleets for filters
   const uniqueFleets = [...new Set(enhancedRecords.map(r => r.fleetNumber))].sort();
