@@ -14,9 +14,6 @@ import {
   Edit,
   Download,
   X,
-  Calendar,
-  User,
-  Clock,
   AlertTriangle,
   CheckCircle,
   FileUp

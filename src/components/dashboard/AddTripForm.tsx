@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Trip } from '../../types';
 import Button from '../ui/Button';
@@ -46,11 +45,12 @@ const AddTripForm: React.FC<AddTripFormProps> = ({ onAddTrip }) => {
         costs: [],
         additionalCosts: [],
         delayReasons: [],
-        followUpHistory: []
+        followUpHistory: [],
+        clientType: 'external', // Added for Trip type
+        paymentStatus: 'unpaid' // Added for Trip type
       };
 
       onAddTrip(newTrip);
-      
       // Reset form
       setFormData({
         fleetNumber: '',
@@ -75,7 +75,7 @@ const AddTripForm: React.FC<AddTripFormProps> = ({ onAddTrip }) => {
         <Select
           label="Fleet Number"
           value={formData.fleetNumber}
-          onChange={e => handleChange('fleetNumber', e.target.value)}
+          onChange={value => handleChange('fleetNumber', value)}
           options={[
             { label: 'Select Fleet', value: '' },
             ...FLEET_NUMBERS.map(fleet => ({ label: fleet, value: fleet }))
@@ -86,7 +86,7 @@ const AddTripForm: React.FC<AddTripFormProps> = ({ onAddTrip }) => {
         <Select
           label="Driver"
           value={formData.driverName}
-          onChange={e => handleChange('driverName', e.target.value)}
+          onChange={value => handleChange('driverName', value)}
           options={[
             { label: 'Select Driver', value: '' },
             ...DRIVERS.map(driver => ({ label: driver, value: driver }))
@@ -97,7 +97,7 @@ const AddTripForm: React.FC<AddTripFormProps> = ({ onAddTrip }) => {
         <Select
           label="Client"
           value={formData.clientName}
-          onChange={e => handleChange('clientName', e.target.value)}
+          onChange={value => handleChange('clientName', value)}
           options={[
             { label: 'Select Client', value: '' },
             ...CLIENTS.map(client => ({ label: client, value: client }))
@@ -108,7 +108,7 @@ const AddTripForm: React.FC<AddTripFormProps> = ({ onAddTrip }) => {
         <Input
           label="Route"
           value={formData.route}
-          onChange={e => handleChange('route', e.target.value)}
+          onChange={value => handleChange('route', value)}
           placeholder="e.g., JHB - CPT"
           required
         />
@@ -117,7 +117,7 @@ const AddTripForm: React.FC<AddTripFormProps> = ({ onAddTrip }) => {
           label="Base Revenue"
           type="number"
           value={formData.baseRevenue}
-          onChange={e => handleChange('baseRevenue', e.target.value)}
+          onChange={value => handleChange('baseRevenue', value)}
           placeholder="0.00"
           step="0.01"
           required
@@ -126,7 +126,7 @@ const AddTripForm: React.FC<AddTripFormProps> = ({ onAddTrip }) => {
         <Select
           label="Currency"
           value={formData.revenueCurrency}
-          onChange={e => handleChange('revenueCurrency', e.target.value)}
+          onChange={value => handleChange('revenueCurrency', value)}
           options={[
             { label: 'ZAR (R)', value: 'ZAR' },
             { label: 'USD ($)', value: 'USD' }
@@ -138,7 +138,7 @@ const AddTripForm: React.FC<AddTripFormProps> = ({ onAddTrip }) => {
           label="Start Date"
           type="date"
           value={formData.startDate}
-          onChange={e => handleChange('startDate', e.target.value)}
+          onChange={value => handleChange('startDate', value)}
           required
         />
 
@@ -146,7 +146,7 @@ const AddTripForm: React.FC<AddTripFormProps> = ({ onAddTrip }) => {
           label="End Date"
           type="date"
           value={formData.endDate}
-          onChange={e => handleChange('endDate', e.target.value)}
+          onChange={value => handleChange('endDate', value)}
           required
         />
       </div>
@@ -155,7 +155,7 @@ const AddTripForm: React.FC<AddTripFormProps> = ({ onAddTrip }) => {
         <Button
           type="submit"
           disabled={isSubmitting}
-          loading={isSubmitting}
+          isLoading={isSubmitting}
         >
           {isSubmitting ? 'Creating Trip...' : 'Create Trip'}
         </Button>
