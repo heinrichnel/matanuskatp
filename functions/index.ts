@@ -2,11 +2,12 @@ import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 admin.initializeApp();
 
-// This endpoint receives filtered/validated trips data from your Apps Script as JSON
+// Hierdie funksie ontvang trips-data (array of arrays) via POST as JSON en laai dit in Firestore
 export const importTripsFromWebBook = functions.https.onRequest(async (req, res) => {
   try {
-    // Expect an array of trips (each trip as an array in the expected order)
+    // 1. Kry trips uit POST body (dit moet 'n array wees)
     const trips = Array.isArray(req.body) ? req.body : [];
+
     type Trip = {
       fleetNumber: any;
       driverName: any;
@@ -21,6 +22,7 @@ export const importTripsFromWebBook = functions.https.onRequest(async (req, res)
       status: string;
       createdAt: admin.firestore.FieldValue;
     };
+
     const validTrips: Trip[] = [];
     const db = admin.firestore();
 
@@ -38,7 +40,7 @@ export const importTripsFromWebBook = functions.https.onRequest(async (req, res)
         deliveredDate
       ] = row;
 
-      // Duplikate voorkom: Net as loadRef NIE reeds bestaan nie
+      // Verhoed duplikate met unieke LoadRef
       const existing = await db.collection('trips').where('loadRef', '==', loadRef).get();
       if (existing.empty && loadRef) {
         validTrips.push({
@@ -73,4 +75,4 @@ export const importTripsFromWebBook = functions.https.onRequest(async (req, res)
   }
 });
 
-// Manual trip forms remain active and functional elsewhere in your app.
+// Jy hoef nie ander funksies of code in hierdie lêer te hê nie.
