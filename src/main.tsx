@@ -1,15 +1,14 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { AppProvider } from './context/AppContext'; // <-- Make sure this import exists
 import './index.css';
 
-// ✅ Mount the app to the root div
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  createRoot(rootElement).render(
-    <StrictMode>
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <AppProvider>
       <App />
-    </StrictMode>
-  );
-}
+    </AppProvider>
+  </React.StrictMode>
+);
 
