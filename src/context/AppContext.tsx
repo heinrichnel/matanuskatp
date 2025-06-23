@@ -32,6 +32,10 @@ import {
 import { generateTripId, shouldAutoCompleteTrip, isOnline } from '../utils/helpers';
 import { fetchTripsFromWebhook } from '../utils/webhook';
 
+// Add these imports for Firestore snapshot
+import { onSnapshot, collection } from 'firebase/firestore';
+import { db } from '../firebase';
+
 interface AppContextType {
   trips: Trip[];
   addTrip: (trip: Omit<Trip, 'id' | 'costs' | 'status'>) => string;
@@ -221,6 +225,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       unsubscribeConnectionMonitor();
     };
   }, []);
+  
+  // Real-time Firestore listener for trips
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "trips"), (snapshot) => {
+      const tripsData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTrips(tripsData as Trip[]);
+    });
+    return () => unsub();
+  }, [setTrips]);
   
   // Monitor online/offline status
   useEffect(() => {
