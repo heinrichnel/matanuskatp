@@ -72,6 +72,7 @@ interface AppContextType {
   // CSV Import functions
   importTripsFromCSV: (trips: Omit<Trip, 'id' | 'costs' | 'status'>[]) => void;
   importTripsFromWebhook: () => Promise<{ imported: number; skipped: number }>; // ADDED
+  importDriverBehaviorEventsFromWebhook: () => Promise<{ imported: number; skipped: number }>; // ADDED
   importCostsFromCSV: (costs: Omit<CostEntry, 'id' | 'attachments'>[]) => void;
   
   // Diesel consumption management
@@ -1059,6 +1060,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteCARReportFromFirebase(id);
   };
   
+  // Webhook Import for Driver Behavior Events
+  const importDriverBehaviorEventsFromWebhook = async () => {
+    try {
+      // Use the integration utility to fetch and save events
+      // Returns the number of new events imported
+      const { fetchAndSaveDriverEvents } = await import('../utils/driverBehaviorIntegration');
+      const imported = await fetchAndSaveDriverEvents();
+      // For UI consistency, return { imported, skipped: 0 }
+      return { imported: imported || 0, skipped: 0 };
+    } catch (error) {
+      console.error('Driver Behavior Webhook import failed:', error);
+      throw error;
+    }
+  };
+  
   const contextValue: AppContextType = {
     trips,
     addTrip,
@@ -1080,6 +1096,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateInvoicePayment,
     importTripsFromCSV,
     importTripsFromWebhook, // ADDED
+    importDriverBehaviorEventsFromWebhook, // ADDED
     importCostsFromCSV,
     dieselRecords,
     addDieselRecord,

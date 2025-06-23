@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DriverBehaviorEvent } from '../types';
+import { useAppContext } from '../context/AppContext';
 import Button from '../components/ui/Button';
 import DriverPerformanceOverview from '../components/drivers/DriverPerformanceOverview';
 import DriverBehaviorEventForm from '../components/drivers/DriverBehaviorEventForm';
@@ -15,6 +16,7 @@ const DriverBehaviorPage: React.FC = () => {
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [showCARForm, setShowCARForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<DriverBehaviorEvent | null>(null);
+  const { importDriverBehaviorEventsFromWebhook } = useAppContext();
   
   // Handle initiating CAR from event
   const handleInitiateCAR = (event: DriverBehaviorEvent) => {
@@ -24,8 +26,12 @@ const DriverBehaviorPage: React.FC = () => {
   
   // Manual sync handler
   const handleSyncNow = async () => {
-    // Fallback: just alert for now, or implement actual sync logic if available
-    alert('Manual sync not yet implemented.');
+    try {
+      const result = await importDriverBehaviorEventsFromWebhook();
+      alert(`Manual sync complete. Imported: ${result.imported}, Skipped: ${result.skipped}`);
+    } catch (error) {
+      alert('Manual sync failed. Please try again.');
+    }
   };
   
   return (
