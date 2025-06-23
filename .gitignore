@@ -1,4 +1,12 @@
-node_modules
-
-# Local Netlify folder
-.netlify
+node_modules/
+dist/
+build/
+.env
+.env.*
+.netlify/
+firebase-debug.log
+firebase-error.log
+*.local
+.DS_Store
+coverage/
+.vscode/
