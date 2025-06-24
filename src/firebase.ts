@@ -11,7 +11,8 @@ import {
   orderBy,
   serverTimestamp,
   enableNetwork,
-import { getAuth } from 'firebase/auth';
+  disableNetwork
+} from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport } from './types';
 
@@ -41,10 +42,8 @@ const firebaseConfig: FirebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore with real-time capabilities
-// Connect to the 'matapp' database as it's the active one for this application
-export const db = getFirestore(app, import.meta.env.VITE_FIREBASE_DATABASE_ID || 'matapp');
-export const auth = getAuth(app);
+// Initialize Firestore with real-time capabilities (default database only)
+export const db = getFirestore(app);
 
 // Initialize Analytics (only in production)
 let analytics: ReturnType<typeof getAnalytics> | undefined;
@@ -53,6 +52,10 @@ if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
 }
 export { analytics };
 
+// Enable/disable Firestore network for real-time sync
+export const enableFirestoreNetwork = () => enableNetwork(db);
+export const disableFirestoreNetwork = () => disableNetwork(db);
+
 // Enable offline persistence
 try {
   // Enable offline persistence for better user experience
@@ -60,6 +63,32 @@ try {
 } catch (error) {
   console.warn('Firestore offline persistence not available:', error);
 }
+
+// Optionally, you can add a connection status monitor:
+export const monitorConnectionStatus = (
+  onOnline: () => void,
+  onOffline: () => void
+): (() => void) => {
+  const handleOnline = () => {
+    console.log("🟢 Firebase connection restored");
+    enableFirestoreNetwork();
+    onOnline();
+  };
+  
+  const handleOffline = () => {
+    console.log("🔴 Firebase connection lost - working offline");
+    disableFirestoreNetwork();
+    onOffline();
+  };
+  
+  window.addEventListener('online', handleOnline);
+  window.addEventListener('offline', handleOffline);
+  
+  return () => {
+    window.removeEventListener('online', handleOnline);
+    window.removeEventListener('offline', handleOffline);
+  };
+};
 
 // Collection references
 export const tripsCollection = collection(db, 'trips');
