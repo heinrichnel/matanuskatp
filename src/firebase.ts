@@ -43,7 +43,8 @@ const firebaseConfig: FirebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore with real-time capabilities
-export const db = getFirestore(app);
+// Connect to the 'matapp' database as it's the active one for this application
+export const db = getFirestore(app, import.meta.env.VITE_FIREBASE_DATABASE_ID || 'matapp');
 export const auth = getAuth(app);
 
 // Initialize Analytics (only in production)
@@ -70,10 +71,6 @@ export const activityLogsCollection = collection(db, 'activityLogs');
 export const driverBehaviorCollection = collection(db, 'driverBehavior');
 export const actionItemsCollection = collection(db, 'actionItems');
 export const carReportsCollection = collection(db, 'carReports');
-
-// Real-time connection status
-export const enableFirestoreNetwork = () => enableNetwork(db);
-export const disableFirestoreNetwork = () => disableNetwork(db);
 
 // Helper function to remove undefined values from objects
 const cleanUndefinedValues = (obj: any): any => {
@@ -642,31 +639,6 @@ const logActivity = async (
     console.warn("⚠️ Failed to log activity:", error);
     // Don't throw - activity logging shouldn't break the main operation
   }
-};
-
-// Connection Status Monitoring
-export const monitorConnectionStatus = (
-  onOnline: () => void,
-  onOffline: () => void
-): (() => void) => {
-  const handleOnline = () => {
-    console.log("🟢 Firebase connection restored");
-    enableFirestoreNetwork();
-    onOnline();
-  };
-  
-  const handleOffline = () => {
-    console.log("🔴 Firebase connection lost - working offline");
-    onOffline();
-  };
-  
-  window.addEventListener('online', handleOnline);
-  window.addEventListener('offline', handleOffline);
-  
-  return () => {
-    window.removeEventListener('online', handleOnline);
-    window.removeEventListener('offline', handleOffline);
-  };
 };
 
 // Batch Operations for Performance
