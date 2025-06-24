@@ -185,48 +185,39 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
         </div>
       )}
 
-      {/* Structured Cost Category Selection */}
+      {/* Structured Cost Category and Subcategory Selection */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Category */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Cost Category *</label>
-          <select
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          <Select
+            label="Cost Category *"
             value={formData.category}
-            onChange={(e) => handleChange('category', e.target.value)}
-          >
-            <option value="">Select cost category</option>
-            {Object.keys(COST_CATEGORIES).filter(cat => cat !== 'System Costs').map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-          {errors.category && <p className="text-sm text-red-600 mt-1">{errors.category}</p>}
+            onChange={(value) => handleChange('category', value)}
+            options={[
+              { label: 'Select cost category', value: '' },
+              ...Object.keys(COST_CATEGORIES)
+                .filter(cat => cat !== 'System Costs')
+                .map(cat => ({ label: cat, value: cat }))
+            ]}
+            error={errors.category}
+          />
         </div>
-
+        {/* Subcategory */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Sub-Cost Type *</label>
-          <select
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          <Select
+            label="Sub-Cost Type *"
             value={formData.subCategory}
-            onChange={(e) => handleChange('subCategory', e.target.value)}
-            disabled={!formData.category}
-          >
-            <option value="">
-              {formData.category ? 'Select sub-cost type' : 'Select category first'}
-            </option>
-            {availableSubCategories.map((subCategory) => (
-              <option key={subCategory} value={subCategory}>
-                {subCategory}
-              </option>
-            ))}
-          </select>
-          {errors.subCategory && <p className="text-sm text-red-600 mt-1">{errors.subCategory}</p>}
-          {formData.category && availableSubCategories.length === 0 && (
-            <p className="text-sm text-gray-500 mt-1">No sub-categories available for this category</p>
-          )}
+            onChange={(value) => handleChange('subCategory', value)}
+            options={[
+              { label: 'Select sub-cost type', value: '' },
+              ...availableSubCategories.map(sub => ({ label: sub, value: sub }))
+            ]}
+            error={errors.subCategory}
+          />
         </div>
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Select
           label="Currency *"
           value={formData.currency}
