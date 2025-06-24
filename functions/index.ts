@@ -22,9 +22,15 @@ export const importTripsFromWebBook = onCall(
 
     try {
       const trips = Array.isArray(request.data) ? request.data : [];
+      console.log(`Received ${trips.length} rows for import.`);
+      if (trips.length > 0) {
+        console.log("First row sample:", JSON.stringify(trips[0]));
+      }
 
       const db = admin.firestore();
       const validTrips: any[] = [];
+      let skippedExisting = 0;
+      let skippedNoLoadRef = 0;
 
       for (const row of trips) {
         const [
@@ -40,7 +46,10 @@ export const importTripsFromWebBook = onCall(
           deliveredDate,
         ] = row;
 
-        if (!loadRef) continue;
+        if (!loadRef) {
+          skippedNoLoadRef++;
+          continue;
+        }
 
         const existing = await db
           .collection("trips")
@@ -73,6 +82,8 @@ export const importTripsFromWebBook = onCall(
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           };
           validTrips.push({ ref: tripRef, data: newTrip });
+        } else {
+          skippedExisting++;
         }
       }
 
@@ -84,7 +95,9 @@ export const importTripsFromWebBook = onCall(
         await batch.commit();
       }
 
-      return { imported: validTrips.length };
+      const summary = `Import summary: ${validTrips.length} new trips imported. ${skippedExisting} trips already exist. ${skippedNoLoadRef} rows skipped due to missing loadRef.`;
+      console.log(summary);
+      return { imported: validTrips.length, message: summary };
     } catch (error: any) {
       console.error("Error importing trips:", error);
       throw new HttpsError("internal", error.message);
@@ -101,16 +114,28 @@ export const scheduledImportTripsFromWebBook = functionsV1.pubsub
       return null;
     }
     try {
+      console.log(`Fetching trips from: ${WEB_BOOK_TRIPS_URL}`);
       const response = await fetch(WEB_BOOK_TRIPS_URL, { method: "GET" });
       if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`Failed to fetch web book: ${response.status} ${response.statusText}`, { errorBody });
         throw new Error(`Failed to fetch web book: ${response.statusText}`);
       }
       const trips = await response.json();
       if (!Array.isArray(trips)) {
+        console.error("Web book response is not an array. Received:", trips);
         throw new Error("Web book response is not an array");
       }
+      
+      console.log(`Received ${trips.length} rows from web book.`);
+      if (trips.length > 0) {
+        console.log("First row sample:", JSON.stringify(trips[0]));
+      }
+
       const db = admin.firestore();
       const validTrips: any[] = [];
+      let skippedExisting = 0;
+      let skippedNoLoadRef = 0;
 
       for (const row of trips) {
         const [
@@ -126,7 +151,10 @@ export const scheduledImportTripsFromWebBook = functionsV1.pubsub
           deliveredDate,
         ] = row;
 
-        if (!loadRef) continue;
+        if (!loadRef) {
+          skippedNoLoadRef++;
+          continue;
+        }
 
         const existing = await db
           .collection("trips")
@@ -159,6 +187,8 @@ export const scheduledImportTripsFromWebBook = functionsV1.pubsub
                 updatedAt: admin.firestore.FieldValue.serverTimestamp(),
             };
             validTrips.push({ ref: tripRef, data: newTrip });
+        } else {
+          skippedExisting++;
         }
       }
 
@@ -170,7 +200,7 @@ export const scheduledImportTripsFromWebBook = functionsV1.pubsub
         await batch.commit();
       }
       
-      console.log(`Imported ${validTrips.length} trips from web book.`);
+      console.log(`Import summary: ${validTrips.length} new trips imported. ${skippedExisting} trips already exist. ${skippedNoLoadRef} rows skipped due to missing loadRef.`);
       return null;
     } catch (error) {
       console.error("Scheduled import error:", error);
