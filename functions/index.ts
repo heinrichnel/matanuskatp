@@ -1,4 +1,4 @@
-import { onCall, HttpsError } from "firebase-functions/v2/https";
+import { onCall, onRequest, HttpsError } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 import fetch from "node-fetch";
 import * as functionsV1 from "firebase-functions/v1";
@@ -208,6 +208,49 @@ export const scheduledImportTripsFromWebBook = functionsV1.pubsub
     }
   });
 
+// New HTTP endpoint for live driver behavior webhook
+export const importDriverBehaviorWebhook = onRequest(async (req, res) => {
+  // Only accept POSTs
+  if (req.method !== 'POST') {
+    res.status(405).send('Method Not Allowed');
+    return;
+  }
+
+  const events = Array.isArray(req.body) ? req.body as any[] : [];
+  if (!events.length) {
+    res.status(400).send('Invalid or empty payload');
+    return;
+  }
+
+  const db = admin.firestore();
+  let imported = 0;
+  let skipped = 0;
+
+  for (const evt of events) {
+    const id = evt.id;
+    if (!id || evt.eventType === 'UNKNOWN') {
+      skipped++;
+      continue;
+    }
+
+    const ref = db.collection('driverBehavior').doc(id.toString());
+    const snap = await ref.get();
+    if (snap.exists) {
+      skipped++;
+      continue;
+    }
+
+    // Write event, preserving fields and adding createdAt
+    await ref.set({
+      ...evt,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    imported++;
+  }
+
+  res.status(200).send({ imported, skipped });
+});
+
 // Scheduled function to fetch driver behavior events from a Google Sheets web book and import to Firestore
 export const scheduledImportDriverBehaviorFromWebBook = functionsV1.pubsub
   .schedule("every 5 minutes")
@@ -294,6 +337,49 @@ export const scheduledImportDriverBehaviorFromWebBook = functionsV1.pubsub
       return null;
     }
   });
+
+// New HTTP endpoint for live trips webhook
+export const importTripsWebhook = onRequest(async (req, res) => {
+  if (req.method !== 'POST') {
+    res.status(405).send('Method Not Allowed');
+    return;
+  }
+
+  const trips = Array.isArray(req.body) ? req.body as any[] : [];
+  if (!trips.length) {
+    res.status(400).send('Invalid or empty payload');
+    return;
+  }
+
+  const db = admin.firestore();
+  let imported = 0;
+  let skipped = 0;
+
+  for (const t of trips) {
+    const id = t.loadRef || t.id;
+    if (!id) {
+      skipped++;
+      continue;
+    }
+
+    const ref = db.collection('trips').doc(id.toString());
+    const snap = await ref.get();
+    if (snap.exists) {
+      skipped++;
+      continue;
+    }
+
+    // Write trip, preserving fields and adding timestamps
+    await ref.set({
+      ...t,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+    imported++;
+  }
+
+  res.status(200).send({ imported, skipped });
+});
 
 // Example function to create a diesel record with your schema
 export const createDieselRecord = onCall({ enforceAppCheck: true }, async (request) => {
