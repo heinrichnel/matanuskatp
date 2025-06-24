@@ -11,7 +11,6 @@ import {
   orderBy,
   serverTimestamp,
   enableNetwork,
-  disableNetwork} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getAnalytics } from 'firebase/analytics';
 import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport } from './types';
