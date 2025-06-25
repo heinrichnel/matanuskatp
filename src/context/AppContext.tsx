@@ -16,6 +16,7 @@ import {
 } from '../firebase';
 import { generateTripId } from '../utils/helpers';
 import { v4 as uuidv4 } from 'uuid';
+import { importTripsFromWebhook, importDriverBehaviorEventsFromWebhook } from '../utils/webhook';
 
 interface AppContextType {
   trips: Trip[];
@@ -154,8 +155,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const completeTrip = async (tripId: string): Promise<void> => {
     const trip = trips.find(t => t.id === tripId);
     if (trip) {
-      const updatedTrip = { ...trip, status: 'completed' as 'completed' };
       try {
+        const updatedTrip = { ...trip, status: 'completed' as 'completed' };
         await updateTripInFirebase(updatedTrip.id, updatedTrip);
       } catch (error: any) {
         // Check if the error is a Firestore 'not-found' error
@@ -170,6 +171,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         throw error; // Re-throw to allow calling code to handle if needed
       }
+    }
+  };
+
+  // Implement the webhook import functions
+  const handleImportTripsFromWebhook = async (): Promise<{imported: number, skipped: number}> => {
+    try {
+      return await importTripsFromWebhook();
+    } catch (error) {
+      console.error('Error importing trips from webhook:', error);
+      throw error;
+    }
+  };
+
+  const handleImportDriverBehaviorEventsFromWebhook = async (): Promise<{imported: number, skipped: number}> => {
+    try {
+      return await importDriverBehaviorEventsFromWebhook();
+    } catch (error) {
+      console.error('Error importing driver behavior events from webhook:', error);
+      throw error;
     }
   };
 
@@ -199,7 +219,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateInvoicePayment: placeholder,
     importTripsFromCSV: placeholder,
     importCostsFromCSV: placeholder,
-    importTripsFromWebhook: placeholderObject,
+    importTripsFromWebhook: handleImportTripsFromWebhook,
     dieselRecords,
     addDieselRecord: placeholderString,
     updateDieselRecord: placeholder,
@@ -214,7 +234,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteDriverBehaviorEvent: placeholder,
     getDriverPerformance: () => ({}) as any,
     getAllDriversPerformance: () => [] as any[],
-    importDriverBehaviorEventsFromWebhook: placeholderObject,
+    importDriverBehaviorEventsFromWebhook: handleImportDriverBehaviorEventsFromWebhook,
     actionItems,
     addActionItem: placeholderString,
     updateActionItem: placeholder,

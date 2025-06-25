@@ -7,7 +7,7 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 
 // ─── Icons ───────────────────────────────────────────────────────
-import { Upload, X, Wifi, WifiOff } from 'lucide-react';
+import { Upload, X, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 
 
 interface LoadImportModalProps {
@@ -196,6 +196,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
               isLoading={isWebhookProcessing}
               className="mt-2"
               variant="outline"
+              icon={isWebhookProcessing ? <RefreshCw className="w-4 h-4 animate-spin" /> : undefined}
             >
               {isWebhookProcessing ? 'Importing from Webhook...' : 'Import from Webhook'}
             </Button>
@@ -236,44 +237,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
             <Button
               variant="outline"
               className="mb-2"
-              onClick={() => {
-                const headers = [
-                  'fleetNumber',
-                  'driverName',
-                  'clientName',
-                  'route',
-                  'baseRevenue',
-                  'revenueCurrency',
-                  'startDate',
-                  'endDate',
-                  'distanceKm',
-                  'clientType',
-                  'description',
-                  'paymentStatus'
-                ];
-                const sample = [
-                  '6H',
-                  'John Doe',
-                  'Acme Corp',
-                  'JHB-DBN',
-                  '12000',
-                  'ZAR',
-                  '2025-06-01',
-                  '2025-06-03',
-                  '600',
-                  'external',
-                  'Sample trip',
-                  'unpaid'
-                ];
-                const csv = `${headers.join(',')}\n${sample.join(',')}`;
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'trip_import_template.csv';
-                a.click();
-                URL.revokeObjectURL(url);
-              }}
+              onClick={handleDownloadTemplate}
             >
               Download CSV Template
             </Button>
