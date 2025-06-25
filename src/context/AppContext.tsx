@@ -153,7 +153,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const trip = trips.find(t => t.id === tripId);
     if (trip) {
       const updatedTrip = { ...trip, status: 'completed' as 'completed' };
-      await updateTripInFirebase(updatedTrip.id, updatedTrip);
+      try {
+        await updateTripInFirebase(updatedTrip.id, updatedTrip);
+      } catch (error: any) {
+        // Check if the error is a Firestore 'not-found' error
+        if (error?.code === 'not-found' || error?.message?.includes('No document to update')) {
+          // Remove the non-existent trip from local state
+          setTrips(prevTrips => prevTrips.filter(t => t.id !== tripId));
+          alert('This trip no longer exists in the database and has been removed from your view. It may have been deleted by another user.');
+        } else {
+          // Handle other types of errors
+          console.error('Error completing trip:', error);
+          alert('An error occurred while completing the trip. Please try again.');
+        }
+        throw error; // Re-throw to allow calling code to handle if needed
+      }
     }
   };
 
