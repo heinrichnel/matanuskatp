@@ -1,14 +1,9 @@
-// ─── React & Context ─────────────────────────────────────────────
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
-
-// ─── UI Components ───────────────────────────────────────────────
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-
-// ─── Icons ───────────────────────────────────────────────────────
 import { Upload, X, Wifi, WifiOff, RefreshCw } from 'lucide-react';
-
+import { useSyncContext } from '../../context/SyncContext';
 
 interface LoadImportModalProps {
   isOpen: boolean;
@@ -16,11 +11,14 @@ interface LoadImportModalProps {
 }
 
 const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) => {
-  const { importTripsFromCSV, importTripsFromWebhook, connectionStatus } = useAppContext();
+  const { importTripsFromCSV, importTripsFromWebhook } = useAppContext();
+  const { isOnline } = useSyncContext();
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isWebhookProcessing, setIsWebhookProcessing] = useState(false);
   const [previewData, setPreviewData] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) {
@@ -61,6 +59,8 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
     if (!csvFile) return;
 
     setIsProcessing(true);
+    setError(null);
+    setSuccess(null);
 
     try {
       const text = await csvFile.text();
@@ -86,11 +86,17 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
       }));
 
       await importTripsFromCSV(trips);
-      alert(`Successfully imported ${trips.length} trips from CSV file.${connectionStatus !== 'connected' ? '\n\nData will be synced when your connection is restored.' : ''}`);
-      onClose();
-    } catch (error) {
-      console.error('Failed to import CSV:', error);
-      alert('Failed to import CSV file. Please check the file format and try again.');
+      setSuccess(`Successfully imported ${trips.length} trips from CSV file.${!isOnline ? '\n\nData will be synced when your connection is restored.' : ''}`);
+      setCsvFile(null);
+      setPreviewData([]);
+      
+      // Close modal after a short delay
+      setTimeout(() => {
+        onClose();
+      }, 2000);
+    } catch (err: any) {
+      console.error('Failed to import CSV:', err);
+      setError(`Error importing trips: ${err.message}`);
     } finally {
       setIsProcessing(false);
     }
@@ -98,16 +104,22 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
 
   const handleWebhookImport = async () => {
     setIsWebhookProcessing(true);
+    setError(null);
+    setSuccess(null);
 
     try {
       const result = await importTripsFromWebhook();
-      alert(`Webhook import completed!\n\nImported: ${result.imported} trips\nSkipped: ${result.skipped} trips${connectionStatus !== 'connected' ? '\n\nData will be synced when your connection is restored.' : ''}`);
+      setSuccess(`Webhook import completed!\n\nImported: ${result.imported} trips\nSkipped: ${result.skipped} trips${!isOnline ? '\n\nData will be synced when your connection is restored.' : ''}`);
+      
+      // Close modal after a short delay if successful
       if (result.imported > 0) {
-        onClose();
+        setTimeout(() => {
+          onClose();
+        }, 2000);
       }
-    } catch (error) {
-      console.error('Failed to import from webhook:', error);
-      alert('Failed to import from webhook. Please check your connection and try again.');
+    } catch (err: any) {
+      console.error('Failed to import from webhook:', err);
+      setError(`Error importing from webhook: ${err.message}`);
     } finally {
       setIsWebhookProcessing(false);
     }
@@ -116,11 +128,13 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
   const handleClose = () => {
     setCsvFile(null);
     setIsProcessing(false);
+    setIsWebhookProcessing(false);
     setPreviewData([]);
+    setError(null);
+    setSuccess(null);
     onClose();
   };
 
-  // Add CSV template download helper
   const handleDownloadTemplate = () => {
     const headers = [
       'fleetNumber',
@@ -134,23 +148,23 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
       'distanceKm',
       'clientType',
       'description',
-      'paymentStatus',
+      'paymentStatus'
     ];
-    const example = [
+    const sample = [
       '6H',
       'John Doe',
       'Acme Corp',
-      'Cape Town - Durban',
+      'JHB-DBN',
       '12000',
       'ZAR',
       '2025-06-01',
       '2025-06-03',
-      '1600',
+      '600',
       'external',
-      'General cargo',
-      'unpaid',
+      'Sample trip',
+      'unpaid'
     ];
-    const csv = `${headers.join(',')}\n${example.join(',')}`;
+    const csv = `${headers.join(',')}\n${sample.join(',')}`;
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -161,24 +175,61 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Import Trips from CSV" maxWidth="md">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Import Trips"
+      maxWidth="md"
+    >
       <div className="space-y-6">
         {/* Connection Status Warning */}
-        {connectionStatus !== 'connected' && (
+        {!isOnline && (
           <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
             <div className="flex items-start space-x-3">
-              {connectionStatus === 'disconnected' ? (
-                <WifiOff className="w-5 h-5 text-amber-600 mt-0.5" />
-              ) : (
-                <Wifi className="w-5 h-5 text-amber-600 mt-0.5" />
-              )}
+              <WifiOff className="w-5 h-5 text-amber-600 mt-0.5" />
               <div>
-                <h4 className="text-sm font-medium text-amber-800">
-                  {connectionStatus === 'disconnected' ? 'Working Offline' : 'Reconnecting...'}
-                </h4>
+                <h4 className="text-sm font-medium text-amber-800">Working Offline</h4>
                 <p className="text-sm text-amber-700 mt-1">
                   You can still import trips while offline. Your data will be stored locally and synced with the server when your connection is restored.
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-red-800">Import Error</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{error}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success Message */}
+        {success && (
+          <div className="bg-green-50 border border-green-200 rounded-md p-4">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium text-green-800">Import Successful</h3>
+                <div className="mt-2 text-sm text-green-700 whitespace-pre-line">
+                  <p>{success}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -232,17 +283,6 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         </div>
 
         <div className="space-y-4">
-          {/* Download CSV Template Button */}
-          <div>
-            <Button
-              variant="outline"
-              className="mb-2"
-              onClick={handleDownloadTemplate}
-            >
-              Download CSV Template
-            </Button>
-          </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Select CSV File
@@ -250,7 +290,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
             <input
               type="file"
               accept=".csv"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFileChange(e)}
+              onChange={handleFileChange}
               className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
                 file:rounded-md file:border-0 file:text-sm file:font-medium 
                 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
