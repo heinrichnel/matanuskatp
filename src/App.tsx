@@ -21,6 +21,7 @@ import DriverBehaviorPage from "./pages/DriverBehaviorPage";
 import ActionLog from "./components/actionlog/ActionLog";
 import TripDetails from "./components/trips/TripDetails";
 import TripForm from "./components/trips/TripForm";
+import TripCalendarPage from "./components/trips/TripCalendarPage";
 
 // Utilities & Types
 import { Trip } from "./types";
@@ -168,6 +169,8 @@ const AppContent: React.FC = () => {
                />;
       case "completed-trips":
         return <CompletedTrips trips={trips.filter(t => t.status === 'completed')} onView={handleShowTripDetails} />;
+      case "trip-calendar":
+        return <TripCalendarPage />;
       case "flags":
         return <FlagsInvestigations trips={trips} />;
       case "reports":
