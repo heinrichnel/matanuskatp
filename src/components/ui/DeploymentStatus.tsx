@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { fetchDeploymentStatus } from '../../utils/deploymentStatus';
 
 interface DeploymentStatusProps {
   className?: string;
@@ -19,11 +20,10 @@ const DeploymentStatus: React.FC<DeploymentStatusProps> = ({
     try {
       setIsLoading(true);
       
-      // In a real implementation, this would be an API call to check deployment status
-      const response = await fetch('/api/deployment-status');
-      const data = await response.json();
+      // Use the mock utility function instead of making a real API call
+      const data = await fetchDeploymentStatus();
       
-      setStatus(data.status);
+      setStatus(data.status as 'deploying' | 'success' | 'error' | 'idle');
       setDeployUrl(data.url);
       setDeployTime(data.deployedAt);
     } catch (error) {
