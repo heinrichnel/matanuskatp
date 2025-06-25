@@ -8,7 +8,7 @@ import DriverBehaviorEventDetails from '../components/drivers/DriverBehaviorEven
 import CARReportForm from '../components/drivers/CARReportForm';
 import CARReportList from '../components/drivers/CARReportList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
-import { User, FileText, Plus } from 'lucide-react';
+import { User, FileText, Plus, RefreshCw } from 'lucide-react';
 
 const DriverBehaviorPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('performance');

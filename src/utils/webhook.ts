@@ -4,7 +4,7 @@ import { Trip, DriverBehaviorEvent } from '../types';
 // Example: fetch trips from a webhook endpoint (Google Apps Script, etc.)
 export async function fetchTripsFromWebhook(): Promise<Omit<Trip, 'id' | 'costs' | 'status'>[]> {
   // Replace with your actual webhook URL
-  const WEBHOOK_URL = import.meta.env.VITE_WEBHOOK_URL || 'https://your-webhook-url.com/trips';
+  const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbz4UiNEXj2BubLii3xlU7wHMkG6RuHekD_yTT-1d-euE5X-Pw2swehZb6RrghixvLYP/exec';
   const response = await fetch(WEBHOOK_URL);
   if (!response.ok) throw new Error('Failed to fetch trips from webhook');
   const data = await response.json();
@@ -15,8 +15,8 @@ export async function fetchTripsFromWebhook(): Promise<Omit<Trip, 'id' | 'costs'
     clientName: row.clientName || row.client || '',
     baseRevenue: parseFloat(row.baseRevenue || row.revenue || '0'),
     revenueCurrency: row.revenueCurrency || row.currency || 'ZAR',
-    startDate: row.startDate || '',
-    endDate: row.endDate || '',
+    startDate: row.shippedDate || '',
+    endDate: row.deliveredDate || '',
     driverName: row.driverName || row.driver || '',
     distanceKm: parseFloat(row.distanceKm || row.distance || '0'),
     clientType: row.clientType || 'external',
@@ -82,7 +82,7 @@ export async function importTripsFromWebhook(): Promise<{imported: number, skipp
     // Use the Cloud Function URL for trips
     const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/manualImportTrips';
     
-    const response = await fetch(WEBHOOK_URL);
+    const response = await retryWebhookCall(() => fetch(WEBHOOK_URL));
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Failed to fetch trips: ${response.status} ${response.statusText} - ${errorText}`);
@@ -108,13 +108,15 @@ export async function importDriverBehaviorEventsFromWebhook(): Promise<{imported
     const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook';
     
     // Make a POST request with empty body to trigger the import
-    const response = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify([]) // Empty array to trigger the function to fetch from the web book
-    });
+    const response = await retryWebhookCall(() => 
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify([]) // Empty array to trigger the function to fetch from the web book
+      })
+    );
     
     if (!response.ok) {
       const errorText = await response.text();
@@ -136,10 +138,10 @@ export async function importDriverBehaviorEventsFromWebhook(): Promise<{imported
 
 // Function with retry logic for webhook calls
 export async function retryWebhookCall<T>(
-  callFn: () => Promise<T>,
+  callFn: () => Promise<Response>,
   maxRetries: number = 3,
   delayMs: number = 1000
-): Promise<T> {
+): Promise<Response> {
   let lastError: Error | null = null;
   
   for (let attempt = 1; attempt <= maxRetries; attempt++) {

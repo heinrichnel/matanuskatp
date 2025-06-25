@@ -27,6 +27,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
   const [selectedSeverity, setSelectedSeverity] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [isSyncing, setIsSyncing] = useState(false);
   
   // Get all driver performance data
   const driversPerformance = useMemo(() => {
@@ -121,6 +122,20 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
       default: return 'bg-yellow-100 text-yellow-800';
     }
   };
+
+  // Handle sync now with loading state
+  const handleSyncNow = async () => {
+    if (!onSyncNow) return;
+    
+    setIsSyncing(true);
+    try {
+      await onSyncNow();
+    } catch (error) {
+      console.error('Error syncing driver behavior events:', error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -139,11 +154,12 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
           </Button>
           {onSyncNow && (
             <Button
-              onClick={onSyncNow}
-              icon={<RefreshCw className="w-4 h-4 animate-spin" />}
+              onClick={handleSyncNow}
+              icon={<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />}
               variant="outline"
+              disabled={isSyncing}
             >
-              Sync Now
+              {isSyncing ? 'Syncing...' : 'Sync Now'}
             </Button>
           )}
         </div>
@@ -414,7 +430,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
                           {event.severity.toUpperCase()}
                         </span>
                         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(event.status)}`}>
-                          {event.status?.toUpperCase()}
+                          {event.status?.toUpperCase() || 'PENDING'}
                         </span>
                       </div>
                       
