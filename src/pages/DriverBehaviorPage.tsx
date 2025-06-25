@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DriverBehaviorEvent } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { useSyncContext } from '../context/SyncContext';
 import Button from '../components/ui/Button';
 import DriverPerformanceOverview from '../components/drivers/DriverPerformanceOverview';
 import DriverBehaviorEventForm from '../components/drivers/DriverBehaviorEventForm';
@@ -9,6 +10,7 @@ import CARReportForm from '../components/drivers/CARReportForm';
 import CARReportList from '../components/drivers/CARReportList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
 import { User, FileText, Plus, RefreshCw } from 'lucide-react';
+import SyncIndicator from '../components/ui/SyncIndicator';
 
 const DriverBehaviorPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('performance');
@@ -17,6 +19,8 @@ const DriverBehaviorPage: React.FC = () => {
   const [showCARForm, setShowCARForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<DriverBehaviorEvent | null>(null);
   const { importDriverBehaviorEventsFromWebhook } = useAppContext();
+  const { subscribeToDriverBehavior } = useSyncContext();
+  const [isSyncing, setIsSyncing] = useState(false);
   
   // Handle initiating CAR from event
   const handleInitiateCAR = (event: DriverBehaviorEvent) => {
@@ -27,11 +31,21 @@ const DriverBehaviorPage: React.FC = () => {
   // Manual sync handler
   const handleSyncNow = async () => {
     try {
+      setIsSyncing(true);
       const result = await importDriverBehaviorEventsFromWebhook();
       alert(`Manual sync complete. Imported: ${result.imported}, Skipped: ${result.skipped}`);
     } catch (error) {
       alert('Manual sync failed. Please try again.');
+    } finally {
+      setIsSyncing(false);
     }
+  };
+
+  // Subscribe to driver behavior events when viewing details
+  const handleViewEvent = (event: DriverBehaviorEvent) => {
+    subscribeToDriverBehavior(event.driverName);
+    setSelectedEvent(event);
+    setShowEventDetails(true);
   };
   
   return (
@@ -39,7 +53,10 @@ const DriverBehaviorPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Driver Management</h1>
-          <p className="text-lg text-gray-600 mt-2">Monitor driver behavior and manage corrective actions</p>
+          <div className="flex items-center mt-1">
+            <p className="text-lg text-gray-600 mr-3">Monitor driver behavior and manage corrective actions</p>
+            <SyncIndicator />
+          </div>
         </div>
         <div className="flex space-x-3">
           <Button
@@ -50,6 +67,14 @@ const DriverBehaviorPage: React.FC = () => {
             icon={<Plus className="w-4 h-4" />}
           >
             Record Behavior Event
+          </Button>
+          <Button
+            onClick={handleSyncNow}
+            icon={<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />}
+            variant="outline"
+            disabled={isSyncing}
+          >
+            {isSyncing ? 'Syncing...' : 'Sync Now'}
           </Button>
         </div>
       </div>
@@ -72,10 +97,7 @@ const DriverBehaviorPage: React.FC = () => {
               setSelectedEvent(null);
               setShowEventForm(true);
             }}
-            onViewEvent={(event: DriverBehaviorEvent) => {
-              setSelectedEvent(event);
-              setShowEventDetails(true);
-            }}
+            onViewEvent={handleViewEvent}
             onEditEvent={(event: DriverBehaviorEvent) => {
               setSelectedEvent(event);
               setShowEventForm(true);
