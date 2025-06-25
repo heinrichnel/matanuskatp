@@ -1,5 +1,5 @@
 // src/utils/webhook.ts
-import { Trip } from '../types';
+import { Trip, DriverBehaviorEvent } from '../types';
 
 // Example: fetch trips from a webhook endpoint (Google Apps Script, etc.)
 export async function fetchTripsFromWebhook(): Promise<Omit<Trip, 'id' | 'costs' | 'status'>[]> {
@@ -25,4 +25,78 @@ export async function fetchTripsFromWebhook(): Promise<Omit<Trip, 'id' | 'costs'
     additionalCosts: [],
     followUpHistory: [],
   }));
+}
+
+// Fetch driver behavior events from webhook
+export async function fetchDriverBehaviorEventsFromWebhook(): Promise<{imported: number, skipped: number}> {
+  try {
+    // Use the Cloud Function URL for driver behavior events
+    const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/manualImportDriverEvents';
+    
+    const response = await fetch(WEBHOOK_URL);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch driver behavior events: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
+    const result = await response.json();
+    console.log('Driver behavior events import result:', result);
+    
+    return {
+      imported: result.imported || 0,
+      skipped: result.skipped || 0
+    };
+  } catch (error) {
+    console.error('Error importing driver behavior events:', error);
+    throw error;
+  }
+}
+
+// Process driver behavior events from raw data
+export function processDriverBehaviorEvents(rawEvents: any[]): DriverBehaviorEvent[] {
+  return rawEvents.map(event => {
+    // Map the raw event data to the expected format
+    return {
+      id: event.id || `event_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      driverId: event.driverId || '',
+      driverName: event.driverName || '',
+      fleetNumber: event.fleetNumber || '',
+      eventType: event.eventType || 'other',
+      severity: event.severity || 'medium',
+      eventDate: event.eventDate || new Date().toISOString().split('T')[0],
+      eventTime: event.eventTime || new Date().toTimeString().split(' ')[0].substring(0, 5),
+      location: event.location || '',
+      description: event.description || '',
+      followUpRequired: event.followUpRequired || false,
+      reportedBy: event.reportedBy || 'WebBook Script',
+      reportedAt: event.reportedAt || new Date().toISOString(),
+      points: Number(event.points) || 0,
+      status: event.status || 'pending'
+    };
+  });
+}
+
+// Import trips from webhook with error handling and retry logic
+export async function importTripsFromWebhook(): Promise<{imported: number, skipped: number}> {
+  try {
+    // Use the Cloud Function URL for trips
+    const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/manualImportTrips';
+    
+    const response = await fetch(WEBHOOK_URL);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to fetch trips: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+    
+    const result = await response.json();
+    console.log('Trips import result:', result);
+    
+    return {
+      imported: result.imported || 0,
+      skipped: result.skipped || 0
+    };
+  } catch (error) {
+    console.error('Error importing trips:', error);
+    throw error;
+  }
 }
