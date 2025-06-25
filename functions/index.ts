@@ -275,7 +275,8 @@ export const scheduledImportDriverBehaviorFromWebBook = functionsV1.pubsub
         throw new Error("Driver behavior web book response is not an array");
       }
       const db = admin.firestore();
-      const validEvents: any[] = [];
+      let imported = 0;
+      let skipped = 0;
 
       for (const row of events) {
         // Example: [reportedAt, description, driverName, eventDate, eventTime, eventType, fleetNumber, location, severity, status, points]
@@ -295,9 +296,24 @@ export const scheduledImportDriverBehaviorFromWebBook = functionsV1.pubsub
         
         if (!eventType || eventType === 'UNKNOWN') continue;
         
+        // Generate a unique ID for the event
+        const uniqueId = `event_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        
+        // Check for duplicate by generated ID
+        const existing = await db
+          .collection("driverBehavior")
+          .where("id", "==", uniqueId)
+          .limit(1)
+          .get();
+          
+        if (!existing.empty) {
+          skipped++;
+          continue;
+        }
+        
         const eventRef = db.collection("driverBehavior").doc();
         const newEvent = {
-          id: eventRef.id,
+          id: uniqueId,
           reportedAt: reportedAt ? new Date(reportedAt).toISOString() : new Date().toISOString(),
           description: description || "",
           driverName: driverName || "",
@@ -312,21 +328,15 @@ export const scheduledImportDriverBehaviorFromWebBook = functionsV1.pubsub
           reportedBy: "WebBook Script",
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         };
-        validEvents.push({ ref: eventRef, data: newEvent });
-      }
-
-      if (validEvents.length > 0) {
-        const batch = db.batch();
-        validEvents.forEach(event => {
-          batch.set(event.ref, event.data);
-        });
-        await batch.commit();
+        
+        await eventRef.set(newEvent);
+        imported++;
       }
 
       console.log(
-        `Imported ${validEvents.length} driver behavior events from web book.`
+        `Imported ${imported} driver behavior events from web book, skipped ${skipped}.`
       );
-      return null;
+      return { imported, skipped };
     } catch (error) {
       console.error("Scheduled driver behavior import error:", error);
       return null;
@@ -374,97 +384,6 @@ export const importTripsWebhook = onRequest(async (req, res) => {
   }
 
   res.status(200).send({ imported, skipped });
-});
-
-// Example function to create a diesel record with your schema
-export const createDieselRecord = onCall({ enforceAppCheck: true }, async (request) => {
-  const db = admin.firestore();
-  const dieselRef = db.collection("diesel").doc();
-  const data = request.data || {};
-  const newDiesel = {
-    id: dieselRef.id,
-    tripId: data.tripId || "",
-    fleetNumber: data.fleetNumber || "",
-    driverName: data.driverName || "",
-    fuelStation: data.fuelStation || "",
-    date: data.date || "",
-    currency: data.currency || "ZAR",
-    costPerLitre: Number(data.costPerLitre) || 0,
-    litresFilled: Number(data.litresFilled) || 0,
-    totalCost: Number(data.totalCost) || 0,
-    kmReading: Number(data.kmReading) || 0,
-    previousKmReading: Number(data.previousKmReading) || 0,
-    distanceTravelled: Number(data.distanceTravelled) || 0,
-    kmPerLitre: Number(data.kmPerLitre) || 0,
-    isReeferUnit: Boolean(data.isReeferUnit),
-    notes: data.notes || "",
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-  };
-  await dieselRef.set(newDiesel);
-  return { id: dieselRef.id };
-});
-
-// Example function to create an action item with your schema
-export const createActionItem = onCall({ enforceAppCheck: true }, async (request) => {
-  const db = admin.firestore();
-  const actionRef = db.collection("actionItems").doc();
-  const data = request.data || {};
-  const newAction = {
-    id: actionRef.id,
-    title: data.title || "",
-    description: data.description || "",
-    responsiblePerson: data.responsiblePerson || "",
-    status: data.status || "pending",
-    startDate: data.startDate || "",
-    dueDate: data.dueDate || "",
-    completedAt: data.completedAt || "",
-    completedBy: data.completedBy || "",
-    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-    createdBy: data.createdBy || "",
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    attachments: Array.isArray(data.attachments) ? data.attachments : [],
-    isOverdue: Boolean(data.isOverdue),
-    isOverdueBy5: Boolean(data.isOverdueBy5),
-    isOverdueBy10: Boolean(data.isOverdueBy10),
-    overdueBy: Number(data.overdueBy) || 0,
-    needsReason: Boolean(data.needsReason),
-  };
-  await actionRef.set(newAction);
-  return { id: actionRef.id };
-});
-
-// Callable function to create or update a system cost rates document
-export const upsertSystemCostRates = onCall({ enforceAppCheck: true }, async (request) => {
-  const db = admin.firestore();
-  const data = request.data || {};
-  const currency = data.currency || "ZAR";
-  const docId = `${currency}_rates`;
-  const ratesRef = db.collection("systemCostRates").doc(docId);
-  const now = new Date().toISOString();
-  const newRates = {
-    id: docId,
-    currency,
-    effectiveDate: data.effectiveDate || now,
-    lastUpdated: now,
-    updatedBy: data.updatedBy || "system",
-    perDayCosts: {
-      depreciation: Number(data.perDayCosts?.depreciation) || 0,
-      fleetManagementSystem: Number(data.perDayCosts?.fleetManagementSystem) || 0,
-      gitInsurance: Number(data.perDayCosts?.gitInsurance) || 0,
-      licensing: Number(data.perDayCosts?.licensing) || 0,
-      shortTermInsurance: Number(data.perDayCosts?.shortTermInsurance) || 0,
-      trackingCost: Number(data.perDayCosts?.trackingCost) || 0,
-      vidRoadworthy: Number(data.perDayCosts?.vidRoadworthy) || 0,
-      wages: Number(data.perDayCosts?.wages) || 0,
-    },
-    perKmCosts: {
-      repairMaintenance: Number(data.perKmCosts?.repairMaintenance) || 0,
-      tyreCost: Number(data.perKmCosts?.tyreCost) || 0,
-    },
-  };
-  await ratesRef.set(newRates, { merge: true });
-  return { id: docId };
 });
 
 // Function to handle driver behavior events from the web book
@@ -581,3 +500,94 @@ export const importDriverBehaviorEventsFromWebhook = onCall(
     }
   }
 );
+
+// Example function to create a diesel record with your schema
+export const createDieselRecord = onCall({ enforceAppCheck: true }, async (request) => {
+  const db = admin.firestore();
+  const dieselRef = db.collection("diesel").doc();
+  const data = request.data || {};
+  const newDiesel = {
+    id: dieselRef.id,
+    tripId: data.tripId || "",
+    fleetNumber: data.fleetNumber || "",
+    driverName: data.driverName || "",
+    fuelStation: data.fuelStation || "",
+    date: data.date || "",
+    currency: data.currency || "ZAR",
+    costPerLitre: Number(data.costPerLitre) || 0,
+    litresFilled: Number(data.litresFilled) || 0,
+    totalCost: Number(data.totalCost) || 0,
+    kmReading: Number(data.kmReading) || 0,
+    previousKmReading: Number(data.previousKmReading) || 0,
+    distanceTravelled: Number(data.distanceTravelled) || 0,
+    kmPerLitre: Number(data.kmPerLitre) || 0,
+    isReeferUnit: Boolean(data.isReeferUnit),
+    notes: data.notes || "",
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  await dieselRef.set(newDiesel);
+  return { id: dieselRef.id };
+});
+
+// Example function to create an action item with your schema
+export const createActionItem = onCall({ enforceAppCheck: true }, async (request) => {
+  const db = admin.firestore();
+  const actionRef = db.collection("actionItems").doc();
+  const data = request.data || {};
+  const newAction = {
+    id: actionRef.id,
+    title: data.title || "",
+    description: data.description || "",
+    responsiblePerson: data.responsiblePerson || "",
+    status: data.status || "pending",
+    startDate: data.startDate || "",
+    dueDate: data.dueDate || "",
+    completedAt: data.completedAt || "",
+    completedBy: data.completedBy || "",
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdBy: data.createdBy || "",
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    attachments: Array.isArray(data.attachments) ? data.attachments : [],
+    isOverdue: Boolean(data.isOverdue),
+    isOverdueBy5: Boolean(data.isOverdueBy5),
+    isOverdueBy10: Boolean(data.isOverdueBy10),
+    overdueBy: Number(data.overdueBy) || 0,
+    needsReason: Boolean(data.needsReason),
+  };
+  await actionRef.set(newAction);
+  return { id: actionRef.id };
+});
+
+// Callable function to create or update a system cost rates document
+export const upsertSystemCostRates = onCall({ enforceAppCheck: true }, async (request) => {
+  const db = admin.firestore();
+  const data = request.data || {};
+  const currency = data.currency || "ZAR";
+  const docId = `${currency}_rates`;
+  const ratesRef = db.collection("systemCostRates").doc(docId);
+  const now = new Date().toISOString();
+  const newRates = {
+    id: docId,
+    currency,
+    effectiveDate: data.effectiveDate || now,
+    lastUpdated: now,
+    updatedBy: data.updatedBy || "system",
+    perDayCosts: {
+      depreciation: Number(data.perDayCosts?.depreciation) || 0,
+      fleetManagementSystem: Number(data.perDayCosts?.fleetManagementSystem) || 0,
+      gitInsurance: Number(data.perDayCosts?.gitInsurance) || 0,
+      licensing: Number(data.perDayCosts?.licensing) || 0,
+      shortTermInsurance: Number(data.perDayCosts?.shortTermInsurance) || 0,
+      trackingCost: Number(data.perDayCosts?.trackingCost) || 0,
+      vidRoadworthy: Number(data.perDayCosts?.vidRoadworthy) || 0,
+      wages: Number(data.perDayCosts?.wages) || 0,
+    },
+    perKmCosts: {
+      repairMaintenance: Number(data.perKmCosts?.repairMaintenance) || 0,
+      tyreCost: Number(data.perKmCosts?.tyreCost) || 0,
+    },
+  };
+  await ratesRef.set(newRates, { merge: true });
+  return { id: docId };
+});
