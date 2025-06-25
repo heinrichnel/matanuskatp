@@ -18,6 +18,7 @@ import {
   UserRound
 } from 'lucide-react';
 import Button from '../ui/Button';
+import DeploymentStatus from '../ui/DeploymentStatus';
 
 interface HeaderProps {
   currentView: string;
@@ -74,30 +75,33 @@ const Header: FC<HeaderProps> = ({
           ))}
         </ul>
       </nav>
-      <div className="px-6 py-4 border-t flex items-center gap-3">
-        <UserRound className="w-5 h-5 text-gray-400" />
-        <span className="text-sm text-gray-700">{userName}</span>
-        <button
-          className="ml-auto p-2 rounded-full hover:bg-gray-100 focus:outline-none"
-          onClick={onNotificationsClick}
-          aria-label="Notifications"
-        >
-          <Bell className="w-5 h-5 text-gray-400" />
-        </button>
-        <button
-          className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
-          onClick={onSettingsClick}
-          aria-label="Settings"
-        >
-          <Settings className="w-5 h-5 text-gray-400" />
-        </button>
-        <button
-          className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
-          onClick={onProfileClick}
-          aria-label="Profile"
-        >
-          <Shield className="w-5 h-5 text-gray-400" />
-        </button>
+      <div className="px-6 py-4 border-t">
+        <DeploymentStatus className="mb-3" />
+        <div className="flex items-center gap-3">
+          <UserRound className="w-5 h-5 text-gray-400" />
+          <span className="text-sm text-gray-700">{userName}</span>
+          <button
+            className="ml-auto p-2 rounded-full hover:bg-gray-100 focus:outline-none"
+            onClick={onNotificationsClick}
+            aria-label="Notifications"
+          >
+            <Bell className="w-5 h-5 text-gray-400" />
+          </button>
+          <button
+            className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
+            onClick={onSettingsClick}
+            aria-label="Settings"
+          >
+            <Settings className="w-5 h-5 text-gray-400" />
+          </button>
+          <button
+            className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
+            onClick={onProfileClick}
+            aria-label="Profile"
+          >
+            <Shield className="w-5 h-5 text-gray-400" />
+          </button>
+        </div>
       </div>
     </aside>
   );
