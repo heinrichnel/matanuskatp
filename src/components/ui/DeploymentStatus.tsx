@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
-import { fetchDeploymentStatus } from '../../utils/deploymentStatus';
 
 interface DeploymentStatusProps {
   className?: string;
@@ -20,12 +19,13 @@ const DeploymentStatus: React.FC<DeploymentStatusProps> = ({
     try {
       setIsLoading(true);
       
-      // Use the mock utility function instead of making a real API call
-      const data = await fetchDeploymentStatus();
+      // Mock deployment status check
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      setStatus(data.status as 'deploying' | 'success' | 'error' | 'idle');
-      setDeployUrl(data.url);
-      setDeployTime(data.deployedAt);
+      // Simulate a successful deployment
+      setStatus('success');
+      setDeployUrl('https://your-deployed-app.netlify.app');
+      setDeployTime(new Date().toISOString());
     } catch (error) {
       console.error('Error checking deployment status:', error);
       setStatus('error');

@@ -8,6 +8,7 @@ import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Select, Input } from '../ui/FormElements';
 import { Calendar, Filter, Plus } from 'lucide-react';
+import Modal from '../ui/Modal';
 
 const TripCalendarPage: React.FC = () => {
   const { trips, updateTrip, addTrip, deleteTrip, completeTrip } = useAppContext();
@@ -15,6 +16,7 @@ const TripCalendarPage: React.FC = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [showTripForm, setShowTripForm] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
   
   // Filters
   const [filters, setFilters] = useState({
@@ -68,6 +70,7 @@ const TripCalendarPage: React.FC = () => {
   // Handle add trip
   const handleAddTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     try {
+      setIsLoading(true);
       const tripId = await addTrip(tripData);
       setShowTripForm(false);
       setEditingTrip(undefined);
@@ -75,6 +78,8 @@ const TripCalendarPage: React.FC = () => {
     } catch (error) {
       console.error("Error adding trip:", error);
       alert("Error creating trip. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -82,6 +87,7 @@ const TripCalendarPage: React.FC = () => {
   const handleUpdateTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     if (editingTrip) {
       try {
+        setIsLoading(true);
         const updatedTrip: Trip = {
           ...editingTrip,
           ...tripData,
@@ -99,28 +105,39 @@ const TripCalendarPage: React.FC = () => {
       } catch (error) {
         console.error("Error updating trip:", error);
         alert("Error updating trip. Please try again.");
+      } finally {
+        setIsLoading(false);
       }
     }
   };
   
   // Handle delete trip
   const handleDeleteTrip = async (id: string) => {
-    try {
-      await deleteTrip(id);
-    } catch (error) {
-      console.error("Error deleting trip:", error);
-      alert("Error deleting trip. Please try again.");
+    if (confirm("Are you sure you want to delete this trip? This action cannot be undone.")) {
+      try {
+        setIsLoading(true);
+        await deleteTrip(id);
+        alert("Trip deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting trip:", error);
+        alert("Error deleting trip. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
   
   // Handle complete trip
   const handleCompleteTrip = async (tripId: string) => {
     try {
+      setIsLoading(true);
       await completeTrip(tripId);
       alert("Trip marked as completed successfully!");
     } catch (error) {
       console.error("Error completing trip:", error);
       alert("Error completing trip. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
   
@@ -239,7 +256,15 @@ const TripCalendarPage: React.FC = () => {
       )}
       
       {/* Trip Form Modal */}
-      {showTripForm && (
+      <Modal
+        isOpen={showTripForm}
+        onClose={() => {
+          setShowTripForm(false);
+          setEditingTrip(undefined);
+        }}
+        title={editingTrip ? "Edit Trip" : "Add New Trip"}
+        maxWidth="lg"
+      >
         <TripForm
           onSubmit={editingTrip ? handleUpdateTrip : handleAddTrip}
           onCancel={() => {
@@ -248,7 +273,7 @@ const TripCalendarPage: React.FC = () => {
           }}
           trip={editingTrip}
         />
-      )}
+      </Modal>
     </div>
   );
 };

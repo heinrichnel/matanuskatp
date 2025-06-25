@@ -1,10 +1,8 @@
-// ─── React ───────────────────────────────────────────────────────
 import React, { useState, useEffect } from 'react';
-// ─── Types & Constants ───────────────────────────────────────────
 import { Trip, CLIENTS, DRIVERS, CLIENT_TYPES, FLEET_NUMBERS } from '../../types';
-// ─── UI Components ───────────────────────────────────────────────
 import { Input, Select, TextArea } from '../ui/FormElements';
 import Button from '../ui/Button';
+import { Save, X } from 'lucide-react';
 
 interface TripFormProps {
   trip?: Trip;
@@ -28,6 +26,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
   });
   const [touched, setTouched] = useState<{[key: string]: boolean}>({});
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (trip) {
@@ -44,6 +43,12 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
         clientType: trip.clientType || 'external',
         description: trip.description || '',
       });
+    } else {
+      // Set default start date to today for new trips
+      setFormData(prev => ({
+        ...prev,
+        startDate: new Date().toISOString().split('T')[0]
+      }));
     }
   }, [trip]);
 
@@ -67,7 +72,6 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
       newErrors.baseRevenue = 'Base Revenue must be greater than 0';
     }
     if (!formData.revenueCurrency) newErrors.revenueCurrency = 'Currency is required';
-    if (!formData.description) newErrors.description = 'Trip Description is required';
     return newErrors;
   };
 
@@ -92,7 +96,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
@@ -109,23 +113,34 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
       revenueCurrency: true,
       description: true,
     });
+    
     if (Object.keys(validationErrors).length > 0) return;
-    onSubmit({
-      clientType: formData.clientType,
-      fleetNumber: formData.fleetNumber,
-      clientName: formData.clientName,
-      driverName: formData.driverName,
-      route: formData.route,
-      startDate: formData.startDate,
-      endDate: formData.endDate,
-      distanceKm: parseFloat(formData.distanceKm),
-      baseRevenue: parseFloat(formData.baseRevenue),
-      revenueCurrency: formData.revenueCurrency,
-      description: formData.description,
-      additionalCosts: [],
-      paymentStatus: 'unpaid',
-      followUpHistory: [],
-    });
+    
+    setIsSubmitting(true);
+    
+    try {
+      await onSubmit({
+        clientType: formData.clientType,
+        fleetNumber: formData.fleetNumber,
+        clientName: formData.clientName,
+        driverName: formData.driverName,
+        route: formData.route,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        distanceKm: parseFloat(formData.distanceKm),
+        baseRevenue: parseFloat(formData.baseRevenue),
+        revenueCurrency: formData.revenueCurrency,
+        description: formData.description,
+        additionalCosts: [],
+        paymentStatus: 'unpaid',
+        followUpHistory: [],
+      });
+    } catch (error) {
+      console.error('Error submitting trip:', error);
+      alert('An error occurred while saving the trip. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -145,7 +160,10 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
           value={formData.fleetNumber}
           onChange={(value) => handleChange('fleetNumber', value)}
           onBlur={() => handleBlur('fleetNumber')}
-          options={FLEET_NUMBERS.map(f => ({ label: f, value: f }))}
+          options={[
+            { label: 'Select fleet...', value: '' },
+            ...FLEET_NUMBERS.map(f => ({ label: f, value: f }))
+          ]}
           required
           error={touched.fleetNumber && errors.fleetNumber}
         />
@@ -154,7 +172,10 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
           value={formData.clientName}
           onChange={(value) => handleChange('clientName', value)}
           onBlur={() => handleBlur('clientName')}
-          options={CLIENTS.map(c => ({ label: c, value: c }))}
+          options={[
+            { label: 'Select client...', value: '' },
+            ...CLIENTS.map(c => ({ label: c, value: c }))
+          ]}
           required
           error={touched.clientName && errors.clientName}
         />
@@ -163,15 +184,19 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
           value={formData.driverName}
           onChange={(value) => handleChange('driverName', value)}
           onBlur={() => handleBlur('driverName')}
-          options={DRIVERS.map(d => ({ label: d, value: d }))}
+          options={[
+            { label: 'Select driver...', value: '' },
+            ...DRIVERS.map(d => ({ label: d, value: d }))
+          ]}
           required
           error={touched.driverName && errors.driverName}
         />
         <Input
-          label="Route (semicolon separated)"
+          label="Route"
           value={formData.route}
           onChange={(value) => handleChange('route', value)}
           onBlur={() => handleBlur('route')}
+          placeholder="e.g., JHB - CPT"
           required
           error={touched.route && errors.route}
         />
@@ -199,6 +224,9 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
           value={formData.distanceKm}
           onChange={(value) => handleChange('distanceKm', value)}
           onBlur={() => handleBlur('distanceKm')}
+          placeholder="0"
+          min="1"
+          step="1"
           required
           error={touched.distanceKm && errors.distanceKm}
         />
@@ -208,6 +236,9 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
           value={formData.baseRevenue}
           onChange={(value) => handleChange('baseRevenue', value)}
           onBlur={() => handleBlur('baseRevenue')}
+          placeholder="0.00"
+          min="0.01"
+          step="0.01"
           required
           error={touched.baseRevenue && errors.baseRevenue}
         />
@@ -217,8 +248,8 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
           onChange={(value) => handleChange('revenueCurrency', value)}
           onBlur={() => handleBlur('revenueCurrency')}
           options={[
-            { label: 'USD', value: 'USD' },
-            { label: 'ZAR', value: 'ZAR' },
+            { label: 'ZAR (R)', value: 'ZAR' },
+            { label: 'USD ($)', value: 'USD' }
           ]}
           required
           error={touched.revenueCurrency && errors.revenueCurrency}
@@ -230,14 +261,23 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
         onChange={(value) => handleChange('description', value)}
         placeholder="Description of the trip..."
         rows={3}
-        required
-        error={touched.description && errors.description}
       />
       <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          icon={<X className="w-4 h-4" />}
+          disabled={isSubmitting}
+        >
           Cancel
         </Button>
-        <Button type="submit" disabled={!isFormValid}>
+        <Button 
+          type="submit" 
+          disabled={!isFormValid || isSubmitting}
+          icon={<Save className="w-4 h-4" />}
+          isLoading={isSubmitting}
+        >
           {trip ? 'Update Trip' : 'Create Trip'}
         </Button>
       </div>
