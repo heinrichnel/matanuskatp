@@ -294,7 +294,10 @@ export const scheduledImportDriverBehaviorFromWebBook = functionsV1.pubsub
           points = 0
         ] = row;
         
-        if (!eventType || eventType === 'UNKNOWN') continue;
+        if (!eventType || eventType === 'UNKNOWN') {
+          skipped++;
+          continue;
+        }
         
         // Generate a unique ID for the event
         const uniqueId = `event_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;

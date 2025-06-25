@@ -45,6 +45,7 @@ interface AppContextType {
 
   importTripsFromCSV: (trips: Omit<Trip, 'id' | 'costs' | 'status'>[]) => Promise<void>;
   importCostsFromCSV: (costs: Omit<CostEntry, 'id' | 'attachments'>[]) => Promise<void>;
+  importTripsFromWebhook: () => Promise<{imported: number, skipped: number}>;
   
   dieselRecords: DieselConsumptionRecord[];
   addDieselRecord: (record: Omit<DieselConsumptionRecord, 'id'>) => Promise<string>;
@@ -63,6 +64,7 @@ interface AppContextType {
   deleteDriverBehaviorEvent: (id: string) => Promise<void>;
   getDriverPerformance: (driverName: string) => any;
   getAllDriversPerformance: () => any[];
+  importDriverBehaviorEventsFromWebhook: () => Promise<{imported: number, skipped: number}>;
   
   actionItems: ActionItem[];
   addActionItem: (item: Omit<ActionItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => Promise<string>;
@@ -174,6 +176,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Placeholder implementations for other functions
   const placeholder = async () => { console.warn("Function not implemented"); };
   const placeholderString = async () => { console.warn("Function not implemented"); return ""; };
+  const placeholderObject = async () => { console.warn("Function not implemented"); return { imported: 0, skipped: 0 }; };
 
   const value = {
     trips,
@@ -196,6 +199,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateInvoicePayment: placeholder,
     importTripsFromCSV: placeholder,
     importCostsFromCSV: placeholder,
+    importTripsFromWebhook: placeholderObject,
     dieselRecords,
     addDieselRecord: placeholderString,
     updateDieselRecord: placeholder,
@@ -210,6 +214,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteDriverBehaviorEvent: placeholder,
     getDriverPerformance: () => ({}) as any,
     getAllDriversPerformance: () => [] as any[],
+    importDriverBehaviorEventsFromWebhook: placeholderObject,
     actionItems,
     addActionItem: placeholderString,
     updateActionItem: placeholder,

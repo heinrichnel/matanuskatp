@@ -54,7 +54,7 @@ exports.importTripsFromWebBook = functions.https.onRequest(async (req, res) => {
 });
 
 // Import Driver Behavior Events from Web Book (automatic sync)
-const DRIVER_BEHAVIOR_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbw5_oPDd7wVIEOxf9rY6wKqUN1aNFuVqGrPl83Z2YKygZiHftyUxU-_sV4Wu_vY1h1vSg/exec';
+const DRIVER_BEHAVIOR_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyCG4lCgvmwXhGBoClqGbK3VeOEEuz6m4Y4JeBEobYRkSh52wedzq5IxCO--DfmuHnOKA/exec';
 
 exports.importDriverEventsFromWebBook = functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
     try {
@@ -162,6 +162,76 @@ exports.importTripsWebhook = functions.https.onRequest(async (req, res) => {
             res.status(400).json({ error: 'Invalid or empty payload' });
             return;
         }
+        
+        const db = admin.firestore();
+        let imported = 0;
+        let skipped = 0;
+        
+        for (const trip of trips) {
+            const loadRef = trip.loadRef || trip.id;
+            if (!loadRef) {
+                skipped++;
+                continue;
+            }
+            
+            // Check for duplicate by loadRef
+            const existing = await db.collection('trips').where('loadRef', '==', loadRef).limit(1).get();
+            if (!existing.empty) {
+                skipped++;
+                continue;
+            }
+            
+            // Process the trip data
+            const processedTrip = {
+                id: trip.id || loadRef,
+                fleetNumber: trip.fleetNumber || "",
+                driverName: trip.driverName || "",
+                clientType: trip.clientType || "external",
+                clientName: trip.clientName || "",
+                loadRef: loadRef,
+                route: trip.route || "",
+                startDate: trip.shippedDate || new Date().toISOString(),
+                endDate: trip.deliveredDate || new Date().toISOString(),
+                status: "active",
+                baseRevenue: 0,
+                revenueCurrency: "ZAR",
+                costs: [],
+                additionalCosts: [],
+                followUpHistory: [],
+                paymentStatus: "unpaid",
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            };
+            
+            await db.collection('trips').doc(loadRef).set(processedTrip);
+            imported++;
+        }
+        
+        res.status(200).json({ imported, skipped });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Manual trigger for driver behavior events import
+exports.manualImportDriverEvents = functions.https.onRequest(async (req, res) => {
+    try {
+        const result = await exports.importDriverEventsFromWebBook.run();
+        res.status(200).json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Manual trigger for trips import
+exports.manualImportTrips = functions.https.onRequest(async (req, res) => {
+    try {
+        const fetch = (await import('node-fetch')).default;
+        const response = await fetch(WEBHOOK_URL);
+        if (!response.ok) throw new Error('Failed to fetch from Google Sheets Web App');
+        const trips = await response.json();
         
         const db = admin.firestore();
         let imported = 0;
