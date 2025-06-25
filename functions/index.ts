@@ -278,43 +278,38 @@ export const scheduledImportDriverBehaviorFromWebBook = functionsV1.pubsub
       const validEvents: any[] = [];
 
       for (const row of events) {
-        // Example: [fleetNumber, driverName, eventType, description, points, eventDate, eventTime, severity, location, actionTaken, status, resolved, date, reportedAt, reportedBy]
+        // Example: [reportedAt, description, driverName, eventDate, eventTime, eventType, fleetNumber, location, severity, status, points]
         const [
-          fleetNumber = "",
-          driverName = "",
-          eventType = "",
+          reportedAt = "",
           description = "",
-          points = 0,
+          driverName = "",
           eventDate = "",
           eventTime = "",
-          severity = "",
+          eventType = "",
+          fleetNumber = "",
           location = "",
-          actionTaken = "",
+          severity = "",
           status = "pending",
-          resolved = false,
-          date = "",
-          reportedAt = "",
-          reportedBy = ""
+          points = 0
         ] = row;
-        if (!eventType || !eventDate) continue;
+        
+        if (!eventType || eventType === 'UNKNOWN') continue;
+        
         const eventRef = db.collection("driverBehavior").doc();
         const newEvent = {
           id: eventRef.id,
-          fleetNumber,
-          driverName,
-          eventType,
-          description,
+          reportedAt: reportedAt ? new Date(reportedAt).toISOString() : new Date().toISOString(),
+          description: description || "",
+          driverName: driverName || "",
+          eventDate: eventDate || "",
+          eventTime: eventTime || "",
+          eventType: eventType || "",
+          fleetNumber: fleetNumber || "",
+          location: location || "",
+          severity: severity || "medium",
+          status: status || "pending",
           points: Number(points) || 0,
-          eventDate,
-          eventTime,
-          severity,
-          location,
-          actionTaken,
-          status,
-          resolved: Boolean(resolved),
-          date,
-          reportedAt,
-          reportedBy,
+          reportedBy: "WebBook Script",
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
         };
         validEvents.push({ ref: eventRef, data: newEvent });
@@ -471,3 +466,118 @@ export const upsertSystemCostRates = onCall({ enforceAppCheck: true }, async (re
   await ratesRef.set(newRates, { merge: true });
   return { id: docId };
 });
+
+// Function to handle driver behavior events from the web book
+export const importDriverBehaviorEventsFromWebhook = onCall(
+  { enforceAppCheck: true },
+  async (request) => {
+    try {
+      const db = admin.firestore();
+      let imported = 0;
+      let skipped = 0;
+      
+      // If data is provided directly in the request, use it
+      if (request.data && Array.isArray(request.data)) {
+        const events = request.data;
+        
+        for (const event of events) {
+          if (!event.id || event.eventType === 'UNKNOWN') {
+            skipped++;
+            continue;
+          }
+          
+          // Check for duplicate by event.id
+          const existing = await db
+            .collection('driverBehavior')
+            .where('id', '==', event.id)
+            .limit(1)
+            .get();
+            
+          if (!existing.empty) {
+            skipped++;
+            continue;
+          }
+          
+          // Add the event to Firestore
+          const eventRef = db.collection('driverBehavior').doc();
+          await eventRef.set({
+            ...event,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+          });
+          
+          imported++;
+        }
+        
+        return { imported, skipped };
+      }
+      
+      // If no data in request, fetch from web book URL
+      if (!WEB_BOOK_DRIVER_BEHAVIOR_URL) {
+        throw new HttpsError(
+          "failed-precondition",
+          "Driver behavior web book URL not configured"
+        );
+      }
+      
+      console.log(`Fetching driver behavior events from: ${WEB_BOOK_DRIVER_BEHAVIOR_URL}`);
+      const response = await fetch(WEB_BOOK_DRIVER_BEHAVIOR_URL, { method: "GET" });
+      
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`Failed to fetch driver behavior web book: ${response.status} ${response.statusText}`, { errorBody });
+        throw new HttpsError(
+          "internal",
+          `Failed to fetch driver behavior web book: ${response.statusText}`
+        );
+      }
+      
+      const events = await response.json();
+      
+      if (!Array.isArray(events)) {
+        console.error("Driver behavior web book response is not an array. Received:", events);
+        throw new HttpsError(
+          "internal",
+          "Driver behavior web book response is not an array"
+        );
+      }
+      
+      console.log(`Received ${events.length} driver behavior events from web book.`);
+      
+      for (const event of events) {
+        if (!event.id || event.eventType === 'UNKNOWN') {
+          skipped++;
+          continue;
+        }
+        
+        // Check for duplicate by event.id
+        const existing = await db
+          .collection('driverBehavior')
+          .where('id', '==', event.id)
+          .limit(1)
+          .get();
+          
+        if (!existing.empty) {
+          skipped++;
+          continue;
+        }
+        
+        // Add the event to Firestore
+        const eventRef = db.collection('driverBehavior').doc();
+        await eventRef.set({
+          ...event,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        
+        imported++;
+      }
+      
+      console.log(`Imported ${imported} driver behavior events, skipped ${skipped} duplicates.`);
+      return { imported, skipped };
+    } catch (error: any) {
+      console.error("Error importing driver behavior events:", error);
+      throw new HttpsError("internal", error.message);
+    }
+  }
+);
