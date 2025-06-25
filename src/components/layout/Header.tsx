@@ -15,7 +15,8 @@ import {
   Upload,
   Users,
   Bell,
-  UserRound
+  UserRound,
+  Calendar
 } from 'lucide-react';
 import Button from '../ui/Button';
 import DeploymentStatus from '../ui/DeploymentStatus';
@@ -44,6 +45,7 @@ const Header: FC<HeaderProps> = ({
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
     { id: 'active-trips', label: 'Active Trips', icon: Truck },
     { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle },
+    { id: 'trip-calendar', label: 'Trip Calendar', icon: Calendar },
     { id: 'flags', label: 'Flags & Investigations', icon: Flag },
     { id: 'reports', label: 'Reports & Exports', icon: BarChart3 },
     { id: 'invoice-aging', label: 'Invoice Aging', icon: Clock },
