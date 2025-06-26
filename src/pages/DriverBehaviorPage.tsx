@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { DriverBehaviorEvent } from '../types';
 import { useAppContext } from '../context/AppContext';
-import { useSyncContext } from '../context/SyncContext';
 import Button from '../components/ui/Button';
 import DriverPerformanceOverview from '../components/drivers/DriverPerformanceOverview';
 import DriverBehaviorEventForm from '../components/drivers/DriverBehaviorEventForm';
@@ -13,19 +12,20 @@ import { User, FileText, Plus, RefreshCw } from 'lucide-react';
 import SyncIndicator from '../components/ui/SyncIndicator';
 
 const DriverBehaviorPage: React.FC = () => {
+  const [isSyncing, setIsSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState('performance');
   const [showEventForm, setShowEventForm] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [showCARForm, setShowCARForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<DriverBehaviorEvent | null>(null);
   const { importDriverBehaviorEventsFromWebhook } = useAppContext();
-  
+
   // Handle initiating CAR from event
   const handleInitiateCAR = (event: DriverBehaviorEvent) => {
     setSelectedEvent(event);
     setShowCARForm(true);
   };
-  
+
   // Manual sync handler
   const handleSyncNow = async () => {
     try {
@@ -40,11 +40,10 @@ const DriverBehaviorPage: React.FC = () => {
 
   // Subscribe to driver behavior events when viewing details
   const handleViewEvent = (event: DriverBehaviorEvent) => {
-    subscribeToDriverBehavior(event.driverName);
     setSelectedEvent(event);
     setShowEventDetails(true);
   };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -75,7 +74,7 @@ const DriverBehaviorPage: React.FC = () => {
           </Button>
         </div>
       </div>
-      
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 w-[400px]">
           <TabsTrigger value="performance" className="flex items-center space-x-2">
@@ -87,9 +86,9 @@ const DriverBehaviorPage: React.FC = () => {
             <span>CAR Reports</span>
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="performance" className="mt-6">
-          <DriverPerformanceOverview 
+          <DriverPerformanceOverview
             onAddEvent={() => {
               setSelectedEvent(null);
               setShowEventForm(true);
@@ -102,12 +101,12 @@ const DriverBehaviorPage: React.FC = () => {
             onSyncNow={handleSyncNow}
           />
         </TabsContent>
-        
+
         <TabsContent value="car-reports" className="mt-6">
           <CARReportList />
         </TabsContent>
       </Tabs>
-      
+
       {/* Event Form Modal */}
       <DriverBehaviorEventForm
         isOpen={showEventForm}
@@ -118,7 +117,7 @@ const DriverBehaviorPage: React.FC = () => {
         event={selectedEvent ?? undefined}
         onInitiateCAR={handleInitiateCAR}
       />
-      
+
       {/* Event Details Modal */}
       {selectedEvent && (
         <DriverBehaviorEventDetails
@@ -138,7 +137,7 @@ const DriverBehaviorPage: React.FC = () => {
           }}
         />
       )}
-      
+
       {/* CAR Form Modal */}
       <CARReportForm
         isOpen={showCARForm}

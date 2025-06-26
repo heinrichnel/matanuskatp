@@ -23,7 +23,7 @@ export interface Trip {
   deletionRecord?: TripDeletionRecord;
   autoCompletedAt?: string;
   autoCompletedReason?: string;
-  
+
   // NEW: Enhanced Planned vs Actual Timestamps with Validation
   plannedArrivalDateTime?: string;
   plannedOffloadDateTime?: string;
@@ -38,10 +38,10 @@ export interface Trip {
   timelineValidatedBy?: string;     // Who validated the timeline
   timelineValidatedAt?: string;     // When timeline was validated
   delayReasons?: DelayReason[];
-  
+
   // NEW: Additional costs before invoicing
   additionalCosts: AdditionalCost[];
-  
+
   // NEW: Enhanced Invoice and payment tracking
   invoiceNumber?: string;
   invoiceDate?: string;
@@ -58,7 +58,7 @@ export interface Trip {
   followUpHistory: FollowUpRecord[];
   proofOfDelivery?: Attachment[];
   signedInvoice?: Attachment[];
-  
+
   // NEW: Load timeline tracking
   loadTimelineEvents?: LoadTimelineEvent[];
 
@@ -228,7 +228,7 @@ export interface MissedLoad {
   recordedBy: string;
   recordedAt: string;
   impact: 'low' | 'medium' | 'high'; // Business impact
-  
+
   // NEW: Resolution tracking (not payment)
   resolutionNotes?: string;
   resolvedAt?: string;
@@ -344,10 +344,10 @@ export interface CARReport {
   dateDue: string;
   clientReport: string;
   severity: 'high' | 'medium' | 'low';
-  
+
   // Problem identification
   problemIdentification: string;
-  
+
   // Primary cause analysis (fishbone)
   causeAnalysisPeople: string;
   causeAnalysisMaterials: string;
@@ -355,24 +355,24 @@ export interface CARReport {
   causeAnalysisMethods: string;
   causeAnalysisMetrics: string;
   causeAnalysisEnvironment: string;
-  
+
   // Root cause analysis
   rootCauseAnalysis: string;
-  
+
   // Actions
   correctiveActions: string;
   preventativeActionsImmediate: string;
   preventativeActionsLongTerm: string;
-  
+
   // Impact and comments
   financialImpact: string;
   generalComments: string;
-  
+
   // Status and tracking
   status: 'draft' | 'submitted' | 'in_progress' | 'completed';
   completedAt?: string;
   completedBy?: string;
-  
+
   // Metadata
   createdAt: string;
   updatedAt: string;
@@ -528,9 +528,9 @@ export const FLEET_NUMBERS = [
 export const RESPONSIBLE_PERSONS = [
   'Fleet Manager', 'Operations Manager', 'Safety Officer', 'Maintenance Supervisor',
   'Driver Supervisor', 'Quality Assurance Manager', 'Compliance Officer', 'HR Manager',
-  'Finance Manager', 'General Manager', 'Enock Mukonyerwa', 'Jonathan Bepete', 
-  'Lovemore Qochiwe', 'Peter Farai', 'Phillimon Kwarire', 'Taurayi Vherenaisi', 
-  'Adrian Moyo', 'Canaan Chipfurutse', 'Doctor Kondwani', 'Biggie Mugwa', 
+  'Finance Manager', 'General Manager', 'Enock Mukonyerwa', 'Jonathan Bepete',
+  'Lovemore Qochiwe', 'Peter Farai', 'Phillimon Kwarire', 'Taurayi Vherenaisi',
+  'Adrian Moyo', 'Canaan Chipfurutse', 'Doctor Kondwani', 'Biggie Mugwa',
   'Luckson Tanyanyiwa', 'Wellington Musumbu', 'Decide Murahwa'
 ];
 
@@ -713,6 +713,8 @@ export const TRIP_DELETION_REASONS = [
   'Merged with another trip record', 'Client contract cancellation', 'Regulatory compliance requirement',
   'Other (specify in comments)'
 ];
+
+export * from './audit.d';
 
 // NEW: Invoice Aging Thresholds
 export const AGING_THRESHOLDS = {

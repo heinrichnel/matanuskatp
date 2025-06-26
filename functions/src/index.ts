@@ -1,4 +1,3 @@
-import * as functions from "firebase-functions";
 import { onObjectFinalized } from "firebase-functions/v2/storage";
 import * as admin from "firebase-admin";
 
@@ -175,7 +174,9 @@ const endTrip = async (tripId: string, endData: any) => {
 
 // 5. New Webhook Cloud Functions
 
-export const telematicsDriverEventWebhook = functions.https.onRequest(async (req, res) => {
+import { onRequest } from "firebase-functions/v2/https";
+
+export const telematicsDriverEventWebhook = onRequest(async (req, res) => {
     if (req.method !== "POST") {
         res.status(405).send("Method Not Allowed");
         return;
@@ -212,7 +213,7 @@ export const telematicsDriverEventWebhook = functions.https.onRequest(async (req
     }
 });
 
-export const telematicsTripUpdateWebhook = functions.https.onRequest(async (req, res) => {
+export const telematicsTripUpdateWebhook = onRequest(async (req, res) => {
     if (req.method !== "POST") {
         res.status(405).send("Method Not Allowed");
         return;
@@ -255,7 +256,7 @@ export const telematicsTripUpdateWebhook = functions.https.onRequest(async (req,
 // EXISTING FUNCTIONS (Preserved)
 // ================================================================
 
-export const importTripsFromWebBook = functions.https.onRequest(async (req, res) => {
+export const importTripsFromWebBook = onRequest(async (req, res) => {
     if (req.method !== 'POST') {
         res.status(405).send('Method Not Allowed');
         return;
@@ -263,7 +264,7 @@ export const importTripsFromWebBook = functions.https.onRequest(async (req, res)
     try {
         const { trips } = req.body;
         if (!trips || !Array.isArray(trips)) {
-            res.status(400).send('Invalid payload');
+            res.status(400).json({ error: 'Invalid payload' });
             return;
         }
         const batch = db.batch();
@@ -292,14 +293,14 @@ export const importTripsFromWebBook = functions.https.onRequest(async (req, res)
             await batch.commit();
         }
         console.log(`[importTripsFromWebBook] Import finished. Imported: ${imported}, Skipped: ${skipped}`);
-        res.status(200).send({ imported, skipped, message: "Import process finished." });
+        res.status(200).json({ imported, skipped, message: "Import process finished." });
     } catch (error) {
         console.error("Error importing trips:", error);
         res.status(500).send('Internal Server Error');
     }
 });
 
-export const importDriverBehaviorWebhook = functions.https.onRequest(async (req, res) => {
+export const importDriverBehaviorWebhook = onRequest(async (req, res) => {
     if (req.method !== 'POST') {
         res.status(405).send('Method Not Allowed');
         return;
@@ -307,7 +308,7 @@ export const importDriverBehaviorWebhook = functions.https.onRequest(async (req,
     try {
         const { events } = req.body;
         if (!events || !Array.isArray(events)) {
-            res.status(400).send('Invalid payload');
+            res.status(400).json({ error: 'Invalid payload' });
             return;
         }
         const batch = db.batch();
@@ -326,7 +327,7 @@ export const importDriverBehaviorWebhook = functions.https.onRequest(async (req,
             }
         }
         await batch.commit();
-        res.status(200).send({ imported, skipped });
+        res.status(200).json({ imported, skipped });
     } catch (error) {
         console.error("Error importing driver behavior events:", error);
         res.status(500).send('Internal Server Error');

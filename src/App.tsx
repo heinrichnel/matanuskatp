@@ -29,7 +29,7 @@ import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "./firebase";
 
 const AppContent: React.FC = () => {
-  const { 
+  const {
     trips, setTrips, missedLoads, addMissedLoad, updateMissedLoad, deleteMissedLoad,
     updateTrip, addTrip, deleteTrip, completeTrip
   } = useAppContext();
@@ -38,7 +38,7 @@ const AppContent: React.FC = () => {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [showTripForm, setShowTripForm] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); - This state was unused
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, "trips"), (snapshot) => {
@@ -53,7 +53,7 @@ const AppContent: React.FC = () => {
 
   const handleAddTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       const tripId = await addTrip(tripData);
       setShowTripForm(false);
       setEditingTrip(undefined);
@@ -62,14 +62,14 @@ const AppContent: React.FC = () => {
       console.error("Error adding trip:", error);
       alert("Error creating trip. Please try again.");
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
   const handleUpdateTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     if (editingTrip) {
       try {
-        setIsLoading(true);
+        // setIsLoading(true);
         const updatedTrip: Trip = {
           ...editingTrip,
           ...tripData,
@@ -88,7 +88,7 @@ const AppContent: React.FC = () => {
         console.error("Error updating trip:", error);
         alert("Error updating trip. Please try again.");
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     }
   };
@@ -109,13 +109,13 @@ const AppContent: React.FC = () => {
       case "dashboard":
         return <Dashboard trips={trips} />;
       case "active-trips":
-        return <ActiveTrips 
-                trips={trips.filter(t => t.status === 'active')} 
-                onView={handleShowTripDetails} 
-                onEdit={handleEditTrip} 
-                onDelete={deleteTrip} 
-                onCompleteTrip={completeTrip} 
-               />;
+        return <ActiveTrips
+          trips={trips.filter(t => t.status === 'active')}
+          onView={handleShowTripDetails}
+          onEdit={handleEditTrip}
+          onDelete={deleteTrip}
+          onCompleteTrip={completeTrip}
+        />;
       case "completed-trips":
         return <CompletedTrips trips={trips.filter(t => t.status === 'completed')} onView={handleShowTripDetails} />;
       case "flags":
@@ -143,13 +143,13 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-      <Header 
-        currentView={currentView} 
-        onNavigate={setCurrentView} 
+      <Header
+        currentView={currentView}
+        onNavigate={setCurrentView}
         onNewTrip={() => {
           setEditingTrip(undefined);
           setShowTripForm(true);
-        }} 
+        }}
       />
       <main className="ml-64 p-4">
         <div className="flex justify-between items-center mb-4">

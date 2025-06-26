@@ -1,31 +1,31 @@
 import React from 'react';
 import { useSyncContext } from '../../context/SyncContext';
-import { RefreshCw, Check, Clock, WifiOff, Wifi } from 'lucide-react';
+import { RefreshCw, WifiOff } from 'lucide-react';
 
 interface SyncIndicatorProps {
   className?: string;
   showText?: boolean;
 }
 
-const SyncIndicator: React.FC<SyncIndicatorProps> = ({ 
+const SyncIndicator: React.FC<SyncIndicatorProps> = ({
   className = '',
   showText = true
 }) => {
   const { syncStatus, isOnline, lastSynced, pendingChangesCount } = useSyncContext();
-  
+
   // Format time since last sync
   const getTimeSinceSync = () => {
     if (!lastSynced) return 'Never';
-    
+
     const seconds = Math.floor((new Date().getTime() - lastSynced.getTime()) / 1000);
-    
+
     if (seconds < 5) return 'Just now';
     if (seconds < 60) return `${seconds}s ago`;
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
     return `${Math.floor(seconds / 86400)}d ago`;
   };
-  
+
   return (
     <div className={`flex items-center space-x-2 text-xs ${className}`}>
       {syncStatus === 'syncing' ? (
@@ -50,11 +50,11 @@ const SyncIndicator: React.FC<SyncIndicatorProps> = ({
           ) : (
             <div className="w-3 h-3 rounded-full bg-green-500" />
           )}
-          
+
           {showText && (
             <span className={syncStatus === 'error' ? 'text-red-500' : 'text-gray-500'}>
-              {syncStatus === 'error' 
-                ? 'Sync error' 
+              {syncStatus === 'error'
+                ? 'Sync error'
                 : `Synced ${getTimeSinceSync()}`}
             </span>
           )}

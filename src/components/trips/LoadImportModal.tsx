@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { Upload, X, Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { Upload, X, WifiOff, RefreshCw } from 'lucide-react';
 import { useSyncContext } from '../../context/SyncContext';
 
 interface LoadImportModalProps {
@@ -89,7 +89,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
       setSuccess(`Successfully imported ${trips.length} trips from CSV file.${!isOnline ? '\n\nData will be synced when your connection is restored.' : ''}`);
       setCsvFile(null);
       setPreviewData([]);
-      
+
       // Close modal after a short delay
       setTimeout(() => {
         onClose();
@@ -110,7 +110,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
     try {
       const result = await importTripsFromWebhook();
       setSuccess(`Webhook import completed!\n\nImported: ${result.imported} trips\nSkipped: ${result.skipped} trips${!isOnline ? '\n\nData will be synced when your connection is restored.' : ''}`);
-      
+
       // Close modal after a short delay if successful
       if (result.imported > 0) {
         setTimeout(() => {

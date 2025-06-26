@@ -15,8 +15,8 @@ import {
   updateMissedLoadInFirebase,
   deleteMissedLoadFromFirebase,
   addDieselToFirebase,
-  updateDieselInFirebase,
-  deleteDieselFromFirebase,
+  // updateDieselInFirebase, // Unused
+  // deleteDieselFromFirebase, // Unused
   listenToAuditLogs,
   addAuditLogToFirebase
 } from '../firebase';
@@ -30,43 +30,43 @@ interface AppContextType {
   updateTrip: (trip: Trip) => Promise<void>;
   deleteTrip: (id: string) => Promise<void>;
   getTrip: (id: string) => Trip | undefined;
-  
+
   addCostEntry: (costEntry: Omit<CostEntry, 'id' | 'attachments'>, files?: FileList) => Promise<string>;
   updateCostEntry: (costEntry: CostEntry) => Promise<void>;
   deleteCostEntry: (id: string) => Promise<void>;
-  
+
   addAttachment: (attachment: Omit<Attachment, 'id'>) => Promise<string>;
   deleteAttachment: (id: string) => Promise<void>;
-  
+
   addAdditionalCost: (tripId: string, cost: Omit<AdditionalCost, 'id'>, files?: FileList) => Promise<string>;
   removeAdditionalCost: (tripId: string, costId: string) => Promise<void>;
-  
+
   addDelayReason: (tripId: string, delay: Omit<DelayReason, 'id'>) => Promise<string>;
-  
+
   missedLoads: MissedLoad[];
   addMissedLoad: (missedLoad: Omit<MissedLoad, 'id'>) => Promise<string>;
   updateMissedLoad: (missedLoad: MissedLoad) => Promise<void>;
   deleteMissedLoad: (id: string) => Promise<void>;
-  
+
   updateInvoicePayment: (tripId: string, paymentData: any) => Promise<void>;
 
   importTripsFromCSV: (trips: Omit<Trip, 'id' | 'costs' | 'status'>[]) => Promise<void>;
   triggerTripImport: () => Promise<void>;
   importCostsFromCSV: (costs: Omit<CostEntry, 'id' | 'attachments'>[]) => Promise<void>;
-  importTripsFromWebhook: () => Promise<{imported: number, skipped: number}>;
-  importDriverBehaviorEventsFromWebhook: () => Promise<{imported: number, skipped: number}>;
-  
+  importTripsFromWebhook: () => Promise<{ imported: number, skipped: number }>;
+  importDriverBehaviorEventsFromWebhook: () => Promise<{ imported: number, skipped: number }>;
+
   dieselRecords: DieselConsumptionRecord[];
   addDieselRecord: (record: Omit<DieselConsumptionRecord, 'id'>) => Promise<string>;
   updateDieselRecord: (record: DieselConsumptionRecord) => Promise<void>;
   deleteDieselRecord: (id: string) => Promise<void>;
   importDieselFromCSV: (records: Omit<DieselConsumptionRecord, 'id'>[]) => Promise<void>;
-  
+
   updateDieselDebrief: (recordId: string, debriefData: any) => Promise<void>;
-  
+
   allocateDieselToTrip: (dieselId: string, tripId: string) => Promise<void>;
   removeDieselFromTrip: (dieselId: string) => Promise<void>;
-  
+
   driverBehaviorEvents: DriverBehaviorEvent[];
   addDriverBehaviorEvent: (event: Omit<DriverBehaviorEvent, 'id'>, files?: FileList) => Promise<string>;
   updateDriverBehaviorEvent: (event: DriverBehaviorEvent) => Promise<void>;
@@ -74,18 +74,18 @@ interface AppContextType {
   getDriverPerformance: (driverName: string) => any;
   getAllDriversPerformance: () => any[];
   triggerDriverBehaviorImport: () => Promise<void>;
-  
+
   actionItems: ActionItem[];
   addActionItem: (item: Omit<ActionItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => Promise<string>;
   updateActionItem: (item: ActionItem) => Promise<void>;
   deleteActionItem: (id: string) => Promise<void>;
   addActionItemComment: (itemId: string, comment: string) => Promise<void>;
-  
+
   carReports: CARReport[];
   addCARReport: (report: Omit<CARReport, 'id' | 'createdAt' | 'updatedAt'>, files?: FileList) => Promise<string>;
   updateCARReport: (report: CARReport, files?: FileList) => Promise<void>;
   deleteCARReport: (id: string) => Promise<void>;
-  
+
   connectionStatus: 'connected' | 'disconnected' | 'reconnecting';
 
   bulkDeleteTrips: (tripIds: string[]) => Promise<void>;
@@ -108,7 +108,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [carReports, setCARReports] = useState<CARReport[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogType[]>([]);
   const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected');
-  
+
   useEffect(() => {
     const unsubscribeTrips = listenToTrips(setTrips, (error) => console.error(error));
     const unsubscribeMissedLoads = listenToMissedLoads(setMissedLoads, (error) => console.error(error));
@@ -187,8 +187,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const completeTrip = async (tripId: string): Promise<void> => {
     const trip = trips.find(t => t.id === tripId);
     if (trip) {
-      const updatedTrip = { 
-        ...trip, 
+      const updatedTrip = {
+        ...trip,
         status: 'completed' as 'completed',
         completedAt: new Date().toISOString(),
         completedBy: 'Current User' // In a real app, use the logged-in user
@@ -209,7 +209,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
-    
+
     // If linked to a trip, create a cost entry
     if (newRecord.tripId) {
       const trip = trips.find(t => t.id === newRecord.tripId);
@@ -227,17 +227,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           attachments: [],
           isFlagged: false
         };
-        
+
         // Add cost entry to trip
         const updatedTrip = {
           ...trip,
           costs: [...trip.costs, costEntry]
         };
-        
+
         await updateTripInFirebase(trip.id, updatedTrip);
       }
     }
-    
+
     return await addDieselToFirebase(newRecord as DieselConsumptionRecord);
   };
 
@@ -274,7 +274,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const value = {
-        trips,
+    trips,
     addTrip,
     updateTrip,
     deleteTrip,

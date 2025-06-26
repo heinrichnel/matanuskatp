@@ -28,20 +28,20 @@ export async function fetchTripsFromWebhook(): Promise<Omit<Trip, 'id' | 'costs'
 }
 
 // Fetch driver behavior events from webhook
-export async function fetchDriverBehaviorEventsFromWebhook(): Promise<{imported: number, skipped: number}> {
+export async function fetchDriverBehaviorEventsFromWebhook(): Promise<{ imported: number, skipped: number }> {
   try {
     // Use the Cloud Function URL for driver behavior events
     const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/manualImportDriverEvents';
-    
+
     const response = await fetch(WEBHOOK_URL);
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Failed to fetch driver behavior events: ${response.status} ${response.statusText} - ${errorText}`);
     }
-    
+
     const result = await response.json();
     console.log('Driver behavior events import result:', result);
-    
+
     return {
       imported: result.imported || 0,
       skipped: result.skipped || 0
@@ -77,20 +77,20 @@ export function processDriverBehaviorEvents(rawEvents: any[]): DriverBehaviorEve
 }
 
 // Import trips from webhook with error handling and retry logic
-export async function importTripsFromWebhook(): Promise<{imported: number, skipped: number}> {
+export async function importTripsFromWebhook(): Promise<{ imported: number, skipped: number }> {
   try {
     // Use the Cloud Function URL for trips
     const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/manualImportTrips';
-    
+
     const response = await retryWebhookCall(() => fetch(WEBHOOK_URL));
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Failed to fetch trips: ${response.status} ${response.statusText} - ${errorText}`);
     }
-    
+
     const result = await response.json();
     console.log('Trips import result:', result);
-    
+
     return {
       imported: result.imported || 0,
       skipped: result.skipped || 0
@@ -102,13 +102,13 @@ export async function importTripsFromWebhook(): Promise<{imported: number, skipp
 }
 
 // Function to manually trigger driver behavior events import
-export async function importDriverBehaviorEventsFromWebhook(): Promise<{imported: number, skipped: number}> {
+export async function importDriverBehaviorEventsFromWebhook(): Promise<{ imported: number, skipped: number }> {
   try {
     // Use the Cloud Function URL for manual driver behavior events import
     const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook';
-    
+
     // Make a POST request with empty body to trigger the import
-    const response = await retryWebhookCall(() => 
+    const response = await retryWebhookCall(() =>
       fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
@@ -117,15 +117,15 @@ export async function importDriverBehaviorEventsFromWebhook(): Promise<{imported
         body: JSON.stringify([]) // Empty array to trigger the function to fetch from the web book
       })
     );
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Failed to import driver behavior events: ${response.status} ${response.statusText} - ${errorText}`);
     }
-    
+
     const result = await response.json();
     console.log('Manual driver behavior events import result:', result);
-    
+
     return {
       imported: result.imported || 0,
       skipped: result.skipped || 0
@@ -137,20 +137,20 @@ export async function importDriverBehaviorEventsFromWebhook(): Promise<{imported
 }
 
 // Function with retry logic for webhook calls
-export async function retryWebhookCall<T>(
+export async function retryWebhookCall(
   callFn: () => Promise<Response>,
   maxRetries: number = 3,
   delayMs: number = 1000
 ): Promise<Response> {
   let lastError: Error | null = null;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await callFn();
     } catch (error: any) {
       lastError = error;
       console.warn(`Webhook call failed (attempt ${attempt}/${maxRetries}):`, error.message);
-      
+
       if (attempt < maxRetries) {
         // Wait with exponential backoff before retrying
         const backoffDelay = delayMs * Math.pow(2, attempt - 1);
@@ -159,6 +159,6 @@ export async function retryWebhookCall<T>(
       }
     }
   }
-  
+
   throw lastError || new Error('All webhook call attempts failed');
 }
