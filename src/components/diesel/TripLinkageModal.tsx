@@ -1,15 +1,8 @@
-// ─── React ───────────────────────────────────────────────────────
 import React, { useState, useEffect } from 'react';
-
-// ─── Context ─────────────────────────────────────────────────────
 import { useAppContext } from '../../context/AppContext';
-
-// ─── UI Components ───────────────────────────────────────────────
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Select } from '../ui/FormElements';
-
-// ─── Icons ───────────────────────────────────────────────────────
 import {
   Link,
   X,
@@ -19,10 +12,7 @@ import {
   Truck,
   Calendar
 } from 'lucide-react';
-
-// ─── Utilities ───────────────────────────────────────────────────
 import { formatCurrency, formatDate } from '../../utils/helpers';
-
 
 interface TripLinkageModalProps {
   isOpen: boolean;

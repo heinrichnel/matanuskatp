@@ -16,7 +16,9 @@ import {
   CheckCircle,
   Link,
   Search,
-  RefreshCw
+  RefreshCw,
+  Trash2,
+  Edit
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import SyncIndicator from '../ui/SyncIndicator';
@@ -28,7 +30,7 @@ import ProbeVerificationModal from './ProbeVerificationModal';
 import TripLinkageModal from './TripLinkageModal';
 
 const DieselDashboard: React.FC = () => {
-  const { dieselRecords = [], trips = [] } = useAppContext();
+  const { dieselRecords = [], trips = [], deleteDieselRecord, updateDieselRecord } = useAppContext();
   const { subscribeToDieselRecords } = useSyncContext();
   
   const [showManualEntryModal, setShowManualEntryModal] = useState(false);
@@ -37,16 +39,18 @@ const DieselDashboard: React.FC = () => {
   const [showDebriefModal, setShowDebriefModal] = useState(false);
   const [showProbeModal, setShowProbeModal] = useState(false);
   const [showLinkageModal, setShowLinkageModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   
   const [selectedDieselId, setSelectedDieselId] = useState<string>('');
   const [filterFleet, setFilterFleet] = useState<string>('');
   const [filterDriver, setFilterDriver] = useState<string>('');
-  const [filterDateRange, setFilterDateRange] = useState<{start: string, end: string}>({start: '', end: ''});
+  const [filterDateRange, setFilterDateRange] = useState({ start: '', end: '' });
   const [filterFuelStation, setFilterFuelStation] = useState<string>('');
   const [filterType, setFilterType] = useState<string>('all'); // 'all', 'horse', 'reefer'
   
   const [dieselNorms, setDieselNorms] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   
   // Subscribe to diesel records for the selected fleet
   useEffect(() => {
@@ -134,6 +138,12 @@ const DieselDashboard: React.FC = () => {
     setSelectedDieselId(recordId);
     setShowLinkageModal(true);
   };
+
+  // Handle opening edit modal
+  const handleOpenEditModal = (recordId: string) => {
+    setSelectedDieselId(recordId);
+    setShowEditModal(true);
+  };
   
   // Handle updating diesel norms
   const handleUpdateNorms = (norms: any[]) => {
@@ -190,6 +200,22 @@ const DieselDashboard: React.FC = () => {
       alert('Error exporting diesel records. Please try again.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Delete diesel record
+  const handleDeleteDieselRecord = async (id: string) => {
+    if (confirm('Are you sure you want to delete this diesel record? This action cannot be undone.')) {
+      try {
+        setIsDeleting(id);
+        await deleteDieselRecord(id);
+        alert('Diesel record deleted successfully');
+      } catch (error) {
+        console.error('Error deleting diesel record:', error);
+        alert('Error deleting diesel record. Please try again.');
+      } finally {
+        setIsDeleting(null);
+      }
     }
   };
   
@@ -673,6 +699,26 @@ const DieselDashboard: React.FC = () => {
                             <Button
                               size="xs"
                               variant="outline"
+                              icon={<Edit className="w-3 h-3" />}
+                              onClick={() => handleOpenEditModal(record.id)}
+                            >
+                              Edit
+                            </Button>
+
+                            <Button
+                              size="xs"
+                              variant="danger"
+                              icon={<Trash2 className="w-3 h-3" />}
+                              onClick={() => handleDeleteDieselRecord(record.id)}
+                              isLoading={isDeleting === record.id}
+                              disabled={isDeleting !== null}
+                            >
+                              Delete
+                            </Button>
+                            
+                            <Button
+                              size="xs"
+                              variant="outline"
                               icon={<Search className="w-3 h-3" />}
                             >
                               View
@@ -729,6 +775,8 @@ const DieselDashboard: React.FC = () => {
           dieselRecordId={selectedDieselId}
         />
       )}
+
+      {/* Edit Modal would go here - we'll implement it in the next component */}
     </div>
   );
 };
