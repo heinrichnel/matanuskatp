@@ -4,14 +4,15 @@ import React, { useState } from 'react';
 import { Trip } from '../../types';
 
 // ─── UI Components ───────────────────────────────────────────────
-import { Select } from '../ui/FormElements';
+import { Select, Input } from '../ui/FormElements';
 import Button from '../ui/Button';
 import Card, { CardContent, CardHeader } from '../ui/Card';
-import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle } from 'lucide-react';
-import { formatCurrency } from '../../utils/helpers';
+import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign } from 'lucide-react';
+import { formatCurrency, formatDate } from '../../utils/helpers';
 import LoadImportModal from './LoadImportModal';
 import TripStatusUpdateModal from './TripStatusUpdateModal';
 import { useAppContext } from '../../context/AppContext';
+import SyncIndicator from '../ui/SyncIndicator';
 
 interface ActiveTripsProps {
   trips: Trip[];
@@ -82,27 +83,27 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Active Trips</h2>
-        <Button variant="primary" size="md" icon={<Upload className="w-5 h-5" />} onClick={openImportModal}>
-          <span className="sr-only">Import Loads</span>
-        </Button>
-      </div>
-      {/* Info Banner */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 mb-6">
-        <CheckCircle className="w-6 h-6 text-green-500" />
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
         <div>
-          <div className="font-semibold text-green-800">
-            All trips imported via CSV, webhook, or added manually will appear here as active trips. You can view, edit, or delete any trip.
+          <h2 className="text-2xl font-bold text-gray-900">Active Trips</h2>
+          <div className="flex items-center mt-1">
+            <p className="text-gray-600 mr-3">Manage ongoing trips and track their status</p>
+            <SyncIndicator />
           </div>
         </div>
+        <div className="flex space-x-2">
+          <Button variant="outline" size="md" icon={<Upload className="w-5 h-5" />} onClick={openImportModal}>
+            Import Trips
+          </Button>
+        </div>
       </div>
+
       {/* Filters Section */}
       <Card>
         <CardHeader title="Filter Active Trips" />
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Select
               label="Fleet"
               value={filterFleet}
@@ -124,58 +125,117 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
           </div>
           <div className="mt-4 flex justify-end">
             <Button size="sm" variant="outline" onClick={clearFilters}>
-              <span className="sr-only">Clear Filters</span>
+              Clear Filters
             </Button>
           </div>
         </CardContent>
       </Card>
+
       {/* Trip Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTrips.map(trip => (
-          <Card key={trip.id}>
-            <CardHeader
-              title={<span className="flex items-center gap-2"><Truck className="w-5 h-5 text-blue-500" />Fleet {trip.fleetNumber}</span>}
-              subtitle={<span className="text-xs text-gray-500">{trip.route}</span>}
-              action={
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={() => onView(trip)}>
-                    <span className="sr-only">View</span>
-                  </Button>
-                  <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => onEdit(trip)}>
-                    <span className="sr-only">Edit</span>
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="danger" 
-                    icon={<Trash2 className="w-4 h-4" />} 
-                    onClick={() => handleDelete(trip.id)}
-                    isLoading={isDeleting === trip.id}
-                    disabled={isDeleting !== null}
-                  >
-                    <span className="sr-only">Delete</span>
-                  </Button>
+      {filteredTrips.length === 0 ? (
+        <div className="text-center py-12 bg-white rounded-lg shadow">
+          <Truck className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-lg font-medium text-gray-900">No active trips found</h3>
+          <p className="mt-1 text-gray-500">
+            {filterFleet || filterDriver || filterClient ? 
+              'No trips match your current filter criteria.' : 
+              'Start by adding a new trip or importing trips from your system.'}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredTrips.map(trip => (
+            <Card key={trip.id} className="hover:shadow-md transition-shadow">
+              <CardHeader
+                title={
+                  <div className="flex items-center gap-2">
+                    <Truck className="w-5 h-5 text-blue-500" />
+                    <span>Fleet {trip.fleetNumber}</span>
+                  </div>
+                }
+                subtitle={<span className="text-xs text-gray-500">{trip.route}</span>}
+              />
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-start space-x-2">
+                      <User className="w-4 h-4 text-gray-400 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-500">Driver</p>
+                        <p className="font-medium">{trip.driverName}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2">
+                      <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-500">Client</p>
+                        <p className="font-medium">{trip.clientName}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2">
+                      <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-500">Dates</p>
+                        <p className="font-medium text-sm">{formatDate(trip.startDate)} - {formatDate(trip.endDate)}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2">
+                      <DollarSign className="w-4 h-4 text-gray-400 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-500">Revenue</p>
+                        <p className="font-medium text-green-600">{formatCurrency(trip.baseRevenue, trip.revenueCurrency)}</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Flag indicator */}
+                  {trip.costs && trip.costs.some(c => c.isFlagged) && (
+                    <div className="flex items-center text-amber-600 text-sm">
+                      <AlertTriangle className="w-4 h-4 mr-1" />
+                      <span>
+                        {trip.costs.filter(c => c.isFlagged).length} flagged item{trip.costs.filter(c => c.isFlagged).length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex flex-wrap gap-2 pt-2 border-t">
+                    <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={() => onView(trip)}>
+                      View
+                    </Button>
+                    <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => onEdit(trip)}>
+                      Edit
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="danger" 
+                      icon={<Trash2 className="w-4 h-4" />} 
+                      onClick={() => handleDelete(trip.id)}
+                      isLoading={isDeleting === trip.id}
+                      disabled={isDeleting !== null}
+                    >
+                      Delete
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="success" 
+                      icon={<CheckCircle className="w-4 h-4" />} 
+                      onClick={() => onCompleteTrip(trip.id)}
+                      disabled={trip.costs && trip.costs.some(c => c.isFlagged && c.investigationStatus !== 'resolved')}
+                      title={trip.costs && trip.costs.some(c => c.isFlagged && c.investigationStatus !== 'resolved') ? 
+                        'Cannot complete: Unresolved flags' : 'Mark as completed'}
+                    >
+                      Complete
+                    </Button>
+                  </div>
                 </div>
-              }
-            />
-            <CardContent>
-              <div className="flex flex-col gap-2">
-                <div className="text-lg font-bold text-gray-900">{trip.driverName}</div>
-                <div className="text-sm text-gray-500">Client: {trip.clientName}</div>
-                <div className="text-sm text-gray-500">Start: {trip.startDate} | End: {trip.endDate}</div>
-                <div className="text-sm text-gray-500">Revenue: {formatCurrency(trip.baseRevenue, trip.revenueCurrency)}</div>
-                <div className="flex gap-2 mt-2">
-                  <Button size="xs" variant="success" icon={<CheckCircle className="w-4 h-4" />} onClick={() => onCompleteTrip(trip.id)}>
-                    <span className="sr-only">Complete</span>
-                  </Button>
-                  <Button size="xs" variant="outline" icon={<AlertTriangle className="w-4 h-4" />} onClick={() => setStatusUpdateTrip(trip)}>
-                    <span className="sr-only">Update Status</span>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <LoadImportModal isOpen={isImportModalOpen} onClose={closeImportModal} />
       {/* Status Update Modal */}
