@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Trip } from '../../types';
 
 // ─── UI Components ───────────────────────────────────────────────
-import { Select, Input } from '../ui/FormElements';
+import { Select } from '../ui/FormElements';
 import Button from '../ui/Button';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign } from 'lucide-react';
@@ -137,8 +137,8 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
           <Truck className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-lg font-medium text-gray-900">No active trips found</h3>
           <p className="mt-1 text-gray-500">
-            {filterFleet || filterDriver || filterClient ? 
-              'No trips match your current filter criteria.' : 
+            {filterFleet || filterDriver || filterClient ?
+              'No trips match your current filter criteria.' :
               'Start by adding a new trip or importing trips from your system.'}
           </p>
         </div>
@@ -158,7 +158,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                       Active
                     </span>
                   </div>
-                  
+
                   {/* Trip Details */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="flex items-start space-x-2">
@@ -168,7 +168,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                         <p className="font-medium">{trip.driverName}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start space-x-2">
                       <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
                       <div>
@@ -176,7 +176,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                         <p className="font-medium">{trip.route}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start space-x-2">
                       <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
                       <div>
@@ -184,7 +184,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                         <p className="font-medium">{trip.clientName}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-start space-x-2">
                       <DollarSign className="w-4 h-4 text-gray-400 mt-0.5" />
                       <div>
@@ -193,7 +193,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start space-x-2">
                     <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
                     <div>
@@ -201,7 +201,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                       <p className="font-medium">{formatDate(trip.startDate)} - {formatDate(trip.endDate)}</p>
                     </div>
                   </div>
-                  
+
                   {/* Flag indicator */}
                   {trip.costs && trip.costs.some(c => c.isFlagged) && (
                     <div className="flex items-center text-amber-600 text-sm">
@@ -211,7 +211,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                       </span>
                     </div>
                   )}
-                  
+
                   {/* Actions */}
                   <div className="flex flex-wrap gap-2 pt-2 border-t">
                     <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={() => onView(trip)}>
@@ -220,23 +220,23 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                     <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => onEdit(trip)}>
                       Edit
                     </Button>
-                    <Button 
-                      size="sm" 
-                      variant="danger" 
-                      icon={<Trash2 className="w-4 h-4" />} 
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      icon={<Trash2 className="w-4 h-4" />}
                       onClick={() => handleDelete(trip.id)}
                       isLoading={isDeleting === trip.id}
                       disabled={isDeleting !== null}
                     >
                       Delete
                     </Button>
-                    <Button 
-                      size="sm" 
-                      variant="success" 
-                      icon={<CheckCircle className="w-4 h-4" />} 
+                    <Button
+                      size="sm"
+                      variant="success"
+                      icon={<CheckCircle className="w-4 h-4" />}
                       onClick={() => onCompleteTrip(trip.id)}
                       disabled={trip.costs && trip.costs.some(c => c.isFlagged && c.investigationStatus !== 'resolved')}
-                      title={trip.costs && trip.costs.some(c => c.isFlagged && c.investigationStatus !== 'resolved') ? 
+                      title={trip.costs && trip.costs.some(c => c.isFlagged && c.investigationStatus !== 'resolved') ?
                         'Cannot complete: Unresolved flags' : 'Mark as completed'}
                     >
                       Complete
