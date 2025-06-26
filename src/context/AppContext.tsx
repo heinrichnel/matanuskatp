@@ -12,7 +12,10 @@ import {
   deleteTripFromFirebase,
   addMissedLoadToFirebase,
   updateMissedLoadInFirebase,
-  deleteMissedLoadFromFirebase
+  deleteMissedLoadFromFirebase,
+  addDieselToFirebase,
+  updateDieselInFirebase,
+  deleteDieselFromFirebase
 } from '../firebase';
 import { generateTripId } from '../utils/helpers';
 import { v4 as uuidv4 } from 'uuid';
@@ -164,6 +167,206 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // Diesel record management functions
+  const addDieselRecord = async (record: Omit<DieselConsumptionRecord, 'id'>): Promise<string> => {
+    const newRecord = { 
+      ...record, 
+      id: `diesel-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // If linked to a trip, create a cost entry
+    if (newRecord.tripId) {
+      const trip = trips.find(t => t.id === newRecord.tripId);
+      if (trip) {
+        const costEntry: CostEntry = {
+          id: `cost-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          tripId: trip.id,
+          category: 'Diesel',
+          subCategory: `${newRecord.fuelStation} - ${newRecord.fleetNumber}`,
+          amount: newRecord.totalCost,
+          currency: newRecord.currency || trip.revenueCurrency,
+          referenceNumber: `DIESEL-${newRecord.id}`,
+          date: newRecord.date,
+          notes: `Diesel: ${newRecord.litresFilled} liters at ${newRecord.fuelStation}`,
+          attachments: [],
+          isFlagged: false
+        };
+        
+        // Add cost entry to trip
+        const updatedTrip = {
+          ...trip,
+          costs: [...trip.costs, costEntry]
+        };
+        
+        await updateTripInFirebase(trip.id, updatedTrip);
+      }
+    }
+    
+    return await addDieselToFirebase(newRecord as DieselConsumptionRecord);
+  };
+
+  const updateDieselRecord = async (record: DieselConsumptionRecord): Promise<void> => {
+    // Update the diesel record
+    await updateDieselInFirebase(record.id, record);
+    
+    // If linked to a trip, update the cost entry
+    if (record.tripId) {
+      const trip = trips.find(t => t.id === record.tripId);
+      if (trip) {
+        // Find the cost entry for this diesel record
+        const costIndex = trip.costs.findIndex(c => c.referenceNumber === `DIESEL-${record.id}`);
+        
+        if (costIndex >= 0) {
+          // Update the existing cost entry
+          const updatedCosts = [...trip.costs];
+          updatedCosts[costIndex] = {
+            ...updatedCosts[costIndex],
+            amount: record.totalCost,
+            date: record.date,
+            notes: `Diesel: ${record.litresFilled} liters at ${record.fuelStation}`,
+            updatedAt: new Date().toISOString()
+          };
+          
+          const updatedTrip = {
+            ...trip,
+            costs: updatedCosts
+          };
+          
+          await updateTripInFirebase(trip.id, updatedTrip);
+        } else {
+          // Create a new cost entry
+          const costEntry: CostEntry = {
+            id: `cost-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            tripId: trip.id,
+            category: 'Diesel',
+            subCategory: `${record.fuelStation} - ${record.fleetNumber}`,
+            amount: record.totalCost,
+            currency: record.currency || trip.revenueCurrency,
+            referenceNumber: `DIESEL-${record.id}`,
+            date: record.date,
+            notes: `Diesel: ${record.litresFilled} liters at ${record.fuelStation}`,
+            attachments: [],
+            isFlagged: false
+          };
+          
+          const updatedTrip = {
+            ...trip,
+            costs: [...trip.costs, costEntry]
+          };
+          
+          await updateTripInFirebase(trip.id, updatedTrip);
+        }
+      }
+    }
+  };
+
+  const deleteDieselRecord = async (id: string): Promise<void> => {
+    // Find the diesel record
+    const record = dieselRecords.find(r => r.id === id);
+    
+    // Delete the diesel record
+    await deleteDieselFromFirebase(id);
+    
+    // If linked to a trip, remove the cost entry
+    if (record && record.tripId) {
+      const trip = trips.find(t => t.id === record.tripId);
+      if (trip) {
+        // Remove the cost entry for this diesel record
+        const updatedCosts = trip.costs.filter(c => c.referenceNumber !== `DIESEL-${id}`);
+        
+        const updatedTrip = {
+          ...trip,
+          costs: updatedCosts
+        };
+        
+        await updateTripInFirebase(trip.id, updatedTrip);
+      }
+    }
+  };
+
+  // Function to allocate diesel to trip
+  const allocateDieselToTrip = async (dieselId: string, tripId: string): Promise<void> => {
+    // Find the diesel record
+    const record = dieselRecords.find(r => r.id === dieselId);
+    if (!record) {
+      throw new Error(`Diesel record ${dieselId} not found`);
+    }
+    
+    // Find the trip
+    const trip = trips.find(t => t.id === tripId);
+    if (!trip) {
+      throw new Error(`Trip ${tripId} not found`);
+    }
+    
+    // Update the diesel record with the trip ID
+    const updatedRecord = {
+      ...record,
+      tripId,
+      updatedAt: new Date().toISOString()
+    };
+    
+    await updateDieselInFirebase(dieselId, updatedRecord);
+    
+    // Create a cost entry for the trip
+    const costEntry: CostEntry = {
+      id: `cost-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      tripId,
+      category: 'Diesel',
+      subCategory: `${record.fuelStation} - ${record.fleetNumber}`,
+      amount: record.totalCost,
+      currency: record.currency || trip.revenueCurrency,
+      referenceNumber: `DIESEL-${dieselId}`,
+      date: record.date,
+      notes: `Diesel: ${record.litresFilled} liters at ${record.fuelStation}`,
+      attachments: [],
+      isFlagged: false
+    };
+    
+    // Add cost entry to trip
+    const updatedTrip = {
+      ...trip,
+      costs: [...trip.costs, costEntry]
+    };
+    
+    await updateTripInFirebase(tripId, updatedTrip);
+  };
+
+  // Function to remove diesel from trip
+  const removeDieselFromTrip = async (dieselId: string): Promise<void> => {
+    // Find the diesel record
+    const record = dieselRecords.find(r => r.id === dieselId);
+    if (!record || !record.tripId) {
+      throw new Error(`Diesel record ${dieselId} not found or not linked to a trip`);
+    }
+    
+    // Find the trip
+    const trip = trips.find(t => t.id === record.tripId);
+    if (!trip) {
+      throw new Error(`Trip ${record.tripId} not found`);
+    }
+    
+    // Update the diesel record to remove the trip ID
+    const updatedRecord = {
+      ...record,
+      tripId: undefined,
+      updatedAt: new Date().toISOString()
+    };
+    
+    await updateDieselInFirebase(dieselId, updatedRecord);
+    
+    // Remove the cost entry from the trip
+    const updatedCosts = trip.costs.filter(c => c.referenceNumber !== `DIESEL-${dieselId}`);
+    
+    const updatedTrip = {
+      ...trip,
+      costs: updatedCosts
+    };
+    
+    await updateTripInFirebase(trip.id, updatedTrip);
+  };
+
   // Placeholder implementations for other functions
   const placeholder = async () => { console.warn("Function not implemented"); };
   const placeholderString = async () => { console.warn("Function not implemented"); return ""; };
@@ -193,13 +396,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     importTripsFromWebhook: placeholderWebhook,
     importDriverBehaviorEventsFromWebhook: placeholderWebhook,
     dieselRecords,
-    addDieselRecord: placeholderString,
-    updateDieselRecord: placeholder,
-    deleteDieselRecord: placeholder,
+    addDieselRecord,
+    updateDieselRecord,
+    deleteDieselRecord,
     importDieselFromCSV: placeholder,
     updateDieselDebrief: placeholder,
-    allocateDieselToTrip: placeholder,
-    removeDieselFromTrip: placeholder,
+    allocateDieselToTrip,
+    removeDieselFromTrip,
     driverBehaviorEvents,
     addDriverBehaviorEvent: placeholderString,
     updateDriverBehaviorEvent: placeholder,
