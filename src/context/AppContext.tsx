@@ -13,7 +13,12 @@ import {
   deleteTripFromFirebase,
   addMissedLoadToFirebase,
   updateMissedLoadInFirebase,
-  deleteMissedLoadFromFirebase
+  deleteMissedLoadFromFirebase,
+  addDieselToFirebase,
+  updateDieselInFirebase,
+  deleteDieselFromFirebase,
+  listenToAuditLogs,
+  addAuditLogToFirebase
 } from '../firebase';
 import { generateTripId } from '../utils/helpers';
 import { sendTripEvent, sendDriverBehaviorEvent } from '../utils/webhookSenders';
@@ -111,7 +116,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const unsubscribeDriverBehavior = listenToDriverBehaviorEvents(setDriverBehaviorEvents, (error) => console.error(error));
     const unsubscribeActionItems = listenToActionItems(setActionItems, (error) => console.error(error));
     const unsubscribeCARReports = listenToCARReports(setCARReports, (error) => console.error(error));
-    const unsubscribeAuditLogs = listenToAuditLogs(setAuditLogs, (error) => console.error(error));
+    const unsubscribeAuditLogs = listenToAuditLogs(setAuditLogs, (error: any) => console.error(error));
 
     return () => {
       unsubscribeTrips();
@@ -197,8 +202,79 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const placeholderString = async () => { console.warn("Function not implemented"); return ""; };
   const placeholderWebhook = async () => { console.warn("Function not implemented"); return { imported: 0, skipped: 0 }; };
 
+  const addDieselRecord = async (record: Omit<DieselConsumptionRecord, 'id'>): Promise<string> => {
+    const newRecord = {
+      ...record,
+      id: `diesel-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // If linked to a trip, create a cost entry
+    if (newRecord.tripId) {
+      const trip = trips.find(t => t.id === newRecord.tripId);
+      if (trip) {
+        const costEntry: CostEntry = {
+          id: `cost-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          tripId: trip.id,
+          category: 'Diesel',
+          subCategory: `${newRecord.fuelStation} - ${newRecord.fleetNumber}`,
+          amount: newRecord.totalCost,
+          currency: newRecord.currency || trip.revenueCurrency,
+          referenceNumber: `DIESEL-${newRecord.id}`,
+          date: newRecord.date,
+          notes: `Diesel: ${newRecord.litresFilled} liters at ${newRecord.fuelStation}`,
+          attachments: [],
+          isFlagged: false
+        };
+        
+        // Add cost entry to trip
+        const updatedTrip = {
+          ...trip,
+          costs: [...trip.costs, costEntry]
+        };
+        
+        await updateTripInFirebase(trip.id, updatedTrip);
+      }
+    }
+    
+    return await addDieselToFirebase(newRecord as DieselConsumptionRecord);
+  };
+
+  const triggerTripImport = async (): Promise<void> => {
+    try {
+      const eventData = {
+        eventType: 'trip.import_request',
+        timestamp: new Date().toISOString(),
+        data: {
+          source: 'webapp',
+        },
+      };
+      await sendTripEvent(eventData);
+    } catch (error) {
+      console.error("Error triggering trip import:", error);
+      throw error;
+    }
+  };
+
+  const triggerDriverBehaviorImport = async (): Promise<void> => {
+    try {
+      const eventData = {
+        eventType: 'driver.behavior.import_request',
+        timestamp: new Date().toISOString(),
+        data: {
+          source: 'webapp',
+        },
+      };
+      await sendDriverBehaviorEvent(eventData);
+    } catch (error) {
+      console.error("Error triggering driver behavior import:", error);
+      throw error;
+    }
+  };
+
   const value = {
-    trips,
+        trips,
     addTrip,
     updateTrip,
     deleteTrip,
@@ -228,12 +304,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     importDriverBehaviorEventsFromWebhook: placeholderWebhook,
     dieselRecords,
     addDieselRecord,
-    updateDieselRecord,
-    deleteDieselRecord,
+    updateDieselRecord: placeholder,
+    deleteDieselRecord: placeholder,
     importDieselFromCSV: placeholder,
     updateDieselDebrief: placeholder,
-    allocateDieselToTrip,
-    removeDieselFromTrip,
+    allocateDieselToTrip: placeholder,
+    removeDieselFromTrip: placeholder,
     driverBehaviorEvents,
     addDriverBehaviorEvent: placeholderString,
     updateDriverBehaviorEvent: placeholder,
