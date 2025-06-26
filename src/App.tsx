@@ -21,7 +21,6 @@ import DriverBehaviorPage from "./pages/DriverBehaviorPage";
 import ActionLog from "./components/actionlog/ActionLog";
 import TripDetails from "./components/trips/TripDetails";
 import TripForm from "./components/trips/TripForm";
-import TripCalendarPage from "./components/trips/TripCalendarPage";
 
 // Utilities & Types
 import { Trip } from "./types";
@@ -31,7 +30,7 @@ import { db } from "./firebase";
 const AppContent: React.FC = () => {
   const { 
     trips, setTrips, missedLoads, addMissedLoad, updateMissedLoad, deleteMissedLoad,
-    updateTrip, addTrip, deleteTrip, completeTrip, importTripsFromWebhook, importDriverBehaviorEventsFromWebhook
+    updateTrip, addTrip, deleteTrip, completeTrip
   } = useAppContext();
 
   const [currentView, setCurrentView] = useState("ytd-kpis");
@@ -93,31 +92,6 @@ const AppContent: React.FC = () => {
     }
   };
 
-  const handleDeleteTrip = async (id: string) => {
-    try {
-      setIsLoading(true);
-      await deleteTrip(id);
-    } catch (error) {
-      console.error("Error deleting trip:", error);
-      alert("Error deleting trip. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCompleteTrip = async (tripId: string) => {
-    try {
-      setIsLoading(true);
-      await completeTrip(tripId);
-      alert("Trip marked as completed successfully!");
-    } catch (error) {
-      console.error("Error completing trip:", error);
-      alert("Error completing trip. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleShowTripDetails = (trip: Trip) => {
     setSelectedTrip(trip);
   };
@@ -125,32 +99,6 @@ const AppContent: React.FC = () => {
   const handleEditTrip = (trip: Trip) => {
     setEditingTrip(trip);
     setShowTripForm(true);
-  };
-
-  const handleImportTripsFromWebhook = async () => {
-    try {
-      setIsLoading(true);
-      const result = await importTripsFromWebhook();
-      alert(`Successfully imported ${result.imported} trips from webhook. ${result.skipped} trips were skipped (already exist).`);
-    } catch (error) {
-      console.error("Error importing trips from webhook:", error);
-      alert("Error importing trips from webhook. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleImportDriverBehaviorEvents = async () => {
-    try {
-      setIsLoading(true);
-      const result = await importDriverBehaviorEventsFromWebhook();
-      alert(`Successfully imported ${result.imported} driver behavior events. ${result.skipped} events were skipped (already exist).`);
-    } catch (error) {
-      console.error("Error importing driver behavior events:", error);
-      alert("Error importing driver behavior events. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const renderView = () => {
@@ -164,13 +112,11 @@ const AppContent: React.FC = () => {
                 trips={trips.filter(t => t.status === 'active')} 
                 onView={handleShowTripDetails} 
                 onEdit={handleEditTrip} 
-                onDelete={handleDeleteTrip} 
-                onCompleteTrip={handleCompleteTrip} 
+                onDelete={deleteTrip} 
+                onCompleteTrip={completeTrip} 
                />;
       case "completed-trips":
         return <CompletedTrips trips={trips.filter(t => t.status === 'completed')} onView={handleShowTripDetails} />;
-      case "trip-calendar":
-        return <TripCalendarPage />;
       case "flags":
         return <FlagsInvestigations trips={trips} />;
       case "reports":

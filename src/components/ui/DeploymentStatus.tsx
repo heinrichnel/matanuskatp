@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
+import { getDeploymentStatus } from '../../utils/deploymentStatus';
 
 interface DeploymentStatusProps {
   className?: string;
@@ -19,13 +20,13 @@ const DeploymentStatus: React.FC<DeploymentStatusProps> = ({
     try {
       setIsLoading(true);
       
-      // Mock deployment status check
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Get deployment status
+      const deploymentStatus = await getDeploymentStatus();
       
-      // Simulate a successful deployment
-      setStatus('success');
-      setDeployUrl('https://your-deployed-app.netlify.app');
-      setDeployTime(new Date().toISOString());
+      // Update state based on response
+      setStatus(deploymentStatus.status);
+      setDeployUrl(deploymentStatus.deployUrl);
+      setDeployTime(deploymentStatus.deployTime);
     } catch (error) {
       console.error('Error checking deployment status:', error);
       setStatus('error');
