@@ -23,7 +23,8 @@ import {
   Truck,
   User,
   MapPin,
-  DollarSign
+  DollarSign,
+  Plus
 } from 'lucide-react';
 import { 
   formatCurrency, 
