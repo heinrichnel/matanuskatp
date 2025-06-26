@@ -38,7 +38,16 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
   const handleDelete = async (id: string) => {
     const trip = trips.find(t => t.id === id);
     if (trip && confirm(`Delete trip for fleet ${trip.fleetNumber}? This cannot be undone.`)) {
-      onDelete(id);
+      try {
+        setIsDeleting(id); // Set loading state for this specific trip
+        await onDelete(id);
+        // No need to manually update UI - real-time listener will handle it
+      } catch (error) {
+        console.error("Error deleting trip:", error);
+        alert(`Failed to delete trip: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      } finally {
+        setIsDeleting(null); // Clear loading state
+      }
     }
   };
 
