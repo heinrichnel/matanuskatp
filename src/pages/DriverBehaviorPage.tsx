@@ -19,8 +19,6 @@ const DriverBehaviorPage: React.FC = () => {
   const [showCARForm, setShowCARForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<DriverBehaviorEvent | null>(null);
   const { importDriverBehaviorEventsFromWebhook } = useAppContext();
-  const { subscribeToDriverBehavior } = useSyncContext();
-  const [isSyncing, setIsSyncing] = useState(false);
   
   // Handle initiating CAR from event
   const handleInitiateCAR = (event: DriverBehaviorEvent) => {
@@ -31,7 +29,6 @@ const DriverBehaviorPage: React.FC = () => {
   // Manual sync handler
   const handleSyncNow = async () => {
     try {
-      setIsSyncing(true);
       const result = await importDriverBehaviorEventsFromWebhook();
       alert(`Manual sync complete. Imported: ${result.imported}, Skipped: ${result.skipped}`);
     } catch (error) {

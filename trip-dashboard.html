@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Trip Management Dashboard</title>
+
+    <!--
+    ================================================================
+    CSS STYLING
+    - A soft, modern, and responsive theme.
+    - Uses CSS variables for easy theme management.
+    - Clean layout with cards for trips and a structured form.
+    ================================================================
+    -->
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --primary-color: #007bff;
+            --primary-color-hover: #0056b3;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 20px;
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+
+        #display-section {
+            flex: 2;
+            min-width: 300px;
+        }
+
+        #form-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: var(--card-bg-color);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            align-self: flex-start;
+        }
+        
+        /* Trip List Styles */
+        #trip-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .trip-card {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .trip-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        .trip-card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .trip-card p {
+            margin: 5px 0;
+        }
+
+        .trip-card .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .status-planned { background-color: #17a2b8; }
+        .status-in-progress { background-color: #ffc107; color: #333}
+        .status-completed { background-color: var(--success-color); }
+        
+        /* Form Styles */
+        #trip-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        #trip-form input,
+        #trip-form select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+
+        #trip-form button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        #trip-form button:hover {
+            background-color: var(--primary-color-hover);
+        }
+
+        /* Error/Success Message Styling */
+        .api-message {
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .api-message.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .api-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Current Trip Management Dashboard</h1>
+        </header>
+
+        <main>
+            <!--
+            ================================================================
+            HTML STRUCTURE - Display Section
+            - This section will be dynamically populated with trip data.
+            ================================================================
+            -->
+            <section id="display-section">
+                <h2>Current Trips</h2>
+                <div id="trip-list">
+                    <!-- Trip cards will be injected here by JavaScript -->
+                </div>
+            </section>
+
+            <!--
+            ================================================================
+            HTML STRUCTURE - Form Section
+            - A form for creating a new trip.
+            - Includes client-side validation (e.g., `required`).
+            ================================================================
+            -->
+            <section id="form-section">
+                <h2>Create New Trip</h2>
+                <form id="trip-form">
+                    <div>
+                        <label for="destination">Destination:</label>
+                        <input type="text" id="destination" name="destination" required>
+                    </div>
+                    <div>
+                        <label for="travelers">Number of Travelers:</label>
+                        <input type="number" id="travelers" name="travelers" min="1" required>
+                    </div>
+                    <div>
+                        <label for="startDate">Start Date:</label>
+                        <input type="date" id="startDate" name="startDate" required>
+                    </div>
+                    <div>
+                        <label for="endDate">End Date:</label>
+                        <input type="date" id="endDate" name="endDate" required>
+                    </div>
+                    <div>
+                        <label for="status">Status:</label>
+                        <select id="status" name="status" required>
+                            <option value="Planned" selected>Planned</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                    <button type="submit">Create Trip</button>
+                    <div id="api-status-message" role="status"></div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <!--
+    ====================================================================
+    TRIP DATA STRUCTURE (Canonical JSON Object)
+    - The `id` is generated by the server upon creation.
+    - This structure is used for both fetching (GET) and creating (POST) trips.
+
+    {
+      "id": "string (UUID or number)",
+      "destination": "string",
+      "travelers": "number",
+      "startDate": "string (format: YYYY-MM-DD)",
+      "endDate": "string (format: YYYY-MM-DD)",
+      "status": "string ('Planned', 'In Progress', 'Completed')"
+    }
+    ====================================================================
+    -->
+
+    <script>
+    // ================================================================
+    // JAVASCRIPT LOGIC AND BEHAVIOR
+    // - Uses modern vanilla JavaScript (ES6+).
+    // - No external libraries or frameworks.
+    // - Asynchronous operations with `fetch` API.
+    // ================================================================
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const tripListElement = document.getElementById('trip-list');
+        const tripForm = document.getElementById('trip-form');
+        const apiStatusMessage = document.getElementById('api-status-message');
+
+        const API_ENDPOINT = '/api/trips';
+
+        /**
+         * -----------------------------------------------------------------
+         * @function displayApiMessage
+         * @description Displays a status message for API operations.
+         * @param {string} message - The message to display.
+         * @param {boolean} isError - True if it's an error message.
+         * -----------------------------------------------------------------
+         */
+        const displayApiMessage = (message, isError = false) => {
+            apiStatusMessage.textContent = message;
+            apiStatusMessage.className = `api-message ${isError ? 'error' : 'success'}`;
+            setTimeout(() => apiStatusMessage.innerHTML = '', 4000); // Hide after 4 seconds
+        };
+        
+        /**
+         * -----------------------------------------------------------------
+         * @function createTripCard
+         * @description Creates an HTML element for a single trip.
+         * @param {object} trip - The trip data object.
+         * @returns {HTMLElement} - The trip card div element.
+         * -----------------------------------------------------------------
+         */
+        const createTripCard = (trip) => {
+            const card = document.createElement('div');
+            card.className = 'trip-card';
+            card.dataset.id = trip.id;
+            
+            const statusClass = `status-${trip.status.toLowerCase().replace(' ', '-')}`;
+
+            card.innerHTML = `
+                <h3>${trip.destination}</h3>
+                <p><strong>Travelers:</strong> ${trip.travelers}</p>
+                <p><strong>Dates:</strong> ${trip.startDate} to ${trip.endDate}</p>
+                <p><strong>Status:</strong> <span class="status ${statusClass}">${trip.status}</span></p>
+            `;
+            return card;
+        };
+
+        /**
+         * -----------------------------------------------------------------
+         * @function renderTrips
+         * @description Renders a list of trips to the DOM.
+         * @param {Array<object>} trips - An array of trip objects.
+         * -----------------------------------------------------------------
+         */
+        const renderTrips = (trips) => {
+            tripListElement.innerHTML = ''; // Clear existing list
+            if (!trips || trips.length === 0) {
+                tripListElement.innerHTML = '<p>No current trips found.</p>';
+                return;
+            }
+            trips.forEach(trip => {
+                const tripCard = createTripCard(trip);
+                tripListElement.appendChild(tripCard);
+            });
+        };
+
+        /**
+         * -----------------------------------------------------------------
+         * @function addTripToDOM
+         * @description Adds a single new trip to the DOM without a full re-render.
+         * @param {object} trip - The new trip object to add.
+         * -----------------------------------------------------------------
+         */
+        const addTripToDOM = (trip) => {
+            // Remove the "No current trips" message if it exists
+            const noTripsMessage = tripListElement.querySelector('p');
+            if (noTripsMessage) {
+                noTripsMessage.remove();
+            }
+            const tripCard = createTripCard(trip);
+            tripListElement.appendChild(tripCard);
+        };
+
+        /**
+         * -----------------------------------------------------------------
+         * @function fetchTrips
+         * @description Fetches all trips from the API and renders them.
+         * -----------------------------------------------------------------
+         */
+        const fetchTrips = async () => {
+            try {
+                const response = await fetch(API_ENDPOINT);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const trips = await response.json();
+                renderTrips(trips);
+            } catch (error) {
+                console.error("Failed to fetch trips:", error);
+                tripListElement.innerHTML = '<p style="color: red;">Could not load trips. Please try again later.</p>';
+            }
+        };
+
+        /**
+         * -----------------------------------------------------------------
+         * @function postTrip
+         * @description Posts a new trip to the API.
+         * @param {object} newTripData - The trip data to post.
+         * -----------------------------------------------------------------
+         */
+        const postTrip = async (newTripData) => {
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newTripData),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const createdTrip = await response.json();
+                addTripToDOM(createdTrip); // Add new trip to the UI
+                tripForm.reset(); // Clear the form
+                displayApiMessage('Trip created successfully!', false);
+
+            } catch (error) {
+                console.error("Failed to post trip:", error);
+                displayApiMessage('Failed to create trip. Please try again.', true);
+            }
+        };
+
+        /**
+         * -----------------------------------------------------------------
+         * @event submit
+         * @description Handles the form submission for creating a new trip.
+         * -----------------------------------------------------------------
+         */
+        tripForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            // Client-side check to ensure end date is not before start date
+            const startDate = new Date(tripForm.elements.startDate.value);
+            const endDate = new Date(tripForm.elements.endDate.value);
+
+            if (endDate < startDate) {
+                displayApiMessage('End date cannot be before the start date.', true);
+                return;
+            }
+
+            const formData = new FormData(tripForm);
+            
+            // Construct the trip object to match the canonical structure
+            const newTripData = {
+                destination: formData.get('destination'),
+                travelers: parseInt(formData.get('travelers'), 10),
+                startDate: formData.get('startDate'),
+                endDate: formData.get('endDate'),
+                status: formData.get('status'),
+            };
+
+            postTrip(newTripData);
+        });
+
+        // Initial fetch of trips when the page loads
+        fetchTrips();
+    });
+    </script>
+</body>
+</html>

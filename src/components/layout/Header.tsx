@@ -15,7 +15,8 @@ import {
   Upload,
   Users,
   Bell,
-  UserRound
+  UserRound,
+  History
 } from 'lucide-react';
 import Button from '../ui/Button';
 import SyncIndicator from '../ui/SyncIndicator';
@@ -51,7 +52,8 @@ const Header: FC<HeaderProps> = ({
     { id: 'missed-loads', label: 'Missed Loads', icon: ClipboardList },
     { id: 'diesel-dashboard', label: 'Diesel Dashboard', icon: Fuel },
     { id: 'driver-behavior', label: 'Driver Behavior', icon: UserRound },
-    { id: 'action-log', label: 'Action Log', icon: Upload }
+    { id: 'action-log', label: 'Action Log', icon: Upload },
+    { id: 'audit-log', label: 'Audit Log', icon: History }
   ];
 
   return (

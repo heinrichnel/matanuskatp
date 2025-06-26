@@ -3,6 +3,7 @@ import {
   getFirestore, 
   collection, 
   addDoc, 
+  setDoc,
   updateDoc, 
   deleteDoc, 
   doc, 
@@ -18,6 +19,7 @@ import {
 } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport } from './types';
+import { AuditLog } from './types/audit';
 
 // Firebase configuration
 interface FirebaseConfig {
@@ -102,6 +104,7 @@ export const activityLogsCollection = collection(db, 'activityLogs');
 export const driverBehaviorCollection = collection(db, 'driverBehavior');
 export const actionItemsCollection = collection(db, 'actionItems');
 export const carReportsCollection = collection(db, 'carReports');
+export const auditLogsCollection = collection(db, 'auditLogs');
 
 // Helper function to remove undefined values from objects
 const cleanUndefinedValues = (obj: any): any => {
@@ -137,13 +140,15 @@ export const addTripToFirebase = async (tripData: Trip): Promise<string> => {
       version: 1
     });
     
-    const docRef = await addDoc(tripsCollection, tripWithTimestamp);
-    console.log("✅ Trip added with real-time sync ID:", docRef.id);
+    // Use client-generated id for document so delete/update by id works
+    const tripRef = doc(db, 'trips', tripData.id);
+    await setDoc(tripRef, tripWithTimestamp as any);
+    console.log("✅ Trip added with real-time sync ID:", tripData.id);
     
     // Log activity
-    await logActivity('trip_created', docRef.id, 'trip', tripData);
+    await logActivity('trip_created', tripData.id, 'trip', tripData);
     
-    return docRef.id;
+    return tripData.id;
   } catch (error) {
     console.error("❌ Error adding trip:", error);
     throw error;
@@ -688,6 +693,50 @@ const logActivity = async (
     console.warn("⚠️ Failed to log activity:", error);
     // Don't throw - activity logging shouldn't break the main operation
   }
+};
+
+export const addAuditLogToFirebase = async (logData: AuditLog): Promise<string> => {
+  try {
+    const logWithTimestamp = cleanUndefinedValues({
+      ...logData,
+      timestamp: serverTimestamp(),
+    });
+    
+    const docRef = await addDoc(auditLogsCollection, logWithTimestamp);
+    console.log("✅ Audit log added:", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error("❌ Error adding audit log:", error);
+    throw error;
+  }
+};
+
+export const listenToAuditLogs = (
+  callback: (logs: AuditLog[]) => void,
+  onError?: (error: any) => void
+): (() => void) => {
+  const q = query(auditLogsCollection, orderBy('timestamp', 'desc'));
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const logs: AuditLog[] = [];
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        logs.push({
+          id: doc.id,
+          ...data,
+          timestamp: data.timestamp?.toDate?.().toISOString() || data.timestamp,
+        } as AuditLog);
+      });
+      console.log(`🔄 Real-time audit logs update: ${logs.length} logs loaded`);
+      callback(logs);
+    },
+    (error) => {
+      console.error("❌ Real-time audit logs listener error:", error);
+      if (onError) onError(error);
+    }
+  );
 };
 
 // Batch Operations for Performance

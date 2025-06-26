@@ -1,6 +1,6 @@
-import React from 'react';
-import { useSyncContext } from '../../context/SyncContext';
-import { RefreshCw, Check, Clock, WifiOff, Wifi } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useAppContext } from '../../context/AppContext';
+import { RefreshCw, Check, Clock } from 'lucide-react';
 
 interface SyncIndicatorProps {
   className?: string;
@@ -45,12 +45,9 @@ const SyncIndicator: React.FC<SyncIndicatorProps> = ({
         </>
       ) : (
         <>
-          {syncStatus === 'error' ? (
-            <div className="w-3 h-3 rounded-full bg-red-500" />
-          ) : (
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-          )}
-          
+          <div className={`w-2 h-2 rounded-full ${
+            connectionStatus === 'connected' ? 'bg-green-500' : 'bg-red-500'
+          }`} />
           {showText && (
             <span className={syncStatus === 'error' ? 'text-red-500' : 'text-gray-500'}>
               {syncStatus === 'error' 
