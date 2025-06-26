@@ -19,6 +19,7 @@ import MissedLoadsTracker from "./components/trips/MissedLoadsTracker";
 import DieselDashboard from "./components/diesel/DieselDashboard";
 import DriverBehaviorPage from "./pages/DriverBehaviorPage";
 import ActionLog from "./components/actionlog/ActionLog";
+import AuditLogPage from "./pages/AuditLogPage";
 import TripDetails from "./components/trips/TripDetails";
 import TripForm from "./components/trips/TripForm";
 
@@ -133,6 +134,8 @@ const AppContent: React.FC = () => {
         return <DriverBehaviorPage />;
       case "action-log":
         return <ActionLog />;
+      case "audit-log":
+        return <AuditLogPage />;
       default:
         return <YearToDateKPIs trips={trips} />;
     }

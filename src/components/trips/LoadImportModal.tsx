@@ -11,8 +11,7 @@ interface LoadImportModalProps {
 }
 
 const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) => {
-  const { importTripsFromCSV, importTripsFromWebhook } = useAppContext();
-  const { isOnline } = useSyncContext();
+  const { importTripsFromCSV, triggerTripImport, connectionStatus } = useAppContext();
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isWebhookProcessing, setIsWebhookProcessing] = useState(false);
@@ -108,18 +107,12 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
     setSuccess(null);
 
     try {
-      const result = await importTripsFromWebhook();
-      setSuccess(`Webhook import completed!\n\nImported: ${result.imported} trips\nSkipped: ${result.skipped} trips${!isOnline ? '\n\nData will be synced when your connection is restored.' : ''}`);
-      
-      // Close modal after a short delay if successful
-      if (result.imported > 0) {
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      }
-    } catch (err: any) {
-      console.error('Failed to import from webhook:', err);
-      setError(`Error importing from webhook: ${err.message}`);
+      await triggerTripImport();
+      alert('Webhook import triggered! The data will appear shortly.');
+      onClose();
+    } catch (error) {
+      console.error('Failed to import from webhook:', error);
+      alert('Failed to import from webhook. Please check your connection and try again.');
     } finally {
       setIsWebhookProcessing(false);
     }
