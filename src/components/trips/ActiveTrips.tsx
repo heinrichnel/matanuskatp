@@ -131,7 +131,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
         </CardContent>
       </Card>
 
-      {/* Trip Cards Grid */}
+      {/* Trip List - Vertical Layout */}
       {filteredTrips.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg shadow">
           <Truck className="mx-auto h-12 w-12 text-gray-400" />
@@ -143,26 +143,37 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-4">
           {filteredTrips.map(trip => (
             <Card key={trip.id} className="hover:shadow-md transition-shadow">
-              <CardHeader
-                title={
-                  <div className="flex items-center gap-2">
-                    <Truck className="w-5 h-5 text-blue-500" />
-                    <span>Fleet {trip.fleetNumber}</span>
+              <CardContent className="p-4">
+                <div className="flex flex-col space-y-4">
+                  {/* Trip Header */}
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center">
+                      <Truck className="w-5 h-5 text-blue-500 mr-2" />
+                      <h3 className="text-lg font-medium text-gray-900">Fleet {trip.fleetNumber}</h3>
+                    </div>
+                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+                      Active
+                    </span>
                   </div>
-                }
-                subtitle={<span className="text-xs text-gray-500">{trip.route}</span>}
-              />
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                  
+                  {/* Trip Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="flex items-start space-x-2">
                       <User className="w-4 h-4 text-gray-400 mt-0.5" />
                       <div>
                         <p className="text-sm text-gray-500">Driver</p>
                         <p className="font-medium">{trip.driverName}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-start space-x-2">
+                      <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-gray-500">Route</p>
+                        <p className="font-medium">{trip.route}</p>
                       </div>
                     </div>
                     
@@ -175,19 +186,19 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                     </div>
                     
                     <div className="flex items-start space-x-2">
-                      <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-gray-500">Dates</p>
-                        <p className="font-medium text-sm">{formatDate(trip.startDate)} - {formatDate(trip.endDate)}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-start space-x-2">
                       <DollarSign className="w-4 h-4 text-gray-400 mt-0.5" />
                       <div>
                         <p className="text-sm text-gray-500">Revenue</p>
                         <p className="font-medium text-green-600">{formatCurrency(trip.baseRevenue, trip.revenueCurrency)}</p>
                       </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start space-x-2">
+                    <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-gray-500">Dates</p>
+                      <p className="font-medium">{formatDate(trip.startDate)} - {formatDate(trip.endDate)}</p>
                     </div>
                   </div>
                   
@@ -201,6 +212,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                     </div>
                   )}
                   
+                  {/* Actions */}
                   <div className="flex flex-wrap gap-2 pt-2 border-t">
                     <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={() => onView(trip)}>
                       View
