@@ -16,7 +16,6 @@ import {
 } from '../firebase';
 import { generateTripId } from '../utils/helpers';
 import { v4 as uuidv4 } from 'uuid';
-import { importTripsFromWebhook, importDriverBehaviorEventsFromWebhook } from '../utils/webhook';
 
 interface AppContextType {
   trips: Trip[];
@@ -47,6 +46,7 @@ interface AppContextType {
   importTripsFromCSV: (trips: Omit<Trip, 'id' | 'costs' | 'status'>[]) => Promise<void>;
   importCostsFromCSV: (costs: Omit<CostEntry, 'id' | 'attachments'>[]) => Promise<void>;
   importTripsFromWebhook: () => Promise<{imported: number, skipped: number}>;
+  importDriverBehaviorEventsFromWebhook: () => Promise<{imported: number, skipped: number}>;
   
   dieselRecords: DieselConsumptionRecord[];
   addDieselRecord: (record: Omit<DieselConsumptionRecord, 'id'>) => Promise<string>;
@@ -65,7 +65,6 @@ interface AppContextType {
   deleteDriverBehaviorEvent: (id: string) => Promise<void>;
   getDriverPerformance: (driverName: string) => any;
   getAllDriversPerformance: () => any[];
-  importDriverBehaviorEventsFromWebhook: () => Promise<{imported: number, skipped: number}>;
   
   actionItems: ActionItem[];
   addActionItem: (item: Omit<ActionItem, 'id' | 'createdAt' | 'updatedAt' | 'createdBy'>) => Promise<string>;
@@ -155,48 +154,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const completeTrip = async (tripId: string): Promise<void> => {
     const trip = trips.find(t => t.id === tripId);
     if (trip) {
-      try {
-        const updatedTrip = { ...trip, status: 'completed' as 'completed' };
-        await updateTripInFirebase(updatedTrip.id, updatedTrip);
-      } catch (error: any) {
-        // Check if the error is a Firestore 'not-found' error
-        if (error?.code === 'not-found' || error?.message?.includes('No document to update')) {
-          // Remove the non-existent trip from local state
-          setTrips(prevTrips => prevTrips.filter(t => t.id !== tripId));
-          alert('This trip no longer exists in the database and has been removed from your view. It may have been deleted by another user.');
-        } else {
-          // Handle other types of errors
-          console.error('Error completing trip:', error);
-          alert('An error occurred while completing the trip. Please try again.');
-        }
-        throw error; // Re-throw to allow calling code to handle if needed
-      }
-    }
-  };
-
-  // Implement the webhook import functions
-  const handleImportTripsFromWebhook = async (): Promise<{imported: number, skipped: number}> => {
-    try {
-      return await importTripsFromWebhook();
-    } catch (error) {
-      console.error('Error importing trips from webhook:', error);
-      throw error;
-    }
-  };
-
-  const handleImportDriverBehaviorEventsFromWebhook = async (): Promise<{imported: number, skipped: number}> => {
-    try {
-      return await importDriverBehaviorEventsFromWebhook();
-    } catch (error) {
-      console.error('Error importing driver behavior events from webhook:', error);
-      throw error;
+      const updatedTrip = { 
+        ...trip, 
+        status: 'completed' as 'completed',
+        completedAt: new Date().toISOString(),
+        completedBy: 'Current User' // In a real app, use the logged-in user
+      };
+      await updateTripInFirebase(updatedTrip.id, updatedTrip);
     }
   };
 
   // Placeholder implementations for other functions
   const placeholder = async () => { console.warn("Function not implemented"); };
   const placeholderString = async () => { console.warn("Function not implemented"); return ""; };
-  const placeholderObject = async () => { console.warn("Function not implemented"); return { imported: 0, skipped: 0 }; };
+  const placeholderWebhook = async () => { console.warn("Function not implemented"); return { imported: 0, skipped: 0 }; };
 
   const value = {
     trips,
@@ -219,7 +190,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateInvoicePayment: placeholder,
     importTripsFromCSV: placeholder,
     importCostsFromCSV: placeholder,
-    importTripsFromWebhook: handleImportTripsFromWebhook,
+    importTripsFromWebhook: placeholderWebhook,
+    importDriverBehaviorEventsFromWebhook: placeholderWebhook,
     dieselRecords,
     addDieselRecord: placeholderString,
     updateDieselRecord: placeholder,
@@ -234,7 +206,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteDriverBehaviorEvent: placeholder,
     getDriverPerformance: () => ({}) as any,
     getAllDriversPerformance: () => [] as any[],
-    importDriverBehaviorEventsFromWebhook: handleImportDriverBehaviorEventsFromWebhook,
     actionItems,
     addActionItem: placeholderString,
     updateActionItem: placeholder,

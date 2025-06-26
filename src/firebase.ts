@@ -11,7 +11,10 @@ import {
   orderBy,
   serverTimestamp,
   enableNetwork,
-  disableNetwork
+  disableNetwork,
+  writeBatch,
+  getDocs,
+  where
 } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport } from './types';
@@ -173,9 +176,27 @@ export const updateTripInFirebase = async (id: string, tripData: Partial<Trip>):
 
 export const deleteTripFromFirebase = async (id: string): Promise<void> => {
   try {
+    // First, get the trip data to log it before deletion
     const tripRef = doc(db, 'trips', id);
-    await deleteDoc(tripRef);
-    console.log("✅ Trip deleted with real-time sync:", id);
+    
+    // Create a batch operation for atomicity
+    const batch = writeBatch(db);
+    
+    // Delete the trip
+    batch.delete(tripRef);
+    
+    // Delete any related cost entries or other dependent documents
+    // This ensures we don't have orphaned data
+    const relatedCostsQuery = query(collection(db, 'costs'), where('tripId', '==', id));
+    const costsSnapshot = await getDocs(relatedCostsQuery);
+    costsSnapshot.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+    
+    // Commit the batch
+    await batch.commit();
+    
+    console.log("✅ Trip and related data deleted with real-time sync:", id);
     
     // Log activity
     await logActivity('trip_deleted', id, 'trip', { deletedAt: new Date().toISOString() });
