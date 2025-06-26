@@ -35,6 +35,7 @@ const CompletedTrips: React.FC<CompletedTripsProps> = ({ trips, onView }) => {
   });
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [deletingTrip, setDeletingTrip] = useState<Trip | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const userRole: 'admin' | 'manager' | 'operator' = 'admin';
 
@@ -61,16 +62,24 @@ const CompletedTrips: React.FC<CompletedTripsProps> = ({ trips, onView }) => {
     });
   };
 
-  const handleEditSave = (updatedTrip: Trip) => {
+  const handleEditSave = (updatedTrip: Trip, editRecord: any) => {
     updateTrip(updatedTrip);
     setEditingTrip(null);
     alert('Trip updated successfully. Edit logged.');
   };
 
-  const handleDelete = (trip: Trip) => {
-    deleteTrip(trip.id);
-    setDeletingTrip(null);
-    alert('Trip deleted successfully. Deletion logged.');
+  const handleDelete = async (trip: Trip) => {
+    try {
+      setIsDeleting(true);
+      await deleteTrip(trip.id);
+      setDeletingTrip(null);
+      alert('Trip deleted successfully. Deletion logged.');
+    } catch (error) {
+      console.error("Error deleting trip:", error);
+      alert(`Failed to delete trip: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const uniqueClients = [...new Set(trips.map(t => t.clientName))];
@@ -156,7 +165,13 @@ const CompletedTrips: React.FC<CompletedTripsProps> = ({ trips, onView }) => {
                   <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4 text-green-600" />} onClick={() => setEditingTrip(trip)}>
                     <span className="sr-only">Edit</span>
                   </Button>
-                  <Button size="sm" variant="danger" icon={<Trash2 className="w-4 h-4 text-red-600" />} onClick={() => setDeletingTrip(trip)}>
+                  <Button 
+                    size="sm" 
+                    variant="danger" 
+                    icon={<Trash2 className="w-4 h-4 text-red-600" />} 
+                    onClick={() => setDeletingTrip(trip)}
+                    disabled={isDeleting}
+                  >
                     <span className="sr-only">Delete</span>
                   </Button>
                 </div>
@@ -175,7 +190,14 @@ const CompletedTrips: React.FC<CompletedTripsProps> = ({ trips, onView }) => {
                   <Button size="xs" variant="outline" icon={<Edit className="w-4 h-4 text-green-600" />} onClick={() => setEditingTrip(trip)}>
                     <span className="sr-only">Edit</span>
                   </Button>
-                  <Button size="xs" variant="danger" icon={<Trash2 className="w-4 h-4 text-red-600" />} onClick={() => setDeletingTrip(trip)}>
+                  <Button 
+                    size="xs" 
+                    variant="danger" 
+                    icon={<Trash2 className="w-4 h-4 text-red-600" />} 
+                    onClick={() => setDeletingTrip(trip)}
+                    disabled={isDeleting}
+                    isLoading={isDeleting && deletingTrip?.id === trip.id}
+                  >
                     <span className="sr-only">Delete</span>
                   </Button>
                 </div>

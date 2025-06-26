@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 // ─── Types & Constants ───────────────────────────────────────────
 import { Trip } from '../../types';
@@ -7,13 +7,11 @@ import { Trip } from '../../types';
 import { Select } from '../ui/FormElements';
 import Button from '../ui/Button';
 import Card, { CardContent, CardHeader } from '../ui/Card';
-import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar } from 'lucide-react';
+import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle } from 'lucide-react';
 import { formatCurrency } from '../../utils/helpers';
 import LoadImportModal from './LoadImportModal';
 import TripStatusUpdateModal from './TripStatusUpdateModal';
 import { useAppContext } from '../../context/AppContext';
-import SyncIndicator from '../ui/SyncIndicator';
-import { useSyncContext } from '../../context/SyncContext';
 
 interface ActiveTripsProps {
   trips: Trip[];
@@ -25,57 +23,41 @@ interface ActiveTripsProps {
 
 const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onView, onCompleteTrip }) => {
   const { updateTripStatus } = useAppContext();
-  const { subscribeToTrip } = useSyncContext();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [filterFleet, setFilterFleet] = useState<string>('');
   const [filterDriver, setFilterDriver] = useState<string>('');
   const [filterClient, setFilterClient] = useState<string>('');
   const [statusUpdateTrip, setStatusUpdateTrip] = useState<Trip | null>(null);
   const [statusUpdateType] = useState<'shipped' | 'delivered'>('shipped');
-  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   const openImportModal = () => setIsImportModalOpen(true);
   const closeImportModal = () => setIsImportModalOpen(false);
 
-  // Subscribe to real-time updates for all active trips
-  useEffect(() => {
-    trips.forEach(trip => {
-      subscribeToTrip(trip.id);
-    });
-  }, [trips, subscribeToTrip]);
-
   const handleDelete = async (id: string) => {
     const trip = trips.find(t => t.id === id);
     if (trip && confirm(`Delete trip for fleet ${trip.fleetNumber}? This cannot be undone.`)) {
-      setIsLoading(prev => ({ ...prev, [id]: true }));
       try {
+        setIsDeleting(id); // Set loading state for this specific trip
         await onDelete(id);
+        // No need to manually update UI - real-time listener will handle it
+      } catch (error) {
+        console.error("Error deleting trip:", error);
+        alert(`Failed to delete trip: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
-        setIsLoading(prev => ({ ...prev, [id]: false }));
+        setIsDeleting(null); // Clear loading state
       }
-    }
-  };
-
-  const handleCompleteTrip = async (tripId: string) => {
-    setIsLoading(prev => ({ ...prev, [tripId]: true }));
-    try {
-      await onCompleteTrip(tripId);
-    } finally {
-      setIsLoading(prev => ({ ...prev, [tripId]: false }));
     }
   };
 
   // Handle trip status update
   const handleUpdateTripStatus = async (tripId: string, status: 'shipped' | 'delivered', notes: string) => {
-    setIsLoading(prev => ({ ...prev, [tripId]: true }));
     try {
       await updateTripStatus(tripId, status, notes);
       setStatusUpdateTrip(null);
     } catch (error) {
       console.error(`Error updating trip status to ${status}:`, error);
       throw error;
-    } finally {
-      setIsLoading(prev => ({ ...prev, [tripId]: false }));
     }
   };
 
@@ -99,36 +81,14 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
     setFilterClient('');
   };
 
-  // Group trips by date
-  const tripsByDate: Record<string, Trip[]> = {};
-  filteredTrips.forEach(trip => {
-    const date = new Date(trip.startDate).toISOString().split('T')[0];
-    if (!tripsByDate[date]) {
-      tripsByDate[date] = [];
-    }
-    tripsByDate[date].push(trip);
-  });
-
-  // Sort dates in descending order
-  const sortedDates = Object.keys(tripsByDate).sort((a, b) => 
-    new Date(b).getTime() - new Date(a).getTime()
-  );
-
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Active Trips</h2>
-          <div className="flex items-center mt-1">
-            <p className="text-gray-600 mr-3">Manage ongoing trips and track their status</p>
-            <SyncIndicator />
-          </div>
-        </div>
+        <h2 className="text-2xl font-bold text-gray-900">Active Trips</h2>
         <Button variant="primary" size="md" icon={<Upload className="w-5 h-5" />} onClick={openImportModal}>
-          Import Trips
+          <span className="sr-only">Import Loads</span>
         </Button>
       </div>
-      
       {/* Info Banner */}
       <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 mb-6">
         <CheckCircle className="w-6 h-6 text-green-500" />
@@ -138,7 +98,6 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
           </div>
         </div>
       </div>
-      
       {/* Filters Section */}
       <Card>
         <CardHeader title="Filter Active Trips" />
@@ -165,113 +124,60 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
           </div>
           <div className="mt-4 flex justify-end">
             <Button size="sm" variant="outline" onClick={clearFilters}>
-              Clear Filters
+              <span className="sr-only">Clear Filters</span>
             </Button>
           </div>
         </CardContent>
       </Card>
-
-      {/* Trips by Date */}
-      {sortedDates.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg shadow">
-          <Truck className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-lg font-medium text-gray-900">No active trips</h3>
-          <p className="mt-1 text-gray-500">Get started by adding a new trip or importing trips.</p>
-        </div>
-      ) : (
-        sortedDates.map(date => (
-          <div key={date} className="space-y-4">
-            <div className="flex items-center">
-              <Calendar className="w-5 h-5 text-blue-500 mr-2" />
-              <h3 className="text-lg font-medium text-gray-900">
-                {new Date(date).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </h3>
-              <span className="ml-2 text-sm text-gray-500">
-                ({tripsByDate[date].length} trip{tripsByDate[date].length !== 1 ? 's' : ''})
-              </span>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tripsByDate[date].map(trip => (
-                <Card key={trip.id}>
-                  <CardHeader
-                    title={<span className="flex items-center gap-2"><Truck className="w-5 h-5 text-blue-500" />Fleet {trip.fleetNumber}</span>}
-                    subtitle={<span className="text-xs text-gray-500">{trip.route}</span>}
-                    action={
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={() => onView(trip)}>
-                          View
-                        </Button>
-                        <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => onEdit(trip)}>
-                          Edit
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="danger" 
-                          icon={<Trash2 className="w-4 h-4" />} 
-                          onClick={() => handleDelete(trip.id)}
-                          isLoading={isLoading[trip.id]}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    }
-                  />
-                  <CardContent>
-                    <div className="flex flex-col gap-2">
-                      <div className="text-lg font-bold text-gray-900">{trip.driverName}</div>
-                      <div className="text-sm text-gray-500">Client: {trip.clientName}</div>
-                      <div className="text-sm text-gray-500">Start: {trip.startDate} | End: {trip.endDate}</div>
-                      <div className="text-sm text-gray-500">Revenue: {formatCurrency(trip.baseRevenue, trip.revenueCurrency)}</div>
-                      
-                      {/* Flag indicator */}
-                      {trip.costs && trip.costs.some(c => c.isFlagged) && (
-                        <div className="flex items-center mt-1 text-amber-600 text-sm">
-                          <AlertTriangle className="w-4 h-4 mr-1" />
-                          <span>
-                            {trip.costs.filter(c => c.isFlagged).length} flagged item{trip.costs.filter(c => c.isFlagged).length !== 1 ? 's' : ''}
-                          </span>
-                        </div>
-                      )}
-                      
-                      <div className="flex gap-2 mt-2">
-                        <Button 
-                          size="xs" 
-                          variant="success" 
-                          icon={<CheckCircle className="w-4 h-4" />} 
-                          onClick={() => handleCompleteTrip(trip.id)}
-                          isLoading={isLoading[trip.id]}
-                          disabled={trip.costs && trip.costs.some(c => c.isFlagged && c.investigationStatus !== 'resolved')}
-                          title={trip.costs && trip.costs.some(c => c.isFlagged && c.investigationStatus !== 'resolved') ? 
-                            'Cannot complete: Unresolved flags' : 'Mark as completed'}
-                        >
-                          Complete
-                        </Button>
-                        <Button 
-                          size="xs" 
-                          variant="outline" 
-                          icon={<AlertTriangle className="w-4 h-4" />} 
-                          onClick={() => setStatusUpdateTrip(trip)}
-                        >
-                          Update Status
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        ))
-      )}
+      {/* Trip Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredTrips.map(trip => (
+          <Card key={trip.id}>
+            <CardHeader
+              title={<span className="flex items-center gap-2"><Truck className="w-5 h-5 text-blue-500" />Fleet {trip.fleetNumber}</span>}
+              subtitle={<span className="text-xs text-gray-500">{trip.route}</span>}
+              action={
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={() => onView(trip)}>
+                    <span className="sr-only">View</span>
+                  </Button>
+                  <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => onEdit(trip)}>
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="danger" 
+                    icon={<Trash2 className="w-4 h-4" />} 
+                    onClick={() => handleDelete(trip.id)}
+                    isLoading={isDeleting === trip.id}
+                    disabled={isDeleting !== null}
+                  >
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </div>
+              }
+            />
+            <CardContent>
+              <div className="flex flex-col gap-2">
+                <div className="text-lg font-bold text-gray-900">{trip.driverName}</div>
+                <div className="text-sm text-gray-500">Client: {trip.clientName}</div>
+                <div className="text-sm text-gray-500">Start: {trip.startDate} | End: {trip.endDate}</div>
+                <div className="text-sm text-gray-500">Revenue: {formatCurrency(trip.baseRevenue, trip.revenueCurrency)}</div>
+                <div className="flex gap-2 mt-2">
+                  <Button size="xs" variant="success" icon={<CheckCircle className="w-4 h-4" />} onClick={() => onCompleteTrip(trip.id)}>
+                    <span className="sr-only">Complete</span>
+                  </Button>
+                  <Button size="xs" variant="outline" icon={<AlertTriangle className="w-4 h-4" />} onClick={() => setStatusUpdateTrip(trip)}>
+                    <span className="sr-only">Update Status</span>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       <LoadImportModal isOpen={isImportModalOpen} onClose={closeImportModal} />
-      
       {/* Status Update Modal */}
       {statusUpdateTrip && (
         <TripStatusUpdateModal
