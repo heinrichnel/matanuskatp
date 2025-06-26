@@ -15,11 +15,10 @@ import {
   Upload,
   Users,
   Bell,
-  UserRound,
-  Calendar
+  UserRound
 } from 'lucide-react';
 import Button from '../ui/Button';
-import DeploymentStatus from '../ui/DeploymentStatus';
+import SyncIndicator from '../ui/SyncIndicator';
 
 interface HeaderProps {
   currentView: string;
@@ -45,7 +44,6 @@ const Header: FC<HeaderProps> = ({
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
     { id: 'active-trips', label: 'Active Trips', icon: Truck },
     { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle },
-    { id: 'trip-calendar', label: 'Trip Calendar', icon: Calendar },
     { id: 'flags', label: 'Flags & Investigations', icon: Flag },
     { id: 'reports', label: 'Reports & Exports', icon: BarChart3 },
     { id: 'invoice-aging', label: 'Invoice Aging', icon: Clock },
@@ -78,7 +76,9 @@ const Header: FC<HeaderProps> = ({
         </ul>
       </nav>
       <div className="px-6 py-4 border-t">
-        <DeploymentStatus className="mb-3" />
+        <div className="mb-3">
+          <SyncIndicator showText={true} />
+        </div>
         <div className="flex items-center gap-3">
           <UserRound className="w-5 h-5 text-gray-400" />
           <span className="text-sm text-gray-700">{userName}</span>
