@@ -4,8 +4,9 @@ import { DriverBehaviorEvent, DRIVER_BEHAVIOR_EVENT_TYPES, DRIVERS } from '../..
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Input, Select } from '../ui/FormElements';
-import { User as UserRound, AlertTriangle, CheckCircle, Plus, RefreshCw, Shield, Clock, Eye, Edit } from 'lucide-react';
+import { UserRound, AlertTriangle, CheckCircle, Plus, RefreshCw, Shield, Clock, Eye, Edit } from 'lucide-react';
 import { formatDate, formatDateTime } from '../../utils/helpers';
+import SyncIndicator from '../ui/SyncIndicator';
 
 interface DriverPerformanceOverviewProps {
   onAddEvent: () => void;
@@ -143,7 +144,10 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Driver Performance Overview</h2>
-          <p className="text-gray-600">Monitor driver behavior and identify high-risk drivers</p>
+          <div className="flex items-center mt-1">
+            <p className="text-gray-600 mr-3">Monitor driver behavior and identify high-risk drivers</p>
+            <SyncIndicator />
+          </div>
         </div>
         <div className="flex space-x-2">
           <Button

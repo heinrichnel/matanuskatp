@@ -1,9 +1,9 @@
 // Utility functions for checking deployment status
 
 /**
- * Fetches the current deployment status from the API
+ * Fetches the current deployment status
  */
-export const fetchDeploymentStatus = async () => {
+export const getDeploymentStatus = async () => {
   try {
     // In a real implementation, this would be an API call to your deployment service
     // For now, we'll simulate a response
@@ -13,9 +13,9 @@ export const fetchDeploymentStatus = async () => {
     
     // Simulate a successful deployment
     return {
-      status: 'success', // 'deploying' | 'success' | 'error' | 'idle'
-      url: 'https://your-deployed-app.netlify.app',
-      deployedAt: new Date().toISOString(),
+      status: 'success' as 'deploying' | 'success' | 'error' | 'idle',
+      deployUrl: 'https://your-deployed-app.netlify.app',
+      deployTime: new Date().toISOString(),
       deployId: 'deploy-123456',
       branch: 'main',
       commitSha: 'abc123',
