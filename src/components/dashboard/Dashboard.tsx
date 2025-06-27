@@ -1,48 +1,35 @@
-// ─── React & State ───────────────────────────────────────────────
 import React, { useState, useMemo } from 'react';
-
-// ─── Types ───────────────────────────────────────────────────────
-import { Trip, CLIENTS, DRIVERS } from '../../types';
-
-// ─── UI Components ───────────────────────────────────────────────
+import { useAppContext } from '../../context/AppContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import { Input, Select } from '../ui/FormElements';
+import { Select } from '../ui/FormElements';
 import { Tooltip } from '../ui/Tooltip';
-
-// ─── Icons ───────────────────────────────────────────────────────
-import {
-  TrendingUp,
-  Truck,
-  DollarSign,
-  TrendingDown,
-  AlertTriangle,
-  Flag,
-  CheckCircle,
-  User,
-  Activity,
-  Target,
-  Award,
-  Download,
-  Eye
+import { 
+  TrendingUp, 
+  Truck, 
+  DollarSign, 
+  TrendingDown, 
+  AlertTriangle, 
+  Flag, 
+  CheckCircle, 
+  User, 
+  Activity, 
+  Target, 
+  Award, 
+  Download 
 } from 'lucide-react';
-
-// ─── Utils ───────────────────────────────────────────────────────
-import {
-  formatCurrency,
-  formatDate,
-  calculateTotalCosts,
-  filterTripsByDateRange,
-  filterTripsByClient,
-  filterTripsByCurrency,
-  filterTripsByDriver,
-  getAllFlaggedCosts,
-  getUnresolvedFlagsCount,
-  canCompleteTrip
+import { 
+  formatCurrency, 
+  calculateTotalCosts, 
+  filterTripsByDateRange, 
+  filterTripsByClient, 
+  filterTripsByCurrency, 
+  filterTripsByDriver, 
+  getAllFlaggedCosts, 
+  getUnresolvedFlagsCount, 
+  canCompleteTrip 
 } from '../../utils/helpers';
-
-// ─── Context ─────────────────────────────────────────────────────
-import { useAppContext } from '../../context/AppContext';
+import { Trip, CLIENTS, DRIVERS } from '../../types';
 
 interface DashboardProps {
   trips: Trip[];
@@ -58,7 +45,7 @@ const Dashboard: React.FC<DashboardProps> = ({ trips }) => {
     driver: ''
   });
 
-  const [showFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
   const filteredTrips = useMemo(() => {
     let filtered = trips;
@@ -225,66 +212,6 @@ const Dashboard: React.FC<DashboardProps> = ({ trips }) => {
         <h2 className="text-2xl font-bold text-gray-900">Dashboard Overview</h2>
         <Button variant="primary" size="md" icon={<Download className="w-5 h-5" />}>Export Data</Button>
       </div>
-
-      {/* Filters */}
-      {showFilters && (
-        <Card>
-          <CardHeader title="Filter Dashboard Data" />
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              <Input
-                label="Start Date"
-                type="date"
-                value={filters.startDate}
-                onChange={value => handleFilterChange('startDate', value)}
-              />
-              <Input
-                label="End Date"
-                type="date"
-                value={filters.endDate}
-                onChange={value => handleFilterChange('endDate', value)}
-              />
-              <Select
-                label="Client"
-                value={filters.client}
-                onChange={value => handleFilterChange('client', value)}
-                options={[
-                  { label: 'All Clients', value: '' },
-                  ...CLIENTS.map(c => ({ label: c, value: c }))
-                ]}
-              />
-              <Select
-                label="Driver"
-                value={filters.driver}
-                onChange={value => handleFilterChange('driver', value)}
-                options={[
-                  { label: 'All Drivers', value: '' },
-                  ...DRIVERS.map(d => ({ label: d, value: d }))
-                ]}
-              />
-              <Select
-                label="Currency"
-                value={filters.currency}
-                onChange={value => handleFilterChange('currency', value)}
-                options={[
-                  { label: 'All Currencies', value: '' },
-                  { label: 'ZAR (R)', value: 'ZAR' },
-                  { label: 'USD ($)', value: 'USD' }
-                ]}
-              />
-            </div>
-            <div className="mt-4 flex justify-end">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={clearFilters}
-              >
-                Clear Filters
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Key Performance Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -454,12 +381,8 @@ const Dashboard: React.FC<DashboardProps> = ({ trips }) => {
                       <div>
                         <p className="font-medium text-gray-900">Fleet {trip.fleetNumber}</p>
                         <p className="text-sm text-gray-600">{trip.route}</p>
-                        <p className="text-xs text-gray-500">{trip.driverName} • {formatDate(trip.endDate)}</p>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium text-green-600">{formatCurrency(trip.baseRevenue || 0, trip.revenueCurrency)}</p>
-                        <Button size="sm" variant="outline" icon={<Eye className="w-3 h-3" />}>View</Button>
-                      </div>
+                      <Button size="sm" variant="outline">View</Button>
                     </div>
                   </div>
                 ))}
@@ -495,11 +418,10 @@ const Dashboard: React.FC<DashboardProps> = ({ trips }) => {
                         <div>
                           <p className="font-medium text-gray-900">Fleet {trip.fleetNumber}</p>
                           <p className="text-sm text-gray-600">{trip.route}</p>
-                          <p className="text-xs text-gray-500">{trip.driverName} • {formatDate(trip.endDate)}</p>
                         </div>
                         <div className="text-right">
                           <p className="font-medium text-amber-600">{unresolvedCount} unresolved</p>
-                          <Button size="sm" variant="outline" icon={<Eye className="w-3 h-3" />}>View</Button>
+                          <Button size="sm" variant="outline">View</Button>
                         </div>
                       </div>
                     </div>
