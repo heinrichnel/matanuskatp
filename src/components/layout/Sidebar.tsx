@@ -1,24 +1,5 @@
 import { FC } from 'react';
-import {
-  Activity,
-  BarChart3,
-  CheckCircle,
-  ClipboardList,
-  Clock,
-  Flag,
-  Fuel,
-  Plus,
-  Settings,
-  Shield,
-  Target,
-  Truck,
-  Upload,
-  Users,
-  UserRound,
-  Bell,
-  User,
-  History
-} from 'lucide-react';
+import { Activity, BarChart3, CheckCircle, ClipboardList, Clock, Flag, Fuel, Plus, Settings, Shield, Target, Truck, Upload, Users, User as UserRound, Bell, User, History } from 'lucide-react';
 import Button from '../ui/Button';
 import SyncIndicator from '../ui/SyncIndicator';
 
