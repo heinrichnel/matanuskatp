@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import ErrorBoundary from './components/ErrorBoundary';
 
 // UI Components
-import Header from "./components/layout/Header";
+import Sidebar from "./components/layout/Sidebar";
 
 // Feature Components
 import Dashboard from "./components/dashboard/Dashboard";
@@ -25,12 +25,10 @@ import TripForm from "./components/trips/TripForm";
 
 // Utilities & Types
 import { Trip } from "./types";
-import { collection, onSnapshot } from "firebase/firestore";
-import { db } from "./firebase";
 
 const AppContent: React.FC = () => {
   const {
-    trips, setTrips, missedLoads, addMissedLoad, updateMissedLoad, deleteMissedLoad,
+    trips, missedLoads, addMissedLoad, updateMissedLoad, deleteMissedLoad,
     updateTrip, addTrip, deleteTrip, completeTrip
   } = useAppContext();
 
@@ -39,17 +37,6 @@ const AppContent: React.FC = () => {
   const [showTripForm, setShowTripForm] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | undefined>();
   // const [isLoading, setIsLoading] = useState(false); - This state was unused
-
-  useEffect(() => {
-    const unsub = onSnapshot(collection(db, "trips"), (snapshot) => {
-      const tripsData = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setTrips(tripsData as Trip[]);
-    });
-    return () => unsub();
-  }, [setTrips]);
 
   const handleAddTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     try {
@@ -143,7 +130,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-      <Header
+      <Sidebar
         currentView={currentView}
         onNavigate={setCurrentView}
         onNewTrip={() => {

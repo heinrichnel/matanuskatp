@@ -170,7 +170,7 @@ const ModalForm: React.FC<ModalFormProps> = ({
 
   // Render form fields based on type
   const renderField = (field: FormField) => {
-    const { id, label, type, placeholder, required, options, value, min, max, step, rows } = field;
+    const { id, label, type, placeholder, required, options, min, max, step, rows } = field;
     const hasError = touched[id] && errors[id];
 
     switch (type) {
@@ -226,9 +226,6 @@ const ModalForm: React.FC<ModalFormProps> = ({
             onChange={(value) => handleChange(id, value)}
             onBlur={() => handleBlur(id)}
             placeholder={placeholder}
-            min={min?.toString()}
-            max={max?.toString()}
-            step={step?.toString()}
             error={hasError ? errors[id] : undefined}
           />
         );

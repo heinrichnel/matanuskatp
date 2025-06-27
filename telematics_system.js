@@ -178,14 +178,14 @@ const updateTripProgress = (tripId, updateData) => {
     }
     const lastUpdate = trip.updates[trip.updates.length - 1];
     const distanceIncrement = haversineDistance(lastUpdate.location, updateData.location);
-    
+
     trip.distanceTraveledKm += distanceIncrement;
     trip.updates.push(updateData);
-    
+
     // Simple ETA calculation: assumes constant speed to a hypothetical destination
     // A real implementation would require a destination and a routing service.
-    trip.eta = "Calculating..."; 
-    
+    trip.eta = "Calculating...";
+
     console.log(`Updated trip ${tripId}. Total distance: ${trip.distanceTraveledKm.toFixed(2)} km.`);
     return trip;
 };
@@ -205,7 +205,7 @@ const endTrip = (tripId, endData) => {
     if (!trip || trip.status !== 'in_progress') {
         throw new Error("Trip not found or not in progress.");
     }
-    
+
     const startTime = new Date(trip.startTime);
     const endTime = new Date(endData.endTime);
     const durationMillis = endTime - startTime;
@@ -213,17 +213,17 @@ const endTrip = (tripId, endData) => {
 
     const speeds = trip.updates.map(u => u.speed).filter(s => s > 0);
     const averageSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
-    
+
     trip.status = 'completed';
     trip.endTime = endData.endTime;
     trip.endLocation = endData.endLocation;
-    
+
     trip.summary = {
         totalDistanceKm: trip.distanceTraveledKm.toFixed(2),
         totalDurationHours: durationHours.toFixed(2),
         averageSpeedMph: averageSpeed.toFixed(2),
     };
-    
+
     console.log(`Ended trip ${tripId}. Summary:`, trip.summary);
     return trip;
 };
@@ -256,7 +256,7 @@ app.post('/webhook/driver-event', (req, res) => {
 
         // --- Core Logic ---
         calculateDriverSafetyScore(driverId);
-        
+
         let alert = null;
         // Generate an alert for severe events
         if (
@@ -302,7 +302,7 @@ app.post('/webhook/trip-update', (req, res) => {
                 }
                 result = startTrip({ tripId, driverId, vehicleId, startTime: timestamp, startLocation: location });
                 break;
-            
+
             case 'in_progress':
                 const { location: updateLocation, speed } = req.body;
                 if (!updateLocation || speed === undefined) {
@@ -310,10 +310,10 @@ app.post('/webhook/trip-update', (req, res) => {
                 }
                 result = updateTripProgress(tripId, { timestamp, location: updateLocation, speed });
                 break;
-            
+
             case 'trip_ended':
-                 const { location: endLocation } = req.body;
-                 if (!endLocation) {
+                const { location: endLocation } = req.body;
+                if (!endLocation) {
                     return res.status(400).json({ error: 'Missing location for ending a trip.' });
                 }
                 result = endTrip(tripId, { endTime: timestamp, endLocation });
@@ -322,7 +322,7 @@ app.post('/webhook/trip-update', (req, res) => {
             default:
                 return res.status(400).json({ error: 'Invalid trip status.' });
         }
-        
+
         res.status(200).json({
             message: `Trip status '${status}' processed successfully.`,
             trip: result,

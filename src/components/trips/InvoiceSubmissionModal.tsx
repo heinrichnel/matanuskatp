@@ -238,9 +238,11 @@ const InvoiceSubmissionModal: React.FC<InvoiceSubmissionModalProps> = ({
         {/* Additional Costs Form */}
         <AdditionalCostsForm
           tripId={trip.id}
-          onAddCost={onAddAdditionalCost}
-          onRemoveCost={onRemoveAdditionalCost}
-          additionalCosts={trip.additionalCosts || []}
+          currency={trip.revenueCurrency}
+          costs={trip.additionalCosts || []}
+          onAdd={onAddAdditionalCost}
+          onRemove={onRemoveAdditionalCost}
+          onCancel={() => { /* Close/hide form logic if needed */ }}
         />
 
         {/* Actions */}

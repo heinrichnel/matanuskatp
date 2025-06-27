@@ -59,7 +59,7 @@ const Header: FC<HeaderProps> = ({
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r shadow flex flex-col z-30">
       <div className="flex items-center justify-between px-6 py-4 border-b">
-        <span className="text-xl font-bold text-blue-700 tracking-tight">TripPro</span>
+        <span className="text-xl font-bold text-primary tracking-tight">TripPro</span>
         <Button size="sm" variant="primary" onClick={onNewTrip} icon={<Plus className="w-4 h-4" />}>Add Trip</Button>
       </div>
       <nav className="flex-1 overflow-y-auto py-4">
@@ -67,7 +67,7 @@ const Header: FC<HeaderProps> = ({
           {navItems.map(({ id, label, icon: Icon }) => (
             <li key={id}>
               <button
-                className={`w-full flex items-center gap-3 px-4 py-2 rounded transition-colors text-left ${currentView === id ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-700 hover:bg-gray-100'}`}
+                className={`w-full flex items-center gap-3 px-4 py-2 rounded transition-colors text-left ${currentView === id ? 'bg-secondary text-primary font-semibold' : 'text-gray-700 hover:bg-gray-100'}`}
                 onClick={() => onNavigate(id)}
               >
                 <Icon className="w-5 h-5" />

@@ -268,7 +268,7 @@ export const importTripsFromWebBook = onRequest(async (req, res) => {
             return;
         }
         const batch = db.batch();
-        const targetCollection = 'Trips';
+        const targetCollection = 'trips';
         console.log(`[importTripsFromWebBook] Targeting collection: '${targetCollection}'`);
         let imported = 0;
         let skipped = 0;
@@ -438,6 +438,7 @@ export const importDriverBehaviorFromFile = onObjectFinalized(async (event) => {
 });
 
 import { onDocumentDeleted } from "firebase-functions/v2/firestore";
+import { RecaptchaEnterpriseServiceClient } from "@google-cloud/recaptcha-enterprise";
 
 export const logTripDeletion = onDocumentDeleted("trips/{tripId}", async (event) => {
     const snap = event.data;
@@ -465,5 +466,54 @@ export const logTripDeletion = onDocumentDeleted("trips/{tripId}", async (event)
         console.log(`Successfully logged deletion of trip ${tripId} to audit trail.`);
     } catch (error) {
         console.error(`Failed to log deletion of trip ${tripId}:`, error);
+    }
+});
+
+export const verifyRecaptcha = onRequest(async (req, res) => {
+    if (req.method !== "POST") {
+        res.status(405).send("Method Not Allowed");
+        return;
+    }
+
+    const { token, recaptchaAction } = req.body;
+    const projectID = "mat1-9e6b3";
+    const recaptchaKey = "6Leyim8rAAAAAINSXyIYn8xtPeOH-7sTB2-fBcNh";
+
+    try {
+        const client = new RecaptchaEnterpriseServiceClient();
+        const projectPath = client.projectPath(projectID);
+
+        const request = {
+            assessment: {
+                event: {
+                    token: token,
+                    siteKey: recaptchaKey,
+                },
+            },
+            parent: projectPath,
+        };
+
+        const [response] = await client.createAssessment(request);
+
+        if (!response.tokenProperties || !response.tokenProperties.valid) {
+            console.log(`The CreateAssessment call failed because the token was: ${response.tokenProperties ? response.tokenProperties.invalidReason : 'unknown'}`);
+            res.status(400).json({ success: false, message: "Invalid reCAPTCHA token." });
+            return;
+        }
+
+        if (response.tokenProperties.action === recaptchaAction) {
+            console.log(`The reCAPTCHA score is: ${response.riskAnalysis?.score}`);
+            if (response.riskAnalysis && response.riskAnalysis.score && response.riskAnalysis.score < 0.5) {
+                res.status(400).json({ success: false, message: "reCAPTCHA verification failed. Low score."});
+                return;
+            }
+            res.status(200).json({ success: true, score: response.riskAnalysis?.score });
+        } else {
+            console.log("The action attribute in your reCAPTCHA tag does not match the action you are expecting to score");
+            res.status(400).json({ success: false, message: "reCAPTCHA action mismatch." });
+        }
+    } catch (error) {
+        console.error("Error creating assessment:", error);
+        res.status(500).json({ success: false, message: "Internal server error during reCAPTCHA verification." });
     }
 });

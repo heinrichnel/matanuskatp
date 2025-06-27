@@ -7,17 +7,16 @@ import TripForm from './TripForm';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Select, Input } from '../ui/FormElements';
-import { Calendar, Filter, Plus } from 'lucide-react';
+import { Filter, Plus } from 'lucide-react';
 import Modal from '../ui/Modal';
 
 const TripCalendarPage: React.FC = () => {
   const { trips, updateTrip, addTrip, deleteTrip, completeTrip } = useAppContext();
-  
+
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [showTripForm, setShowTripForm] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
-  
+
   // Filters
   const [filters, setFilters] = useState({
     status: '',
@@ -26,7 +25,7 @@ const TripCalendarPage: React.FC = () => {
     dateRange: { start: '', end: '' }
   });
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // Apply filters
   const filteredTrips = trips.filter(trip => {
     if (filters.status && trip.status !== filters.status) return false;
@@ -36,11 +35,11 @@ const TripCalendarPage: React.FC = () => {
     if (filters.dateRange.end && trip.endDate > filters.dateRange.end) return false;
     return true;
   });
-  
+
   // Get unique values for filters
   const uniqueClients = [...new Set(trips.map(t => t.clientName))].sort();
   const uniqueDrivers = [...new Set(trips.map(t => t.driverName))].sort();
-  
+
   // Handle filter changes
   const handleFilterChange = (field: string, value: string) => {
     if (field.includes('dateRange')) {
@@ -56,7 +55,7 @@ const TripCalendarPage: React.FC = () => {
       setFilters(prev => ({ ...prev, [field]: value }));
     }
   };
-  
+
   // Clear filters
   const clearFilters = () => {
     setFilters({
@@ -66,11 +65,10 @@ const TripCalendarPage: React.FC = () => {
       dateRange: { start: '', end: '' }
     });
   };
-  
+
   // Handle add trip
   const handleAddTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     try {
-      setIsLoading(true);
       const tripId = await addTrip(tripData);
       setShowTripForm(false);
       setEditingTrip(undefined);
@@ -78,16 +76,13 @@ const TripCalendarPage: React.FC = () => {
     } catch (error) {
       console.error("Error adding trip:", error);
       alert("Error creating trip. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
-  
+
   // Handle update trip
   const handleUpdateTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
     if (editingTrip) {
       try {
-        setIsLoading(true);
         const updatedTrip: Trip = {
           ...editingTrip,
           ...tripData,
@@ -105,42 +100,34 @@ const TripCalendarPage: React.FC = () => {
       } catch (error) {
         console.error("Error updating trip:", error);
         alert("Error updating trip. Please try again.");
-      } finally {
-        setIsLoading(false);
       }
     }
   };
-  
+
   // Handle delete trip
   const handleDeleteTrip = async (id: string) => {
     if (confirm("Are you sure you want to delete this trip? This action cannot be undone.")) {
       try {
-        setIsLoading(true);
         await deleteTrip(id);
         alert("Trip deleted successfully!");
       } catch (error) {
         console.error("Error deleting trip:", error);
         alert("Error deleting trip. Please try again.");
-      } finally {
-        setIsLoading(false);
       }
     }
   };
-  
+
   // Handle complete trip
   const handleCompleteTrip = async (tripId: string) => {
     try {
-      setIsLoading(true);
       await completeTrip(tripId);
       alert("Trip marked as completed successfully!");
     } catch (error) {
       console.error("Error completing trip:", error);
       alert("Error completing trip. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -168,7 +155,7 @@ const TripCalendarPage: React.FC = () => {
           </Button>
         </div>
       </div>
-      
+
       {/* Filters */}
       {showFilters && (
         <Card>
@@ -186,7 +173,7 @@ const TripCalendarPage: React.FC = () => {
                   { label: 'Invoiced', value: 'invoiced' }
                 ]}
               />
-              
+
               <Select
                 label="Client"
                 value={filters.client}
@@ -196,7 +183,7 @@ const TripCalendarPage: React.FC = () => {
                   ...uniqueClients.map(c => ({ label: c, value: c }))
                 ]}
               />
-              
+
               <Select
                 label="Driver"
                 value={filters.driver}
@@ -206,7 +193,7 @@ const TripCalendarPage: React.FC = () => {
                   ...uniqueDrivers.map(d => ({ label: d, value: d }))
                 ]}
               />
-              
+
               <div className="grid grid-cols-2 gap-2">
                 <Input
                   label="From Date"
@@ -234,7 +221,7 @@ const TripCalendarPage: React.FC = () => {
           </CardContent>
         </Card>
       )}
-      
+
       {/* Calendar View */}
       <TripCalendarView
         trips={filteredTrips}
@@ -246,7 +233,7 @@ const TripCalendarPage: React.FC = () => {
         onDelete={handleDeleteTrip}
         onCompleteTrip={handleCompleteTrip}
       />
-      
+
       {/* Trip Details Modal */}
       {selectedTrip && (
         <TripDetails
@@ -254,7 +241,7 @@ const TripCalendarPage: React.FC = () => {
           onBack={() => setSelectedTrip(null)}
         />
       )}
-      
+
       {/* Trip Form Modal */}
       <Modal
         isOpen={showTripForm}

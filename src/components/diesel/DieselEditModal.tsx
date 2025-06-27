@@ -5,7 +5,6 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Input, Select, TextArea } from '../ui/FormElements';
 import { Save, X, Calculator, AlertTriangle, Fuel } from 'lucide-react';
-import { formatCurrency } from '../../utils/helpers';
 
 interface DieselEditModalProps {
   isOpen: boolean;
@@ -19,7 +18,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
   dieselRecordId
 }) => {
   const { dieselRecords, updateDieselRecord, trips } = useAppContext();
-  
+
   const [formData, setFormData] = useState({
     fleetNumber: '',
     date: '',
@@ -39,10 +38,10 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [autoCalculate, setAutoCalculate] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Find the diesel record
   const record = dieselRecords.find(r => r.id === dieselRecordId);
-  
+
   // Initialize form with record data
   useEffect(() => {
     if (record) {
@@ -63,10 +62,10 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
       });
     }
   }, [record, isOpen]);
-  
+
   const handleChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     // Clear errors
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -103,7 +102,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.fleetNumber) newErrors.fleetNumber = 'Fleet number is required';
     if (!formData.date) newErrors.date = 'Date is required';
     if (!formData.litresFilled) newErrors.litresFilled = 'Litres filled is required';
@@ -119,7 +118,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
     if (formData.totalCost && (isNaN(Number(formData.totalCost)) || Number(formData.totalCost) <= 0)) {
       newErrors.totalCost = 'Must be a valid positive number';
     }
-    
+
     // For reefer units, validate hours operated
     if (formData.isReeferUnit) {
       if (!formData.hoursOperated) {
@@ -132,7 +131,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
       if (!formData.kmReading || isNaN(Number(formData.kmReading)) || Number(formData.kmReading) <= 0) {
         newErrors.kmReading = 'KM reading must be a valid positive number';
       }
-      
+
       // Validate KM readings
       if (formData.kmReading && formData.previousKmReading) {
         const current = Number(formData.kmReading);
@@ -188,7 +187,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
       };
 
       await updateDieselRecord(updatedRecord);
-      
+
       alert('Diesel record updated successfully!');
       onClose();
     } catch (err: any) {
@@ -264,9 +263,9 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
             onChange={val => handleChange('fleetNumber', val)}
             options={[
               { label: 'Select fleet...', value: '' },
-              ...FLEET_NUMBERS.map(f => ({ 
-                label: f, 
-                value: f 
+              ...FLEET_NUMBERS.map(f => ({
+                label: f,
+                value: f
               }))
             ]}
             error={errors.fleetNumber}
@@ -351,7 +350,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
               ]}
               error={errors.currency}
             />
-            
+
             <Input
               label="Total Cost *"
               type="number"

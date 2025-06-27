@@ -20,6 +20,10 @@ export default {
           900: '#0c4a6e',
           950: '#082f49',
         },
+        secondary: '#f1f1f1',
+        warning: '#ffb703',
+        error: '#d90429',
+        success: '#2a9d8f'
       },
       boxShadow: {
         card: '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
