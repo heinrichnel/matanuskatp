@@ -6,8 +6,7 @@ interface TooltipProps {
   position?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ text, position = 'top' }) => {
-  // Simple tooltip using Tailwind for demonstration
+export const Tooltip: React.FC<TooltipProps> = ({ text, position = 'top' }) => {
   return (
     <span className="relative group inline-flex items-center">
       <Info className="w-4 h-4 text-gray-400 ml-1" />
@@ -22,5 +21,3 @@ const Tooltip: React.FC<TooltipProps> = ({ text, position = 'top' }) => {
     </span>
   );
 };
-
-export { Tooltip };

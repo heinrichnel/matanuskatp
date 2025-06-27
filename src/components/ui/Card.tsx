@@ -38,9 +38,11 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
     <div className={`px-6 py-4 border-b border-slate-200 flex justify-between items-center ${className}`}>
       <div className="flex items-center gap-2">
         {icon && <span className="text-xl">{icon}</span>}
-        <h3 className="text-xl font-semibold text-slate-800">{title}</h3>
+        <div>
+          <h3 className="text-xl font-semibold text-slate-800">{title}</h3>
+          {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
+        </div>
       </div>
-      {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
       {action && <div>{action}</div>}
     </div>
   );
