@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Trip, CostEntry } from '../../types';
+import React, { useState, useEffect } from 'react';
+import { Trip, CostEntry, Attachment, AdditionalCost, DelayReason } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import { useSyncContext } from '../../context/SyncContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
