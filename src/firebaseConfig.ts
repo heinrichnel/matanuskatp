@@ -1,7 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
-// ✅ Gebruik omgewingsveranderlikes uit .env
+// Use environment variables from .env
 export const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -13,13 +13,36 @@ export const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// 🔥 Firebase App initialiseer
+// Validate required Firebase configuration
+const validateConfig = () => {
+  const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+  const missingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
+  
+  if (missingFields.length > 0) {
+    console.error('❌ Missing Firebase configuration values:', missingFields);
+    throw new Error(`Firebase configuration is incomplete. Missing: ${missingFields.join(', ')}. Please check your .env file.`);
+  }
+};
+
+// Validate configuration before initializing
+validateConfig();
+
+// Initialize Firebase app
 export const firebaseApp = initializeApp(firebaseConfig);
 
-// 📊 Optioneel: Analytics initialiseer net as dit beskikbaar is
+// Initialize Analytics only if supported and not on localhost
 export const initAnalytics = async () => {
-  if (await isSupported()) {
-    return getAnalytics(firebaseApp);
+  if (typeof window !== 'undefined' && 
+      window.location.hostname !== 'localhost' && 
+      firebaseConfig.projectId && 
+      firebaseConfig.measurementId) {
+    try {
+      if (await isSupported()) {
+        return getAnalytics(firebaseApp);
+      }
+    } catch (error) {
+      console.warn('⚠️ Firebase Analytics initialization failed:', error);
+    }
   }
   return null;
 };

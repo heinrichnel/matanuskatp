@@ -20,58 +20,19 @@ import {
 import { getAnalytics } from 'firebase/analytics';
 import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport } from './types';
 import { AuditLog } from './types/audit';
-
-// Firebase configuration
-interface FirebaseConfig {
-  apiKey: string;
-  authDomain: string;
-  databaseURL: string;
-  projectId: string;
-  storageBucket: string;
-  messagingSenderId: string;
-  appId: string;
-  measurementId: string;
-}
-
-const firebaseConfig: FirebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API || '',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || '',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ''
-};
-
-// Validate required Firebase configuration
-const validateFirebaseConfig = (config: FirebaseConfig): void => {
-  const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
-  const missingFields = requiredFields.filter(field => !config[field as keyof FirebaseConfig]);
-  
-  if (missingFields.length > 0) {
-    console.error('❌ Missing Firebase configuration values:', missingFields);
-    throw new Error(`Firebase configuration is incomplete. Missing: ${missingFields.join(', ')}. Please check your environment variables.`);
-  }
-};
-
-// Validate configuration before initializing Firebase
-validateFirebaseConfig(firebaseConfig);
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+import { firebaseConfig, firebaseApp } from './firebaseConfig';
 
 // Initialize Firestore with real-time capabilities (default database only)
-export const db = getFirestore(app);
+export const db = getFirestore(firebaseApp);
 
-// Initialize Analytics only if all required config is present and not in localhost
+// Initialize Analytics (only in production)
 let analytics: ReturnType<typeof getAnalytics> | undefined;
 if (typeof window !== 'undefined' && 
     window.location.hostname !== 'localhost' && 
     firebaseConfig.projectId && 
     firebaseConfig.measurementId) {
   try {
-    analytics = getAnalytics(app);
+    analytics = getAnalytics(firebaseApp);
     console.log('✅ Firebase Analytics initialized');
   } catch (error) {
     console.warn('⚠️ Firebase Analytics initialization failed:', error);
