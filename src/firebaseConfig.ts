@@ -1,5 +1,4 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics, isSupported } from "firebase/analytics";
 
 // Use environment variables from .env
 export const firebaseConfig = {
@@ -17,7 +16,7 @@ export const firebaseConfig = {
 const validateConfig = () => {
   const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
   const missingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
-  
+
   if (missingFields.length > 0) {
     console.error('❌ Missing Firebase configuration values:', missingFields);
     throw new Error(`Firebase configuration is incomplete. Missing: ${missingFields.join(', ')}`);
@@ -30,19 +29,4 @@ validateConfig();
 // Initialize Firebase app
 export const firebaseApp = initializeApp(firebaseConfig);
 
-// Initialize Analytics only if supported and not on localhost
-export const initAnalytics = async () => {
-  if (typeof window !== 'undefined' && 
-      window.location.hostname !== 'localhost' && 
-      firebaseConfig.projectId && 
-      firebaseConfig.measurementId) {
-    try {
-      if (await isSupported()) {
-        return getAnalytics(firebaseApp);
-      }
-    } catch (error) {
-      console.warn('⚠️ Firebase Analytics initialization failed:', error);
-    }
-  }
-  return null;
-};
+// Analytics initialization is handled in firebase.ts to avoid redundancy.
