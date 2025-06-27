@@ -12,6 +12,18 @@ pinned_version = "6"
 
 [plugins.inputs]
 
+[[plugins]]
+origin = "config"
+package = "netlify-plugin-formspree"
+
+[plugins.inputs]
+
+[[plugins]]
+origin = "config"
+package = "netlify-plugin-image-optim"
+
+[plugins.inputs]
+
 [build]
 publish = "/workspaces/APppp/dist"
 publishOrigin = "config"
