@@ -3,14 +3,14 @@ import { getAnalytics, isSupported } from "firebase/analytics";
 
 // Use environment variables from .env
 export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: "AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g",
+  authDomain: "mat1-9e6b3.firebaseapp.com",
+  databaseURL: "https://mat1-9e6b3-default-rtdb.firebaseio.com",
+  projectId: "mat1-9e6b3",
+  storageBucket: "mat1-9e6b3.firebasestorage.app",
+  messagingSenderId: "250085264089",
+  appId: "1:250085264089:web:51c2b209e0265e7d04ccc8",
+  measurementId: "G-YHQHSJN5CQ"
 };
 
 // Validate required Firebase configuration
@@ -20,7 +20,7 @@ const validateConfig = () => {
   
   if (missingFields.length > 0) {
     console.error('❌ Missing Firebase configuration values:', missingFields);
-    throw new Error(`Firebase configuration is incomplete. Missing: ${missingFields.join(', ')}. Please check your .env file.`);
+    throw new Error(`Firebase configuration is incomplete. Missing: ${missingFields.join(', ')}`);
   }
 };
 
