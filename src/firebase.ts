@@ -1,14 +1,14 @@
-import { initializeApp } from 'firebase/app';
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  collection,
+  addDoc,
   setDoc,
-  updateDoc, 
-  deleteDoc, 
-  doc, 
-  onSnapshot, 
-  query, 
+  updateDoc,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
   orderBy,
   serverTimestamp,
   enableNetwork,
@@ -22,15 +22,18 @@ import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionI
 import { AuditLog } from './types/audit';
 import { firebaseConfig, firebaseApp } from './firebaseConfig';
 
-// Initialize Firestore with real-time capabilities (default database only)
-export const db = getFirestore(firebaseApp);
+// Initialize Firestore with offline persistence
+export const db = initializeFirestore(firebaseApp, {
+  localCache: persistentLocalCache({ cacheSizeBytes: 104857600 }), // 100 MB
+});
+console.log("✅ Firestore initialized with persistent cache.");
 
 // Initialize Analytics (only in production)
 let analytics: ReturnType<typeof getAnalytics> | undefined;
-if (typeof window !== 'undefined' && 
-    window.location.hostname !== 'localhost' && 
-    firebaseConfig.projectId && 
-    firebaseConfig.measurementId) {
+if (typeof window !== 'undefined' &&
+  window.location.hostname !== 'localhost' &&
+  firebaseConfig.projectId &&
+  firebaseConfig.measurementId) {
   try {
     analytics = getAnalytics(firebaseApp);
     console.log('✅ Firebase Analytics initialized');
@@ -44,14 +47,6 @@ export { analytics };
 export const enableFirestoreNetwork = () => enableNetwork(db);
 export const disableFirestoreNetwork = () => disableNetwork(db);
 
-// Enable offline persistence
-try {
-  // Enable offline persistence for better user experience
-  console.log('Firebase Firestore initialized with offline persistence');
-} catch (error) {
-  console.warn('Firestore offline persistence not available:', error);
-}
-
 // Optionally, you can add a connection status monitor:
 export const monitorConnectionStatus = (
   onOnline: () => void,
@@ -62,16 +57,16 @@ export const monitorConnectionStatus = (
     enableFirestoreNetwork();
     onOnline();
   };
-  
+
   const handleOffline = () => {
     console.log("🔴 Firebase connection lost - working offline");
     disableFirestoreNetwork();
     onOffline();
   };
-  
+
   window.addEventListener('online', handleOnline);
   window.addEventListener('offline', handleOffline);
-  
+
   return () => {
     window.removeEventListener('online', handleOnline);
     window.removeEventListener('offline', handleOffline);
@@ -94,11 +89,11 @@ const cleanUndefinedValues = (obj: any): any => {
   if (obj === null || obj === undefined) {
     return null;
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(cleanUndefinedValues);
   }
-  
+
   if (typeof obj === 'object') {
     const cleaned: any = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -108,7 +103,7 @@ const cleanUndefinedValues = (obj: any): any => {
     }
     return cleaned;
   }
-  
+
   return obj;
 };
 
@@ -122,15 +117,15 @@ export const addTripToFirebase = async (tripData: Trip): Promise<string> => {
       updatedAt: serverTimestamp(),
       version: 1
     });
-    
+
     // Use client-generated id for document so delete/update by id works
     const tripRef = doc(db, 'trips', tripData.id);
     await setDoc(tripRef, tripWithTimestamp as any);
     console.log("✅ Trip added with real-time sync ID:", tripData.id);
-    
+
     // Log activity
     await logActivity('trip_created', tripData.id, 'trip', tripData);
-    
+
     return tripData.id;
   } catch (error) {
     console.error("❌ Error adding trip:", error);
@@ -141,7 +136,7 @@ export const addTripToFirebase = async (tripData: Trip): Promise<string> => {
 export const updateTripInFirebase = async (id: string, tripData: Partial<Trip>): Promise<void> => {
   try {
     const tripRef = doc(db, 'trips', id);
-    
+
     // Add update timestamp and increment version, clean undefined values
     const updateData = cleanUndefinedValues({
       ...tripData,
@@ -149,13 +144,13 @@ export const updateTripInFirebase = async (id: string, tripData: Partial<Trip>):
       // Increment version if present, otherwise set to 1
       version: typeof (tripData as any).version === 'number' ? (tripData as any).version + 1 : 1
     });
-    
+
     await updateDoc(tripRef, updateData);
     console.log("✅ Trip updated with real-time sync:", id);
-    
+
     // Log activity
     await logActivity('trip_updated', id, 'trip', updateData);
-    
+
   } catch (error) {
     console.error("❌ Error updating trip:", error);
     throw error;
@@ -166,13 +161,13 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
   try {
     // First, get the trip data to log it before deletion
     const tripRef = doc(db, 'trips', id);
-    
+
     // Create a batch operation for atomicity
     const batch = writeBatch(db);
-    
+
     // Delete the trip
     batch.delete(tripRef);
-    
+
     // Delete any related cost entries or other dependent documents
     // This ensures we don't have orphaned data
     const relatedCostsQuery = query(collection(db, 'costs'), where('tripId', '==', id));
@@ -180,15 +175,15 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
     costsSnapshot.forEach(doc => {
       batch.delete(doc.ref);
     });
-    
+
     // Commit the batch
     await batch.commit();
-    
+
     console.log("✅ Trip and related data deleted with real-time sync:", id);
-    
+
     // Log activity
     await logActivity('trip_deleted', id, 'trip', { deletedAt: new Date().toISOString() });
-    
+
   } catch (error) {
     console.error("❌ Error deleting trip:", error);
     throw error;
@@ -201,25 +196,25 @@ export const listenToTrips = (
   onError?: (error: Error) => void
 ): (() => void) => {
   const q = query(
-    tripsCollection, 
+    tripsCollection,
     orderBy('startDate', 'desc')
   );
-  
+
   return onSnapshot(
-    q, 
+    q,
     (snapshot) => {
       const trips: Trip[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        trips.push({ 
-          id: doc.id, 
+        trips.push({
+          id: doc.id,
           ...data,
           // Convert Firestore timestamps to ISO strings
           createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
           updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt
         } as unknown as Trip);
       });
-      
+
       console.log(`🔄 Real-time trips update: ${trips.length} trips loaded`);
       callback(trips);
     },
@@ -238,12 +233,12 @@ export const addDieselToFirebase = async (dieselData: DieselConsumptionRecord): 
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    
+
     const docRef = await addDoc(dieselCollection, dieselWithTimestamp);
     console.log("✅ Diesel record added with real-time sync:", docRef.id);
-    
+
     await logActivity('diesel_created', docRef.id, 'diesel', dieselData);
-    
+
     return docRef.id;
   } catch (error) {
     console.error("❌ Error adding diesel record:", error);
@@ -258,12 +253,12 @@ export const updateDieselInFirebase = async (id: string, dieselData: Partial<Die
       ...dieselData,
       updatedAt: serverTimestamp()
     });
-    
+
     await updateDoc(dieselRef, updateData);
     console.log("✅ Diesel record updated with real-time sync:", id);
-    
+
     await logActivity('diesel_updated', id, 'diesel', updateData);
-    
+
   } catch (error) {
     console.error("❌ Error updating diesel record:", error);
     throw error;
@@ -275,9 +270,9 @@ export const deleteDieselFromFirebase = async (id: string): Promise<void> => {
     const dieselRef = doc(db, 'diesel', id);
     await deleteDoc(dieselRef);
     console.log("✅ Diesel record deleted with real-time sync:", id);
-    
+
     await logActivity('diesel_deleted', id, 'diesel', { deletedAt: new Date().toISOString() });
-    
+
   } catch (error) {
     console.error("❌ Error deleting diesel record:", error);
     throw error;
@@ -289,21 +284,21 @@ export const listenToDieselRecords = (
   onError?: (error: Error) => void
 ): (() => void) => {
   const q = query(dieselCollection, orderBy('date', 'desc'));
-  
+
   return onSnapshot(
     q,
     (snapshot) => {
       const records: DieselConsumptionRecord[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        records.push({ 
-          id: doc.id, 
+        records.push({
+          id: doc.id,
           ...data,
           createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
           updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt
         } as unknown as DieselConsumptionRecord);
       });
-      
+
       console.log(`🔄 Real-time diesel records update: ${records.length} records loaded`);
       callback(records);
     },
@@ -322,12 +317,12 @@ export const addMissedLoadToFirebase = async (loadData: MissedLoad): Promise<str
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    
+
     const docRef = await addDoc(missedLoadsCollection, loadWithTimestamp);
     console.log("✅ Missed load added with real-time sync:", docRef.id);
-    
+
     await logActivity('missed_load_created', docRef.id, 'missed_load', loadData);
-    
+
     return docRef.id;
   } catch (error) {
     console.error("❌ Error adding missed load:", error);
@@ -342,12 +337,12 @@ export const updateMissedLoadInFirebase = async (id: string, loadData: Partial<M
       ...loadData,
       updatedAt: serverTimestamp()
     });
-    
+
     await updateDoc(loadRef, updateData);
     console.log("✅ Missed load updated with real-time sync:", id);
-    
+
     await logActivity('missed_load_updated', id, 'missed_load', updateData);
-    
+
   } catch (error) {
     console.error("❌ Error updating missed load:", error);
     throw error;
@@ -359,9 +354,9 @@ export const deleteMissedLoadFromFirebase = async (id: string): Promise<void> =>
     const loadRef = doc(db, 'missedLoads', id);
     await deleteDoc(loadRef);
     console.log("✅ Missed load deleted with real-time sync:", id);
-    
+
     await logActivity('missed_load_deleted', id, 'missed_load', { deletedAt: new Date().toISOString() });
-    
+
   } catch (error) {
     console.error("❌ Error deleting missed load:", error);
     throw error;
@@ -373,21 +368,21 @@ export const listenToMissedLoads = (
   onError?: (error: Error) => void
 ): (() => void) => {
   const q = query(missedLoadsCollection, orderBy('recordedAt', 'desc'));
-  
+
   return onSnapshot(
     q,
     (snapshot) => {
       const loads: MissedLoad[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        loads.push({ 
-          id: doc.id, 
+        loads.push({
+          id: doc.id,
           ...data,
           createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
           updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt
         } as unknown as MissedLoad);
       });
-      
+
       console.log(`🔄 Real-time missed loads update: ${loads.length} loads loaded`);
       callback(loads);
     },
@@ -406,12 +401,12 @@ export const addDriverBehaviorEventToFirebase = async (eventData: DriverBehavior
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    
+
     const docRef = await addDoc(driverBehaviorCollection, eventWithTimestamp);
     console.log("✅ Driver behavior event added with real-time sync:", docRef.id);
-    
+
     await logActivity('driver_behavior_created', docRef.id, 'driver_behavior', eventData);
-    
+
     return docRef.id;
   } catch (error) {
     console.error("❌ Error adding driver behavior event:", error);
@@ -426,12 +421,12 @@ export const updateDriverBehaviorEventToFirebase = async (id: string, eventData:
       ...eventData,
       updatedAt: serverTimestamp()
     });
-    
+
     await updateDoc(eventRef, updateData);
     console.log("✅ Driver behavior event updated with real-time sync:", id);
-    
+
     await logActivity('driver_behavior_updated', id, 'driver_behavior', updateData);
-    
+
   } catch (error) {
     console.error("❌ Error updating driver behavior event:", error);
     throw error;
@@ -443,9 +438,9 @@ export const deleteDriverBehaviorEventToFirebase = async (id: string): Promise<v
     const eventRef = doc(db, 'driverBehavior', id);
     await deleteDoc(eventRef);
     console.log("✅ Driver behavior event deleted with real-time sync:", id);
-    
+
     await logActivity('driver_behavior_deleted', id, 'driver_behavior', { deletedAt: new Date().toISOString() });
-    
+
   } catch (error) {
     console.error("❌ Error deleting driver behavior event:", error);
     throw error;
@@ -457,21 +452,21 @@ export const listenToDriverBehaviorEvents = (
   onError?: (error: Error) => void
 ): (() => void) => {
   const q = query(driverBehaviorCollection, orderBy('eventDate', 'desc'));
-  
+
   return onSnapshot(
     q,
     (snapshot) => {
       const events: DriverBehaviorEvent[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        events.push({ 
-          id: doc.id, 
+        events.push({
+          id: doc.id,
           ...data,
           createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
           updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt
         } as unknown as DriverBehaviorEvent);
       });
-      
+
       console.log(`🔄 Real-time driver behavior events update: ${events.length} events loaded`);
       callback(events);
     },
@@ -490,12 +485,12 @@ export const addActionItemToFirebase = async (itemData: ActionItem): Promise<str
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    
+
     const docRef = await addDoc(actionItemsCollection, itemWithTimestamp);
     console.log("✅ Action item added with real-time sync:", docRef.id);
-    
+
     await logActivity('action_item_created', docRef.id, 'action_item', itemData);
-    
+
     return docRef.id;
   } catch (error) {
     console.error("❌ Error adding action item:", error);
@@ -510,12 +505,12 @@ export const updateActionItemInFirebase = async (id: string, itemData: Partial<A
       ...itemData,
       updatedAt: serverTimestamp()
     });
-    
+
     await updateDoc(itemRef, updateData);
     console.log("✅ Action item updated with real-time sync:", id);
-    
+
     await logActivity('action_item_updated', id, 'action_item', updateData);
-    
+
   } catch (error) {
     console.error("❌ Error updating action item:", error);
     throw error;
@@ -527,9 +522,9 @@ export const deleteActionItemFromFirebase = async (id: string): Promise<void> =>
     const itemRef = doc(db, 'actionItems', id);
     await deleteDoc(itemRef);
     console.log("✅ Action item deleted with real-time sync:", id);
-    
+
     await logActivity('action_item_deleted', id, 'action_item', { deletedAt: new Date().toISOString() });
-    
+
   } catch (error) {
     console.error("❌ Error deleting action item:", error);
     throw error;
@@ -541,22 +536,22 @@ export const listenToActionItems = (
   onError?: (error: Error) => void
 ): (() => void) => {
   const q = query(actionItemsCollection, orderBy('dueDate', 'asc'));
-  
+
   return onSnapshot(
     q,
     (snapshot) => {
       const items: ActionItem[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        items.push({ 
-          id: doc.id, 
+        items.push({
+          id: doc.id,
           ...data,
           createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
           updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt,
           completedAt: data.completedAt?.toDate?.()?.toISOString() || data.completedAt
         } as ActionItem);
       });
-      
+
       console.log(`🔄 Real-time action items update: ${items.length} items loaded`);
       callback(items);
     },
@@ -575,12 +570,12 @@ export const addCARReportToFirebase = async (reportData: CARReport): Promise<str
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
-    
+
     const docRef = await addDoc(carReportsCollection, reportWithTimestamp);
     console.log("✅ CAR report added with real-time sync:", docRef.id);
-    
+
     await logActivity('car_report_created', docRef.id, 'car_report', reportData);
-    
+
     return docRef.id;
   } catch (error) {
     console.error("❌ Error adding CAR report:", error);
@@ -595,12 +590,12 @@ export const updateCARReportInFirebase = async (id: string, reportData: Partial<
       ...reportData,
       updatedAt: serverTimestamp()
     });
-    
+
     await updateDoc(reportRef, updateData);
     console.log("✅ CAR report updated with real-time sync:", id);
-    
+
     await logActivity('car_report_updated', id, 'car_report', updateData);
-    
+
   } catch (error) {
     console.error("❌ Error updating CAR report:", error);
     throw error;
@@ -612,9 +607,9 @@ export const deleteCARReportFromFirebase = async (id: string): Promise<void> => 
     const reportRef = doc(db, 'carReports', id);
     await deleteDoc(reportRef);
     console.log("✅ CAR report deleted with real-time sync:", id);
-    
+
     await logActivity('car_report_deleted', id, 'car_report', { deletedAt: new Date().toISOString() });
-    
+
   } catch (error) {
     console.error("❌ Error deleting CAR report:", error);
     throw error;
@@ -626,22 +621,22 @@ export const listenToCARReports = (
   onError?: (error: Error) => void
 ): (() => void) => {
   const q = query(carReportsCollection, orderBy('createdAt', 'desc'));
-  
+
   return onSnapshot(
     q,
     (snapshot) => {
       const reports: CARReport[] = [];
       snapshot.forEach((doc) => {
         const data = doc.data();
-        reports.push({ 
-          id: doc.id, 
+        reports.push({
+          id: doc.id,
           ...data,
           createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
           updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt,
           completedAt: data.completedAt?.toDate?.()?.toISOString() || data.completedAt
         } as CARReport);
       });
-      
+
       console.log(`🔄 Real-time CAR reports update: ${reports.length} reports loaded`);
       callback(reports);
     },
@@ -654,9 +649,9 @@ export const listenToCARReports = (
 
 // Activity Logging for Audit Trail
 const logActivity = async (
-  action: string, 
-  entityId: string, 
-  entityType: string, 
+  action: string,
+  entityId: string,
+  entityType: string,
   data: any
 ): Promise<void> => {
   try {
@@ -670,7 +665,7 @@ const logActivity = async (
       userAgent: navigator.userAgent,
       ipAddress: 'unknown' // In production, get from server
     });
-    
+
     await addDoc(activityLogsCollection, cleanedData);
   } catch (error) {
     console.warn("⚠️ Failed to log activity:", error);
@@ -684,7 +679,7 @@ export const addAuditLogToFirebase = async (logData: AuditLog): Promise<string> 
       ...logData,
       timestamp: serverTimestamp(),
     });
-    
+
     const docRef = await addDoc(auditLogsCollection, logWithTimestamp);
     console.log("✅ Audit log added:", docRef.id);
     return docRef.id;
@@ -738,5 +733,3 @@ export const batchUpdateTrips = async (updates: Array<{ id: string; data: Partia
 export const generateTripId = (): string => {
   return `trip_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
-
-console.log("🚀 Firebase Firestore initialized with real-time sync capabilities");

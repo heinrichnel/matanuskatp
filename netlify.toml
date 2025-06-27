@@ -1,3 +1,9 @@
 [build]
 command = "vite build"
 publish = "dist"
+
+[[plugins]]
+  package = "netlify-plugin-formspree"
+
+[[plugins]]
+package = "netlify-plugin-image-optim"
