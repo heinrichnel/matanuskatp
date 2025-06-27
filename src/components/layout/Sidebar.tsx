@@ -15,7 +15,7 @@ import {
   Upload,
   Users,
   Bell,
-  UserRound,
+  User,
   History
 } from 'lucide-react';
 import Button from '../ui/Button';
@@ -82,7 +82,7 @@ const Header: FC<HeaderProps> = ({
           <SyncIndicator showText={true} />
         </div>
         <div className="flex items-center gap-3">
-          <UserRound className="w-5 h-5 text-gray-400" />
+          <User className="w-5 h-5 text-gray-400" />
           <span className="text-sm text-gray-700">{userName}</span>
           <button
             className="ml-auto p-2 rounded-full hover:bg-gray-100 focus:outline-none"

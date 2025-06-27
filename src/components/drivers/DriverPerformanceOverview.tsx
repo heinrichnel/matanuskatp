@@ -4,7 +4,7 @@ import { DriverBehaviorEvent, DRIVER_BEHAVIOR_EVENT_TYPES, DRIVERS } from '../..
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Input, Select } from '../ui/FormElements';
-import { UserRound, AlertTriangle, CheckCircle, Plus, RefreshCw, Shield, Clock, Eye, Edit } from 'lucide-react';
+import { User, AlertTriangle, CheckCircle, Plus, RefreshCw, Shield, Clock, Eye, Edit } from 'lucide-react';
 import { formatDate, formatDateTime } from '../../utils/helpers';
 import SyncIndicator from '../ui/SyncIndicator';
 
@@ -179,7 +179,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
                 <p className="text-2xl font-bold text-gray-900">{summary.totalEvents}</p>
                 <p className="text-xs text-gray-400">Recorded incidents</p>
               </div>
-              <UserRound className="w-8 h-8 text-blue-500" />
+              <User className="w-8 h-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -409,7 +409,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
         <CardContent>
           {filteredEvents.length === 0 ? (
             <div className="text-center py-8">
-              <UserRound className="mx-auto h-10 w-10 text-gray-400" />
+              <User className="mx-auto h-10 w-10 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No behavior events found</h3>
               <p className="mt-1 text-sm text-gray-500">
                 {selectedDriver || selectedEventType || selectedSeverity || selectedStatus || dateRange.start || dateRange.end

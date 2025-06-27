@@ -12,7 +12,7 @@ import {
   AlertTriangle, 
   Flag, 
   CheckCircle, 
-  User, 
+  User,
   Activity, 
   Target, 
   Award, 
