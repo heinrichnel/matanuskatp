@@ -1,3 +1,13 @@
 [build]
-command = "vite build"
+command = "npm run build"
 publish = "dist"
+
+# Uncomment if you need environment variables for different contexts
+# [context.production.environment]
+# VITE_API_URL = "https://api.production.com"
+
+# Handle single-page application routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
