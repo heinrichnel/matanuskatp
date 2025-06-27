@@ -16,9 +16,7 @@ import {
   CheckCircle,
   Link,
   Search,
-  RefreshCw,
-  Trash2,
-  Edit
+  Trash2
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import SyncIndicator from '../ui/SyncIndicator';
@@ -28,9 +26,10 @@ import DieselNormsModal from './DieselNormsModal';
 import DieselDebriefModal from './DieselDebriefModal';
 import ProbeVerificationModal from './ProbeVerificationModal';
 import TripLinkageModal from './TripLinkageModal';
+import DieselEditModal from './DieselEditModal';
 
 const DieselDashboard: React.FC = () => {
-  const { dieselRecords = [], trips = [], deleteDieselRecord, updateDieselRecord } = useAppContext();
+  const { dieselRecords = [], trips = [], deleteDieselRecord } = useAppContext();
   const { subscribeToDieselRecords } = useSyncContext();
   
   const [showManualEntryModal, setShowManualEntryModal] = useState(false);
@@ -92,7 +91,7 @@ const DieselDashboard: React.FC = () => {
   
   const avgKmPerLitre = sortedRecords
     .filter(r => r.kmPerLitre && !r.isReeferUnit)
-    .reduce((sum, r, i, arr) => sum + (r.kmPerLitre || 0) / arr.length, 0);
+    .reduce((sum, r, _, arr) => sum + (r.kmPerLitre || 0) / arr.length, 0);
   
   const recordsNeedingProbeVerification = sortedRecords.filter(r => 
     !r.isReeferUnit && 
@@ -100,28 +99,66 @@ const DieselDashboard: React.FC = () => {
     ['22H', '23H', '24H', '26H', '28H', '31H', '30H'].includes(r.fleetNumber)
   );
   
-  const recordsNeedingDebrief = sortedRecords.filter(r => {
-    if (r.isReeferUnit) {
-      // For reefer units, check if litres per hour is outside expected range
-      const expectedLitresPerHour = 3.5; // Default value
-      const tolerance = 0.15; // 15% tolerance
-      const litresPerHour = r.litresPerHour || (r.hoursOperated ? r.litresFilled / r.hoursOperated : 0);
+  const recordsForDebrief = sortedRecords.map(r => {
+    const norm = dieselNorms.find(n => n.fleetNumber === r.fleetNumber);
+    const isReefer = r.isReeferUnit;
+
+    const expectedKmPerLitre = (!isReefer && norm?.expectedKmPerLitre) ? norm.expectedKmPerLitre : 3.0;
+    const expectedLitresPerHour = (isReefer && norm?.litresPerHour) ? norm.litresPerHour : 3.5;
+    const tolerancePercentage = norm?.tolerancePercentage || (isReefer ? 15 : 10);
+    const tolerance = tolerancePercentage / 100;
+
+    let efficiencyMetric = 0;
+    let expectedMetric = 0;
+    let efficiencyVariance = 0;
+    let performanceStatus: 'poor' | 'normal' | 'excellent' = 'normal';
+
+    if (isReefer) {
+      efficiencyMetric = r.litresPerHour || (r.hoursOperated && r.hoursOperated > 0 ? r.litresFilled / r.hoursOperated : 0);
+      expectedMetric = expectedLitresPerHour;
       
-      return litresPerHour > 0 && 
-        (litresPerHour < expectedLitresPerHour * (1 - tolerance) || 
-         litresPerHour > expectedLitresPerHour * (1 + tolerance)) &&
-        !r.debriefDate;
+      if (efficiencyMetric > 0) {
+        efficiencyVariance = ((efficiencyMetric - expectedMetric) / expectedMetric) * 100;
+
+        if (efficiencyMetric > expectedMetric * (1 + tolerance)) {
+            performanceStatus = 'poor';
+        } else if (efficiencyMetric < expectedMetric * (1 - tolerance)) {
+            performanceStatus = 'excellent';
+        } else {
+            performanceStatus = 'normal';
+        }
+      }
     } else {
-      // For regular units, check if km per litre is outside expected range
-      const expectedKmPerLitre = 3.0; // Default value
-      const tolerance = 0.10; // 10% tolerance
-      
-      return r.kmPerLitre && 
-        (r.kmPerLitre < expectedKmPerLitre * (1 - tolerance) || 
-         r.kmPerLitre > expectedKmPerLitre * (1 + tolerance)) &&
-        !r.debriefDate;
+      efficiencyMetric = r.kmPerLitre || 0;
+      expectedMetric = expectedKmPerLitre;
+
+      if (efficiencyMetric > 0) {
+        efficiencyVariance = ((efficiencyMetric - expectedMetric) / expectedMetric) * 100;
+        
+        if (efficiencyMetric < expectedMetric * (1 - tolerance)) {
+          performanceStatus = 'poor';
+        } else if (efficiencyMetric > expectedMetric * (1 + tolerance)) {
+          performanceStatus = 'excellent';
+        } else {
+          performanceStatus = 'normal';
+        }
+      }
     }
+
+    const requiresDebrief = performanceStatus === 'poor' && !r.debriefDate;
+
+    return {
+      ...r,
+      expectedKmPerLitre: isReefer ? 0 : expectedKmPerLitre,
+      expectedLitresPerHour: isReefer ? expectedLitresPerHour : undefined,
+      efficiencyVariance: efficiencyVariance,
+      performanceStatus: performanceStatus,
+      requiresDebrief: requiresDebrief,
+      toleranceRange: tolerancePercentage,
+    };
   });
+  
+  const recordsNeedingDebrief = recordsForDebrief.filter(r => r.requiresDebrief);
   
   const recordsWithoutTripLinkage = sortedRecords.filter(r => 
     !r.isReeferUnit && !r.tripId
@@ -139,12 +176,6 @@ const DieselDashboard: React.FC = () => {
     setShowLinkageModal(true);
   };
 
-  // Handle opening edit modal
-  const handleOpenEditModal = (recordId: string) => {
-    setSelectedDieselId(recordId);
-    setShowEditModal(true);
-  };
-  
   // Handle updating diesel norms
   const handleUpdateNorms = (norms: any[]) => {
     setDieselNorms(norms);
@@ -698,15 +729,6 @@ const DieselDashboard: React.FC = () => {
                             
                             <Button
                               size="xs"
-                              variant="outline"
-                              icon={<Edit className="w-3 h-3" />}
-                              onClick={() => handleOpenEditModal(record.id)}
-                            >
-                              Edit
-                            </Button>
-
-                            <Button
-                              size="xs"
                               variant="danger"
                               icon={<Trash2 className="w-3 h-3" />}
                               onClick={() => handleDeleteDieselRecord(record.id)}
@@ -776,7 +798,13 @@ const DieselDashboard: React.FC = () => {
         />
       )}
 
-      {/* Edit Modal would go here - we'll implement it in the next component */}
+      {showEditModal && (
+        <DieselEditModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          dieselRecordId={selectedDieselId}
+        />
+      )}
     </div>
   );
 };

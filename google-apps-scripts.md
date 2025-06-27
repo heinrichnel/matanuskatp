@@ -71,7 +71,7 @@ function postTripsToFirebase() {
 
   if (tripsToPost.length === 0) return;
 
-  const firebaseUrl = 'https://importtripsfromwebbook-3ongv2xd5a-uc.a.run.app';
+  const firebaseUrl = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importTripsFromWebBook';
 
   const options = {
     method: 'POST',

@@ -62,8 +62,8 @@ const CompletedTrips: React.FC<CompletedTripsProps> = ({ trips, onView }) => {
     });
   };
 
-  const handleEditSave = (updatedTrip: Trip, editRecord: any) => {
-    updateTrip(updatedTrip);
+  const handleEditSave = async (updatedTrip: Trip) => {
+    await updateTrip(updatedTrip);
     setEditingTrip(null);
     alert('Trip updated successfully. Edit logged.');
   };

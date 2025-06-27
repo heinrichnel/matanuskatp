@@ -5,6 +5,18 @@ import * as path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  css: {
+    postcss: './postcss.config.cjs',
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://us-central1-mat1-9e6b3.cloudfunctions.net',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'), // 👈 Gebruik '@' vir skoner imports soos '@/components/TripForm'
