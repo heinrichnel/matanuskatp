@@ -44,16 +44,38 @@ const firebaseConfig: FirebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ''
 };
 
+// Validate required Firebase configuration
+const validateFirebaseConfig = (config: FirebaseConfig): void => {
+  const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+  const missingFields = requiredFields.filter(field => !config[field as keyof FirebaseConfig]);
+  
+  if (missingFields.length > 0) {
+    console.error('❌ Missing Firebase configuration values:', missingFields);
+    throw new Error(`Firebase configuration is incomplete. Missing: ${missingFields.join(', ')}. Please check your environment variables.`);
+  }
+};
+
+// Validate configuration before initializing Firebase
+validateFirebaseConfig(firebaseConfig);
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore with real-time capabilities (default database only)
 export const db = getFirestore(app);
 
-// Initialize Analytics (only in production)
+// Initialize Analytics only if all required config is present and not in localhost
 let analytics: ReturnType<typeof getAnalytics> | undefined;
-if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-  analytics = getAnalytics(app);
+if (typeof window !== 'undefined' && 
+    window.location.hostname !== 'localhost' && 
+    firebaseConfig.projectId && 
+    firebaseConfig.measurementId) {
+  try {
+    analytics = getAnalytics(app);
+    console.log('✅ Firebase Analytics initialized');
+  } catch (error) {
+    console.warn('⚠️ Firebase Analytics initialization failed:', error);
+  }
 }
 export { analytics };
 
