@@ -1,5 +1,6 @@
 // ─── React ───────────────────────────────────────────────────────
 import React, { useState } from 'react';
+import { useAppContext } from '../../context/AppContext';
 
 // ─── Types ───────────────────────────────────────────────────────
 import { Trip } from '../../types';
