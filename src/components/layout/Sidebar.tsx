@@ -1,5 +1,11 @@
 import { FC } from 'react';
 import { Activity, BarChart3, CheckCircle, ClipboardList, Clock, Flag, Fuel, Plus, Settings, Shield, Target, Truck, Upload, Users, Bell, User, History } from 'lucide-react';
+
+const Header: FC<{
+  onProfileClick,
+  onNotificationsClick,
+  onSettingsClick
+}> = ({
   onProfileClick,
   onNotificationsClick,
   onSettingsClick
