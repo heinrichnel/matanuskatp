@@ -9,9 +9,10 @@ interface SyncIndicatorProps {
 
 const SyncIndicator: React.FC<SyncIndicatorProps> = ({
   className = '',
-  showText = true
+  showText = true 
 }) => {
-  const { syncStatus, isOnline, lastSynced, pendingChangesCount } = useSyncContext();
+  const syncContext = useSyncContext();
+  const { syncStatus, isOnline, lastSynced, pendingChangesCount } = syncContext;
 
   // Format time since last sync
   const getTimeSinceSync = () => {
@@ -31,7 +32,7 @@ const SyncIndicator: React.FC<SyncIndicatorProps> = ({
       {syncStatus === 'syncing' ? (
         <>
           <RefreshCw className="w-3 h-3 animate-spin text-blue-500" />
-          {showText && <span className="text-blue-600">Syncing data...</span>}
+          {showText && <span className="text-blue-600">Syncing data...</span>} 
         </>
       ) : !isOnline ? (
         <>
@@ -43,19 +44,17 @@ const SyncIndicator: React.FC<SyncIndicatorProps> = ({
             </span>
           )}
         </>
-      ) : (
+      ) : ( 
         <>
-          {syncStatus === 'error' ? (
-            <div className="w-3 h-3 rounded-full bg-red-500" />
-          ) : (
-            <div className="w-3 h-3 rounded-full bg-green-500" />
-          )}
+          <div className={`w-3 h-3 rounded-full ${
+            syncStatus === 'error' ? 'bg-red-500' : 'bg-green-500'
+          }`} />
 
           {showText && (
             <span className={syncStatus === 'error' ? 'text-red-500' : 'text-gray-500'}>
               {syncStatus === 'error'
                 ? 'Sync error'
-                : `Synced ${getTimeSinceSync()}`}
+                : `Synced ${getTimeSinceSync()}`} 
             </span>
           )}
         </>
