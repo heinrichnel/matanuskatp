@@ -3,6 +3,34 @@ import { v4 as uuidv4 } from 'uuid';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 
+// Export the cleanObjectForFirestore function to be used throughout the app
+export const cleanObjectForFirestore = (obj: any): any => {
+  if (obj === null || obj === undefined) {
+    return null;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(cleanObjectForFirestore);
+  }
+
+  if (typeof obj === 'object') {
+    // Check if it's a Date object
+    if (obj instanceof Date) {
+      return obj;
+    }
+    
+    const cleaned: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = cleanObjectForFirestore(value);
+      }
+    }
+    return cleaned;
+  }
+
+  return obj;
+};
+
 // -------------------- ID Generation --------------------
 
 export const generateTripId = (): string => {
@@ -110,6 +138,17 @@ export const getUnresolvedFlagsCount = (costs: CostEntry[]): number =>
 
 export const canCompleteTrip = (trip: Trip): boolean =>
   getUnresolvedFlagsCount(trip.costs || []) === 0;
+  
+// Get all flagged costs across multiple trips
+export const getAllFlaggedCosts = (trips: Trip[]): FlaggedCost[] => {
+  const flagged: FlaggedCost[] = [];
+  trips.forEach(trip => {
+    if (trip.costs && Array.isArray(trip.costs)) {
+      trip.costs.filter(cost => cost.isFlagged).forEach(cost => flagged.push({...cost, tripFleetNumber: trip.fleetNumber, tripRoute: trip.route, tripDriverName: trip.driverName}));
+    }
+  });
+  return flagged;
+};
 
 export const shouldAutoCompleteTrip = (trip: Trip): boolean =>
   trip.status === 'active' &&
@@ -144,58 +183,37 @@ export const filterTripsByDriver = (trips: Trip[], driver: string): Trip[] =>
 
 // -------------------- Utility Functions --------------------
 
-export const isOnline = (): boolean => navigator.onLine;
+// Check if the user is online
+export const isOnline = (): boolean => {
+  return navigator.onLine;
+};
 
-export const retryOperation = async (
-  operation: () => Promise<any>,
-  maxRetries = 3,
-  delay = 1000
-): Promise<any> => {
-  let lastError;
-  for (let i = 0; i < maxRetries; i++) {
+// Helper to retry failed operations with exponential backoff
+export const retryOperation = async <T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  initialDelayMs: number = 1000
+): Promise<T> => {
+  let lastError: any = new Error('Operation failed after max retries');
+  let delay = initialDelayMs;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
-    } catch (err) {
-      console.warn(`Retry ${i + 1}/${maxRetries} failed`, err);
-      lastError = err;
-      await new Promise((resolve) => setTimeout(resolve, delay * Math.pow(2, i)));
-    }
-  }
-  throw lastError;
-};
-
-export const getFileIcon = (fileType: string): string => {
-  if (!fileType) return 'Paperclip';
-  if (fileType.includes('pdf')) return 'FileText';
-  if (fileType.includes('image')) return 'Image';
-  return 'Paperclip';
-};
-
-// -------------------- Helper to clean objects for Firestore --------------------
-
-export const cleanObjectForFirestore = (obj: any): any => {
-  if (obj === null || obj === undefined) {
-    return null;
-  }
-  
-  if (Array.isArray(obj)) {
-    return obj.map(cleanObjectForFirestore);
-  }
-  
-  if (typeof obj === 'object') {
-    const cleaned: any = {};
-    for (const [key, value] of Object.entries(obj)) {
-      if (value !== undefined) {
-        cleaned[key] = cleanObjectForFirestore(value);
+    } catch (error) {
+      lastError = error;
+      console.warn(`Attempt ${attempt}/${maxRetries} failed:`, error);
+      
+      if (attempt < maxRetries) {
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        delay *= 2; // Exponential backoff
       }
     }
-    return cleaned;
   }
   
-  return obj;
+  throw lastError;
 };
-
-// -------------------- Download Placeholders --------------------
 
 export const downloadTripPDF = async (trip: Trip) => {
   try {

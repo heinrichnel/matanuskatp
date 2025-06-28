@@ -1,5 +1,7 @@
 import { db } from '../firebase';
 import {
+  enableNetwork,
+  disableNetwork,
   collection,
   doc,
   onSnapshot,
@@ -10,6 +12,7 @@ import {
   where,
   orderBy,
   getDocs,
+  Unsubscribe,
   Timestamp
 } from 'firebase/firestore';
 import {
@@ -28,10 +31,12 @@ const auditLogsCollection = collection(db, 'auditLogs');
 
 // Type for sync status
 export type SyncStatus = 'idle' | 'syncing' | 'success' | 'error';
+export type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting';
 
 // Interface for sync listeners
 interface SyncListeners {
   onSyncStatusChange?: (status: SyncStatus) => void;
+  onConnectionStatusChange?: (status: ConnectionStatus) => void;
   onTripUpdate?: (trip: Trip) => void;
   onDieselUpdate?: (record: DieselConsumptionRecord) => void;
   onDriverBehaviorUpdate?: (event: DriverBehaviorEvent) => void;
@@ -44,8 +49,10 @@ export class SyncService {
   private tripUnsubscribes: Map<string, () => void> = new Map();
   private dieselUnsubscribes: Map<string, () => void> = new Map();
   private driverBehaviorUnsubscribes: Map<string, () => void> = new Map();
+  private globalUnsubscribes: Map<string, Unsubscribe> = new Map();
   private auditLogUnsubscribes: Map<string, () => void> = new Map();
   public syncStatus: SyncStatus = 'idle';
+  public connectionStatus: ConnectionStatus = 'connected';
   private pendingChanges: Map<string, any> = new Map();
   public isOnline: boolean = navigator.onLine;
   public lastSynced: Date | null = null;
@@ -59,6 +66,9 @@ export class SyncService {
     // Initialize online status
     this.isOnline = navigator.onLine;
     console.log(`SyncService initialized. Online status: ${this.isOnline ? 'online' : 'offline'}`);
+    
+    // Setup a periodic connection check
+    setInterval(() => this.checkConnection(), 60000); // Check every minute
   }
 
   // Register listeners
@@ -66,19 +76,37 @@ export class SyncService {
     this.listeners = { ...this.listeners, ...listeners };
   }
 
+  // Check connection and attempt reconnection if needed
+  private async checkConnection(): Promise<void> {
+    if (!this.isOnline && navigator.onLine) {
+      // We were offline but now we appear to be online
+      console.log('Network connection detected - attempting to reconnect');
+      await this.handleOnline();
+    } else if (this.isOnline && !navigator.onLine) {
+      // We were online but now appear to be offline
+      this.handleOffline();
+    }
+  }
+
   // Handle online event
   private handleOnline = async (): Promise<void> => {
     console.log('🟢 Connection restored - syncing pending changes');
     this.isOnline = true;
+    this.setConnectionStatus('reconnecting');
     this.setSyncStatus('syncing');
 
     try {
+      // Enable Firestore network
+      await enableNetwork(db);
+      
       // Process any pending changes
       await this.processPendingChanges();
       this.setSyncStatus('success');
+      this.setConnectionStatus('connected');
       this.lastSynced = new Date();
     } catch (error) {
       console.error('Error syncing pending changes:', error);
+      this.setConnectionStatus('disconnected');
       this.setSyncStatus('error');
     }
   };
@@ -87,7 +115,13 @@ export class SyncService {
   private handleOffline = (): void => {
     console.log('🔴 Connection lost - working offline');
     this.isOnline = false;
+    this.setConnectionStatus('disconnected');
     this.setSyncStatus('idle');
+    
+    // Disable Firestore network to avoid unnecessary retries
+    disableNetwork(db).catch(error => {
+      console.error('Error disabling Firestore network:', error);
+    });
   };
 
   // Set sync status and notify listeners
@@ -96,6 +130,14 @@ export class SyncService {
     this.pendingChangesCount = this.pendingChanges.size;
     if (this.listeners.onSyncStatusChange) {
       this.listeners.onSyncStatusChange(status);
+    }
+  }
+
+  // Set connection status and notify listeners
+  private setConnectionStatus(status: ConnectionStatus): void {
+    this.connectionStatus = status;
+    if (this.listeners.onConnectionStatusChange) {
+      this.listeners.onConnectionStatusChange(status);
     }
   }
 
@@ -158,6 +200,46 @@ export class SyncService {
     );
 
     this.tripUnsubscribes.set(tripId, unsubscribe);
+  }
+
+  // Subscribe to all trips (global listener)
+  public subscribeToAllTrips(callback: (trips: Trip[]) => void): void {
+    // Clear any existing global trip listeners
+    if (this.globalUnsubscribes.has('allTrips')) {
+      this.globalUnsubscribes.get('allTrips')?.();
+    }
+
+    const tripsQuery = query(collection(db, 'trips'), orderBy('startDate', 'desc'));
+    
+    const unsubscribe = onSnapshot(
+      tripsQuery,
+      {
+        next: (snapshot) => {
+          console.log(`🔄 Global trips listener: ${snapshot.size} documents`);
+          const trips: Trip[] = [];
+          
+          // Process document changes
+          snapshot.docChanges().forEach(change => {
+            console.log(`Global trip listener - document ${change.doc.id} ${change.type}`);
+          });
+          
+          // Process all documents
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            trips.push({ id: doc.id, ...data } as Trip);
+          });
+          
+          callback(trips);
+          this.lastSynced = new Date();
+        },
+        error: (error) => {
+          console.error('Error in global trips listener:', error);
+          // Don't change connection status here to avoid false disconnections
+        }
+      }
+    );
+    
+    this.globalUnsubscribes.set('allTrips', unsubscribe);
   }
 
   // Subscribe to diesel records for a specific fleet
@@ -236,6 +318,90 @@ export class SyncService {
     );
 
     this.driverBehaviorUnsubscribes.set(driverName, unsubscribe);
+  }
+
+  // Subscribe to all driver behavior events (global listener)
+  public subscribeToAllDriverBehaviorEvents(callback: (events: DriverBehaviorEvent[]) => void): void {
+    // Clear any existing global driver behavior listeners
+    if (this.globalUnsubscribes.has('allDriverBehavior')) {
+      this.globalUnsubscribes.get('allDriverBehavior')?.();
+    }
+    
+    const eventsQuery = query(
+      collection(db, 'driverBehavior'), 
+      orderBy('eventDate', 'desc')
+    );
+    
+    const unsubscribe = onSnapshot(
+      eventsQuery,
+      {
+        next: (snapshot) => {
+          console.log(`🔄 Global driver behavior listener: ${snapshot.size} documents`);
+          const events: DriverBehaviorEvent[] = [];
+          
+          // Process document changes
+          snapshot.docChanges().forEach(change => {
+            console.log(`Global driver behavior listener - document ${change.doc.id} ${change.type}`);
+          });
+          
+          // Process all documents
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            events.push({ id: doc.id, ...data } as DriverBehaviorEvent);
+          });
+          
+          callback(events);
+          this.lastSynced = new Date();
+        },
+        error: (error) => {
+          console.error('Error in global driver behavior listener:', error);
+        }
+      }
+    );
+    
+    this.globalUnsubscribes.set('allDriverBehavior', unsubscribe);
+  }
+
+  // Subscribe to all diesel records (global listener)
+  public subscribeToAllDieselRecords(callback: (records: DieselConsumptionRecord[]) => void): void {
+    // Clear any existing global diesel listeners
+    if (this.globalUnsubscribes.has('allDiesel')) {
+      this.globalUnsubscribes.get('allDiesel')?.();
+    }
+    
+    const recordsQuery = query(
+      collection(db, 'diesel'), 
+      orderBy('date', 'desc')
+    );
+    
+    const unsubscribe = onSnapshot(
+      recordsQuery,
+      {
+        next: (snapshot) => {
+          console.log(`🔄 Global diesel listener: ${snapshot.size} documents`);
+          const records: DieselConsumptionRecord[] = [];
+          
+          // Process document changes
+          snapshot.docChanges().forEach(change => {
+            console.log(`Global diesel listener - document ${change.doc.id} ${change.type}`);
+          });
+          
+          // Process all documents
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            records.push({ id: doc.id, ...data } as DieselConsumptionRecord);
+          });
+          
+          callback(records);
+          this.lastSynced = new Date();
+        },
+        error: (error) => {
+          console.error('Error in global diesel listener:', error);
+        }
+      }
+    );
+    
+    this.globalUnsubscribes.set('allDiesel', unsubscribe);
   }
 
   // Subscribe to audit logs
@@ -460,33 +626,44 @@ export class SyncService {
 
   // Cleanup method to unsubscribe from all listeners
   public cleanup(): void {
-    // Unsubscribe from all trip listeners
+    // Unsubscribe from all individual trip listeners
     for (const unsubscribe of this.tripUnsubscribes.values()) {
       unsubscribe();
     }
     this.tripUnsubscribes.clear();
 
-    // Unsubscribe from all diesel listeners
+    // Unsubscribe from all individual diesel listeners
     for (const unsubscribe of this.dieselUnsubscribes.values()) {
       unsubscribe();
     }
     this.dieselUnsubscribes.clear();
 
-    // Unsubscribe from all driver behavior listeners
+    // Unsubscribe from all individual driver behavior listeners
     for (const unsubscribe of this.driverBehaviorUnsubscribes.values()) {
       unsubscribe();
     }
     this.driverBehaviorUnsubscribes.clear();
 
-    // Unsubscribe from all audit log listeners
+    // Unsubscribe from all individual audit log listeners
     for (const unsubscribe of this.auditLogUnsubscribes.values()) {
       unsubscribe();
     }
     this.auditLogUnsubscribes.clear();
+    
+    // Unsubscribe from all global listeners
+    for (const unsubscribe of this.globalUnsubscribes.values()) {
+      unsubscribe();
+    }
+    this.globalUnsubscribes.clear();
 
     // Remove event listeners
     window.removeEventListener('online', this.handleOnline);
     window.removeEventListener('offline', this.handleOffline);
+  }
+  
+  // Get connection status
+  public getConnectionStatus(): ConnectionStatus {
+    return this.connectionStatus;
   }
 }
 

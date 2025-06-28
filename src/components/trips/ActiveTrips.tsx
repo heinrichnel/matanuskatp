@@ -11,9 +11,11 @@ import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar,
 import { formatCurrency, formatDate, getAllFlaggedCosts, getUnresolvedFlagsCount, canCompleteTrip } from '../../utils/helpers';
 import LoadImportModal from './LoadImportModal';
 import TripStatusUpdateModal from './TripStatusUpdateModal';
-import { useAppContext } from "../../context/AppContext";
+import { useAppContext } from '../../context/AppContext';
 import SyncIndicator from '../ui/SyncIndicator';
 import { useOutletContext, useNavigate } from 'react-router-dom';
+import LoadingIndicator from '../ui/LoadingIndicator';
+import ErrorMessage from '../ui/ErrorMessage';
 
 interface ActiveTripsProps {
   trips?: Trip[];
@@ -32,7 +34,7 @@ interface OutletContextType {
 
 const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   // Get functions from context
-  const { trips: contextTrips, updateTripStatus, deleteTrip, completeTrip } = useAppContext();
+  const { trips: contextTrips, updateTripStatus, deleteTrip, completeTrip, isLoading } = useAppContext();
   const context = useOutletContext<OutletContextType>();
   const navigate = useNavigate();
 
@@ -53,18 +55,20 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   const [statusUpdateTrip, setStatusUpdateTrip] = useState<Trip | null>(null);
   const [statusUpdateType] = useState<'shipped' | 'delivered'>('shipped');
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const openImportModal = () => setIsImportModalOpen(true);
   const closeImportModal = () => setIsImportModalOpen(false);
 
   const handleDelete = async (id: string) => {
     const trip = trips.find((t) => t.id === id);
-    if (trip && confirm(`Delete trip for fleet ${trip.fleetNumber}? This cannot be undone.`)) {
+    if (trip && window.confirm(`Delete trip for fleet ${trip.fleetNumber}? This action cannot be undone.`)) {
       try {
-        setIsDeleting(id); // Set loading state for this specific trip
+        setIsDeleting(id);
+        setError(null);
         await onDelete(id);
-        // No need to manually update UI - real-time listener will handle it
       } catch (error) {
+        setError(`Failed to delete trip: ${error instanceof Error ? error.message : 'Unknown error'}`);
         console.error("Error deleting trip:", error);
         alert(`Failed to delete trip: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
@@ -76,7 +80,9 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   // Handle trip status update
   const handleUpdateTripStatus = async (tripId: string, status: 'shipped' | 'delivered', notes: string) => {
     try {
+      setError(null);
       await updateTripStatus(tripId, status, notes);
+      console.log(`✅ Trip ${tripId} status updated to ${status}`);
       setStatusUpdateTrip(null);
     } catch (error) {
       console.error(`Error updating trip status to ${status}:`, error);
@@ -121,7 +127,19 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
         </div>
       </div>
 
-      {/* Filters Section */}
+      {/* Error message */}
+      {error && (
+        <ErrorMessage 
+          message={error} 
+          onRetry={() => setError(null)} 
+          className="mb-4"
+        />
+      )}
+      
+      {/* Loading state for the entire component */}
+      {isLoading.loadTrips && (
+        <LoadingIndicator text="Loading trips..." className="my-4" />
+      )}
       <Card>
         <CardHeader title="Filter Active Trips" />
         <CardContent>
@@ -246,19 +264,20 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
                     <Button
                       size="sm"
                       variant="danger"
-                      icon={<Trash2 className="w-4 h-4" />}
+                      icon={isDeleting === trip.id ? undefined : <Trash2 className="w-4 h-4" />}
                       onClick={() => handleDelete(trip.id)}
-                      isLoading={isDeleting === trip.id}
-                      disabled={isDeleting !== null}
+                      isLoading={isLoading[`deleteTrip-${trip.id}`] || isDeleting === trip.id}
+                      disabled={isLoading[`deleteTrip-${trip.id}`] || isDeleting !== null}
                     >
                       Delete
                     </Button>
                     <Button
                       size="sm"
                       variant="success"
-                      icon={<CheckCircle className="w-4 h-4" />} 
+                      icon={<CheckCircle className="w-4 h-4" />}
                       onClick={() => onCompleteTrip(trip.id)}
                       disabled={!canCompleteTrip(trip)}
+                      isLoading={isLoading[`completeTrip-${trip.id}`]}
                       title={!canCompleteTrip(trip) ?
                         'Cannot complete: Unresolved flags' : 'Mark as completed'}
                     >
@@ -276,7 +295,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
       {/* Status Update Modal */}
       {statusUpdateTrip && (
         <TripStatusUpdateModal
-          isOpen={!!statusUpdateTrip}
+          isOpen={Boolean(statusUpdateTrip)}
           onClose={() => setStatusUpdateTrip(null)}
           trip={statusUpdateTrip}
           status={statusUpdateType}
