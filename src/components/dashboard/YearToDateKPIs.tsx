@@ -10,6 +10,7 @@ import { useAppContext } from '../../context/AppContext';
 // ─── UI Components ───────────────────────────────────────────────
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
+import Modal from '../ui/Modal';
 import { Input } from '../ui/FormElements';
 import { Tooltip } from '../ui/Tooltip';
 
