@@ -10,7 +10,7 @@ import {
   DollarSign, 
   TrendingDown, 
   AlertTriangle, 
-  Flag, 
+  User,
   CheckCircle, 
   User,
   Activity, 

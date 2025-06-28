@@ -15,7 +15,7 @@ const Header: FC<{
     { id: 'reports', label: 'Reports & Exports', icon: BarChart3 },
     { id: 'invoice-aging', label: 'Invoice Aging', icon: Clock },
     { id: 'customer-retention', label: 'Customer Retention', icon: Users },
-    { id: 'missed-loads', label: 'Missed Loads', icon: ClipboardList },
+  User,
     { id: 'diesel-dashboard', label: 'Diesel Dashboard', icon: Fuel },
     { id: 'driver-behavior', label: 'Driver Behavior', icon: UserRound },
     { id: 'action-log', label: 'Action Log', icon: Upload },
