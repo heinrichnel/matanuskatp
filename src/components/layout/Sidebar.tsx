@@ -5,11 +5,7 @@ const Header: FC<{
   onProfileClick,
   onNotificationsClick,
   onSettingsClick
-}> = ({
-  onProfileClick,
-  onNotificationsClick,
-  onSettingsClick
-}) => {
+}> => {
   const navItems = [
     { id: 'ytd-kpis', label: 'YTD KPIs', icon: Target },
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
