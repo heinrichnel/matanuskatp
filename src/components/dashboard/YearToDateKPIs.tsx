@@ -10,7 +10,6 @@ import { useAppContext } from '../../context/AppContext';
 // ─── UI Components ───────────────────────────────────────────────
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import Modal from '../ui/Modal';
 import { Input } from '../ui/FormElements';
 import { Tooltip } from '../ui/Tooltip';
 
@@ -122,9 +121,11 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
     if (savedYtdData) {
       try {
         const parsedData = JSON.parse(savedYtdData);
-        setYtdData(parsedData);
+        if (parsedData.USD && parsedData.ZAR) {
+          setYtdData(parsedData);
+        }
       } catch (error) {
-        console.error('Error parsing saved YTD data:', error);
+        console.error("Error parsing saved YTD data:", error);
       }
     }
   }, []);
@@ -302,16 +303,15 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
   const exportWeeklyReport = () => {
     let csvContent = "data:text/csv;charset=utf-8,";
     csvContent += "WEEKLY REVENUE REPORTING - AUTOMATED CYCLE\n";
-    csvContent += `Generated on,${new Date().toLocaleDateString()}\n`;
-    csvContent += "Based on completed trips using offloading dates\n\n";
-
+    csvContent += `Generated on,${new Date().toLocaleDateString()}\n\n`;
+    
     csvContent += "Week Number,Week Start,Week End,Trip Count,Total Revenue,Currency,Total Costs,Gross Profit,Profit Margin %,Total KM,IPK,CPK\n";
     weeklyMetrics.forEach(week => {
       csvContent += `${week.weekNumber},"${week.weekStart}","${week.weekEnd}",${week.tripCount},${week.totalRevenue.toFixed(2)},${week.currency},${week.totalCosts.toFixed(2)},${week.grossProfit.toFixed(2)},${week.profitMargin.toFixed(2)},${week.totalKilometers},${week.ipk.toFixed(3)},${week.cpk.toFixed(3)}\n`;
     });
 
     const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", `weekly-revenue-report-${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
@@ -793,7 +793,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                 type="number"
                 step="1"
                 value={formData.totalKms?.toString() || ''}
-                onChange={value => handleChange('totalKms', value)}
+                onChange={(value) => handleChange('totalKms', value)}
                 error={errors.totalKms}
               />
 
@@ -802,7 +802,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                 type="number"
                 step="0.01"
                 value={formData.ipk?.toString() || ''}
-                onChange={value => handleChange('ipk', value)}
+                onChange={(value) => handleChange('ipk', value)}
                 error={errors.ipk}
               />
 
@@ -811,7 +811,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                 type="number"
                 step="0.01"
                 value={formData.operationalCpk?.toString() || ''}
-                onChange={value => handleChange('operationalCpk', value)}
+                onChange={(value) => handleChange('operationalCpk', value)}
                 error={errors.operationalCpk}
               />
 
@@ -820,7 +820,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                 type="number"
                 step="0.01"
                 value={formData.revenue?.toString() || ''}
-                onChange={value => handleChange('revenue', value)}
+                onChange={(value) => handleChange('revenue', value)}
                 error={errors.revenue}
               />
 
@@ -829,7 +829,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                 type="number"
                 step="0.01"
                 value={formData.ebit?.toString() || ''}
-                onChange={value => handleChange('ebit', value)}
+                onChange={(value) => handleChange('ebit', value)}
               />
 
               <Input
@@ -837,7 +837,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                 type="number"
                 step="0.01"
                 value={formData.ebitMargin?.toString() || ''}
-                onChange={value => handleChange('ebitMargin', value)}
+                onChange={(value) => handleChange('ebitMargin', value)}
               />
 
               <Input
@@ -845,7 +845,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                 type="number"
                 step="0.01"
                 value={formData.netProfit?.toString() || ''}
-                onChange={value => handleChange('netProfit', value)}
+                onChange={(value) => handleChange('netProfit', value)}
               />
 
               <Input
@@ -853,7 +853,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                 type="number"
                 step="0.01"
                 value={formData.netProfitMargin?.toString() || ''}
-                onChange={value => handleChange('netProfitMargin', value)}
+                onChange={(value) => handleChange('netProfitMargin', value)}
               />
 
               <Input
@@ -861,7 +861,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                 type="number"
                 step="0.01"
                 value={formData.roe?.toString() || ''}
-                onChange={value => handleChange('roe', value)}
+                onChange={(value) => handleChange('roe', value)}
               />
 
               <Input
@@ -869,7 +869,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                 type="number"
                 step="0.01"
                 value={formData.roic?.toString() || ''}
-                onChange={value => handleChange('roic', value)}
+                onChange={(value) => handleChange('roic', value)}
               />
             </div>
 
