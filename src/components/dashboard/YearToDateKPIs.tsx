@@ -1,5 +1,7 @@
 // ─── React & State ───────────────────────────────────────────────
 import React, { useState, useMemo, useEffect } from 'react';
+
+// ─── Context ─────────────────────────────────────────────────────
 import { useAppContext } from '../../context/AppContext';
 
 // ─── Types ───────────────────────────────────────────────────────
