@@ -1,11 +1,27 @@
 import { FC } from 'react';
 import { Activity, BarChart3, CheckCircle, ClipboardList, Clock, Flag, Fuel, Plus, Settings, Shield, Target, Truck, Upload, Users, Bell, User, History } from 'lucide-react';
+import Button from '../ui/Button';
+import SyncIndicator from '../ui/SyncIndicator';
 
-const Header: FC<{
+interface HeaderProps {
+  currentView: string;
+  onNavigate: (view: string) => void;
+  onNewTrip: () => void;
+  userName?: string;
+  onProfileClick?: () => void;
+  onNotificationsClick?: () => void;
+  onSettingsClick?: () => void;
+}
+
+const Header: FC<HeaderProps> = ({
+  currentView,
+  onNavigate,
+  onNewTrip,
+  userName = "Current User",
   onProfileClick,
   onNotificationsClick,
   onSettingsClick
-}> => {
+}) => {
   const navItems = [
     { id: 'ytd-kpis', label: 'YTD KPIs', icon: Target },
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
@@ -15,9 +31,9 @@ const Header: FC<{
     { id: 'reports', label: 'Reports & Exports', icon: BarChart3 },
     { id: 'invoice-aging', label: 'Invoice Aging', icon: Clock },
     { id: 'customer-retention', label: 'Customer Retention', icon: Users },
-  User,
+    { id: 'missed-loads', label: 'Missed Loads', icon: ClipboardList },
     { id: 'diesel-dashboard', label: 'Diesel Dashboard', icon: Fuel },
-    { id: 'driver-behavior', label: 'Driver Behavior', icon: UserRound },
+    { id: 'driver-behavior', label: 'Driver Behavior', icon: User },
     { id: 'action-log', label: 'Action Log', icon: Upload },
     { id: 'audit-log', label: 'Audit Log', icon: History }
   ];
