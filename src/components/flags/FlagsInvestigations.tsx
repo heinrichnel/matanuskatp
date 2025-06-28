@@ -8,7 +8,6 @@
 import React, { useState, useMemo } from 'react';
 import { Trip, FlaggedCost, CostEntry } from '../../types';
 import { useAppContext } from '../../context/AppContext';
-import { useAppContext } from '../../context/AppContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Select } from '../ui/FormElements';
