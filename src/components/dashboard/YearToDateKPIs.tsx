@@ -1,11 +1,11 @@
 // ─── React & State ───────────────────────────────────────────────
 import React, { useState, useMemo, useEffect } from 'react';
 
-// ─── Context ─────────────────────────────────────────────────────
-import { useAppContext } from '../../context/AppContext';
-
 // ─── Types ───────────────────────────────────────────────────────
 import { Trip } from '../../types';
+
+// ─── Context ─────────────────────────────────────────────────────
+import { useAppContext } from '../../context/AppContext';
 
 // ─── UI Components ───────────────────────────────────────────────
 import Card, { CardContent, CardHeader } from '../ui/Card';
