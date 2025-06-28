@@ -7,6 +7,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  getDoc,
   onSnapshot,
   query,
   orderBy,
@@ -15,7 +16,8 @@ import {
   disableNetwork,
   writeBatch,
   getDocs,
-  where
+  where,
+  Timestamp
 } from 'firebase/firestore';
 import { getAnalytics } from 'firebase/analytics';
 import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport } from './types';
@@ -48,6 +50,36 @@ export const enableFirestoreNetwork = () => enableNetwork(db);
 export const disableFirestoreNetwork = () => disableNetwork(db);
 
 // Optionally, you can add a connection status monitor:
+
+/**
+ * Helper function to convert Firestore Timestamps to ISO strings recursively
+ * @param obj Any object or value that might contain Firestore Timestamp
+ * @returns The object with all Timestamp instances converted to ISO strings
+ */
+const convertTimestamps = (obj: any): any => {
+  if (obj === null || obj === undefined) {
+    return null;
+  }
+  
+  if (obj instanceof Timestamp) {
+    return obj.toDate().toISOString();
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(convertTimestamps);
+  }
+  
+  if (typeof obj === 'object') {
+    const converted: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      converted[key] = convertTimestamps(value);
+    }
+    return converted;
+  }
+  
+  return obj;
+};
+
 export const monitorConnectionStatus = (
   onOnline: () => void,
   onOffline: () => void
@@ -159,30 +191,50 @@ export const updateTripInFirebase = async (id: string, tripData: Partial<Trip>):
 
 export const deleteTripFromFirebase = async (id: string): Promise<void> => {
   try {
-    // First, get the trip data to log it before deletion
     const tripRef = doc(db, 'trips', id);
+    
+    // Fetch the trip data before deletion for audit log
+    const tripDoc = await getDoc(tripRef);
+    if (!tripDoc.exists()) {
+      console.warn(`Trip with ID ${id} does not exist, nothing to delete`);
+      return;
+    }
 
-    // Create a batch operation for atomicity
+    console.log(`Preparing to delete trip with ID: ${id}`);
+    
+    // Create a batch for atomic operations
     const batch = writeBatch(db);
-
-    // Delete the trip
+    
+    // Add delete operation to batch
     batch.delete(tripRef);
-
-    // Delete any related cost entries or other dependent documents
-    // This ensures we don't have orphaned data
+    
+    // Check for and delete related documents
     const relatedCostsQuery = query(collection(db, 'costs'), where('tripId', '==', id));
     const costsSnapshot = await getDocs(relatedCostsQuery);
-    costsSnapshot.forEach(doc => {
-      batch.delete(doc.ref);
-    });
-
-    // Commit the batch
-    await batch.commit();
-
-    console.log("✅ Trip and related data deleted with real-time sync:", id);
-
-    // Log activity
-    await logActivity('trip_deleted', id, 'trip', { deletedAt: new Date().toISOString() });
+    
+    if (!costsSnapshot.empty) {
+      console.log(`Found ${costsSnapshot.size} related cost entries to delete`);
+      costsSnapshot.forEach(doc => {
+        batch.delete(doc.ref);
+      });
+    }
+    
+    // Commit batch and log results
+    try {
+      await batch.commit();
+      console.log(`✅ Successfully deleted trip ${id} and ${costsSnapshot.size} related documents`);
+      
+      // Log activity
+      await logActivity('trip_deleted', id, 'trip', { 
+        deletedAt: new Date().toISOString(),
+        tripData: convertTimestamps(tripDoc.data())
+      });
+      
+      return;
+    } catch (batchError) {
+      console.error(`❌ Batch deletion failed for trip ${id}:`, batchError);
+      throw batchError;
+    }
 
   } catch (error) {
     console.error("❌ Error deleting trip:", error);
@@ -192,33 +244,34 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
 
 // Real-time listeners with enhanced error handling
 export const listenToTrips = (
-  callback: (trips: Trip[]) => void,
-  onError?: (error: Error) => void
-): (() => void) => {
-  const q = query(
-    tripsCollection,
-    orderBy('startDate', 'desc')
-  );
-
+    callback: (trips: Trip[]) => void,
+    onError?: (error: Error) => void
+  ): (() => void) => {
+  const q = query(tripsCollection, orderBy('startDate', 'desc'));
+  
   return onSnapshot(
     q,
-    (snapshot) => {
+    snapshot => {
       const trips: Trip[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        trips.push({
-          id: doc.id,
-          ...data,
-          // Convert Firestore timestamps to ISO strings
-          createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
-          updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt
-        } as unknown as Trip);
+      
+      // Process document changes (added, modified, removed)
+      snapshot.docChanges().forEach(change => {
+        console.log(`Trip document ${change.doc.id} ${change.type}`);
       });
-
+      
+      // Add all current documents to the array
+      snapshot.forEach(doc => {
+        const data = convertTimestamps(doc.data());
+        trips.push({ 
+          id: doc.id, 
+          ...data 
+        } as Trip);
+      });
+      
       console.log(`🔄 Real-time trips update: ${trips.length} trips loaded`);
       callback(trips);
     },
-    (error) => {
+    error => {
       console.error("❌ Real-time trips listener error:", error);
       if (onError) onError(error);
     }
@@ -289,14 +342,19 @@ export const listenToDieselRecords = (
     q,
     (snapshot) => {
       const records: DieselConsumptionRecord[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        records.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
-          updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt
-        } as unknown as DieselConsumptionRecord);
+      
+      // Process document changes
+      snapshot.docChanges().forEach(change => {
+        console.log(`Diesel record ${change.doc.id} ${change.type}`);
+      });
+      
+      // Add all current documents to the array
+      snapshot.forEach(doc => {
+        const data = convertTimestamps(doc.data());
+        records.push({ 
+          id: doc.id, 
+          ...data 
+        } as DieselConsumptionRecord);
       });
 
       console.log(`🔄 Real-time diesel records update: ${records.length} records loaded`);
@@ -373,14 +431,19 @@ export const listenToMissedLoads = (
     q,
     (snapshot) => {
       const loads: MissedLoad[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        loads.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
-          updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt
-        } as unknown as MissedLoad);
+      
+      // Process document changes
+      snapshot.docChanges().forEach(change => {
+        console.log(`Missed load ${change.doc.id} ${change.type}`);
+      });
+      
+      // Add all current documents to the array
+      snapshot.forEach(doc => {
+        const data = convertTimestamps(doc.data());
+        loads.push({ 
+          id: doc.id, 
+          ...data 
+        } as MissedLoad);
       });
 
       console.log(`🔄 Real-time missed loads update: ${loads.length} loads loaded`);
@@ -457,14 +520,19 @@ export const listenToDriverBehaviorEvents = (
     q,
     (snapshot) => {
       const events: DriverBehaviorEvent[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        events.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
-          updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt
-        } as unknown as DriverBehaviorEvent);
+      
+      // Process document changes
+      snapshot.docChanges().forEach(change => {
+        console.log(`Driver behavior event ${change.doc.id} ${change.type}`);
+      });
+      
+      // Add all current documents to the array
+      snapshot.forEach(doc => {
+        const data = convertTimestamps(doc.data());
+        events.push({ 
+          id: doc.id, 
+          ...data 
+        } as DriverBehaviorEvent);
       });
 
       console.log(`🔄 Real-time driver behavior events update: ${events.length} events loaded`);
@@ -541,14 +609,18 @@ export const listenToActionItems = (
     q,
     (snapshot) => {
       const items: ActionItem[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        items.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
-          updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt,
-          completedAt: data.completedAt?.toDate?.()?.toISOString() || data.completedAt
+      
+      // Process document changes
+      snapshot.docChanges().forEach(change => {
+        console.log(`Action item ${change.doc.id} ${change.type}`);
+      });
+      
+      // Add all current documents to the array
+      snapshot.forEach(doc => {
+        const data = convertTimestamps(doc.data());
+        items.push({ 
+          id: doc.id, 
+          ...data 
         } as ActionItem);
       });
 
@@ -626,14 +698,18 @@ export const listenToCARReports = (
     q,
     (snapshot) => {
       const reports: CARReport[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        reports.push({
-          id: doc.id,
-          ...data,
-          createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
-          updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt,
-          completedAt: data.completedAt?.toDate?.()?.toISOString() || data.completedAt
+      
+      // Process document changes
+      snapshot.docChanges().forEach(change => {
+        console.log(`CAR report ${change.doc.id} ${change.type}`);
+      });
+      
+      // Add all current documents to the array
+      snapshot.forEach(doc => {
+        const data = convertTimestamps(doc.data());
+        reports.push({ 
+          id: doc.id, 
+          ...data 
         } as CARReport);
       });
 
@@ -699,14 +775,21 @@ export const listenToAuditLogs = (
     q,
     (snapshot) => {
       const logs: AuditLog[] = [];
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-        logs.push({
-          id: doc.id,
-          ...data,
-          timestamp: data.timestamp?.toDate?.().toISOString() || data.timestamp,
+      
+      // Process document changes
+      snapshot.docChanges().forEach(change => {
+        console.log(`Audit log ${change.doc.id} ${change.type}`);
+      });
+      
+      // Add all current documents to the array
+      snapshot.forEach(doc => {
+        const data = convertTimestamps(doc.data());
+        logs.push({ 
+          id: doc.id, 
+          ...data 
         } as AuditLog);
       });
+      
       console.log(`🔄 Real-time audit logs update: ${logs.length} logs loaded`);
       callback(logs);
     },
