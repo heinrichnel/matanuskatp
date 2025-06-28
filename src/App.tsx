@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import ErrorBoundary from './components/ErrorBoundary';
+import Layout from './components/layout/Layout';
 
 // UI Components
-import Sidebar from "./components/layout/Sidebar";
+// Removed Sidebar import as it will be used inside Layout
 
 // Feature Components
 import Dashboard from "./components/dashboard/Dashboard";
@@ -20,161 +22,34 @@ import DieselDashboard from "./components/diesel/DieselDashboard";
 import DriverBehaviorPage from "./pages/DriverBehaviorPage";
 import ActionLog from "./components/actionlog/ActionLog";
 import AuditLogPage from "./pages/AuditLogPage";
-import TripDetails from "./components/trips/TripDetails";
-import TripForm from "./components/trips/TripForm";
 
-// Utilities & Types
-import { Trip } from "./types";
-
-const AppContent: React.FC = () => {
-  const {
-    trips, missedLoads, addMissedLoad, updateMissedLoad, deleteMissedLoad,
-    updateTrip, addTrip, deleteTrip, completeTrip
-  } = useAppContext();
-
-  const [currentView, setCurrentView] = useState("ytd-kpis");
-  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
-  const [showTripForm, setShowTripForm] = useState(false);
-  const [editingTrip, setEditingTrip] = useState<Trip | undefined>();
-  // const [isLoading, setIsLoading] = useState(false); - This state was unused
-
-  const handleAddTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
-    try {
-      // setIsLoading(true);
-      const tripId = await addTrip(tripData);
-      setShowTripForm(false);
-      setEditingTrip(undefined);
-      alert(`Trip created successfully!\n\nFleet: ${tripData.fleetNumber}\nDriver: ${tripData.driverName}\nRoute: ${tripData.route}\n\nTrip ID: ${tripId}`);
-    } catch (error) {
-      console.error("Error adding trip:", error);
-      alert("Error creating trip. Please try again.");
-    } finally {
-      // setIsLoading(false);
-    }
-  };
-
-  const handleUpdateTrip = async (tripData: Omit<Trip, "id" | "costs" | "status">) => {
-    if (editingTrip) {
-      try {
-        // setIsLoading(true);
-        const updatedTrip: Trip = {
-          ...editingTrip,
-          ...tripData,
-          id: editingTrip.id,
-          costs: editingTrip.costs,
-          status: editingTrip.status,
-          additionalCosts: editingTrip.additionalCosts || [],
-          delayReasons: editingTrip.delayReasons || [],
-          followUpHistory: editingTrip.followUpHistory || [],
-        };
-        await updateTrip(updatedTrip);
-        setShowTripForm(false);
-        setEditingTrip(undefined);
-        alert("Trip updated successfully!");
-      } catch (error) {
-        console.error("Error updating trip:", error);
-        alert("Error updating trip. Please try again.");
-      } finally {
-        // setIsLoading(false);
-      }
-    }
-  };
-
-  const handleShowTripDetails = (trip: Trip) => {
-    setSelectedTrip(trip);
-  };
-
-  const handleEditTrip = (trip: Trip) => {
-    setEditingTrip(trip);
-    setShowTripForm(true);
-  };
-
-  const renderView = () => {
-    switch (currentView) {
-      case "ytd-kpis":
-        return <YearToDateKPIs trips={trips} />;
-      case "dashboard":
-        return <Dashboard trips={trips} />;
-      case "active-trips":
-        return <ActiveTrips
-          trips={trips.filter(t => t.status === 'active')}
-          onView={handleShowTripDetails}
-          onEdit={handleEditTrip}
-          onDelete={deleteTrip}
-          onCompleteTrip={completeTrip}
-        />;
-      case "completed-trips":
-        return <CompletedTrips trips={trips.filter(t => t.status === 'completed')} onView={handleShowTripDetails} />;
-      case "flags":
-        return <FlagsInvestigations trips={trips} />;
-      case "reports":
-        return <CurrencyFleetReport trips={trips} />;
-      case "invoice-aging":
-        return <InvoiceAgingDashboard trips={trips} onViewTrip={handleShowTripDetails} />;
-      case "customer-retention":
-        return <CustomerRetentionDashboard trips={trips} />;
-      case "missed-loads":
-        return <MissedLoadsTracker missedLoads={missedLoads} onAddMissedLoad={addMissedLoad} onUpdateMissedLoad={updateMissedLoad} onDeleteMissedLoad={deleteMissedLoad} />;
-      case "diesel-dashboard":
-        return <DieselDashboard />;
-      case "driver-behavior":
-        return <DriverBehaviorPage />;
-      case "action-log":
-        return <ActionLog />;
-      case "audit-log":
-        return <AuditLogPage />;
-      default:
-        return <YearToDateKPIs trips={trips} />;
-    }
-  };
-
-  return (
-    <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-      <Sidebar
-        currentView={currentView}
-        onNavigate={setCurrentView}
-        onNewTrip={() => {
-          setEditingTrip(undefined);
-          setShowTripForm(true);
-        }}
-      />
-      <main className="ml-64 p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-            Fleet Management Dashboard
-          </h1>
-        </div>
-
-        {renderView()}
-
-        {selectedTrip && (
-          <TripDetails
-            trip={selectedTrip}
-            onBack={() => setSelectedTrip(null)}
-          />
-        )}
-
-        {showTripForm && (
-          <TripForm
-            onSubmit={editingTrip ? handleUpdateTrip : handleAddTrip}
-            onCancel={() => {
-              setShowTripForm(false);
-              setEditingTrip(undefined);
-            }}
-            trip={editingTrip}
-          />
-        )}
-      </main>
-    </div>
-  );
-};
-
+// Main App component with Router implementation
 const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <AppProvider>
         <SyncProvider>
-          <AppContent />
+          <Router>
+            <Routes>
+              <Route path="/" element={<Layout />}>
+                <Route index element={<Navigate to="/ytd-kpis" replace />} />
+                <Route path="ytd-kpis" element={<YearToDateKPIs />} />
+                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="active-trips" element={<ActiveTrips />} />
+                <Route path="completed-trips" element={<CompletedTrips />} />
+                <Route path="flags" element={<FlagsInvestigations />} />
+                <Route path="reports" element={<CurrencyFleetReport />} />
+                <Route path="invoice-aging" element={<InvoiceAgingDashboard />} />
+                <Route path="customer-retention" element={<CustomerRetentionDashboard />} />
+                <Route path="missed-loads" element={<MissedLoadsTracker />} />
+                <Route path="diesel-dashboard" element={<DieselDashboard />} />
+                <Route path="driver-behavior" element={<DriverBehaviorPage />} />
+                <Route path="action-log" element={<ActionLog />} />
+                <Route path="audit-log" element={<AuditLogPage />} />
+                <Route path="*" element={<Navigate to="/ytd-kpis" replace />} />
+              </Route>
+            </Routes>
+          </Router>
         </SyncProvider>
       </AppProvider>
     </ErrorBoundary>
