@@ -42,7 +42,7 @@ const getInitialState = (trip?: Trip): FormState => {
     driverName: trip?.driverName || '',
     route: trip?.route || '',
     startDate: trip?.startDate || new Date().toISOString().split('T')[0],
-    endDate: trip?.endDate || '',
+    endDate: trip?.endDate || '2025-06-29',
     distanceKm: trip?.distanceKm ? String(trip.distanceKm) : '',
     baseRevenue: trip?.baseRevenue ? String(trip.baseRevenue) : '',
     revenueCurrency: trip?.revenueCurrency || 'ZAR',
@@ -175,6 +175,9 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
       dispatch({ type: 'SUBMIT_FAILURE', error: "Please fix the errors before submitting." });
       return;
     }
+
+    // Show loading state
+    dispatch({ type: 'SUBMIT_START' });
 
     const isVerified = await handleReCaptchaVerify();
     if (!isVerified) {
