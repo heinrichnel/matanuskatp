@@ -16,7 +16,7 @@ import { AlertTriangle, Eye, CheckCircle, Clock, Play, Flag, Upload, Edit, XCirc
 import { formatCurrency, formatDate, getAllFlaggedCosts } from '../../utils/helpers';
 
 interface FlagsInvestigationsProps {
-  trips: Trip[];
+  trips?: Trip[];
 }
 
 type FeedbackMessage = {
@@ -24,8 +24,12 @@ type FeedbackMessage = {
   message: string;
 };
 
-const FlagsInvestigations: React.FC<FlagsInvestigationsProps> = ({ trips }) => {
-  const { updateCostEntry, completeTrip } = useAppContext();
+const FlagsInvestigations: React.FC<FlagsInvestigationsProps> = (props) => {
+  const { trips: contextTrips, updateCostEntry, completeTrip } = useAppContext();
+  
+  // Use props if provided, otherwise use context
+  const trips = props.trips || contextTrips;
+  
   const [selectedCost, setSelectedCost] = useState<FlaggedCost | null>(null);
   const [showResolutionModal, setShowResolutionModal] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('');

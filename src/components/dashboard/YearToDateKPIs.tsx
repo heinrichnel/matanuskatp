@@ -65,10 +65,15 @@ interface WeeklyMetrics {
 }
 
 interface YearToDateKPIsProps {
-  trips: Trip[];
+  trips?: Trip[];
 }
 
-const YearToDateKPIs: React.FC<YearToDateKPIsProps> = ({ trips }) => {
+const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
+  const { trips: contextTrips } = useAppContext();
+  
+  // Use props if provided, otherwise use context
+  const trips = props.trips || contextTrips;
+  
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingYear, setEditingYear] = useState<2024 | 2025 | null>(null);
   const [formData, setFormData] = useState<Partial<YTDMetrics>>({});

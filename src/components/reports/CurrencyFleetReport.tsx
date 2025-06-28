@@ -28,10 +28,15 @@ import {
 
 
 interface CurrencyFleetReportProps {
-  trips: Trip[];
+  trips?: Trip[];
 }
 
-const CurrencyFleetReport: React.FC<CurrencyFleetReportProps> = ({ trips }) => {
+const CurrencyFleetReport: React.FC<CurrencyFleetReportProps> = (props) => {
+  const { trips: contextTrips } = useAppContext();
+  
+  // Use props if provided, otherwise use context
+  const trips = props.trips || contextTrips;
+  
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',

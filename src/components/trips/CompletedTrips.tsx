@@ -14,18 +14,31 @@ import { CheckCircle, Truck, Edit, Trash2, Eye, Download } from 'lucide-react';
 // ─── Feature Components ──────────────────────────────────────────
 import CompletedTripEditModal from './CompletedTripEditModal';
 import TripDeletionModal from './TripDeletionModal';
+import { useOutletContext } from 'react-router-dom';
 
 // ─── Helper Functions ────────────────────────────────────────────
 import { formatCurrency } from '../../utils/helpers';
 
 
 interface CompletedTripsProps {
-  trips: Trip[];
-  onView: (trip: Trip) => void;
+  trips?: Trip[];
+  onView?: (trip: Trip) => void;
 }
 
-const CompletedTrips: React.FC<CompletedTripsProps> = ({ trips, onView }) => {
-  const { updateTrip, deleteTrip } = useAppContext();
+// Type for context provided by the outlet
+interface OutletContextType {
+  setSelectedTrip: (trip: Trip | null) => void;
+  setEditingTrip: (trip: Trip | undefined) => void;
+  setShowTripForm: (show: boolean) => void;
+}
+
+const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
+  const { trips: contextTrips, updateTrip, deleteTrip } = useAppContext();
+  const context = useOutletContext<OutletContextType>();
+  
+  // Use props if provided, otherwise use context
+  const trips = props.trips || contextTrips.filter(t => t.status === 'completed');
+  const onView = props.onView || context.setSelectedTrip;
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
