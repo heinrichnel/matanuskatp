@@ -1,11 +1,12 @@
 // ─── React ───────────────────────────────────────────────────────
 import React, { useState, useMemo } from 'react';
+import { useAppContext } from '../../context/AppContext';
 
 // ─── Types ───────────────────────────────────────────────────────
 import { Trip, InvoiceAging, AGING_THRESHOLDS, FOLLOW_UP_THRESHOLDS } from '../../types';
 
 // ─── Context ─────────────────────────────────────────────────────
-import { useAppContext } from '../../context/AppContext';
+import { useOutletContext } from 'react-router-dom';
 
 // ─── UI Components ───────────────────────────────────────────────
 import Card, { CardContent, CardHeader } from '../ui/Card';

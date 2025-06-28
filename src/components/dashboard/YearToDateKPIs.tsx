@@ -1,5 +1,6 @@
 // ─── React & State ───────────────────────────────────────────────
 import React, { useState, useMemo, useEffect } from 'react';
+import { useAppContext } from '../../context/AppContext';
 
 // ─── Types ───────────────────────────────────────────────────────
 import { Trip } from '../../types';
