@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Trip, CostEntry, Attachment, AdditionalCost, DelayReason, MissedLoad, DieselConsumptionRecord, DriverBehaviorEvent, ActionItem, CARReport } from '../types';
 import { AuditLog as AuditLogType } from '../types/audit';
+import { doc, updateDoc, collection, addDoc, deleteDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import {
+  db,
   listenToTrips,
   listenToDieselRecords,
   listenToMissedLoads,
@@ -20,14 +22,15 @@ import {
   listenToAuditLogs,
   addAuditLogToFirebase
 } from '../firebase';
-import { generateTripId } from '../utils/helpers';
+import { generateTripId, cleanObjectForFirestore } from '../utils/helpers';
 import { sendTripEvent, sendDriverBehaviorEvent } from '../utils/webhookSenders';
 import { v4 as uuidv4 } from 'uuid';
+import syncService from '../utils/syncService';
 
 interface AppContextType {
   trips: Trip[];
   addTrip: (trip: Omit<Trip, 'id' | 'costs' | 'status'>) => Promise<string>;
-  updateTrip: (trip: Trip) => Promise<void>;
+  updateTrip: (trip: Trip | Partial<Trip>) => Promise<void>;
   deleteTrip: (id: string) => Promise<void>;
   getTrip: (id: string) => Trip | undefined;
 
@@ -93,6 +96,8 @@ interface AppContextType {
   updateTripStatus: (tripId: string, status: 'shipped' | 'delivered', notes: string) => Promise<void>;
 
   setTrips: React.Dispatch<React.SetStateAction<Trip[]>>;
+  isLoading: Record<string, boolean>;
+  setIsLoading: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   completeTrip: (tripId: string) => Promise<void>;
   auditLogs: AuditLogType[];
 }
@@ -107,29 +112,164 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [carReports, setCARReports] = useState<CARReport[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogType[]>([]);
-  const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected');
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>(
+    syncService.getConnectionStatus()
+  );
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    const unsubscribeTrips = listenToTrips(setTrips, (error) => console.error(error));
-    const unsubscribeMissedLoads = listenToMissedLoads(setMissedLoads, (error) => console.error(error));
-    const unsubscribeDiesel = listenToDieselRecords(setDieselRecords, (error) => console.error(error));
-    const unsubscribeDriverBehavior = listenToDriverBehaviorEvents(setDriverBehaviorEvents, (error) => console.error(error));
+    // Register sync service listeners
+    syncService.registerListeners({
+      onSyncStatusChange: (status) => {
+        console.log(`Sync status changed: ${status}`);
+      },
+      onConnectionStatusChange: (status) => {
+        console.log(`Connection status changed: ${status}`);
+        setConnectionStatus(status);
+      }
+    });
+    
+    // Setup global listeners through sync service
+    syncService.subscribeToAllTrips(setTrips);
+    syncService.subscribeToAllDieselRecords(setDieselRecords);
+    syncService.subscribeToAllDriverBehaviorEvents(setDriverBehaviorEvents);
+    
+    // Setup collection-specific listeners through Firebase directly
+    const unsubscribeMissedLoads = listenToMissedLoads(setMissedLoads, (error) => {
+      console.error("Error in missed loads listener:", error);
+    });
     const unsubscribeActionItems = listenToActionItems(setActionItems, (error) => console.error(error));
     const unsubscribeCARReports = listenToCARReports(setCARReports, (error) => console.error(error));
-    const unsubscribeAuditLogs = listenToAuditLogs(setAuditLogs, (error: any) => console.error(error));
+    const unsubscribeAuditLogs = listenToAuditLogs(setAuditLogs, (error) => console.error(error));
+    
+    // Log the initial data state
+    console.log("AppContext initialized with real-time listeners");
 
     return () => {
-      unsubscribeTrips();
+      // Clean up sync service
+      syncService.cleanup();
+      
+      // Clean up direct listeners
       unsubscribeMissedLoads();
-      unsubscribeDiesel();
-      unsubscribeDriverBehavior();
       unsubscribeActionItems();
       unsubscribeCARReports();
       unsubscribeAuditLogs();
     };
-  }, []);
+  }, []); // Empty dependency array for initial setup only
 
   const addTrip = async (trip: Omit<Trip, 'id' | 'costs' | 'status'>): Promise<string> => {
+    setIsLoading(prev => ({ ...prev, addTrip: true }));
+    
+    try {
+      const newTrip = {
+        ...trip,
+        id: generateTripId(),
+        costs: [],
+        status: 'active' as 'active',
+        additionalCosts: [],
+        followUpHistory: []
+      };
+      
+      const tripId = await addTripToFirebase(newTrip as Trip);
+      console.log(`✅ Trip created with ID: ${tripId}`);
+      return tripId;
+    } catch (error) {
+      console.error('❌ Error adding trip:', error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, addTrip: false }));
+    }
+  };
+
+  const updateTrip = async (tripData: Trip | Partial<Trip>): Promise<void> => {
+    const opId = `updateTrip-${tripData.id || 'unknown'}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      // If we're given the full trip object
+      if ('id' in tripData && tripData.id) {
+        await updateTripInFirebase(tripData.id, tripData);
+      } 
+      // If we're given a partial update with an ID
+      else if (tripData.id) {
+        await updateTripInFirebase(tripData.id, tripData);
+      } else {
+        throw new Error("Cannot update trip: no ID provided");
+      }
+    } catch (error) {
+      console.error(`❌ Error updating trip:`, error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
+
+  const deleteTrip = async (id: string): Promise<void> => {
+    const opId = `deleteTrip-${id}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      // Find trip in local state to create audit log
+      const tripToDelete = trips.find(t => t.id === id);
+      
+      if (tripToDelete) {
+        // Create audit log for the deletion
+        await addAuditLogToFirebase({
+          id: uuidv4(),
+          timestamp: new Date().toISOString(),
+          user: 'system', // Should be replaced with actual user
+          action: 'delete',
+          entity: 'trip',
+          entityId: id,
+          details: `Trip ${id} deleted`,
+          changes: tripToDelete
+        });
+      }
+      
+      // Delete from Firestore
+      await deleteTripFromFirebase(id);
+      
+      // Optimistically update local state
+      setTrips(prev => prev.filter(t => t.id !== id));
+      
+      console.log(`✅ Trip ${id} deleted successfully`);
+    } catch (error) {
+      console.error(`❌ Error deleting trip ${id}:`, error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
+
+  const completeTrip = async (tripId: string): Promise<void> => {
+    const opId = `completeTrip-${tripId}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      const trip = trips.find(t => t.id === tripId);
+      if (!trip) {
+        throw new Error(`Trip with ID ${tripId} not found`);
+      }
+      
+      const updatedTrip = {
+        ...trip,
+        status: 'completed' as 'completed',
+        completedAt: new Date().toISOString(),
+        completedBy: 'Current User' // Should be replaced with actual user
+      };
+      
+      await updateTripInFirebase(tripId, updatedTrip);
+      console.log(`✅ Trip ${tripId} marked as completed`);
+    } catch (error) {
+      console.error(`❌ Error completing trip ${tripId}:`, error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
+
+  // Helper function to add trip old way (kept for reference)
+  const addTripOld = async (trip: Omit<Trip, 'id' | 'costs' | 'status'>): Promise<string> => {
     const newTrip = {
       ...trip,
       id: generateTripId(),
@@ -139,11 +279,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return await addTripToFirebase(newTrip as Trip);
   };
 
-  const updateTrip = async (trip: Trip): Promise<void> => {
+  // Helper function to update trip old way (kept for reference)
+  const updateTripOld = async (trip: Trip): Promise<void> => {
     await updateTripInFirebase(trip.id, trip);
   };
 
-  const deleteTrip = async (id: string): Promise<void> => {
+  // Helper function to delete trip old way (kept for reference)
+  const deleteTripOld = async (id: string): Promise<void> => {
     try {
       const tripToDelete = trips.find(t => t.id === id);
       if (tripToDelete) {
@@ -171,34 +313,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return trips.find(t => t.id === id);
   };
 
-  const addMissedLoad = async (missedLoad: Omit<MissedLoad, 'id'>): Promise<string> => {
-    const newMissedLoad = { ...missedLoad, id: uuidv4() };
-    return await addMissedLoadToFirebase(newMissedLoad as MissedLoad);
-  };
-
-  const updateMissedLoad = async (missedLoad: MissedLoad): Promise<void> => {
-    await updateMissedLoadInFirebase(missedLoad.id, missedLoad);
-  };
-
-  const deleteMissedLoad = async (id: string): Promise<void> => {
-    await deleteMissedLoadFromFirebase(id);
-  };
-
-  const completeTrip = async (tripId: string): Promise<void> => {
-    const trip = trips.find(t => t.id === tripId);
-    if (trip) {
-      const updatedTrip = {
-        ...trip,
-        status: 'completed' as 'completed',
-        completedAt: new Date().toISOString(),
-        completedBy: 'Current User' // In a real app, use the logged-in user
-      };
-      await updateTripInFirebase(updatedTrip.id, updatedTrip);
-    }
-  };
-
-  // Placeholder implementations for other functions
+  // Enhanced updateCostEntry with loading state
   const updateCostEntry = async (costEntry: CostEntry): Promise<void> => {
+    const opId = `updateCostEntry-${costEntry.id}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
     try {
       // Find the trip that contains this cost
       const trip = trips.find(t => t.id === costEntry.tripId);
@@ -224,15 +343,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.log(`✅ Cost entry ${costEntry.id} updated in trip ${trip.id}`);
       
     } catch (error) {
-      console.error('Error updating cost entry:', error);
+      console.error(`❌ Error updating cost entry ${costEntry.id}:`, error);
       throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
     }
   };
   
+  // Enhanced deleteCostEntry with loading state
   const deleteCostEntry = async (id: string): Promise<void> => {
+    const opId = `deleteCostEntry-${id}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
     try {
       // Find the trip that contains this cost
-      const trip = trips.find(t => t.costs.some(c => c.id === id));
+      const trip = trips.find(t => t.costs && t.costs.some(c => c.id === id));
       if (!trip) {
         throw new Error(`Trip with cost ID ${id} not found`);
       }
@@ -253,15 +378,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.log(`✅ Cost entry ${id} deleted from trip ${trip.id}`);
       
     } catch (error) {
-      console.error('Error deleting cost entry:', error);
+      console.error(`❌ Error deleting cost entry ${id}:`, error);
       throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
     }
   };
   
+  // Enhanced addCostEntry with loading state
   const addCostEntry = async (
     costData: Omit<CostEntry, 'id' | 'attachments'>, 
     files?: FileList
   ): Promise<string> => {
+    const opId = `addCostEntry-${Date.now()}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
     try {
       // Find the trip to add this cost to
       const trip = trips.find(t => t.id === costData.tripId);
@@ -309,60 +440,169 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       // Update in Firestore
       await updateTripInFirebase(trip.id, updatedTrip);
-      
       console.log(`✅ Cost entry ${costId} added to trip ${trip.id}`);
+      
       return costId;
       
     } catch (error) {
-      console.error('Error adding cost entry:', error);
+      console.error(`❌ Error adding cost entry:`, error);
       throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
     }
   };
 
-  const addDieselRecord = async (record: Omit<DieselConsumptionRecord, 'id'>): Promise<string> => {
-    const newRecord = {
-      ...record,
-      id: `diesel-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+  // Enhanced addMissedLoad with loading state
+  const addMissedLoad = async (missedLoad: Omit<MissedLoad, 'id'>): Promise<string> => {
+    const opId = 'addMissedLoad';
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      const newMissedLoad = { 
+        ...missedLoad, 
+        id: uuidv4(),
+        recordedAt: new Date().toISOString()
+      };
+      
+      const id = await addMissedLoadToFirebase(newMissedLoad as MissedLoad);
+      console.log(`✅ Missed load added with ID: ${id}`);
+      return id;
+    } catch (error) {
+      console.error('❌ Error adding missed load:', error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
 
-    // If linked to a trip, create a cost entry
-    if (newRecord.tripId) {
-      const trip = trips.find(t => t.id === newRecord.tripId);
-      if (trip) {
-        const costEntry: CostEntry = {
-          id: `cost-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-          tripId: trip.id,
-          category: 'Diesel',
-          subCategory: `${newRecord.fuelStation} - ${newRecord.fleetNumber}`,
-          amount: newRecord.totalCost,
-          currency: newRecord.currency || trip.revenueCurrency,
-          referenceNumber: `DIESEL-${newRecord.id}`,
-          date: newRecord.date,
-          notes: `Diesel: ${newRecord.litresFilled} liters at ${newRecord.fuelStation}`,
-          attachments: [],
-          isFlagged: false
-        };
+  // Enhanced updateMissedLoad with loading state
+  const updateMissedLoad = async (missedLoad: MissedLoad): Promise<void> => {
+    const opId = `updateMissedLoad-${missedLoad.id}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      await updateMissedLoadInFirebase(missedLoad.id, missedLoad);
+      console.log(`✅ Missed load ${missedLoad.id} updated`);
+    } catch (error) {
+      console.error(`❌ Error updating missed load ${missedLoad.id}:`, error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
 
-        // Add cost entry to trip
-        const updatedTrip = {
-          ...trip,
-          costs: [...trip.costs, costEntry]
-        };
+  // Enhanced deleteMissedLoad with loading state
+  const deleteMissedLoad = async (id: string): Promise<void> => {
+    const opId = `deleteMissedLoad-${id}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      await deleteMissedLoadFromFirebase(id);
+      console.log(`✅ Missed load ${id} deleted`);
+      
+      // Optimistically update local state
+      setMissedLoads(prev => prev.filter(ml => ml.id !== id));
+    } catch (error) {
+      console.error(`❌ Error deleting missed load ${id}:`, error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
 
-        await updateTripInFirebase(trip.id, updatedTrip);
+  // Method to update invoice payment data
+  const updateInvoicePayment = async (tripId: string, paymentData: any): Promise<void> => {
+    const opId = `updateInvoicePayment-${tripId}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      // Find the trip
+      const trip = trips.find(t => t.id === tripId);
+      if (!trip) {
+        throw new Error(`Trip with ID ${tripId} not found`);
       }
+      
+      // Update trip with payment data
+      const updatedTrip = {
+        ...trip,
+        ...paymentData,
+        updatedAt: new Date().toISOString()
+      };
+      
+      await updateTripInFirebase(tripId, updatedTrip);
+      console.log(`✅ Invoice payment updated for trip ${tripId}`);
+    } catch (error) {
+      console.error(`❌ Error updating invoice payment for trip ${tripId}:`, error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
     }
-
-    return await addDieselToFirebase(newRecord as DieselConsumptionRecord);
   };
 
-  const updateDieselRecord = async (record: DieselConsumptionRecord): Promise<void> => {
+  // Enhanced Diesel operations with loading states
+  const addDieselRecord = async (record: Omit<DieselConsumptionRecord, 'id'>): Promise<string> => {
+    const opId = 'addDieselRecord';
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      const newRecord = {
+        ...record,
+        id: `diesel-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+  
+      // If linked to a trip, create a cost entry
+      if (newRecord.tripId) {
+        const trip = trips.find(t => t.id === newRecord.tripId);
+        if (trip) {
+          const costEntry: CostEntry = {
+            id: `cost-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            tripId: trip.id,
+            category: 'Diesel',
+            subCategory: `${newRecord.fuelStation} - ${newRecord.fleetNumber}`,
+            amount: newRecord.totalCost,
+            currency: newRecord.currency || trip.revenueCurrency,
+            referenceNumber: `DIESEL-${newRecord.id}`,
+            date: newRecord.date,
+            notes: `Diesel: ${newRecord.litresFilled} liters at ${newRecord.fuelStation}`,
+            attachments: [],
+            isFlagged: false
+          };
+  
+          // Add cost entry to trip
+          const updatedTrip = {
+            ...trip,
+            costs: [...(trip.costs || []), costEntry]
+          };
+  
+          await updateTripInFirebase(trip.id, updatedTrip);
+        }
+      }
+  
+      const recordId = await addDieselToFirebase(newRecord as DieselConsumptionRecord);
+      console.log(`✅ Diesel record added with ID: ${recordId}`);
+      return recordId;
+    } catch (error) {
+      console.error('❌ Error adding diesel record:', error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
+  
+  // Enhanced diesel update with loading state and error handling
+  const updateDieselRecord = async (record: DieselConsumptionRecord): Promise<void> =>  {
+    const opId = `updateDieselRecord-${record.id}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
     try {
       // Update the diesel record in Firestore
       const docRef = doc(db, 'diesel', record.id);
-      await updateDoc(docRef, cleanUndefinedValues(record));
+      await updateDoc(docRef, {
+        ...cleanObjectForFirestore(record),
+        updatedAt: serverTimestamp()
+      });
       
       // Optimistically update local state
       setDieselRecords(prev => 
@@ -371,15 +611,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       console.log(`✅ Diesel record ${record.id} updated`);
     } catch (error) {
-      console.error('Error updating diesel record:', error);
+      console.error(`❌ Error updating diesel record ${record.id}:`, error);
       throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
     }
   };
   
+  // Enhanced diesel delete with loading state
   const deleteDieselRecord = async (id: string): Promise<void> => {
+    const opId = `deleteDieselRecord-${id}`;
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
     try {
-      // Delete the diesel record from Firestore
+      // Delete from Firestore
       const docRef = doc(db, 'diesel', id);
+      
+      // Check if record exists
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        console.warn(`Diesel record ${id} does not exist - nothing to delete`);
+        return;
+      }
+      
       await deleteDoc(docRef);
       
       // Optimistically update local state
@@ -387,8 +641,117 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       console.log(`✅ Diesel record ${id} deleted`);
     } catch (error) {
-      console.error('Error deleting diesel record:', error);
+      console.error(`❌ Error deleting diesel record ${id}:`, error);
       throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
+  
+  // Import trips from CSV
+  const importTripsFromCSV = async (newTrips: Omit<Trip, 'id' | 'costs' | 'status'>[]): Promise<void> => {
+    const opId = 'importTripsFromCSV';
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      console.log(`Starting import of ${newTrips.length} trips from CSV...`);
+      let successCount = 0;
+      let errorCount = 0;
+      
+      // Process and add each trip
+      for (const tripData of newTrips) {
+        try {
+          // Create new trip with required fields
+          const newTrip = {
+            ...tripData,
+            id: generateTripId(),
+            costs: [],
+            status: 'active' as 'active',
+            additionalCosts: [],
+            followUpHistory: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          
+          await addTripToFirebase(newTrip as Trip);
+          successCount++;
+        } catch (tripError) {
+          console.error('Error importing individual trip:', tripError);
+          errorCount++;
+        }
+      }
+      
+      console.log(`✅ Import complete: ${successCount} trips imported successfully, ${errorCount} failed`);
+    } catch (error) {
+      console.error('❌ Error importing trips from CSV:', error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
+  
+  // Import from webhook
+  const importTripsFromWebhook = async (): Promise<{ imported: number, skipped: number }> => {
+    const opId = 'importTripsFromWebhook';
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      // Use Firebase Function URL for webhook import
+      console.log('Triggering webhook import for trips...');
+      const response = await fetch('https://us-central1-mat1-9e6b3.cloudfunctions.net/manualImportTrips');
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to import trips: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+      
+      const result = await response.json();
+      console.log('✅ Trip import result:', result);
+      
+      return {
+        imported: result.imported || 0,
+        skipped: result.skipped || 0
+      };
+    } catch (error) {
+      console.error("❌ Error importing trips from webhook:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
+  
+  // Import driver behavior events from webhook
+  const importDriverBehaviorEventsFromWebhook = async (): Promise<{ imported: number, skipped: number }> => {
+    const opId = 'importDriverBehaviorEvents';
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      console.log('Triggering webhook import for driver behavior events...');
+      const response = await fetch('https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify([]) // Empty array to trigger fetching from the source
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to import driver behavior events: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+      
+      const result = await response.json();
+      console.log('✅ Driver behavior import result:', result);
+      
+      return {
+        imported: result.imported || 0,
+        skipped: result.skipped || 0
+      };
+    } catch (error) {
+      console.error("❌ Error importing driver behavior events from webhook:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
     }
   };
   
@@ -425,7 +788,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   
   const triggerTripImport = async (): Promise<void> => {
+    const opId = 'triggerTripImport';
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
     try {
+      console.log('Triggering remote trip import...');
       const eventData = {
         eventType: 'trip.import_request',
         timestamp: new Date().toISOString(),
@@ -435,8 +802,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       await sendTripEvent(eventData);
     } catch (error) {
-      console.error("Error triggering trip import:", error);
+      console.error("❌ Error triggering trip import:", error);
       throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
+    }
+  };
+  
+  const triggerDriverBehaviorImport = async (): Promise<void> => {
+    const opId = 'triggerDriverBehaviorImport';
+    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    
+    try {
+      const eventData = {
+        eventType: 'driver.behavior.import_request',
+        timestamp: new Date().toISOString(),
+        data: { source: 'webapp' },
+      };
+      await sendDriverBehaviorEvent(eventData);
+    } catch (error) {
+      console.error("❌ Error triggering driver behavior import:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, [opId]: false }));
     }
   };
 
@@ -860,11 +1248,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     dieselRecords,
     addDieselRecord,
     updateDieselRecord,
-    deleteDieselRecord,
+    deleteDieselRecord: deleteDieselRecord,
     importDieselFromCSV: async () => { console.warn("Function not implemented"); },
     updateDieselDebrief: async () => { console.warn("Function not implemented"); },
     allocateDieselToTrip: async () => { console.warn("Function not implemented"); },
     removeDieselFromTrip: async () => { console.warn("Function not implemented"); },
+
     driverBehaviorEvents,
     addDriverBehaviorEvent,
     updateDriverBehaviorEvent,
@@ -872,10 +1261,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     getDriverPerformance: (driverName: string) => {
       const events = driverBehaviorEvents.filter(e => e.driverName === driverName);
       const totalPoints = events.reduce((sum, e) => sum + (e.points || 0), 0);
-      const behaviorScore = Math.max(0, 100 - totalPoints);
+      // Calculate score from 0-100 where 100 is best
+      const behaviorScore = Math.max(0, Math.min(100, 100 - totalPoints));
       
       return {
-        driverName,
+        driverName, 
         events,
         totalPoints,
         behaviorScore,
@@ -888,20 +1278,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return driverNames.map(driverName => {
         const events = driverBehaviorEvents.filter(e => e.driverName === driverName);
         const totalPoints = events.reduce((sum, e) => sum + (e.points || 0), 0);
-        const behaviorScore = Math.max(0, 100 - totalPoints);
+        // Calculate score from 0-100 where 100 is best
+        const behaviorScore = Math.max(0, Math.min(100, 100 - totalPoints));
         
         return {
           driverName,
-          events,
+          events, 
           totalPoints,
           behaviorScore,
           eventCount: events.length,
         };
       });
     },
-    triggerDriverBehaviorImport,
+    triggerDriverBehaviorImport: triggerDriverBehaviorImport,
     actionItems,
-    addActionItem,
+    addActionItem: placeholderString, 
     updateActionItem,
     deleteActionItem,
     addActionItemComment,
@@ -911,7 +1302,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteCARReport,
     connectionStatus,
     bulkDeleteTrips: async () => { console.warn("Function not implemented"); },
-    updateTripStatus,
+    updateTripStatus: updateTripStatus,
+    
+    // UI and state management
+    isLoading,
+    setIsLoading,
     setTrips,
     completeTrip,
     auditLogs,

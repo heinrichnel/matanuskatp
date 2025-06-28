@@ -1,10 +1,16 @@
 import React, { createContext, useContext } from 'react';
+import { Trip } from '../types';
 import syncService from '../utils/syncService';
 import type { SyncService } from '../utils/syncService';
 
 const SyncContext = createContext<SyncService | undefined>(undefined);
 
-export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface SyncProviderProps {
+  children: React.ReactNode;
+}
+
+export const SyncProvider: React.FC<SyncProviderProps> = ({ children }) => {
+  // Initialize syncService
   return (
     <SyncContext.Provider value={syncService}>
       {children}
@@ -18,4 +24,28 @@ export const useSyncContext = (): SyncService => {
     throw new Error('useSyncContext must be used within a SyncProvider');
   }
   return context;
+};
+
+// Custom hook for subscribing to a specific trip
+export const useTripSync = (tripId: string | null): { isSyncing: boolean } => {
+  const syncContext = useSyncContext();
+  
+  React.useEffect(() => {
+    if (tripId) {
+      console.log(`Setting up trip sync for trip ID: ${tripId}`);
+      syncContext.subscribeToTrip(tripId);
+      
+      // Return cleanup function to unsubscribe when component unmounts
+      // or when tripId changes
+      return () => {
+        console.log(`Cleaning up trip sync for trip ID: ${tripId}`);
+        // syncService handles unsubscribing internally when a new subscription
+        // is made for the same tripId
+      };
+    }
+  }, [tripId, syncContext]);
+  
+  return {
+    isSyncing: syncContext.syncStatus === 'syncing'
+  };
 };
