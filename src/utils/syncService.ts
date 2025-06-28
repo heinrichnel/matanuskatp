@@ -142,8 +142,8 @@ export class SyncService {
         if (snapshot.exists()) {
           const tripData = snapshot.data();
 
-          // Convert Firestore timestamps to ISO strings
-          const trip = this.convertTimestamps(tripData) as Trip;
+          // Convert Firestore timestamps to ISO strings using our helper function
+          const trip = convertTimestamps(tripData) as Trip;
 
           console.log(`🔄 Real-time update for trip ${tripId}`);
 
@@ -180,7 +180,7 @@ export class SyncService {
           const dieselData = change.doc.data();
 
           // Convert Firestore timestamps to ISO strings
-          const dieselRecord = this.convertTimestamps(dieselData) as DieselConsumptionRecord;
+          const dieselRecord = convertTimestamps(dieselData) as DieselConsumptionRecord;
 
           if (change.type === 'added' || change.type === 'modified') {
             console.log(`🔄 Real-time update for diesel record ${change.doc.id}`);
@@ -219,7 +219,7 @@ export class SyncService {
           const eventData = change.doc.data();
 
           // Convert Firestore timestamps to ISO strings
-          const event = this.convertTimestamps(eventData) as DriverBehaviorEvent;
+          const event = convertTimestamps(eventData) as DriverBehaviorEvent;
 
           if (change.type === 'added' || change.type === 'modified') {
             console.log(`🔄 Real-time update for driver behavior event ${change.doc.id}`);
@@ -245,7 +245,7 @@ export class SyncService {
       (snapshot) => {
         snapshot.docChanges().forEach((change) => {
           const logData = change.doc.data();
-          const log = this.convertTimestamps(logData) as AuditLog;
+          const log = convertTimestamps(logData) as AuditLog;
 
           if (change.type === 'added') {
             console.log(`🔄 Real-time update for audit log ${change.doc.id}`);
@@ -269,7 +269,7 @@ export class SyncService {
       this.setSyncStatus('syncing');
 
       // Clean data for Firestore (remove undefined values)
-      const cleanData = this.cleanObjectForFirestore(data);
+      const cleanData = cleanObjectForFirestore(data);
 
       // Add updatedAt timestamp
       const updateData = {
@@ -305,7 +305,7 @@ export class SyncService {
       this.setSyncStatus('syncing');
 
       // Clean data for Firestore
-      const cleanData = this.cleanObjectForFirestore(data);
+      const cleanData = cleanObjectForFirestore(data);
 
       // Add updatedAt timestamp
       const updateData = {
@@ -341,7 +341,7 @@ export class SyncService {
       this.setSyncStatus('syncing');
 
       // Clean data for Firestore
-      const cleanData = this.cleanObjectForFirestore(data);
+      const cleanData = cleanObjectForFirestore(data);
 
       // Add updatedAt timestamp
       const updateData = {
@@ -458,56 +458,6 @@ export class SyncService {
     }
   }
 
-  // Clean object for Firestore (remove undefined values)
-  private cleanObjectForFirestore(obj: any): any {
-    if (obj === null || obj === undefined) {
-      return null;
-    }
-
-    if (Array.isArray(obj)) {
-      return obj.map(item => this.cleanObjectForFirestore(item));
-    }
-
-    if (typeof obj === 'object') {
-      const cleaned: any = {};
-      for (const [key, value] of Object.entries(obj)) {
-        if (value !== undefined) {
-          cleaned[key] = this.cleanObjectForFirestore(value);
-        }
-      }
-      return cleaned;
-    }
-
-    return obj;
-  }
-
-  // Convert Firestore timestamps to ISO strings
-  private convertTimestamps(obj: any): any {
-    if (obj === null || obj === undefined) {
-      return null;
-    }
-
-    if (Array.isArray(obj)) {
-      return obj.map(item => this.convertTimestamps(item));
-    }
-
-    if (typeof obj === 'object') {
-      // Check if it's a Firestore Timestamp
-      if (obj instanceof Timestamp) {
-        return obj.toDate().toISOString();
-      }
-
-      // Regular object - process all properties
-      const converted: any = {};
-      for (const [key, value] of Object.entries(obj)) {
-        converted[key] = this.convertTimestamps(value);
-      }
-      return converted;
-    }
-
-    return obj;
-  }
-
   // Cleanup method to unsubscribe from all listeners
   public cleanup(): void {
     // Unsubscribe from all trip listeners
@@ -539,6 +489,54 @@ export class SyncService {
     window.removeEventListener('offline', this.handleOffline);
   }
 }
+
+// Helper function to clean objects for Firestore (remove undefined values)
+export const cleanObjectForFirestore = (obj: any): any => {
+  if (obj === null || obj === undefined) {
+    return null;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => cleanObjectForFirestore(item));
+  }
+
+  if (typeof obj === 'object') {
+    const cleaned: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = cleanObjectForFirestore(value);
+      }
+    }
+    return cleaned;
+  }
+
+  return obj;
+};
+
+// Helper function to convert Firestore timestamps to ISO strings
+export const convertTimestamps = (obj: any): any => {
+    if (obj === null || obj === undefined) {
+        return null;
+    }
+    
+    if (obj instanceof Timestamp) {
+        return obj.toDate().toISOString();
+    }
+    
+    if (Array.isArray(obj)) {
+        return obj.map(convertTimestamps);
+    }
+    
+    if (typeof obj === 'object') {
+        const converted: any = {};
+        for (const [key, value] of Object.entries(obj)) {
+            converted[key] = convertTimestamps(value);
+        }
+        return converted;
+    }
+    
+    return obj;
+};
 
 // Create and export a singleton instance
 export const syncService = new SyncService();
