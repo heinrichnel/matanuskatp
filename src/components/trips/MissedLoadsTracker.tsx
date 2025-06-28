@@ -23,19 +23,20 @@ import { formatCurrency, formatDate } from '../../utils/helpers';
 import { useAppContext } from '../../context/AppContext';
 
 interface MissedLoadsTrackerProps {
-  missedLoads: MissedLoad[];
-  onAddMissedLoad: (missedLoad: Omit<MissedLoad, 'id'>) => Promise<string>;
-  onUpdateMissedLoad: (missedLoad: MissedLoad) => Promise<void>;
+  missedLoads?: MissedLoad[];
+  onAddMissedLoad?: (missedLoad: Omit<MissedLoad, 'id'>) => Promise<string>;
+  onUpdateMissedLoad?: (missedLoad: MissedLoad) => Promise<void>;
   onDeleteMissedLoad?: (id: string) => Promise<void>;
 }
 
-const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
-  missedLoads,
-  onAddMissedLoad,
-  onUpdateMissedLoad,
-  onDeleteMissedLoad
-}) => {
-  const { connectionStatus } = useAppContext();
+const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
+  const { missedLoads: contextMissedLoads, addMissedLoad, updateMissedLoad, deleteMissedLoad, connectionStatus } = useAppContext();
+  
+  // Use props if provided, otherwise use context
+  const missedLoads = props.missedLoads || contextMissedLoads;
+  const onAddMissedLoad = props.onAddMissedLoad || addMissedLoad;
+  const onUpdateMissedLoad = props.onUpdateMissedLoad || updateMissedLoad;
+  const onDeleteMissedLoad = props.onDeleteMissedLoad || deleteMissedLoad;
   const [showModal, setShowModal] = useState(false);
   const [showResolutionModal, setShowResolutionModal] = useState(false);
   const [editingLoad, setEditingLoad] = useState<MissedLoad | null>(null);

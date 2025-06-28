@@ -26,10 +26,15 @@ import { formatCurrency, formatDate } from '../../utils/helpers';
 
 
 interface CustomerRetentionDashboardProps {
-  trips: Trip[];
+  trips?: Trip[];
 }
 
-const CustomerRetentionDashboard: React.FC<CustomerRetentionDashboardProps> = ({ trips }) => {
+const CustomerRetentionDashboard: React.FC<CustomerRetentionDashboardProps> = (props) => {
+  const { trips: contextTrips } = useAppContext();
+  
+  // Use props if provided, otherwise use context
+  const trips = props.trips || contextTrips;
+  
   const [filters, setFilters] = useState({
     riskLevel: '',
     currency: '',

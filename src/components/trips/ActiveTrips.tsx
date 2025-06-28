@@ -8,22 +8,44 @@ import { Select } from '../ui/FormElements';
 import Button from '../ui/Button';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign } from 'lucide-react';
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import { formatCurrency, formatDate, getAllFlaggedCosts, getUnresolvedFlagsCount, canCompleteTrip } from '../../utils/helpers';
 import LoadImportModal from './LoadImportModal';
 import TripStatusUpdateModal from './TripStatusUpdateModal';
-import { useAppContext } from '../../context/AppContext';
+import { useAppContext } from "../../context/AppContext";
 import SyncIndicator from '../ui/SyncIndicator';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 
 interface ActiveTripsProps {
-  trips: Trip[];
-  onView: (trip: Trip) => void;
-  onEdit: (trip: Trip) => void;
-  onDelete: (id: string) => void;
-  onCompleteTrip: (tripId: string) => void;
+  trips?: Trip[];
+  onView?: (trip: Trip) => void;
+  onEdit?: (trip: Trip) => void;
+  onDelete?: (id: string) => void;
+  onCompleteTrip?: (tripId: string) => void;
 }
 
-const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onView, onCompleteTrip }) => {
-  const { updateTripStatus } = useAppContext();
+// Type for context provided by the outlet
+interface OutletContextType {
+  setSelectedTrip: (trip: Trip | null) => void;
+  setEditingTrip: (trip: Trip | undefined) => void;
+  setShowTripForm: (show: boolean) => void;
+}
+
+const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
+  // Get functions from context
+  const { trips: contextTrips, updateTripStatus, deleteTrip, completeTrip } = useAppContext();
+  const context = useOutletContext<OutletContextType>();
+  const navigate = useNavigate();
+
+  // Use props if provided, otherwise use context
+  const trips = props.trips || contextTrips.filter(t => t.status === 'active');
+  const onView = props.onView || context.setSelectedTrip;
+  const onEdit = props.onEdit || ((trip: Trip) => {
+    context.setEditingTrip(trip);
+    context.setShowTripForm(true);
+  });
+  const onDelete = props.onDelete || deleteTrip;
+  const onCompleteTrip = props.onCompleteTrip || completeTrip;
+
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [filterFleet, setFilterFleet] = useState<string>('');
   const [filterDriver, setFilterDriver] = useState<string>('');
@@ -36,7 +58,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
   const closeImportModal = () => setIsImportModalOpen(false);
 
   const handleDelete = async (id: string) => {
-    const trip = trips.find(t => t.id === id);
+    const trip = trips.find((t) => t.id === id);
     if (trip && confirm(`Delete trip for fleet ${trip.fleetNumber}? This cannot be undone.`)) {
       try {
         setIsDeleting(id); // Set loading state for this specific trip
@@ -146,6 +168,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
         <div className="space-y-4">
           {filteredTrips.map(trip => (
             <Card key={trip.id} className="hover:shadow-md transition-shadow">
+              {/* Trip Card Content */}
               <CardContent className="p-4">
                 <div className="flex flex-col space-y-4">
                   {/* Trip Header */}
@@ -203,11 +226,11 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                   </div>
 
                   {/* Flag indicator */}
-                  {trip.costs && trip.costs.some(c => c.isFlagged) && (
+                  {getAllFlaggedCosts([trip]).length > 0 && (
                     <div className="flex items-center text-amber-600 text-sm">
                       <AlertTriangle className="w-4 h-4 mr-1" />
                       <span>
-                        {trip.costs.filter(c => c.isFlagged).length} flagged item{trip.costs.filter(c => c.isFlagged).length !== 1 ? 's' : ''}
+                        {getAllFlaggedCosts([trip]).length} flagged item{getAllFlaggedCosts([trip]).length !== 1 ? 's' : ''}
                       </span>
                     </div>
                   )}
@@ -233,10 +256,10 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ trips, onEdit, onDelete, onVi
                     <Button
                       size="sm"
                       variant="success"
-                      icon={<CheckCircle className="w-4 h-4" />}
+                      icon={<CheckCircle className="w-4 h-4" />} 
                       onClick={() => onCompleteTrip(trip.id)}
-                      disabled={trip.costs && trip.costs.some(c => c.isFlagged && c.investigationStatus !== 'resolved')}
-                      title={trip.costs && trip.costs.some(c => c.isFlagged && c.investigationStatus !== 'resolved') ?
+                      disabled={!canCompleteTrip(trip)}
+                      title={!canCompleteTrip(trip) ?
                         'Cannot complete: Unresolved flags' : 'Mark as completed'}
                     >
                       Complete

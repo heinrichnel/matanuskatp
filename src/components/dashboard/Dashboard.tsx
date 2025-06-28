@@ -4,20 +4,7 @@ import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Select } from '../ui/FormElements';
 import { Tooltip } from '../ui/Tooltip';
-import { 
-  TrendingUp, 
-  Truck, 
-  DollarSign, 
-  TrendingDown, 
-  AlertTriangle, 
-  User,
-  CheckCircle, 
-  User,
-  Activity, 
-  Target, 
-  Award, 
-  Download 
-} from 'lucide-react';
+import { TrendingUp, Truck, DollarSign, TrendingDown, AlertTriangle, Flag, CheckCircle, User, Activity, Target, Award, Download } from 'lucide-react';
 import { 
   formatCurrency, 
   calculateTotalCosts, 
@@ -30,13 +17,23 @@ import {
   canCompleteTrip 
 } from '../../utils/helpers';
 import { Trip, CLIENTS, DRIVERS } from '../../types';
+import { useOutletContext } from 'react-router-dom';
 
 interface DashboardProps {
-  trips: Trip[];
+  trips?: Trip[];
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ trips }) => {
-  const { missedLoads = [] } = useAppContext();
+// Type for context provided by the outlet
+interface OutletContextType {
+  setSelectedTrip: (trip: Trip | null) => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = (props) => {
+  const { trips: contextTrips, missedLoads = [] } = useAppContext();
+  const context = useOutletContext<OutletContextType>();
+  
+  // Use props if provided, otherwise use context
+  const trips = props.trips || contextTrips;
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',

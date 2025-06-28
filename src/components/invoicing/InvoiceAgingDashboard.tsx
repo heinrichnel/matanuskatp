@@ -33,15 +33,22 @@ import { formatCurrency, formatDate, formatDateTime } from '../../utils/helpers'
 
 
 interface InvoiceAgingDashboardProps {
-  trips: Trip[];
-  onViewTrip: (trip: Trip) => void;
+  trips?: Trip[];
+  onViewTrip?: (trip: Trip) => void;
 }
 
-const InvoiceAgingDashboard: React.FC<InvoiceAgingDashboardProps> = ({
-  trips,
-  onViewTrip
-}) => {
-  const { updateTrip, updateInvoicePayment } = useAppContext();
+// Type for context provided by the outlet
+interface OutletContextType {
+  setSelectedTrip: (trip: Trip | null) => void;
+}
+
+const InvoiceAgingDashboard: React.FC<InvoiceAgingDashboardProps> = (props) => {
+  const { trips: contextTrips, updateTrip, updateInvoicePayment } = useAppContext();
+  const context = useOutletContext<OutletContextType>();
+  
+  // Use props if provided, otherwise use context
+  const trips = props.trips || contextTrips;
+  const onViewTrip = props.onViewTrip || context.setSelectedTrip;
   const [filters, setFilters] = useState({
     currency: '',
     status: '',
