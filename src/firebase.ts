@@ -193,6 +193,19 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
   try {
     const tripRef = doc(db, 'trips', id);
     
+    // Fetch the trip data before deletion
+    const tripSnap = await getDoc(tripRef);
+    if (!tripSnap.exists()) {
+      console.warn(`Trip with ID ${id} not found, nothing to delete`);
+      return;
+    }
+    
+    const tripData = tripSnap.data();
+    console.log(`🗑️ Deleting trip: ${id}`, tripData ? { 
+      fleetNumber: tripData.fleetNumber,
+      route: tripData.route 
+    } : 'No data');
+    
     // Fetch the trip data before deletion for audit log
     const tripDoc = await getDoc(tripRef);
     if (!tripDoc.exists()) {
@@ -205,37 +218,52 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
     // Create a batch for atomic operations
     const batch = writeBatch(db);
     
-    // Add delete operation to batch
+    // Delete the trip document
     batch.delete(tripRef);
+    console.log(`Added delete operation for trip: ${id}`);
     
     // Check for and delete related documents
     const relatedCostsQuery = query(collection(db, 'costs'), where('tripId', '==', id));
     const costsSnapshot = await getDocs(relatedCostsQuery);
     
-    if (!costsSnapshot.empty) {
-      console.log(`Found ${costsSnapshot.size} related cost entries to delete`);
-      costsSnapshot.forEach(doc => {
+    // Log and add deletion operations for related costs
+    const relatedCostsCount = costsSnapshot.size;
+    console.log(`Found ${relatedCostsCount} related cost documents`);
+    
+    if (relatedCostsCount > 0) {
+      for (const doc of costsSnapshot.docs) {
+        console.log(`Adding delete operation for cost: ${doc.id}`);
         batch.delete(doc.ref);
-      });
+      }
     }
     
-    // Commit batch and log results
+    // Create audit log entry
+    const auditLogData = {
+      id: uuidv4(),
+      timestamp: serverTimestamp(),
+      user: 'system', // Replace with actual user in production
+      action: 'delete',
+      entity: 'trip',
+      entityId: id,
+      details: `Trip ${id} deleted with ${relatedCostsCount} related documents`,
+      changes: convertTimestamps(tripSnap.data())
+    };
+    
+    // Add audit log creation to batch
+    const auditLogRef = doc(collection(db, 'auditLogs'));
+    batch.set(auditLogRef, auditLogData);
+    console.log(`Added audit log creation to batch: ${auditLogRef.id}`);
+
+    // Commit all operations atomically
     try {
       await batch.commit();
-      console.log(`✅ Successfully deleted trip ${id} and ${costsSnapshot.size} related documents`);
-      
-      // Log activity
-      await logActivity('trip_deleted', id, 'trip', { 
-        deletedAt: new Date().toISOString(),
-        tripData: convertTimestamps(tripDoc.data())
-      });
+      console.log(`✅ Successfully deleted trip ${id} and ${relatedCostsCount} related documents`);
       
       return;
     } catch (batchError) {
       console.error(`❌ Batch deletion failed for trip ${id}:`, batchError);
       throw batchError;
     }
-
   } catch (error) {
     console.error("❌ Error deleting trip:", error);
     throw error;

@@ -213,29 +213,50 @@ export class SyncService {
     
     const unsubscribe = onSnapshot(
       tripsQuery,
-      {
-        next: (snapshot) => {
-          console.log(`🔄 Global trips listener: ${snapshot.size} documents`);
-          const trips: Trip[] = [];
+      (snapshot) => {
+        const trips: Trip[] = [];
+        
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+        
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+          const data = convertTimestamps(change.doc.data());
           
-          // Process document changes
-          snapshot.docChanges().forEach(change => {
-            console.log(`Global trip listener - document ${change.doc.id} ${change.type}`);
-          });
+          if (change.type === 'added') {
+            added++;
+            console.log(`Trip added: ${id}`);
+            trips.push({ id, ...data } as Trip);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Trip modified: ${id}`);
+            trips.push({ id, ...data } as Trip);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Trip removed: ${id}`);
+            // Removed trips will be filtered out when we rebuild the trips array
+          }
+        });
+        
+        // If we have added/modified/removed items, do a full rebuild of the trips array
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Global trips listener changes: ${added} added, ${modified} modified, ${removed} removed`);
           
-          // Process all documents
+          // For a complete refresh, get all current documents
+          const currentTrips: Trip[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
-            trips.push({ id: doc.id, ...data } as Trip);
+            currentTrips.push({ id: doc.id, ...data } as Trip);
           });
           
-          callback(trips);
+          callback(currentTrips);
           this.lastSynced = new Date();
-        },
-        error: (error) => {
-          console.error('Error in global trips listener:', error);
-          // Don't change connection status here to avoid false disconnections
         }
+      },
+      (error) => {
+        console.error('Error in global trips listener:', error);
+        // Don't change connection status here to avoid false disconnections
       }
     );
     
@@ -334,17 +355,31 @@ export class SyncService {
     
     const unsubscribe = onSnapshot(
       eventsQuery,
-      {
-        next: (snapshot) => {
-          console.log(`🔄 Global driver behavior listener: ${snapshot.size} documents`);
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+        
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+          
+          if (change.type === 'added') {
+            added++;
+            console.log(`Driver behavior event added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Driver behavior event modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Driver behavior event removed: ${id}`);
+          }
+        });
+        
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Driver behavior changes: ${added} added, ${modified} modified, ${removed} removed`);
+          
+          // Get all current documents for a full refresh
           const events: DriverBehaviorEvent[] = [];
-          
-          // Process document changes
-          snapshot.docChanges().forEach(change => {
-            console.log(`Global driver behavior listener - document ${change.doc.id} ${change.type}`);
-          });
-          
-          // Process all documents
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
             events.push({ id: doc.id, ...data } as DriverBehaviorEvent);
@@ -352,10 +387,10 @@ export class SyncService {
           
           callback(events);
           this.lastSynced = new Date();
-        },
-        error: (error) => {
-          console.error('Error in global driver behavior listener:', error);
         }
+      },
+      (error) => {
+        console.error('Error in global driver behavior listener:', error);
       }
     );
     
@@ -376,17 +411,31 @@ export class SyncService {
     
     const unsubscribe = onSnapshot(
       recordsQuery,
-      {
-        next: (snapshot) => {
-          console.log(`🔄 Global diesel listener: ${snapshot.size} documents`);
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+        
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+          
+          if (change.type === 'added') {
+            added++;
+            console.log(`Diesel record added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Diesel record modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Diesel record removed: ${id}`);
+          }
+        });
+        
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Diesel records changes: ${added} added, ${modified} modified, ${removed} removed`);
+          
+          // Get all current documents for a full refresh
           const records: DieselConsumptionRecord[] = [];
-          
-          // Process document changes
-          snapshot.docChanges().forEach(change => {
-            console.log(`Global diesel listener - document ${change.doc.id} ${change.type}`);
-          });
-          
-          // Process all documents
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
             records.push({ id: doc.id, ...data } as DieselConsumptionRecord);
@@ -394,10 +443,10 @@ export class SyncService {
           
           callback(records);
           this.lastSynced = new Date();
-        },
-        error: (error) => {
-          console.error('Error in global diesel listener:', error);
         }
+      },
+      (error) => {
+        console.error('Error in global diesel listener:', error);
       }
     );
     
@@ -626,6 +675,7 @@ export class SyncService {
 
   // Cleanup method to unsubscribe from all listeners
   public cleanup(): void {
+    console.log("🧹 Cleaning up all SyncService listeners");
     // Unsubscribe from all individual trip listeners
     for (const unsubscribe of this.tripUnsubscribes.values()) {
       unsubscribe();
@@ -693,23 +743,49 @@ export const cleanObjectForFirestore = (obj: any): any => {
 // Helper function to convert Firestore timestamps to ISO strings
 export const convertTimestamps = (obj: any): any => {
     if (obj === null || obj === undefined) {
-        return null;
+        return obj;
     }
     
-    if (obj instanceof Timestamp) {
-        return obj.toDate().toISOString();
+    // Handle Firestore Timestamp objects
+    try {
+      if (obj instanceof Timestamp) {
+          return obj.toDate().toISOString();
+      }
+
+      // Also check for a toDate() method to handle different Timestamp implementations
+      if (obj && typeof obj.toDate === 'function') {
+          return obj.toDate().toISOString();
+      }
+    } catch (err) {
+      console.error("Error converting timestamp:", err);
+      // Return the original object if conversion fails
+      return obj;
     }
     
     if (Array.isArray(obj)) {
-        return obj.map(convertTimestamps);
+        // Safely convert array items
+        try {
+          return obj.map(item => convertTimestamps(item));
+        } catch (err) {
+          console.error("Error converting array items:", err);
+          return obj;
+        }
     }
     
     if (typeof obj === 'object') {
-        const converted: any = {};
-        for (const [key, value] of Object.entries(obj)) {
+      // Handle regular objects
+      try {
+        const converted: Record<string, any> = {};
+        Object.entries(obj).forEach(([key, value]) => {
+          if (value !== undefined) {
             converted[key] = convertTimestamps(value);
-        }
-        return converted;
+          }
+        });
+        return converted; 
+      } catch (err) {
+        console.error("Error converting object properties:", err);
+        return obj;
+      }
     }
     
     return obj;

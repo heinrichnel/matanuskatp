@@ -13,7 +13,7 @@ import LoadImportModal from './LoadImportModal';
 import TripStatusUpdateModal from './TripStatusUpdateModal';
 import { useAppContext } from '../../context/AppContext';
 import SyncIndicator from '../ui/SyncIndicator';
-import { useOutletContext, useNavigate } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import LoadingIndicator from '../ui/LoadingIndicator';
 import ErrorMessage from '../ui/ErrorMessage';
 
@@ -36,7 +36,6 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   // Get functions from context
   const { trips: contextTrips, updateTripStatus, deleteTrip, completeTrip, isLoading } = useAppContext();
   const context = useOutletContext<OutletContextType>();
-  const navigate = useNavigate();
 
   // Use props if provided, otherwise use context
   const trips = props.trips || contextTrips.filter(t => t.status === 'active');
@@ -115,14 +114,32 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
       <div className="flex justify-between items-center mb-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Active Trips</h2>
-          <div className="flex items-center mt-1">
-            <p className="text-gray-600 mr-3">Manage ongoing trips and track their status</p>
-            <SyncIndicator />
+          <div className="flex items-center justify-between mt-1">
+            <div className="flex items-center">
+              <p className="text-gray-600 mr-3">Manage ongoing trips and track their status</p>
+              <SyncIndicator />
+            </div>
           </div>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" size="md" icon={<Upload className="w-5 h-5" />} onClick={openImportModal}>
+          <Button 
+            variant="outline" 
+            size="md" 
+            icon={<Upload className="w-5 h-5" />} 
+            onClick={openImportModal}
+          >
             Import Trips
+          </Button>
+          <Button 
+            variant="primary"
+            size="md"
+            icon={<Plus className="w-5 h-5" />}
+            onClick={() => {
+              context.setEditingTrip(undefined);
+              context.setShowTripForm(true);
+            }}
+          >
+            Add Trip
           </Button>
         </div>
       </div>

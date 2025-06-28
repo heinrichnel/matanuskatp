@@ -42,7 +42,6 @@ const Header: FC<HeaderProps> = ({
     <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r shadow flex flex-col z-30">
       <div className="flex items-center justify-between px-6 py-4 border-b">
         <span className="text-xl font-bold text-primary tracking-tight">TripPro</span>
-        <Button size="sm" variant="primary" onClick={onNewTrip} icon={<Plus className="w-4 h-4" />}>Add Trip</Button>
       </div>
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1">

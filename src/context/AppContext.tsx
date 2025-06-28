@@ -207,37 +207,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteTrip = async (id: string): Promise<void> => {
     const opId = `deleteTrip-${id}`;
     setIsLoading(prev => ({ ...prev, [opId]: true }));
-    
+
     try {
-      // Find trip in local state to create audit log
-      const tripToDelete = trips.find(t => t.id === id);
-      
-      if (tripToDelete) {
-        // Create audit log for the deletion
-        await addAuditLogToFirebase({
-          id: uuidv4(),
-          timestamp: new Date().toISOString(),
-          user: 'system', // Should be replaced with actual user
-          action: 'delete',
-          entity: 'trip',
-          entityId: id,
-          details: `Trip ${id} deleted`,
-          changes: tripToDelete
-        });
-      }
-      
+      console.log(`🗑️ Deleting trip with ID: ${id}`);
+
       // Delete from Firestore
       await deleteTripFromFirebase(id);
-      
+
       // Optimistically update local state
-      setTrips(prev => prev.filter(t => t.id !== id));
-      
+      setTrips(prev => {
+        console.log(`Optimistically removing trip ${id} from local state`);
+        return prev.filter(t => t.id !== id);
+      });
+
       console.log(`✅ Trip ${id} deleted successfully`);
     } catch (error) {
       console.error(`❌ Error deleting trip ${id}:`, error);
       throw error;
     } finally {
-      setIsLoading(prev => ({ ...prev, [opId]: false }));
+      setIsLoading(prev => {
+        const updated = { ...prev };
+        delete updated[opId];
+        return updated;
+      });
     }
   };
 
