@@ -85,36 +85,48 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
     setIsSubmitting(true);
     
     const finalReason = editReason === 'Other (specify in comments)' ? customReason.trim() : editReason;
-
-    // Create a new edit record for each actual change
-    const newEditRecords: TripEditRecord[] = changedFields.map(change => ({
-      id: crypto.randomUUID(),
-      tripId: trip.id,
-      editedBy: 'Current User', // STUB: Replace with actual authenticated user
-      editedAt: new Date().toISOString(),
-      reason: finalReason,
-      fieldChanged: change.field,
-      oldValue: change.oldValue,
-      newValue: change.newValue,
-      changeType: 'update',
-    }));
-
-    const updatedTrip: Trip = {
-      ...trip,
-      baseRevenue: parseFloat(formData.baseRevenue),
-      distanceKm: parseFloat(formData.distanceKm),
-      editHistory: [...(trip.editHistory || []), ...newEditRecords],
-    };
-
+    
     try {
+      // Create a new edit record for each actual change
+      const newEditRecords: TripEditRecord[] = changedFields.map(change => ({
+        id: crypto.randomUUID(),
+        tripId: trip.id,
+        editedBy: 'Current User', // STUB: Replace with actual authenticated user
+        editedAt: new Date().toISOString(),
+        reason: finalReason,
+        fieldChanged: change.field,
+        oldValue: change.oldValue,
+        newValue: change.newValue,
+        changeType: 'update',
+      }));
+      
+      console.log(`Creating ${newEditRecords.length} edit records for trip ${trip.id}`);
+    
+      const updatedTrip: Trip = {
+        ...trip,
+        baseRevenue: parseFloat(formData.baseRevenue),
+        distanceKm: parseFloat(formData.distanceKm),
+        editHistory: [...(trip.editHistory || []), ...newEditRecords],
+        updatedAt: new Date().toISOString()
+      };
+      
+      console.log(`Saving updated trip: ${trip.id}`, {
+        baseRevenue: updatedTrip.baseRevenue,
+        distanceKm: updatedTrip.distanceKm,
+        editHistoryLength: updatedTrip.editHistory?.length
+      });
+    
       await onSave(updatedTrip);
       onClose();
     } catch (error) {
       console.error("KILO CODE AUDIT // Failed to save completed trip:", error);
       setErrors({ general: 'Failed to save changes. Please try again.' });
+      
+      // Throw error after setting UI error state
+      throw error;
     } finally {
       setIsSubmitting(false);
-    }
+    };
   };
 
   return (
@@ -178,7 +190,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
           <Button 
             icon={<Save className="h-4 w-4"/>} 
             onClick={handleSave} 
-            disabled={isSubmitting || changedFields.length === 0}
+            disabled={isSubmitting || changedFields.length === 0 || Object.keys(errors).length > 0}
             isLoading={isSubmitting}
           >
             Save Changes

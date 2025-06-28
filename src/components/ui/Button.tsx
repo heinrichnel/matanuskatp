@@ -3,7 +3,7 @@ import React from 'react';
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'danger' | 'success';
 type ButtonSize = 'xs' | 'sm' | 'md' | 'lg';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
   icon?: React.ReactNode;
@@ -51,7 +51,7 @@ const Button: React.FC<ButtonProps> = ({
       </>
     ) : (
       <>
-        {icon && <span className="mr-2">{icon}</span>}
+        {icon && <span className={children ? "mr-2" : ""}>{icon}</span>}
         {children}
       </>
     )}
