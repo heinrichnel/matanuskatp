@@ -1,23 +1,5 @@
 import { FC } from 'react';
-import { Activity, BarChart3, CheckCircle, ClipboardList, Clock, Flag, Fuel, Plus, Settings, Shield, Target, Truck, Upload, Users, User as UserRound, Bell, User, History } from 'lucide-react';
-import Button from '../ui/Button';
-import SyncIndicator from '../ui/SyncIndicator';
-
-interface HeaderProps {
-  currentView: string;
-  onNavigate: (view: string) => void;
-  onNewTrip: () => void;
-  userName?: string;
-  onProfileClick?: () => void;
-  onNotificationsClick?: () => void;
-  onSettingsClick?: () => void;
-}
-
-const Header: FC<HeaderProps> = ({
-  currentView,
-  onNavigate,
-  onNewTrip,
-  userName = "Current User",
+import { Activity, BarChart3, CheckCircle, ClipboardList, Clock, Flag, Fuel, Plus, Settings, Shield, Target, Truck, Upload, Users, Bell, User, History } from 'lucide-react';
   onProfileClick,
   onNotificationsClick,
   onSettingsClick
