@@ -79,21 +79,39 @@ export function processDriverBehaviorEvents(rawEvents: any[]): DriverBehaviorEve
 // Import trips from webhook with error handling and retry logic
 export async function importTripsFromWebhook(): Promise<{ imported: number, skipped: number }> {
   try {
-    // Use the Cloud Function URL for trips
-    const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/manualImportTrips';
+    // Use the correct Cloud Function URL for trips
+    const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importTripsFromWebBook';
 
-    const response = await retryWebhookCall(() => fetch(WEBHOOK_URL));
+    const response = await retryWebhookCall(() => fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ trips: [] })  // Empty array to trigger fetching from source
+    }));
+    
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Failed to fetch trips: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
-    const result = await response.json();
-    console.log('Trips import result:', result);
+    // Safely try to parse the response
+    let result;
+    try {
+      result = await response.json();
+      console.log('Trips import result:', result);
+    } catch (jsonError) {
+      console.warn('Could not parse JSON response:', jsonError);
+      const text = await response.text();
+      console.log('Response text:', text);
+      // Return a default response if JSON parsing fails
+      result = { imported: 0, skipped: 0, message: text || 'Response was not valid JSON' };
+    }
 
     return {
-      imported: result.imported || 0,
-      skipped: result.skipped || 0
+      imported: result?.imported || 0,
+      skipped: result?.skipped || 0
     };
   } catch (error) {
     console.error('Error importing trips:', error);
@@ -104,17 +122,18 @@ export async function importTripsFromWebhook(): Promise<{ imported: number, skip
 // Function to manually trigger driver behavior events import
 export async function importDriverBehaviorEventsFromWebhook(): Promise<{ imported: number, skipped: number }> {
   try {
-    // Use the Cloud Function URL for manual driver behavior events import
-    const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook';
+    // Use the correct Cloud Function URL for driver behavior events
+    const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverEventsFromWebBook';
 
     // Make a POST request with empty body to trigger the import
     const response = await retryWebhookCall(() =>
       fetch(WEBHOOK_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify([]) // Empty array to trigger the function to fetch from the web book
+        body: JSON.stringify({ events: [] }) // Empty events array to trigger fetching from source
       })
     );
 
@@ -123,12 +142,22 @@ export async function importDriverBehaviorEventsFromWebhook(): Promise<{ importe
       throw new Error(`Failed to import driver behavior events: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
-    const result = await response.json();
-    console.log('Manual driver behavior events import result:', result);
+    // Safely try to parse the response
+    let result;
+    try {
+      result = await response.json();
+      console.log('Driver behavior events import result:', result);
+    } catch (jsonError) {
+      console.warn('Could not parse JSON response:', jsonError);
+      const text = await response.text();
+      console.log('Response text:', text);
+      // Return a default response if JSON parsing fails
+      result = { imported: 0, skipped: 0, message: text || 'Response was not valid JSON' };
+    }
 
     return {
-      imported: result.imported || 0,
-      skipped: result.skipped || 0
+      imported: result?.imported || 0,
+      skipped: result?.skipped || 0
     };
   } catch (error) {
     console.error('Error manually importing driver behavior events:', error);

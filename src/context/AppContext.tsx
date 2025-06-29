@@ -207,20 +207,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteTrip = async (id: string): Promise<void> => {
     const opId = `deleteTrip-${id}`;
     setIsLoading(prev => ({ ...prev, [opId]: true }));
-
+    
     try {
       console.log(`🗑️ Deleting trip with ID: ${id}`);
-
-      // Delete from Firestore
-      await deleteTripFromFirebase(id);
-
-      // Optimistically update local state
-      setTrips(prev => {
-        console.log(`Optimistically removing trip ${id} from local state`);
-        return prev.filter(t => t.id !== id);
+      
+      // First, verify the trip exists in Firestore
+      const trip = trips.find(t => t.id === id);
+      if (!trip) {
+        console.warn(`Trip with ID ${id} not found in local state, nothing to delete`);
+        return;
+      }
+      
+      // Log what we're about to delete
+      console.log(`About to delete trip:`, {
+        id,
+        fleetNumber: trip.fleetNumber, 
+        route: trip.route,
+        costsCount: trip.costs?.length || 0
       });
-
-      console.log(`✅ Trip ${id} deleted successfully`);
+      
+      try {
+        // Delete from Firestore - no optimistic update yet
+        await deleteTripFromFirebase(id);
+        console.log(`✅ Backend deletion successful for trip ${id}`);
+        
+        // Now update the local state after confirmed deletion
+        setTrips(prev => {
+          console.log(`Removing trip ${id} from local state`);
+          return prev.filter(t => t.id !== id);
+        });
+        
+        console.log(`✅ Trip ${id} completely deleted from both backend and UI`);
+      } catch (deleteError) {
+        console.error(`❌ Error in Firebase deletion for trip ${id}:`, deleteError);
+        throw deleteError;
+      }
     } catch (error) {
       console.error(`❌ Error deleting trip ${id}:`, error);
       throw error;
@@ -684,25 +705,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   
   // Import from webhook
   const importTripsFromWebhook = async (): Promise<{ imported: number, skipped: number }> => {
-    const opId = 'importTripsFromWebhook';
-    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    const opId = 'importTripsFromWebhook'; 
+    setIsLoading(prev => ({ ...prev, [opId]: true })); 
     
     try {
-      // Use Firebase Function URL for webhook import
-      console.log('Triggering webhook import for trips...');
-      const response = await fetch('https://us-central1-mat1-9e6b3.cloudfunctions.net/manualImportTrips');
+      // Use correct Firebase Function URL with full path
+      console.log('⚡ Triggering webhook import for trips...');
+      const functionUrl = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importTripsFromWebBook';
+      
+      // Create an empty request body to trigger the function
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ trips: [] }) // Empty array to trigger fetching from the source
+      });
       
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to import trips: ${response.status} ${response.statusText} - ${errorText}`);
       }
       
-      const result = await response.json();
-      console.log('✅ Trip import result:', result);
+      let result;
+      try {
+        result = await response.json();
+        console.log('✅ Trip import result:', result);
+      } catch (jsonError) {
+        console.warn('Could not parse JSON response:', jsonError);
+        // Return a default response if JSON parsing fails
+        result = { imported: 0, skipped: 0, message: 'Response was not valid JSON' };
+      }
       
       return {
-        imported: result.imported || 0,
-        skipped: result.skipped || 0
+        imported: result?.imported || 0,
+        skipped: result?.skipped || 0
       };
     } catch (error) {
       console.error("❌ Error importing trips from webhook:", error);
@@ -715,16 +752,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Import driver behavior events from webhook
   const importDriverBehaviorEventsFromWebhook = async (): Promise<{ imported: number, skipped: number }> => {
     const opId = 'importDriverBehaviorEvents';
-    setIsLoading(prev => ({ ...prev, [opId]: true }));
+    setIsLoading(prev => ({ ...prev, [opId]: true })); 
     
     try {
-      console.log('Triggering webhook import for driver behavior events...');
-      const response = await fetch('https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook', {
+      // Use the correct Firebase Function URL
+      const functionUrl = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverEventsFromWebBook';
+      console.log(`⚡ Triggering webhook import for driver behavior events from: ${functionUrl}`);
+      
+      const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify([]) // Empty array to trigger fetching from the source
+        body: JSON.stringify({ events: [] }) // Empty array to trigger fetching from the source
       });
       
       if (!response.ok) {
@@ -732,12 +772,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         throw new Error(`Failed to import driver behavior events: ${response.status} ${response.statusText} - ${errorText}`);
       }
       
-      const result = await response.json();
-      console.log('✅ Driver behavior import result:', result);
+      let result;
+      try {
+        result = await response.json();
+        console.log('✅ Driver behavior import result:', result);
+      } catch (jsonError) {
+        console.warn('Could not parse JSON response:', jsonError);
+        // Return a default response if JSON parsing fails
+        result = { imported: 0, skipped: 0, message: 'Response was not valid JSON' };
+      }
       
       return {
-        imported: result.imported || 0,
-        skipped: result.skipped || 0
+        imported: result?.imported || 0,
+        skipped: result?.skipped || 0
       };
     } catch (error) {
       console.error("❌ Error importing driver behavior events from webhook:", error);
