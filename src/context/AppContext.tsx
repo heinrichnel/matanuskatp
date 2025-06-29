@@ -662,6 +662,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   
   // Import trips from CSV
+  // Import trips from CSV with loading state
   const importTripsFromCSV = async (newTrips: Omit<Trip, 'id' | 'costs' | 'status'>[]): Promise<void> => {
     const opId = 'importTripsFromCSV';
     setIsLoading(prev => ({ ...prev, [opId]: true }));
@@ -704,6 +705,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   
   // Import from webhook
+  // Import from webhook with loading state
   const importTripsFromWebhook = async (): Promise<{ imported: number, skipped: number }> => {
     const opId = 'importTripsFromWebhook'; 
     setIsLoading(prev => ({ ...prev, [opId]: true })); 
@@ -750,6 +752,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   
   // Import driver behavior events from webhook
+  // Import driver behavior events from webhook with loading state
   const importDriverBehaviorEventsFromWebhook = async (): Promise<{ imported: number, skipped: number }> => {
     const opId = 'importDriverBehaviorEvents';
     setIsLoading(prev => ({ ...prev, [opId]: true })); 
@@ -794,6 +797,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
   
+  // Update trip status
   const updateTripStatus = async (tripId: string, status: 'shipped' | 'delivered', notes: string): Promise<void> => {
     try {
       const trip = trips.find(t => t.id === tripId);
@@ -826,6 +830,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
   
+  // Trigger trip import
   const triggerTripImport = async (): Promise<void> => {
     const opId = 'triggerTripImport';
     setIsLoading(prev => ({ ...prev, [opId]: true }));
@@ -848,6 +853,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
   
+  // Trigger driver behavior import
   const triggerDriverBehaviorImport = async (): Promise<void> => {
     const opId = 'triggerDriverBehaviorImport';
     setIsLoading(prev => ({ ...prev, [opId]: true }));
@@ -1138,132 +1144,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
   
   const updateInvoicePayment = async (tripId: string, paymentData: any): Promise<void> => {
-    try {
-      // Find the trip
-      const trip = trips.find(t => t.id === tripId);
-      if (!trip) {
-        throw new Error(`Trip with ID ${tripId} not found`);
-      }
-      
-      // Update trip with payment data
-      const updatedTrip = {
-        ...trip,
-        ...paymentData,
-        updatedAt: new Date().toISOString()
-      };
-      
-      // Update in Firestore
-      await updateTripInFirebase(tripId, updatedTrip);
-      
-      console.log(`✅ Invoice payment updated for trip ${tripId}`);
-    } catch (error) {
-      console.error('Error updating invoice payment:', error);
-      throw error;
-    }
-  };
-  
-  const importTripsFromCSV = async (newTrips: Omit<Trip, 'id' | 'costs' | 'status'>[]): Promise<void> => {
-    try {
-      // Process and add each trip
-      const results = [];
-      for (const tripData of newTrips) {
-        try {
-          const newTrip = {
-            ...tripData,
-            id: generateTripId(),
-            costs: [],
-            status: 'active' as 'active',
-          };
-          
-          const tripId = await addTripToFirebase(newTrip as Trip);
-          results.push({ status: 'success', id: tripId });
-          console.log(`✅ Trip imported: ${tripId}`);
-        } catch (tripError) {
-          console.error('Error importing individual trip:', tripError);
-          results.push({ status: 'error', error: tripError.message });
-        }
-      }
-      
-      console.log(`Imported ${results.filter(r => r.status === 'success').length} of ${newTrips.length} trips`);
-    } catch (error) {
-      console.error('Error importing trips from CSV:', error);
-      throw error;
-    }
-  };
-  
-  const importTripsFromWebhook = async (): Promise<{ imported: number, skipped: number }> => {
-    try {
-      // Use Firebase Function URL for webhook import
-      const response = await fetch('https://us-central1-mat1-9e6b3.cloudfunctions.net/manualImportTrips');
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to import trips: ${response.status} ${response.statusText} - ${errorText}`);
-      }
-      
-      const result = await response.json();
-      console.log('Trip import result:', result);
-      
-      return {
-        imported: result.imported || 0,
-        skipped: result.skipped || 0
-      };
-    } catch (error) {
-      console.error("Error importing trips from webhook:", error);
-      throw error;
-    }
-  };
-  
-  const triggerDriverBehaviorImport = async (): Promise<void> => {
-    try {
-      const eventData = {
-        eventType: 'driver.behavior.import_request',
-        timestamp: new Date().toISOString(),
-        data: {
-          source: 'webapp',
-        },
-      };
-      await sendDriverBehaviorEvent(eventData);
-    } catch (error) {
-      console.error("Error triggering driver behavior import:", error);
-      throw error;
-    }
-  };
-  
-  const importDriverBehaviorEventsFromWebhook = async (): Promise<{ imported: number, skipped: number }> => {
-    try {
-      // Use Firebase Function URL for webhook import
-      const response = await fetch('https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify([]) // Empty array to trigger fetching from the source
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to import driver behavior events: ${response.status} ${response.statusText} - ${errorText}`);
-      }
-      
-      const result = await response.json();
-      console.log('Driver behavior import result:', result);
-      
-      return {
-        imported: result.imported || 0,
-        skipped: result.skipped || 0
-      };
-    } catch (error) {
-      console.error("Error importing driver behavior events from webhook:", error);
-      throw error;
-    }
-  };
-
-  const value = {
+  // Enhanced updateInvoicePayment with loading state
+  const updateInvoicePayment = async (tripId: string, paymentData: any): Promise<void> => {
     trips,
     addTrip,
     updateTrip,
-    deleteTrip,
+    deleteTrip, 
     getTrip,
     addCostEntry,
     updateCostEntry,
@@ -1271,13 +1157,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Placeholder functions that still need implementation
     addAttachment: async () => { console.warn("Function not implemented"); return ""; },
     deleteAttachment: async () => { console.warn("Function not implemented"); },
-    addAdditionalCost: async () => { console.warn("Function not implemented"); return ""; },
+    addAdditionalCost: async () => { console.warn("Function not implemented"); return ""; }, 
     removeAdditionalCost: async () => { console.warn("Function not implemented"); },
     addDelayReason: async () => { console.warn("Function not implemented"); return ""; },
     missedLoads,
     addMissedLoad,
     updateMissedLoad,
-    deleteMissedLoad,
+    deleteMissedLoad, 
     updateInvoicePayment,
     importTripsFromCSV,
     triggerTripImport,
@@ -1331,10 +1217,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     },
     triggerDriverBehaviorImport: triggerDriverBehaviorImport,
     actionItems,
-    addActionItem: placeholderString, 
+    addActionItem, 
     updateActionItem,
     deleteActionItem,
-    addActionItemComment,
+    addActionItemComment, 
     carReports,
     addCARReport,
     updateCARReport,
@@ -1343,7 +1229,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     bulkDeleteTrips: async () => { console.warn("Function not implemented"); },
     updateTripStatus: updateTripStatus,
     
-    // UI and state management
+    // State management
     isLoading,
     setIsLoading,
     setTrips,
