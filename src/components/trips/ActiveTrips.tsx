@@ -7,7 +7,7 @@ import { Trip } from '../../types';
 import { Select } from '../ui/FormElements';
 import Button from '../ui/Button';
 import Card, { CardContent, CardHeader } from '../ui/Card';
-import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign } from 'lucide-react';
+import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign, Plus } from 'lucide-react';
 import { formatCurrency, formatDate, getAllFlaggedCosts, getUnresolvedFlagsCount, canCompleteTrip } from '../../utils/helpers';
 import LoadImportModal from './LoadImportModal';
 import TripStatusUpdateModal from './TripStatusUpdateModal';
@@ -61,15 +61,22 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
 
   const handleDelete = async (id: string) => {
     const trip = trips.find((t) => t.id === id);
-    if (trip && window.confirm(`Delete trip for fleet ${trip.fleetNumber}? This action cannot be undone.`)) {
+    if (trip && window.confirm(`Delete trip for fleet ${trip.fleetNumber}? This will permanently remove the trip and all related data. This action cannot be undone.`)) {
       try {
         setIsDeleting(id);
         setError(null);
+        console.log(`🗑️ User confirmed delete for trip ${id}`);
+        
+        // Call onDelete (which maps to deleteTrip from context)
         await onDelete(id);
+        
+        console.log(`✅ Delete operation completed for trip ${id}`);
+        
+        // Optional: Refresh the trips list after deletion
+        // (This would be needed if the real-time listeners aren't picking up the deletion)
       } catch (error) {
+        console.error(`❌ Error in trip deletion UI flow:`, error);
         setError(`Failed to delete trip: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        console.error("Error deleting trip:", error);
-        alert(`Failed to delete trip: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
         setIsDeleting(null); // Clear loading state
       }
@@ -275,7 +282,12 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
                     <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={() => onView(trip)}>
                       View
                     </Button>
-                    <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => onEdit(trip)}>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      icon={<Edit className="w-4 h-4" />} 
+                      onClick={() => onEdit(trip)}
+                    >
                       Edit
                     </Button>
                     <Button
@@ -293,7 +305,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
                       variant="success"
                       icon={<CheckCircle className="w-4 h-4" />}
                       onClick={() => onCompleteTrip(trip.id)}
-                      disabled={!canCompleteTrip(trip)}
+                      disabled={!canCompleteTrip(trip) || isLoading[`completeTrip-${trip.id}`]}
                       isLoading={isLoading[`completeTrip-${trip.id}`]}
                       title={!canCompleteTrip(trip) ?
                         'Cannot complete: Unresolved flags' : 'Mark as completed'}
