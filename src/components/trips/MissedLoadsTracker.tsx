@@ -227,7 +227,8 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
 
     if (confirm(confirmMessage)) {
       try {
-        setIsDeleting(true);
+        setIsDeleting(id); // Track which specific load is being deleted
+        
         
         // Delete the missed load
         await onDeleteMissedLoad(id);
@@ -239,12 +240,16 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
           props.missedLoads = updatedLoads;
         }
         
-        alert('Missed load deleted successfully');
+        
+        // Update the local state to reflect the deletion
+        setMissedLoads(prev => prev.filter(load => load.id !== id));
+        
+        alert('Missed load deleted successfully!');
       } catch (error) {
         console.error("Error deleting missed load:", error);
         alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
       } finally {
-        setIsDeleting(false);
+        setIsDeleting(null); // Clear deletion state when done
       }
     }
   };
@@ -528,7 +533,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
                         <Button
                           size="sm"
                           variant="danger"
-                          onClick={() => handleDelete(load.id)}
+                          onClick={() => handleDelete(load.id)} 
                           icon={isDeleting === load.id ? undefined : <Trash2 className="w-3 h-3" />}
                           disabled={isDeleting !== null || connectionStatus !== 'connected'}
                           isLoading={isDeleting === load.id}
