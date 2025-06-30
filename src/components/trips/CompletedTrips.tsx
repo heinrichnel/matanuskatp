@@ -36,7 +36,6 @@ const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
   const { trips: contextTrips, updateTrip, deleteTrip } = useAppContext();
   // Use an empty object as fallback if context is undefined
   const context = useOutletContext<OutletContextType | undefined>() || {};
-  const context = useOutletContext<OutletContextType | undefined>() || {};
   
   // Use props if provided, otherwise use context
   const trips = props.trips || contextTrips.filter(t => t.status === 'completed');

@@ -23,12 +23,6 @@ interface OutletContextType {
   setShowTripForm?: (show: boolean) => void;
 }
 
-interface OutletContextType {
-  setSelectedTrip: (trip: Trip | null) => void;
-  setEditingTrip?: (trip: Trip | undefined) => void;
-  setShowTripForm?: (show: boolean) => void;
-}
-
 interface ActiveTripsProps {
   trips?: Trip[];
   onView?: (trip: Trip) => void;
@@ -37,12 +31,9 @@ interface ActiveTripsProps {
   onCompleteTrip?: (tripId: string) => void;
 }
 
-// Type for context provided by the outlet
-interface OutletContextType {
-  setSelectedTrip: (trip: Trip | null) => void;
-  setEditingTrip?: (trip: Trip | undefined) => void;
-  setShowTripForm?: (show: boolean) => void;
-  const context = useOutletContext<OutletContextType | undefined>() || {}; 
+const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
+  const { trips: contextTrips, deleteTrip, completeTrip, updateTripStatus, isLoading } = useAppContext();
+  const context = useOutletContext<OutletContextType | undefined>() || {};
 
   // Use props if provided, otherwise use context
   const trips = props.trips || contextTrips.filter(t => t.status === 'active');
