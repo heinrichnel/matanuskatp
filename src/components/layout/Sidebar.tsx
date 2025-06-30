@@ -18,28 +18,16 @@ import {
   User,
   History
 } from 'lucide-react';
-import { Activity, BarChart3, CheckCircle, ClipboardList, Clock, Flag, Fuel, Plus, Settings, Shield, Target, Truck, Upload, Users, Bell, User, History } from 'lucide-react';
-import Button from '../ui/Button';
 import SyncIndicator from '../ui/SyncIndicator';
 
 interface HeaderProps {
   currentView: string;
   onNavigate: (view: string) => void;
-  onNewTrip: () => void;
-  userName?: string;
-  onProfileClick?: () => void;
-  onNotificationsClick?: () => void;
-  onSettingsClick?: () => void;
 }
 
 const Sidebar: FC<HeaderProps> = ({
   currentView,
-  onNavigate,
-  onNewTrip,
-  userName = "Current User",
-  onProfileClick,
-  onNotificationsClick,
-  onSettingsClick
+  onNavigate
 }) => {
   const navItems = [
     { id: 'add-trip', label: 'Add Trip', icon: Plus },
@@ -54,7 +42,6 @@ const Sidebar: FC<HeaderProps> = ({
     { id: 'missed-loads', label: 'Missed Loads', icon: ClipboardList },
     { id: 'diesel-dashboard', label: 'Diesel Dashboard', icon: Fuel },
     { id: 'driver-behavior', label: 'Driver Behavior', icon: User },
-    { id: 'driver-behavior', label: 'Driver Behavior', icon: User },
     { id: 'action-log', label: 'Action Log', icon: Upload },
     { id: 'audit-log', label: 'Audit Log', icon: History },
     { id: 'notifications', label: 'Notifications', icon: Bell },
@@ -66,8 +53,6 @@ const Sidebar: FC<HeaderProps> = ({
     <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r shadow flex flex-col z-30">
       <div className="flex items-center justify-between px-6 py-4 border-b">
         <span className="text-xl font-bold text-primary-600 tracking-tight">TripPro</span>
-        <Button size="sm" variant="primary" onClick={onNewTrip} icon={<Plus className="w-4 h-4" />}>Add Trip</Button>
-        <span className="text-xl font-bold text-primary tracking-tight">TripPro</span>
       </div>
       <nav className="flex-1 overflow-y-auto py-4">
         <ul className="space-y-1">
@@ -90,29 +75,7 @@ const Sidebar: FC<HeaderProps> = ({
         </div>
         <div className="flex items-center gap-3">
           <User className="w-5 h-5 text-gray-400" />
-          <User className="w-5 h-5 text-gray-400" />
-          <span className="text-sm text-gray-700">{userName}</span>
-          <button
-            className="ml-auto p-2 rounded-full hover:bg-gray-100 focus:outline-none"
-            onClick={onNotificationsClick}
-            aria-label="Notifications"
-          >
-            <Bell className="w-5 h-5 text-gray-400" />
-          </button>
-          <button
-            className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
-            onClick={onSettingsClick}
-            aria-label="Settings"
-          >
-            <Settings className="w-5 h-5 text-gray-400" />
-          </button>
-          <button
-            className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
-            onClick={onProfileClick}
-            aria-label="Profile"
-          >
-            <Shield className="w-5 h-5 text-gray-400" />
-          </button>
+          <span className="text-sm text-gray-700">User</span>
         </div>
       </div>
     </aside>

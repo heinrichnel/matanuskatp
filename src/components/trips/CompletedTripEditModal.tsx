@@ -53,7 +53,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
       changes.push({ field: 'baseRevenue', oldValue: trip.baseRevenue.toString(), newValue: formData.baseRevenue });
     }
     if (parseFloat(formData.distanceKm) !== (trip.distanceKm || 0)) {
-        changes.push({ field: 'distanceKm', oldValue: trip.distanceKm?.toString() || '0', newValue: formData.distanceKm });
+      changes.push({ field: 'distanceKm', oldValue: trip.distanceKm?.toString() || '0', newValue: formData.distanceKm });
     }
     return changes;
   }, [formData, trip]);
@@ -61,7 +61,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     const finalReason = editReason === 'Other (specify in comments)' ? customReason.trim() : editReason;
-    
+
     if (!finalReason) {
       newErrors.editReason = 'An edit reason is mandatory.';
     }
@@ -69,10 +69,10 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
       newErrors.general = 'No changes have been made to the trip data.';
     }
     if (isNaN(parseFloat(formData.baseRevenue)) || parseFloat(formData.baseRevenue) <= 0) {
-        newErrors.baseRevenue = "Revenue must be a positive number.";
+      newErrors.baseRevenue = "Revenue must be a positive number.";
     }
     if (isNaN(parseFloat(formData.distanceKm)) || parseFloat(formData.distanceKm) < 0) {
-        newErrors.distanceKm = "Distance cannot be negative.";
+      newErrors.distanceKm = "Distance cannot be negative.";
     }
 
     setErrors(newErrors);
@@ -81,11 +81,11 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
 
   const handleSave = async () => {
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
-    
+
     const finalReason = editReason === 'Other (specify in comments)' ? customReason.trim() : editReason;
-    
+
     try {
       // Create a new edit record for each actual change
       const newEditRecords: TripEditRecord[] = changedFields.map(change => ({
@@ -99,29 +99,28 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
         newValue: change.newValue,
         changeType: 'update',
       }));
-      
+
       console.log(`Creating ${newEditRecords.length} edit records for trip ${trip.id}`);
-    
+
       const updatedTrip: Trip = {
         ...trip,
         baseRevenue: parseFloat(formData.baseRevenue),
         distanceKm: parseFloat(formData.distanceKm),
-        editHistory: [...(trip.editHistory || []), ...newEditRecords],
-        updatedAt: new Date().toISOString()
+        editHistory: [...(trip.editHistory || []), ...newEditRecords]
       };
-      
+
       console.log(`Saving updated trip: ${trip.id}`, {
         baseRevenue: updatedTrip.baseRevenue,
         distanceKm: updatedTrip.distanceKm,
         editHistoryLength: updatedTrip.editHistory?.length
       });
-    
+
       await onSave(updatedTrip);
       onClose();
     } catch (error) {
       console.error("KILO CODE AUDIT // Failed to save completed trip:", error);
       setErrors({ general: 'Failed to save changes. Please try again.' });
-      
+
       // Throw error after setting UI error state
       throw error;
     } finally {
@@ -143,20 +142,20 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input 
-                label="Base Revenue" 
-                type="number"
-                value={formData.baseRevenue} 
-                onChange={val => setFormData(p => ({...p, baseRevenue: val}))} 
-                error={errors.baseRevenue}
-            />
-            <Input 
-                label="Distance (km)" 
-                type="number"
-                value={formData.distanceKm} 
-                onChange={val => setFormData(p => ({...p, distanceKm: val}))} 
-                error={errors.distanceKm}
-            />
+          <Input
+            label="Base Revenue"
+            type="number"
+            value={formData.baseRevenue}
+            onChange={val => setFormData(p => ({ ...p, baseRevenue: val }))}
+            error={errors.baseRevenue}
+          />
+          <Input
+            label="Distance (km)"
+            type="number"
+            value={formData.distanceKm}
+            onChange={val => setFormData(p => ({ ...p, distanceKm: val }))}
+            error={errors.distanceKm}
+          />
         </div>
 
         {/* Edit Reason - Required */}
@@ -182,14 +181,14 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
             />
           )}
         </div>
-        
+
         {errors.general && <div className="text-red-600 text-sm font-medium p-2 bg-red-50 rounded-md">{errors.general}</div>}
 
         <div className="flex justify-end space-x-2 pt-2">
-          <Button icon={<X className="h-4 w-4"/>} variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
-          <Button 
-            icon={<Save className="h-4 w-4"/>} 
-            onClick={handleSave} 
+          <Button icon={<X className="h-4 w-4" />} variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
+          <Button
+            icon={<Save className="h-4 w-4" />}
+            onClick={handleSave}
             disabled={isSubmitting || changedFields.length === 0 || Object.keys(errors).length > 0}
             isLoading={isSubmitting}
           >
