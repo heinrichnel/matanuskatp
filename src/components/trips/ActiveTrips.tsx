@@ -17,6 +17,12 @@ import { useOutletContext } from 'react-router-dom';
 import LoadingIndicator from '../ui/LoadingIndicator';
 import ErrorMessage from '../ui/ErrorMessage';
 
+interface OutletContextType {
+  setSelectedTrip: (trip: Trip | null) => void;
+  setEditingTrip: (trip: Trip | undefined) => void;
+  setShowTripForm: (show: boolean) => void;
+}
+
 interface ActiveTripsProps {
   trips?: Trip[];
   onView?: (trip: Trip) => void;
@@ -35,14 +41,20 @@ interface OutletContextType {
 const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   // Get functions from context
   const { trips: contextTrips, updateTripStatus, deleteTrip, completeTrip, isLoading } = useAppContext();
-  const context = useOutletContext<OutletContextType>();
+  // Use optional chaining to handle potentially undefined context
+  const context = useOutletContext<OutletContextType | undefined>();
 
   // Use props if provided, otherwise use context
   const trips = props.trips || contextTrips.filter(t => t.status === 'active');
-  const onView = props.onView || context.setSelectedTrip;
+  // Use fallbacks when context or context methods are undefined
+  const onView = props.onView || (context?.setSelectedTrip ? context.setSelectedTrip : () => {});
   const onEdit = props.onEdit || ((trip: Trip) => {
-    context.setEditingTrip(trip);
-    context.setShowTripForm(true);
+    if (context?.setEditingTrip) {
+      context.setEditingTrip(trip);
+      if (context?.setShowTripForm) {
+        context.setShowTripForm(true);
+      }
+    }
   });
   const onDelete = props.onDelete || deleteTrip;
   const onCompleteTrip = props.onCompleteTrip || completeTrip;
@@ -142,8 +154,10 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
             size="md"
             icon={<Plus className="w-5 h-5" />}
             onClick={() => {
-              context.setEditingTrip(undefined);
-              context.setShowTripForm(true);
+              if (context?.setEditingTrip && context?.setShowTripForm) {
+                context.setEditingTrip(undefined);
+                context.setShowTripForm(true);
+              }
             }}
           >
             Add Trip
