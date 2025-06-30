@@ -67,6 +67,7 @@ export interface Trip {
   shippedNotes?: string;
   deliveredAt?: string;
   deliveredNotes?: string;
+  statusNotes?: string; // Added for storing notes when updating trip status
 }
 
 export interface CostEntry {

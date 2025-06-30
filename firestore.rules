@@ -1,0 +1,163 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Base rules
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(resource) {
+      return resource.data.userId == request.auth.uid;
+    }
+    
+    // User can only access their own user document
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId);
+      allow write: if isAuthenticated() && (request.auth.uid == userId);
+    }
+    
+    // Trip rules - all authenticated users can read, but only owners can write
+    match /trips/{tripId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                     request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                             (isOwner(resource) || 
+                              hasRole('admin') || 
+                              hasRole('manager'));
+    }
+    
+    // Cost entry rules - tied to trip access
+    match /costs/{costId} {
+      function canAccessParentTrip() {
+        let tripId = resource.data.tripId;
+        let tripRef = /databases/$(database)/documents/trips/$(tripId);
+        return isAuthenticated() && 
+               (exists(tripRef) && 
+               (get(tripRef).data.userId == request.auth.uid || 
+                hasRole('admin') || 
+                hasRole('manager')));
+      }
+      
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                     (request.resource.data.userId == request.auth.uid || 
+                      canAccessParentTrip());
+      allow update, delete: if isAuthenticated() && 
+                             (isOwner(resource) || 
+                              canAccessParentTrip() || 
+                              hasRole('admin'));
+    }
+    
+    // Diesel consumption records
+    match /diesel/{recordId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                     request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                             (isOwner(resource) || 
+                              hasRole('admin') || 
+                              hasRole('manager'));
+    }
+    
+    // Missed loads tracking
+    match /missedLoads/{loadId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                     request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                             (isOwner(resource) || 
+                              hasRole('admin') || 
+                              hasRole('manager'));
+    }
+    
+    // Driver behavior events
+    match /driverBehavior/{eventId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                     request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                             (isOwner(resource) || 
+                              hasRole('admin') || 
+                              hasRole('manager'));
+    }
+    
+    // Action items
+    match /actionItems/{itemId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                     request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                             (isOwner(resource) || 
+                              resource.data.responsiblePerson == request.auth.uid || 
+                              hasRole('admin') || 
+                              hasRole('manager'));
+    }
+    
+    // CAR Reports
+    match /carReports/{reportId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                     request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && 
+                             (isOwner(resource) || 
+                              resource.data.responsiblePerson == request.auth.uid || 
+                              hasRole('admin') || 
+                              hasRole('manager'));
+    }
+    
+    // Additional costs
+    match /additionalCosts/{costId} {
+      function canAccessParentTrip() {
+        let tripId = resource.data.tripId;
+        let tripRef = /databases/$(database)/documents/trips/$(tripId);
+        return isAuthenticated() && 
+               (exists(tripRef) && 
+               (get(tripRef).data.userId == request.auth.uid || 
+                hasRole('admin') || 
+                hasRole('manager')));
+      }
+      
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && 
+                     (request.resource.data.userId == request.auth.uid || 
+                      canAccessParentTrip());
+      allow update, delete: if isAuthenticated() && 
+                             (isOwner(resource) || 
+                              canAccessParentTrip() || 
+                              hasRole('admin'));
+    }
+    
+    // System configuration - admin only
+    match /systemConfig/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && hasRole('admin');
+    }
+    
+    // Activity logs - read access for all authenticated users, write for admins only
+    match /activityLogs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && hasRole('admin');
+    }
+    
+    // Audit logs - read access for authenticated users, write for system/admin only
+    match /auditLogs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && hasRole('admin');
+    }
+    
+    // Helper function to check user roles
+    function hasRole(role) {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc != null && userDoc.data.roles != null && userDoc.data.roles[role] == true;
+    }
+    
+    // Default deny for all other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
