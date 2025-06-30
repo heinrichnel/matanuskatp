@@ -11,7 +11,6 @@ import { Trip, CLIENTS, DRIVERS, CLIENT_TYPES, FLEET_NUMBERS, TripFormData } fro
 import { Input, Select, TextArea } from '../ui/FormElements';
 import Button from '../ui/Button';
 import { Save, X } from 'lucide-react';
-import Modal from '../ui/Modal';
 import ErrorMessage from '../ui/ErrorMessage';
 
 interface TripFormProps {
@@ -215,157 +214,150 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
 
   // Add a proper form wrapper with Modal
   return (
-    <Modal
-      isOpen={true}
-      onClose={onCancel}
-      title={trip ? "Edit Trip" : "Add New Trip"}
-      maxWidth="xl"
-    >
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Form validation error */}
-        {state.submitError && (
-          <ErrorMessage message={state.submitError} />
-        )}
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Form validation error */}
+      {state.submitError && (
+        <ErrorMessage message={state.submitError} />
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Select
-            label="Client Type"
-            value={state.formData.clientType}
-            onChange={(value) => handleChange('clientType', value)}
-            onBlur={() => handleBlur('clientType')}
-            options={CLIENT_TYPES.map(type => ({ label: type.label, value: type.value }))}
-            required
-            error={state.touched.clientType ? state.errors.clientType : undefined}
-          />
-          <Select
-            label="Fleet Number"
-            value={state.formData.fleetNumber}
-            onChange={(value) => handleChange('fleetNumber', value)}
-            onBlur={() => handleBlur('fleetNumber')}
-            options={[
-              { label: 'Select fleet...', value: '' },
-              ...FLEET_NUMBERS.map(f => ({ label: f, value: f }))
-            ]}
-            required
-            error={state.touched.fleetNumber ? state.errors.fleetNumber : undefined}
-          />
-          <Select
-            label="Client"
-            value={state.formData.clientName}
-            onChange={(value) => handleChange('clientName', value)}
-            onBlur={() => handleBlur('clientName')}
-            options={[
-              { label: 'Select client...', value: '' },
-              ...CLIENTS.map(c => ({ label: c, value: c }))
-            ]}
-            required
-            error={state.touched.clientName ? state.errors.clientName : undefined}
-          />
-          <Select
-            label="Driver"
-            value={state.formData.driverName}
-            onChange={(value) => handleChange('driverName', value)}
-            onBlur={() => handleBlur('driverName')}
-            options={[
-              { label: 'Select driver...', value: '' },
-              ...DRIVERS.map(d => ({ label: d, value: d }))
-            ]}
-            required
-            error={state.touched.driverName ? state.errors.driverName : undefined}
-          />
-          <Input
-            label="Route"
-            value={state.formData.route}
-            onChange={(value) => handleChange('route', value)}
-            onBlur={() => handleBlur('route')}
-            placeholder="e.g., JHB - CPT"
-            required
-            error={state.touched.route ? state.errors.route : undefined}
-          />
-          <Input
-            label="Start Date"
-            type="date"
-            value={state.formData.startDate}
-            onChange={(value) => handleChange('startDate', value)}
-            onBlur={() => handleBlur('startDate')}
-            required
-            error={state.touched.startDate ? state.errors.startDate : undefined}
-          />
-          <Input
-            label="End Date"
-            type="date"
-            value={state.formData.endDate}
-            onChange={(value) => handleChange('endDate', value)}
-            onBlur={() => handleBlur('endDate')}
-            required
-            error={state.touched.endDate ? state.errors.endDate : undefined}
-          />
-          <Input
-            label="Distance (KM)"
-            type="number"
-            value={state.formData.distanceKm}
-            onChange={(value) => handleChange('distanceKm', value)}
-            onBlur={() => handleBlur('distanceKm')}
-            placeholder="0"
-            min="1"
-            step="1"
-            required
-            error={state.touched.distanceKm ? state.errors.distanceKm : undefined}
-          />
-          <Input
-            label="Base Revenue"
-            type="number"
-            value={state.formData.baseRevenue}
-            onChange={(value) => handleChange('baseRevenue', value)}
-            onBlur={() => handleBlur('baseRevenue')}
-            placeholder="0.00"
-            min="0.01"
-            step="0.01"
-            required
-            error={state.touched.baseRevenue ? state.errors.baseRevenue : undefined}
-          />
-          <Select
-            label="Revenue Currency"
-            value={state.formData.revenueCurrency}
-            onChange={(value) => handleChange('revenueCurrency', value)}
-            onBlur={() => handleBlur('revenueCurrency')}
-            options={[
-              { label: 'ZAR (R)', value: 'ZAR' },
-              { label: 'USD ($)', value: 'USD' }
-            ]}
-            required
-            error={state.touched.revenueCurrency ? state.errors.revenueCurrency : undefined}
-          />
-        </div>
-        <TextArea
-          label="Trip Description"
-          value={state.formData.description || ''}
-          onChange={(value) => handleChange('description', value)}
-          placeholder="Description of the trip..."
-          rows={3}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Select
+          label="Client Type"
+          value={state.formData.clientType}
+          onChange={(value) => handleChange('clientType', value)}
+          onBlur={() => handleBlur('clientType')}
+          options={CLIENT_TYPES.map(type => ({ label: type.label, value: type.value }))}
+          required
+          error={state.touched.clientType ? state.errors.clientType : undefined}
         />
+        <Select
+          label="Fleet Number"
+          value={state.formData.fleetNumber}
+          onChange={(value) => handleChange('fleetNumber', value)}
+          onBlur={() => handleBlur('fleetNumber')}
+          options={[
+            { label: 'Select fleet...', value: '' },
+            ...FLEET_NUMBERS.map(f => ({ label: f, value: f }))
+          ]}
+          required
+          error={state.touched.fleetNumber ? state.errors.fleetNumber : undefined}
+        />
+        <Select
+          label="Client"
+          value={state.formData.clientName}
+          onChange={(value) => handleChange('clientName', value)}
+          onBlur={() => handleBlur('clientName')}
+          options={[
+            { label: 'Select client...', value: '' },
+            ...CLIENTS.map(c => ({ label: c, value: c }))
+          ]}
+          required
+          error={state.touched.clientName ? state.errors.clientName : undefined}
+        />
+        <Select
+          label="Driver"
+          value={state.formData.driverName}
+          onChange={(value) => handleChange('driverName', value)}
+          onBlur={() => handleBlur('driverName')}
+          options={[
+            { label: 'Select driver...', value: '' },
+            ...DRIVERS.map(d => ({ label: d, value: d }))
+          ]}
+          required
+          error={state.touched.driverName ? state.errors.driverName : undefined}
+        />
+        <Input
+          label="Route"
+          value={state.formData.route}
+          onChange={(value) => handleChange('route', value)}
+          onBlur={() => handleBlur('route')}
+          placeholder="e.g., JHB - CPT"
+          required
+          error={state.touched.route ? state.errors.route : undefined}
+        />
+        <Input
+          label="Start Date"
+          type="date"
+          value={state.formData.startDate}
+          onChange={(value) => handleChange('startDate', value)}
+          onBlur={() => handleBlur('startDate')}
+          required
+          error={state.touched.startDate ? state.errors.startDate : undefined}
+        />
+        <Input
+          label="End Date"
+          type="date"
+          value={state.formData.endDate}
+          onChange={(value) => handleChange('endDate', value)}
+          onBlur={() => handleBlur('endDate')}
+          required
+          error={state.touched.endDate ? state.errors.endDate : undefined}
+        />
+        <Input
+          label="Distance (KM)"
+          type="number"
+          value={state.formData.distanceKm}
+          onChange={(value) => handleChange('distanceKm', value)}
+          onBlur={() => handleBlur('distanceKm')}
+          placeholder="0"
+          min="1"
+          step="1"
+          required
+          error={state.touched.distanceKm ? state.errors.distanceKm : undefined}
+        />
+        <Input
+          label="Base Revenue"
+          type="number"
+          value={state.formData.baseRevenue}
+          onChange={(value) => handleChange('baseRevenue', value)}
+          onBlur={() => handleBlur('baseRevenue')}
+          placeholder="0.00"
+          min="0.01"
+          step="0.01"
+          required
+          error={state.touched.baseRevenue ? state.errors.baseRevenue : undefined}
+        />
+        <Select
+          label="Revenue Currency"
+          value={state.formData.revenueCurrency}
+          onChange={(value) => handleChange('revenueCurrency', value)}
+          onBlur={() => handleBlur('revenueCurrency')}
+          options={[
+            { label: 'ZAR (R)', value: 'ZAR' },
+            { label: 'USD ($)', value: 'USD' }
+          ]}
+          required
+          error={state.touched.revenueCurrency ? state.errors.revenueCurrency : undefined}
+        />
+      </div>
+      <TextArea
+        label="Trip Description"
+        value={state.formData.description || ''}
+        onChange={(value) => handleChange('description', value)}
+        placeholder="Description of the trip..."
+        rows={3}
+      />
 
-        <div className="flex justify-end space-x-3 pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            icon={<X className="w-4 h-4" />}
-            disabled={state.isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            disabled={!isFormValid || state.isSubmitting}
-            icon={<Save className="w-4 h-4" />}
-            isLoading={state.isSubmitting}
-          >
-            {trip ? 'Update Trip' : 'Create Trip'}
-          </Button>
-        </div>
-      </form>
-    </Modal>
+      <div className="flex justify-end space-x-3 pt-4 border-t">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          icon={<X className="w-4 h-4" />}
+          disabled={state.isSubmitting}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="submit"
+          disabled={!isFormValid || state.isSubmitting}
+          icon={<Save className="w-4 h-4" />}
+          isLoading={state.isSubmitting}
+        >
+          {trip ? 'Update Trip' : 'Create Trip'}
+        </Button>
+      </div>
+    </form>
   );
 };
 
