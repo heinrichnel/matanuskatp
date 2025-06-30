@@ -150,7 +150,10 @@ function postDriverBehaviorToFirebase() {
 
   const response = UrlFetchApp.fetch(firebaseUrl, options);
   Logger.log(response.getContentText());
-
+  
+  // Save the updated sentRefs to avoid duplicates in future runs
+  props.setProperty('sentEventRefs', JSON.stringify(sentRefs));
+}
   props.setProperty('sentEventRefs', JSON.stringify(sentRefs));
 }
 

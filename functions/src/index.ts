@@ -374,25 +374,27 @@ export const importDriverBehaviorWebhook = onRequest(async (req, res) => {
         res.status(405).send('Method Not Allowed');
         return;
     }
+    
     try {
         // DEBUG ONLY – Enhanced payload logging
         console.log("[importDriverBehaviorWebhook] Received webhook payload:", JSON.stringify(req.body, null, 2));
 
-        const { events } = req.body;
+        // Extract events from the payload
+        let events = req.body.events;
+        
+        // Check if events array exists and is valid
         if (!events || !Array.isArray(events)) {
             console.error("[importDriverBehaviorWebhook] Invalid payload structure:", JSON.stringify(req.body, null, 2));
             res.status(400).json({ error: 'Invalid payload' });
             return;
         }
-
-        // Log summary of the events array
-        console.log(`[importDriverBehaviorWebhook] Processing ${events.length} driver behavior events`);
-
+        
         const batch = db.batch();
+        const targetCollection = 'driverBehaviorEvents';
+        console.log(`[importDriverBehaviorWebhook] Targeting collection: '${targetCollection}'`);
         let imported = 0;
         let skipped = 0;
-        let validationErrors = 0;
-        let processingDetails = [];
+        const processingDetails = [];
 
         for (const event of events) {
             // Log each event's structure for diagnostic purposes
@@ -404,25 +406,14 @@ export const importDriverBehaviorWebhook = onRequest(async (req, res) => {
             if (!fleetNumber || !eventType || !eventTime) {
                 console.error(`[importDriverBehaviorWebhook] Missing required fields in event:`,
                     { fleetNumber, eventType, eventTime });
-                validationErrors++;
+                skipped++;
                 processingDetails.push({ status: 'error', reason: 'missing_required_fields', event });
                 continue;
             }
 
-            // Log missing fields that are expected by frontend but absent in payload
-            const expectedFields = [
-                'driverName', 'eventDate', 'severity', 'points', 'description',
-                'status', 'location', 'reportedAt', 'reportedBy'
-            ];
-            const missingFields = expectedFields.filter(field => event[field] === undefined);
-            if (missingFields.length > 0) {
-                console.log(`[importDriverBehaviorWebhook] Event missing optional fields expected by frontend:`,
-                    { fleetNumber, eventType, missingFields });
-            }
-
-            // Generate document ID
+            // Generate document ID based on unique fields
             const uniqueKey = `${fleetNumber}_${eventType}_${eventTime}`;
-            const eventRef = db.collection('driverBehaviorEvents').doc(uniqueKey);
+            const eventRef = db.collection(targetCollection).doc(uniqueKey);
             const doc = await eventRef.get();
 
             if (doc.exists) {
@@ -452,8 +443,7 @@ export const importDriverBehaviorWebhook = onRequest(async (req, res) => {
         const response = {
             imported,
             skipped,
-            validationErrors,
-            message: `Processed ${events.length} driver behavior events. Imported: ${imported}, Skipped: ${skipped}, Errors: ${validationErrors}`,
+            message: `Processed ${events.length} driver behavior events. Imported: ${imported}, Skipped: ${skipped}`,
             processingDetails: processingDetails.length <= 10 ? processingDetails : `${processingDetails.length} events processed`
         };
 
