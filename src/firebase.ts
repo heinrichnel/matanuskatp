@@ -332,18 +332,57 @@ export const listenToTrips = (
 // Diesel Records Services with Real-time Sync
 export const addDieselToFirebase = async (dieselData: DieselConsumptionRecord): Promise<string> => {
   try {
+    // Create a batch for atomic operations
+    const batch = writeBatch(db);
+    
     const dieselWithTimestamp = cleanUndefinedValues({
       ...dieselData,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
 
-    const docRef = await addDoc(dieselCollection, dieselWithTimestamp);
-    console.log("✅ Diesel record added with real-time sync:", docRef.id);
-
-    await logActivity('diesel_created', docRef.id, 'diesel', dieselData);
-
-    return docRef.id;
+    // Generate a new doc ref
+    const dieselRef = doc(dieselCollection);
+    batch.set(dieselRef, dieselWithTimestamp);
+    
+    // If linked to a trip, create a cost entry
+    if (dieselData.tripId) {
+      const tripRef = doc(db, 'trips', dieselData.tripId);
+      const tripSnap = await getDoc(tripRef);
+      
+      if (tripSnap.exists()) {
+        const trip = tripSnap.data() as Trip;
+        
+        const costEntry: CostEntry = {
+          id: `cost-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          tripId: trip.id,
+          category: 'Diesel',
+          subCategory: `${dieselData.fuelStation} - ${dieselData.fleetNumber}${dieselData.isReeferUnit ? ' (Reefer)' : ''}`,
+          amount: dieselData.totalCost,
+          currency: dieselData.currency || trip.revenueCurrency,
+          referenceNumber: `DIESEL-${dieselData.isReeferUnit ? 'REEFER-' : ''}${dieselRef.id}`,
+          date: dieselData.date,
+          notes: `Diesel: ${dieselData.litresFilled} liters at ${dieselData.fuelStation}${dieselData.isReeferUnit ? ' (Reefer)' : ''}`,
+          attachments: [],
+          isFlagged: false
+        };
+        
+        // Add cost entry to trip
+        const updatedCosts = [...(trip.costs || []), costEntry];
+        batch.update(tripRef, { costs: updatedCosts, updatedAt: serverTimestamp() });
+        
+        console.log(`✅ Cost entry added to trip ${trip.id} for diesel record ${dieselRef.id}`);
+      }
+    }
+    
+    // Commit all operations atomically
+    await batch.commit();
+    console.log("✅ Diesel record added with real-time sync:", dieselRef.id);
+    
+    // Log activity after successful commit
+    await logActivity('diesel_created', dieselRef.id, 'diesel', dieselData);
+    
+    return dieselRef.id;
   } catch (error) {
     console.error("❌ Error adding diesel record:", error);
     throw error;
@@ -352,17 +391,75 @@ export const addDieselToFirebase = async (dieselData: DieselConsumptionRecord): 
 
 export const updateDieselInFirebase = async (id: string, dieselData: Partial<DieselConsumptionRecord>): Promise<void> => {
   try {
+    // Create a batch for atomic operations
+    const batch = writeBatch(db);
+    
     const dieselRef = doc(db, 'diesel', id);
+    
+    // Get the current diesel record to check if trip linkage changed
+    const dieselSnap = await getDoc(dieselRef);
+    if (!dieselSnap.exists()) {
+      throw new Error(`Diesel record ${id} not found`);
+    }
+    
+    const currentDiesel = dieselSnap.data() as DieselConsumptionRecord;
+    
     const updateData = cleanUndefinedValues({
       ...dieselData,
       updatedAt: serverTimestamp()
     });
 
-    await updateDoc(dieselRef, updateData);
+    // Add diesel update to batch
+    batch.update(dieselRef, updateData);
     console.log("✅ Diesel record updated with real-time sync:", id);
-
+    
+    // Handle trip cost entry updates if needed
+    if (dieselData.tripId || currentDiesel.tripId) {
+      // Case 1: Update existing trip cost entry if tripId is unchanged
+      if (dieselData.tripId === currentDiesel.tripId && currentDiesel.tripId) {
+        const tripRef = doc(db, 'trips', currentDiesel.tripId);
+        const tripSnap = await getDoc(tripRef);
+        
+        if (tripSnap.exists()) {
+          const trip = tripSnap.data() as Trip;
+          
+          // Find the cost entry for this diesel record
+          const costIndex = trip.costs.findIndex(c => 
+            c.referenceNumber === `DIESEL-${id}` || 
+            c.referenceNumber === `DIESEL-REEFER-${id}`
+          );
+          
+          if (costIndex !== -1) {
+            // Update cost entry with new values
+            const updatedCosts = [...trip.costs];
+            updatedCosts[costIndex] = {
+              ...updatedCosts[costIndex],
+              amount: dieselData.totalCost || currentDiesel.totalCost,
+              currency: dieselData.currency || currentDiesel.currency || trip.revenueCurrency,
+              notes: `Diesel: ${dieselData.litresFilled || currentDiesel.litresFilled} liters at ${
+                dieselData.fuelStation || currentDiesel.fuelStation
+              }${(dieselData.isReeferUnit !== undefined ? dieselData.isReeferUnit : currentDiesel.isReeferUnit) ? ' (Reefer)' : ''}`
+            };
+            
+            batch.update(tripRef, { 
+              costs: updatedCosts,
+              updatedAt: serverTimestamp()
+            });
+            
+            console.log(`✅ Updated cost entry in trip ${currentDiesel.tripId} for diesel record ${id}`);
+          }
+        }
+      }
+      
+      // Case 2: Trip linkage changed - this needs to be handled by allocateDieselToTrip or removeDieselFromTrip
+      // We don't handle this case here to avoid complexity
+    }
+    
+    // Commit all changes atomically
+    await batch.commit();
+    
+    // Log after successful commit
     await logActivity('diesel_updated', id, 'diesel', updateData);
-
   } catch (error) {
     console.error("❌ Error updating diesel record:", error);
     throw error;
@@ -371,12 +468,53 @@ export const updateDieselInFirebase = async (id: string, dieselData: Partial<Die
 
 export const deleteDieselFromFirebase = async (id: string): Promise<void> => {
   try {
+    // Create a batch for atomic operations
+    const batch = writeBatch(db);
+    
     const dieselRef = doc(db, 'diesel', id);
-    await deleteDoc(dieselRef);
+    
+    // Get the diesel record to check for trip linkage
+    const dieselSnap = await getDoc(dieselRef);
+    if (!dieselSnap.exists()) {
+      throw new Error(`Diesel record ${id} not found`);
+    }
+    
+    const dieselData = dieselSnap.data() as DieselConsumptionRecord;
+    
+    // If linked to a trip, remove the cost entry
+    if (dieselData.tripId) {
+      const tripRef = doc(db, 'trips', dieselData.tripId);
+      const tripSnap = await getDoc(tripRef);
+      
+      if (tripSnap.exists()) {
+        const trip = tripSnap.data() as Trip;
+        
+        // Remove the cost entry for this diesel record
+        const updatedCosts = trip.costs.filter(c => 
+          c.referenceNumber !== `DIESEL-${id}` && 
+          c.referenceNumber !== `DIESEL-REEFER-${id}`
+        );
+        
+        // Only update if costs array changed
+        if (updatedCosts.length !== trip.costs.length) {
+          batch.update(tripRef, { 
+            costs: updatedCosts,
+            updatedAt: serverTimestamp()
+          });
+          
+          console.log(`✅ Removed cost entry from trip ${dieselData.tripId} for diesel record ${id}`);
+        }
+      }
+    }
+    
+    // Add diesel deletion to batch
+    batch.delete(dieselRef);
+    
+    // Commit all changes atomically
+    await batch.commit();
     console.log("✅ Diesel record deleted with real-time sync:", id);
 
     await logActivity('diesel_deleted', id, 'diesel', { deletedAt: new Date().toISOString() });
-
   } catch (error) {
     console.error("❌ Error deleting diesel record:", error);
     throw error;
