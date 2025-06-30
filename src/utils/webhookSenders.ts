@@ -1,6 +1,6 @@
 // Use Firebase Cloud Function URLs instead of direct Google Sheets access
 const TRIP_WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importTripsFromWebBook';
-const DRIVER_BEHAVIOR_WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook'; // Fixed function name
+const DRIVER_BEHAVIOR_WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook';
 
 // Get Firebase ID token for authentication - this should be replaced with actual auth mechanism
 async function getAuthToken(): Promise<string | null> {
