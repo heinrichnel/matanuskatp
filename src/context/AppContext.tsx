@@ -202,6 +202,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteMissedLoad = async (id: string): Promise<void> => {
     try {
+      // Set loading state
+      setIsLoading(prev => ({ ...prev, [`deleteMissedLoad-${id}`]: true }));
+      
+      // Delete from Firestore
       await deleteMissedLoadFromFirebase(id);
       
       // Optimistically update local state
@@ -209,6 +213,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (error) {
       console.error("Error deleting missed load:", error);
       throw error;
+    } finally {
+      // Clear loading state
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`deleteMissedLoad-${id}`];
+        return newState;
+      });
     }
   };
 

@@ -216,7 +216,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
   const handleDelete = async (id: string) => {
     if (!onDeleteMissedLoad) return;
     
-    const load = missedLoads.find(l => l.id === id);
+    const load = missedLoads?.find(l => l.id === id);
     if (!load) return;
 
     const confirmMessage = `Are you sure you want to delete this missed load?\n\n` +
@@ -228,7 +228,17 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
     if (confirm(confirmMessage)) {
       try {
         setIsDeleting(true);
+        
+        // Delete the missed load
         await onDeleteMissedLoad(id);
+        
+        // Optimistically update the local UI state (this is redundant if AppContext already handles it,
+        // but it ensures the UI updates immediately regardless)
+        const updatedLoads = missedLoads.filter(load => load.id !== id);
+        if (props.missedLoads) {
+          props.missedLoads = updatedLoads;
+        }
+        
         alert('Missed load deleted successfully');
       } catch (error) {
         console.error("Error deleting missed load:", error);
@@ -519,9 +529,9 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
                           size="sm"
                           variant="danger"
                           onClick={() => handleDelete(load.id)}
-                          icon={<Trash2 className="w-3 h-3" />}
-                          disabled={isDeleting || connectionStatus !== 'connected'}
-                          isLoading={isDeleting}
+                          icon={isDeleting === load.id ? undefined : <Trash2 className="w-3 h-3" />}
+                          disabled={isDeleting !== null || connectionStatus !== 'connected'}
+                          isLoading={isDeleting === load.id}
                         >
                           Delete
                         </Button>
