@@ -236,24 +236,25 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
     batch.delete(tripRef);
     console.log(`Added delete operation for trip: ${id}`);
 
-    // Check for and delete related documents
-    console.log(`Looking for related costs for trip: ${id}`);
+    // Check for and update any diesel records that reference this trip
+    console.log(`Looking for diesel records referencing trip: ${id}`);
+    const dieselCollection = collection(db, 'diesel');
+    const dieselQuery = query(dieselCollection, where('tripId', '==', id));
+    const dieselSnapshot = await getDocs(dieselQuery);
 
-    // First, look for costs in the trip's costs array
-    const costsCollection = collection(db, 'costs');
-    const costsQuery = query(costsCollection, where('tripId', '==', id));
-    const costsSnapshot = await getDocs(costsQuery);
-
-    // Log and add deletion operations for related costs
-    const relatedCostsCount = costsSnapshot.size;
-    console.log(`Found ${relatedCostsCount} related cost documents`);
-
-    if (relatedCostsCount > 0) {
-      for (const doc of costsSnapshot.docs) {
-        console.log(`Adding delete operation for cost: ${doc.id}`);
-        batch.delete(doc.ref);
-      }
+    // Update diesel records to remove the trip reference
+    let relatedDieselCount = 0;
+    if (!dieselSnapshot.empty) {
+      dieselSnapshot.forEach(dieselDoc => {
+        relatedDieselCount++;
+        console.log(`Removing trip reference from diesel record: ${dieselDoc.id}`);
+        batch.update(dieselDoc.ref, {
+          tripId: null,
+          updatedAt: serverTimestamp()
+        });
+      });
     }
+    console.log(`Found and updated ${relatedDieselCount} related diesel records`);
 
     // Create audit log entry for the deletion
     const auditLogData = {
@@ -263,7 +264,7 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
       action: 'delete',
       entity: 'trip',
       entityId: id,
-      details: `Trip ${id} deleted with ${relatedCostsCount} related documents`,
+      details: `Trip ${id} deleted with ${relatedDieselCount} related diesel records updated`,
       changes: convertTimestamps(tripData || {})
     };
 
@@ -276,7 +277,7 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
     try {
       console.log(`🔥 Committing batch deletion for trip: ${id}`);
       await batch.commit();
-      console.log(`✅ Successfully deleted trip ${id} and ${relatedCostsCount} related documents`);
+      console.log(`✅ Successfully deleted trip ${id} and updated ${relatedDieselCount} related diesel records`);
 
       return;
     } catch (batchError) {

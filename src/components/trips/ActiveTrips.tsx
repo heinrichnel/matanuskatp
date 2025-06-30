@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 // ─── Types & Constants ───────────────────────────────────────────
 import { Trip } from '../../types';
+
+// ─── Utilities ─────────────────────────────────────────────────
+import { getTripsByStatus, analyzeTripData } from '../../utils/tripDebugger';
 
 // ─── UI Components ───────────────────────────────────────────────
 import { Select } from '../ui/FormElements';
 import Button from '../ui/Button';
 import Card, { CardContent, CardHeader } from '../ui/Card';
-import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign, Plus } from 'lucide-react';
+import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign, Plus, RefreshCcw } from 'lucide-react';
 import { formatCurrency, formatDate, getAllFlaggedCosts, canCompleteTrip } from '../../utils/helpers';
 import LoadImportModal from './LoadImportModal';
 import TripStatusUpdateModal from './TripStatusUpdateModal';
@@ -32,20 +35,56 @@ interface ActiveTripsProps {
 }
 
 const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
-  const { trips: contextTrips, deleteTrip, completeTrip, updateTripStatus, isLoading } = useAppContext();
-  const context = useOutletContext<OutletContextType | undefined>() || {};
+  const { trips: contextTrips, deleteTrip, completeTrip, updateTripStatus, isLoading, refreshTrips } = useAppContext();
+  // Create a default context with empty functions to avoid TypeScript errors
+  const defaultContext: OutletContextType = {
+    setSelectedTrip: () => { },
+    setEditingTrip: () => { },
+    setShowTripForm: () => { }
+  };
+
+  const context = useOutletContext<OutletContextType | undefined>() || defaultContext;
 
   // Use props if provided, otherwise use context
-  const trips = props.trips || contextTrips.filter(t => t.status === 'active');
+  // Replace direct filter with improved getTripsByStatus utility that handles case sensitivity
+  const trips = props.trips || getTripsByStatus(contextTrips, 'active');
   // Use fallbacks when context or context methods are undefined
-  const onView = props.onView || (context.setSelectedTrip || (() => {})); 
+  const onView = props.onView || context.setSelectedTrip;
   const onEdit = props.onEdit || ((trip: Trip) => {
     if (context.setEditingTrip) context.setEditingTrip(trip);
     if (context.setShowTripForm) context.setShowTripForm(true);
   });
   const onDelete = props.onDelete || deleteTrip;
   const onCompleteTrip = props.onCompleteTrip || completeTrip;
+  const [debugInfo, setDebugInfo] = useState<any>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Effect to analyze trip data when component mounts or trips change
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      // In development mode, analyze trip data to help diagnose issues
+      const analysis = analyzeTripData(contextTrips);
+      setDebugInfo(analysis);
+
+      // Log trip status distribution for debugging
+      console.log('Trip status analysis:', analysis);
+    }
+  }, [contextTrips]);
+
+  // Handle manual data refresh
+  const handleRefreshData = async () => {
+    try {
+      setIsRefreshing(true);
+      setError(null);
+      await refreshTrips();
+      console.log('Trip data refreshed successfully');
+    } catch (err) {
+      console.error('Error refreshing trip data:', err);
+      setError('Failed to refresh trip data. Please try again.');
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [filterFleet, setFilterFleet] = useState<string>('');
   const [filterDriver, setFilterDriver] = useState<string>('');
@@ -54,10 +93,45 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   const statusUpdateType: 'shipped' | 'delivered' = 'shipped';
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
+  <Button
+    variant="outline"
+    size="md"
+    icon={<RefreshCcw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />}
+    onClick={handleRefreshData}
+    isLoading={isRefreshing}
+    disabled={isRefreshing}
+  >
+    Refresh
+  </Button>
   const openImportModal = () => setIsImportModalOpen(true);
   const closeImportModal = () => setIsImportModalOpen(false);
-
+  {/* Debug information (only in development mode) */ }
+  {
+    process.env.NODE_ENV === 'development' && debugInfo && debugInfo.potentialIssues && debugInfo.potentialIssues.length > 0 && (
+      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <AlertTriangle className="h-5 w-5 text-yellow-400" />
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-yellow-800">Trip Status Issues Detected</h3>
+            <div className="mt-2 text-sm text-yellow-700">
+              <ul className="list-disc pl-5 space-y-1">
+                {debugInfo.potentialIssues.map((issue: string, index: number) => (
+                  <li key={index}>{issue}</li>
+                ))}
+              </ul>
+            </div>
+            <p className="text-xs text-yellow-600 mt-2">
+              Total trips: {debugInfo.totalTrips} |
+              Active: {debugInfo.activeTrips} |
+              Completed: {debugInfo.completedTrips}
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
   const handleDelete = async (id: string) => {
     const trip = trips.find((t) => t.id === id);
     if (trip && window.confirm(`Delete trip for fleet ${trip.fleetNumber}? This will permanently remove the trip and all related data. This action cannot be undone.`)) {
@@ -196,7 +270,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
 
       {/* Trip List - Vertical Layout */}
       {filteredTrips.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg shadow">
+        <div className="text-center py-12 bg-white rounded-lg shadow border border-gray-100">
           <Truck className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-lg font-medium text-gray-900">No active trips found</h3>
           <p className="mt-1 text-gray-500">
@@ -204,6 +278,21 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
               'No trips match your current filter criteria.' :
               'Start by adding a new trip or importing trips from your system.'}
           </p>
+          {!filterFleet && !filterDriver && !filterClient && contextTrips.length > 0 && (
+            <div className="mt-4">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleRefreshData}
+                icon={<RefreshCcw className="w-4 h-4 mr-2" />}
+              >
+                Refresh Data
+              </Button>
+              <p className="text-xs text-gray-500 mt-2">
+                There are {contextTrips.length} total trips in the system, but none with 'active' status.
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="space-y-4">

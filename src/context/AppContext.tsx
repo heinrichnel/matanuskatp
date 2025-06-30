@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import {
   Trip,
   CostEntry,
@@ -36,11 +36,12 @@ interface AppContextType {
   updateTrip: (trip: Trip) => Promise<void>;
   deleteTrip: (id: string) => Promise<void>;
   getTrip: (id: string) => Trip | undefined;
-
+  refreshTrips: () => Promise<void>;
+  
   addCostEntry: (costEntry: Omit<CostEntry, 'id' | 'attachments'>, files?: FileList) => Promise<string>;
   updateCostEntry: (costEntry: CostEntry) => Promise<void>;
   deleteCostEntry: (id: string) => Promise<void>;
-
+  
   addAttachment: (attachment: Omit<Attachment, 'id'>) => Promise<string>;
   deleteAttachment: (id: string) => Promise<void>;
 
@@ -122,6 +123,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [carReports, setCARReports] = useState<CARReport[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogType[]>([]);
   const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected'); // TODO: Implement actual connection status monitoring
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+
+  // Add refreshTrips method to manually refresh trip data from Firestore
+  const refreshTrips = useCallback(async (): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, loadTrips: true }));
+      console.log("🔄 Refreshing trip data from Firestore...");
+
+      // Force resubscribe to trips collection to get fresh data
+      syncService.unsubscribeFromTrips();
+      syncService.subscribeToAllTrips();
+
+      // Wait a moment for data to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      console.log("✅ Trip data refreshed successfully");
+      return Promise.resolve();
+    } catch (error) {
+      console.error("❌ Error refreshing trip data:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, loadTrips: false }));
+    }
+  }, []);
 
   useEffect(() => {
     // Set up all data subscriptions through the SyncService
@@ -151,9 +176,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       syncService.cleanup();
     };
   }, []);
-
-  // Add loading state management to addTrip and updateTrip
-  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
 
   const addTrip = async (trip: Omit<Trip, 'id' | 'costs' | 'status'>): Promise<string> => {
     try {
@@ -360,6 +382,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateTrip,
     deleteTrip,
     getTrip,
+    refreshTrips,
     addCostEntry: placeholderString,
     updateCostEntry: placeholder,
     deleteCostEntry: placeholder,
@@ -821,7 +844,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteCARReport: placeholder,
     connectionStatus,
     bulkDeleteTrips: placeholder,
-    updateTripStatus: placeholder,
+    updateTripStatus: async (tripId: string, status: 'shipped' | 'delivered', notes: string): Promise<void> => {
+      try {
+        const trip = trips.find(t => t.id === tripId);
+        if (!trip) {
+          throw new Error(`Trip with ID ${tripId} not found`);
+        }
+
+        const updatedTrip = {
+          ...trip,
+          status: status === 'delivered' ? 'completed' : trip.status,
+          shippedAt: status === 'shipped' ? new Date().toISOString() : trip.shippedAt,
+          deliveredAt: status === 'delivered' ? new Date().toISOString() : trip.deliveredAt,
+          statusNotes: notes || trip.statusNotes
+        };
+
+        await updateTripInFirebase(tripId, updatedTrip);
+        console.log(`✅ Trip ${tripId} status updated to ${status}`);
+      } catch (error) {
+        console.error(`❌ Error updating trip status to ${status}:`, error);
+        throw error;
+      }
+    },
     setTrips,
     completeTrip,
     auditLogs,

@@ -223,12 +223,20 @@ export class SyncService {
     this.tripUnsubscribes.set(tripId, unsubscribe);
   }
 
+  // Unsubscribe from trips collection subscription
+  public unsubscribeFromTrips(): void {
+    // Unsubscribe from global trips listener if it exists
+    if (this.globalUnsubscribes.has('allTrips')) {
+      this.globalUnsubscribes.get('allTrips')?.();
+      this.globalUnsubscribes.delete('allTrips');
+      console.log('🔄 Unsubscribed from trips collection');
+    }
+  }
+
   // Subscribe to all trips (global listener)
   public subscribeToAllTrips(): void {
     // Clear any existing global trip listeners
-    if (this.globalUnsubscribes.has('allTrips')) {
-      this.globalUnsubscribes.get('allTrips')?.();
-    }
+    this.unsubscribeFromTrips();
 
     const tripsQuery = query(collection(db, 'trips'), orderBy('startDate', 'desc'));
 
