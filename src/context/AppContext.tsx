@@ -23,7 +23,6 @@ import {
   addDieselToFirebase,
   updateDieselInFirebase,
   deleteDieselFromFirebase,
-  listenToAuditLogs,
   addAuditLogToFirebase
 } from '../firebase';
 import { generateTripId } from '../utils/helpers';
@@ -136,9 +135,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCarReports: setCARReports,
       setAuditLogs
     });
-    
+
     // Subscribe to all collections
     syncService.subscribeToAllTrips();
+    // Methods now implemented in syncService
     syncService.subscribeToAllMissedLoads();
     syncService.subscribeToAllDieselRecords();
     syncService.subscribeToAllDriverBehaviorEvents();
@@ -154,7 +154,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Add loading state management to addTrip and updateTrip
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
-  
+
   const addTrip = async (trip: Omit<Trip, 'id' | 'costs' | 'status'>): Promise<string> => {
     try {
       setIsLoading(prev => ({ ...prev, addTrip: true }));
@@ -168,10 +168,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (error) {
       console.error("Error adding trip:", error);
       throw error;
-      return await addTripToFirebase(newTrip as Trip);
     } finally {
       setIsLoading(prev => ({ ...prev, addTrip: false }));
-      };
+    };
   }
 
   const updateTrip = async (trip: Trip): Promise<void> => {
@@ -179,9 +178,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsLoading(prev => ({ ...prev, updateTrip: true }));
       // Get the original trip for audit logging
       const originalTrip = trips.find(t => t.id === trip.id);
-      
+
       await updateTripInFirebase(trip.id, trip);
-      
+
       // Log trip update for audit trail
       if (originalTrip) {
         await addAuditLogToFirebase({
@@ -247,15 +246,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       // Set loading state
       setIsLoading(prev => ({ ...prev, [`deleteMissedLoad-${id}`]: true }));
-      
+
       // Delete from Firestore
       await deleteMissedLoadFromFirebase(id);
-      
+
       // Optimistically update local state
       setMissedLoads(prev => prev.filter(load => load.id !== id));
-    } catch (error) {
-      console.error("Error deleting missed load:", error);
-      throw error;
     } catch (error) {
       console.error("Error deleting missed load:", error);
       throw error;

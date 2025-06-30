@@ -1,6 +1,4 @@
 import {
-  deleteDoc,
-  getDoc,
   initializeFirestore,
   persistentLocalCache,
   collection,
@@ -19,7 +17,8 @@ import {
   disableNetwork,
   writeBatch,
   where,
-  Timestamp
+  Timestamp,
+  Firestore
 } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { getAnalytics } from 'firebase/analytics';
@@ -30,7 +29,7 @@ import { firebaseConfig, firebaseApp } from './firebaseConfig';
 // Initialize Firestore with offline persistence
 // DEBUG ONLY - Add diagnostic logs to track Firestore initialization issues
 console.log("🔍 DEBUG: About to initialize Firestore");
-let db;
+let db: Firestore;
 
 try {
   // Use a simpler initialization approach to avoid TypeScript issues
@@ -331,7 +330,7 @@ export const addDieselToFirebase = async (dieselData: DieselConsumptionRecord): 
   try {
     // Create a batch for atomic operations
     const batch = writeBatch(db);
-    
+
     const dieselWithTimestamp = cleanUndefinedValues({
       ...dieselData,
       createdAt: serverTimestamp(),
@@ -341,15 +340,15 @@ export const addDieselToFirebase = async (dieselData: DieselConsumptionRecord): 
     // Generate a new doc ref
     const dieselRef = doc(dieselCollection);
     batch.set(dieselRef, dieselWithTimestamp);
-    
+
     // If linked to a trip, create a cost entry
     if (dieselData.tripId) {
       const tripRef = doc(db, 'trips', dieselData.tripId);
       const tripSnap = await getDoc(tripRef);
-      
+
       if (tripSnap.exists()) {
         const trip = tripSnap.data() as Trip;
-        
+
         const costEntry: CostEntry = {
           id: `cost-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
           tripId: trip.id,
@@ -363,22 +362,22 @@ export const addDieselToFirebase = async (dieselData: DieselConsumptionRecord): 
           attachments: [],
           isFlagged: false
         };
-        
+
         // Add cost entry to trip
         const updatedCosts = [...(trip.costs || []), costEntry];
         batch.update(tripRef, { costs: updatedCosts, updatedAt: serverTimestamp() });
-        
+
         console.log(`✅ Cost entry added to trip ${trip.id} for diesel record ${dieselRef.id}`);
       }
     }
-    
+
     // Commit all operations atomically
     await batch.commit();
     console.log("✅ Diesel record added with real-time sync:", dieselRef.id);
-    
+
     // Log activity after successful commit
     await logActivity('diesel_created', dieselRef.id, 'diesel', dieselData);
-    
+
     return dieselRef.id;
   } catch (error) {
     console.error("❌ Error adding diesel record:", error);
@@ -390,17 +389,17 @@ export const updateDieselInFirebase = async (id: string, dieselData: Partial<Die
   try {
     // Create a batch for atomic operations
     const batch = writeBatch(db);
-    
+
     const dieselRef = doc(db, 'diesel', id);
-    
+
     // Get the current diesel record to check if trip linkage changed
     const dieselSnap = await getDoc(dieselRef);
     if (!dieselSnap.exists()) {
       throw new Error(`Diesel record ${id} not found`);
     }
-    
+
     const currentDiesel = dieselSnap.data() as DieselConsumptionRecord;
-    
+
     const updateData = cleanUndefinedValues({
       ...dieselData,
       updatedAt: serverTimestamp()
@@ -409,23 +408,23 @@ export const updateDieselInFirebase = async (id: string, dieselData: Partial<Die
     // Add diesel update to batch
     batch.update(dieselRef, updateData);
     console.log("✅ Diesel record updated with real-time sync:", id);
-    
+
     // Handle trip cost entry updates if needed
     if (dieselData.tripId || currentDiesel.tripId) {
       // Case 1: Update existing trip cost entry if tripId is unchanged
       if (dieselData.tripId === currentDiesel.tripId && currentDiesel.tripId) {
         const tripRef = doc(db, 'trips', currentDiesel.tripId);
         const tripSnap = await getDoc(tripRef);
-        
+
         if (tripSnap.exists()) {
           const trip = tripSnap.data() as Trip;
-          
+
           // Find the cost entry for this diesel record
-          const costIndex = trip.costs.findIndex(c => 
-            c.referenceNumber === `DIESEL-${id}` || 
+          const costIndex = trip.costs.findIndex(c =>
+            c.referenceNumber === `DIESEL-${id}` ||
             c.referenceNumber === `DIESEL-REEFER-${id}`
           );
-          
+
           if (costIndex !== -1) {
             // Update cost entry with new values
             const updatedCosts = [...trip.costs];
@@ -433,28 +432,27 @@ export const updateDieselInFirebase = async (id: string, dieselData: Partial<Die
               ...updatedCosts[costIndex],
               amount: dieselData.totalCost || currentDiesel.totalCost,
               currency: dieselData.currency || currentDiesel.currency || trip.revenueCurrency,
-              notes: `Diesel: ${dieselData.litresFilled || currentDiesel.litresFilled} liters at ${
-                dieselData.fuelStation || currentDiesel.fuelStation
-              }${(dieselData.isReeferUnit !== undefined ? dieselData.isReeferUnit : currentDiesel.isReeferUnit) ? ' (Reefer)' : ''}`
+              notes: `Diesel: ${dieselData.litresFilled || currentDiesel.litresFilled} liters at ${dieselData.fuelStation || currentDiesel.fuelStation
+                }${(dieselData.isReeferUnit !== undefined ? dieselData.isReeferUnit : currentDiesel.isReeferUnit) ? ' (Reefer)' : ''}`
             };
-            
-            batch.update(tripRef, { 
+
+            batch.update(tripRef, {
               costs: updatedCosts,
               updatedAt: serverTimestamp()
             });
-            
+
             console.log(`✅ Updated cost entry in trip ${currentDiesel.tripId} for diesel record ${id}`);
           }
         }
       }
-      
+
       // Case 2: Trip linkage changed - this needs to be handled by allocateDieselToTrip or removeDieselFromTrip
       // We don't handle this case here to avoid complexity
     }
-    
+
     // Commit all changes atomically
     await batch.commit();
-    
+
     // Log after successful commit
     await logActivity('diesel_updated', id, 'diesel', updateData);
   } catch (error) {
@@ -467,46 +465,46 @@ export const deleteDieselFromFirebase = async (id: string): Promise<void> => {
   try {
     // Create a batch for atomic operations
     const batch = writeBatch(db);
-    
+
     const dieselRef = doc(db, 'diesel', id);
-    
+
     // Get the diesel record to check for trip linkage
     const dieselSnap = await getDoc(dieselRef);
     if (!dieselSnap.exists()) {
       throw new Error(`Diesel record ${id} not found`);
     }
-    
+
     const dieselData = dieselSnap.data() as DieselConsumptionRecord;
-    
+
     // If linked to a trip, remove the cost entry
     if (dieselData.tripId) {
       const tripRef = doc(db, 'trips', dieselData.tripId);
       const tripSnap = await getDoc(tripRef);
-      
+
       if (tripSnap.exists()) {
         const trip = tripSnap.data() as Trip;
-        
+
         // Remove the cost entry for this diesel record
-        const updatedCosts = trip.costs.filter(c => 
-          c.referenceNumber !== `DIESEL-${id}` && 
+        const updatedCosts = trip.costs.filter(c =>
+          c.referenceNumber !== `DIESEL-${id}` &&
           c.referenceNumber !== `DIESEL-REEFER-${id}`
         );
-        
+
         // Only update if costs array changed
         if (updatedCosts.length !== trip.costs.length) {
-          batch.update(tripRef, { 
+          batch.update(tripRef, {
             costs: updatedCosts,
             updatedAt: serverTimestamp()
           });
-          
+
           console.log(`✅ Removed cost entry from trip ${dieselData.tripId} for diesel record ${id}`);
         }
       }
     }
-    
+
     // Add diesel deletion to batch
     batch.delete(dieselRef);
-    
+
     // Commit all changes atomically
     await batch.commit();
     console.log("✅ Diesel record deleted with real-time sync:", id);
@@ -596,19 +594,19 @@ export const updateMissedLoadInFirebase = async (id: string, loadData: Partial<M
 export const deleteMissedLoadFromFirebase = async (id: string): Promise<void> => {
   try {
     const loadRef = doc(db, 'missedLoads', id);
-    
+
     // Get the document before deletion to log what's being deleted
     const snapshot = await getDoc(loadRef);
     if (!snapshot.exists()) {
       console.warn(`Missed load with ID ${id} not found, nothing to delete`);
       return;
     }
-    
+
     await deleteDoc(loadRef);
     console.log("✅ Missed load deleted with real-time sync:", id);
 
     // Add more detailed logging with the deleted data
-    await logActivity('missed_load_deleted', id, 'missed_load', { 
+    await logActivity('missed_load_deleted', id, 'missed_load', {
       deletedAt: new Date().toISOString(),
       deletedData: snapshot.data()
     });
