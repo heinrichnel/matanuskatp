@@ -42,18 +42,18 @@ interface TripDashboardProps {
 
 const TripDashboard: React.FC<TripDashboardProps> = ({ trip, onBack }) => {
   const { addCostEntry, updateCostEntry, deleteCostEntry, updateTrip, addAdditionalCost, removeAdditionalCost, addDelayReason } = useAppContext();
-  const { subscribeToTrip } = useSyncContext();
+  const syncContext = useSyncContext();
 
   const [activeTab, setActiveTab] = useState('overview');
   const [showCostForm, setShowCostForm] = useState(false);
   const [showSystemCostGenerator, setShowSystemCostGenerator] = useState(false);
-const [showAdditionalCostForm, setShowAdditionalCostForm] = useState(false);
+  const [showAdditionalCostForm, setShowAdditionalCostForm] = useState(false);
   const [editingCost, setEditingCost] = useState<CostEntry | undefined>();
 
   // Subscribe to real-time updates for this trip
   React.useEffect(() => {
-    subscribeToTrip(trip.id);
-  }, [trip.id, subscribeToTrip]);
+    syncContext.subscribeToTrip(trip.id);
+  }, [trip.id, syncContext]);
 
   // Enhanced handleAddCost with file support
   const handleAddCost = async (costData: Omit<CostEntry, 'id' | 'attachments'>, files?: FileList) => {
@@ -356,8 +356,8 @@ const [showAdditionalCostForm, setShowAdditionalCostForm] = useState(false);
                   <div>
                     <p className="text-sm text-gray-500">Status</p>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${trip.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        trip.status === 'invoiced' ? 'bg-blue-100 text-blue-800' :
-                          'bg-yellow-100 text-yellow-800'
+                      trip.status === 'invoiced' ? 'bg-blue-100 text-blue-800' :
+                        'bg-yellow-100 text-yellow-800'
                       }`}>
                       {trip.status === 'completed' ? (
                         <><CheckCircle className="w-3 h-3 mr-1" /> Completed</>

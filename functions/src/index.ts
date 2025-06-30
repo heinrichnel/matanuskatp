@@ -374,21 +374,21 @@ export const importDriverBehaviorWebhook = onRequest(async (req, res) => {
         res.status(405).send('Method Not Allowed');
         return;
     }
-    
+
     try {
         // DEBUG ONLY – Enhanced payload logging
         console.log("[importDriverBehaviorWebhook] Received webhook payload:", JSON.stringify(req.body, null, 2));
 
         // Extract events from the payload
         let events = req.body.events;
-        
+
         // Check if events array exists and is valid
         if (!events || !Array.isArray(events)) {
             console.error("[importDriverBehaviorWebhook] Invalid payload structure:", JSON.stringify(req.body, null, 2));
             res.status(400).json({ error: 'Invalid payload' });
             return;
         }
-        
+
         const batch = db.batch();
         const targetCollection = 'driverBehaviorEvents';
         console.log(`[importDriverBehaviorWebhook] Targeting collection: '${targetCollection}'`);
@@ -562,7 +562,6 @@ export const importDriverBehaviorFromFile = onObjectFinalized(async (event) => {
 });
 
 import { onDocumentDeleted } from "firebase-functions/v2/firestore";
-import * as functions from "firebase-functions";
 
 export const logTripDeletion = onDocumentDeleted("trips/{tripId}", async (event) => {
     const snap = event.data;
@@ -600,7 +599,7 @@ export const verifyRecaptcha = onRequest(async (req, res) => {
     }
 
     const { token } = req.body; // The reCAPTCHA token from the frontend
-    
+
     // Get the secret key from Firebase Functions environment
     // For development, you might use a hardcoded key, but for production
     // use environment variables: functions.config().recaptcha.secret_key
@@ -631,9 +630,9 @@ export const verifyRecaptcha = onRequest(async (req, res) => {
         } else {
             // reCAPTCHA verification failed
             console.log("reCAPTCHA verification failed:", data['error-codes']);
-            res.status(400).json({ 
-                success: false, 
-                message: "reCAPTCHA verification failed.", 
+            res.status(400).json({
+                success: false,
+                message: "reCAPTCHA verification failed.",
                 'error-codes': data['error-codes']
             });
         }

@@ -66,7 +66,7 @@ export class SyncService {
     // Initialize online status
     this.isOnline = navigator.onLine;
     console.log(`SyncService initialized. Online status: ${this.isOnline ? 'online' : 'offline'}`);
-    
+
     // Setup a periodic connection check
     setInterval(() => this.checkConnection(), 60000); // Check every minute
   }
@@ -98,7 +98,7 @@ export class SyncService {
     try {
       // Enable Firestore network
       await enableNetwork(db);
-      
+
       // Process any pending changes
       await this.processPendingChanges();
       this.setSyncStatus('success');
@@ -117,7 +117,7 @@ export class SyncService {
     this.isOnline = false;
     this.setConnectionStatus('disconnected');
     this.setSyncStatus('idle');
-    
+
     // Disable Firestore network to avoid unnecessary retries
     disableNetwork(db).catch(error => {
       console.error('Error disabling Firestore network:', error);
@@ -171,6 +171,17 @@ export class SyncService {
 
   // Subscribe to a trip's real-time updates
   public subscribeToTrip(tripId: string): void {
+    // DEBUG ONLY - Validate context
+    console.log('🔍 subscribeToTrip called with tripId:', tripId);
+    console.log('🔍 this context available:', this !== undefined);
+    console.log('🔍 tripUnsubscribes available:', this?.tripUnsubscribes !== undefined);
+
+    // Guard against undefined 'this'
+    if (!this || !this.tripUnsubscribes) {
+      console.error('❌ ERROR: Missing context in subscribeToTrip - "this" is unavailable', new Error().stack);
+      return; // Abort to prevent crash
+    }
+
     // Unsubscribe if already subscribed
     if (this.tripUnsubscribes.has(tripId)) {
       this.tripUnsubscribes.get(tripId)?.();
@@ -210,20 +221,20 @@ export class SyncService {
     }
 
     const tripsQuery = query(collection(db, 'trips'), orderBy('startDate', 'desc'));
-    
+
     const unsubscribe = onSnapshot(
       tripsQuery,
       (snapshot) => {
         const trips: Trip[] = [];
-        
+
         // Track changes for debugging
         let added = 0, modified = 0, removed = 0;
-        
+
         // Process document changes
         snapshot.docChanges().forEach(change => {
           const id = change.doc.id;
           const data = convertTimestamps(change.doc.data());
-          
+
           if (change.type === 'added') {
             added++;
             console.log(`Trip added: ${id}`);
@@ -238,18 +249,18 @@ export class SyncService {
             // Removed trips will be filtered out when we rebuild the trips array
           }
         });
-        
+
         // If we have added/modified/removed items, do a full rebuild of the trips array
         if (added > 0 || modified > 0 || removed > 0) {
           console.log(`🔄 Global trips listener changes: ${added} added, ${modified} modified, ${removed} removed`);
-          
+
           // For a complete refresh, get all current documents
           const currentTrips: Trip[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
             currentTrips.push({ id: doc.id, ...data } as Trip);
           });
-          
+
           callback(currentTrips);
           this.lastSynced = new Date();
         }
@@ -259,7 +270,7 @@ export class SyncService {
         // Don't change connection status here to avoid false disconnections
       }
     );
-    
+
     this.globalUnsubscribes.set('allTrips', unsubscribe);
   }
 
@@ -347,22 +358,22 @@ export class SyncService {
     if (this.globalUnsubscribes.has('allDriverBehavior')) {
       this.globalUnsubscribes.get('allDriverBehavior')?.();
     }
-    
+
     const eventsQuery = query(
-      collection(db, 'driverBehavior'), 
+      collection(db, 'driverBehavior'),
       orderBy('eventDate', 'desc')
     );
-    
+
     const unsubscribe = onSnapshot(
       eventsQuery,
       (snapshot) => {
         // Track changes for debugging
         let added = 0, modified = 0, removed = 0;
-        
+
         // Process document changes
         snapshot.docChanges().forEach(change => {
           const id = change.doc.id;
-          
+
           if (change.type === 'added') {
             added++;
             console.log(`Driver behavior event added: ${id}`);
@@ -374,17 +385,17 @@ export class SyncService {
             console.log(`Driver behavior event removed: ${id}`);
           }
         });
-        
+
         if (added > 0 || modified > 0 || removed > 0) {
           console.log(`🔄 Driver behavior changes: ${added} added, ${modified} modified, ${removed} removed`);
-          
+
           // Get all current documents for a full refresh
           const events: DriverBehaviorEvent[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
             events.push({ id: doc.id, ...data } as DriverBehaviorEvent);
           });
-          
+
           callback(events);
           this.lastSynced = new Date();
         }
@@ -393,7 +404,7 @@ export class SyncService {
         console.error('Error in global driver behavior listener:', error);
       }
     );
-    
+
     this.globalUnsubscribes.set('allDriverBehavior', unsubscribe);
   }
 
@@ -403,22 +414,22 @@ export class SyncService {
     if (this.globalUnsubscribes.has('allDiesel')) {
       this.globalUnsubscribes.get('allDiesel')?.();
     }
-    
+
     const recordsQuery = query(
-      collection(db, 'diesel'), 
+      collection(db, 'diesel'),
       orderBy('date', 'desc')
     );
-    
+
     const unsubscribe = onSnapshot(
       recordsQuery,
       (snapshot) => {
         // Track changes for debugging
         let added = 0, modified = 0, removed = 0;
-        
+
         // Process document changes
         snapshot.docChanges().forEach(change => {
           const id = change.doc.id;
-          
+
           if (change.type === 'added') {
             added++;
             console.log(`Diesel record added: ${id}`);
@@ -430,17 +441,17 @@ export class SyncService {
             console.log(`Diesel record removed: ${id}`);
           }
         });
-        
+
         if (added > 0 || modified > 0 || removed > 0) {
           console.log(`🔄 Diesel records changes: ${added} added, ${modified} modified, ${removed} removed`);
-          
+
           // Get all current documents for a full refresh
           const records: DieselConsumptionRecord[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
             records.push({ id: doc.id, ...data } as DieselConsumptionRecord);
           });
-          
+
           callback(records);
           this.lastSynced = new Date();
         }
@@ -449,7 +460,7 @@ export class SyncService {
         console.error('Error in global diesel listener:', error);
       }
     );
-    
+
     this.globalUnsubscribes.set('allDiesel', unsubscribe);
   }
 
@@ -699,7 +710,7 @@ export class SyncService {
       unsubscribe();
     }
     this.auditLogUnsubscribes.clear();
-    
+
     // Unsubscribe from all global listeners
     for (const unsubscribe of this.globalUnsubscribes.values()) {
       unsubscribe();
@@ -710,7 +721,7 @@ export class SyncService {
     window.removeEventListener('online', this.handleOnline);
     window.removeEventListener('offline', this.handleOffline);
   }
-  
+
   // Get connection status
   public getConnectionStatus(): ConnectionStatus {
     return this.connectionStatus;
@@ -742,53 +753,53 @@ export const cleanObjectForFirestore = (obj: any): any => {
 
 // Helper function to convert Firestore timestamps to ISO strings
 export const convertTimestamps = (obj: any): any => {
-    if (obj === null || obj === undefined) {
-        return obj;
-    }
-    
-    // Handle Firestore Timestamp objects
-    try {
-      if (obj instanceof Timestamp) {
-          return obj.toDate().toISOString();
-      }
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
 
-      // Also check for a toDate() method to handle different Timestamp implementations
-      if (obj && typeof obj.toDate === 'function') {
-          return obj.toDate().toISOString();
-      }
+  // Handle Firestore Timestamp objects
+  try {
+    if (obj instanceof Timestamp) {
+      return obj.toDate().toISOString();
+    }
+
+    // Also check for a toDate() method to handle different Timestamp implementations
+    if (obj && typeof obj.toDate === 'function') {
+      return obj.toDate().toISOString();
+    }
+  } catch (err) {
+    console.error("Error converting timestamp:", err);
+    // Return the original object if conversion fails
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    // Safely convert array items
+    try {
+      return obj.map(item => convertTimestamps(item));
     } catch (err) {
-      console.error("Error converting timestamp:", err);
-      // Return the original object if conversion fails
+      console.error("Error converting array items:", err);
       return obj;
     }
-    
-    if (Array.isArray(obj)) {
-        // Safely convert array items
-        try {
-          return obj.map(item => convertTimestamps(item));
-        } catch (err) {
-          console.error("Error converting array items:", err);
-          return obj;
+  }
+
+  if (typeof obj === 'object') {
+    // Handle regular objects
+    try {
+      const converted: Record<string, any> = {};
+      Object.entries(obj).forEach(([key, value]) => {
+        if (value !== undefined) {
+          converted[key] = convertTimestamps(value);
         }
+      });
+      return converted;
+    } catch (err) {
+      console.error("Error converting object properties:", err);
+      return obj;
     }
-    
-    if (typeof obj === 'object') {
-      // Handle regular objects
-      try {
-        const converted: Record<string, any> = {};
-        Object.entries(obj).forEach(([key, value]) => {
-          if (value !== undefined) {
-            converted[key] = convertTimestamps(value);
-          }
-        });
-        return converted; 
-      } catch (err) {
-        console.error("Error converting object properties:", err);
-        return obj;
-      }
-    }
-    
-    return obj;
+  }
+
+  return obj;
 };
 
 // Create and export a singleton instance

@@ -26,10 +26,34 @@ import { AuditLog } from './types/audit';
 import { firebaseConfig, firebaseApp } from './firebaseConfig';
 
 // Initialize Firestore with offline persistence
-export const db = initializeFirestore(firebaseApp, {
-  localCache: persistentLocalCache({ cacheSizeBytes: 104857600 }), // 100 MB
-});
-console.log("✅ Firestore initialized with persistent cache.");
+// DEBUG ONLY - Add diagnostic logs to track Firestore initialization issues
+console.log("🔍 DEBUG: About to initialize Firestore");
+
+// Import Firestore instance type
+import { Firestore } from 'firebase/firestore';
+
+// Explicitly type the db variable with the correct Firestore type
+let db: Firestore;
+
+try {
+  // Use a simpler initialization approach to avoid TypeScript issues
+  // Just use the basic persistentLocalCache with default settings
+  db = initializeFirestore(firebaseApp, {
+    localCache: persistentLocalCache({
+      cacheSizeBytes: 104857600 // 100 MB
+      // No additional options that might cause type errors
+    })
+  });
+  console.log("✅ Firestore initialized with persistent cache");
+} catch (error) {
+  console.error("❌ Firestore initialization error:", error, typeof error === 'object' ? JSON.stringify(error) : '');
+  // Fallback to initialize without persistence to ensure the app works
+  db = initializeFirestore(firebaseApp, {});
+  console.warn("⚠️ Firestore initialized WITHOUT persistent cache due to error. Real-time sync may still work, but offline capabilities will be limited.");
+}
+
+// Export the db instance after initialization
+export { db };
 
 // Initialize Analytics (only in production)
 let analytics: ReturnType<typeof getAnalytics> | undefined;
