@@ -230,9 +230,14 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
         setIsDeleting(id); // Track which specific load is being deleted
         
         
+        
         // Delete the missed load
         await onDeleteMissedLoad(id);
         
+        // Update the local state to reflect the deletion
+        setMissedLoads(prev => prev.filter(load => load.id !== id));
+        
+        alert('Missed load deleted successfully!');
         // Optimistically update the local UI state (this is redundant if AppContext already handles it,
         // but it ensures the UI updates immediately regardless)
         const updatedLoads = missedLoads.filter(load => load.id !== id);
