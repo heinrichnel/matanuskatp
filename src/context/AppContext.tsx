@@ -126,13 +126,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     // Set up all data subscriptions through the SyncService
-    syncService.subscribeToAllTrips(setTrips);
-    syncService.subscribeToAllMissedLoads(setMissedLoads);
-    syncService.subscribeToAllDieselRecords(setDieselRecords);
-    syncService.subscribeToAllDriverBehaviorEvents(setDriverBehaviorEvents);
-    syncService.subscribeToAllActionItems(setActionItems);
-    syncService.subscribeToAllCARReports(setCARReports);
-    syncService.subscribeToAuditLogs(setAuditLogs);
+    // Register all data callbacks with SyncService
+    syncService.registerDataCallbacks({
+      setTrips,
+      setMissedLoads,
+      setDieselRecords,
+      setDriverBehaviorEvents,
+      setActionItems,
+      setCarReports: setCARReports,
+      setAuditLogs
+    });
+    
+    // Subscribe to all collections
+    syncService.subscribeToAllTrips();
+    syncService.subscribeToAllMissedLoads();
+    syncService.subscribeToAllDieselRecords();
+    syncService.subscribeToAllDriverBehaviorEvents();
+    syncService.subscribeToAllActionItems();
+    syncService.subscribeToAllCARReports();
+    syncService.subscribeToAuditLogs();
 
     return () => {
       // Let SyncService handle unsubscribing from all listeners
@@ -146,7 +158,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addTrip = async (trip: Omit<Trip, 'id' | 'costs' | 'status'>): Promise<string> => {
     try {
       setIsLoading(prev => ({ ...prev, addTrip: true }));
-      
       const newTrip = {
         ...trip,
         id: generateTripId(),
@@ -154,15 +165,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         status: 'active' as 'active',
       };
       return await addTripToFirebase(newTrip as Trip);
+    } catch (error) {
+      console.error("Error adding trip:", error);
+      throw error;
+      return await addTripToFirebase(newTrip as Trip);
     } finally {
       setIsLoading(prev => ({ ...prev, addTrip: false }));
-    }
-  };
+      };
+  }
 
   const updateTrip = async (trip: Trip): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, updateTrip: true }));
-      
       // Get the original trip for audit logging
       const originalTrip = trips.find(t => t.id === trip.id);
       
@@ -184,6 +198,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         });
       }
+    } catch (error) {
+      console.error("Error updating trip:", error);
+      throw error;
     } finally {
       setIsLoading(prev => ({ ...prev, updateTrip: false }));
     }
@@ -236,6 +253,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       // Optimistically update local state
       setMissedLoads(prev => prev.filter(load => load.id !== id));
+    } catch (error) {
+      console.error("Error deleting missed load:", error);
+      throw error;
     } catch (error) {
       console.error("Error deleting missed load:", error);
       throw error;

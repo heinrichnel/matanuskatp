@@ -46,6 +46,7 @@ interface SyncListeners {
 // Sync service class
 export class SyncService {
   private listeners: SyncListeners = {};
+  private dataCallbacks: Record<string, Function> = {};
   private tripUnsubscribes: Map<string, () => void> = new Map();
   private dieselUnsubscribes: Map<string, () => void> = new Map();
   private driverBehaviorUnsubscribes: Map<string, () => void> = new Map();
@@ -69,6 +70,12 @@ export class SyncService {
 
     // Setup a periodic connection check
     setInterval(() => this.checkConnection(), 60000); // Check every minute
+  }
+
+  // Register data callbacks for all collections
+  public registerDataCallbacks(callbacks: Record<string, Function>): void {
+    this.dataCallbacks = { ...this.dataCallbacks, ...callbacks };
+    console.log('✅ Data callbacks registered:', Object.keys(callbacks).join(', '));
   }
 
   // Register listeners
@@ -214,7 +221,7 @@ export class SyncService {
   }
 
   // Subscribe to all trips (global listener)
-  public subscribeToAllTrips(callback: (trips: Trip[]) => void): void {
+  public subscribeToAllTrips(): void {
     // Clear any existing global trip listeners
     if (this.globalUnsubscribes.has('allTrips')) {
       this.globalUnsubscribes.get('allTrips')?.();
@@ -261,7 +268,11 @@ export class SyncService {
             currentTrips.push({ id: doc.id, ...data } as Trip);
           });
 
-          callback(currentTrips);
+          if (typeof this.dataCallbacks.setTrips === 'function') {
+            this.dataCallbacks.setTrips(currentTrips);
+          } else {
+            console.warn('⚠️ setTrips callback not registered');
+          }
           this.lastSynced = new Date();
         }
       },
@@ -353,7 +364,7 @@ export class SyncService {
   }
 
   // Subscribe to all driver behavior events (global listener)
-  public subscribeToAllDriverBehaviorEvents(callback: (events: DriverBehaviorEvent[]) => void): void {
+  public subscribeToAllDriverBehaviorEvents(): void {
     // Clear any existing global driver behavior listeners
     if (this.globalUnsubscribes.has('allDriverBehavior')) {
       this.globalUnsubscribes.get('allDriverBehavior')?.();
@@ -396,7 +407,11 @@ export class SyncService {
             events.push({ id: doc.id, ...data } as DriverBehaviorEvent);
           });
 
-          callback(events);
+          if (typeof this.dataCallbacks.setDriverBehaviorEvents === 'function') {
+            this.dataCallbacks.setDriverBehaviorEvents(events);
+          } else {
+            console.warn('⚠️ setDriverBehaviorEvents callback not registered');
+          }
           this.lastSynced = new Date();
         }
       },
@@ -409,7 +424,7 @@ export class SyncService {
   }
 
   // Subscribe to all diesel records (global listener)
-  public subscribeToAllDieselRecords(callback: (records: DieselConsumptionRecord[]) => void): void {
+  public subscribeToAllDieselRecords(): void {
     // Clear any existing global diesel listeners
     if (this.globalUnsubscribes.has('allDiesel')) {
       this.globalUnsubscribes.get('allDiesel')?.();
@@ -452,7 +467,11 @@ export class SyncService {
             records.push({ id: doc.id, ...data } as DieselConsumptionRecord);
           });
 
-          callback(records);
+          if (typeof this.dataCallbacks.setDieselRecords === 'function') {
+            this.dataCallbacks.setDieselRecords(records);
+          } else {
+            console.warn('⚠️ setDieselRecords callback not registered');
+          }
           this.lastSynced = new Date();
         }
       },
@@ -474,9 +493,12 @@ export class SyncService {
           const log = convertTimestamps(logData) as AuditLog;
 
           if (change.type === 'added') {
-            console.log(`🔄 Real-time update for audit log ${change.doc.id}`);
-            if (this.listeners.onAuditLogUpdate) {
-              this.listeners.onAuditLogUpdate({ ...log, id: change.doc.id });
+            const auditLog = { ...log, id: change.doc.id };
+            if (typeof this.dataCallbacks.setAuditLogs === 'function') {
+              // Get current audit logs and add the new one
+              this.dataCallbacks.setAuditLogs((prevLogs: AuditLog[]) => [auditLog, ...prevLogs]);
+            } else if (this.listeners.onAuditLogUpdate) {
+              this.listeners.onAuditLogUpdate(auditLog);
             }
           }
         });
