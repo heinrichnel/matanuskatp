@@ -390,7 +390,7 @@ export const importDriverBehaviorWebhook = onRequest(async (req, res) => {
         }
 
         const batch = db.batch();
-        const targetCollection = 'driverBehaviorEvents';
+        const targetCollection = 'driverBehavior';
         console.log(`[importDriverBehaviorWebhook] Targeting collection: '${targetCollection}'`);
         let imported = 0;
         let skipped = 0;
@@ -543,7 +543,7 @@ export const importDriverBehaviorFromFile = onObjectFinalized(async (event) => {
         for (const event of events) {
             const { fleetNumber, eventType, eventTime } = event;
             const uniqueKey = `${fleetNumber}_${eventType}_${eventTime}`;
-            const eventRef = db.collection('driverBehaviorEvents').doc(uniqueKey);
+            const eventRef = db.collection('driverBehavior').doc(uniqueKey);
             const doc = await eventRef.get();
             if (doc.exists) {
                 skipped++;

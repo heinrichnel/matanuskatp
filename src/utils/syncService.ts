@@ -20,7 +20,10 @@ import {
   CostEntry,
   DieselConsumptionRecord,
   DriverBehaviorEvent,
-  AuditLog
+  AuditLog,
+  MissedLoad,
+  ActionItem,
+  CARReport
 } from '../types';
 
 // Collection references
@@ -690,6 +693,186 @@ export class SyncService {
     } catch (error) {
       console.error('Error storing pending changes in localStorage:', error);
     }
+  }
+
+  // Subscribe to all missed loads (global listener)
+  public subscribeToAllMissedLoads(): void {
+    // Clear any existing global missed loads listeners
+    if (this.globalUnsubscribes.has('allMissedLoads')) {
+      this.globalUnsubscribes.get('allMissedLoads')?.();
+    }
+
+    const missedLoadsQuery = query(
+      collection(db, 'missedLoads'),
+      orderBy('date', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      missedLoadsQuery,
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+
+          if (change.type === 'added') {
+            added++;
+            console.log(`Missed load added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Missed load modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Missed load removed: ${id}`);
+          }
+        });
+
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Missed loads changes: ${added} added, ${modified} modified, ${removed} removed`);
+
+          // Get all current documents for a full refresh
+          const missedLoads: MissedLoad[] = [];
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            missedLoads.push({ id: doc.id, ...data } as MissedLoad);
+          });
+
+          if (typeof this.dataCallbacks.setMissedLoads === 'function') {
+            this.dataCallbacks.setMissedLoads(missedLoads);
+          } else {
+            console.warn('⚠️ setMissedLoads callback not registered');
+          }
+          this.lastSynced = new Date();
+        }
+      },
+      (error) => {
+        console.error('Error in global missed loads listener:', error);
+      }
+    );
+
+    this.globalUnsubscribes.set('allMissedLoads', unsubscribe);
+  }
+
+  // Subscribe to all action items (global listener)
+  public subscribeToAllActionItems(): void {
+    // Clear any existing global action items listeners
+    if (this.globalUnsubscribes.has('allActionItems')) {
+      this.globalUnsubscribes.get('allActionItems')?.();
+    }
+
+    const actionItemsQuery = query(
+      collection(db, 'actionItems'),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      actionItemsQuery,
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+
+          if (change.type === 'added') {
+            added++;
+            console.log(`Action item added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Action item modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Action item removed: ${id}`);
+          }
+        });
+
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Action items changes: ${added} added, ${modified} modified, ${removed} removed`);
+
+          // Get all current documents for a full refresh
+          const actionItems: ActionItem[] = [];
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            actionItems.push({ id: doc.id, ...data } as ActionItem);
+          });
+
+          if (typeof this.dataCallbacks.setActionItems === 'function') {
+            this.dataCallbacks.setActionItems(actionItems);
+          } else {
+            console.warn('⚠️ setActionItems callback not registered');
+          }
+          this.lastSynced = new Date();
+        }
+      },
+      (error) => {
+        console.error('Error in global action items listener:', error);
+      }
+    );
+
+    this.globalUnsubscribes.set('allActionItems', unsubscribe);
+  }
+
+  // Subscribe to all CAR reports (global listener)
+  public subscribeToAllCARReports(): void {
+    // Clear any existing global CAR reports listeners
+    if (this.globalUnsubscribes.has('allCARReports')) {
+      this.globalUnsubscribes.get('allCARReports')?.();
+    }
+
+    const carReportsQuery = query(
+      collection(db, 'carReports'),
+      orderBy('createdAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      carReportsQuery,
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+
+          if (change.type === 'added') {
+            added++;
+            console.log(`CAR report added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`CAR report modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`CAR report removed: ${id}`);
+          }
+        });
+
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 CAR reports changes: ${added} added, ${modified} modified, ${removed} removed`);
+
+          // Get all current documents for a full refresh
+          const carReports: CARReport[] = [];
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            carReports.push({ id: doc.id, ...data } as CARReport);
+          });
+
+          if (typeof this.dataCallbacks.setCarReports === 'function') {
+            this.dataCallbacks.setCarReports(carReports);
+          } else {
+            console.warn('⚠️ setCarReports callback not registered');
+          }
+          this.lastSynced = new Date();
+        }
+      },
+      (error) => {
+        console.error('Error in global CAR reports listener:', error);
+      }
+    );
+
+    this.globalUnsubscribes.set('allCARReports', unsubscribe);
   }
 
   // Load pending changes from localStorage
