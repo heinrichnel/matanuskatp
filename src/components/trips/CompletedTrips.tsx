@@ -34,11 +34,11 @@ interface OutletContextType {
 
 const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
   const { trips: contextTrips, updateTrip, deleteTrip } = useAppContext();
-  const context = useOutletContext<OutletContextType>();
+  const outletContext = useOutletContext<OutletContextType | undefined>();
   
   // Use props if provided, otherwise use context
   const trips = props.trips || contextTrips.filter(t => t.status === 'completed');
-  const onView = props.onView || context.setSelectedTrip;
+  const onView = props.onView || outletContext?.setSelectedTrip || (() => {});
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
