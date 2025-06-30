@@ -562,7 +562,7 @@ export const importDriverBehaviorFromFile = onObjectFinalized(async (event) => {
 });
 
 import { onDocumentDeleted } from "firebase-functions/v2/firestore";
-import { RecaptchaEnterpriseServiceClient } from "@google-cloud/recaptcha-enterprise";
+import * as functions from "firebase-functions";
 
 export const logTripDeletion = onDocumentDeleted("trips/{tripId}", async (event) => {
     const snap = event.data;
@@ -599,45 +599,46 @@ export const verifyRecaptcha = onRequest(async (req, res) => {
         return;
     }
 
-    const { token, recaptchaAction } = req.body;
-    const projectID = "mat1-9e6b3";
-    const recaptchaKey = "6Leyim8rAAAAAINSXyIYn8xtPeOH-7sTB2-fBcNh";
+    const { token } = req.body; // The reCAPTCHA token from the frontend
+    
+    // Get the secret key from Firebase Functions environment
+    // For development, you might use a hardcoded key, but for production
+    // use environment variables: functions.config().recaptcha.secret_key
+    const recaptchaSecretKey = "7AEC0463-8EE3-4C42-94BE-362F2EB9AD7F"; // Your reCAPTCHA secret key
+
+    if (!token) {
+        res.status(400).json({ success: false, message: "reCAPTCHA token is missing." });
+        return;
+    }
 
     try {
-        const client = new RecaptchaEnterpriseServiceClient();
-        const projectPath = client.projectPath(projectID);
+        // Make a direct HTTP request to the reCAPTCHA API endpoint
+        const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${token}`;
+        const fetch = (await import('node-fetch')).default;
+        const response = await fetch(verificationUrl, { method: 'POST' });
+        const data = await response.json();
 
-        const request = {
-            assessment: {
-                event: {
-                    token: token,
-                    siteKey: recaptchaKey,
-                },
-            },
-            parent: projectPath,
-        };
+        console.log("reCAPTCHA verification response:", data);
 
-        const [response] = await client.createAssessment(request);
-
-        if (!response.tokenProperties || !response.tokenProperties.valid) {
-            console.log(`The CreateAssessment call failed because the token was: ${response.tokenProperties ? response.tokenProperties.invalidReason : 'unknown'}`);
-            res.status(400).json({ success: false, message: "Invalid reCAPTCHA token." });
-            return;
-        }
-
-        if (response.tokenProperties.action === recaptchaAction) {
-            console.log(`The reCAPTCHA score is: ${response.riskAnalysis?.score}`);
-            if (response.riskAnalysis && response.riskAnalysis.score && response.riskAnalysis.score < 0.5) {
+        if (data.success) {
+            // reCAPTCHA verification successful
+            // For reCAPTCHA v3, check the score if present
+            if (data.score && data.score < 0.5) { // Adjust threshold (0.0 to 1.0) as needed
                 res.status(400).json({ success: false, message: "reCAPTCHA verification failed. Low score." });
                 return;
             }
-            res.status(200).json({ success: true, score: response.riskAnalysis?.score });
+            res.status(200).json({ success: true, score: data.score || 1.0 });
         } else {
-            console.log("The action attribute in your reCAPTCHA tag does not match the action you are expecting to score");
-            res.status(400).json({ success: false, message: "reCAPTCHA action mismatch." });
+            // reCAPTCHA verification failed
+            console.log("reCAPTCHA verification failed:", data['error-codes']);
+            res.status(400).json({ 
+                success: false, 
+                message: "reCAPTCHA verification failed.", 
+                'error-codes': data['error-codes']
+            });
         }
     } catch (error) {
-        console.error("Error creating assessment:", error);
+        console.error("Error during reCAPTCHA verification:", error);
         res.status(500).json({ success: false, message: "Internal server error during reCAPTCHA verification." });
     }
 });
