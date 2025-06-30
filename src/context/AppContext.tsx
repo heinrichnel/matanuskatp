@@ -14,12 +14,6 @@ import {
 } from '../types';
 import { AuditLog as AuditLogType } from '../types/audit';
 import {
-  listenToTrips,
-  listenToDieselRecords,
-  listenToMissedLoads,
-  listenToDriverBehaviorEvents,
-  listenToActionItems,
-  listenToCARReports,
   addTripToFirebase,
   updateTripInFirebase,
   deleteTripFromFirebase,
@@ -35,6 +29,7 @@ import {
 import { generateTripId } from '../utils/helpers';
 import { sendTripEvent, sendDriverBehaviorEvent } from '../utils/webhookSenders';
 import { v4 as uuidv4 } from 'uuid';
+import syncService from '../utils/syncService';
 
 interface AppContextType {
   trips: Trip[];
@@ -130,37 +125,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected'); // TODO: Implement actual connection status monitoring
 
   useEffect(() => {
-    const unsubscribeTrips = listenToTrips(setTrips, (error) => console.error(error));
-    const unsubscribeMissedLoads = listenToMissedLoads(setMissedLoads, (error) => console.error(error));
-    const unsubscribeDiesel = listenToDieselRecords(setDieselRecords, (error) => console.error(error));
-    const unsubscribeDriverBehavior = listenToDriverBehaviorEvents(setDriverBehaviorEvents, (error) => console.error(error));
-    const unsubscribeActionItems = listenToActionItems(setActionItems, (error) => console.error(error));
-    const unsubscribeCARReports = listenToCARReports(setCARReports, (error) => console.error(error));
-    const unsubscribeAuditLogs = listenToAuditLogs(setAuditLogs, (error: any) => console.error(error));
+    // Register all data callbacks with the SyncService
+    syncService.registerDataCallbacks({
+      setTrips,
+      setMissedLoads,
+      setDieselRecords,
+      setDriverBehaviorEvents,
+      setActionItems,
+      setCARReports,
+      setAuditLogs
+    });
+    
+    // Set up all data subscriptions through the SyncService
+    syncService.subscribeToAllTrips(setTrips);
+    syncService.subscribeToAllMissedLoads(setMissedLoads);
+    syncService.subscribeToAllDieselRecords(setDieselRecords);
+    syncService.subscribeToAllDriverBehaviorEvents(setDriverBehaviorEvents);
+    syncService.subscribeToAllActionItems(setActionItems);
+    syncService.subscribeToAllCARReports(setCARReports);
+    syncService.subscribeToAuditLogs(setAuditLogs);
 
     return () => {
-      unsubscribeTrips();
-      unsubscribeMissedLoads();
-      unsubscribeDiesel();
-      unsubscribeDriverBehavior();
-      unsubscribeActionItems();
-      unsubscribeCARReports();
-      unsubscribeAuditLogs();
+      // Let SyncService handle unsubscribing from all listeners
+      syncService.cleanup();
     };
   }, []);
 
+  // Add loading state management to addTrip and updateTrip
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+  
   const addTrip = async (trip: Omit<Trip, 'id' | 'costs' | 'status'>): Promise<string> => {
-    const newTrip = {
-      ...trip,
-      id: generateTripId(),
-      costs: [],
-      status: 'active' as 'active',
-    };
+    try {
+      setIsLoading(prev => ({ ...prev, addTrip: true }));
+      
+      const newTrip = {
+        ...trip,
+        id: generateTripId(),
+        costs: [],
+        status: 'active' as 'active',
+      };
+      return await addTripToFirebase(newTrip as Trip);
+    } finally {
+      setIsLoading(prev => ({ ...prev, addTrip: false }));
+      setIsLoading(prev => ({ ...prev, updateTrip: true }));
+      await updateTripInFirebase(trip.id, trip);
+    } finally {
+      setIsLoading(prev => ({ ...prev, updateTrip: false }));
     return await addTripToFirebase(newTrip as Trip);
-  };
-
-  const updateTrip = async (trip: Trip): Promise<void> => {
-    await updateTripInFirebase(trip.id, trip);
   };
 
   const deleteTrip = async (id: string): Promise<void> => {
@@ -311,10 +322,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       throw error;
     }
   };
-
-  // Initialize loading state - use a Record type for dynamic keys
-  const [isLoading, _setIsLoading] = useState<Record<string, boolean>>({});
-  // Rename to _setIsLoading since it's not directly used (avoids linter warnings)
 
   const value = {
     trips,
