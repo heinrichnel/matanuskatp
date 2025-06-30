@@ -2,15 +2,29 @@ import { initializeApp } from "firebase/app";
 
 // Use environment variables from .env
 export const firebaseConfig = {
-  apiKey: "AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g",
-  authDomain: "mat1-9e6b3.firebaseapp.com",
-  databaseURL: "https://mat1-9e6b3-default-rtdb.firebaseio.com",
-  projectId: "mat1-9e6b3",
-  storageBucket: "mat1-9e6b3.firebasestorage.app",
-  messagingSenderId: "250085264089",
-  appId: "1:250085264089:web:51c2b209e0265e7d04ccc8",
-  measurementId: "G-YHQHSJN5CQ"
+  apiKey: import.meta.env.VITE_FIREBASE_API,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
+
+// DEBUG ONLY – To detect missing environment variables during development
+if (import.meta.env.DEV) {
+  console.log('Firebase Config:', {
+    apiKey: import.meta.env.VITE_FIREBASE_API ? '✓ Present' : '✗ Missing',
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? '✓ Present' : '✗ Missing',
+    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL ? '✓ Present' : '✗ Missing',
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ? '✓ Present' : '✗ Missing',
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ? '✓ Present' : '✗ Missing',
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ? '✓ Present' : '✗ Missing',
+    appId: import.meta.env.VITE_FIREBASE_APP_ID ? '✓ Present' : '✗ Missing',
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID ? '✓ Present' : '✗ Missing'
+  });
+}
 
 // Validate required Firebase configuration
 const validateConfig = () => {

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
@@ -24,6 +24,15 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = (props) => {
   const { trips: contextTrips, missedLoads = [] } = useAppContext();
+
+  // DEBUG ONLY - Remove after verification
+  useEffect(() => {
+    console.log('Lucide React components loaded:', {
+      Flag: typeof Flag !== 'undefined' ? 'Available' : 'Not defined',
+      TrendingUp: typeof TrendingUp !== 'undefined' ? 'Available' : 'Not defined'
+    });
+  }, []);
+
   // Use props if provided, otherwise use context
   const trips = props.trips || contextTrips;
   const [filters, setFilters] = useState({
