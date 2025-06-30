@@ -4,15 +4,27 @@ import Sidebar from './Sidebar';
 import { useAppContext } from '../../context/AppContext';
 import { Trip } from '../../types';
 
-const Layout: React.FC = () => {
+interface LayoutProps {
+  setShowTripForm: (show: boolean) => void;
+  setEditingTrip: (trip: Trip | undefined) => void;
+}
+
+const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
   const location = useLocation();
   const navigate = useNavigate();
   useAppContext(); // Keep this to ensure we're still using the AppContext
   
   // State for outlet context
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
-  const [editingTrip, setEditingTrip] = useState<Trip | undefined>(undefined);
-  const [showTripForm, setShowTripForm] = useState(false);
+  
+  // Use the props for editingTrip and showTripForm
+  const handleSetEditingTrip = (trip: Trip | undefined) => {
+    setEditingTrip(trip);
+  };
+  
+  const handleShowTripForm = (show: boolean) => {
+    setShowTripForm(show);
+  };
 
   // Get current path from location to determine active menu item
   const currentView = location.pathname.split('/')[1] || 'dashboard';
@@ -25,8 +37,8 @@ const Layout: React.FC = () => {
   // Context object to pass to outlet
   const outletContext = {
     setSelectedTrip,
-    setEditingTrip,
-    setShowTripForm
+    setEditingTrip: handleSetEditingTrip,
+    setShowTripForm: handleShowTripForm
   };
   return (
     <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
