@@ -19,8 +19,8 @@ import ErrorMessage from '../ui/ErrorMessage';
 
 interface OutletContextType {
   setSelectedTrip: (trip: Trip | null) => void;
-  setEditingTrip: (trip: Trip | undefined) => void;
-  setShowTripForm: (show: boolean) => void;
+  setEditingTrip?: (trip: Trip | undefined) => void;
+  setShowTripForm?: (show: boolean) => void;
 }
 
 interface ActiveTripsProps {
@@ -42,18 +42,18 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   // Get functions from context
   const { trips: contextTrips, updateTripStatus, deleteTrip, completeTrip, isLoading } = useAppContext();
   // Use optional chaining to handle potentially undefined context
-  const context = useOutletContext<OutletContextType | undefined>();
+  const context = useOutletContext<OutletContextType | undefined>() || {};
 
   // Use props if provided, otherwise use context
   const trips = props.trips || contextTrips.filter(t => t.status === 'active');
   // Use fallbacks when context or context methods are undefined
-  const onView = props.onView || (context?.setSelectedTrip ? context.setSelectedTrip : () => {});
+  const onView = props.onView || (context.setSelectedTrip || (() => {}));
   const onEdit = props.onEdit || ((trip: Trip) => {
-    if (context?.setEditingTrip) {
+    if (context.setEditingTrip) {
       context.setEditingTrip(trip);
-      if (context?.setShowTripForm) {
-        context.setShowTripForm(true);
-      }
+    }
+    if (context.setShowTripForm) {
+      context.setShowTripForm(true);
     }
   });
   const onDelete = props.onDelete || deleteTrip;
@@ -154,8 +154,10 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
             size="md"
             icon={<Plus className="w-5 h-5" />}
             onClick={() => {
-              if (context?.setEditingTrip && context?.setShowTripForm) {
+              if (context.setEditingTrip) {
                 context.setEditingTrip(undefined);
+              }
+              if (context.setShowTripForm) {
                 context.setShowTripForm(true);
               }
             }}

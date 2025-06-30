@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import ErrorBoundary from './components/ErrorBoundary';
@@ -31,68 +31,43 @@ import TripForm from "./components/trips/TripForm";
 const Notifications = () => <div>Notifications Page</div>;
 const Settings = () => <div>Settings Page</div>;
 const Profile = () => <div>Profile Page</div>;
-
-// Wrapper for TripForm to handle navigation
-const TripFormWrapper: React.FC = () => {
-  const navigate = useNavigate();
-  const { addTrip } = useAppContext();
-
-  const handleSubmit = async (tripData: any) => {
-    try {
-      await addTrip(tripData);
-      navigate('/active-trips');
-    } catch (error) {
-      console.error("Error adding trip:", error);
-      // Handle error (e.g., show error message to user)
-    }
-  };
-
-  const handleCancel = () => {
-    navigate('/active-trips');
-  };
-
-  return <TripForm onSubmit={handleSubmit} onCancel={handleCancel} />;
-};
-
+  
 // Main App component with Router implementation
 const App: React.FC = () => {
   const [showAddTripModal, setShowAddTripModal] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | undefined>(undefined);
+
+  // Function to handle trip form submission
+  const handleTripSubmit = async (tripData: Omit<Trip, 'id' | 'costs' | 'status'>) => {
+    try {
+      const { addTrip, updateTrip } = useAppContext();
+      if (editingTrip) {
+        await updateTrip({ ...editingTrip, ...tripData });
+      } else {
+        await addTrip(tripData);
+      }
+      setShowAddTripModal(false);
+      setEditingTrip(undefined);
+    } catch (error) {
+      console.error("Error submitting trip:", error);
+    }
+  };
 
   return (
     <ErrorBoundary>
       <AppProvider>
         <SyncProvider>
           <Router>
-            {/* Global Trip Form Modal */}
-            <Modal
-              isOpen={showAddTripModal}
-              onClose={() => setShowAddTripModal(false)}
-              title={editingTrip ? "Edit Trip" : "Add New Trip"}
-              maxWidth="lg"
-            >
-              {showAddTripModal && (
-                <TripForm
-                  trip={editingTrip}
-                  onSubmit={async (tripData) => {
-                    const { addTrip, updateTrip } = useAppContext();
-                    try {
-                      if (editingTrip) {
-                        await updateTrip({ ...editingTrip, ...tripData });
-                      } else {
-                        await addTrip(tripData);
-                      }
-                      setShowAddTripModal(false);
-                    } catch (error) {
-                      console.error("Error submitting trip:", error);
-                    }
-                  }}
-                  onCancel={() => setShowAddTripModal(false)}
-                />
-              )}
-            </Modal>
             <Routes>
-              <Route path="/" element={<Layout setShowTripForm={setShowAddTripModal} setEditingTrip={setEditingTrip} />}>
+              <Route 
+                path="/" 
+                element={
+                  <Layout 
+                    setShowTripForm={setShowAddTripModal} 
+                    setEditingTrip={setEditingTrip} 
+                  />
+                }
+              >
                 <Route index element={<Navigate to="/ytd-kpis" replace />} />
                 <Route path="ytd-kpis" element={<YearToDateKPIs />} />
                 <Route path="dashboard" element={<Dashboard />} />
@@ -107,13 +82,32 @@ const App: React.FC = () => {
                 <Route path="driver-behavior" element={<DriverBehaviorPage />} />
                 <Route path="action-log" element={<ActionLog />} />
                 <Route path="audit-log" element={<AuditLogPage />} />
-                <Route path="add-trip" element={<TripFormWrapper />} />
                 <Route path="notifications" element={<Notifications />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="*" element={<Navigate to="/ytd-kpis" replace />} />
               </Route>
             </Routes>
+            
+            {/* Global Trip Form Modal */}
+            <Modal
+              isOpen={showAddTripModal}
+              onClose={() => {
+                setShowAddTripModal(false);
+                setEditingTrip(undefined);
+              }}
+              title={editingTrip ? "Edit Trip" : "Add New Trip"}
+              maxWidth="lg"
+            >
+              <TripForm
+                trip={editingTrip}
+                onSubmit={handleTripSubmit}
+                onCancel={() => {
+                  setShowAddTripModal(false);
+                  setEditingTrip(undefined);
+                }}
+              />
+            </Modal>
           </Router>
         </SyncProvider>
       </AppProvider>

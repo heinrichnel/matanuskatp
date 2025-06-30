@@ -28,17 +28,18 @@ interface CompletedTripsProps {
 // Type for context provided by the outlet
 interface OutletContextType {
   setSelectedTrip: (trip: Trip | null) => void;
-  setEditingTrip: (trip: Trip | undefined) => void;
-  setShowTripForm: (show: boolean) => void;
+  setEditingTrip?: (trip: Trip | undefined) => void;
+  setShowTripForm?: (show: boolean) => void;
 }
 
 const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
   const { trips: contextTrips, updateTrip, deleteTrip } = useAppContext();
-  const outletContext = useOutletContext<OutletContextType | undefined>();
+  // Use an empty object as fallback if context is undefined
+  const outletContext = useOutletContext<OutletContextType | undefined>() || {};
   
   // Use props if provided, otherwise use context
   const trips = props.trips || contextTrips.filter(t => t.status === 'completed');
-  const onView = props.onView || outletContext?.setSelectedTrip || (() => {});
+  const onView = props.onView || (outletContext.setSelectedTrip || (() => {}));
   const [filters, setFilters] = useState({
     startDate: '',
     endDate: '',
@@ -101,7 +102,10 @@ const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Completed Trips</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Completed Trips</h2>
+          <p className="text-gray-600">View and manage completed trips</p>
+        </div>
         <Button variant="primary" size="md" icon={<Download className="w-5 h-5" />}>
           <span className="sr-only">Export</span>
         </Button>
