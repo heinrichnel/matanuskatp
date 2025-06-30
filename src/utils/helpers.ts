@@ -18,7 +18,7 @@ export const cleanObjectForFirestore = (obj: any): any => {
     if (obj instanceof Date) {
       return obj;
     }
-    
+
     const cleaned: any = {};
     for (const [key, value] of Object.entries(obj)) {
       if (value !== undefined) {
@@ -138,17 +138,7 @@ export const getUnresolvedFlagsCount = (costs: CostEntry[]): number =>
 
 export const canCompleteTrip = (trip: Trip): boolean =>
   getUnresolvedFlagsCount(trip.costs || []) === 0;
-  
-// Get all flagged costs across multiple trips
-export const getAllFlaggedCosts = (trips: Trip[]): FlaggedCost[] => {
-  const flagged: FlaggedCost[] = [];
-  trips.forEach(trip => {
-    if (trip.costs && Array.isArray(trip.costs)) {
-      trip.costs.filter(cost => cost.isFlagged).forEach(cost => flagged.push({...cost, tripFleetNumber: trip.fleetNumber, tripRoute: trip.route, tripDriverName: trip.driverName}));
-    }
-  });
-  return flagged;
-};
+
 
 export const shouldAutoCompleteTrip = (trip: Trip): boolean =>
   trip.status === 'active' &&
@@ -196,14 +186,14 @@ export const retryOperation = async <T>(
 ): Promise<T> => {
   let lastError: any = new Error('Operation failed after max retries');
   let delay = initialDelayMs;
-  
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       return await operation();
     } catch (error) {
       lastError = error;
       console.warn(`Attempt ${attempt}/${maxRetries} failed:`, error);
-      
+
       if (attempt < maxRetries) {
         console.log(`Retrying in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
@@ -211,7 +201,7 @@ export const retryOperation = async <T>(
       }
     }
   }
-  
+
   throw lastError;
 };
 
@@ -281,7 +271,7 @@ export const downloadTripExcel = async (trip: Trip) => {
 export const generateReport = (trip: Trip) => {
   try {
     const costs = trip.costs || [];
-    
+
     // Calculate cost breakdown by category
     const categoryTotals: Record<string, number> = {};
     costs.forEach(cost => {
@@ -290,7 +280,7 @@ export const generateReport = (trip: Trip) => {
     });
 
     const totalCosts = Object.values(categoryTotals).reduce((sum, amount) => sum + amount, 0);
-    
+
     const costBreakdown = Object.entries(categoryTotals).map(([category, total]) => ({
       category,
       total,
@@ -298,7 +288,7 @@ export const generateReport = (trip: Trip) => {
     })).sort((a, b) => b.total - a.total);
 
     // Find missing receipts
-    const missingReceipts = costs.filter(cost => 
+    const missingReceipts = costs.filter(cost =>
       !cost.attachments || cost.attachments.length === 0
     );
 
@@ -335,56 +325,56 @@ export const generateCurrencyFleetReport = (trips: Trip[], currency: 'USD' | 'ZA
     const totalTrips = trips.length;
     const activeTrips = trips.filter(t => t.status === 'active').length;
     const completedTrips = trips.filter(t => t.status === 'completed' || t.status === 'invoiced' || t.status === 'paid').length;
-    
+
     const totalRevenue = trips.reduce((sum, trip) => sum + (trip.baseRevenue || 0), 0);
     const totalExpenses = trips.reduce((sum, trip) => sum + calculateTotalCosts(trip.costs || []), 0);
     const netProfit = totalRevenue - totalExpenses;
-    
+
     const avgRevenuePerTrip = totalTrips > 0 ? totalRevenue / totalTrips : 0;
     const avgCostPerTrip = totalTrips > 0 ? totalExpenses / totalTrips : 0;
     const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
-    
+
     // Client type breakdown
     const internalTrips = trips.filter(t => t.clientType === 'internal').length;
     const externalTrips = trips.filter(t => t.clientType === 'external').length;
-    
+
     const internalRevenue = trips
       .filter(t => t.clientType === 'internal')
       .reduce((sum, trip) => sum + (trip.baseRevenue || 0), 0);
-    
+
     const externalRevenue = trips
       .filter(t => t.clientType === 'external')
       .reduce((sum, trip) => sum + (trip.baseRevenue || 0), 0);
-    
+
     const internalExpenses = trips
       .filter(t => t.clientType === 'internal')
       .reduce((sum, trip) => sum + calculateTotalCosts(trip.costs || []), 0);
-    
+
     const externalExpenses = trips
       .filter(t => t.clientType === 'external')
       .reduce((sum, trip) => sum + calculateTotalCosts(trip.costs || []), 0);
-    
+
     const internalProfit = internalRevenue - internalExpenses;
     const externalProfit = externalRevenue - externalExpenses;
-    
+
     const internalProfitMargin = internalRevenue > 0 ? (internalProfit / internalRevenue) * 100 : 0;
     const externalProfitMargin = externalRevenue > 0 ? (externalProfit / externalRevenue) * 100 : 0;
-    
+
     // Investigation metrics
     const tripsWithInvestigations = trips.filter(t => t.costs && t.costs.some(c => c.isFlagged)).length;
     const totalFlags = trips.reduce((sum, trip) => sum + getFlaggedCostsCount(trip.costs || []), 0);
     const unresolvedFlags = trips.reduce((sum, trip) => sum + getUnresolvedFlagsCount(trip.costs || []), 0);
-    
+
     const investigationRate = totalTrips > 0 ? (tripsWithInvestigations / totalTrips) * 100 : 0;
     const avgFlagsPerTrip = totalTrips > 0 ? totalFlags / totalTrips : 0;
-    
+
     // Calculate average resolution time
     let totalResolutionTime = 0;
     let resolvedFlagsCount = 0;
-    
+
     trips.forEach(trip => {
       if (!trip.costs) return;
-      
+
       trip.costs.forEach(cost => {
         if (cost.isFlagged && cost.flaggedAt && cost.resolvedAt && cost.investigationStatus === 'resolved') {
           const flaggedDate = new Date(cost.flaggedAt);
@@ -395,12 +385,12 @@ export const generateCurrencyFleetReport = (trips: Trip[], currency: 'USD' | 'ZA
         }
       });
     });
-    
+
     const avgResolutionTime = resolvedFlagsCount > 0 ? totalResolutionTime / resolvedFlagsCount : 0;
-    
+
     // Driver statistics
     const driverStats: Record<string, any> = {};
-    
+
     trips.forEach(trip => {
       const driver = trip.driverName;
       if (!driverStats[driver]) {
@@ -413,19 +403,19 @@ export const generateCurrencyFleetReport = (trips: Trip[], currency: 'USD' | 'ZA
           externalTrips: 0
         };
       }
-      
+
       driverStats[driver].trips++;
       driverStats[driver].revenue += trip.baseRevenue || 0;
       driverStats[driver].expenses += calculateTotalCosts(trip.costs || []);
       driverStats[driver].flags += getFlaggedCostsCount(trip.costs || []);
-      
+
       if (trip.clientType === 'internal') {
         driverStats[driver].internalTrips++;
       } else {
         driverStats[driver].externalTrips++;
       }
     });
-    
+
     return {
       currency,
       totalTrips,
@@ -484,10 +474,10 @@ export const generateCurrencyFleetReport = (trips: Trip[], currency: 'USD' | 'ZA
 export const downloadCurrencyFleetReport = async (trips: Trip[], currency: 'USD' | 'ZAR') => {
   try {
     const report = generateCurrencyFleetReport(trips, currency);
-    
+
     // Create workbook
     const wb = XLSX.utils.book_new();
-    
+
     // Summary sheet
     const summaryData = [
       ['CURRENCY FLEET REPORT', ''],
@@ -519,16 +509,16 @@ export const downloadCurrencyFleetReport = async (trips: Trip[], currency: 'USD'
       ['Avg Flags Per Trip', report.avgFlagsPerTrip.toFixed(2)],
       ['Avg Resolution Time (days)', report.avgResolutionTime.toFixed(2)]
     ];
-    
+
     const summaryWs = XLSX.utils.aoa_to_sheet(summaryData);
     XLSX.utils.book_append_sheet(wb, summaryWs, 'Summary');
-    
+
     // Driver stats sheet
     const driverHeaders = ['Driver', 'Trips', 'Revenue', 'Expenses', 'Net Profit', 'Profit Margin', 'Flags', 'Internal Trips', 'External Trips'];
     const driverRows = Object.entries(report.driverStats).map(([driver, stats]) => {
       const netProfit = stats.revenue - stats.expenses;
       const profitMargin = stats.revenue > 0 ? (netProfit / stats.revenue) * 100 : 0;
-      
+
       return [
         driver,
         stats.trips,
@@ -541,18 +531,18 @@ export const downloadCurrencyFleetReport = async (trips: Trip[], currency: 'USD'
         stats.externalTrips
       ];
     });
-    
+
     const driverData = [driverHeaders, ...driverRows];
     const driverWs = XLSX.utils.aoa_to_sheet(driverData);
     XLSX.utils.book_append_sheet(wb, driverWs, 'Driver Performance');
-    
+
     // Trips detail sheet
     const tripHeaders = ['Fleet', 'Driver', 'Client', 'Route', 'Start Date', 'End Date', 'Status', 'Revenue', 'Costs', 'Profit', 'Margin', 'Flags'];
     const tripRows = trips.map(trip => {
       const costs = calculateTotalCosts(trip.costs || []);
       const profit = (trip.baseRevenue || 0) - costs;
       const margin = trip.baseRevenue ? (profit / trip.baseRevenue) * 100 : 0;
-      
+
       return [
         trip.fleetNumber,
         trip.driverName,
@@ -568,11 +558,11 @@ export const downloadCurrencyFleetReport = async (trips: Trip[], currency: 'USD'
         getFlaggedCostsCount(trip.costs || [])
       ];
     });
-    
+
     const tripData = [tripHeaders, ...tripRows];
     const tripWs = XLSX.utils.aoa_to_sheet(tripData);
     XLSX.utils.book_append_sheet(wb, tripWs, 'Trip Details');
-    
+
     // Write file
     XLSX.writeFile(wb, `${currency}_Fleet_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
   } catch (error) {
@@ -589,7 +579,7 @@ export const getAllFlaggedCosts = (trips: Trip[]): FlaggedCost[] => {
 
     trips?.forEach(trip => {
       if (!trip.costs) return;
-      
+
       trip.costs?.forEach(cost => {
         if (cost.isFlagged) {
           flaggedCosts.push({
@@ -618,7 +608,7 @@ export const getAllFlaggedCosts = (trips: Trip[]): FlaggedCost[] => {
 export const sortTripsByLoadingDate = (trips: Trip[]): Record<string, Trip[]> => {
   // Group trips by loading date (start date)
   const tripsByDate: Record<string, Trip[]> = {};
-  
+
   trips.forEach(trip => {
     const loadDate = trip.startDate;
     if (!tripsByDate[loadDate]) {
@@ -626,18 +616,18 @@ export const sortTripsByLoadingDate = (trips: Trip[]): Record<string, Trip[]> =>
     }
     tripsByDate[loadDate].push(trip);
   });
-  
+
   // Sort dates in descending order (newest first)
-  const sortedDates = Object.keys(tripsByDate).sort((a, b) => 
+  const sortedDates = Object.keys(tripsByDate).sort((a, b) =>
     new Date(b).getTime() - new Date(a).getTime()
   );
-  
+
   // Create a new object with sorted dates
   const sortedTripsByDate: Record<string, Trip[]> = {};
   sortedDates.forEach(date => {
     sortedTripsByDate[date] = tripsByDate[date];
   });
-  
+
   return sortedTripsByDate;
 };
 

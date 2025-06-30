@@ -1,5 +1,4 @@
 import React, { createContext, useContext } from 'react';
-import { Trip } from '../types';
 import syncService from '../utils/syncService';
 import type { SyncService } from '../utils/syncService';
 
@@ -29,12 +28,12 @@ export const useSyncContext = (): SyncService => {
 // Custom hook for subscribing to a specific trip
 export const useTripSync = (tripId: string | null): { isSyncing: boolean } => {
   const syncContext = useSyncContext();
-  
+
   React.useEffect(() => {
     if (tripId) {
       console.log(`Setting up trip sync for trip ID: ${tripId}`);
       syncContext.subscribeToTrip(tripId);
-      
+
       // Return cleanup function to unsubscribe when component unmounts
       // or when tripId changes
       return () => {
@@ -44,7 +43,7 @@ export const useTripSync = (tripId: string | null): { isSyncing: boolean } => {
       };
     }
   }, [tripId, syncContext]);
-  
+
   return {
     isSyncing: syncContext.syncStatus === 'syncing'
   };
