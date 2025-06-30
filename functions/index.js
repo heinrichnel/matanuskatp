@@ -323,6 +323,94 @@ exports.importDriverBehaviorWebhook = functions.https.onRequest(async (req, res)
     }
 });
 
+// Import driver behavior events webhook
+exports.importDriverBehaviorWebhook = functions.https.onRequest(async (req, res) => {
+    try {
+        // Only accept POST
+        if (req.method !== 'POST') {
+            res.status(405).send('Method Not Allowed');
+            return;
+        }
+        
+        console.log("[importDriverBehaviorWebhook] Received payload:", JSON.stringify(req.body, null, 2));
+        const { events } = req.body;
+        
+        if (!events || !Array.isArray(events)) {
+            console.error("[importDriverBehaviorWebhook] Invalid payload structure:", JSON.stringify(req.body, null, 2));
+            return res.status(400).json({ error: 'Invalid payload: events must be an array' });
+        }
+        
+        console.log(`[importDriverBehaviorWebhook] Processing ${events.length} driver behavior events`);
+        
+        const batch = admin.firestore().batch();
+        let imported = 0;
+        let skipped = 0;
+        
+        for (const event of events) {
+            // Check for required fields
+            const { fleetNumber, driverName, eventType, eventTime } = event;
+            
+            if (!fleetNumber || !eventType || !eventTime) {
+                console.error(`[importDriverBehaviorWebhook] Missing required fields:`, 
+                    { fleetNumber, eventType, eventTime });
+                continue;
+            }
+            
+            // Generate unique document ID to prevent duplicates
+            const uniqueId = `${fleetNumber}_${eventType}_${eventTime}`;
+            const eventRef = admin.firestore().collection('driverBehaviorEvents').doc(uniqueId);
+            
+            // Check if document already exists
+            const eventDoc = await eventRef.get();
+            
+            if (eventDoc.exists) {
+                console.log(`[importDriverBehaviorWebhook] Event already exists: ${uniqueId}`);
+                skipped++;
+                continue;
+            }
+            
+            // Process the event - ensure proper fields
+            const processedEvent = {
+                fleetNumber,
+                driverName: driverName || '',
+                eventType,
+                eventTime,
+                cameraId: event.cameraId || '',
+                videoUrl: event.videoUrl || '',
+                severity: event.severity || 'medium',
+                eventScore: parseFloat(event.eventScore) || 0,
+                notes: event.notes || '',
+                createdAt: event.createdAt || new Date().toISOString(),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            };
+            
+            console.log(`[importDriverBehaviorWebhook] Adding event: ${uniqueId}`, processedEvent);
+            batch.set(eventRef, processedEvent);
+            imported++;
+        }
+        
+        // Commit the batch if there are items to import
+        if (imported > 0) {
+            await batch.commit();
+            console.log(`[importDriverBehaviorWebhook] Successfully committed ${imported} events to Firestore`);
+        } else {
+            console.log('[importDriverBehaviorWebhook] No new events to import');
+        }
+        
+        return res.status(200).json({
+            message: 'Driver behavior events processed successfully',
+            imported,
+            skipped
+        });
+    } catch (error) {
+        console.error("[importDriverBehaviorWebhook] Error processing events:", error);
+        return res.status(500).json({ 
+            error: 'Internal Server Error', 
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+});
+
 // HTTP endpoint for trips webhook
 exports.importTripsWebhook = functions.https.onRequest(async (req, res) => {
     try {
