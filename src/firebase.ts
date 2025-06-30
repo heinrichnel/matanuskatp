@@ -30,12 +30,7 @@ import { firebaseConfig, firebaseApp } from './firebaseConfig';
 // Initialize Firestore with offline persistence
 // DEBUG ONLY - Add diagnostic logs to track Firestore initialization issues
 console.log("🔍 DEBUG: About to initialize Firestore");
-
-// Import Firestore instance type
-import { Firestore } from 'firebase/firestore';
-
-// Explicitly type the db variable with the correct Firestore type
-let db: Firestore;
+let db;
 
 try {
   // Use a simpler initialization approach to avoid TypeScript issues
