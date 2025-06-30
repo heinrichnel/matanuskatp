@@ -170,6 +170,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const updateTrip = async (trip: Trip): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, updateTrip: true }));
+      
+      // Get the original trip for audit logging
+      const originalTrip = trips.find(t => t.id === trip.id);
+      
+      await updateTripInFirebase(trip.id, trip);
+      
+      // Log trip update for audit trail
+      if (originalTrip) {
+        await addAuditLogToFirebase({
+          id: uuidv4(),
+          timestamp: new Date().toISOString(),
+          user: 'system', // Replace with actual user
+          action: 'update',
+          entity: 'trip',
+          entityId: trip.id,
+          details: `Trip ${trip.id} updated`,
+          changes: {
+            before: originalTrip,
+            after: trip
+          }
+        });
+      }
+    } finally {
+      setIsLoading(prev => ({ ...prev, updateTrip: false }));
+    }
+  };
+
   const deleteTrip = async (id: string): Promise<void> => {
     try {
       const tripToDelete = trips.find(t => t.id === id);
