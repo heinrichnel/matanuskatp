@@ -8,7 +8,7 @@ import { Select } from '../ui/FormElements';
 import Button from '../ui/Button';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign, Plus } from 'lucide-react';
-import { formatCurrency, formatDate, getAllFlaggedCosts, getUnresolvedFlagsCount, canCompleteTrip } from '../../utils/helpers';
+import { formatCurrency, formatDate, getAllFlaggedCosts, canCompleteTrip } from '../../utils/helpers';
 import LoadImportModal from './LoadImportModal';
 import TripStatusUpdateModal from './TripStatusUpdateModal';
 import { useAppContext } from '../../context/AppContext';
@@ -52,7 +52,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   const [filterDriver, setFilterDriver] = useState<string>('');
   const [filterClient, setFilterClient] = useState<string>('');
   const [statusUpdateTrip, setStatusUpdateTrip] = useState<Trip | null>(null);
-  const [statusUpdateType] = useState<'shipped' | 'delivered'>('shipped');
+  const statusUpdateType: 'shipped' | 'delivered' = 'shipped';
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -66,12 +66,12 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
         setIsDeleting(id);
         setError(null);
         console.log(`🗑️ User confirmed delete for trip ${id}`);
-        
+
         // Call onDelete (which maps to deleteTrip from context)
         await onDelete(id);
-        
+
         console.log(`✅ Delete operation completed for trip ${id}`);
-        
+
         // Optional: Refresh the trips list after deletion
         // (This would be needed if the real-time listeners aren't picking up the deletion)
       } catch (error) {
@@ -129,15 +129,15 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
           </div>
         </div>
         <div className="flex space-x-2">
-          <Button 
-            variant="outline" 
-            size="md" 
-            icon={<Upload className="w-5 h-5" />} 
+          <Button
+            variant="outline"
+            size="md"
+            icon={<Upload className="w-5 h-5" />}
             onClick={openImportModal}
           >
             Import Trips
           </Button>
-          <Button 
+          <Button
             variant="primary"
             size="md"
             icon={<Plus className="w-5 h-5" />}
@@ -153,13 +153,13 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
 
       {/* Error message */}
       {error && (
-        <ErrorMessage 
-          message={error} 
-          onRetry={() => setError(null)} 
+        <ErrorMessage
+          message={error}
+          onRetry={() => setError(null)}
           className="mb-4"
         />
       )}
-      
+
       {/* Loading state for the entire component */}
       {isLoading.loadTrips && (
         <LoadingIndicator text="Loading trips..." className="my-4" />
@@ -282,10 +282,10 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
                     <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={() => onView(trip)}>
                       View
                     </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      icon={<Edit className="w-4 h-4" />} 
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      icon={<Edit className="w-4 h-4" />}
                       onClick={() => onEdit(trip)}
                     >
                       Edit

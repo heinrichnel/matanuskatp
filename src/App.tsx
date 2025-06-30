@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import ErrorBoundary from './components/ErrorBoundary';
@@ -22,6 +22,34 @@ import DieselDashboard from "./components/diesel/DieselDashboard";
 import DriverBehaviorPage from "./pages/DriverBehaviorPage";
 import ActionLog from "./components/actionlog/ActionLog";
 import AuditLogPage from "./pages/AuditLogPage";
+import TripForm from "./components/trips/TripForm";
+
+// Placeholder components for new routes
+const Notifications = () => <div>Notifications Page</div>;
+const Settings = () => <div>Settings Page</div>;
+const Profile = () => <div>Profile Page</div>;
+
+// Wrapper for TripForm to handle navigation
+const TripFormWrapper: React.FC = () => {
+  const navigate = useNavigate();
+  const { addTrip } = useAppContext();
+
+  const handleSubmit = async (tripData: any) => {
+    try {
+      await addTrip(tripData);
+      navigate('/active-trips');
+    } catch (error) {
+      console.error("Error adding trip:", error);
+      // Handle error (e.g., show error message to user)
+    }
+  };
+
+  const handleCancel = () => {
+    navigate('/active-trips');
+  };
+
+  return <TripForm onSubmit={handleSubmit} onCancel={handleCancel} />;
+};
 
 // Main App component with Router implementation
 const App: React.FC = () => {
@@ -46,6 +74,10 @@ const App: React.FC = () => {
                 <Route path="driver-behavior" element={<DriverBehaviorPage />} />
                 <Route path="action-log" element={<ActionLog />} />
                 <Route path="audit-log" element={<AuditLogPage />} />
+                <Route path="add-trip" element={<TripFormWrapper />} />
+                <Route path="notifications" element={<Notifications />} />
+                <Route path="settings" element={<Settings />} />
+                <Route path="profile" element={<Profile />} />
                 <Route path="*" element={<Navigate to="/ytd-kpis" replace />} />
               </Route>
             </Routes>
