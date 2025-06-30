@@ -80,7 +80,7 @@ export function processDriverBehaviorEvents(rawEvents: any[]): DriverBehaviorEve
 export async function importTripsFromWebhook(): Promise<{ imported: number, skipped: number }> {
   try {
     // Use the correct Cloud Function URL for trips
-    const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importTripsFromWebBook';
+    const WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importTripsWebhook';
 
     const response = await retryWebhookCall(() => fetch(WEBHOOK_URL, {
       method: 'POST',

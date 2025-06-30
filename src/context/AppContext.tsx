@@ -111,6 +111,8 @@ interface AppContextType {
   // Add isLoading property to fix TypeScript error in ActiveTrips component
   isLoading: {
     loadTrips?: boolean;
+    addTrip?: boolean;
+    updateTrip?: boolean;
     [key: string]: boolean | undefined;
   };
 }
@@ -199,7 +201,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteMissedLoad = async (id: string): Promise<void> => {
-    await deleteMissedLoadFromFirebase(id);
+    try {
+      await deleteMissedLoadFromFirebase(id);
+      
+      // Optimistically update local state
+      setMissedLoads(prev => prev.filter(load => load.id !== id));
+    } catch (error) {
+      console.error("Error deleting missed load:", error);
+      throw error;
+    }
   };
 
   const completeTrip = async (tripId: string): Promise<void> => {

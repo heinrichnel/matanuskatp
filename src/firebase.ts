@@ -1,4 +1,6 @@
 import {
+  deleteDoc,
+  getDoc,
   initializeFirestore,
   persistentLocalCache,
   collection,
@@ -21,7 +23,7 @@ import {
 } from 'firebase/firestore';
 import { v4 as uuidv4 } from 'uuid';
 import { getAnalytics } from 'firebase/analytics';
-import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport } from './types';
+import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport, CostEntry } from './types';
 import { AuditLog } from './types/audit';
 import { firebaseConfig, firebaseApp } from './firebaseConfig';
 
@@ -599,10 +601,22 @@ export const updateMissedLoadInFirebase = async (id: string, loadData: Partial<M
 export const deleteMissedLoadFromFirebase = async (id: string): Promise<void> => {
   try {
     const loadRef = doc(db, 'missedLoads', id);
+    
+    // Get the document before deletion to log what's being deleted
+    const snapshot = await getDoc(loadRef);
+    if (!snapshot.exists()) {
+      console.warn(`Missed load with ID ${id} not found, nothing to delete`);
+      return;
+    }
+    
     await deleteDoc(loadRef);
     console.log("✅ Missed load deleted with real-time sync:", id);
 
-    await logActivity('missed_load_deleted', id, 'missed_load', { deletedAt: new Date().toISOString() });
+    // Add more detailed logging with the deleted data
+    await logActivity('missed_load_deleted', id, 'missed_load', { 
+      deletedAt: new Date().toISOString(),
+      deletedData: snapshot.data()
+    });
 
   } catch (error) {
     console.error("❌ Error deleting missed load:", error);

@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import ErrorBoundary from './components/ErrorBoundary';
 import Layout from './components/layout/Layout';
+import TripForm from "./components/trips/TripForm";
+import Modal from "./components/ui/Modal";
+import { Trip } from "./types";
 
 // UI Components
 // Removed Sidebar import as it will be used inside Layout
@@ -53,13 +56,43 @@ const TripFormWrapper: React.FC = () => {
 
 // Main App component with Router implementation
 const App: React.FC = () => {
+  const [showAddTripModal, setShowAddTripModal] = useState(false);
+  const [editingTrip, setEditingTrip] = useState<Trip | undefined>(undefined);
+
   return (
     <ErrorBoundary>
       <AppProvider>
         <SyncProvider>
           <Router>
+            {/* Global Trip Form Modal */}
+            <Modal
+              isOpen={showAddTripModal}
+              onClose={() => setShowAddTripModal(false)}
+              title={editingTrip ? "Edit Trip" : "Add New Trip"}
+              maxWidth="lg"
+            >
+              {showAddTripModal && (
+                <TripForm
+                  trip={editingTrip}
+                  onSubmit={async (tripData) => {
+                    const { addTrip, updateTrip } = useAppContext();
+                    try {
+                      if (editingTrip) {
+                        await updateTrip({ ...editingTrip, ...tripData });
+                      } else {
+                        await addTrip(tripData);
+                      }
+                      setShowAddTripModal(false);
+                    } catch (error) {
+                      console.error("Error submitting trip:", error);
+                    }
+                  }}
+                  onCancel={() => setShowAddTripModal(false)}
+                />
+              )}
+            </Modal>
             <Routes>
-              <Route path="/" element={<Layout />}>
+              <Route path="/" element={<Layout setShowTripForm={setShowAddTripModal} setEditingTrip={setEditingTrip} />}>
                 <Route index element={<Navigate to="/ytd-kpis" replace />} />
                 <Route path="ytd-kpis" element={<YearToDateKPIs />} />
                 <Route path="dashboard" element={<Dashboard />} />
