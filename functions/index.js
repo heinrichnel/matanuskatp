@@ -36,6 +36,175 @@ setGlobalOptions({ maxInstances: 10 });
 
 const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxWt9XUjNLKwoT38iWuFh-h8Qs7PxCu2I-KGiJqspIm-jVxiSFeZ-KPOqeVoxxEbhv8/exec';
 
+// Add the importTripsFromWebBook function to handle webhook requests from Google Apps Script
+exports.importTripsFromWebBook = functions.https.onRequest(async (req, res) => {
+    try {
+        // Log the incoming request for debugging
+        console.log("Received importTripsFromWebBook request:", JSON.stringify(req.body, null, 2));
+        
+        // Extract trips from the request body
+        const { trips } = req.body;
+        
+        // Validate the payload
+        if (!trips || !Array.isArray(trips)) {
+            console.error("Invalid payload structure:", JSON.stringify(req.body, null, 2));
+            return res.status(400).json({ error: 'Invalid payload: trips must be an array' });
+        }
+        
+        // Initialize counters for tracking results
+        let imported = 0;
+        let skipped = 0;
+        
+        // Create a batch for atomic operations
+        const batch = admin.firestore().batch();
+        
+        // Process each trip
+        for (const trip of trips) {
+            // Extract data from the trip array
+            const [
+                fleetNumber,
+                driverName,
+                clientType,
+                clientName,
+                loadRef,
+                route,
+                shippedStatus,
+                shippedDate,
+                ,  // Skip empty field
+                deliveredStatus,
+                deliveredDate
+            ] = trip;
+            
+            // Skip if no loadRef (required field)
+            if (!loadRef) {
+                console.log("Skipping trip with missing loadRef");
+                skipped++;
+                continue;
+            }
+            
+            // Check if the trip already exists
+            const tripRef = admin.firestore().collection('trips').doc(String(loadRef));
+            const tripDoc = await tripRef.get();
+            
+            // Prepare the trip data
+            const tripData = {
+                fleetNumber: fleetNumber || '',
+                driverName: driverName || '',
+                clientType: clientType || 'external',
+                clientName: clientName || '',
+                loadRef: loadRef,
+                route: route || '',
+                shippedStatus: shippedStatus === 'shipped' || shippedStatus === true,
+                shippedDate: shippedDate ? new Date(shippedDate).toISOString() : null,
+                deliveredStatus: deliveredStatus === 'delivered' || deliveredStatus === true,
+                deliveredDate: deliveredDate ? new Date(deliveredDate).toISOString() : null,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            };
+            
+            // Add status field based on shipped/delivered status
+            if (tripData.deliveredStatus) {
+                tripData.status = 'completed';
+            } else if (tripData.shippedStatus) {
+                tripData.status = 'active';
+            } else {
+                tripData.status = 'active';
+            }
+            
+            // If trip exists, update it; otherwise, create it
+            if (tripDoc.exists) {
+                batch.update(tripRef, tripData);
+                skipped++;
+            } else {
+                // Add createdAt for new trips
+                tripData.createdAt = admin.firestore.FieldValue.serverTimestamp();
+                tripData.costs = []; // Initialize empty costs array
+                tripData.additionalCosts = []; // Initialize empty additionalCosts array
+                tripData.followUpHistory = []; // Initialize empty followUpHistory array
+                
+                batch.set(tripRef, tripData);
+                imported++;
+            }
+        }
+        
+        // Commit the batch
+        await batch.commit();
+        
+        // Return success response
+        return res.status(200).json({
+            message: 'Import successful',
+            imported,
+            skipped
+        });
+    } catch (error) {
+        // Log and return error
+        console.error("Error in importTripsFromWebBook:", error);
+        return res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+});
+
+// Add the telematicsTripUpdateWebhook function to handle trip status updates
+exports.telematicsTripUpdateWebhook = functions.https.onRequest(async (req, res) => {
+    try {
+        // Log the incoming request for debugging
+        console.log("Received telematicsTripUpdateWebhook request:", JSON.stringify(req.body, null, 2));
+        
+        // Extract data from the request body
+        const { tripId, status, timestamp, driverId, vehicleId, location, endLocation } = req.body;
+        
+        // Validate required fields
+        if (!tripId || !status) {
+            return res.status(400).json({ error: 'Missing required fields: tripId and status' });
+        }
+        
+        // Reference to the trip document
+        const tripRef = admin.firestore().collection('trips').doc(String(tripId));
+        
+        // Prepare update data based on status
+        const updateData = { updatedAt: admin.firestore.FieldValue.serverTimestamp() };
+        
+        if (status === 'trip_started') {
+            // Validate required fields for trip start
+            if (!driverId || !vehicleId || !location) {
+                return res.status(400).json({ error: 'Missing required fields for trip_started status' });
+            }
+            
+            updateData.startedAt = timestamp || new Date().toISOString();
+            updateData.driverId = driverId;
+            updateData.vehicleId = vehicleId;
+            updateData.startLocation = location;
+            updateData.shippedStatus = true;
+            updateData.shippedDate = timestamp || new Date().toISOString();
+            updateData.status = 'active';
+        } else if (status === 'trip_ended') {
+            // Validate required fields for trip end
+            if (!endLocation) {
+                return res.status(400).json({ error: 'Missing required field endLocation for trip_ended status' });
+            }
+            
+            updateData.endedAt = timestamp || new Date().toISOString();
+            updateData.endLocation = endLocation;
+            updateData.deliveredStatus = true;
+            updateData.deliveredDate = timestamp || new Date().toISOString();
+            updateData.status = 'completed';
+        } else {
+            // Handle other status updates
+            updateData.lastUpdated = timestamp || new Date().toISOString();
+        }
+        
+        // Update the trip document
+        await tripRef.set(updateData, { merge: true });
+        
+        // Return success response
+        return res.status(200).json({
+            message: `Trip ${tripId} updated with status: ${status}`,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        // Log and return error
+        console.error("Error in telematicsTripUpdateWebhook:", error);
+        return res.status(500).json({ error: error.message || 'Internal server error' });
+    }
+});
 exports.importTripsFromWebBook = functions.https.onRequest(async (req, res) => {
     try {
         // Fetch data from Google Sheets Web App
