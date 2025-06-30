@@ -171,6 +171,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await updateTripInFirebase(trip.id, trip);
     } finally {
       setIsLoading(prev => ({ ...prev, updateTrip: false }));
+    }
     return await addTripToFirebase(newTrip as Trip);
   };
 
