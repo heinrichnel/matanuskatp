@@ -271,67 +271,6 @@ exports.importDriverBehaviorWebhook = functions.https.onRequest(async (req, res)
             return;
         }
         
-        const events = Array.isArray(req.body) ? req.body : [];
-        if (!events.length) {
-            res.status(400).json({ error: 'Invalid or empty payload' });
-            return;
-        }
-        
-        const db = admin.firestore();
-        let imported = 0;
-        let skipped = 0;
-        
-        for (const event of events) {
-            if (!event || event.eventType === 'UNKNOWN' || !event.id) {
-                skipped++;
-                continue;
-            }
-            
-            // Check for duplicate by event.id
-            const existing = await db.collection('driverBehavior').where('id', '==', event.id).limit(1).get();
-            if (!existing.empty) {
-                skipped++;
-                continue;
-            }
-            
-            // Process the event data according to the expected format
-            const processedEvent = {
-                id: event.id,
-                reportedAt: event.reportedAt || new Date().toISOString(),
-                description: event.description || "",
-                driverName: event.driverName || "",
-                eventDate: event.eventDate || "",
-                eventTime: event.eventTime || "",
-                eventType: event.eventType || "",
-                fleetNumber: event.fleetNumber || "",
-                location: event.location || "",
-                severity: event.severity || "medium",
-                status: event.status || "pending",
-                points: Number(event.points) || 0,
-                reportedBy: event.reportedBy || "WebBook Script",
-                createdAt: admin.firestore.FieldValue.serverTimestamp()
-            };
-            
-            await db.collection('driverBehavior').add(processedEvent);
-            imported++;
-        }
-        
-        res.status(200).json({ imported, skipped });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Import driver behavior events webhook
-exports.importDriverBehaviorWebhook = functions.https.onRequest(async (req, res) => {
-    try {
-        // Only accept POST
-        if (req.method !== 'POST') {
-            res.status(405).send('Method Not Allowed');
-            return;
-        }
-        
         console.log("[importDriverBehaviorWebhook] Received payload:", JSON.stringify(req.body, null, 2));
         const { events } = req.body;
         
@@ -339,24 +278,42 @@ exports.importDriverBehaviorWebhook = functions.https.onRequest(async (req, res)
             console.error("[importDriverBehaviorWebhook] Invalid payload structure:", JSON.stringify(req.body, null, 2));
             return res.status(400).json({ error: 'Invalid payload: events must be an array' });
         }
-        
+
+        // Log summary of the events array
         console.log(`[importDriverBehaviorWebhook] Processing ${events.length} driver behavior events`);
+
+        // Make sure the events is properly formatted as expected from Google Apps Script
+        // The expected format from GAS is { events: [...] }
+        const eventsArray = Array.isArray(events) ? events : [];
         
         const batch = admin.firestore().batch();
         let imported = 0;
         let skipped = 0;
+        let validationErrors = 0;
+        let processingDetails = [];
         
-        for (const event of events) {
+        for (const event of eventsArray) {
+            // Log each event's structure for diagnostic purposes
+            const timestamp = new Date().toISOString();
+            console.log(`[importDriverBehaviorWebhook][${timestamp}] Processing event:`, JSON.stringify(event, null, 2));
+            
             // Check for required fields
             const { fleetNumber, driverName, eventType, eventTime } = event;
             
             if (!fleetNumber || !eventType || !eventTime) {
                 console.error(`[importDriverBehaviorWebhook] Missing required fields:`, 
                     { fleetNumber, eventType, eventTime });
+                validationErrors++;
+                processingDetails.push({
+                    event: event,
+                    error: 'Missing required fields',
+                    timestamp
+                });
                 continue;
             }
             
             // Generate unique document ID to prevent duplicates
+            // Use the same format as in the Google Apps Script for consistency
             const uniqueId = `${fleetNumber}_${eventType}_${eventTime}`;
             const eventRef = admin.firestore().collection('driverBehaviorEvents').doc(uniqueId);
             
@@ -366,6 +323,12 @@ exports.importDriverBehaviorWebhook = functions.https.onRequest(async (req, res)
             if (eventDoc.exists) {
                 console.log(`[importDriverBehaviorWebhook] Event already exists: ${uniqueId}`);
                 skipped++;
+                processingDetails.push({
+                    uniqueId,
+                    status: 'skipped',
+                    reason: 'already exists',
+                    timestamp
+                });
                 continue;
             }
             
@@ -380,6 +343,10 @@ exports.importDriverBehaviorWebhook = functions.https.onRequest(async (req, res)
                 severity: event.severity || 'medium',
                 eventScore: parseFloat(event.eventScore) || 0,
                 notes: event.notes || '',
+                reportedAt: event.reportedAt || new Date().toISOString(),
+                reportedBy: event.reportedBy || 'WebBook Script',
+                status: event.status || 'pending',
+                points: Number(event.points) || 0,
                 createdAt: event.createdAt || new Date().toISOString(),
                 updatedAt: admin.firestore.FieldValue.serverTimestamp()
             };
@@ -387,6 +354,11 @@ exports.importDriverBehaviorWebhook = functions.https.onRequest(async (req, res)
             console.log(`[importDriverBehaviorWebhook] Adding event: ${uniqueId}`, processedEvent);
             batch.set(eventRef, processedEvent);
             imported++;
+            processingDetails.push({
+                uniqueId,
+                status: 'imported',
+                timestamp
+            });
         }
         
         // Commit the batch if there are items to import
@@ -397,11 +369,17 @@ exports.importDriverBehaviorWebhook = functions.https.onRequest(async (req, res)
             console.log('[importDriverBehaviorWebhook] No new events to import');
         }
         
-        return res.status(200).json({
-            message: 'Driver behavior events processed successfully',
+        const response = {
             imported,
-            skipped
-        });
+            skipped,
+            validationErrors,
+            message: `Processed ${events.length} driver behavior events. Imported: ${imported}, Skipped: ${skipped}, Errors: ${validationErrors}`,
+            processingDetails: processingDetails.length <= 10 ? processingDetails : `${processingDetails.length} events processed`
+        };
+        
+        console.log('[importDriverBehaviorWebhook] Final response:', response);
+        
+        return res.status(200).json(response);
     } catch (error) {
         console.error("[importDriverBehaviorWebhook] Error processing events:", error);
         return res.status(500).json({ 
@@ -544,5 +522,38 @@ exports.manualImportTrips = functions.https.onRequest(async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
+    }
+});
+
+// Manual import endpoint for driver behavior events (can be triggered from the UI)
+exports.manualImportDriverBehavior = functions.https.onRequest(async (req, res) => {
+    try {
+        // Simulate the webhook call with empty events array to trigger the import
+        const fetch = (await import('node-fetch')).default;
+        const response = await fetch('https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ events: [] })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Failed to trigger driver behavior import: ${response.status} ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('[manualImportDriverBehavior] Import triggered:', result);
+        
+        res.status(200).json({
+            message: 'Manual driver behavior import triggered',
+            result
+        });
+    } catch (error) {
+        console.error('[manualImportDriverBehavior] Error:', error);
+        res.status(500).json({
+            error: 'Failed to trigger import',
+            details: error.message
+        });
     }
 });
