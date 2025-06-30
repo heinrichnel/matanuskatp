@@ -59,10 +59,6 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   const onEdit = props.onEdit || ((trip: Trip) => {
     if (context.setEditingTrip) context.setEditingTrip(trip);
     if (context.setShowTripForm) context.setShowTripForm(true);
-    }
-    if (context.setShowTripForm) {
-      context.setShowTripForm(true);
-    }
   });
   const onDelete = props.onDelete || deleteTrip;
   const onCompleteTrip = props.onCompleteTrip || completeTrip;
@@ -164,10 +160,6 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
             onClick={() => {
               if (context.setEditingTrip) context.setEditingTrip(undefined);
               if (context.setShowTripForm) context.setShowTripForm(true);
-              }
-              if (context.setShowTripForm) {
-                context.setShowTripForm(true);
-              }
             }}
           >
             Add Trip
