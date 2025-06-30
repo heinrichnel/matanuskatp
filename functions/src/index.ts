@@ -24,13 +24,13 @@ const telematicsConfig = {
 // 2. Type Definitions
 interface Location { lat: number; lon: number; }
 interface DriverEvent {
-  driverId: string;
-  eventType: "speeding" | "harsh_braking" | "rapid_acceleration" | "sharp_cornering";
-  value: number;
-  timestamp: string;
-  location: Location;
-  vehicleId?: string;
-  tripId?: string;
+    driverId: string;
+    eventType: "speeding" | "harsh_braking" | "rapid_acceleration" | "sharp_cornering";
+    value: number;
+    timestamp: string;
+    location: Location;
+    vehicleId?: string;
+    tripId?: string;
 }
 
 // 3. Core Logic Functions (Driver Behavior)
@@ -262,8 +262,12 @@ export const importTripsFromWebBook = onRequest(async (req, res) => {
         return;
     }
     try {
+        // DEBUG ONLY – Enhanced payload logging
+        console.log("[importTripsFromWebBook] Received webhook payload:", JSON.stringify(req.body, null, 2));
+
         const { trips } = req.body;
         if (!trips || !Array.isArray(trips)) {
+            console.error("[importTripsFromWebBook] Invalid payload structure:", JSON.stringify(req.body, null, 2));
             res.status(400).json({ error: 'Invalid payload' });
             return;
         }
@@ -279,12 +283,77 @@ export const importTripsFromWebBook = onRequest(async (req, res) => {
                 skipped++;
                 return;
             }
+
+            // DEBUG ONLY - Log status fields for diagnostic purposes
+            console.log(`[importTripsFromWebBook] Trip ${loadRef} status fields:`, {
+                rawStatus: trip.status,
+                shippedStatus: trip.shippedStatus,
+                deliveredStatus: trip.deliveredStatus,
+                completedStatus: trip.completedStatus,
+                // Log any other potential status-related fields
+                inProgress: trip.inProgress,
+                isCompleted: trip.isCompleted,
+                isDelivered: trip.isDelivered,
+                isShipped: trip.isShipped
+            });
+
             const tripRef = db.collection(targetCollection).doc(String(loadRef));
             const doc = await tripRef.get();
             if (doc.exists) {
                 skipped++;
             } else {
-                batch.set(tripRef, trip);
+                // Create a transformed version of the trip data with properly mapped status fields
+                const transformedTrip = { ...trip };
+
+                // Log the incoming trip status fields with timestamp for traceability
+                const timestamp = new Date().toISOString();
+                console.log(`[importTripsFromWebBook][${timestamp}] Processing trip ${loadRef} status transformation:`, {
+                    beforeTransform: {
+                        rawStatus: trip.status,
+                        shippedStatus: trip.shippedStatus,
+                        shippedDate: trip.shippedDate,
+                        deliveredStatus: trip.deliveredStatus,
+                        deliveredDate: trip.deliveredDate,
+                        completedStatus: trip.completedStatus,
+                        inProgress: trip.inProgress
+                    }
+                });
+
+                // Transform boolean status + date fields into frontend-expected fields
+                if (trip.shippedStatus === true && trip.shippedDate) {
+                    transformedTrip.shippedAt = trip.shippedDate; // Frontend expects shippedAt
+                }
+
+                if (trip.deliveredStatus === true && trip.deliveredDate) {
+                    transformedTrip.deliveredAt = trip.deliveredDate; // Frontend expects deliveredAt
+                }
+
+                // Update the main status field based on shipping/delivery states
+                // This follows the expected progression: active -> shipped -> delivered -> completed
+                let updatedStatus = trip.status || 'active';
+
+                if (trip.completedStatus === true) {
+                    updatedStatus = 'completed';
+                } else if (trip.deliveredStatus === true) {
+                    updatedStatus = 'delivered';
+                } else if (trip.shippedStatus === true) {
+                    updatedStatus = 'shipped';
+                }
+
+                // Set the status field
+                transformedTrip.status = updatedStatus;
+
+                // DEBUG ONLY - Log the transformed trip data with timestamp for traceability
+                console.log(`[importTripsFromWebBook][${timestamp}] Trip ${loadRef} after transformation:`, {
+                    afterTransform: {
+                        status: transformedTrip.status,
+                        shippedAt: transformedTrip.shippedAt,
+                        deliveredAt: transformedTrip.deliveredAt
+                    }
+                });
+
+                // Set the transformed trip data to Firestore
+                batch.set(tripRef, transformedTrip);
                 imported++;
             }
         });
@@ -306,31 +375,96 @@ export const importDriverBehaviorWebhook = onRequest(async (req, res) => {
         return;
     }
     try {
+        // DEBUG ONLY – Enhanced payload logging
+        console.log("[importDriverBehaviorWebhook] Received webhook payload:", JSON.stringify(req.body, null, 2));
+
         const { events } = req.body;
         if (!events || !Array.isArray(events)) {
+            console.error("[importDriverBehaviorWebhook] Invalid payload structure:", JSON.stringify(req.body, null, 2));
             res.status(400).json({ error: 'Invalid payload' });
             return;
         }
+
+        // Log summary of the events array
+        console.log(`[importDriverBehaviorWebhook] Processing ${events.length} driver behavior events`);
+
         const batch = db.batch();
         let imported = 0;
         let skipped = 0;
+        let validationErrors = 0;
+        let processingDetails = [];
+
         for (const event of events) {
+            // Log each event's structure for diagnostic purposes
+            const timestamp = new Date().toISOString();
+            console.log(`[importDriverBehaviorWebhook][${timestamp}] Processing event:`, JSON.stringify(event, null, 2));
+
+            // Check for required fields and log validation errors
             const { fleetNumber, eventType, eventTime } = event;
+            if (!fleetNumber || !eventType || !eventTime) {
+                console.error(`[importDriverBehaviorWebhook] Missing required fields in event:`,
+                    { fleetNumber, eventType, eventTime });
+                validationErrors++;
+                processingDetails.push({ status: 'error', reason: 'missing_required_fields', event });
+                continue;
+            }
+
+            // Log missing fields that are expected by frontend but absent in payload
+            const expectedFields = [
+                'driverName', 'eventDate', 'severity', 'points', 'description',
+                'status', 'location', 'reportedAt', 'reportedBy'
+            ];
+            const missingFields = expectedFields.filter(field => event[field] === undefined);
+            if (missingFields.length > 0) {
+                console.log(`[importDriverBehaviorWebhook] Event missing optional fields expected by frontend:`,
+                    { fleetNumber, eventType, missingFields });
+            }
+
+            // Generate document ID
             const uniqueKey = `${fleetNumber}_${eventType}_${eventTime}`;
             const eventRef = db.collection('driverBehaviorEvents').doc(uniqueKey);
             const doc = await eventRef.get();
+
             if (doc.exists) {
+                console.log(`[importDriverBehaviorWebhook] Event already exists, skipping:`, uniqueKey);
                 skipped++;
+                processingDetails.push({ status: 'skipped', reason: 'already_exists', uniqueKey });
             } else {
+                // Log what exactly will be written to Firestore
+                console.log(`[importDriverBehaviorWebhook] Writing event to Firestore:`,
+                    { uniqueKey, event: JSON.stringify(event) });
                 batch.set(eventRef, event);
                 imported++;
+                processingDetails.push({ status: 'imported', uniqueKey });
             }
         }
-        await batch.commit();
-        res.status(200).json({ imported, skipped });
+
+        // Log batch operation results
+        if (imported > 0) {
+            console.log(`[importDriverBehaviorWebhook] Committing batch with ${imported} events`);
+            await batch.commit();
+            console.log(`[importDriverBehaviorWebhook] Batch commit successful`);
+        } else {
+            console.log(`[importDriverBehaviorWebhook] No events to import, skipping batch commit`);
+        }
+
+        // Return detailed response
+        const response = {
+            imported,
+            skipped,
+            validationErrors,
+            message: `Processed ${events.length} driver behavior events. Imported: ${imported}, Skipped: ${skipped}, Errors: ${validationErrors}`,
+            processingDetails: processingDetails.length <= 10 ? processingDetails : `${processingDetails.length} events processed`
+        };
+
+        console.log(`[importDriverBehaviorWebhook] Import finished:`, response);
+        res.status(200).json(response);
     } catch (error) {
-        console.error("Error importing driver behavior events:", error);
-        res.status(500).send('Internal Server Error');
+        console.error("[importDriverBehaviorWebhook] Error importing driver behavior events:", error);
+        res.status(500).json({
+            error: 'Internal Server Error',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
     }
 });
 
@@ -504,7 +638,7 @@ export const verifyRecaptcha = onRequest(async (req, res) => {
         if (response.tokenProperties.action === recaptchaAction) {
             console.log(`The reCAPTCHA score is: ${response.riskAnalysis?.score}`);
             if (response.riskAnalysis && response.riskAnalysis.score && response.riskAnalysis.score < 0.5) {
-                res.status(400).json({ success: false, message: "reCAPTCHA verification failed. Low score."});
+                res.status(400).json({ success: false, message: "reCAPTCHA verification failed. Low score." });
                 return;
             }
             res.status(200).json({ success: true, score: response.riskAnalysis?.score });

@@ -1,293 +1,331 @@
-# Production-Ready Webhook System for Trip Logistics and Driver Behavior
+# 🔄 Production-Ready Webhook System
 
-This document outlines a complete, production-ready solution for a webhook-driven system designed to monitor trip logistics and driver behavior. The system consists of two primary components: backend serverless functions for AWS Lambda and client-side JavaScript senders.
+> This document describes the complete webhook system architecture for Matanuska Transport's driver behavior event tracking system. It outlines the technical implementation, security measures, scaling considerations, and integration points.
 
-## 1. Backend AWS Lambda Functions
+## 🏗️ System Architecture
 
-Here are the Node.js source code for two separate AWS Lambda handlers. These functions are designed to be deployed as individual AWS Lambda functions.
+![Webhook System Architecture](https://via.placeholder.com/800x500?text=Webhook+System+Architecture)
 
-### `trip-webhook-handler`
+### Core Components
 
-This function processes events related to a trip's lifecycle.
+1. **External Data Sources**
+   - Google Sheets (via Google Apps Script)
+   - Telematics systems (via API)
+   - Mobile driver apps
+   - Third-party logistics systems
 
-**`index.js`**
-```javascript
-'use strict';
+2. **Webhook Endpoints (Firebase Cloud Functions)**
+   - `importDriverBehaviorWebhook`: Processes driver behavior events
+   - `importTripsFromWebBook`: Processes trip data
+   - Additional endpoints for other event types
 
-const process = require('process');
+3. **Firestore Database Collections**
+   - `/driverBehaviorEvents`: Stores all driver behavior incidents
+   - `/trips`: Stores trip data with references to behavior events
+   - `/auditLog`: Tracks all webhook interactions for compliance
 
-// Retrieve the secure API key from environment variables for security
-const VALID_API_KEY = process.env.X_API_KEY;
+4. **Frontend Components**
+   - Real-time listeners for syncing UI state
+   - Dashboard components for displaying event data
+   - Form components for manual data entry
 
-exports.handler = async (event) => {
-    // 1. Security Validation: Ensure the request comes from a trusted source
-    const apiKey = event.headers['x-api-key'] || event.headers['X-API-Key'];
+### Data Flow
 
-    if (!apiKey || apiKey !== VALID_API_KEY) {
-        console.warn('Unauthorized request: Missing or invalid API key.');
-        return {
-            statusCode: 401,
-            body: JSON.stringify({ message: 'Unauthorized: Invalid API Key' }),
-        };
-    }
+1. External system generates event data
+2. Data is sent via HTTPS POST to Firebase Function webhook endpoint
+3. Cloud Function validates payload, processes data, and writes to Firestore
+4. Frontend components with onSnapshot listeners update UI in real-time
+5. Audit logs are generated for compliance and troubleshooting
 
-    try {
-        // 2. Parse the incoming request body
-        const body = JSON.parse(event.body);
-        const { eventType, timestamp, data } = body;
+## 🔐 Security Considerations
 
-        // Log the received event for monitoring and debugging
-        console.log(`Received event: ${eventType} at ${timestamp}`, JSON.stringify(data, null, 2));
+### Authentication & Authorization
 
-        // 3. Process the event based on its type
-        switch (eventType) {
-            case 'trip.created':
-                // Stub for database insertion
-                console.log(`Processing trip.created for tripId: ${data.tripId}`);
-                // Example: await db.saveTrip(data);
-                break;
-            case 'trip.started':
-                // Stub for updating trip status
-                console.log(`Processing trip.started for tripId: ${data.tripId}`);
-                // Example: await db.updateTripStatus(data.tripId, 'in_progress');
-                break;
-            case 'trip.location.updated':
-                // Stub for updating location data
-                console.log(`Processing trip.location.updated for tripId: ${data.tripId}`);
-                // Example: await db.updateTripLocation(data.tripId, data.currentLocation);
-                break;
-            case 'trip.completed':
-                // Stub for finalizing trip details
-                console.log(`Processing trip.completed for tripId: ${data.tripId}`);
-                // Example: await db.finalizeTrip(data.tripId);
-                break;
-            default:
-                // Handle unknown event types gracefully
-                console.warn(`Unknown eventType: ${eventType}`);
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({ message: 'Bad Request: Unknown event type' }),
-                };
+- **Service Account Authentication**
+  - Each webhook consumer must use Firebase Admin SDK with service account
+  - Service accounts have minimal required permissions (principle of least privilege)
+  - Credentials are never stored in code repositories
+
+- **Token-based Authentication**
+  - Custom tokens for external systems that cannot use service accounts
+  - Short-lived tokens with appropriate scopes
+  - Token rotation and revocation procedures
+
+### Data Validation
+
+- **Schema Validation**
+  - All incoming data is validated against TypeScript interfaces
+  - Required fields are enforced (fleetNumber, eventType, eventTime, etc.)
+  - Data types and formats are strictly validated
+
+- **Business Logic Validation**
+  - Event times must be within acceptable range (not future-dated)
+  - Fleet numbers must exist in the system
+  - Events must be associated with valid trip IDs when applicable
+
+### Network Security
+
+- **HTTPS Only**
+  - All webhook endpoints require HTTPS
+  - TLS 1.2+ enforced
+
+- **Rate Limiting**
+  - Configured at Firebase project level
+  - Per-IP limits to prevent DoS attacks
+  - Exponential backoff for retry logic
+
+## 📈 Scaling & Performance
+
+### Optimization Techniques
+
+- **Batch Processing**
+  - Multiple events can be sent in a single request
+  - Firestore batch operations for atomic writes
+  - Maximum batch size of 500 documents
+
+- **Document ID Strategy**
+  - Document IDs follow pattern: `${fleetNumber}_${eventType}_${eventTime}`
+  - Enables quick lookup and prevents duplicates
+  - Supports efficient indexing
+
+### Concurrency Handling
+
+- **Firestore Transactions**
+  - Used for operations requiring atomic reads and writes
+  - Prevents race conditions in high-concurrency scenarios
+
+- **Function Execution Guarantees**
+  - At-least-once delivery semantics
+  - Idempotent processing to handle duplicate events safely
+
+### Performance Monitoring
+
+- **Metrics Tracking**
+  - Function execution time
+  - Cold start frequency
+  - Error rates and types
+  - Payload sizes
+
+- **Alerting**
+  - Alerts on sustained high error rates
+  - Alerts on function timeout or memory issues
+  - Daily webhook health report
+
+## 🔄 Integration Points
+
+### Frontend Integration
+
+- **Real-time Updates**
+  - Components use `onSnapshot` for real-time data sync
+  - Example:
+    ```typescript
+    useEffect(() => {
+      const unsubscribe = onSnapshot(
+        query(collection(db, "driverBehaviorEvents"), 
+              where("fleetNumber", "==", selectedFleet),
+              orderBy("eventTime", "desc"),
+              limit(50)),
+        (snapshot) => {
+          setEvents(snapshot.docs.map(doc => ({ 
+            id: doc.id, 
+            ...doc.data() 
+          })));
         }
+      );
+      
+      return () => unsubscribe();
+    }, [selectedFleet]);
+    ```
 
-        // 4. Send a success response
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Event processed successfully' }),
-        };
-    } catch (error) {
-        // 5. Handle parsing errors or other exceptions
-        console.error('Error processing request:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Internal Server Error' }),
-        };
-    }
-};
+- **Manual Entry Forms**
+  - `DriverBehaviorEventForm.tsx` component for manual entries
+  - Form validation mirrors webhook validation rules
+  - Uses same Firestore document structure
 
-```
+### Google Apps Script Integration
 
-### `driver-behavior-webhook-handler`
-
-This function processes events related to driver safety and performance.
-
-**`index.js`**
-```javascript
-'use strict';
-
-const process = require('process');
-
-// Retrieve the secure API key from environment variables
-const VALID_API_KEY = process.env.X_API_KEY;
-
-exports.handler = async (event) => {
-    // 1. Security Validation: Ensure the request is authorized
-    const apiKey = event.headers['x-api-key'] || event.headers['X-API-Key'];
-
-    if (!apiKey || apiKey !== VALID_API_KEY) {
-        console.warn('Unauthorized request: Missing or invalid API key.');
-        return {
-            statusCode: 401,
-            body: JSON.stringify({ message: 'Unauthorized: Invalid API Key' }),
-        };
-    }
-
-    try {
-        // 2. Parse the incoming request body
-        const body = JSON.parse(event.body);
-        const { eventType, timestamp, data } = body;
-
-        // Log the received event for auditing and debugging
-        console.log(`Received event: ${eventType} at ${timestamp}`, JSON.stringify(data, null, 2));
-
-        // 3. Process the event based on its type
-        switch (eventType) {
-            case 'driver.speeding':
-                // Stub for logging speeding incidents and alerting
-                console.log(`Processing driver.speeding for driverId: ${data.driverId}`);
-                // Example: await alerts.notifySupervisor(data.driverId, 'Speeding violation');
-                // Example: await db.updateDriverScore(data.driverId, -5);
-                break;
-            case 'driver.harsh_braking':
-                // Stub for logging harsh braking and updating driver score
-                console.log(`Processing driver.harsh_braking for driverId: ${data.driverId}`);
-                // Example: await db.logSafetyEvent(data);
-                // Example: await db.updateDriverScore(data.driverId, -2);
-                break;
-            case 'driver.rapid_acceleration':
-                // Stub for logging rapid acceleration events
-                console.log(`Processing driver.rapid_acceleration for driverId: ${data.driverId}`);
-                // Example: await db.logSafetyEvent(data);
-                // Example: await db.updateDriverScore(data.driverId, -2);
-                break;
-            default:
-                // Handle unknown event types
-                console.warn(`Unknown eventType: ${eventType}`);
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({ message: 'Bad Request: Unknown event type' }),
-                };
-        }
-
-        // 4. Send a success response
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Event processed successfully' }),
-        };
-    } catch (error) {
-        // 5. Handle parsing errors or other exceptions
-        console.error('Error processing request:', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ message: 'Internal Server Error' }),
-        };
-    }
-};
-```
-
-## 2. Client-Side JavaScript Webhook Senders
-
-This JavaScript module contains two async functions to send data to the webhook endpoints.
-
-**`webhookSenders.js`**
-```javascript
-/**
- * Sends a trip-related event to the specified webhook URL.
- *
- * @param {string} webhookUrl - The URL of the trip webhook endpoint.
- * @param {string} apiKey - The secure API key for authorization.
- * @param {object} eventData - The event data payload to send.
- * @returns {Promise<object>} - The JSON response from the server.
- * @throws {Error} - If the request fails or the server returns an error.
- */
-export async function sendTripEvent(webhookUrl, apiKey, eventData) {
-    try {
-        const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': apiKey,
-            },
-            body: JSON.stringify(eventData),
+- **Webhook Sender Script**
+  - Runs on Google Sheets to send data to webhook endpoints
+  - Includes authentication, retry logic, and logging
+  - Example:
+    ```javascript
+    function sendDriverBehaviorEvents() {
+      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Driver Events");
+      const data = sheet.getDataRange().getValues();
+      const headers = data[0];
+      const events = [];
+      
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i];
+        if (!row[0]) continue; // Skip empty rows
+        
+        events.push({
+          fleetNumber: row[headers.indexOf("Fleet Number")],
+          driverName: row[headers.indexOf("Driver Name")],
+          eventType: row[headers.indexOf("Event Type")],
+          eventTime: new Date(row[headers.indexOf("Event Time")]).toISOString(),
+          location: row[headers.indexOf("Location")],
+          description: row[headers.indexOf("Description")],
+          severity: row[headers.indexOf("Severity")]
         });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Failed to send trip event:', error);
-        throw error;
+      }
+      
+      if (events.length === 0) {
+        Logger.log("No events to send");
+        return;
+      }
+      
+      sendToWebhook(events);
     }
-}
-
-/**
- * Sends a driver behavior event to the specified webhook URL.
- *
- * @param {string} webhookUrl - The URL of the driver behavior webhook endpoint.
- * @param {string} apiKey - The secure API key for authorization.
- * @param {object} eventData - The event data payload to send.
- * @returns {Promise<object>} - The JSON response from the server.
- * @throws {Error} - If the request fails or the server returns an error.
- */
-export async function sendDriverBehaviorEvent(webhookUrl, apiKey, eventData) {
-    try {
-        const response = await fetch(webhookUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-API-Key': apiKey,
-            },
-            body: JSON.stringify(eventData),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-        }
-
-        return await response.json();
-    } catch (error) {
-        console.error('Failed to send driver behavior event:', error);
-        throw error;
-    }
-}
-
-// --- Example Usage ---
-
-// Configuration (replace with your actual deployment details)
-const TRIP_WEBHOOK_URL = 'https://your-api-gateway.execute-api.us-east-1.amazonaws.com/prod/trip-webhook';
-const DRIVER_BEHAVIOR_WEBHOOK_URL = 'https://your-api-gateway.execute-api.us-east-1.amazonaws.com/prod/driver-behavior-webhook';
-const API_KEY = 'your-secure-api-key'; // This should match the key in your Lambda environment variables
-
-// Example 1: Creating a new trip
-async function exampleCreateTrip() {
-    const tripData = {
-        eventType: 'trip.created',
-        timestamp: new Date().toISOString(),
-        data: {
-            tripId: `uuid-${Date.now()}-abc`,
-            driverId: 'drv-456',
-            vehicleId: 'vcl-789',
-            startLocation: { lat: 34.0522, lon: -118.2437 },
-            endLocation: { lat: 34.1522, lon: -118.3437 },
+    
+    function sendToWebhook(events) {
+      const url = "https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook";
+      const token = getAuthToken(); // Custom function to get token
+      
+      const options = {
+        method: "post",
+        contentType: "application/json",
+        payload: JSON.stringify(events),
+        headers: {
+          Authorization: `Bearer ${token}`
         },
-    };
-
-    try {
-        const result = await sendTripEvent(TRIP_WEBHOOK_URL, API_KEY, tripData);
-        console.log('Trip created successfully:', result);
-    } catch (error) {
-        console.error('Error creating trip:', error.message);
+        muteHttpExceptions: true
+      };
+      
+      const response = UrlFetchApp.fetch(url, options);
+      Logger.log(response.getContentText());
+      
+      // Update status in sheet
+      updateSendStatus(response.getResponseCode() === 200);
     }
-}
+    ```
 
-// Example 2: Reporting a harsh braking incident
-async function exampleReportHarshBraking() {
-    const incidentData = {
-        eventType: 'driver.harsh_braking',
-        timestamp: new Date().toISOString(),
-        data: {
-            incidentId: `uuid-${Date.now()}-xyz`,
-            tripId: 'uuid-1667823456-abc',
-            driverId: 'drv-456',
-            location: { lat: 34.0987, lon: -118.2876 },
-            details: {
-                severity: 'high',
-            },
-        },
-    };
+## 📊 Monitoring & Troubleshooting
 
-    try {
-        const result = await sendDriverBehaviorEvent(DRIVER_BEHAVIOR_WEBHOOK_URL, API_KEY, incidentData);
-        console.log('Harsh braking incident reported successfully:', result);
-    } catch (error) {
-        console.error('Error reporting harsh braking:', error.message);
-    }
-}
+### Logging Strategy
 
-// To run the examples:
-// exampleCreateTrip();
-// exampleReportHarshBraking();
+- **Structured Logging**
+  - All logs use consistent JSON structure
+  - Include request ID for tracing
+  - Log key events: request received, validation results, write completed
+  - Example:
+    ```typescript
+    functions.logger.info("Processing driver behavior events", {
+      requestId: uuid(),
+      eventCount: events.length,
+      source: source || "unknown"
+    });
+    ```
+
+- **Log Levels**
+  - INFO: Normal operation events
+  - WARNING: Potential issues that don't block operation
+  - ERROR: Failed operations requiring attention
+  - DEBUG: Detailed information for troubleshooting (development only)
+
+### Diagnostics Tools
+
+- **Webhook Testing UI**
+  - Browser-based tool for testing webhook functionality
+  - Validates event format and processing
+  - Shows detailed error messages
+
+- **Firestore Verification Scripts**
+  - Command-line tools to verify data integrity
+  - Checks for missing fields or invalid data
+  - Reports discrepancies for resolution
+
+## 🚀 Deployment & CI/CD
+
+### Deployment Process
+
+1. Run all tests locally with Firebase emulators
+2. Deploy to staging environment first
+3. Run integration tests against staging
+4. Deploy to production with atomic function updates
+5. Verify production deployment with minimal test
+
+### CI/CD Pipeline
+
+- **GitHub Actions Workflow**
+  - Triggered on pull requests and merges to main
+  - Runs TypeScript compilation and linting
+  - Executes unit and integration tests
+  - Deploys to environments based on branch
+
+- **Environment Configuration**
+  - Environment variables stored in GitHub Secrets
+  - Different service accounts for staging vs. production
+  - Feature flags for gradual rollout
+
+## 🧪 Testing Strategy
+
+### Test Types
+
+- **Unit Tests**
+  - Test individual validation and processing functions
+  - Mock Firestore operations
+
+- **Integration Tests**
+  - Test webhook endpoints with real payloads
+  - Use Firebase emulators
+
+- **End-to-End Tests**
+  - Test entire flow from external system to UI update
+  - Validate real-time sync behavior
+
+### Test Coverage
+
+- Validation logic: 100% coverage
+- Error handling: All error conditions tested
+- Edge cases: Boundary values, malformed data, etc.
+
+## 🛠️ Maintenance & Support
+
+### Regular Maintenance Tasks
+
+- Review Firebase function logs daily
+- Monitor cold start performance
+- Check for deprecated Firebase features
+- Update dependencies and security patches
+
+### Troubleshooting Guide
+
+1. **Check Firebase Function Logs**
+   - Look for ERROR level messages
+   - Check request details and payload
+
+2. **Verify Firestore Data**
+   - Use verification scripts to check data integrity
+   - Look for missing or malformed documents
+
+3. **Test Webhook Endpoints**
+   - Use the webhook testing UI to send test events
+   - Verify proper response codes and messages
+
+4. **Check Frontend Components**
+   - Verify real-time listeners are active
+   - Check for console errors in browser
+
+## 🔮 Future Enhancements
+
+- **Enhanced Analytics**
+  - Dashboard for webhook performance metrics
+  - Success/failure rates by source
+
+- **Webhook Management UI**
+  - Interface for managing webhook consumers
+  - Self-service token generation and management
+
+- **Advanced Validation Rules**
+  - ML-based anomaly detection for event data
+  - Contextual validation based on historical patterns
+
+- **Multi-region Deployment**
+  - Deploy webhook functions to multiple regions
+  - Geo-routing based on source location
+
+---
+
+> This document is maintained by the Matanuska Engineering Team  
+> Last Updated: 2025-06-30

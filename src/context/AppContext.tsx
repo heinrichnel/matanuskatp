@@ -125,7 +125,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [carReports, setCARReports] = useState<CARReport[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogType[]>([]);
-  const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected');
+  const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected'); // TODO: Implement actual connection status monitoring
 
   useEffect(() => {
     const unsubscribeTrips = listenToTrips(setTrips, (error) => console.error(error));
@@ -291,8 +291,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Initialize loading state
-  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+  // Initialize loading state - use a Record type for dynamic keys
+  const [isLoading, _setIsLoading] = useState<Record<string, boolean>>({});
+  // Rename to _setIsLoading since it's not directly used (avoids linter warnings)
 
   const value = {
     trips,

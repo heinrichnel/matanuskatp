@@ -139,14 +139,14 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
     }
 
     const token = await executeRecaptcha('trip_form_submit');
-    
+
     // This would be a call to your backend function
     const response = await fetch('/api/verifyRecaptcha', { // This URL needs to be configured to point to your cloud function
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token, recaptchaAction: 'trip_form_submit' }),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token, recaptchaAction: 'trip_form_submit' }),
     });
 
     const data = await response.json();
@@ -156,7 +156,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
   useEffect(() => {
     dispatch({ type: 'RESET_FORM', payload: getInitialState(trip).formData });
   }, [trip]);
-  
+
   const isFormValid = Object.keys(validate(state.formData)).length === 0;
 
   const handleBlur = (field: keyof TripFormData) => {
@@ -167,15 +167,15 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
   const handleChange = (field: keyof TripFormData, value: any) => {
     dispatch({ type: 'SET_FIELD', field, value });
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
+
+    if (!isFormValid) {
       dispatch({ type: 'SUBMIT_FAILURE', error: "Please fix validation errors before submitting." });
       return;
     }
-    
+
     dispatch({ type: 'SUBMIT_START' });
 
     const validationErrors = validate(state.formData);
@@ -186,7 +186,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
 
     // Show loading state
     dispatch({ type: 'SUBMIT_START' });
-    
+
     const isVerified = await handleReCaptchaVerify();
     if (!isVerified) {
       dispatch({ type: 'SUBMIT_FAILURE', error: "reCAPTCHA verification failed. Please try again." });
@@ -199,7 +199,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
         distanceKm: parseFloat(state.formData.distanceKm),
         baseRevenue: parseFloat(state.formData.baseRevenue),
       });
-      
+
       await onSubmit({
         ...state.formData,
         distanceKm: parseFloat(state.formData.distanceKm),
@@ -226,7 +226,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
         {state.submitError && (
           <ErrorMessage message={state.submitError} />
         )}
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Select
             label="Client Type"
@@ -346,17 +346,17 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
         />
 
         <div className="flex justify-end space-x-3 pt-4 border-t">
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             onClick={onCancel}
             icon={<X className="w-4 h-4" />}
             disabled={state.isSubmitting}
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={!isFormValid || state.isSubmitting}
             icon={<Save className="w-4 h-4" />}
             isLoading={state.isSubmitting}

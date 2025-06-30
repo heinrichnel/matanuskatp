@@ -16,10 +16,10 @@ import {
   enableNetwork,
   disableNetwork,
   writeBatch,
-  getDocs,
   where,
   Timestamp
 } from 'firebase/firestore';
+import { v4 as uuidv4 } from 'uuid';
 import { getAnalytics } from 'firebase/analytics';
 import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport } from './types';
 import { AuditLog } from './types/audit';
@@ -61,15 +61,15 @@ const convertTimestamps = (obj: any): any => {
   if (obj === null || obj === undefined) {
     return null;
   }
-  
+
   if (obj instanceof Timestamp) {
     return obj.toDate().toISOString();
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(convertTimestamps);
   }
-  
+
   if (typeof obj === 'object') {
     const converted: any = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -77,7 +77,7 @@ const convertTimestamps = (obj: any): any => {
     }
     return converted;
   }
-  
+
   return obj;
 };
 
@@ -202,9 +202,9 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
     }
 
     const tripData = tripSnap.data();
-    console.log(`🗑️ Deleting trip: ${id}`, tripData ? { 
+    console.log(`🗑️ Deleting trip: ${id}`, tripData ? {
       fleetNumber: tripData.fleetNumber,
-      route: tripData.route 
+      route: tripData.route
     } : 'No data');
 
     console.log(`🔄 Preparing batch deletion for trip: ${id}`);
@@ -218,7 +218,7 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
 
     // Check for and delete related documents
     console.log(`Looking for related costs for trip: ${id}`);
-    
+
     // First, look for costs in the trip's costs array
     const costsCollection = collection(db, 'costs');
     const costsQuery = query(costsCollection, where('tripId', '==', id));
@@ -271,30 +271,30 @@ export const deleteTripFromFirebase = async (id: string): Promise<void> => {
 
 // Real-time listeners with enhanced error handling
 export const listenToTrips = (
-    callback: (trips: Trip[]) => void,
-    onError?: (error: Error) => void
-  ): (() => void) => {
+  callback: (trips: Trip[]) => void,
+  onError?: (error: Error) => void
+): (() => void) => {
   const q = query(tripsCollection, orderBy('startDate', 'desc'));
-  
+
   return onSnapshot(
     q,
     snapshot => {
       const trips: Trip[] = [];
-      
+
       // Process document changes (added, modified, removed)
       snapshot.docChanges().forEach(change => {
         console.log(`Trip document ${change.doc.id} ${change.type}`);
       });
-      
+
       // Add all current documents to the array
       snapshot.forEach(doc => {
         const data = convertTimestamps(doc.data());
-        trips.push({ 
-          id: doc.id, 
-          ...data 
+        trips.push({
+          id: doc.id,
+          ...data
         } as Trip);
       });
-      
+
       console.log(`🔄 Real-time trips update: ${trips.length} trips loaded`);
       callback(trips);
     },
@@ -369,18 +369,18 @@ export const listenToDieselRecords = (
     q,
     (snapshot) => {
       const records: DieselConsumptionRecord[] = [];
-      
+
       // Process document changes
       snapshot.docChanges().forEach(change => {
         console.log(`Diesel record ${change.doc.id} ${change.type}`);
       });
-      
+
       // Add all current documents to the array
       snapshot.forEach(doc => {
         const data = convertTimestamps(doc.data());
-        records.push({ 
-          id: doc.id, 
-          ...data 
+        records.push({
+          id: doc.id,
+          ...data
         } as DieselConsumptionRecord);
       });
 
@@ -458,18 +458,18 @@ export const listenToMissedLoads = (
     q,
     (snapshot) => {
       const loads: MissedLoad[] = [];
-      
+
       // Process document changes
       snapshot.docChanges().forEach(change => {
         console.log(`Missed load ${change.doc.id} ${change.type}`);
       });
-      
+
       // Add all current documents to the array
       snapshot.forEach(doc => {
         const data = convertTimestamps(doc.data());
-        loads.push({ 
-          id: doc.id, 
-          ...data 
+        loads.push({
+          id: doc.id,
+          ...data
         } as MissedLoad);
       });
 
@@ -547,18 +547,18 @@ export const listenToDriverBehaviorEvents = (
     q,
     (snapshot) => {
       const events: DriverBehaviorEvent[] = [];
-      
+
       // Process document changes
       snapshot.docChanges().forEach(change => {
         console.log(`Driver behavior event ${change.doc.id} ${change.type}`);
       });
-      
+
       // Add all current documents to the array
       snapshot.forEach(doc => {
         const data = convertTimestamps(doc.data());
-        events.push({ 
-          id: doc.id, 
-          ...data 
+        events.push({
+          id: doc.id,
+          ...data
         } as DriverBehaviorEvent);
       });
 
@@ -636,18 +636,18 @@ export const listenToActionItems = (
     q,
     (snapshot) => {
       const items: ActionItem[] = [];
-      
+
       // Process document changes
       snapshot.docChanges().forEach(change => {
         console.log(`Action item ${change.doc.id} ${change.type}`);
       });
-      
+
       // Add all current documents to the array
       snapshot.forEach(doc => {
         const data = convertTimestamps(doc.data());
-        items.push({ 
-          id: doc.id, 
-          ...data 
+        items.push({
+          id: doc.id,
+          ...data
         } as ActionItem);
       });
 
@@ -725,18 +725,18 @@ export const listenToCARReports = (
     q,
     (snapshot) => {
       const reports: CARReport[] = [];
-      
+
       // Process document changes
       snapshot.docChanges().forEach(change => {
         console.log(`CAR report ${change.doc.id} ${change.type}`);
       });
-      
+
       // Add all current documents to the array
       snapshot.forEach(doc => {
         const data = convertTimestamps(doc.data());
-        reports.push({ 
-          id: doc.id, 
-          ...data 
+        reports.push({
+          id: doc.id,
+          ...data
         } as CARReport);
       });
 
@@ -802,21 +802,21 @@ export const listenToAuditLogs = (
     q,
     (snapshot) => {
       const logs: AuditLog[] = [];
-      
+
       // Process document changes
       snapshot.docChanges().forEach(change => {
         console.log(`Audit log ${change.doc.id} ${change.type}`);
       });
-      
+
       // Add all current documents to the array
       snapshot.forEach(doc => {
         const data = convertTimestamps(doc.data());
-        logs.push({ 
-          id: doc.id, 
-          ...data 
+        logs.push({
+          id: doc.id,
+          ...data
         } as AuditLog);
       });
-      
+
       console.log(`🔄 Real-time audit logs update: ${logs.length} logs loaded`);
       callback(logs);
     },

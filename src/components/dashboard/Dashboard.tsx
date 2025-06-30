@@ -2,36 +2,28 @@ import React, { useState, useMemo } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import { Select } from '../ui/FormElements';
 import { Tooltip } from '../ui/Tooltip';
-import { TrendingUp, Truck, DollarSign, TrendingDown, AlertTriangle, Flag, CheckCircle, User, Activity, Target, Award, Download } from 'lucide-react';
-import { 
-  formatCurrency, 
-  calculateTotalCosts, 
-  filterTripsByDateRange, 
-  filterTripsByClient, 
-  filterTripsByCurrency, 
-  filterTripsByDriver, 
-  getAllFlaggedCosts, 
-  getUnresolvedFlagsCount, 
-  canCompleteTrip 
+import { TrendingUp, Truck, DollarSign, TrendingDown, AlertTriangle, Flag, CheckCircle, User, Activity, Target, Award, Download, Filter, X } from 'lucide-react';
+import {
+  formatCurrency,
+  calculateTotalCosts,
+  filterTripsByDateRange,
+  filterTripsByClient,
+  filterTripsByCurrency,
+  filterTripsByDriver,
+  getAllFlaggedCosts,
+  getUnresolvedFlagsCount,
+  canCompleteTrip
 } from '../../utils/helpers';
-import { Trip, CLIENTS, DRIVERS } from '../../types';
-import { useOutletContext } from 'react-router-dom';
+import { Trip } from '../../types';
 
 interface DashboardProps {
   trips?: Trip[];
 }
 
-// Type for context provided by the outlet
-interface OutletContextType {
-  setSelectedTrip: (trip: Trip | null) => void;
-}
 
 const Dashboard: React.FC<DashboardProps> = (props) => {
   const { trips: contextTrips, missedLoads = [] } = useAppContext();
-  const context = useOutletContext<OutletContextType>();
-  
   // Use props if provided, otherwise use context
   const trips = props.trips || contextTrips;
   const [filters, setFilters] = useState({
@@ -84,13 +76,13 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
 
     const avgResolutionTime = resolvedFlags.length > 0
       ? resolvedFlags.reduce((sum, flag) => {
-          if (flag.flaggedAt && flag.resolvedAt) {
-            const flaggedDate = new Date(flag.flaggedAt);
-            const resolvedDate = new Date(flag.resolvedAt);
-            return sum + (resolvedDate.getTime() - flaggedDate.getTime()) / (1000 * 60 * 60 * 24);
-          }
-          return sum + 3;
-        }, 0) / resolvedFlags.length
+        if (flag.flaggedAt && flag.resolvedAt) {
+          const flaggedDate = new Date(flag.flaggedAt);
+          const resolvedDate = new Date(flag.resolvedAt);
+          return sum + (resolvedDate.getTime() - flaggedDate.getTime()) / (1000 * 60 * 60 * 24);
+        }
+        return sum + 3;
+      }, 0) / resolvedFlags.length
       : 0;
 
     const driverStats = filteredTrips.reduce((acc, trip) => {
@@ -155,10 +147,10 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     // Calculate missed loads metrics
     const missedLoadsZAR = missedLoads.filter(load => load.currency === 'ZAR');
     const missedLoadsUSD = missedLoads.filter(load => load.currency === 'USD');
-    
+
     const missedRevenueZAR = missedLoadsZAR.reduce((sum, load) => sum + load.estimatedRevenue, 0);
     const missedRevenueUSD = missedLoadsUSD.reduce((sum, load) => sum + load.estimatedRevenue, 0);
-    
+
     const missedOpportunities = missedLoads.length;
     const competitorWins = missedLoads.filter(load => load.competitorWon).length;
     const highImpactMissed = missedLoads.filter(load => load.impact === 'high').length;
@@ -207,8 +199,102 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Dashboard Overview</h2>
-        <Button variant="primary" size="md" icon={<Download className="w-5 h-5" />}>Export Data</Button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="md"
+            icon={<Filter className="w-5 h-5" />}
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            {showFilters ? "Hide Filters" : "Show Filters"}
+          </Button>
+          <Button variant="primary" size="md" icon={<Download className="w-5 h-5" />}>Export Data</Button>
+        </div>
       </div>
+
+      {/* Filter Panel */}
+      {showFilters && (
+        <Card>
+          <CardHeader
+            title={<span className="flex items-center gap-2"><Filter className="w-5 h-5 text-blue-500" />Dashboard Filters</span>}
+          />
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                <input
+                  type="date"
+                  id="startDate"
+                  value={filters.startDate}
+                  onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <input
+                  type="date"
+                  id="endDate"
+                  value={filters.endDate}
+                  onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                <select
+                  id="currency"
+                  value={filters.currency}
+                  onChange={(e) => handleFilterChange('currency', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">All Currencies</option>
+                  <option value="ZAR">ZAR</option>
+                  <option value="USD">USD</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="client" className="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                <input
+                  type="text"
+                  id="client"
+                  value={filters.client}
+                  onChange={(e) => handleFilterChange('client', e.target.value)}
+                  placeholder="Filter by client"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="driver" className="block text-sm font-medium text-gray-700 mb-1">Driver</label>
+                <input
+                  type="text"
+                  id="driver"
+                  value={filters.driver}
+                  onChange={(e) => handleFilterChange('driver', e.target.value)}
+                  placeholder="Filter by driver"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+            <div className="flex justify-between items-center border-t pt-4">
+              <div className="text-sm text-gray-600">
+                {filteredTrips.length} of {trips.length} trips shown
+                {Object.values(filters).some(value => value !== '') &&
+                  <span className="ml-1 text-blue-600">(filters applied)</span>
+                }
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={<X className="w-4 h-4" />}
+                onClick={clearFilters}
+              >
+                Clear All Filters
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Key Performance Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -288,7 +374,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
 
       {/* Missed Loads Impact */}
       <Card>
-        <CardHeader 
+        <CardHeader
           title={
             <span className="flex items-center">
               <TrendingDown className="w-5 h-5 text-red-600 mr-2" />
@@ -308,7 +394,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                 Potential lost income
               </p>
             </div>
-            
+
             <div className="text-center p-4 bg-red-50 rounded-lg">
               <p className="text-sm text-gray-500 mb-1">Missed Revenue (USD)</p>
               <p className="text-2xl font-bold text-red-600">
@@ -318,7 +404,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                 Potential lost income
               </p>
             </div>
-            
+
             <div className="text-center p-4 bg-amber-50 rounded-lg">
               <p className="text-sm text-gray-500 mb-1">Missed Opportunities</p>
               <p className="text-2xl font-bold text-amber-600">
@@ -328,7 +414,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                 Total missed loads
               </p>
             </div>
-            
+
             <div className="text-center p-4 bg-orange-50 rounded-lg">
               <p className="text-sm text-gray-500 mb-1">Competitor Wins</p>
               <p className="text-2xl font-bold text-orange-600">
@@ -339,7 +425,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
               </p>
             </div>
           </div>
-          
+
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
             <h4 className="text-sm font-medium text-blue-800 mb-2">Missed Loads Impact Analysis</h4>
             <div className="text-sm text-blue-700 space-y-1">
@@ -356,7 +442,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Trips Ready for Completion */}
         <Card>
-          <CardHeader 
+          <CardHeader
             title={
               <span className="flex items-center">
                 <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
@@ -395,8 +481,8 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
 
         {/* Trips with Unresolved Flags */}
         <Card>
-          <CardHeader 
-            title="Trips with Unresolved Flags" 
+          <CardHeader
+            title="Trips with Unresolved Flags"
             icon={<AlertTriangle className="w-5 h-5 text-amber-600" />}
           />
           <CardContent>
@@ -482,14 +568,13 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                         {data.flagPercentage.toFixed(1)}%
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap text-sm text-center">
-                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          data.flagPercentage > 20 ? 'bg-red-100 text-red-800' :
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${data.flagPercentage > 20 ? 'bg-red-100 text-red-800' :
                           data.flagPercentage > 10 ? 'bg-amber-100 text-amber-800' :
-                          'bg-green-100 text-green-800'
-                        }`}>
+                            'bg-green-100 text-green-800'
+                          }`}>
                           {data.flagPercentage > 20 ? 'High Risk' :
-                           data.flagPercentage > 10 ? 'Medium Risk' :
-                           'Low Risk'}
+                            data.flagPercentage > 10 ? 'Medium Risk' :
+                              'Low Risk'}
                         </span>
                       </td>
                     </tr>
@@ -520,8 +605,8 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                         <span className="text-sm font-medium text-gray-700">{count}</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div 
-                          className="bg-blue-600 h-2.5 rounded-full" 
+                        <div
+                          className="bg-blue-600 h-2.5 rounded-full"
                           style={{ width: `${Math.min(100, (count / Math.max(1, stats.allFlaggedCosts.length)) * 100)}%` }}
                         ></div>
                       </div>
@@ -545,18 +630,18 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                   <span className="text-xs text-red-600">{stats.unresolvedFlags.length} pending</span>
                 </div>
               </div>
-              
+
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-gray-500 mb-1">Avg Resolution Time</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.avgResolutionTime.toFixed(1)}</p>
                 <p className="text-xs text-gray-500 mt-1">days per flag</p>
               </div>
-              
+
               <div className="text-center p-4 bg-gray-50 rounded-lg col-span-2">
                 <p className="text-sm text-gray-500 mb-1">Resolution Rate</p>
                 <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
-                  <div 
-                    className="bg-green-600 h-4 rounded-full" 
+                  <div
+                    className="bg-green-600 h-4 rounded-full"
                     style={{ width: `${stats.allFlaggedCosts.length > 0 ? (stats.resolvedFlags.length / stats.allFlaggedCosts.length) * 100 : 0}%` }}
                   ></div>
                 </div>
