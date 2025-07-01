@@ -1,4 +1,4 @@
-import { onObjectFinalized } from "firebase-functions/v2/storage";
+import { onObjectFinalized, StorageEvent } from "firebase-functions/v2/storage";
 import * as admin from "firebase-admin";
 
 admin.initializeApp();
@@ -458,7 +458,7 @@ export const importDriverBehaviorWebhook = onRequest(async (req, res) => {
     }
 });
 
-export const importTripsFromFile = onObjectFinalized(async (event) => {
+export const importTripsFromFile = onObjectFinalized(async (event: StorageEvent) => {
     console.log("Received storage event for file import:", JSON.stringify(event, null, 2));
     if (!event.data || !event.data.name || !event.data.bucket) {
         console.error("Invalid storage event received. Missing essential data.", event);
@@ -511,7 +511,7 @@ export const importTripsFromFile = onObjectFinalized(async (event) => {
     }
 });
 
-export const importDriverBehaviorFromFile = onObjectFinalized(async (event) => {
+export const importDriverBehaviorFromFile = onObjectFinalized(async (event: StorageEvent) => {
     console.log("Received storage event for driver behavior import:", JSON.stringify(event, null, 2));
     if (!event.data || !event.data.name || !event.data.bucket) {
         console.error("Invalid storage event for driver behavior. Missing essential data.", event);
@@ -561,9 +561,12 @@ export const importDriverBehaviorFromFile = onObjectFinalized(async (event) => {
     }
 });
 
-import { onDocumentDeleted } from "firebase-functions/v2/firestore";
+import { onDocumentDeleted, DocumentSnapshot } from "firebase-functions/v2/firestore";
 
-export const logTripDeletion = onDocumentDeleted("trips/{tripId}", async (event) => {
+export const logTripDeletion = onDocumentDeleted("trips/{tripId}", async (event: {
+    data: DocumentSnapshot | undefined;
+    params: { [key: string]: string };
+}) => {
     const snap = event.data;
     if (!snap) {
         console.error("No data associated with the event");
@@ -589,55 +592,5 @@ export const logTripDeletion = onDocumentDeleted("trips/{tripId}", async (event)
         console.log(`Successfully logged deletion of trip ${tripId} to audit trail.`);
     } catch (error) {
         console.error(`Failed to log deletion of trip ${tripId}:`, error);
-    }
-});
-
-export const verifyRecaptcha = onRequest(async (req, res) => {
-    if (req.method !== "POST") {
-        res.status(405).send("Method Not Allowed");
-        return;
-    }
-
-    const { token } = req.body; // The reCAPTCHA token from the frontend
-
-    // Get the secret key from Firebase Functions environment
-    // For development, you might use a hardcoded key, but for production
-    // use environment variables: functions.config().recaptcha.secret_key
-    const recaptchaSecretKey = "7AEC0463-8EE3-4C42-94BE-362F2EB9AD7F"; // Your reCAPTCHA secret key
-
-    if (!token) {
-        res.status(400).json({ success: false, message: "reCAPTCHA token is missing." });
-        return;
-    }
-
-    try {
-        // Make a direct HTTP request to the reCAPTCHA API endpoint
-        const verificationUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${token}`;
-        const fetch = (await import('node-fetch')).default;
-        const response = await fetch(verificationUrl, { method: 'POST' });
-        const data = await response.json();
-
-        console.log("reCAPTCHA verification response:", data);
-
-        if (data.success) {
-            // reCAPTCHA verification successful
-            // For reCAPTCHA v3, check the score if present
-            if (data.score && data.score < 0.5) { // Adjust threshold (0.0 to 1.0) as needed
-                res.status(400).json({ success: false, message: "reCAPTCHA verification failed. Low score." });
-                return;
-            }
-            res.status(200).json({ success: true, score: data.score || 1.0 });
-        } else {
-            // reCAPTCHA verification failed
-            console.log("reCAPTCHA verification failed:", data['error-codes']);
-            res.status(400).json({
-                success: false,
-                message: "reCAPTCHA verification failed.",
-                'error-codes': data['error-codes']
-            });
-        }
-    } catch (error) {
-        console.error("Error during reCAPTCHA verification:", error);
-        res.status(500).json({ success: false, message: "Internal server error during reCAPTCHA verification." });
     }
 });
