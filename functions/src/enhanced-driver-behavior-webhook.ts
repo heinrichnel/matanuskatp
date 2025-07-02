@@ -79,7 +79,7 @@ export const enhancedDriverBehaviorWebhook = onRequest(async (req, res) => {
         
         const { events } = requestBody;
         const batch = db.batch();
-        const targetCollection = 'driverBehavior';
+        const targetCollection = 'driverBehaviorEvents';
         console.log(`[enhancedDriverBehaviorWebhook] Targeting collection: '${targetCollection}'`);
         
         let imported = 0;

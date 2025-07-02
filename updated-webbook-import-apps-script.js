@@ -41,14 +41,56 @@ function postTripsToFirebase() {
         
     // Get the headers and validate
     const headers = data[0];
-    const expectedHeaders = ["Load Ref", "Customer", "Origin", "Destination", "Status", 
-                            "Shipped Status", "Delivered Status", "Completed Status", 
-                            "Shipped Date", "Delivered Date", "Completed Date"];
-    const missingHeaders = expectedHeaders.filter(header => !headers.includes(header));
-        
-    if (missingHeaders.length > 0) {
-      Logger.log(`⚠️ Warning: Some expected headers are missing: ${missingHeaders.join(", ")}`);
-      Logger.log(`Actual headers: ${headers.join(", ")}`);
+    
+    // Print actual headers to help with debugging
+    Logger.log(`👉 ACTUAL HEADERS in spreadsheet: ${headers.join(", ")}`);
+    
+    // Define flexible header mapping - add alternate header names that might be used
+    const headerMapping = {
+      "loadRef": ["Load Ref", "LoadRef", "Load_Ref", "Load Reference", "Load ID", "Load#", "Load No"],
+      "customer": ["Customer", "Client", "Customer Name", "Client Name", "Customer_Name"],
+      "origin": ["Origin", "From", "Origin Location", "Source", "Pickup"],
+      "destination": ["Destination", "To", "Dest", "Destination Location", "Delivery"],
+      "status": ["Status", "Trip Status", "Load Status", "Delivery Status"],
+      "shippedStatus": ["Shipped Status", "Shipped", "Is Shipped", "Shipping Status", "SHIPPED"],
+      "deliveredStatus": ["Delivered Status", "Delivered", "Is Delivered", "Delivery Status", "DELIVERED"],
+      "completedStatus": ["Completed Status", "Completed", "Is Completed", "Completion Status"],
+      "shippedDate": ["Shipped Date", "Ship Date", "Date Shipped", "Shipping Date"],
+      "deliveredDate": ["Delivered Date", "Delivery Date", "Date Delivered"],
+      "completedDate": ["Completed Date", "Completion Date", "Date Completed"]
+    };
+    
+    // Create a map of actual header indices
+    const headerIndices = {};
+    
+    // For each field we need, try to find a matching header
+    Object.keys(headerMapping).forEach(field => {
+      const possibleHeaders = headerMapping[field];
+      for (const header of possibleHeaders) {
+        const index = headers.findIndex(h => 
+          String(h).toLowerCase().trim() === String(header).toLowerCase().trim()
+        );
+        if (index >= 0) {
+          headerIndices[field] = index;
+          break;
+        }
+      }
+    });
+    
+    // Log the header mapping results
+    Logger.log("📊 Header mapping results:");
+    Object.keys(headerIndices).forEach(field => {
+      Logger.log(`- ${field}: found at column ${headerIndices[field] + 1} (header: "${headers[headerIndices[field]]}")`);
+    });
+    
+    // Check for missing required fields
+    const requiredFields = ["loadRef"];
+    const missingFields = requiredFields.filter(field => headerIndices[field] === undefined);
+    
+    if (missingFields.length > 0) {
+      Logger.log(`⚠️ ERROR: Required header fields missing: ${missingFields.join(", ")}`);
+      Logger.log("❌ Cannot proceed without the Load Ref field. Check your spreadsheet headers.");
+      return;
     }
         
     // Remove header row
@@ -69,21 +111,8 @@ function postTripsToFirebase() {
 
     data.forEach((row, index) => {
       try {
-        // Get column indices (adjust if your sheet has different column order)
-        const loadRefIndex = headers.indexOf("Load Ref");
-        const customerIndex = headers.indexOf("Customer");
-        const originIndex = headers.indexOf("Origin");
-        const destinationIndex = headers.indexOf("Destination");
-        const statusIndex = headers.indexOf("Status");
-        const shippedStatusIndex = headers.indexOf("Shipped Status");
-        const deliveredStatusIndex = headers.indexOf("Delivered Status");
-        const completedStatusIndex = headers.indexOf("Completed Status");
-        const shippedDateIndex = headers.indexOf("Shipped Date");
-        const deliveredDateIndex = headers.indexOf("Delivered Date");
-        const completedDateIndex = headers.indexOf("Completed Date");
-        
-        // Extract data from columns
-        const loadRef = row[loadRefIndex];
+        // Extract data using the mapped indices
+        const loadRef = headerIndices.loadRef !== undefined ? row[headerIndices.loadRef] : null;
         
         // Skip empty rows or rows without load ref
         if (!loadRef) {
@@ -103,52 +132,65 @@ function postTripsToFirebase() {
         // Build the trip object with proper types - CRITICAL for webhook validation
         const trip = {
           loadRef: String(loadRef), // Ensure it's a string
-          status: statusIndex >= 0 && row[statusIndex] ? String(row[statusIndex]) : "active"
+          status: headerIndices.status !== undefined && row[headerIndices.status] ? 
+                  String(row[headerIndices.status]) : "active"
         };
         
         // Add optional fields if they exist
-        if (customerIndex >= 0 && row[customerIndex]) trip.customer = String(row[customerIndex]);
-        if (originIndex >= 0 && row[originIndex]) trip.origin = String(row[originIndex]);
-        if (destinationIndex >= 0 && row[destinationIndex]) trip.destination = String(row[destinationIndex]);
+        if (headerIndices.customer !== undefined && row[headerIndices.customer]) {
+          trip.customer = String(row[headerIndices.customer]);
+        }
+        
+        if (headerIndices.origin !== undefined && row[headerIndices.origin]) {
+          trip.origin = String(row[headerIndices.origin]);
+        }
+        
+        if (headerIndices.destination !== undefined && row[headerIndices.destination]) {
+          trip.destination = String(row[headerIndices.destination]);
+        }
         
         // Handle status boolean fields
-        if (shippedStatusIndex >= 0) {
-          const shippedStatus = row[shippedStatusIndex];
+        if (headerIndices.shippedStatus !== undefined) {
+          const shippedStatus = row[headerIndices.shippedStatus];
+          // Convert various "true" values to actual boolean
           trip.shippedStatus = typeof shippedStatus === 'boolean' ? shippedStatus : 
                               (String(shippedStatus).toLowerCase() === 'true' || 
                                String(shippedStatus).toLowerCase() === 'yes' || 
+                               String(shippedStatus).toLowerCase() === 'shipped' ||
                                String(shippedStatus) === '1');
         }
         
-        if (deliveredStatusIndex >= 0) {
-          const deliveredStatus = row[deliveredStatusIndex];
+        if (headerIndices.deliveredStatus !== undefined) {
+          const deliveredStatus = row[headerIndices.deliveredStatus];
           trip.deliveredStatus = typeof deliveredStatus === 'boolean' ? deliveredStatus : 
                                 (String(deliveredStatus).toLowerCase() === 'true' || 
                                  String(deliveredStatus).toLowerCase() === 'yes' || 
+                                 String(deliveredStatus).toLowerCase() === 'delivered' ||
                                  String(deliveredStatus) === '1');
         }
         
-        if (completedStatusIndex >= 0) {
-          const completedStatus = row[completedStatusIndex];
+        if (headerIndices.completedStatus !== undefined) {
+          const completedStatus = row[headerIndices.completedStatus];
           trip.completedStatus = typeof completedStatus === 'boolean' ? completedStatus : 
                                 (String(completedStatus).toLowerCase() === 'true' || 
                                  String(completedStatus).toLowerCase() === 'yes' || 
+                                 String(completedStatus).toLowerCase() === 'completed' ||
                                  String(completedStatus) === '1');
         }
         
         // Handle date fields
-        if (shippedDateIndex >= 0 && row[shippedDateIndex]) {
-          const shippedDate = row[shippedDateIndex];
+        if (headerIndices.shippedDate !== undefined && row[headerIndices.shippedDate]) {
+          const shippedDate = row[headerIndices.shippedDate];
           trip.shippedDate = shippedDate instanceof Date ? shippedDate.toISOString() : String(shippedDate);
         }
         
-        if (deliveredDateIndex >= 0 && row[deliveredDateIndex]) {
-          const deliveredDate = row[deliveredDateIndex];
+        if (headerIndices.deliveredDate !== undefined && row[headerIndices.deliveredDate]) {
+          const deliveredDate = row[headerIndices.deliveredDate];
           trip.deliveredDate = deliveredDate instanceof Date ? deliveredDate.toISOString() : String(deliveredDate);
         }
         
-        if (completedDateIndex >= 0 && row[completedDateIndex]) {
-          const completedDate = row[completedDateIndex];
+        if (headerIndices.completedDate !== undefined && row[headerIndices.completedDate]) {
+          const completedDate = row[headerIndices.completedDate];
           trip.completedDate = completedDate instanceof Date ? completedDate.toISOString() : String(completedDate);
         }
         
