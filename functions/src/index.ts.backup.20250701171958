@@ -2,14 +2,11 @@
 import { onObjectFinalized, StorageEvent } from "firebase-functions/v2/storage";
 // @ts-ignore
 import * as admin from "firebase-admin";
-
-// Initialize Firebase first, before importing any other modules that use Firebase
-admin.initializeApp();
-const db = admin.firestore();
-
-// Import modules that depend on Firebase initialization
 import { enhancedDriverBehaviorWebhook } from './enhanced-driver-behavior-webhook';
 import { enhancedWebBookImport } from './enhanced-webbook-import';
+
+admin.initializeApp();
+const db = admin.firestore();
 
 // ================================================================
 // NEW TELEMATICS SYSTEM (Refactored from Express)
