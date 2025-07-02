@@ -1,58 +1,55 @@
-// @ts-ignore
 import { onRequest } from "firebase-functions/v2/https";
-// @ts-ignore
 import * as admin from "firebase-admin";
 
-// Define types for request and response
-interface Request {
-  method: string;
-  body: any;
-  headers: Record<string, string | string[] | undefined>;
+// Ensure Firebase is initialized
+// Note: In actual implementation, you'd check if Firebase is already initialized
+try {
+  admin.initializeApp();
+} catch (e) {
+  console.log('Firebase already initialized');
 }
 
-interface Response {
-  set(field: string, value: string): Response;
-  status(code: number): Response;
-  send(body?: any): Response;
-  json(body: any): Response;
-}
+const db = admin.firestore();
 
-// Define types for Firestore documents
-interface Trip {
+// Trip interface for webhook payload
+interface TripData {
   loadRef: string;
   status?: string;
   shippedStatus?: boolean;
-  deliveredStatus?: boolean;
-  completedStatus?: boolean;
   shippedDate?: string;
+  deliveredStatus?: boolean;
   deliveredDate?: string;
+  completedStatus?: boolean;
+  inProgress?: boolean;
+  isCompleted?: boolean;
+  isDelivered?: boolean;
+  isShipped?: boolean;
   importSource?: string;
-  [key: string]: any;
+  [key: string]: any; // Allow additional fields for flexibility
 }
 
+// Processing result type
+interface ProcessingDetail {
+  status: 'imported' | 'skipped' | 'error';
+  reason?: string;
+  loadRef?: string;
+  transformedStatus?: string;
+  field?: string;
+  trip?: TripData;
+}
+
+// Validation error type
 interface ValidationError {
-  trip: Trip;
+  trip: TripData;
   missingField: string;
   message: string;
 }
-
-interface ProcessingDetail {
-  status: string;
-  reason?: string;
-  field?: string;
-  trip?: Trip;
-  loadRef?: string;
-  transformedStatus?: string;
-}
-
-// Use the existing Firebase app from index.ts
-const db = admin.firestore();
 
 /**
  * Enhanced WebBook Import Webhook with improved validation and error handling
  * This is a drop-in replacement for the existing importTripsFromWebBook function
  */
-export const enhancedWebBookImport = onRequest(async (req: Request, res: Response) => {
+export const enhancedWebBookImport = onRequest(async (req, res) => {
     // CORS headers setup for API access
     res.set('Access-Control-Allow-Origin', '*');
     
@@ -114,7 +111,7 @@ export const enhancedWebBookImport = onRequest(async (req: Request, res: Respons
             return;
         }
         
-        const { trips } = requestBody;
+        const { trips } = requestBody as { trips: TripData[] };
         const batch = db.batch();
         const targetCollection = 'trips';
         console.log(`[enhancedWebBookImport] Targeting collection: '${targetCollection}'`);
@@ -125,7 +122,7 @@ export const enhancedWebBookImport = onRequest(async (req: Request, res: Respons
         const validationErrors: ValidationError[] = [];
         
         // Process each trip with validation
-        const promises = trips.map(async (trip: Trip) => {
+        const promises = trips.map(async (trip: TripData) => {
             const timestamp = new Date().toISOString();
             console.log(`[enhancedWebBookImport][${timestamp}] Processing trip:`, JSON.stringify(trip, null, 2));
             
@@ -218,15 +215,9 @@ export const enhancedWebBookImport = onRequest(async (req: Request, res: Respons
                 // Add metadata about the import
                 transformedTrip.importedVia = 'enhancedWebBookImport';
                 transformedTrip.importedAt = timestamp;
-                // Ensure we get a string value for the import source
-                const headerSource = req.headers['x-source'];
-                transformedTrip.importSource = trip.importSource ||
-                    (typeof headerSource === 'string'
-                        ? headerSource
-                        : Array.isArray(headerSource)
-                            ? headerSource[0]
-                            : undefined) ||
-                    'webhook';
+                
+                // Ensure we get a usable value for the import source
+                transformedTrip.importSource = trip.importSource || (req.headers['x-source'] as string) || 'webhook';
                 
                 // DEBUG ONLY - Log the transformed trip data with timestamp for traceability
                 console.log(`[enhancedWebBookImport][${timestamp}] Trip ${trip.loadRef} after transformation:`, {
@@ -283,11 +274,7 @@ export const enhancedWebBookImport = onRequest(async (req: Request, res: Respons
             error: 'Internal Server Error',
             message: error instanceof Error ? error.message : 'Unknown error',
             timestamp: new Date().toISOString(),
-            requestId: typeof req.headers['x-request-id'] === 'string'
-                ? req.headers['x-request-id']
-                : Array.isArray(req.headers['x-request-id'])
-                    ? req.headers['x-request-id'][0]
-                    : 'unknown'
+            requestId: req.headers['x-request-id'] || 'unknown'
         });
     }
 });
