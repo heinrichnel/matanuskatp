@@ -1,0 +1,13 @@
+# Ignore CSV and data files
+*.csv
+driver_behaviors.csv
+
+# Ignore all markdown files
+*.md
+
+# Specifically ignore markdown files in .kilocode directory
+.kilocode/**/*.md
+
+# Previously specified markdown files (kept for reference)
+tyrestock.md
+fleet-details.md
