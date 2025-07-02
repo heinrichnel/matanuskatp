@@ -1,15 +1,9 @@
-// @ts-ignore
 import { onObjectFinalized, StorageEvent } from "firebase-functions/v2/storage";
-// @ts-ignore
 import * as admin from "firebase-admin";
+import { enhancedDriverBehaviorWebhook } from './enhanced-driver-behavior-webhook';
 
-// Initialize Firebase first, before importing any other modules that use Firebase
 admin.initializeApp();
 const db = admin.firestore();
-
-// Import modules that depend on Firebase initialization
-import { enhancedDriverBehaviorWebhook } from './enhanced-driver-behavior-webhook';
-import { enhancedWebBookImport } from './enhanced-webbook-import';
 
 // ================================================================
 // NEW TELEMATICS SYSTEM (Refactored from Express)
@@ -63,7 +57,7 @@ const calculateDriverSafetyScore = async (driverId: string) => {
         sharp_cornering: telematicsConfig.PENALTY_SHARP_CORNERING,
     };
 
-    eventsSnapshot.forEach((doc: any) => {
+    eventsSnapshot.forEach((doc) => {
         const event = doc.data() as DriverEvent;
         if (penaltyMap[event.eventType]) {
             score -= penaltyMap[event.eventType];
@@ -154,8 +148,8 @@ const endTrip = async (tripId: string, endData: any) => {
     }
 
     const updatesSnapshot = await tripRef.collection("updates").get();
-    const speeds = updatesSnapshot.docs.map((doc: any) => doc.data().speed).filter((s: number) => s > 0);
-    const averageSpeed = speeds.length > 0 ? speeds.reduce((a: number, b: number) => a + b, 0) / speeds.length : 0;
+    const speeds = updatesSnapshot.docs.map((doc) => doc.data().speed).filter((s) => s > 0);
+    const averageSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
 
     const startTime = new Date(trip.startTime);
     const endTime = new Date(endData.endTime);
@@ -181,10 +175,9 @@ const endTrip = async (tripId: string, endData: any) => {
 
 // 5. New Webhook Cloud Functions
 
-// @ts-ignore
 import { onRequest } from "firebase-functions/v2/https";
 
-export const telematicsDriverEventWebhook = onRequest(async (req: any, res: any) => {
+export const telematicsDriverEventWebhook = onRequest(async (req, res) => {
     if (req.method !== "POST") {
         res.status(405).send("Method Not Allowed");
         return;
@@ -221,7 +214,7 @@ export const telematicsDriverEventWebhook = onRequest(async (req: any, res: any)
     }
 });
 
-export const telematicsTripUpdateWebhook = onRequest(async (req: any, res: any) => {
+export const telematicsTripUpdateWebhook = onRequest(async (req, res) => {
     if (req.method !== "POST") {
         res.status(405).send("Method Not Allowed");
         return;
@@ -264,10 +257,6 @@ export const telematicsTripUpdateWebhook = onRequest(async (req: any, res: any) 
 // EXISTING FUNCTIONS (Preserved)
 // ================================================================
 
-// Use the enhanced implementation for the importTripsFromWebBook function
-export { enhancedWebBookImport as importTripsFromWebBook };
-
-/* Original implementation (commented out for reference)
 export const importTripsFromWebBook = onRequest(async (req, res) => {
     if (req.method !== 'POST') {
         res.status(405).send('Method Not Allowed');
@@ -380,7 +369,6 @@ export const importTripsFromWebBook = onRequest(async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-*/
 
 // Use the enhanced implementation for the importDriverBehaviorWebhook function
 export { enhancedDriverBehaviorWebhook as importDriverBehaviorWebhook };
@@ -579,7 +567,6 @@ export const importDriverBehaviorFromFile = onObjectFinalized(async (event: Stor
     }
 });
 
-// @ts-ignore
 import { onDocumentDeleted, DocumentSnapshot } from "firebase-functions/v2/firestore";
 
 export const logTripDeletion = onDocumentDeleted("trips/{tripId}", async (event: {
