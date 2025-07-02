@@ -1,21 +1,55 @@
+// @ts-ignore
 import { onRequest } from "firebase-functions/v2/https";
+// @ts-ignore
 import * as admin from "firebase-admin";
 
-// Ensure Firebase is initialized
-// Note: In actual implementation, you'd check if Firebase is already initialized
-try {
-  admin.initializeApp();
-} catch (e) {
-  console.log('Firebase already initialized');
+// Define types for request and response
+interface Request {
+  method: string;
+  body: any;
+  headers: Record<string, string | string[] | undefined>;
 }
 
+interface Response {
+  set(field: string, value: string): Response;
+  status(code: number): Response;
+  send(body?: any): Response;
+  json(body: any): Response;
+}
+
+// Define types for Firestore documents
+// Used in the implementation for typing event objects
+export interface DriverEvent {
+  fleetNumber: string;
+  eventType: string;
+  eventTime: string;
+  [key: string]: any;
+}
+
+// Used for structuring validation error responses
+export interface ValidationError {
+  event: any;
+  missingFields: string[];
+  message: string;
+}
+
+// Used for tracking processing results in responses
+export interface ProcessingDetail {
+  status: string;
+  reason?: string;
+  fields?: string[];
+  event?: any;
+  uniqueKey?: string;
+}
+
+// Use the existing Firebase app from index.ts
 const db = admin.firestore();
 
 /**
  * Enhanced Driver Behavior Webhook with improved validation and error handling
  * This is a drop-in replacement for the existing importDriverBehaviorWebhook function
  */
-export const enhancedDriverBehaviorWebhook = onRequest(async (req, res) => {
+export const enhancedDriverBehaviorWebhook = onRequest(async (req: Request, res: Response) => {
     // CORS headers setup for API access
     res.set('Access-Control-Allow-Origin', '*');
     
@@ -129,7 +163,10 @@ export const enhancedDriverBehaviorWebhook = onRequest(async (req, res) => {
                     : String(event.eventTime),
                 // Add processing metadata
                 processedAt: timestamp,
-                importSource: event.importSource || req.headers['x-source'] || 'webhook',
+                // Ensure we get a string value for the import source
+                importSource: event.importSource ||
+                    (Array.isArray(req.headers['x-source']) ? req.headers['x-source'][0] : req.headers['x-source']) ||
+                    'webhook',
             };
             
             // Generate a unique key for deduplication
@@ -192,7 +229,11 @@ export const enhancedDriverBehaviorWebhook = onRequest(async (req, res) => {
             error: 'Internal Server Error',
             message: error instanceof Error ? error.message : 'Unknown error',
             timestamp: new Date().toISOString(),
-            requestId: req.headers['x-request-id'] || 'unknown'
+            requestId: typeof req.headers['x-request-id'] === 'string'
+                ? req.headers['x-request-id']
+                : Array.isArray(req.headers['x-request-id'])
+                    ? req.headers['x-request-id'][0]
+                    : 'unknown'
         });
     }
 });
