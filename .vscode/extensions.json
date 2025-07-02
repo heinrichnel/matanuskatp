@@ -1,5 +1,6 @@
 {
     "recommendations": [
+        "davidanson.vscode-markdownlint",
         "kodu-ai.claude-dev-experimental"
     ]
 }
