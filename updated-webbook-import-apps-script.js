@@ -1,15 +1,19 @@
 /**
  * Updated Google Apps Script for WebBook Import Webhook
- * 
+ *
  * This script sends trip data from a Google Sheet to Firebase.
  * It has been updated to ensure proper payload formatting for the enhanced webhook.
- * 
+ *
  * Instructions:
  * 1. Open Google Apps Script editor (script.google.com)
  * 2. Create a new project or open your existing WebBook import script
  * 3. Replace the entire content with this code
  * 4. Save and deploy as a web app
  */
+
+/* eslint-env googleappsscript */
+/* eslint-disable no-unused-vars */
+/* global Logger, SpreadsheetApp, PropertiesService, UrlFetchApp, ScriptApp */
 
 // CONFIGURATION - Update these values
 const FIREBASE_WEBHOOK_URL = 'https://us-central1-mat1-9e6b3.cloudfunctions.net/importTripsFromWebBook';
@@ -283,7 +287,7 @@ function postTripsToFirebase() {
 /**
  * Manual trigger function for testing - run this function directly to test
  */
-function testTripImport() {
+function _testTripImport() {
   Logger.log("🧪 Running trip import in TEST mode...");
   postTripsToFirebase();
 }
@@ -292,7 +296,7 @@ function testTripImport() {
  * Adds time-based trigger to run import automatically
  * This is optional - you can run manually instead
  */
-function setupDailyTrigger() {
+function _setupDailyTrigger() {
   // Delete any existing triggers
   const triggers = ScriptApp.getProjectTriggers();
   for (let i = 0; i < triggers.length; i++) {
@@ -314,10 +318,10 @@ function setupDailyTrigger() {
 /**
  * Creates a custom menu in the Google Sheet
  */
-function onOpen() {
+function _onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('WebBook Import')
-    .addItem('Import Trips to Firebase', 'testTripImport')
-    .addItem('Setup Daily Import Trigger', 'setupDailyTrigger')
+    .addItem('Import Trips to Firebase', '_testTripImport')
+    .addItem('Setup Daily Import Trigger', '_setupDailyTrigger')
     .addToUi();
 }

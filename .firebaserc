@@ -1,7 +1,8 @@
 {
   "projects": {
     "default": "mat1-9e6b3",
-    "production": "mat1-9e6b3"
+    "production": "mat1-9e6b3",
+    "production/string/functions/storage": "mat1-9e6b3"
   },
   "targets": {},
   "etags": {}

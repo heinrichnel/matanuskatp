@@ -29,7 +29,7 @@ import {
 // Collection references
 // const tripsCollection = collection(db, 'trips'); // Unused
 const dieselCollection = collection(db, 'diesel');
-const driverBehaviorCollection = collection(db, 'driverBehavior');
+const driverBehaviorCollection = collection(db, 'driverBehaviorEvents');
 const auditLogsCollection = collection(db, 'auditLogs');
 
 // Type for sync status
@@ -49,7 +49,7 @@ interface SyncListeners {
 // Sync service class
 export class SyncService {
   private listeners: SyncListeners = {};
-  private dataCallbacks: Record<string, Function> = {};
+  private dataCallbacks: Record<string, (...args: any[]) => void> = {};
   private tripUnsubscribes: Map<string, () => void> = new Map();
   private dieselUnsubscribes: Map<string, () => void> = new Map();
   private driverBehaviorUnsubscribes: Map<string, () => void> = new Map();
@@ -76,7 +76,7 @@ export class SyncService {
   }
 
   // Register data callbacks for all collections
-  public registerDataCallbacks(callbacks: Record<string, Function>): void {
+  public registerDataCallbacks(callbacks: Record<string, (...args: any[]) => void>): void {
     this.dataCallbacks = { ...this.dataCallbacks, ...callbacks };
     console.log('✅ Data callbacks registered:', Object.keys(callbacks).join(', '));
   }
@@ -382,7 +382,7 @@ export class SyncService {
     }
 
     const eventsQuery = query(
-      collection(db, 'driverBehavior'),
+      collection(db, 'driverBehaviorEvents'),
       orderBy('eventDate', 'desc')
     );
 
@@ -610,12 +610,12 @@ export class SyncService {
 
       if (this.isOnline) {
         // Online - update directly
-        const eventRef = doc(db, 'driverBehavior', eventId);
+        const eventRef = doc(db, 'driverBehaviorEvents', eventId);
         await updateDoc(eventRef, updateData);
         console.log(`✅ Driver behavior event ${eventId} updated with real-time sync`);
       } else {
         // Offline - store for later sync
-        this.pendingChanges.set(`driverBehavior:${eventId}`, updateData);
+        this.pendingChanges.set(`driverBehaviorEvents:${eventId}`, updateData);
         console.log(`📝 Driver behavior event ${eventId} update queued for sync when online`);
 
         // Store in localStorage as backup

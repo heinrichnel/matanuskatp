@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
     "@google-cloud/kms": "^5.0.1",
     "@radix-ui/react-tabs": "^1.0.4",
     "cors-anywhere": "^0.4.4",

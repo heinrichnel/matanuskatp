@@ -1,133 +1,235 @@
 {
   "indexes": [
     {
-      "collectionGroup": "trips",
+      "collectionGroup": "actionItems",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "startDate", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "trips",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "fleetNumber", "order": "ASCENDING" },
-        { "fieldPath": "startDate", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "trips",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "driverName", "order": "ASCENDING" },
-        { "fieldPath": "startDate", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "trips",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "clientName", "order": "ASCENDING" },
-        { "fieldPath": "startDate", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "diesel",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "fleetNumber", "order": "ASCENDING" },
-        { "fieldPath": "date", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "diesel",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "tripId", "order": "ASCENDING" },
-        { "fieldPath": "date", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "driverBehavior",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "driverName", "order": "ASCENDING" },
-        { "fieldPath": "eventDate", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "driverBehavior",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "fleetNumber", "order": "ASCENDING" },
-        { "fieldPath": "eventDate", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "driverBehavior",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "eventType", "order": "ASCENDING" },
-        { "fieldPath": "eventDate", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "carReports",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "carReports",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "responsiblePerson", "order": "ASCENDING" },
-        { "fieldPath": "dateDue", "order": "ASCENDING" }
+        {
+          "fieldPath": "responsiblePerson",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dueDate",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "actionItems",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "dueDate", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "actionItems",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "responsiblePerson", "order": "ASCENDING" },
-        { "fieldPath": "dueDate", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "missedLoads",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "resolutionStatus", "order": "ASCENDING" },
-        { "fieldPath": "recordedAt", "order": "DESCENDING" }
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dueDate",
+          "order": "ASCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "activityLogs",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "entityType", "order": "ASCENDING" },
-        { "fieldPath": "entityId", "order": "ASCENDING" },
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
+        {
+          "fieldPath": "entityType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "entityId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "auditLogs",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "entity", "order": "ASCENDING" },
-        { "fieldPath": "entityId", "order": "ASCENDING" },
-        { "fieldPath": "timestamp", "order": "DESCENDING" }
+        {
+          "fieldPath": "entity",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "entityId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "timestamp",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "carReports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "responsiblePerson",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dateDue",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "carReports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "diesel",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "fleetNumber",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "date",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "diesel",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "tripId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "date",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "driverBehavior",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "driverName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "eventDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "driverBehavior",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "eventType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "eventDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "driverBehavior",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "fleetNumber",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "eventDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "missedLoads",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "resolutionStatus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "recordedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "trips",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "clientName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "trips",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "driverName",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "trips",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "fleetNumber",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "trips",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "startDate",
+          "order": "DESCENDING"
+        }
       ]
     }
   ],
