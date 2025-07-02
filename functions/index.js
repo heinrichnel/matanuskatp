@@ -34,7 +34,7 @@ setGlobalOptions({ maxInstances: 10 });
 //   response.send("Hello from Firebase!");
 // });
 
-const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxWt9XUjNLKwoT38iWuFh-h8Qs7PxCu2I-KGiJqspIm-jVxiSFeZ-KPOqeVoxxEbhv8/exec';
+const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbx2LuGtG7E8XYNafq37D0JK4SfYYUqGrOnXgpLOsWF1uNYoOlErqaiAYGf7vsCKKLTWJA/exec';
 
 exports.importTripsWebhook = functions.https.onRequest(async (req, res) => {
     try {
@@ -229,7 +229,7 @@ exports.importTripsFromWebBook = functions.https.onRequest(async (req, res) => {
 });
 
 // Import Driver Behavior Events from Web Book (automatic sync)
-const DRIVER_BEHAVIOR_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyCG4lCgvmwXhGBoClqGbK3VeOEEuz6m4Y4JeBEobYRkSh52wedzq5IxCO--DfmuHnOKA/exec';
+const DRIVER_BEHAVIOR_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwssUw9YeaNgesBqB32Z5XD7EHaGhhzbr0s7zaFe-Nefx_ccmB7AbsI9CBTnYhGWSK5/exec';
 
 exports.importDriverEventsFromWebBook = functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
     try {
@@ -246,12 +246,12 @@ exports.importDriverEventsFromWebBook = functions.pubsub.schedule('every 5 minut
                 continue;
             }
             // Check for duplicate by event.id
-            const existing = await db.collection('driverBehavior').where('id', '==', event.id).limit(1).get();
+            const existing = await db.collection('driverBehaviorEvents').where('id', '==', event.id).limit(1).get();
             if (!existing.empty) {
                 skipped++;
                 continue;
             }
-            await db.collection('driverBehavior').add(event);
+            await db.collection('driverBehaviorEvents').add(event);
             imported++;
         }
         console.log(`DriverBehavior Sync: Imported ${imported}, Skipped ${skipped}`);
