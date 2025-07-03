@@ -48,26 +48,59 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
       try {
         const text = await file.text();
         const data = parseCSV(text);
-        setPreviewData(data.slice(0, 3)); // Show first 3 rows
+
+        // Create a preview format that's easier to display
+        const previewData = data.slice(0, 3).map((row: string[]) => {
+          return {
+            'Load Ref': row[0] || '',
+            'Registration': row[3] || '',
+            'Driver': row[5] || '',
+            'Client': row[6] || '',
+            'Start Date': row[9] || '',
+            'End Date': row[10] || '',
+            'Route': `${row[12] || ''} - ${row[14] || ''}`,
+            'Distance (km)': row[17] || '',
+            'Revenue': row[19] || '',
+            'Description': row[21] || ''
+          };
+        });
+
+        setPreviewData(previewData);
       } catch (error) {
         console.error('Failed to parse CSV for preview:', error);
       }
     }
   };
 
+  // Parse CSV with position-based mapping instead of header-based
   const parseCSV = (text: string) => {
     const lines = text.split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
     const data = [];
 
+    // Skip the first row (headers) as requested
     for (let i = 1; i < lines.length; i++) {
       if (lines[i].trim()) {
-        const values = lines[i].split(',').map(v => v.trim());
-        const row: any = {};
-        headers.forEach((header, index) => {
-          row[header] = values[index] || '';
-        });
-        data.push(row);
+        // Parse CSV values with respect to quotes
+        const values = [];
+        let currentValue = '';
+        let inQuotes = false;
+        
+        for (let char of lines[i]) {
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            values.push(currentValue.trim());
+            currentValue = '';
+          } else {
+            currentValue += char;
+          }
+        }
+        values.push(currentValue.trim()); // Don't forget the last value
+        
+        // Only add if we have enough values
+        if (values.length >= 20) {
+          data.push(values);
+        }
       }
     }
 
@@ -93,9 +126,10 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
       let mappedCount = 0;
       let unmappedCount = 0;
 
-      const trips = data.map((row: any) => {
-        // Get registration from the CSV row
-        const registration = row.Registration || row.registration || '';
+      const trips = data.map((row: string[]) => {
+        // Map fields according to the position-based mapping provided
+        // Column 3 (index position) contains the registration number (AGZ1963)
+        const registration = row[3] || '';
         
         // Look up fleet number in the mapping
         let fleetNumber = '';
@@ -111,31 +145,43 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
             // Use registration as fallback if no fleet number is found
             fleetNumber = registration;
           }
-        } else {
-          // If no registration is provided, try to use fleetNumber or fleet directly
-          fleetNumber = row.fleetNumber || row.fleet || '';
-          if (fleetNumber) {
-            mappedCount++;
-          } else {
-            unmappedCount++;
-          }
         }
+        
+        // Build route from columns 12, 13, 14
+        const routeParts = [row[12], row[13], row[14]].filter(part => part);
+        const route = routeParts.join(' - ');
+        
+        // Handle load description
+        const descriptionParts = [row[21], row[22]].filter(part => part);
+        const description = descriptionParts.join(' ');
+        
+        // Format dates to YYYY-MM-DD if they're in DD/MM/YYYY format
+        const formatDate = (dateStr: string) => {
+          if (!dateStr) return '';
+          
+          // Check if it's in DD/MM/YYYY format
+          const dateParts = dateStr.split('/');
+          if (dateParts.length === 3) {
+            return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+          }
+          
+          return dateStr; // Return as is if not in expected format
+        };
         
         return {
           fleetNumber,
-          route: row.route || '',
-          clientName: row.clientName || row.client || '',
-          baseRevenue: parseFloat(row.baseRevenue || row.revenue || '0'),
-          revenueCurrency: row.revenueCurrency || row.currency || 'ZAR',
-          startDate: row.startDate || '',
-          endDate: row.endDate || '',
-          driverName: row.driverName || row.driver || '',
-          distanceKm: parseFloat(row.distanceKm || row.distance || '0'),
-          clientType: row.clientType || 'external',
-          description: row.description || '',
-          paymentStatus: (['unpaid', 'partial', 'paid'].includes((row.paymentStatus || '').toLowerCase())
-            ? (row.paymentStatus || '').toLowerCase()
-            : 'unpaid') as 'unpaid' | 'partial' | 'paid',
+          loadRef: row[0] || '', // Load reference from column 0
+          route,
+          clientName: row[6] || '', // Client name from column 6
+          baseRevenue: parseFloat(row[19] || '0'), // Revenue from column 19
+          revenueCurrency: 'USD' as 'USD' | 'ZAR', // Always USD as specified, properly typed
+          startDate: formatDate(row[9] || ''), // Start date from column 9
+          endDate: formatDate(row[10] || ''), // End date from column 10
+          driverName: row[5] || '', // Driver name from column 5
+          distanceKm: parseFloat(row[17] || '0'), // Distance from column 17
+          clientType: 'external' as 'external' | 'internal', // Explicitly type as union literal
+          description,
+          paymentStatus: 'unpaid' as 'unpaid' | 'partial' | 'paid',
           additionalCosts: [],
           followUpHistory: [],
           status: 'active' as 'active', // Ensure trips are set to active status
@@ -199,35 +245,61 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
   };
 
   const handleDownloadTemplate = () => {
-    const headers = [
+    // Create a sample row based on the required format
+    const sampleRow = [
+      'LO1978/4765',  // Load ref
+      '10215',        // Field 2
+      '',             // Field 3
+      'AGZ1963',      // Registration
+      'AGK6951',      // Field 5
+      'Enock Mukonyerwa', // Driver
+      'MARKETING',    // Client
+      '1035/TPT/ADM/001', // Field 8
+      'Load Delivered', // Status
+      '07/06/2025',   // Start date
+      '09/06/2025',   // End date
+      '',             // Field 12
+      'REZENDE - BV (BACK LOAD)', // Route part 1
+      'Harare',       // Route part 2
+      'BV',           // Route part 3
+      '65775',        // Field 16
+      '66109',        // Field 17
+      '334',          // Distance (km)
+      'Per Km',       // Field 19
+      '731.4600',     // Revenue (USD)
+      '0.00',         // Field 21
+      '1350 crates 30 bins', // Description
+      'Tanaka Mboto' // Field 23
+    ];
+    
+    // Create a header row (will be skipped during import, but useful for reference)
+    const headerRow = [
+      'Load Ref',
+      'Field 2',
+      'Field 3',
       'Registration',
-      'driverName',
-      'clientName',
-      'route',
-      'baseRevenue',
-      'revenueCurrency',
-      'startDate',
-      'endDate',
-      'distanceKm',
-      'clientType',
-      'description',
-      'paymentStatus'
+      'Field 5',
+      'Driver',
+      'Client',
+      'Field 8',
+      'Status',
+      'Start Date',
+      'End Date',
+      'Field 12',
+      'Route Part 1',
+      'Route Part 2',
+      'Route Part 3',
+      'Field 16',
+      'Field 17',
+      'Distance (km)',
+      'Field 19',
+      'Revenue (USD)',
+      'Field 21',
+      'Description',
+      'Field 23'
     ];
-    const sample = [
-      'ABJ3739',
-      'John Doe',
-      'Acme Corp',
-      'JHB-DBN',
-      '12000',
-      'ZAR',
-      '2025-06-01',
-      '2025-06-03',
-      '600',
-      'external',
-      'Sample trip',
-      'unpaid'
-    ];
-    const csv = `${headers.join(',')}\n${sample.join(',')}`;
+    
+    const csv = `${headerRow.join(',')}\n${sampleRow.join(',')}`;
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -343,23 +415,32 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
           <h4 className="text-sm font-medium text-blue-800 mb-2">CSV Format Requirements & Fleet Mapping</h4>
           <div className="text-sm text-blue-700 space-y-1">
-            <p>Your CSV file should include the following columns:</p>
+            <p>Your CSV file should follow this position-based format:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
-              <li><strong>Registration</strong> - Vehicle registration number (e.g., "ABJ3739", "AFQ1327")</li>
-              <li><strong>driverName</strong> - Driver name</li>
-              <li><strong>clientName</strong> - Client/customer name</li>
-              <li><strong>route</strong> - Trip route description</li>
-              <li><strong>baseRevenue</strong> - Revenue amount (numeric)</li>
-              <li><strong>revenueCurrency</strong> - Currency (USD or ZAR)</li>
-              <li><strong>startDate</strong> - Start date (YYYY-MM-DD)</li>
-              <li><strong>endDate</strong> - End date (YYYY-MM-DD)</li>
-              <li><strong>distanceKm</strong> - Distance in kilometers (optional)</li>
-              <li><strong>clientType</strong> - "internal" or "external" (optional)</li>
+              <li><strong>Column 1</strong> - Load reference (e.g., "LO1978/4765")</li>
+              <li><strong>Column 4</strong> - Vehicle registration number (e.g., "AGZ1963")</li>
+              <li><strong>Column 6</strong> - Driver name (e.g., "Enock Mukonyerwa")</li>
+              <li><strong>Column 7</strong> - Client name (e.g., "MARKETING")</li>
+              <li><strong>Column 9</strong> - Status/Note (e.g., "Load Delivered")</li>
+              <li><strong>Column 10</strong> - Start date (loaded date, e.g., "07/06/2025")</li>
+              <li><strong>Column 11</strong> - End date (offloaded date, e.g., "09/06/2025")</li>
+              <li><strong>Columns 13-15</strong> - Route information (e.g., "REZENDE - BV (BACK LOAD)")</li>
+              <li><strong>Column 18</strong> - Distance in kilometers (e.g., "334")</li>
+              <li><strong>Column 20</strong> - Base revenue in USD (e.g., "731.4600")</li>
+              <li><strong>Column 22</strong> - Load description (e.g., "1350 crates 30 bins")</li>
+            </ul>
+            <p className="mt-2 font-medium">Important Notes:</p>
+            <ul className="list-disc list-inside mt-1 space-y-1">
+              <li>The first row is always skipped (headers)</li>
+              <li>Registration numbers (Column 4) will be automatically mapped to fleet numbers</li>
+              <li>If a registration is not found in the Fleet Master List, the registration itself will be used</li>
+              <li>All imported trips are automatically set to active status</li>
             </ul>
             <p className="mt-2 font-medium">Fleet Number Mapping:</p>
             <p>
-              Registration numbers will be automatically mapped to fleet numbers using the Fleet Master List.
-              If a registration is not found in the list, the registration number itself will be used as the fleet number.
+              The system will map these registration numbers to fleet numbers:
+              <br/>
+              AGZ1963 → 31H, AGZ1286 → 4H, AFQ1324 → 23H, etc.
             </p>
             <Button
               onClick={handleDownloadTemplate}
