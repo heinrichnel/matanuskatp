@@ -25,6 +25,7 @@ import { getAnalytics } from 'firebase/analytics';
 import { Trip, DieselConsumptionRecord, MissedLoad, DriverBehaviorEvent, ActionItem, CARReport, CostEntry } from './types';
 import { AuditLog } from './types/audit';
 import { firebaseConfig, firebaseApp } from './firebaseConfig';
+import { connectToEmulators } from './firebaseEmulators';
 
 // Initialize Firestore with offline persistence
 // DEBUG ONLY - Add diagnostic logs to track Firestore initialization issues
@@ -41,6 +42,14 @@ try {
     })
   });
   console.log("✅ Firestore initialized with persistent cache");
+
+  // Connect to emulators in development mode
+  if (import.meta.env.DEV) {
+    console.log("🧪 Checking for Firebase emulators...");
+    connectToEmulators();
+    console.log("⚠️ Firebase emulators connected. ALL OPERATIONS WILL USE EMULATED SERVICES!");
+    console.log("⚠️ Make sure the emulators are running with: firebase emulators:start");
+  }
 } catch (error) {
   console.error("❌ Firestore initialization error:", error, typeof error === 'object' ? JSON.stringify(error) : '');
   // Fallback to initialize without persistence to ensure the app works

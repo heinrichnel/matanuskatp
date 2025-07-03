@@ -1,14 +1,28 @@
+
+
+
+
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { Upload, X, WifiOff, RefreshCw } from 'lucide-react';
+import { Upload, X, WifiOff, RefreshCw, FileSpreadsheet } from 'lucide-react';
 import { useSyncContext } from '../../context/SyncContext';
+import { FLEET_VEHICLES } from '../../types/vehicle';
 
 interface LoadImportModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+// Create a fleet master mapping object for quick lookups
+const createFleetMasterMapping = () => {
+  const mapping: { [key: string]: string } = {};
+  FLEET_VEHICLES.forEach(vehicle => {
+    mapping[vehicle.registrationNo] = vehicle.fleetNo;
+  });
+  return mapping;
+};
 
 const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) => {
   const { importTripsFromCSV, importTripsFromWebhook } = useAppContext();
@@ -19,6 +33,11 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [mappingResults, setMappingResults] = useState<{
+    mapped: number;
+    unmapped: number;
+    total: number;
+  } | null>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) {
@@ -61,30 +80,74 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
     setIsProcessing(true);
     setError(null);
     setSuccess(null);
+    setMappingResults(null);
 
     try {
       const text = await csvFile.text();
       const data = parseCSV(text);
+      
+      // Create fleet master mapping
+      const fleetMasterMapping = createFleetMasterMapping();
+      
+      // Track mapping results
+      let mappedCount = 0;
+      let unmappedCount = 0;
 
-      const trips = data.map((row: any) => ({
-        fleetNumber: row.fleetNumber || row.fleet || '',
-        route: row.route || '',
-        clientName: row.clientName || row.client || '',
-        baseRevenue: parseFloat(row.baseRevenue || row.revenue || '0'),
-        revenueCurrency: row.revenueCurrency || row.currency || 'ZAR',
-        startDate: row.startDate || '',
-        endDate: row.endDate || '',
-        driverName: row.driverName || row.driver || '',
-        distanceKm: parseFloat(row.distanceKm || row.distance || '0'),
-        clientType: row.clientType || 'external',
-        description: row.description || '',
-        paymentStatus: (['unpaid', 'partial', 'paid'].includes((row.paymentStatus || '').toLowerCase())
-          ? (row.paymentStatus || '').toLowerCase()
-          : 'unpaid') as 'unpaid' | 'partial' | 'paid',
-        additionalCosts: [],
-        followUpHistory: [],
-      }));
-
+      const trips = data.map((row: any) => {
+        // Get registration from the CSV row
+        const registration = row.Registration || row.registration || '';
+        
+        // Look up fleet number in the mapping
+        let fleetNumber = '';
+        
+        if (registration) {
+          // Try to get the fleet number from the mapping
+          fleetNumber = fleetMasterMapping[registration] || '';
+          
+          if (fleetNumber) {
+            mappedCount++;
+          } else {
+            unmappedCount++;
+            // Use registration as fallback if no fleet number is found
+            fleetNumber = registration;
+          }
+        } else {
+          // If no registration is provided, try to use fleetNumber or fleet directly
+          fleetNumber = row.fleetNumber || row.fleet || '';
+          if (fleetNumber) {
+            mappedCount++;
+          } else {
+            unmappedCount++;
+          }
+        }
+        
+        return {
+          fleetNumber,
+          route: row.route || '',
+          clientName: row.clientName || row.client || '',
+          baseRevenue: parseFloat(row.baseRevenue || row.revenue || '0'),
+          revenueCurrency: row.revenueCurrency || row.currency || 'ZAR',
+          startDate: row.startDate || '',
+          endDate: row.endDate || '',
+          driverName: row.driverName || row.driver || '',
+          distanceKm: parseFloat(row.distanceKm || row.distance || '0'),
+          clientType: row.clientType || 'external',
+          description: row.description || '',
+          paymentStatus: (['unpaid', 'partial', 'paid'].includes((row.paymentStatus || '').toLowerCase())
+            ? (row.paymentStatus || '').toLowerCase()
+            : 'unpaid') as 'unpaid' | 'partial' | 'paid',
+          additionalCosts: [],
+          followUpHistory: [],
+          status: 'active' as 'active', // Ensure trips are set to active status
+        };
+      });
+      
+      // Set mapping results
+      setMappingResults({
+        mapped: mappedCount,
+        unmapped: unmappedCount,
+        total: data.length
+      });
       await importTripsFromCSV(trips);
       setSuccess(`Successfully imported ${trips.length} trips from CSV file.${!isOnline ? '\n\nData will be synced when your connection is restored.' : ''}`);
       setCsvFile(null);
@@ -137,7 +200,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
 
   const handleDownloadTemplate = () => {
     const headers = [
-      'fleetNumber',
+      'Registration',
       'driverName',
       'clientName',
       'route',
@@ -151,7 +214,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
       'paymentStatus'
     ];
     const sample = [
-      '6H',
+      'ABJ3739',
       'John Doe',
       'Acme Corp',
       'JHB-DBN',
@@ -173,7 +236,6 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
     a.click();
     URL.revokeObjectURL(url);
   };
-
   return (
     <Modal
       isOpen={isOpen}
@@ -235,6 +297,28 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
           </div>
         )}
 
+        {/* Mapping Results */}
+        {mappingResults && (
+          <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+            <div className="flex items-start space-x-3">
+              <FileSpreadsheet className="w-5 h-5 text-blue-600 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-medium text-blue-800">Fleet Mapping Results</h4>
+                <div className="mt-2 text-sm text-blue-700">
+                  <p>Total vehicles: {mappingResults.total}</p>
+                  <p>Successfully mapped: {mappingResults.mapped}</p>
+                  {mappingResults.unmapped > 0 && (
+                    <p className="text-amber-600">
+                      Unmapped registrations: {mappingResults.unmapped} 
+                      <span className="ml-1 text-xs">(Registration used as fallback)</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Webhook Import Section */}
         <div className="bg-green-50 border border-green-200 rounded-md p-4">
           <h4 className="text-sm font-medium text-green-800 mb-2">Import from Google Sheets Webhook</h4>
@@ -257,11 +341,11 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         <div className="text-center text-gray-500 font-medium">OR</div>
 
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-          <h4 className="text-sm font-medium text-blue-800 mb-2">CSV Format Requirements</h4>
+          <h4 className="text-sm font-medium text-blue-800 mb-2">CSV Format Requirements & Fleet Mapping</h4>
           <div className="text-sm text-blue-700 space-y-1">
             <p>Your CSV file should include the following columns:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
-              <li><strong>fleetNumber</strong> - Fleet identifier (e.g., "6H", "26H")</li>
+              <li><strong>Registration</strong> - Vehicle registration number (e.g., "ABJ3739", "AFQ1327")</li>
               <li><strong>driverName</strong> - Driver name</li>
               <li><strong>clientName</strong> - Client/customer name</li>
               <li><strong>route</strong> - Trip route description</li>
@@ -272,6 +356,11 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
               <li><strong>distanceKm</strong> - Distance in kilometers (optional)</li>
               <li><strong>clientType</strong> - "internal" or "external" (optional)</li>
             </ul>
+            <p className="mt-2 font-medium">Fleet Number Mapping:</p>
+            <p>
+              Registration numbers will be automatically mapped to fleet numbers using the Fleet Master List.
+              If a registration is not found in the list, the registration number itself will be used as the fleet number.
+            </p>
             <Button
               onClick={handleDownloadTemplate}
               variant="outline"
@@ -281,7 +370,6 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
             </Button>
           </div>
         </div>
-
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

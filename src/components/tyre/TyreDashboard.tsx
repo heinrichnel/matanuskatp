@@ -17,14 +17,12 @@ import {
 } from 'lucide-react';
 import LoadingIndicator from '../ui/LoadingIndicator';
 
-// Import tyre reference data and mock inventory
+// Import tyre reference data and inventory types
 import {
   getUniqueTyreBrands,
   getUniqueTyreSizes,
   VENDORS,
-  MOCK_INVENTORY,
   TyreInventoryItem,
-  getInventoryItemsByCriteria,
   TyreStoreLocation,
   TYRE_REFERENCES,
   TyreReference
@@ -460,9 +458,6 @@ const TyreDashboard: React.FC = () => {
   const { 
     workshopInventory, 
     refreshWorkshopInventory,
-    addWorkshopInventoryItem,
-    updateWorkshopInventoryItem,
-    deleteWorkshopInventoryItem,
     isLoading: contextLoading
   } = useAppContext();
   
