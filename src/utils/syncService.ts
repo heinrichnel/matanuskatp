@@ -6,7 +6,8 @@ import {
   doc,
   onSnapshot,
   updateDoc,
-  // setDoc, // Unused
+  setDoc,
+  addDoc,
   serverTimestamp,
   query,
   where,
@@ -26,17 +27,24 @@ import {
   CARReport
 } from '../types';
 import { TyreInventoryItem } from './tyreConstants';
+import { Tyre } from '../types/workshop-tyre-inventory';
+import { JobCard } from '../types/workshop-job-card';
 
 // Collection references
 // const tripsCollection = collection(db, 'trips'); // Unused
 const dieselCollection = collection(db, 'diesel');
 const driverBehaviorCollection = collection(db, 'driverBehaviorEvents');
 const auditLogsCollection = collection(db, 'auditLogs');
-
+const workshopInventoryCollection = collection(db, 'workshopInventory');
+const jobCardsCollection = collection(db, 'jobCards');
+const tyresCollection = collection(db, 'tyres');
+  onJobCardUpdate?: (jobCard: JobCard) => void;
+  onTyreUpdate?: (tyre: Tyre) => void;
 // Type for sync status
 export type SyncStatus = 'idle' | 'syncing' | 'success' | 'error';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting';
-
+  private jobCardUnsubscribes: Map<string, () => void> = new Map();
+  private tyreUnsubscribes: Map<string, () => void> = new Map();
 // Interface for sync listeners
 interface SyncListeners {
   onSyncStatusChange?: (status: SyncStatus) => void;
@@ -46,7 +54,17 @@ interface SyncListeners {
   onDriverBehaviorUpdate?: (event: DriverBehaviorEvent) => void;
   onAuditLogUpdate?: (log: AuditLog) => void;
 }
+    // Unsubscribe from all individual job card listeners
+    for (const unsubscribe of this.jobCardUnsubscribes.values()) {
+      unsubscribe();
+    }
+    this.jobCardUnsubscribes.clear();
 
+    // Unsubscribe from all individual tyre listeners
+    for (const unsubscribe of this.tyreUnsubscribes.values()) {
+      unsubscribe();
+    }
+    this.tyreUnsubscribes.clear();
 // Sync service class
 export class SyncService {
   private listeners: SyncListeners = {};
@@ -948,12 +966,534 @@ export class SyncService {
       this.globalUnsubscribes.get('allWorkshopInventory')?.();
     }
 
-    const workshopInventoryCollection = collection(db, 'workshopInventory');
     const inventoryQuery = query(
       workshopInventoryCollection,
       orderBy('purchaseDate', 'desc')
     );
 
+  // Add a workshop inventory item
+  public async addWorkshopInventoryItem(data: Omit<TyreInventoryItem, 'id'>): Promise<string> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(data);
+
+      // Add timestamps
+      const itemData = {
+        ...cleanData,
+        createdAt: this.isOnline ? serverTimestamp() : new Date().toISOString(),
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
+
+      let itemId: string;
+      
+      if (this.isOnline) {
+        // Online - add directly to Firestore
+        const docRef = await addDoc(workshopInventoryCollection, itemData);
+        itemId = docRef.id;
+        console.log(`✅ Workshop inventory item added with ID: ${itemId}`);
+      } else {
+        // Offline - generate temporary ID and store for later sync
+        itemId = `temp-inventory-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        this.pendingChanges.set(`workshopInventory:${itemId}`, itemData);
+        console.log(`📝 Workshop inventory item creation queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+      return itemId;
+    } catch (error) {
+      console.error(`Error adding workshop inventory item:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
+  // Delete a workshop inventory item
+  public async deleteWorkshopInventoryItem(itemId: string): Promise<void> {
+    try {
+      this.setSyncStatus('syncing');
+
+      if (this.isOnline) {
+        // Online - delete directly from Firestore
+        const itemRef = doc(db, 'workshopInventory', itemId);
+        await updateDoc(itemRef, { deleted: true, updatedAt: serverTimestamp() });
+        console.log(`✅ Workshop inventory item ${itemId} marked as deleted`);
+      } else {
+        // Offline - store delete operation for later sync
+        this.pendingChanges.set(`workshopInventory:${itemId}:delete`, { deleted: true });
+        console.log(`📝 Workshop inventory item deletion queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+    } catch (error) {
+      console.error(`Error deleting workshop inventory item ${itemId}:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
+  // Subscribe to all job cards (global listener)
+  public subscribeToAllJobCards(): void {
+    // Clear any existing global job cards listeners
+    if (this.globalUnsubscribes.has('allJobCards')) {
+      this.globalUnsubscribes.get('allJobCards')?.();
+    }
+
+    const jobCardsQuery = query(
+      jobCardsCollection,
+      orderBy('createdDate', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      jobCardsQuery,
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+
+          if (change.type === 'added') {
+            added++;
+            console.log(`Job card added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Job card modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Job card removed: ${id}`);
+          }
+        });
+
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Job cards changes: ${added} added, ${modified} modified, ${removed} removed`);
+
+          // Get all current documents for a full refresh
+          const jobCards: JobCard[] = [];
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            jobCards.push({ id: doc.id, ...data } as JobCard);
+          });
+
+          if (typeof this.dataCallbacks.setJobCards === 'function') {
+            this.dataCallbacks.setJobCards(jobCards);
+          } else {
+            console.warn('⚠️ setJobCards callback not registered');
+          }
+          this.lastSynced = new Date();
+        }
+      },
+      (error) => {
+        console.error('Error in global job cards listener:', error);
+      }
+    );
+
+    this.globalUnsubscribes.set('allJobCards', unsubscribe);
+  }
+
+  // Add a job card
+  public async addJobCard(data: Omit<JobCard, 'id'>): Promise<string> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(data);
+
+      // Add timestamps
+      const jobCardData = {
+        ...cleanData,
+        createdAt: this.isOnline ? serverTimestamp() : new Date().toISOString(),
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
+
+      let jobCardId: string;
+      
+      if (this.isOnline) {
+        // Online - add directly to Firestore
+        const docRef = await addDoc(jobCardsCollection, jobCardData);
+        jobCardId = docRef.id;
+        console.log(`✅ Job card added with ID: ${jobCardId}`);
+      } else {
+        // Offline - generate temporary ID and store for later sync
+        jobCardId = `temp-jobcard-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        this.pendingChanges.set(`jobCards:${jobCardId}`, jobCardData);
+        console.log(`📝 Job card creation queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+      return jobCardId;
+    } catch (error) {
+      console.error(`Error adding job card:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
+  // Update a job card
+  public async updateJobCard(jobCardId: string, data: Partial<JobCard>): Promise<void> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(data);
+
+      // Add updatedAt timestamp
+      const updateData = {
+        ...cleanData,
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
+
+      if (this.isOnline) {
+        // Online - update directly
+        const jobCardRef = doc(db, 'jobCards', jobCardId);
+        await updateDoc(jobCardRef, updateData);
+        console.log(`✅ Job card ${jobCardId} updated with real-time sync`);
+      } else {
+        // Offline - store for later sync
+        this.pendingChanges.set(`jobCards:${jobCardId}`, updateData);
+        console.log(`📝 Job card ${jobCardId} update queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+    } catch (error) {
+      console.error(`Error updating job card ${jobCardId}:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
+  // Delete a job card
+  public async deleteJobCard(jobCardId: string): Promise<void> {
+    try {
+      this.setSyncStatus('syncing');
+
+      if (this.isOnline) {
+        // Online - delete directly from Firestore
+        const jobCardRef = doc(db, 'jobCards', jobCardId);
+        await updateDoc(jobCardRef, { deleted: true, updatedAt: serverTimestamp() });
+        console.log(`✅ Job card ${jobCardId} marked as deleted`);
+      } else {
+        // Offline - store delete operation for later sync
+        this.pendingChanges.set(`jobCards:${jobCardId}:delete`, { deleted: true });
+        console.log(`📝 Job card deletion queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+    } catch (error) {
+      console.error(`Error deleting job card ${jobCardId}:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
+  // Subscribe to all tyres (global listener)
+  public subscribeToAllTyres(): void {
+    // Clear any existing global tyres listeners
+    if (this.globalUnsubscribes.has('allTyres')) {
+      this.globalUnsubscribes.get('allTyres')?.();
+    }
+
+    const tyresQuery = query(
+      tyresCollection,
+      orderBy('installDetails.date', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      tyresQuery,
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+
+          if (change.type === 'added') {
+            added++;
+            console.log(`Tyre added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Tyre modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Tyre removed: ${id}`);
+          }
+        });
+
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Tyres changes: ${added} added, ${modified} modified, ${removed} removed`);
+
+          // Get all current documents for a full refresh
+          const tyres: Tyre[] = [];
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            tyres.push({ id: doc.id, ...data } as Tyre);
+          });
+
+          if (typeof this.dataCallbacks.setTyres === 'function') {
+            this.dataCallbacks.setTyres(tyres);
+          } else {
+            console.warn('⚠️ setTyres callback not registered');
+          }
+          this.lastSynced = new Date();
+        }
+      },
+      (error) => {
+        console.error('Error in global tyres listener:', error);
+      }
+    );
+
+    this.globalUnsubscribes.set('allTyres', unsubscribe);
+  }
+
+  // Add a tyre
+  public async addTyre(data: Omit<Tyre, 'id'>): Promise<string> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(data);
+
+      // Add timestamps
+      const tyreData = {
+        ...cleanData,
+        createdAt: this.isOnline ? serverTimestamp() : new Date().toISOString(),
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
+
+      let tyreId: string;
+      
+      if (this.isOnline) {
+        // Online - add directly to Firestore
+        const docRef = await addDoc(tyresCollection, tyreData);
+        tyreId = docRef.id;
+        console.log(`✅ Tyre added with ID: ${tyreId}`);
+      } else {
+        // Offline - generate temporary ID and store for later sync
+        tyreId = `temp-tyre-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        this.pendingChanges.set(`tyres:${tyreId}`, tyreData);
+        console.log(`📝 Tyre creation queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+      return tyreId;
+    } catch (error) {
+      console.error(`Error adding tyre:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
+  // Update a tyre
+  public async updateTyre(tyreId: string, data: Partial<Tyre>): Promise<void> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(data);
+
+      // Add updatedAt timestamp
+      const updateData = {
+        ...cleanData,
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
+
+      if (this.isOnline) {
+        // Online - update directly
+        const tyreRef = doc(db, 'tyres', tyreId);
+        await updateDoc(tyreRef, updateData);
+        console.log(`✅ Tyre ${tyreId} updated with real-time sync`);
+      } else {
+        // Offline - store for later sync
+        this.pendingChanges.set(`tyres:${tyreId}`, updateData);
+        console.log(`📝 Tyre ${tyreId} update queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+    } catch (error) {
+      console.error(`Error updating tyre ${tyreId}:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
+  // Delete a tyre
+  public async deleteTyre(tyreId: string): Promise<void> {
+    try {
+      this.setSyncStatus('syncing');
+
+      if (this.isOnline) {
+        // Online - delete directly from Firestore
+        const tyreRef = doc(db, 'tyres', tyreId);
+        await updateDoc(tyreRef, { deleted: true, updatedAt: serverTimestamp() });
+        console.log(`✅ Tyre ${tyreId} marked as deleted`);
+      } else {
+        // Offline - store delete operation for later sync
+        this.pendingChanges.set(`tyres:${tyreId}:delete`, { deleted: true });
+        console.log(`📝 Tyre deletion queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+    } catch (error) {
+      console.error(`Error deleting tyre ${tyreId}:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
+  // Add a tyre inspection
+  public async addTyreInspection(tyreId: string, inspectionData: any): Promise<string> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(inspectionData);
+
+      // Add timestamps
+      const data = {
+        ...cleanData,
+        tyreId,
+        timestamp: this.isOnline ? serverTimestamp() : new Date().toISOString(),
+        createdAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
+
+      // Get the tyre to update its inspection history
+      const tyreRef = doc(db, 'tyres', tyreId);
+      const tyreSnap = await getDocs(query(collection(db, 'tyres'), where('id', '==', tyreId)));
+
+      if (tyreSnap.empty) {
+        throw new Error(`Tyre ${tyreId} not found`);
+      }
+
+      const tyreData = tyreSnap.docs[0].data() as Tyre;
+      
+      // Create a new inspection ID
+      const inspectionId = `insp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      
+      // Add the inspection to the tyre's inspection history
+      const inspectionHistory = tyreData.inspectionHistory || [];
+      inspectionHistory.push({
+        ...data,
+        id: inspectionId
+      });
+
+      // Update the tyre with the new inspection history and current tread depth/pressure
+      await updateDoc(tyreRef, {
+        inspectionHistory,
+        treadDepth: data.treadDepth,
+        pressure: data.pressure,
+        status: data.status,
+        lastInspection: this.isOnline ? serverTimestamp() : new Date().toISOString(),
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      });
+
+      console.log(`✅ Tyre inspection added with ID: ${inspectionId}`);
+      this.setSyncStatus('success');
+      return inspectionId;
+    } catch (error) {
+      console.error(`Error adding tyre inspection:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+  
+  // Add inventory item (alias for addWorkshopInventoryItem for consistency)
+  public async addInventoryItem(data: Omit<TyreInventoryItem, 'id'>): Promise<string> {
+    return this.addWorkshopInventoryItem(data);
+  }
+  
+  // Update inventory item (alias for updateWorkshopInventoryItem for consistency)
+  public async updateInventoryItem(itemId: string, data: Partial<TyreInventoryItem>): Promise<void> {
+    return this.updateWorkshopInventoryItem(itemId, data);
+  }
+  
+  // Add a reorder request for inventory items
+  public async addReorderRequest(requestData: any): Promise<string> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(requestData);
+
+      // Add timestamps
+      const data = {
+        ...cleanData,
+        createdAt: this.isOnline ? serverTimestamp() : new Date().toISOString(),
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString(),
+        status: requestData.status || 'pending'
+      };
+
+      let requestId: string;
+      
+      if (this.isOnline) {
+        // Online - add directly to Firestore
+        const docRef = await addDoc(collection(db, 'reorderRequests'), data);
+        requestId = docRef.id;
+        console.log(`✅ Reorder request added with ID: ${requestId}`);
+      } else {
+        // Offline - generate temporary ID and store for later sync
+        requestId = `temp-reorder-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        this.pendingChanges.set(`reorderRequests:${requestId}`, data);
+        console.log(`📝 Reorder request creation queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+      return requestId;
+    } catch (error) {
+      console.error(`Error adding reorder request:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+  
+  // Get tyres - helper method to provide current tyres via callback
+  public getTyres(callback: (tyres: Tyre[]) => void): void {
+    const tyresQuery = query(
+      tyresCollection,
+      orderBy('installDetails.date', 'desc')
+    );
+    
+    getDocs(tyresQuery).then(snapshot => {
+      const tyres: Tyre[] = [];
+      snapshot.forEach(doc => {
+        const data = convertTimestamps(doc.data());
+        tyres.push({ id: doc.id, ...data } as Tyre);
+      });
+      callback(tyres);
+    }).catch(error => {
+      console.error('Error getting tyres:', error);
+      callback([]);
+    });
+  }
     const unsubscribe = onSnapshot(
       inventoryQuery,
       (snapshot) => {
