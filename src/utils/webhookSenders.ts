@@ -92,9 +92,25 @@ export async function sendDriverBehaviorEvent(payload: object): Promise<object> 
     try {
         // Get auth token
         const token = await getAuthToken();
+        
+        // Ensure payload is wrapped in an events array as expected by the server
+        let formattedPayload;
+        
+        // If payload already has an events property that is an array, use it as is
+        if (payload && typeof payload === 'object' && 'events' in payload && Array.isArray((payload as any).events)) {
+            formattedPayload = payload;
+        } 
+        // If payload is an array, wrap it in an object with events property
+        else if (Array.isArray(payload)) {
+            formattedPayload = { events: payload };
+        }
+        // Otherwise, treat the payload as a single event and wrap it in an array inside events property
+        else {
+            formattedPayload = { events: [payload] };
+        }
 
-        // Log the payload for debugging
-        console.log('Driver behavior event payload:', JSON.stringify(payload));
+        // Log the formatted payload for debugging
+        console.log('Driver behavior event payload:', JSON.stringify(formattedPayload));
 
         // Make the request with retry logic
         const response = await retryWebhookCall(async () => {
@@ -105,7 +121,7 @@ export async function sendDriverBehaviorEvent(payload: object): Promise<object> 
                     'Accept': 'application/json',
                     'Authorization': token ? `Bearer ${token}` : ''
                 },
-                body: JSON.stringify(payload),
+                body: JSON.stringify(formattedPayload),
             });
 
             if (!res.ok) {
