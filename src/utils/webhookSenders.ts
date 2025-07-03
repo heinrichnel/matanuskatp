@@ -29,8 +29,24 @@ export async function sendTripEvent(payload: object): Promise<object> {
         // Get auth token
         const token = await getAuthToken();
 
-        // Log the payload for debugging
-        console.log('Trip event payload:', JSON.stringify(payload));
+        // Ensure payload is wrapped in a trips array as expected by the server
+        let formattedPayload;
+        
+        // If payload already has a trips property that is an array, use it as is
+        if (payload && typeof payload === 'object' && 'trips' in payload && Array.isArray((payload as any).trips)) {
+            formattedPayload = payload;
+        } 
+        // If payload is an array, wrap it in an object with trips property
+        else if (Array.isArray(payload)) {
+            formattedPayload = { trips: payload };
+        }
+        // Otherwise, treat the payload as a single trip and wrap it in an array inside trips property
+        else {
+            formattedPayload = { trips: [payload] };
+        }
+
+        // Log the formatted payload for debugging
+        console.log('Trip event payload:', JSON.stringify(formattedPayload));
 
         // Make the request with retry logic
         const response = await retryWebhookCall(async () => {
@@ -41,7 +57,7 @@ export async function sendTripEvent(payload: object): Promise<object> {
                     'Accept': 'application/json',
                     'Authorization': token ? `Bearer ${token}` : ''
                 },
-                body: JSON.stringify(payload),
+                body: JSON.stringify(formattedPayload),
             });
 
             if (!res.ok) {
