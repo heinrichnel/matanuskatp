@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Tyre } from '../../types/workshop-tyre-inventory';
 import Button from '../ui/Button';
 import { useAppContext } from '../../context/AppContext';
+import syncService from '../../utils/syncService';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -28,8 +29,8 @@ import {
   TyreReference
 } from '../../utils/tyreConstants';
 
-// Use the mock inventory data instead of static mock tyres
-// Using mock tyres temporarily as we haven't implemented the active tyres in context yet
+// Mock data for fallback if Firebase has no data
+// This will be replaced with actual Firebase data
 const MOCK_TYRES = [
   {
     id: 'tyre1',
@@ -485,43 +486,55 @@ const TyreDashboard: React.FC = () => {
   const inventoryStats = calculateInventoryStats(workshopInventory);
   const brandPerformance = calculateBrandPerformance(tyres);
 
-  // Load tyres from Firestore (mocked for now)
+  // Register Firebase listeners when component mounts
   useEffect(() => {
-    const fetchTyres = async () => {
-      setLoading(true);
-
-      try {
-        // This would normally be a Firestore query
-        // const db = getFirestore();
-        // const tyresCollection = collection(db, 'tyres');
-        // const tyresSnapshot = await getDocs(tyresCollection);
-        // const tyresData = tyresSnapshot.docs.map(doc => ({
-        //   id: doc.id,
-        //   ...doc.data(),
-        // })) as Tyre[];
-
-        // For now, use mock data
-        const tyresData = [...MOCK_TYRES];
-
-        // Cast to unknown first, then to Tyre[] to avoid TypeScript errors with missing properties
-        const filteredTyres = applyFilters(tyresData as unknown as Tyre[], filterCriteria);
-
+    // Register callbacks for tyre data
+    syncService.registerDataCallbacks({
+      setTyres: (tyreData: Tyre[]) => {
+        const filteredTyres = applyFilters(tyreData, filterCriteria);
         setTyres(filteredTyres);
-
-        // When the inventory view is active, refresh workshop inventory from the backend
-        if (showInventory) {
-          refreshWorkshopInventory();
-        }
-      } catch (error) {
-        console.error('Error fetching tyres:', error);
-        // In production, would set an error state here
-      } finally {
         setLoading(false);
       }
-    };
+    });
 
-    fetchTyres();
-  }, [filterCriteria, showInventory, refreshWorkshopInventory]); // Refetch when filter criteria or view changes
+    // Subscribe to tyre data from Firestore
+    syncService.subscribeToAllTyres();
+
+    // If no data comes back in 2 seconds, use mock data for development
+    const timer = setTimeout(() => {
+      if (tyres.length === 0) {
+        console.warn('No tyres found in Firestore, using sample data');
+        const tyresData = [...MOCK_TYRES] as unknown as Tyre[];
+        const filteredTyres = applyFilters(tyresData, filterCriteria);
+        setTyres(filteredTyres);
+        setLoading(false);
+      }
+    }, 2000);
+
+    return () => {
+      clearTimeout(timer);
+      // Clean up Firebase listeners
+      syncService.unsubscribeFromAllTyres();
+    };
+  }, []);
+
+  // Re-apply filters when filter criteria changes
+  useEffect(() => {
+    if (tyres.length > 0) {
+      // Use the callback to get the latest tyres from syncService
+      syncService.getTyres((latestTyres) => {
+        const filteredTyres = applyFilters(latestTyres, filterCriteria);
+        setTyres(filteredTyres);
+      });
+    }
+  }, [filterCriteria]);
+
+  // Refresh inventory data when inventory view is shown
+  useEffect(() => {
+    if (showInventory) {
+      refreshWorkshopInventory();
+    }
+  }, [showInventory, refreshWorkshopInventory]);
   // Apply filters to the tyre data
   const applyFilters = (tyres: Tyre[], criteria: any) => {
     return tyres.filter(tyre => {
@@ -599,7 +612,101 @@ const TyreDashboard: React.FC = () => {
     setShowInspectionHistory(true);
   };
 
-  // Handle CSV export
+  // Function to add a new tyre inspection
+  const addTyreInspection = async (tyreId: string, inspectionData: any) => {
+    try {
+      await syncService.addTyreInspection(tyreId, inspectionData);
+      // The UI will update automatically when the Firestore listener fires
+    } catch (error) {
+      console.error('Error adding tyre inspection:', error);
+      setError('Failed to add inspection. Please try again.');
+    }
+  };
+
+  // Function to update a tyre
+  const updateTyre = async (tyreId: string, updatedData: Partial<Tyre>) => {
+    try {
+      await syncService.updateTyre(tyreId, updatedData);
+      // The UI will update automatically when the Firestore listener fires
+    } catch (error) {
+      console.error('Error updating tyre:', error);
+      setError('Failed to update tyre. Please try again.');
+    }
+  };
+
+  // Handle use of an inventory item in job card
+  const handleUseItemInJobCard = (item: TyreInventoryItem) => {
+    if (item.quantity > 0) {
+      try {
+        // Update the inventory quantity in Firebase
+        syncService.updateInventoryItem(item.id, {
+          ...item,
+          quantity: item.quantity - 1
+        });
+      } catch (error) {
+        console.error('Error updating inventory item:', error);
+        setError('Failed to update inventory. Please try again.');
+      }
+    }
+  };
+
+  // Handle reorder request for an inventory item
+  const handleReorderItem = (item: TyreInventoryItem) => {
+    try {
+      // Create a reorder request in Firebase
+      const reorderRequest = {
+        itemId: item.id,
+        brand: item.brand,
+        pattern: item.pattern,
+        size: item.size,
+        quantity: Math.max(item.reorderLevel * 2 - item.quantity, 1),
+        supplierId: item.supplierId,
+        requestDate: new Date().toISOString(),
+        status: 'pending'
+      };
+      syncService.addReorderRequest(reorderRequest);
+      alert(`Reorder request created for ${item.brand} ${item.pattern}`);
+    } catch (error) {
+      console.error('Error creating reorder request:', error);
+      setError('Failed to create reorder request. Please try again.');
+    }
+  };
+
+  // Handle tyre rotation
+  const handleTyreRotation = (tyre: Tyre, e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation(); // Prevent opening inspection history
+    }
+    
+    try {
+      // Create a rotation request and update tyre status in Firebase
+      const newPosition = tyre.installDetails.position.includes('front') 
+        ? tyre.installDetails.position.replace('front', 'drive')
+        : tyre.installDetails.position.includes('drive')
+          ? tyre.installDetails.position.replace('drive', 'trailer')
+          : tyre.installDetails.position;
+      
+      if (newPosition !== tyre.installDetails.position) {
+        // Update the tyre with new position
+        updateTyre(tyre.id, {
+          ...tyre,
+          installDetails: {
+            ...tyre.installDetails,
+            position: newPosition
+          }
+        });
+        
+        alert(`Tyre rotated from ${tyre.installDetails.position} to ${newPosition}`);
+      } else {
+        alert('Tyre is already in the final position and cannot be rotated further');
+      }
+    } catch (error) {
+      console.error('Error rotating tyre:', error);
+      setError('Failed to rotate tyre. Please try again.');
+    }
+  };
+
+  // Handle CSV export with Firebase data
   const handleExportCSV = () => {
     if (showInventory) {
       const fields = ['id', 'brand', 'pattern', 'size', 'position', 'quantity', 'cost', 'supplierId', 'storeLocation'];
@@ -628,12 +735,113 @@ const TyreDashboard: React.FC = () => {
         return true;
       })
     : workshopInventory;
-  // Handle CSV import (placeholder)
+  
+  // Handle CSV import with Firebase integration
   const handleImportCSV = () => {
-    alert('CSV import functionality coming soon');
+    // Show file selector and process CSV
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv';
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const csvText = event.target?.result as string;
+        try {
+          // Process CSV and import to Firebase
+          if (showInventory) {
+            // Import inventory items
+            const inventoryItems = processInventoryCSV(csvText);
+            for (const item of inventoryItems) {
+              await syncService.addInventoryItem(item);
+            }
+          } else {
+            // Import tyres
+            const tyreItems = processTyreCSV(csvText);
+            for (const tyre of tyreItems) {
+              await syncService.addTyre(tyre);
+            }
+          }
+          
+          // Refresh data
+          if (showInventory) {
+            refreshWorkshopInventory();
+          } else {
+            syncService.subscribeToAllTyres();
+          }
+          
+          alert('CSV import completed successfully!');
+        } catch (error) {
+          console.error('Error importing CSV:', error);
+          setError('Failed to import CSV. Please check the file format and try again.');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
     // In a real implementation, this would open a file picker and process the CSV
   };
-
+  // Simple CSV processors (placeholder implementations)
+  const processInventoryCSV = (csvText: string): Partial<TyreInventoryItem>[] => {
+    // Basic CSV parsing logic - in a real app, use a robust CSV parser
+    const lines = csvText.split('\n');
+    const headers = lines[0].split(',');
+    
+    return lines.slice(1).filter(line => line.trim()).map(line => {
+      const values = line.split(',');
+      const item: Record<string, any> = {};
+      
+      headers.forEach((header, index) => {
+        // Clean up header and handle special cases
+        const cleanHeader = header.trim();
+        let value = values[index]?.trim();
+        
+        if (cleanHeader === 'quantity' || cleanHeader === 'reorderLevel' || cleanHeader === 'cost') {
+          item[cleanHeader] = parseFloat(value) || 0;
+        } else {
+          item[cleanHeader] = value;
+        }
+      });
+      
+      return item as Partial<TyreInventoryItem>;
+    });
+  };
+  
+  const processTyreCSV = (csvText: string): Partial<Tyre>[] => {
+    // Similar parsing logic for tyres
+    const lines = csvText.split('\n');
+    const headers = lines[0].split(',');
+    
+    return lines.slice(1).filter(line => line.trim()).map(line => {
+      const values = line.split(',');
+      const tyre: Record<string, any> = {
+        installDetails: {}
+      };
+      
+      headers.forEach((header, index) => {
+        const cleanHeader = header.trim();
+        let value = values[index]?.trim();
+        
+        // Handle nested properties
+        if (cleanHeader.startsWith('installDetails.')) {
+          const nestedProp = cleanHeader.split('.')[1];
+          if (nestedProp === 'mileage') {
+            tyre.installDetails[nestedProp] = parseInt(value) || 0;
+          } else {
+            tyre.installDetails[nestedProp] = value;
+          }
+        } else if (cleanHeader === 'treadDepth' || cleanHeader === 'pressure' || cleanHeader === 'cost' || cleanHeader === 'estimatedLifespan') {
+          tyre[cleanHeader] = parseFloat(value) || 0;
+        } else {
+          tyre[cleanHeader] = value;
+        }
+      });
+      
+      return tyre as Partial<Tyre>;
+    });
+  };
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -676,7 +884,19 @@ const TyreDashboard: React.FC = () => {
           </Button>
         </div>
       </div>
-
+      {/* Error message display */}
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+          <strong className="font-bold mr-1">Error:</strong>
+          <span className="block sm:inline">{error}</span>
+          <button
+            className="absolute top-0 right-0 mt-2 mr-2"
+            onClick={() => setError(null)}
+          >
+            <span className="text-red-500">×</span>
+          </button>
+        </div>
+      )}
       {/* Filter Panel */}
       {filterActive && (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -700,6 +920,55 @@ const TyreDashboard: React.FC = () => {
                   </select>
                 </div>
 
+  // Register Firebase listeners when component mounts
+  useEffect(() => {
+    // Register callbacks for tyre data
+    syncService.registerDataCallbacks({
+      setTyres: (tyreData: Tyre[]) => {
+        const filteredTyres = applyFilters(tyreData, filterCriteria);
+        setTyres(filteredTyres);
+        setLoading(false);
+      }
+    });
+
+    // Subscribe to tyre data from Firestore
+    syncService.subscribeToAllTyres();
+
+    // If no data comes back in 2 seconds, use mock data for development
+    const timer = setTimeout(() => {
+      if (tyres.length === 0) {
+        console.warn('No tyres found in Firestore, using sample data');
+        const tyresData = [...MOCK_TYRES] as unknown as Tyre[];
+        const filteredTyres = applyFilters(tyresData, filterCriteria);
+        setTyres(filteredTyres);
+        setLoading(false);
+      }
+    }, 2000);
+
+    return () => {
+      clearTimeout(timer);
+      // Clean up Firebase listeners
+      syncService.unsubscribeFromAllTyres();
+    };
+  }, []);
+
+  // Re-apply filters when filter criteria changes
+  useEffect(() => {
+    if (tyres.length > 0) {
+      // Use the callback to get the latest tyres from syncService
+      syncService.getTyres((latestTyres) => {
+        const filteredTyres = applyFilters(latestTyres, filterCriteria);
+        setTyres(filteredTyres);
+      });
+    }
+  }, [filterCriteria]);
+
+  // Refresh inventory data when inventory view is shown
+  useEffect(() => {
+    if (showInventory) {
+      refreshWorkshopInventory();
+    }
+  }, [showInventory, refreshWorkshopInventory]);
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Size
@@ -747,6 +1016,7 @@ const TyreDashboard: React.FC = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                     value={filterCriteria.storeLocation || 'all'}
                     onChange={(e) => updateFilter('storeLocation', e.target.value)}
+                    onClick={() => handleUseItemInJobCard(item)}
                   >
                     <option value="all">All Locations</option>
                     {Object.values(TyreStoreLocation).map(location => (
@@ -767,6 +1037,7 @@ const TyreDashboard: React.FC = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                     value={filterCriteria.status || 'all'}
                     onChange={(e) => updateFilter('status', e.target.value)}
+                    onClick={() => handleReorderItem(item)}
                   >
                     <option value="all">All Statuses</option>
                     <option value="good">Good</option>
@@ -784,6 +1055,7 @@ const TyreDashboard: React.FC = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                     value={filterCriteria.vehicle || 'all'}
                     onChange={(e) => updateFilter('vehicle', e.target.value)}
+                    onClick={(e) => handleTyreRotation(tyre, e)}
                   >
                     <option value="all">All Vehicles</option>
                     <option value="21H">21H - Volvo FH16</option>
