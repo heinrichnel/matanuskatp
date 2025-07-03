@@ -33,14 +33,48 @@ console.log("🔍 DEBUG: About to initialize Firestore");
 let db: Firestore;
 
 try {
-  // Use a simpler initialization approach to avoid TypeScript issues
-  // Just use the basic persistentLocalCache with default settings
+  // Initialize Firestore with standard settings first
   db = initializeFirestore(firebaseApp, {
     localCache: persistentLocalCache({
       cacheSizeBytes: 104857600 // 100 MB
-      // No additional options that might cause type errors
     })
   });
+  
+  // Then enable multi-tab persistence explicitly through the Firestore instance
+  // This approach is compatible with TypeScript types
+  try {
+    // Using dynamic import to access enablePersistence with proper settings
+    import('firebase/firestore').then(async (firebaseModule) => {
+      try {
+        // Use the correct approach for Firebase v9+ - enableIndexedDbPersistence
+        // with proper type assertion for the module
+        const firestoreModule = firebaseModule as unknown as {
+          enableIndexedDbPersistence: (db: Firestore, options?: { synchronizeTabs?: boolean }) => Promise<void>;
+        };
+        
+        if (typeof firestoreModule.enableIndexedDbPersistence === 'function') {
+          await firestoreModule.enableIndexedDbPersistence(db, { synchronizeTabs: true });
+          console.log("✅ Multi-tab persistence enabled successfully");
+        }
+      } catch (error) {
+        // Handle common persistence errors gracefully with proper type guards
+        const persistenceError = error as { code?: string };
+        
+        if (persistenceError && typeof persistenceError === 'object' && persistenceError.code === 'failed-precondition') {
+          console.warn("⚠️ Multiple tabs open, persistence enabled in first tab only");
+        } else if (persistenceError && typeof persistenceError === 'object' && persistenceError.code === 'unimplemented') {
+          console.warn("⚠️ Browser doesn't support persistence");
+        } else {
+          console.error("❌ Error enabling persistence:", error);
+        }
+      }
+    }).catch(importError => {
+      console.warn("⚠️ Could not dynamically import Firebase persistence:", importError);
+    });
+  } catch (importError) {
+    console.warn("⚠️ Could not dynamically import Firebase persistence:", importError);
+  }
+
   console.log("✅ Firestore initialized with persistent cache");
 
   // Connect to emulators in development mode
