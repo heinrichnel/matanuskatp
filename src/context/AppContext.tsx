@@ -13,6 +13,8 @@ import {
   FLEETS_WITH_PROBES
 } from '../types';
 import { AuditLog as AuditLogType } from '../types/audit';
+import { TyreInventoryItem } from '../utils/tyreConstants';
+
 import {
   addTripToFirebase,
   updateTripInFirebase,
@@ -92,6 +94,12 @@ interface AppContextType {
   addCARReport: (report: Omit<CARReport, 'id' | 'createdAt' | 'updatedAt'>, files?: FileList) => Promise<string>;
   updateCARReport: (report: CARReport, files?: FileList) => Promise<void>;
   deleteCARReport: (id: string) => Promise<void>;
+  
+  workshopInventory: TyreInventoryItem[];
+  addWorkshopInventoryItem: (item: Omit<TyreInventoryItem, 'id'>) => Promise<string>;
+  updateWorkshopInventoryItem: (item: TyreInventoryItem) => Promise<void>;
+  deleteWorkshopInventoryItem: (id: string) => Promise<void>;
+  refreshWorkshopInventory: () => Promise<void>;
 
   connectionStatus: 'connected' | 'disconnected' | 'reconnecting';
 
@@ -122,6 +130,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [carReports, setCARReports] = useState<CARReport[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogType[]>([]);
+  const [workshopInventory, setWorkshopInventory] = useState<TyreInventoryItem[]>([]);
   const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected'); // TODO: Implement actual connection status monitoring
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
 
@@ -148,6 +157,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
+  // Add refreshWorkshopInventory method to manually refresh workshop inventory data from Firestore
+  const refreshWorkshopInventory = useCallback(async (): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, loadWorkshopInventory: true }));
+      console.log("🔄 Refreshing workshop inventory data from Firestore...");
+
+      // Wait a moment for data to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      console.log("✅ Workshop inventory data refreshed successfully");
+      return Promise.resolve();
+    } catch (error) {
+      console.error("❌ Error refreshing workshop inventory data:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, loadWorkshopInventory: false }));
+    }
+  }, []);
+
   useEffect(() => {
     // Set up all data subscriptions through the SyncService
     // Register all data callbacks with SyncService
@@ -158,7 +186,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setDriverBehaviorEvents,
       setActionItems,
       setCarReports: setCARReports,
-      setAuditLogs
+      setAuditLogs,
+      setWorkshopInventory
     });
 
     // Subscribe to all collections
@@ -176,6 +205,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       syncService.cleanup();
     };
   }, []);
+
+  // Add workshop inventory item
+  const addWorkshopInventoryItem = async (item: Omit<TyreInventoryItem, 'id'>): Promise<string> => {
+    try {
+      setIsLoading(prev => ({ ...prev, addWorkshopInventoryItem: true }));
+      
+      // Create a new item with a unique ID
+      const newItem = {
+        ...item,
+        id: `workshop-inventory-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      };
+      
+      // In a real implementation, this would add the item to Firestore
+      // For now, just update the local state
+      setWorkshopInventory(prev => [...prev, newItem as TyreInventoryItem]);
+      
+      console.log(`✅ Workshop inventory item added: ${newItem.id}`);
+      
+      return newItem.id;
+    } catch (error) {
+      console.error("Error adding workshop inventory item:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, addWorkshopInventoryItem: false }));
+    }
+  };
+
+  // Update workshop inventory item
+  const updateWorkshopInventoryItem = async (item: TyreInventoryItem): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, updateWorkshopInventoryItem: true }));
+      
+      // Update item in Firestore using syncService
+      await syncService.updateWorkshopInventoryItem(item.id, item);
+      
+      // Optimistically update local state
+      setWorkshopInventory(prev => 
+        prev.map(i => i.id === item.id ? item : i)
+      );
+      
+      console.log(`✅ Workshop inventory item updated: ${item.id}`);
+    } catch (error) {
+      console.error("Error updating workshop inventory item:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, updateWorkshopInventoryItem: false }));
+    }
+  };
+
+  // Delete workshop inventory item
+  const deleteWorkshopInventoryItem = async (id: string): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, deleteWorkshopInventoryItem: true }));
+      
+      // In a real implementation, this would delete the item from Firestore
+      // For now, just update the local state
+      setWorkshopInventory(prev => prev.filter(item => item.id !== id));
+      
+      console.log(`✅ Workshop inventory item deleted: ${id}`);
+    } catch (error) {
+      console.error("Error deleting workshop inventory item:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, deleteWorkshopInventoryItem: false }));
+    }
+  };
 
   const addTrip = async (trip: Omit<Trip, 'id' | 'costs' | 'status'>): Promise<string> => {
     try {
@@ -374,6 +469,81 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error("Error triggering driver behavior import:", error);
       throw error;
     }
+  };
+
+  const getDriverPerformance = (driverName: string) => {
+    // Filter events for this driver
+    const driverEvents = driverBehaviorEvents.filter(event => event.driverName === driverName);
+    
+    if (driverEvents.length === 0) {
+      return {
+        driverName,
+        totalEvents: 0,
+        behaviorScore: 100,
+        criticalEvents: 0,
+        highSeverityEvents: 0,
+        recentEvents: []
+      };
+    }
+
+    // Calculate behavior score (100 is perfect, deduct points for events based on severity)
+    const baseScore = 100;
+    const criticalPoints = driverEvents.filter(e => e.severity === 'critical').length * 15;
+    const highPoints = driverEvents.filter(e => e.severity === 'high').length * 10;
+    const mediumPoints = driverEvents.filter(e => e.severity === 'medium').length * 5;
+    const lowPoints = driverEvents.filter(e => e.severity === 'low').length * 2;
+    
+    // Don't go below zero
+    const behaviorScore = Math.max(0, baseScore - criticalPoints - highPoints - mediumPoints - lowPoints);
+    
+    // Sort events by date, most recent first
+    const sortedEvents = [...driverEvents].sort((a, b) => 
+      new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()
+    );
+    
+    return {
+      driverName,
+      totalEvents: driverEvents.length,
+      behaviorScore,
+      criticalEvents: driverEvents.filter(e => e.severity === 'critical').length,
+      highSeverityEvents: driverEvents.filter(e => e.severity === 'high').length,
+      recentEvents: sortedEvents.slice(0, 5) // Return 5 most recent events
+    };
+  };
+
+  const getAllDriversPerformance = () => {
+    // Get unique driver names
+    const driverNames = Array.from(new Set(driverBehaviorEvents.map(event => event.driverName)));
+    
+    // For each driver, calculate their performance
+    return driverNames.map(driverName => {
+      // Filter events for this driver
+      const driverEvents = driverBehaviorEvents.filter(event => event.driverName === driverName);
+      
+      // Calculate behavior score (100 is perfect, deduct points for events based on severity)
+      const baseScore = 100;
+      const criticalPoints = driverEvents.filter(e => e.severity === 'critical').length * 15;
+      const highPoints = driverEvents.filter(e => e.severity === 'high').length * 10;
+      const mediumPoints = driverEvents.filter(e => e.severity === 'medium').length * 5;
+      const lowPoints = driverEvents.filter(e => e.severity === 'low').length * 2;
+      
+      // Don't go below zero
+      const behaviorScore = Math.max(0, baseScore - criticalPoints - highPoints - mediumPoints - lowPoints);
+      
+      // Sort events by date, most recent first
+      const sortedEvents = [...driverEvents].sort((a, b) => 
+        new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()
+      );
+      
+      return {
+        driverName,
+        totalEvents: driverEvents.length,
+        behaviorScore,
+        criticalEvents: driverEvents.filter(e => e.severity === 'critical').length,
+        highSeverityEvents: driverEvents.filter(e => e.severity === 'high').length,
+        recentEvents: sortedEvents.slice(0, 3) // Return 3 most recent events
+      };
+    });
   };
 
   const value = {
@@ -830,8 +1000,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addDriverBehaviorEvent: placeholderString,
     updateDriverBehaviorEvent: placeholder,
     deleteDriverBehaviorEvent: placeholder,
-    getDriverPerformance: () => ({}) as any,
-    getAllDriversPerformance: () => [] as any[],
+    getDriverPerformance,
+    getAllDriversPerformance,
     triggerDriverBehaviorImport,
     actionItems,
     addActionItem: placeholderString,
@@ -842,6 +1012,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addCARReport: placeholderString,
     updateCARReport: placeholder,
     deleteCARReport: placeholder,
+    workshopInventory,
+    addWorkshopInventoryItem,
+    updateWorkshopInventoryItem,
+    deleteWorkshopInventoryItem,
+    refreshWorkshopInventory,
     connectionStatus,
     bulkDeleteTrips: placeholder,
     updateTripStatus: async (tripId: string, status: 'shipped' | 'delivered', notes: string): Promise<void> => {

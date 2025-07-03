@@ -25,6 +25,7 @@ import {
   ActionItem,
   CARReport
 } from '../types';
+import { TyreInventoryItem } from './tyreConstants';
 
 // Collection references
 // const tripsCollection = collection(db, 'trips'); // Unused
@@ -938,6 +939,103 @@ export class SyncService {
   // Get connection status
   public getConnectionStatus(): ConnectionStatus {
     return this.connectionStatus;
+  }
+  
+  // Subscribe to all workshop inventory items (global listener)
+  public subscribeToAllWorkshopInventory(): void {
+    // Clear any existing global workshop inventory listeners
+    if (this.globalUnsubscribes.has('allWorkshopInventory')) {
+      this.globalUnsubscribes.get('allWorkshopInventory')?.();
+    }
+
+    const workshopInventoryCollection = collection(db, 'workshopInventory');
+    const inventoryQuery = query(
+      workshopInventoryCollection,
+      orderBy('purchaseDate', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      inventoryQuery,
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+
+          if (change.type === 'added') {
+            added++;
+            console.log(`Workshop inventory item added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Workshop inventory item modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Workshop inventory item removed: ${id}`);
+          }
+        });
+
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Workshop inventory changes: ${added} added, ${modified} modified, ${removed} removed`);
+
+          // Get all current documents for a full refresh
+          const inventory: TyreInventoryItem[] = [];
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            inventory.push({ id: doc.id, ...data } as TyreInventoryItem);
+          });
+
+          if (typeof this.dataCallbacks.setWorkshopInventory === 'function') {
+            this.dataCallbacks.setWorkshopInventory(inventory);
+          } else {
+            console.warn('⚠️ setWorkshopInventory callback not registered');
+          }
+          this.lastSynced = new Date();
+        }
+      },
+      (error) => {
+        console.error('Error in global workshop inventory listener:', error);
+      }
+    );
+
+    this.globalUnsubscribes.set('allWorkshopInventory', unsubscribe);
+  }
+  
+  // Update a workshop inventory item with real-time sync
+  public async updateWorkshopInventoryItem(itemId: string, data: Partial<TyreInventoryItem>): Promise<void> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(data);
+
+      // Add updatedAt timestamp
+      const updateData = {
+        ...cleanData,
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
+
+      if (this.isOnline) {
+        // Online - update directly
+        const inventoryRef = doc(db, 'workshopInventory', itemId);
+        await updateDoc(inventoryRef, updateData);
+        console.log(`✅ Workshop inventory item ${itemId} updated with real-time sync`);
+      } else {
+        // Offline - store for later sync
+        this.pendingChanges.set(`workshopInventory:${itemId}`, updateData);
+        console.log(`📝 Workshop inventory item ${itemId} update queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+    } catch (error) {
+      console.error(`Error updating workshop inventory item ${itemId}:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
   }
 }
 
