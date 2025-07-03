@@ -8,6 +8,13 @@ driver_behaviors.csv
 # Specifically ignore markdown files in .kilocode directory
 .kilocode/**/*.md
 
+# Specifically ignore markdown files in docs directory
+/docs/
+
 # Previously specified markdown files (kept for reference)
 tyrestock.md
 fleet-details.md
+webhook-typescript-fix.md
+
+# Ignore kilocode system prompt code
+.functions/.kilocode/system-prompt-code

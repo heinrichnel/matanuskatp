@@ -6,6 +6,14 @@ import { formatDateTime } from '../../utils/helpers';
 const AuditLog: React.FC = () => {
   const { auditLogs } = useAppContext();
 
+  if (!auditLogs) {
+    return <div className="text-gray-500">Loading audit logs...</div>;
+  }
+
+  if (auditLogs.length === 0) {
+    return <div className="text-gray-500">No audit logs available.</div>;
+  }
+
   return (
     <div className="bg-white shadow-md rounded-lg p-6">
       <h2 className="text-2xl font-semibold mb-4 text-gray-800">Audit Log</h2>
