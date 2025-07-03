@@ -190,15 +190,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setWorkshopInventory
     });
 
-    // Subscribe to all collections
-    syncService.subscribeToAllTrips();
-    // Methods now implemented in syncService
-    syncService.subscribeToAllMissedLoads();
-    syncService.subscribeToAllDieselRecords();
-    syncService.subscribeToAllDriverBehaviorEvents();
-    syncService.subscribeToAllActionItems();
-    syncService.subscribeToAllCARReports();
-    syncService.subscribeToAuditLogs();
+  // Subscribe to all collections
+  syncService.subscribeToAllTrips();
+  // Methods now implemented in syncService
+  syncService.subscribeToAllMissedLoads();
+  syncService.subscribeToAllDieselRecords();
+  syncService.subscribeToAllDriverBehaviorEvents();
+  syncService.subscribeToAllActionItems();
+  syncService.subscribeToAllCARReports();
+  syncService.subscribeToAuditLogs();
+  syncService.subscribeToAllWorkshopInventory(); // Add subscription to workshop inventory
 
     return () => {
       // Let SyncService handle unsubscribing from all listeners

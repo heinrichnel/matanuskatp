@@ -27,7 +27,8 @@
   ],
   "emulators": {
     "functions": {
-      "port": 5001
+      "host": "127.0.0.1",
+      "port": 8888
     },
     "firestore": {
       "host": "127.0.0.1",
@@ -47,11 +48,25 @@
       "port": 9198
     },
     "dataconnect": {
+      "host": "127.0.0.1",
       "port": 9399,
       "dataDir": "dataconnect/.dataconnect/pgliteData"
     },
     "tasks": {
+      "host": "127.0.0.1",
       "port": 9499
+    },
+    "eventarc": {
+      "host": "127.0.0.1",
+      "port": 9299
+    },
+    "hub": {
+      "host": "127.0.0.1",
+      "port": 4400
+    },
+    "logging": {
+      "host": "127.0.0.1",
+      "port": 4500
     }
   }
 }
