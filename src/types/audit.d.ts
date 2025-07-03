@@ -6,5 +6,5 @@ export interface AuditLog {
   entity: string;
   entityId: string;
   details: string;
-  changes?: Record<string, string | number | boolean | null>;
+  changes?: Record<string, any>;
 }

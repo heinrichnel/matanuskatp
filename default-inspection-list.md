@@ -7,6 +7,7 @@ This markdown provides a default set of inspection records for seeding or refere
 ## Inspection List
 
 ### 21H
+
 - **Frequency:** daily
 - **Status:** completed
 - **Inspector:** John Smith
@@ -18,6 +19,7 @@ This markdown provides a default set of inspection records for seeding or refere
 ---
 
 ### 22H
+
 - **Frequency:** weekly
 - **Status:** requires action
 - **Inspector:** Sarah Johnson
@@ -29,6 +31,7 @@ This markdown provides a default set of inspection records for seeding or refere
 ---
 
 ## Inspection List Attributes
+
 - **Inspection ID**: Unique identifier for the inspection (e.g., 21H, 22H)
 - **Frequency**: daily, weekly, monthly, etc.
 - **Status**: completed, in progress, pending, requires action
@@ -39,6 +42,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - **Summary**: Short description of key findings
 
 ---
+
 # Vehicle Inspection Templates
 
 ---
@@ -46,6 +50,7 @@ This markdown provides a default set of inspection records for seeding or refere
 ## 1. Interlink Trailer Inspection (Voorbeeld: Inspection1038)
 
 ### Braking System
+
 - Brake linings
 - Slack Adjuster
 - Camshaft bushings
@@ -56,17 +61,20 @@ This markdown provides a default set of inspection records for seeding or refere
 - Brakes Controls
 
 ### Cargo
+
 - Ratchets
 - Spare wheel hanger 1
 - Spare wheel hanger 2
 
 ### Chassis
+
 - Under run (Rear Bulbar) 6m
 - Under run (Rear Bulbar) 12m
 - Mudflaps
 - Number plates
 
 ### Chassis & Suspension
+
 - Bushes
 - Torque arm
 - Equalizers
@@ -88,6 +96,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Retaining springs
 
 ### Electrical
+
 - Yellow Suzi
 - Wiring
 - Brake Lights
@@ -101,11 +110,13 @@ This markdown provides a default set of inspection records for seeding or refere
 ## 2. Truck Inspection (Voorbeeld: Inspection1024)
 
 ### Braking System
+
 - Brake Shoes
 - Brake Chambers
 - Brake drums
 
 ### Chassis & Suspension
+
 - Bell Housing
 - Steering system linkage and joints
 - Cab Shock
@@ -118,6 +129,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Ball Joint
 
 ### Cooling System
+
 - Radiator
 - Hoses and Connections
 - Cooling Fan
@@ -127,6 +139,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Radiator Cap
 
 ### Electrical System
+
 - Alternator V-Belt
 - Electronic connections
 - Fuses
@@ -134,6 +147,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Horns
 
 ### Engine
+
 - Turbocharger
 - Belts and Hoses
 - A/C Compressor
@@ -147,6 +161,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Fuel pump
 
 ### External Fixtures
+
 - Reflectors
 - Mirrors
 - Mudflaps
@@ -158,6 +173,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Seatbelts
 
 ### Fifth Wheel
+
 - Fifth Wheel
 - Coupling mechanism
 - Mounting and Bolts
@@ -167,6 +183,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Fifth Wheel Plate
 
 ### Filters
+
 - Fuel filters
 - Oil Filter
 - Water separator Filter
@@ -174,6 +191,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Gearbox Oil Filters
 
 ### Fluids & Lubrication
+
 - Coolant
 - Battery Water
 - Brake fluid
@@ -184,6 +202,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Engine oil
 
 ### Transmission & Driveline
+
 - Differential and Axle Components
 - Clutch Assembly (for Manual Transmission)
 - Transmission Mounts
@@ -201,11 +220,13 @@ This markdown provides a default set of inspection records for seeding or refere
 ## 4. Reefer Inspection (Voorbeeld: Inspection1037)
 
 ### Bulkhead & Air Chute
+
 - Bulkhead integrity (no gaps, holes, or loose fittings)
 - Airflow baffles/dividers (if fitted)
 - Air chute or duct (attached, not collapsed or torn)
 
 ### Structural Inspection
+
 - Overall unit and appearance
 - Doors
 - Interior walls
@@ -214,16 +235,19 @@ This markdown provides a default set of inspection records for seeding or refere
 - Engine mount
 
 ### Air Intake System
+
 - Air filter
 - Air intake ducting and clamps
 
 ### Airflow System
+
 - Evaporator blower motor (operation and sound)
 - Return air sensor
 - Condenser fan motor (operation and sound)
 - Trailer bulkhead and airflow management devices
 
 ### Chassis/Axle/Suspension/Tyres
+
 - Wheel bearings
 - Hub bolts
 - Shackles
@@ -236,6 +260,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Alignment
 
 ### Cooling System
+
 - Coolant level in reservoir
 - Condition of coolant
 - Radiator core and cap condition
@@ -243,12 +268,14 @@ This markdown provides a default set of inspection records for seeding or refere
 - Water pump inspection
 
 ### Defrost System
+
 - Manual defrost cycle function
 - Defrost heaters
 - Drain lines
 - Evaporator pan
 
 ### Electrical System
+
 - Electrical System
 - Alternator output and belt condition
 - Wiring harnesses
@@ -257,6 +284,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - All sensors
 
 ### Engine System
+
 - Engine oil level
 - Engine mounting bolts and brackets
 - Engine coolant level
@@ -266,19 +294,23 @@ This markdown provides a default set of inspection records for seeding or refere
 - Engine noise and vibration
 
 ### Flooring
+
 - Floor condition
 - Floor wear strips or scuff rails
 - Floor insulation integrity
 
 ### Interior Condition
+
 - Inside wall panels
 - Ceiling panel condition
 
 ### Pre-Service Safety & System Checks
+
 - Visual inspection for leaks: oil, fuel, coolant, refrigerant
 - Check control panel for active alarms or fault codes
 
 ### Refrigeration Circuit
+
 - Refrigerant level
 - Suction and discharge line condition
 - Compressor operation and noise level
@@ -291,6 +323,7 @@ This markdown provides a default set of inspection records for seeding or refere
 - Receiver/drier filter
 
 ### Structural Integrity
+
 - Reflectors and conspicuity tape
 - Roof bows and sidewall posts
 - External panels

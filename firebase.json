@@ -6,8 +6,6 @@
     "rules": "storage.rules"
   },
   "firestore": {
-    "database": "(default)",
-    "location": "nam5",
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
@@ -23,20 +21,23 @@
         "*.local"
       ],
       "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run lint",
         "npm --prefix \"$RESOURCE_DIR\" run build"
       ]
     }
   ],
   "emulators": {
     "functions": {
-      "host": "127.0.0.1",
       "port": 5001
     },
     "firestore": {
       "host": "127.0.0.1",
       "port": 8081
     },
+    "ui": {
+      "host": "127.0.0.1",
+      "port": 4001
+    },
+    "singleProjectMode": true,
     "database": {
       "host": "127.0.0.1",
       "port": 9001
@@ -49,20 +50,8 @@
       "port": 9399,
       "dataDir": "dataconnect/.dataconnect/pgliteData"
     },
-    "ui": {
-      "host": "127.0.0.1",
-      "port": 4001
-    },
-    "singleProjectMode": true,
     "tasks": {
       "port": 9499
-    },
-    "pubsub": {
-      "port": 8085
     }
-  },
-  "dataconnect": {
-    "source": "dataconnect"
-  },
-  "extensions": {}
+  }
 }
