@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Tyre } from '../../types/workshop-tyre-inventory';
 import Button from '../ui/Button';
+import { useAppContext } from '../../context/AppContext';
 import {
   AlertTriangle,
   CheckCircle2,
@@ -30,6 +31,7 @@ import {
 } from '../../utils/tyreConstants';
 
 // Use the mock inventory data instead of static mock tyres
+// Using mock tyres temporarily as we haven't implemented the active tyres in context yet
 const MOCK_TYRES = [
   {
     id: 'tyre1',
@@ -343,7 +345,6 @@ const MOCK_TYRES = [
   },
 ];
 
-
 // Status statistics calculation
 const calculateStatusStats = (tyres: Tyre[]) => {
   const stats = {
@@ -455,8 +456,17 @@ const downloadCSV = (data: string, filename: string) => {
 };
 
 const TyreDashboard: React.FC = () => {
+  // Get data and methods from AppContext
+  const { 
+    workshopInventory, 
+    refreshWorkshopInventory,
+    addWorkshopInventoryItem,
+    updateWorkshopInventoryItem,
+    deleteWorkshopInventoryItem,
+    isLoading: contextLoading
+  } = useAppContext();
+  
   const [tyres, setTyres] = useState<Tyre[]>([]);
-  const [inventory, setInventory] = useState<TyreInventoryItem[]>(MOCK_INVENTORY);
   const [loading, setLoading] = useState<boolean>(true);
   const [filterActive, setFilterActive] = useState<boolean>(false);
   const [showInventory, setShowInventory] = useState<boolean>(false);
@@ -477,7 +487,7 @@ const TyreDashboard: React.FC = () => {
 
   // Stats derived from the current filtered tyre list
   const stats = calculateStatusStats(tyres);
-  const inventoryStats = calculateInventoryStats(inventory);
+  const inventoryStats = calculateInventoryStats(workshopInventory);
   const brandPerformance = calculateBrandPerformance(tyres);
 
   // Load tyres from Firestore (mocked for now)
@@ -503,17 +513,9 @@ const TyreDashboard: React.FC = () => {
 
         setTyres(filteredTyres);
 
-        // Filter inventory based on criteria if inventory view is active
+        // When the inventory view is active, refresh workshop inventory from the backend
         if (showInventory) {
-          const filteredInventory = getInventoryItemsByCriteria(
-            filterCriteria.brand,
-            filterCriteria.size,
-            filterCriteria.pattern,
-            filterCriteria.storeLocation
-          );
-          setInventory(filteredInventory);
-        } else {
-          setInventory(MOCK_INVENTORY);
+          refreshWorkshopInventory();
         }
       } catch (error) {
         console.error('Error fetching tyres:', error);
@@ -524,8 +526,7 @@ const TyreDashboard: React.FC = () => {
     };
 
     fetchTyres();
-  }, [filterCriteria, showInventory]); // Refetch when filter criteria or view changes
-
+  }, [filterCriteria, showInventory, refreshWorkshopInventory]); // Refetch when filter criteria or view changes
   // Apply filters to the tyre data
   const applyFilters = (tyres: Tyre[], criteria: any) => {
     return tyres.filter(tyre => {
@@ -569,8 +570,14 @@ const TyreDashboard: React.FC = () => {
   };
 
   const toggleInventoryView = () => {
-    setShowInventory(!showInventory);
+    const newShowInventory = !showInventory;
+    setShowInventory(newShowInventory);
     setShowAnalytics(false);
+    
+    // Refresh workshop inventory when switching to inventory view
+    if (newShowInventory) {
+      refreshWorkshopInventory();
+    }
   };
 
   const toggleAnalyticsView = () => {
@@ -601,7 +608,7 @@ const TyreDashboard: React.FC = () => {
   const handleExportCSV = () => {
     if (showInventory) {
       const fields = ['id', 'brand', 'pattern', 'size', 'position', 'quantity', 'cost', 'supplierId', 'storeLocation'];
-      const csv = convertToCSV(inventory, fields);
+      const csv = convertToCSV(workshopInventory, fields);
       downloadCSV(csv, 'tyre_inventory.csv');
     } else {
       const fields = [
@@ -615,7 +622,17 @@ const TyreDashboard: React.FC = () => {
       downloadCSV(csv, 'active_tyres.csv');
     }
   };
-
+  // Filter inventory items based on criteria
+  const filteredInventory = filterCriteria.brand || filterCriteria.size || 
+                           filterCriteria.pattern || filterCriteria.storeLocation 
+    ? workshopInventory.filter(item => {
+        if (filterCriteria.brand && item.brand !== filterCriteria.brand) return false;
+        if (filterCriteria.size && item.size !== filterCriteria.size) return false;
+        if (filterCriteria.pattern && item.pattern !== filterCriteria.pattern) return false;
+        if (filterCriteria.storeLocation && item.storeLocation !== filterCriteria.storeLocation) return false;
+        return true;
+      })
+    : workshopInventory;
   // Handle CSV import (placeholder)
   const handleImportCSV = () => {
     alert('CSV import functionality coming soon');
@@ -862,7 +879,7 @@ const TyreDashboard: React.FC = () => {
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
             <h3 className="text-lg font-medium">Brands in Stock</h3>
             <p className="text-3xl font-bold mt-2">
-              {new Set(inventory.map(item => item.brand)).size}
+              {new Set(workshopInventory.map(item => item.brand)).size}
             </p>
           </div>
 
@@ -1188,19 +1205,19 @@ const TyreDashboard: React.FC = () => {
       )}
 
       {/* Content Based on View */}
-      {loading ? (
+      {loading || (showInventory && contextLoading?.loadWorkshopInventory) ? (
         <div className="flex justify-center items-center h-40">
           <LoadingIndicator />
         </div>
       ) : showInventory ? (
         // Inventory View
-        inventory.length === 0 ? (
+        filteredInventory.length === 0 ? (
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
             <p className="text-gray-500">No inventory items match the selected filters.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {inventory.map(item => (
+            {filteredInventory.map(item => (
               <div
                 key={item.id}
                 className={`
