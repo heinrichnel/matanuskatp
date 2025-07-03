@@ -9,10 +9,16 @@
 
 const {setGlobalOptions} = require("firebase-functions");
 const {onRequest} = require("firebase-functions/https");
+const {onSchedule} = require("firebase-functions/v2/scheduler");
 const logger = require("firebase-functions/logger");
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp();
+
+// Define environment variables for WebBook URLs
+// These should be set in your Firebase environment configuration
+const WEB_BOOK_TRIPS_URL = process.env.WEB_BOOK_TRIPS_URL || "";
+const WEB_BOOK_DRIVER_BEHAVIOR_URL = process.env.WEB_BOOK_DRIVER_BEHAVIOR_URL || "";
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected
@@ -26,534 +32,731 @@ admin.initializeApp();
 // this will be the maximum concurrent request count.
 setGlobalOptions({ maxInstances: 10 });
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
-
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
-
-const WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbx2LuGtG7E8XYNafq37D0JK4SfYYUqGrOnXgpLOsWF1uNYoOlErqaiAYGf7vsCKKLTWJA/exec';
-
-exports.importTripsWebhook = functions.https.onRequest(async (req, res) => {
-    try {
-        console.log("[importTripsWebhook] Received request:", JSON.stringify(req.body, null, 2));
-        const { trips } = req.body;
-
-        if (!trips || !Array.isArray(trips)) {
-            console.error("[importTripsWebhook] Invalid payload structure:", JSON.stringify(req.body, null, 2));
-            return res.status(400).json({ error: 'Invalid payload: trips must be an array' });
-        }
-
-        let imported = 0;
-        let skipped = 0;
-
-        const batch = admin.firestore().batch();
-        console.log(`[importTripsWebhook] Processing ${trips.length} trips`);
-
-        for (const trip of trips) {
-            const [
-                fleetNumber,
-                driverName,
-                clientType,
-                clientName,
-                loadRef,
-                route,
-                shippedStatus,
-                shippedDate,
-                ,  // Skip empty field
-                deliveredStatus,
-                deliveredDate,
-                baseRevenue,
-                revenueCurrency,
-                distanceKm,
-                createdAt
-            ] = trip;
-            
-            if (!loadRef) {
-                console.log("[importTripsWebhook] Skipping trip with missing loadRef");
-                skipped++;
-                continue;
-            }
-
-            // Debug log to check status values
-            console.log(`[importTripsWebhook] Trip ${loadRef} status values:`, {
-                shippedStatus,
-                deliveredStatus,
-                shippedDate,
-                deliveredDate
-            });
-
-            const tripRef = admin.firestore().collection('trips').doc(String(loadRef));
-            const tripDoc = await tripRef.get();
-            
-            // Create the trip data
-            let tripData = {
-                fleetNumber: fleetNumber || '',
-                driverName: driverName || '',
-                clientType: clientType || 'external',
-                clientName: clientName || '',
-                loadRef: loadRef,
-                route: route || '',
-                baseRevenue: parseFloat(baseRevenue) || 0,
-                revenueCurrency: revenueCurrency || 'ZAR',
-                distanceKm: parseFloat(distanceKm) || 0,
-                shippedStatus: shippedStatus === true || shippedStatus === 'Shipped',
-                deliveredStatus: deliveredStatus === true || deliveredStatus === 'Delivered',
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            };
-
-            // Parse dates - ensure they're proper ISO strings
-            if (shippedDate) {
-                tripData.shippedDate = new Date(shippedDate).toISOString();
-            }
-            
-            if (deliveredDate) {
-                tripData.deliveredDate = new Date(deliveredDate).toISOString();
-            }
-            
-            // Determine trip status based on shipped/delivered status
-            if (tripData.deliveredStatus) {
-                tripData.status = 'completed';
-            } else if (tripData.shippedStatus) {
-                tripData.status = 'shipped';
-            } else {
-                tripData.status = 'active';
-            }
-            
-            if (tripDoc.exists) {
-                batch.update(tripRef, tripData);
-                skipped++;
-            } else {
-                // Add additional fields for new trips
-                tripData = {
-                    ...tripData,
-                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-                    costs: [],
-                    additionalCosts: [],
-                    followUpHistory: [],
-                    paymentStatus: 'unpaid'
-                };
-                
-                batch.set(tripRef, tripData);
-                imported++;
-            }
-        }
-        
-        await batch.commit();
-        
-        console.log(`[importTripsWebhook] Import complete. Imported: ${imported}, Skipped: ${skipped}`);
-        return res.status(200).json({
-            message: 'Import successful',
-            imported,
-            skipped
-        });
-    } catch (error) {
-        console.error("[importTripsWebhook] Error:", error);
-        return res.status(500).json({ error: error.message || 'Internal server error' });
+// importTripsFromWebBook
+export const importTripsFromWebBook = onCall(async (request) => {
+  try {
+    // DEBUG ONLY – remove after verification
+    console.log("importTripsFromWebBook received payload:", JSON.stringify(request.data, null, 2));
+    
+    // Extract trips from the nested structure (request.data.trips) or from request.data if it's an array
+    let trips = [];
+    if (request.data && request.data.trips && Array.isArray(request.data.trips)) {
+      // Structure: { trips: [...], meta: {...} }
+      trips = request.data.trips;
+      console.log(`Processing ${trips.length} trips from nested structure`);
+    } else if (Array.isArray(request.data)) {
+      // Backward compatibility: if request.data is directly an array
+      trips = request.data;
+      console.log(`Processing ${trips.length} trips from direct array`);
     }
-});
-
-exports.telematicsTripUpdateWebhook = functions.https.onRequest(async (req, res) => {
-    try {
-        console.log("[telematicsTripUpdateWebhook] Received request:", JSON.stringify(req.body, null, 2));
-        
-        const { tripId, status, timestamp, driverId, vehicleId, location, endLocation } = req.body;
-        
-        if (!tripId || !status) {
-            return res.status(400).json({ error: 'Missing required fields: tripId and status' });
-        }
-        
-        const tripRef = admin.firestore().collection('trips').doc(String(tripId));
-        
-        const updateData = { updatedAt: admin.firestore.FieldValue.serverTimestamp() };
-        
-        if (status === 'trip_started') {
-            if (!driverId || !vehicleId || !location) {
-                return res.status(400).json({ error: 'Missing required fields for trip_started status' });
-            }
-            
-            const timestampISO = new Date(timestamp).toISOString();
-            updateData.startedAt = timestampISO;
-            updateData.driverId = driverId;
-            updateData.vehicleId = vehicleId;
-            updateData.startLocation = location;
-            updateData.shippedStatus = true;
-            updateData.shippedDate = timestampISO;
-            updateData.status = 'active';
-        } else if (status === 'trip_ended') {
-            if (!endLocation) {
-                return res.status(400).json({ error: 'Missing required field endLocation for trip_ended status' });
-            }
-            
-            const timestampISO = new Date(timestamp).toISOString();
-            updateData.endedAt = timestampISO;
-            updateData.endLocation = endLocation;
-            updateData.deliveredStatus = true;
-            updateData.deliveredDate = timestampISO;
-            updateData.status = 'completed';
-        } else {
-            updateData.lastUpdated = new Date(timestamp).toISOString();
-        }
-        
-        console.log(`[telematicsTripUpdateWebhook] Updating trip ${tripId} with status ${status}`, updateData);
-        await tripRef.set(updateData, { merge: true });
-        
-        return res.status(200).json({
-            message: `Trip ${tripId} updated with status: ${status}`,
-            timestamp: new Date().toISOString()
-        });
-    } catch (error) {
-        console.error("[telematicsTripUpdateWebhook] Error:", error);
-        return res.status(500).json({ error: error.message || 'Internal server error' });
+    
+    if (trips.length === 0) {
+      console.error("Invalid or empty payload:", request.data);
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Invalid or empty payload. Expected {trips: [...]} or direct array"
+      );
     }
-});
-
-// Keep the existing importTripsFromWebBook function for backward compatibility
-exports.importTripsFromWebBook = functions.https.onRequest(async (req, res) => {
-    try {
-        // Fetch data from Google Sheets Web App
-        const fetch = (await import('node-fetch')).default;
-        const response = await fetch(WEBHOOK_URL);
-        if (!response.ok) throw new Error('Failed to fetch from Google Sheets Web App');
-        const trips = await response.json();
-        // Here you would process and import trips into Firestore
-        // For demonstration, just return the fetched data
-        res.status(200).json({ message: "Function triggered!", imported: trips.length, trips });
+    
+    if (trips.length > 0) {
+      console.log("First row sample:", JSON.stringify(trips[0]));
     }
-    catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
-    }
-});
 
-// Import Driver Behavior Events from Web Book (automatic sync)
-const DRIVER_BEHAVIOR_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwssUw9YeaNgesBqB32Z5XD7EHaGhhzbr0s7zaFe-Nefx_ccmB7AbsI9CBTnYhGWSK5/exec';
+    const db = admin.firestore();
+    const validTrips = [];
+    let skippedExisting = 0;
+    let skippedNoLoadRef = 0;
 
-exports.importDriverEventsFromWebBook = functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
-    try {
-        const fetch = (await import('node-fetch')).default;
-        const response = await fetch(DRIVER_BEHAVIOR_WEBHOOK_URL);
-        if (!response.ok) throw new Error('Failed to fetch from Driver Behavior Web Book');
-        const events = await response.json();
-        const db = admin.firestore();
-        let imported = 0;
-        let skipped = 0;
-        for (const event of events) {
-            if (!event || event.eventType === 'UNKNOWN' || !event.id) {
-                skipped++;
-                continue;
-            }
-            // Check for duplicate by event.id
-            const existing = await db.collection('driverBehaviorEvents').where('id', '==', event.id).limit(1).get();
-            if (!existing.empty) {
-                skipped++;
-                continue;
-            }
-            await db.collection('driverBehaviorEvents').add(event);
-            imported++;
-        }
-        console.log(`DriverBehavior Sync: Imported ${imported}, Skipped ${skipped}`);
-        return { imported, skipped };
-    } catch (error) {
-        console.error(error);
-        throw new Error(error.message);
-    }
-});
+    for (const row of trips) {
+      const [
+        fleetNumber,
+        driverName,
+        clientType,
+        clientName,
+        loadRef,
+        route,
+        shippedStatus,
+        shippedDate,
+        deliveredStatus,
+        deliveredDate,
+      ] = row;
 
-// HTTP endpoint for driver behavior webhook
-exports.importDriverBehaviorWebhook = functions.https.onRequest(async (req, res) => {
-    try {
-        // Only accept POST
-        if (req.method !== 'POST') {
-            res.status(405).send('Method Not Allowed');
-            return;
-        }
-        
-        console.log("[importDriverBehaviorWebhook] Received payload:", JSON.stringify(req.body, null, 2));
-        const { events } = req.body;
-        
-        if (!events || !Array.isArray(events)) {
-            console.error("[importDriverBehaviorWebhook] Invalid payload structure:", JSON.stringify(req.body, null, 2));
-            return res.status(400).json({ error: 'Invalid payload: events must be an array' });
-        }
+      if (!loadRef) {
+        skippedNoLoadRef++;
+        continue;
+      }
 
-        // Log summary of the events array
-        console.log(`[importDriverBehaviorWebhook] Processing ${events.length} driver behavior events`);
-
-        // Make sure the events is properly formatted as expected from Google Apps Script
-        // The expected format from GAS is { events: [...] }
-        const eventsArray = Array.isArray(events) ? events : [];
-        
-        const batch = admin.firestore().batch();
-        let imported = 0;
-        let skipped = 0;
-        let validationErrors = 0;
-        let processingDetails = [];
-        
-        for (const event of eventsArray) {
-            // Log each event's structure for diagnostic purposes
-            const timestamp = new Date().toISOString();
-            console.log(`[importDriverBehaviorWebhook][${timestamp}] Processing event:`, JSON.stringify(event, null, 2));
-            
-            // Check for required fields
-            const { fleetNumber, driverName, eventType, eventTime } = event;
-            
-            if (!fleetNumber || !eventType || !eventTime) {
-                console.error(`[importDriverBehaviorWebhook] Missing required fields:`, 
-                    { fleetNumber, eventType, eventTime });
-                validationErrors++;
-                processingDetails.push({
-                    event: event,
-                    error: 'Missing required fields',
-                    timestamp
-                });
-                continue;
-            }
-            
-            // Generate unique document ID to prevent duplicates
-            // Use the same format as in the Google Apps Script for consistency
-            const uniqueId = `${fleetNumber}_${eventType}_${eventTime}`;
-            const eventRef = admin.firestore().collection('driverBehaviorEvents').doc(uniqueId);
-            
-            // Check if document already exists
-            const eventDoc = await eventRef.get();
-            
-            if (eventDoc.exists) {
-                console.log(`[importDriverBehaviorWebhook] Event already exists: ${uniqueId}`);
-                skipped++;
-                processingDetails.push({
-                    uniqueId,
-                    status: 'skipped',
-                    reason: 'already exists',
-                    timestamp
-                });
-                continue;
-            }
-            
-            // Process the event - ensure proper fields
-            const processedEvent = {
-                fleetNumber,
-                driverName: driverName || '',
-                eventType,
-                eventTime,
-                cameraId: event.cameraId || '',
-                videoUrl: event.videoUrl || '',
-                severity: event.severity || 'medium',
-                eventScore: parseFloat(event.eventScore) || 0,
-                notes: event.notes || '',
-                reportedAt: event.reportedAt || new Date().toISOString(),
-                reportedBy: event.reportedBy || 'WebBook Script',
-                status: event.status || 'pending',
-                points: Number(event.points) || 0,
-                createdAt: event.createdAt || new Date().toISOString(),
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            };
-            
-            console.log(`[importDriverBehaviorWebhook] Adding event: ${uniqueId}`, processedEvent);
-            batch.set(eventRef, processedEvent);
-            imported++;
-            processingDetails.push({
-                uniqueId,
-                status: 'imported',
-                timestamp
-            });
-        }
-        
-        // Commit the batch if there are items to import
-        if (imported > 0) {
-            await batch.commit();
-            console.log(`[importDriverBehaviorWebhook] Successfully committed ${imported} events to Firestore`);
-        } else {
-            console.log('[importDriverBehaviorWebhook] No new events to import');
-        }
-        
-        const response = {
-            imported,
-            skipped,
-            validationErrors,
-            message: `Processed ${events.length} driver behavior events. Imported: ${imported}, Skipped: ${skipped}, Errors: ${validationErrors}`,
-            processingDetails: processingDetails.length <= 10 ? processingDetails : `${processingDetails.length} events processed`
+      const existing = await db
+        .collection("trips")
+        .where("loadRef", "==", loadRef)
+        .get();
+      if (existing.empty) {
+        const tripRef = db.collection("trips").doc();
+        const newTrip = {
+          id: tripRef.id,
+          fleetNumber: fleetNumber || "",
+          driverName: driverName || "",
+          route: route || "",
+          tripDescription: "",
+          tripNotes: "",
+          clientName: clientName || "",
+          clientType: clientType || "",
+          baseRevenue: 0,
+          revenueCurrency: "ZAR",
+          distanceKm: 0,
+          startDate: shippedDate ? new Date(shippedDate).toISOString() : "",
+          endDate: deliveredDate ? new Date(deliveredDate).toISOString() : "",
+          status: deliveredDate ? "completed" : "active",
+          paymentStatus: "unpaid",
+          delayReasons: [],
+          followUpHistory: [],
+          additionalCosts: [],
+          costs: [],
+          loadRef: loadRef,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         };
-        
-        console.log('[importDriverBehaviorWebhook] Final response:', response);
-        
-        return res.status(200).json(response);
-    } catch (error) {
-        console.error("[importDriverBehaviorWebhook] Error processing events:", error);
-        return res.status(500).json({ 
-            error: 'Internal Server Error', 
-            details: error instanceof Error ? error.message : 'Unknown error'
-        });
+        validTrips.push({ ref: tripRef, data: newTrip });
+      } else {
+        skippedExisting++;
+      }
     }
+
+    if (validTrips.length > 0) {
+      const batch = db.batch();
+      validTrips.forEach((trip) => {
+        batch.set(trip.ref, trip.data);
+      });
+      await batch.commit();
+    }
+
+    const summary = `Import summary: ${validTrips.length} new trips imported. ${skippedExisting} trips already exist. ${skippedNoLoadRef} rows skipped due to missing loadRef.`;
+    console.log(summary);
+    return { imported: validTrips.length, message: summary };
+  } catch (error) {
+    console.error("Error importing trips:", error);
+    throw new functions.https.HttpsError("internal", error.message);
+  }
 });
 
-// HTTP endpoint for trips webhook
-exports.importTripsWebhook = functions.https.onRequest(async (req, res) => {
-    try {
-        // Only accept POST
-        if (req.method !== 'POST') {
-            res.status(405).send('Method Not Allowed');
-            return;
-        }
-        
-        const trips = Array.isArray(req.body) ? req.body : [];
-        if (!trips.length) {
-            res.status(400).json({ error: 'Invalid or empty payload' });
-            return;
-        }
-        
-        const db = admin.firestore();
-        let imported = 0;
-        let skipped = 0;
-        
-        for (const trip of trips) {
-            const loadRef = trip.loadRef || trip.id;
-            if (!loadRef) {
-                skipped++;
-                continue;
-            }
-            
-            // Check for duplicate by loadRef
-            const existing = await db.collection('trips').where('loadRef', '==', loadRef).limit(1).get();
-            if (!existing.empty) {
-                skipped++;
-                continue;
-            }
-            
-            // Process the trip data
-            const processedTrip = {
-                id: trip.id || loadRef,
-                fleetNumber: trip.fleetNumber || "",
-                driverName: trip.driverName || "",
-                clientType: trip.clientType || "external",
-                clientName: trip.clientName || "",
-                loadRef: loadRef,
-                route: trip.route || "",
-                startDate: trip.shippedDate || new Date().toISOString(),
-                endDate: trip.deliveredDate || new Date().toISOString(),
-                status: "active",
-                baseRevenue: 0,
-                revenueCurrency: "ZAR",
-                costs: [],
-                additionalCosts: [],
-                followUpHistory: [],
-                paymentStatus: "unpaid",
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            };
-            
-            await db.collection('trips').doc(loadRef).set(processedTrip);
-            imported++;
-        }
-        
-        res.status(200).json({ imported, skipped });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+// scheduledImportTripsFromWebBook
+export const scheduledImportTripsFromWebBook = functionsV1.pubsub
+  .schedule("every 5 minutes")
+  .onRun(async (context) => {
+    if (!WEB_BOOK_TRIPS_URL) {
+      console.error("WEB_BOOK_TRIPS_URL not set in environment variables.");
+      return null;
     }
+    try {
+      console.log(`Fetching trips from: ${WEB_BOOK_TRIPS_URL}`);
+      const response = await fetch(WEB_BOOK_TRIPS_URL, { method: "GET" });
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`Failed to fetch web book: ${response.status} ${response.statusText}`, { errorBody });
+        throw new Error(`Failed to fetch web book: ${response.statusText}`);
+      }
+      const data = await response.json();
+      
+      // DEBUG ONLY – remove after verification
+      console.log("Web book API response:", JSON.stringify(data, null, 2));
+      
+      // Handle both direct array and nested structure
+      let trips = [];
+      if (data && data.trips && Array.isArray(data.trips)) {
+        // Structure: { trips: [...], meta: {...} }
+        trips = data.trips;
+        console.log(`Processing ${trips.length} trips from nested structure`);
+      } else if (Array.isArray(data)) {
+        // Backward compatibility: if response is directly an array
+        trips = data;
+        console.log(`Processing ${trips.length} trips from direct array`);
+      } else {
+        console.error("Web book response is not an array or doesn't contain trips array. Received:", data);
+        throw new Error("Web book response is not an array or doesn't contain trips array");
+      }
+      
+      console.log(`Received ${trips.length} rows from web book.`);
+      if (trips.length > 0) {
+        console.log("First row sample:", JSON.stringify(trips[0]));
+      }
+
+      const db = admin.firestore();
+      const validTrips = [];
+      let skippedExisting = 0;
+      let skippedNoLoadRef = 0;
+
+      for (const row of trips) {
+        const [
+          fleetNumber,
+          driverName,
+          clientType,
+          clientName,
+          loadRef,
+          route,
+          shippedStatus,
+          shippedDate,
+          deliveredStatus,
+          deliveredDate,
+        ] = row;
+
+        if (!loadRef) {
+          skippedNoLoadRef++;
+          continue;
+        }
+
+        const existing = await db
+          .collection("trips")
+          .where("loadRef", "==", loadRef)
+          .get();
+        if (existing.empty) {
+          const tripRef = db.collection("trips").doc();
+          const newTrip = {
+            id: tripRef.id,
+            fleetNumber: fleetNumber || "",
+            driverName: driverName || "",
+            route: route || "",
+            tripDescription: "",
+            tripNotes: "",
+            clientName: clientName || "",
+            clientType: clientType || "",
+            baseRevenue: 0,
+            revenueCurrency: "ZAR",
+            distanceKm: 0,
+            startDate: shippedDate ? new Date(shippedDate).toISOString() : "",
+            endDate: deliveredDate ? new Date(deliveredDate).toISOString() : "",
+            status: deliveredDate ? "completed" : "active",
+            paymentStatus: "unpaid",
+            delayReasons: [],
+            followUpHistory: [],
+            additionalCosts: [],
+            costs: [],
+            loadRef: loadRef,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          };
+          validTrips.push({ ref: tripRef, data: newTrip });
+        } else {
+          skippedExisting++;
+        }
+      }
+
+      if (validTrips.length > 0) {
+        const batch = db.batch();
+        validTrips.forEach(trip => {
+          batch.set(trip.ref, trip.data);
+        });
+        await batch.commit();
+      }
+
+      console.log(`Import summary: ${validTrips.length} new trips imported. ${skippedExisting} trips already exist. ${skippedNoLoadRef} rows skipped due to missing loadRef.`);
+      return null;
+    } catch (error) {
+      console.error("Scheduled import error:", error);
+      return null;
+    }
+  });
+
+// importDriverBehaviorWebhook
+export const importDriverBehaviorWebhook = onRequest(async (req, res) => {
+  if (req.method !== 'POST') {
+    res.status(405).send('Method Not Allowed');
+    return;
+  }
+
+  // DEBUG ONLY – remove after verification
+  console.log("Driver behavior webhook received payload:", JSON.stringify(req.body, null, 2));
+
+  // Extract events from the nested structure (req.body.events) or from req.body if it's an array
+  let events = [];
+  if (req.body && req.body.events && Array.isArray(req.body.events)) {
+    // Structure: { events: [...], meta: {...} }
+    events = req.body.events;
+    console.log(`Processing ${events.length} events from nested structure`);
+  } else if (Array.isArray(req.body)) {
+    // Backward compatibility: if req.body is directly an array
+    events = req.body;
+    console.log(`Processing ${events.length} events from direct array`);
+  }
+
+  if (!events.length) {
+    console.error("Invalid or empty payload:", req.body);
+    res.status(400).send('Invalid or empty payload. Expected {events: [...]} or direct array');
+    return;
+  }
+
+  // Log first event for debugging
+  if (events.length > 0) {
+    console.log("Sample event data:", JSON.stringify(events[0], null, 2));
+  }
+
+  const db = admin.firestore();
+  let imported = 0;
+  let skipped = 0;
+  let errors = 0;
+  const errorDetails = [];
+
+  try {
+    for (const evt of events) {
+      try {
+        // Validate required fields
+        const id = evt.id;
+        if (!id || evt.eventType === 'UNKNOWN') {
+          console.log(`Skipping event with invalid id or type: ${JSON.stringify(evt, null, 2)}`);
+          skipped++;
+          continue;
+        }
+
+        // Check for duplicates
+        const ref = db.collection('driverBehavior').doc(id.toString());
+        const snap = await ref.get();
+        if (snap.exists) {
+          console.log(`Skipping duplicate event with id: ${id}`);
+          skipped++;
+          continue;
+        }
+
+        // Save to Firestore with timestamp
+        await ref.set({
+          ...evt,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          importSource: 'webhook',
+          importedAt: new Date().toISOString()
+        });
+        imported++;
+      } catch (eventError) {
+        // Handle individual event errors
+        console.error(`Error processing event: ${eventError.message}`);
+        errors++;
+        errorDetails.push({
+          message: eventError.message,
+          eventId: evt.id || 'unknown'
+        });
+      }
+    }
+
+    // Send detailed response
+    const response = {
+      imported,
+      skipped,
+      errors,
+      success: true,
+      timestamp: new Date().toISOString(),
+      total: events.length
+    };
+    
+    console.log(`Driver behavior webhook processed: ${imported} imported, ${skipped} skipped, ${errors} errors`);
+    res.status(200).send(response);
+  } catch (error) {
+    // Handle overall function errors
+    console.error(`Critical error in importDriverBehaviorWebhook: ${error.message}`);
+    res.status(500).send({
+      success: false,
+      error: error.message,
+      imported,
+      skipped,
+      errors,
+      errorDetails
+    });
+  }
 });
 
-// Manual trigger for driver behavior events import
-exports.manualImportDriverEvents = functions.https.onRequest(async (req, res) => {
-    try {
-        const result = await exports.importDriverEventsFromWebBook.run();
-        res.status(200).json(result);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+// scheduledImportDriverBehaviorFromWebBook
+export const scheduledImportDriverBehaviorFromWebBook = functionsV1.pubsub
+  .schedule("every 5 minutes")
+  .onRun(async (context) => {
+    if (!WEB_BOOK_DRIVER_BEHAVIOR_URL) {
+      console.error("WEB_BOOK_DRIVER_BEHAVIOR_URL not set in environment variables.");
+      return null;
     }
+    try {
+      const response = await fetch(WEB_BOOK_DRIVER_BEHAVIOR_URL, {
+        method: "GET",
+      });
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch driver behavior web book: ${response.statusText}`
+        );
+      }
+      const events = await response.json();
+      if (!Array.isArray(events)) {
+        throw new Error("Driver behavior web book response is not an array");
+      }
+      const db = admin.firestore();
+      let imported = 0;
+      let skipped = 0;
+
+      for (const row of events) {
+        const [
+          reportedAt = "",
+          description = "",
+          driverName = "",
+          eventDate = "",
+          eventTime = "",
+          eventType = "",
+          fleetNumber = "",
+          location = "",
+          severity = "",
+          status = "pending",
+          points = 0
+        ] = row;
+
+        if (!eventType || eventType === 'UNKNOWN') {
+          skipped++;
+          continue;
+        }
+
+        const uniqueId = `event_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+        const existing = await db
+          .collection("driverBehavior")
+          .where("id", "==", uniqueId)
+          .limit(1)
+          .get();
+
+        if (!existing.empty) {
+          skipped++;
+          continue;
+        }
+
+        const eventRef = db.collection("driverBehavior").doc();
+        const newEvent = {
+          id: uniqueId,
+          reportedAt: reportedAt ? new Date(reportedAt).toISOString() : new Date().toISOString(),
+          description: description || "",
+          driverName: driverName || "",
+          eventDate: eventDate || "",
+          eventTime: eventTime || "",
+          eventType: eventType || "",
+          fleetNumber: fleetNumber || "",
+          location: location || "",
+          severity: severity || "medium",
+          status: status || "pending",
+          points: Number(points) || 0,
+          reportedBy: "WebBook Script",
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        };
+
+        await eventRef.set(newEvent);
+        imported++;
+      }
+
+      console.log(
+        `Imported ${imported} driver behavior events from web book, skipped ${skipped}.`
+      );
+      return { imported, skipped };
+    } catch (error) {
+      console.error("Scheduled driver behavior import error:", error);
+      return null;
+    }
+  });
+
+// importTripsWebhook
+export const importTripsWebhook = onRequest(async (req, res) => {
+  if (req.method !== 'POST') {
+    res.status(405).send('Method Not Allowed');
+    return;
+  }
+
+  // DEBUG ONLY – remove after verification
+  console.log("Trips webhook received payload:", JSON.stringify(req.body, null, 2));
+
+  // Extract trips from the nested structure (req.body.trips) or from req.body if it's an array
+  let trips = [];
+  if (req.body && req.body.trips && Array.isArray(req.body.trips)) {
+    // Structure: { trips: [...], meta: {...} }
+    trips = req.body.trips;
+    console.log(`Processing ${trips.length} trips from nested structure`);
+  } else if (Array.isArray(req.body)) {
+    // Backward compatibility: if req.body is directly an array
+    trips = req.body;
+    console.log(`Processing ${trips.length} trips from direct array`);
+  }
+
+  if (!trips.length) {
+    console.error("Invalid or empty payload:", req.body);
+    res.status(400).send('Invalid or empty payload. Expected {trips: [...]} or direct array');
+    return;
+  }
+
+  // Log first trip for debugging
+  if (trips.length > 0) {
+    console.log("Sample trip data:", JSON.stringify(trips[0], null, 2));
+  }
+
+  const db = admin.firestore();
+  let imported = 0;
+  let skipped = 0;
+  let errors = 0;
+  const errorDetails = [];
+
+  try {
+    for (const t of trips) {
+      try {
+        // Validate required ID field
+        const id = t.loadRef || t.id;
+        if (!id) {
+          console.log(`Skipping trip with no ID or loadRef: ${JSON.stringify(t, null, 2)}`);
+          skipped++;
+          continue;
+        }
+
+        // Check for duplicates
+        const ref = db.collection('trips').doc(id.toString());
+        const snap = await ref.get();
+        if (snap.exists) {
+          console.log(`Skipping duplicate trip with id: ${id}`);
+          skipped++;
+          continue;
+        }
+
+        // Save to Firestore with timestamps
+        await ref.set({
+          ...t,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          importSource: 'webhook',
+          importedAt: new Date().toISOString()
+        });
+        imported++;
+      } catch (tripError) {
+        // Handle individual trip errors
+        console.error(`Error processing trip: ${tripError.message}`);
+        errors++;
+        errorDetails.push({
+          message: tripError.message,
+          tripId: t.loadRef || t.id || 'unknown'
+        });
+      }
+    }
+
+    // Send detailed response
+    const response = {
+      imported,
+      skipped,
+      errors,
+      success: true,
+      timestamp: new Date().toISOString(),
+      total: trips.length
+    };
+    
+    console.log(`Trips webhook processed: ${imported} imported, ${skipped} skipped, ${errors} errors`);
+    res.status(200).send(response);
+  } catch (error) {
+    // Handle overall function errors
+    console.error(`Critical error in importTripsWebhook: ${error.message}`);
+    res.status(500).send({
+      success: false,
+      error: error.message,
+      imported,
+      skipped,
+      errors,
+      errorDetails
+    });
+  }
 });
 
-// Manual trigger for trips import
-exports.manualImportTrips = functions.https.onRequest(async (req, res) => {
-    try {
-        const fetch = (await import('node-fetch')).default;
-        const response = await fetch(WEBHOOK_URL);
-        if (!response.ok) throw new Error('Failed to fetch from Google Sheets Web App');
-        const trips = await response.json();
-        
-        const db = admin.firestore();
-        let imported = 0;
-        let skipped = 0;
-        
-        for (const trip of trips) {
-            const loadRef = trip.loadRef || trip.id;
-            if (!loadRef) {
-                skipped++;
-                continue;
-            }
-            
-            // Check for duplicate by loadRef
-            const existing = await db.collection('trips').where('loadRef', '==', loadRef).limit(1).get();
-            if (!existing.empty) {
-                skipped++;
-                continue;
-            }
-            
-            // Process the trip data
-            const processedTrip = {
-                id: trip.id || loadRef,
-                fleetNumber: trip.fleetNumber || "",
-                driverName: trip.driverName || "",
-                clientType: trip.clientType || "external",
-                clientName: trip.clientName || "",
-                loadRef: loadRef,
-                route: trip.route || "",
-                startDate: trip.shippedDate || new Date().toISOString(),
-                endDate: trip.deliveredDate || new Date().toISOString(),
-                status: "active",
-                baseRevenue: 0,
-                revenueCurrency: "ZAR",
-                costs: [],
-                additionalCosts: [],
-                followUpHistory: [],
-                paymentStatus: "unpaid",
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            };
-            
-            await db.collection('trips').doc(loadRef).set(processedTrip);
-            imported++;
-        }
-        
-        res.status(200).json({ imported, skipped });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+// importDriverBehaviorEventsFromWebhook
+export const importDriverBehaviorEventsFromWebhook = onCall(async (request) => {
+  try {
+    // DEBUG ONLY – remove after verification
+    console.log("importDriverBehaviorEventsFromWebhook received payload:", JSON.stringify(request.data, null, 2));
+    
+    const db = admin.firestore();
+    let imported = 0;
+    let skipped = 0;
+    let invalid = 0;
+    
+    // Extract events from the nested structure (request.data.events) or from request.data if it's an array
+    let events = [];
+    if (request.data && request.data.events && Array.isArray(request.data.events)) {
+      // Structure: { events: [...], meta: {...} }
+      events = request.data.events;
+      console.log(`Processing ${events.length} events from nested structure`);
+    } else if (Array.isArray(request.data)) {
+      // Backward compatibility: if request.data is directly an array
+      events = request.data;
+      console.log(`Processing ${events.length} events from direct array`);
+    } else {
+      console.error("Invalid or empty payload:", request.data);
+      throw new functions.https.HttpsError(
+        "invalid-argument",
+        "Invalid or empty payload. Expected {events: [...]} or direct array"
+      );
     }
+    
+    if (events.length === 0) {
+      console.log("No events to process");
+      return { imported: 0, skipped: 0, invalid: 0 };
+    }
+    
+    // Log first event for debugging
+    if (events.length > 0) {
+      console.log("Sample event data:", JSON.stringify(events[0], null, 2));
+    }
+
+    // Process each event in the array
+    for (const event of events) {
+      // Validate required fields
+      if (!event.driverName || !event.eventType || !event.eventDate) {
+        console.log(`Skipping event with missing required fields: ${JSON.stringify(event)}`);
+        invalid++;
+        continue;
+      }
+      
+      // Skip unknown event types
+      if (event.eventType === 'UNKNOWN') {
+        console.log(`Skipping event with UNKNOWN type: ${JSON.stringify(event)}`);
+        skipped++;
+        continue;
+      }
+
+      // Generate a consistent ID for deduplication if not provided
+      const eventId = event.id || `${event.driverName}_${event.eventType}_${event.eventDate}_${Date.now()}`;
+      
+      // Check for duplicates in the driverBehaviorEvents collection
+      const existing = await db
+        .collection('driverBehaviorEvents')
+        .where('driverName', '==', event.driverName)
+        .where('eventType', '==', event.eventType)
+        .where('eventDate', '==', event.eventDate)
+        .limit(1)
+        .get();
+
+      if (!existing.empty) {
+        console.log(`Skipping duplicate event: ${eventId}`);
+        skipped++;
+        continue;
+      }
+
+      // Create the document with a new ID
+      const eventRef = db.collection('driverBehaviorEvents').doc();
+      
+      // Prepare the document with normalized data
+      const eventDoc = {
+        ...event,                                         // Keep all original fields
+        id: eventId,                                      // Use our consistent ID
+        fleetNumber: event.fleetNumber || "Unknown",      // Default fleet number
+        score: typeof event.score === 'number' ? event.score : 0,  // Default score
+        severity: event.severity || "medium",             // Default severity
+        source: "webhook",                                // Mark the source
+        importedAt: new Date().toISOString(),             // Track import time
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      };
+      
+      // Write to Firestore
+      await eventRef.set(eventDoc);
+      imported++;
+      
+      if (imported % 10 === 0) {
+        console.log(`Progress: ${imported} events imported so far`);
+      }
+    }
+
+    // Log import summary
+    const summary = `Import summary: ${imported} driver behavior events imported, ${skipped} duplicates skipped, ${invalid} invalid events.`;
+    console.log(summary);
+    
+    return {
+      imported,
+      skipped,
+      invalid,
+      success: true,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error("Error importing driver behavior events:", error);
+    throw new functions.https.HttpsError("internal", error.message);
+  }
 });
 
-// Manual import endpoint for driver behavior events (can be triggered from the UI)
-exports.manualImportDriverBehavior = functions.https.onRequest(async (req, res) => {
-    try {
-        // Simulate the webhook call with empty events array to trigger the import
-        const fetch = (await import('node-fetch')).default;
-        const response = await fetch('https://us-central1-mat1-9e6b3.cloudfunctions.net/importDriverBehaviorWebhook', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ events: [] })
-        });
-        
-        if (!response.ok) {
-            throw new Error(`Failed to trigger driver behavior import: ${response.status} ${response.statusText}`);
-        }
-        
-        const result = await response.json();
-        console.log('[manualImportDriverBehavior] Import triggered:', result);
-        
-        res.status(200).json({
-            message: 'Manual driver behavior import triggered',
-            result
-        });
-    } catch (error) {
-        console.error('[manualImportDriverBehavior] Error:', error);
-        res.status(500).json({
-            error: 'Failed to trigger import',
-            details: error.message
-        });
-    }
+// createDieselRecord
+export const createDieselRecord = onCall(async (request) => {
+  const db = admin.firestore();
+  const dieselRef = db.collection("diesel").doc();
+  const data = request.data || {};
+  const newDiesel = {
+    id: dieselRef.id,
+    tripId: data.tripId || "",
+    fleetNumber: data.fleetNumber || "",
+    driverName: data.driverName || "",
+    fuelStation: data.fuelStation || "",
+    date: data.date || "",
+    currency: data.currency || "ZAR",
+    costPerLitre: Number(data.costPerLitre) || 0,
+    litresFilled: Number(data.litresFilled) || 0,
+    totalCost: Number(data.totalCost) || 0,
+    kmReading: Number(data.kmReading) || 0,
+    previousKmReading: Number(data.previousKmReading) || 0,
+    distanceTravelled: Number(data.distanceTravelled) || 0,
+    kmPerLitre: Number(data.kmPerLitre) || 0,
+    isReeferUnit: Boolean(data.isReeferUnit),
+    notes: data.notes || "",
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  await dieselRef.set(newDiesel);
+  return { id: dieselRef.id };
+});
+
+// createActionItem
+export const createActionItem = onCall(async (request) => {
+  const db = admin.firestore();
+  const actionRef = db.collection("actionItems").doc();
+  const data = request.data || {};
+  const newAction = {
+    id: actionRef.id,
+    title: data.title || "",
+    description: data.description || "",
+    responsiblePerson: data.responsiblePerson || "",
+    status: data.status || "pending",
+    startDate: data.startDate || "",
+    dueDate: data.dueDate || "",
+    completedAt: data.completedAt || "",
+    completedBy: data.completedBy || "",
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    createdBy: data.createdBy || "",
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    attachments: Array.isArray(data.attachments) ? data.attachments : [],
+    isOverdue: Boolean(data.isOverdue),
+    isOverdueBy5: Boolean(data.isOverdueBy5),
+    isOverdueBy10: Boolean(data.isOverdueBy10),
+    overdueBy: Number(data.overdueBy) || 0,
+    needsReason: Boolean(data.needsReason),
+  };
+  await actionRef.set(newAction);
+  return { id: actionRef.id };
+});
+
+// upsertSystemCostRates
+export const upsertSystemCostRates = onCall(async (request) => {
+  const db = admin.firestore();
+  const data = request.data || {};
+  const currency = data.currency || "ZAR";
+  const docId = `${currency}_rates`;
+  const ratesRef = db.collection("systemCostRates").doc(docId);
+  const now = new Date().toISOString();
+  const newRates = {
+    id: docId,
+    currency,
+    effectiveDate: data.effectiveDate || now,
+    lastUpdated: now,
+    updatedBy: data.updatedBy || "system",
+    perDayCosts: {
+      depreciation: Number(data.perDayCosts?.depreciation) || 0,
+      fleetManagementSystem: Number(data.perDayCosts?.fleetManagementSystem) || 0,
+      gitInsurance: Number(data.perDayCosts?.gitInsurance) || 0,
+      licensing: Number(data.perDayCosts?.licensing) || 0,
+      shortTermInsurance: Number(data.perDayCosts?.shortTermInsurance) || 0,
+      trackingCost: Number(data.perDayCosts?.trackingCost) || 0,
+      vidRoadworthy: Number(data.perDayCosts?.vidRoadworthy) || 0,
+      wages: Number(data.perDayCosts?.wages) || 0,
+    },
+    perKmCosts: {
+      repairMaintenance: Number(data.perKmCosts?.repairMaintenance) || 0,
+      tyreCost: Number(data.perKmCosts?.tyreCost) || 0,
+    },
+  };
+  await ratesRef.set(newRates, { merge: true });
+  return { id: docId };
 });

@@ -1,4 +1,4 @@
-declare module 'node-fetch' {
+declare module "node-fetch" {
     export interface Response {
         json(): Promise<any>;
         text(): Promise<string>;
@@ -14,7 +14,7 @@ declare module 'node-fetch' {
         method?: string;
         headers?: Record<string, string> | Headers;
         body?: string | Buffer;
-        redirect?: 'follow' | 'manual' | 'error';
+        redirect?: "follow" | "manual" | "error";
         signal?: AbortSignal;
         // Add other properties as needed
     }

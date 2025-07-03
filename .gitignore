@@ -25,10 +25,3 @@ dist-ssr
 
 # Local Netlify folder
 .netlify
-
-/docs/
-
-*.md
-
-# Ignore kilocode system prompt code
-.functions/.kilocode/system-prompt-code

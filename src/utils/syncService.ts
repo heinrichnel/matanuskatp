@@ -49,7 +49,7 @@ interface SyncListeners {
 // Sync service class
 export class SyncService {
   private listeners: SyncListeners = {};
-  private dataCallbacks: Record<string, (...args: unknown[]) => void> = {};
+  private dataCallbacks: Record<string, (...args: any[]) => void> = {};
   private tripUnsubscribes: Map<string, () => void> = new Map();
   private dieselUnsubscribes: Map<string, () => void> = new Map();
   private driverBehaviorUnsubscribes: Map<string, () => void> = new Map();
@@ -57,7 +57,7 @@ export class SyncService {
   private auditLogUnsubscribes: Map<string, () => void> = new Map();
   public syncStatus: SyncStatus = 'idle';
   public connectionStatus: ConnectionStatus = 'connected';
-  private pendingChanges: Map<string, unknown> = new Map();
+  private pendingChanges: Map<string, any> = new Map();
   public isOnline: boolean = navigator.onLine;
   public lastSynced: Date | null = null;
   public pendingChangesCount = 0;
@@ -76,7 +76,7 @@ export class SyncService {
   }
 
   // Register data callbacks for all collections
-  public registerDataCallbacks(callbacks: Record<string, (...args: unknown[]) => void>): void {
+  public registerDataCallbacks(callbacks: Record<string, (...args: any[]) => void>): void {
     this.dataCallbacks = { ...this.dataCallbacks, ...callbacks };
     console.log('✅ Data callbacks registered:', Object.keys(callbacks).join(', '));
   }
@@ -163,13 +163,8 @@ export class SyncService {
         const docRef = doc(db, collection, id);
 
         // Add server timestamp
-        if (typeof change !== 'object' || change === null) {
-          console.error(`Invalid change for ${key}:`, change);
-          continue;
-        }
-
         const dataWithTimestamp = {
-          ...(change as Record<string, unknown>),
+          ...change,
           updatedAt: serverTimestamp()
         };
 
@@ -261,19 +256,11 @@ export class SyncService {
           if (change.type === 'added') {
             added++;
             console.log(`Trip added: ${id}`);
-            if (typeof data === 'object' && data !== null) {
-              trips.push({ id, ...(data as object) } as Trip);
-            } else {
-              trips.push({ id } as Trip);
-            }
+            trips.push({ id, ...data } as Trip);
           } else if (change.type === 'modified') {
             modified++;
             console.log(`Trip modified: ${id}`);
-            if (typeof data === 'object' && data !== null) {
-              trips.push({ id, ...(data as object) } as Trip);
-            } else {
-              trips.push({ id } as Trip);
-            }
+            trips.push({ id, ...data } as Trip);
           } else if (change.type === 'removed') {
             removed++;
             console.log(`Trip removed: ${id}`);
@@ -289,11 +276,7 @@ export class SyncService {
           const currentTrips: Trip[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
-            if (typeof data === 'object' && data !== null) {
-              currentTrips.push({ id: doc.id, ...(data as object) } as Trip);
-            } else {
-              currentTrips.push({ id: doc.id } as Trip);
-            }
+            currentTrips.push({ id: doc.id, ...data } as Trip);
           });
 
           if (typeof this.dataCallbacks.setTrips === 'function') {
@@ -432,11 +415,7 @@ export class SyncService {
           const events: DriverBehaviorEvent[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
-            if (typeof data === 'object' && data !== null) {
-              events.push({ id: doc.id, ...(data as object) } as DriverBehaviorEvent);
-            } else {
-              events.push({ id: doc.id } as DriverBehaviorEvent);
-            }
+            events.push({ id: doc.id, ...data } as DriverBehaviorEvent);
           });
 
           if (typeof this.dataCallbacks.setDriverBehaviorEvents === 'function') {
@@ -496,11 +475,7 @@ export class SyncService {
           const records: DieselConsumptionRecord[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
-            if (typeof data === 'object' && data !== null) {
-              records.push({ id: doc.id, ...(data as object) } as DieselConsumptionRecord);
-            } else {
-              records.push({ id: doc.id } as DieselConsumptionRecord);
-            }
+            records.push({ id: doc.id, ...data } as DieselConsumptionRecord);
           });
 
           if (typeof this.dataCallbacks.setDieselRecords === 'function') {
@@ -556,31 +531,26 @@ export class SyncService {
       const cleanData = cleanObjectForFirestore(data);
 
       // Add updatedAt timestamp
-      if (typeof cleanData === 'object' && cleanData !== null) {
-        const updateData = {
-          ...(cleanData as object),
-          updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
-        };
+      const updateData = {
+        ...cleanData,
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
 
-        if (this.isOnline) {
-          // Online - update directly
-          const tripRef = doc(db, 'trips', tripId);
-          await updateDoc(tripRef, updateData);
-          console.log(`✅ Trip ${tripId} updated with real-time sync`);
-        } else {
-          // Offline - store for later sync
-          this.pendingChanges.set(`trips:${tripId}`, updateData);
-          console.log(`📝 Trip ${tripId} update queued for sync when online`);
-
-          // Store in localStorage as backup
-          this.storePendingChangesInLocalStorage();
-        }
-
-        this.setSyncStatus('success');
+      if (this.isOnline) {
+        // Online - update directly
+        const tripRef = doc(db, 'trips', tripId);
+        await updateDoc(tripRef, updateData);
+        console.log(`✅ Trip ${tripId} updated with real-time sync`);
       } else {
-        console.error(`Invalid trip data for ${tripId}:`, data);
-        this.setSyncStatus('error');
+        // Offline - store for later sync
+        this.pendingChanges.set(`trips:${tripId}`, updateData);
+        console.log(`📝 Trip ${tripId} update queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
       }
+
+      this.setSyncStatus('success');
     } catch (error) {
       console.error(`Error updating trip ${tripId}:`, error);
       this.setSyncStatus('error');
@@ -597,31 +567,26 @@ export class SyncService {
       const cleanData = cleanObjectForFirestore(data);
 
       // Add updatedAt timestamp
-      if (typeof cleanData === 'object' && cleanData !== null) {
-        const updateData = {
-          ...(cleanData as object),
-          updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
-        };
+      const updateData = {
+        ...cleanData,
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
 
-        if (this.isOnline) {
-          // Online - update directly
-          const recordRef = doc(db, 'diesel', recordId);
-          await updateDoc(recordRef, updateData);
-          console.log(`✅ Diesel record ${recordId} updated with real-time sync`);
-        } else {
-          // Offline - store for later sync
-          this.pendingChanges.set(`diesel:${recordId}`, updateData);
-          console.log(`📝 Diesel record ${recordId} update queued for sync when online`);
-
-          // Store in localStorage as backup
-          this.storePendingChangesInLocalStorage();
-        }
-
-        this.setSyncStatus('success');
+      if (this.isOnline) {
+        // Online - update directly
+        const recordRef = doc(db, 'diesel', recordId);
+        await updateDoc(recordRef, updateData);
+        console.log(`✅ Diesel record ${recordId} updated with real-time sync`);
       } else {
-        console.error(`Invalid diesel data for ${recordId}:`, data);
-        this.setSyncStatus('error');
+        // Offline - store for later sync
+        this.pendingChanges.set(`diesel:${recordId}`, updateData);
+        console.log(`📝 Diesel record ${recordId} update queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
       }
+
+      this.setSyncStatus('success');
     } catch (error) {
       console.error(`Error updating diesel record ${recordId}:`, error);
       this.setSyncStatus('error');
@@ -638,31 +603,26 @@ export class SyncService {
       const cleanData = cleanObjectForFirestore(data);
 
       // Add updatedAt timestamp
-      if (typeof cleanData === 'object' && cleanData !== null) {
-        const updateData = {
-          ...(cleanData as object),
-          updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
-        };
+      const updateData = {
+        ...cleanData,
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
 
-        if (this.isOnline) {
-          // Online - update directly
-          const eventRef = doc(db, 'driverBehaviorEvents', eventId);
-          await updateDoc(eventRef, updateData);
-          console.log(`✅ Driver behavior event ${eventId} updated with real-time sync`);
-        } else {
-          // Offline - store for later sync
-          this.pendingChanges.set(`driverBehaviorEvents:${eventId}`, updateData);
-          console.log(`📝 Driver behavior event ${eventId} update queued for sync when online`);
-
-          // Store in localStorage as backup
-          this.storePendingChangesInLocalStorage();
-        }
-
-        this.setSyncStatus('success');
+      if (this.isOnline) {
+        // Online - update directly
+        const eventRef = doc(db, 'driverBehaviorEvents', eventId);
+        await updateDoc(eventRef, updateData);
+        console.log(`✅ Driver behavior event ${eventId} updated with real-time sync`);
       } else {
-        console.error(`Invalid driver behavior data for ${eventId}:`, data);
-        this.setSyncStatus('error');
+        // Offline - store for later sync
+        this.pendingChanges.set(`driverBehaviorEvents:${eventId}`, updateData);
+        console.log(`📝 Driver behavior event ${eventId} update queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
       }
+
+      this.setSyncStatus('success');
     } catch (error) {
       console.error(`Error updating driver behavior event ${eventId}:`, error);
       this.setSyncStatus('error');
@@ -784,11 +744,7 @@ export class SyncService {
           const missedLoads: MissedLoad[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
-            if (typeof data === 'object' && data !== null) {
-              missedLoads.push({ id: doc.id, ...(data as object) } as MissedLoad);
-            } else {
-              missedLoads.push({ id: doc.id } as MissedLoad);
-            }
+            missedLoads.push({ id: doc.id, ...data } as MissedLoad);
           });
 
           if (typeof this.dataCallbacks.setMissedLoads === 'function') {
@@ -848,11 +804,7 @@ export class SyncService {
           const actionItems: ActionItem[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
-            if (typeof data === 'object' && data !== null) {
-              actionItems.push({ id: doc.id, ...(data as object) } as ActionItem);
-            } else {
-              actionItems.push({ id: doc.id } as ActionItem);
-            }
+            actionItems.push({ id: doc.id, ...data } as ActionItem);
           });
 
           if (typeof this.dataCallbacks.setActionItems === 'function') {
@@ -912,11 +864,7 @@ export class SyncService {
           const carReports: CARReport[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
-            if (typeof data === 'object' && data !== null) {
-              carReports.push({ id: doc.id, ...(data as object) } as CARReport);
-            } else {
-              carReports.push({ id: doc.id } as CARReport);
-            }
+            carReports.push({ id: doc.id, ...data } as CARReport);
           });
 
           if (typeof this.dataCallbacks.setCarReports === 'function') {
@@ -994,7 +942,7 @@ export class SyncService {
 }
 
 // Helper function to clean objects for Firestore (remove undefined values)
-export const cleanObjectForFirestore = (obj: unknown): unknown => {
+export const cleanObjectForFirestore = (obj: any): any => {
   if (obj === null || obj === undefined) {
     return null;
   }
@@ -1004,8 +952,8 @@ export const cleanObjectForFirestore = (obj: unknown): unknown => {
   }
 
   if (typeof obj === 'object') {
-    const cleaned: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    const cleaned: any = {};
+    for (const [key, value] of Object.entries(obj)) {
       if (value !== undefined) {
         cleaned[key] = cleanObjectForFirestore(value);
       }
@@ -1017,7 +965,7 @@ export const cleanObjectForFirestore = (obj: unknown): unknown => {
 };
 
 // Helper function to convert Firestore timestamps to ISO strings
-export const convertTimestamps = (obj: unknown): unknown => {
+export const convertTimestamps = (obj: any): any => {
   if (obj === null || obj === undefined) {
     return obj;
   }
@@ -1029,12 +977,8 @@ export const convertTimestamps = (obj: unknown): unknown => {
     }
 
     // Also check for a toDate() method to handle different Timestamp implementations
-    if (obj &&
-      typeof obj === 'object' &&
-      'toDate' in obj &&
-      typeof (obj as { toDate: () => Date }).toDate === 'function'
-    ) {
-      return (obj as { toDate: () => Date }).toDate().toISOString();
+    if (obj && typeof obj.toDate === 'function') {
+      return obj.toDate().toISOString();
     }
   } catch (err) {
     console.error("Error converting timestamp:", err);
