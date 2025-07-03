@@ -2,11 +2,12 @@ import { onRequest } from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 
 // Ensure Firebase is initialized
-// Note: In actual implementation, you'd check if Firebase is already initialized
+// Note: In actual implementation, you'd check if Firebase is already
+// initialized
 try {
   admin.initializeApp();
 } catch (e) {
-  console.log('Firebase already initialized');
+  console.log("Firebase already initialized");
 }
 
 const db = admin.firestore();
@@ -255,27 +256,25 @@ export const enhancedWebBookImport = onRequest(async (req, res) => {
             imported,
             skipped,
             message: `Import process finished. Processed ${trips.length} trips. Imported: ${imported}, Skipped: ${skipped}`,
-            processingDetails: processingDetails.length <= 10 
-                ? processingDetails 
-                : `${processingDetails.length} trips processed`,
-            validationErrors: validationErrors.length > 0 ? validationErrors : undefined
-        };
+    processingDetails: processingDetails.length <= 10 
+        ? processingDetails
+        : `${processingDetails.length} trips processed`,
+    validationErrors: validationErrors.length > 0 ? validationErrors : undefined
+};
         
         console.log(`[enhancedWebBookImport] Import finished:`, response);
         res.status(200).json(response);
-        
     } catch (error) {
-        // Enhanced error logging with detailed information
-        console.error("[enhancedWebBookImport] Error processing request:", error);
-        console.error("[enhancedWebBookImport] Request body:", JSON.stringify(req.body, null, 2));
-        console.error("[enhancedWebBookImport] Stack trace:", error instanceof Error ? error.stack : 'No stack trace');
-        
-        res.status(500).json({
-            error: 'Internal Server Error',
-            message: error instanceof Error ? error.message : 'Unknown error',
-            timestamp: new Date().toISOString(),
-            requestId: req.headers['x-request-id'] || 'unknown'
-        });
+      // Enhanced error logging with detailed information
+      console.error("[enhancedWebBookImport] Error processing request:", error);
+      console.error("[enhancedWebBookImport] Request body:", JSON.stringify(req.body, null, 2));
+      console.error("[enhancedWebBookImport] Stack trace:", error instanceof Error ? error.stack : 'No stack trace');
+      res.status(500).json({
+        error: 'Internal Server Error',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+        requestId: req.headers['x-request-id'] || 'unknown'
+      });
     }
 });
 

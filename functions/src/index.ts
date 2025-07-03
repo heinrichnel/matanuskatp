@@ -5,10 +5,26 @@
  */
 
 import { setGlobalOptions } from "firebase-functions";
-import { onRequest } from "firebase-functions/v2/https";
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import * as logger from "firebase-functions/logger";
+import { Response } from 'express';
+
+// Define TypeScript interface for trip update data
+interface TripUpdateData {
+  updatedAt: any;
+  startedAt?: string;
+  driverId?: string;
+  vehicleId?: string;
+  startLocation?: string;
+  shippedStatus?: boolean;
+  shippedDate?: string;
+  status?: string;
+  endedAt?: string;
+  endLocation?: string;
+  deliveredStatus?: boolean;
+  deliveredDate?: string;
+  lastUpdated?: string;
+}
 
 // Import enhanced TypeScript webhook implementations
 import { enhancedDriverBehaviorWebhook } from "./enhanced-driver-behavior-webhook";
@@ -48,23 +64,25 @@ export const importTripsFromWebBook = enhancedWebBookImport;
 // =============================================
 
 // Telematics trip update webhook
-export const telematicsTripUpdateWebhook = functions.https.onRequest(async (req, res) => {
+export const telematicsTripUpdateWebhook = functions.https.onRequest(async (req, res): Promise<void> => {
   try {
     console.log("[telematicsTripUpdateWebhook] Received request:", JSON.stringify(req.body, null, 2));
     
     const { tripId, status, timestamp, driverId, vehicleId, location, endLocation } = req.body;
     
     if (!tripId || !status) {
-      return res.status(400).json({ error: 'Missing required fields: tripId and status' });
+      res.status(400).json({ error: 'Missing required fields: tripId and status' });
+      return;
     }
     
     const tripRef = admin.firestore().collection('trips').doc(String(tripId));
     
-    const updateData = { updatedAt: admin.firestore.FieldValue.serverTimestamp() };
+    const updateData: TripUpdateData = { updatedAt: admin.firestore.FieldValue.serverTimestamp() };
     
     if (status === 'trip_started') {
       if (!driverId || !vehicleId || !location) {
-        return res.status(400).json({ error: 'Missing required fields for trip_started status' });
+        res.status(400).json({ error: 'Missing required fields for trip_started status' });
+        return;
       }
       
       const timestampISO = new Date(timestamp).toISOString();
@@ -77,7 +95,8 @@ export const telematicsTripUpdateWebhook = functions.https.onRequest(async (req,
       updateData.status = 'active';
     } else if (status === 'trip_ended') {
       if (!endLocation) {
-        return res.status(400).json({ error: 'Missing required field endLocation for trip_ended status' });
+        res.status(400).json({ error: 'Missing required field endLocation for trip_ended status' });
+        return;
       }
       
       const timestampISO = new Date(timestamp).toISOString();
@@ -93,18 +112,21 @@ export const telematicsTripUpdateWebhook = functions.https.onRequest(async (req,
     console.log(`[telematicsTripUpdateWebhook] Updating trip ${tripId} with status ${status}`, updateData);
     await tripRef.set(updateData, { merge: true });
     
-    return res.status(200).json({
+    res.status(200).json({
       message: `Trip ${tripId} updated with status: ${status}`,
       timestamp: new Date().toISOString()
     });
+    return;
   } catch (error) {
     console.error("[telematicsTripUpdateWebhook] Error:", error);
-    return res.status(500).json({ error: error instanceof Error ? error.message : 'Internal server error' });
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Internal server error' });
+    return;
   }
 });
 
 // Import Driver Behavior Events from Web Book (automatic sync)
-export const importDriverEventsFromWebBook = functions.pubsub.schedule('every 5 minutes').onRun(async (context) => {
+// Note: Changed from pubsub.schedule to an HTTP function that can be triggered by Cloud Scheduler
+export const importDriverEventsFromWebBook = functions.https.onRequest(async (req, res): Promise<void> => {
   try {
     const fetch = (await import('node-fetch')).default;
     const response = await fetch(WEBHOOK_URLS.DRIVER_BEHAVIOR);
@@ -134,7 +156,8 @@ export const importDriverEventsFromWebBook = functions.pubsub.schedule('every 5 
     }
     
     console.log(`DriverBehavior Sync: Imported ${imported}, Skipped ${skipped}`);
-    return { imported, skipped };
+    res.status(200).json({ imported, skipped });
+    return;
   } catch (error) {
     console.error("[importDriverEventsFromWebBook] Error:", error);
     throw new Error(error instanceof Error ? error.message : 'Unknown error');
@@ -144,8 +167,7 @@ export const importDriverEventsFromWebBook = functions.pubsub.schedule('every 5 
 // Manual trigger for driver behavior events import
 export const manualImportDriverEvents = functions.https.onRequest(async (req, res) => {
   try {
-    const result = await importDriverEventsFromWebBook.run();
-    res.status(200).json(result);
+    await importDriverEventsFromWebBook(req, res);
   } catch (error) {
     console.error("[manualImportDriverEvents] Error:", error);
     res.status(500).json({ 
@@ -226,34 +248,30 @@ export const manualImportTrips = functions.https.onRequest(async (req, res) => {
 export const manualImportDriverBehavior = functions.https.onRequest(async (req, res) => {
   try {
     // Use our enhanced TypeScript webhook implementation directly
-    const payload = { events: [] };
-    
+
     // Create a mock request/response object to pass to the webhook
     const mockReq = {
-      body: payload,
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-source': 'manual-trigger',
-        'x-request-id': `manual-${Date.now()}`
-      }
-    };
-    
+      body: {},
+      method: 'GET',
+      headers: {}
+    } as functions.https.Request;
+
     const mockRes = {
-      status: (code) => ({
-        json: (data) => {
-          // Return the response from the webhook 
-          res.status(code).json({
-            message: 'Manual driver behavior import triggered',
-            result: data
-          });
-        }
-      }),
-      set: () => mockRes
-    };
-    
-    // Directly call the enhanced webhook implementation
-    await importDriverBehaviorWebhook(mockReq, mockRes);
+      status: (code: number) => {
+        console.log('Mock Status:', code);
+        return mockRes;
+      },
+      json: (data: any) => {
+        console.log('Mock JSON Response:', data);
+        return mockRes;
+      },
+      send: (data: any) => {
+        console.log('Mock Send Response:', data);
+        return mockRes;
+      }
+    } as unknown as Response;
+
+    await importDriverEventsFromWebBook(mockReq, mockRes);
     
   } catch (error) {
     console.error('[manualImportDriverBehavior] Error:', error);
