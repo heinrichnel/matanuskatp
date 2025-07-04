@@ -469,6 +469,7 @@ const TyreDashboard: React.FC = () => {
   const [showAnalytics, setShowAnalytics] = useState<boolean>(false);
   const [selectedTyre, setSelectedTyre] = useState<Tyre | null>(null);
   const [showInspectionHistory, setShowInspectionHistory] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   // More detailed filter criteria
   const [filterCriteria, setFilterCriteria] = useState<{
@@ -535,6 +536,7 @@ const TyreDashboard: React.FC = () => {
       refreshWorkshopInventory();
     }
   }, [showInventory, refreshWorkshopInventory]);
+
   // Apply filters to the tyre data
   const applyFilters = (tyres: Tyre[], criteria: any) => {
     return tyres.filter(tyre => {
@@ -612,17 +614,6 @@ const TyreDashboard: React.FC = () => {
     setShowInspectionHistory(true);
   };
 
-  // Function to add a new tyre inspection
-  const addTyreInspection = async (tyreId: string, inspectionData: any) => {
-    try {
-      await syncService.addTyreInspection(tyreId, inspectionData);
-      // The UI will update automatically when the Firestore listener fires
-    } catch (error) {
-      console.error('Error adding tyre inspection:', error);
-      setError('Failed to add inspection. Please try again.');
-    }
-  };
-
   // Function to update a tyre
   const updateTyre = async (tyreId: string, updatedData: Partial<Tyre>) => {
     try {
@@ -641,7 +632,8 @@ const TyreDashboard: React.FC = () => {
         // Update the inventory quantity in Firebase
         syncService.updateInventoryItem(item.id, {
           ...item,
-          quantity: item.quantity - 1
+          quantity: item.quantity - 1,
+          status: item.status as "in_stock" | "installed" | "scrapped" // Type assertion for status
         });
       } catch (error) {
         console.error('Error updating inventory item:', error);
@@ -690,6 +682,7 @@ const TyreDashboard: React.FC = () => {
         // Update the tyre with new position
         updateTyre(tyre.id, {
           ...tyre,
+          status: tyre.status as "good" | "worn" | "urgent", // Type assertion for status
           installDetails: {
             ...tyre.installDetails,
             position: newPosition
@@ -724,6 +717,7 @@ const TyreDashboard: React.FC = () => {
       downloadCSV(csv, 'active_tyres.csv');
     }
   };
+
   // Filter inventory items based on criteria
   const filteredInventory = filterCriteria.brand || filterCriteria.size || 
                            filterCriteria.pattern || filterCriteria.storeLocation 
@@ -783,8 +777,9 @@ const TyreDashboard: React.FC = () => {
     input.click();
     // In a real implementation, this would open a file picker and process the CSV
   };
+
   // Simple CSV processors (placeholder implementations)
-  const processInventoryCSV = (csvText: string): Partial<TyreInventoryItem>[] => {
+  const processInventoryCSV = (csvText: string): Omit<TyreInventoryItem, "id">[] => {
     // Basic CSV parsing logic - in a real app, use a robust CSV parser
     const lines = csvText.split('\n');
     const headers = lines[0].split(',');
@@ -805,18 +800,43 @@ const TyreDashboard: React.FC = () => {
         }
       });
       
-      return item as Partial<TyreInventoryItem>;
+      // Ensure required fields have default values
+      return {
+        brand: item.brand || 'Unknown',
+        pattern: item.pattern || 'Standard',
+        size: item.size || '315/80R22.5',
+        position: item.position || 'standard',
+        quantity: item.quantity || 0,
+        reorderLevel: item.reorderLevel || 5,
+        cost: item.cost || 0,
+        supplierId: item.supplierId || 'unknown',
+        storeLocation: item.storeLocation || TyreStoreLocation.VICHELS_STORE,
+        status: (item.status as "in_stock" | "installed" | "scrapped") || "in_stock",
+        purchaseDate: item.purchaseDate || new Date().toISOString(),
+        notes: item.notes || '',
+        // Add required fields for TyreInventoryItem
+        tyreRef: {
+          brand: item.brand || 'Unknown',
+          pattern: item.pattern || 'Standard',
+          size: item.size || '315/80R22.5',
+          position: item.position || 'standard'
+        },
+        serialNumber: item.serialNumber || `SN-${Date.now()}`,
+        dotCode: item.dotCode || `DOT-${Date.now()}`,
+        supplier: VENDORS.find(v => v.id === item.supplierId) || VENDORS[0],
+        ...item // Keep any other fields from the CSV
+      };
     });
   };
   
-  const processTyreCSV = (csvText: string): Partial<Tyre>[] => {
+  const processTyreCSV = (csvText: string): Omit<Tyre, "id">[] => {
     // Similar parsing logic for tyres
     const lines = csvText.split('\n');
     const headers = lines[0].split(',');
     
     return lines.slice(1).filter(line => line.trim()).map(line => {
       const values = line.split(',');
-      const tyre: Record<string, any> = {
+      const tyreData: Record<string, any> = {
         installDetails: {}
       };
       
@@ -828,20 +848,45 @@ const TyreDashboard: React.FC = () => {
         if (cleanHeader.startsWith('installDetails.')) {
           const nestedProp = cleanHeader.split('.')[1];
           if (nestedProp === 'mileage') {
-            tyre.installDetails[nestedProp] = parseInt(value) || 0;
+            tyreData.installDetails[nestedProp] = parseInt(value) || 0;
           } else {
-            tyre.installDetails[nestedProp] = value;
+            tyreData.installDetails[nestedProp] = value;
           }
         } else if (cleanHeader === 'treadDepth' || cleanHeader === 'pressure' || cleanHeader === 'cost' || cleanHeader === 'estimatedLifespan') {
-          tyre[cleanHeader] = parseFloat(value) || 0;
+          tyreData[cleanHeader] = parseFloat(value) || 0;
         } else {
-          tyre[cleanHeader] = value;
+          tyreData[cleanHeader] = value;
         }
       });
       
-      return tyre as Partial<Tyre>;
+      // Ensure required fields have default values
+      const now = new Date().toISOString();
+      return {
+        brand: tyreData.brand || 'Unknown',
+        model: tyreData.model || 'Standard',
+        size: tyreData.size || '315/80R22.5',
+        serialNumber: tyreData.serialNumber || `SN-${Date.now()}`,
+        dotCode: tyreData.dotCode || `DOT-${Date.now()}`,
+        manufactureDate: tyreData.manufactureDate || now,
+        treadDepth: tyreData.treadDepth || 8.0,
+        pressure: tyreData.pressure || 35,
+        status: (tyreData.status as "good" | "worn" | "urgent") || "good",
+        cost: tyreData.cost || 0,
+        // Add missing required fields
+        lastInspection: tyreData.lastInspection || now,
+        estimatedLifespan: tyreData.estimatedLifespan || 100000,
+        installDetails: {
+          date: tyreData.installDetails.date || now,
+          position: tyreData.installDetails.position || 'spare',
+          vehicle: tyreData.installDetails.vehicle || 'unknown',
+          mileage: tyreData.installDetails.mileage || 0,
+          ...tyreData.installDetails
+        },
+        ...tyreData // Keep any other fields from the CSV
+      };
     });
   };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -920,55 +965,6 @@ const TyreDashboard: React.FC = () => {
                   </select>
                 </div>
 
-  // Register Firebase listeners when component mounts
-  useEffect(() => {
-    // Register callbacks for tyre data
-    syncService.registerDataCallbacks({
-      setTyres: (tyreData: Tyre[]) => {
-        const filteredTyres = applyFilters(tyreData, filterCriteria);
-        setTyres(filteredTyres);
-        setLoading(false);
-      }
-    });
-
-    // Subscribe to tyre data from Firestore
-    syncService.subscribeToAllTyres();
-
-    // If no data comes back in 2 seconds, use mock data for development
-    const timer = setTimeout(() => {
-      if (tyres.length === 0) {
-        console.warn('No tyres found in Firestore, using sample data');
-        const tyresData = [...MOCK_TYRES] as unknown as Tyre[];
-        const filteredTyres = applyFilters(tyresData, filterCriteria);
-        setTyres(filteredTyres);
-        setLoading(false);
-      }
-    }, 2000);
-
-    return () => {
-      clearTimeout(timer);
-      // Clean up Firebase listeners
-      syncService.unsubscribeFromAllTyres();
-    };
-  }, []);
-
-  // Re-apply filters when filter criteria changes
-  useEffect(() => {
-    if (tyres.length > 0) {
-      // Use the callback to get the latest tyres from syncService
-      syncService.getTyres((latestTyres) => {
-        const filteredTyres = applyFilters(latestTyres, filterCriteria);
-        setTyres(filteredTyres);
-      });
-    }
-  }, [filterCriteria]);
-
-  // Refresh inventory data when inventory view is shown
-  useEffect(() => {
-    if (showInventory) {
-      refreshWorkshopInventory();
-    }
-  }, [showInventory, refreshWorkshopInventory]);
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Size
@@ -1016,7 +1012,6 @@ const TyreDashboard: React.FC = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                     value={filterCriteria.storeLocation || 'all'}
                     onChange={(e) => updateFilter('storeLocation', e.target.value)}
-                    onClick={() => handleUseItemInJobCard(item)}
                   >
                     <option value="all">All Locations</option>
                     {Object.values(TyreStoreLocation).map(location => (
@@ -1037,7 +1032,6 @@ const TyreDashboard: React.FC = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                     value={filterCriteria.status || 'all'}
                     onChange={(e) => updateFilter('status', e.target.value)}
-                    onClick={() => handleReorderItem(item)}
                   >
                     <option value="all">All Statuses</option>
                     <option value="good">Good</option>
@@ -1055,7 +1049,6 @@ const TyreDashboard: React.FC = () => {
                     className="w-full p-2 border border-gray-300 rounded-md"
                     value={filterCriteria.vehicle || 'all'}
                     onChange={(e) => updateFilter('vehicle', e.target.value)}
-                    onClick={(e) => handleTyreRotation(tyre, e)}
                   >
                     <option value="all">All Vehicles</option>
                     <option value="21H">21H - Volvo FH16</option>
@@ -1562,12 +1555,14 @@ const TyreDashboard: React.FC = () => {
                     variant="outline"
                     size="sm"
                     disabled={item.quantity === 0}
+                    onClick={() => handleUseItemInJobCard(item)}
                   >
                     Use in Job Card
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => handleReorderItem(item)}
                   >
                     Reorder
                   </Button>
@@ -1705,6 +1700,7 @@ const TyreDashboard: React.FC = () => {
                     variant="outline"
                     size="xs"
                     icon={<RotateCcw className="w-3 h-3" />}
+                    onClick={(e) => handleTyreRotation(tyre, e)}
                   >
                     Rotation
                   </Button>
