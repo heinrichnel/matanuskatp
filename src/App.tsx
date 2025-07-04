@@ -7,6 +7,7 @@ import Layout from './components/layout/Layout';
 import TripForm from "./components/trips/TripForm";
 import Modal from "./components/ui/Modal";
 import { Trip } from "./types";
+import MapsView from "./components/maps/MapsView";
 
 // UI Components
 // Removed Sidebar import as it will be used inside Layout
@@ -72,6 +73,7 @@ const App: React.FC = () => {
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="active-trips" element={<ActiveTrips />} />
                 <Route path="completed-trips" element={<CompletedTrips />} />
+                <Route path="maps" element={<MapsView />} />
                 <Route path="flags" element={<FlagsInvestigations />} />
                 <Route path="reports" element={<CurrencyFleetReport />} />
                 <Route path="invoice-aging" element={<InvoiceAgingDashboard />} />

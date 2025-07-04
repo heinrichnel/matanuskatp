@@ -33,6 +33,10 @@ import { v4 as uuidv4 } from 'uuid';
 import syncService from '../utils/syncService';
 
 interface AppContextType {
+  // Google Maps properties
+  isGoogleMapsLoaded: boolean;
+  googleMapsError: string | null;
+  loadGoogleMaps: () => Promise<void>;
   trips: Trip[];
   addTrip: (trip: Omit<Trip, 'id' | 'costs' | 'status'>) => Promise<string>;
   updateTrip: (trip: Trip) => Promise<void>;
@@ -133,6 +137,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [workshopInventory, setWorkshopInventory] = useState<TyreInventoryItem[]>([]);
   const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected'); // TODO: Implement actual connection status monitoring
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
+  
+  // Google Maps state
+  const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState<boolean>(false);
+  const [googleMapsError, setGoogleMapsError] = useState<string | null>(null);
 
   // Add refreshTrips method to manually refresh trip data from Firestore
   const refreshTrips = useCallback(async (): Promise<void> => {
@@ -175,6 +183,63 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsLoading(prev => ({ ...prev, loadWorkshopInventory: false }));
     }
   }, []);
+
+  // Google Maps initialization function
+  const loadGoogleMaps = useCallback(async (): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, loadGoogleMaps: true }));
+      
+      // If Google Maps is already loaded, don't load it again
+      if (window.google && window.google.maps) {
+        setIsGoogleMapsLoaded(true);
+        return;
+      }
+      
+      // The Google Maps loading script is defined in a function
+      const loadGoogleMapsScript = () => {
+        return new Promise<void>((resolve, reject) => {
+          try {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g&libraries=places&v=weekly`;
+            script.async = true;
+            script.defer = true;
+            
+            script.onload = () => {
+              setIsGoogleMapsLoaded(true);
+              resolve();
+            };
+            
+            script.onerror = () => {
+              setGoogleMapsError("Failed to load Google Maps API script");
+              reject(new Error("Failed to load Google Maps API script"));
+            };
+            
+            document.head.appendChild(script);
+          } catch (error) {
+            setGoogleMapsError("Error setting up Google Maps: " + (error as Error).message);
+            reject(error);
+          }
+        });
+      };
+      
+      await loadGoogleMapsScript();
+      console.log("✅ Google Maps API loaded successfully");
+      
+    } catch (error) {
+      console.error("❌ Error loading Google Maps API:", error);
+      setGoogleMapsError("Failed to load Google Maps: " + (error as Error).message);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, loadGoogleMaps: false }));
+    }
+  }, []);
+  
+  // Load Google Maps when the app starts
+  useEffect(() => {
+    loadGoogleMaps().catch(err => {
+      console.error("Failed to load Google Maps on initial load:", err);
+    });
+  }, [loadGoogleMaps]);
 
   useEffect(() => {
     // Set up all data subscriptions through the SyncService
@@ -548,6 +613,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const value = {
+    // Google Maps
+    isGoogleMapsLoaded,
+    googleMapsError,
+    loadGoogleMaps,
     trips,
     addTrip,
     updateTrip,

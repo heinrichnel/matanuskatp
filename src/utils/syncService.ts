@@ -6,7 +6,6 @@ import {
   doc,
   onSnapshot,
   updateDoc,
-  setDoc,
   addDoc,
   serverTimestamp,
   query,
@@ -38,13 +37,11 @@ const auditLogsCollection = collection(db, 'auditLogs');
 const workshopInventoryCollection = collection(db, 'workshopInventory');
 const jobCardsCollection = collection(db, 'jobCards');
 const tyresCollection = collection(db, 'tyres');
-  onJobCardUpdate?: (jobCard: JobCard) => void;
-  onTyreUpdate?: (tyre: Tyre) => void;
+
 // Type for sync status
 export type SyncStatus = 'idle' | 'syncing' | 'success' | 'error';
 export type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting';
-  private jobCardUnsubscribes: Map<string, () => void> = new Map();
-  private tyreUnsubscribes: Map<string, () => void> = new Map();
+
 // Interface for sync listeners
 interface SyncListeners {
   onSyncStatusChange?: (status: SyncStatus) => void;
@@ -53,18 +50,10 @@ interface SyncListeners {
   onDieselUpdate?: (record: DieselConsumptionRecord) => void;
   onDriverBehaviorUpdate?: (event: DriverBehaviorEvent) => void;
   onAuditLogUpdate?: (log: AuditLog) => void;
+  onJobCardUpdate?: (jobCard: JobCard) => void;
+  onTyreUpdate?: (tyre: Tyre) => void;
 }
-    // Unsubscribe from all individual job card listeners
-    for (const unsubscribe of this.jobCardUnsubscribes.values()) {
-      unsubscribe();
-    }
-    this.jobCardUnsubscribes.clear();
 
-    // Unsubscribe from all individual tyre listeners
-    for (const unsubscribe of this.tyreUnsubscribes.values()) {
-      unsubscribe();
-    }
-    this.tyreUnsubscribes.clear();
 // Sync service class
 export class SyncService {
   private listeners: SyncListeners = {};
@@ -74,6 +63,8 @@ export class SyncService {
   private driverBehaviorUnsubscribes: Map<string, () => void> = new Map();
   private globalUnsubscribes: Map<string, Unsubscribe> = new Map();
   private auditLogUnsubscribes: Map<string, () => void> = new Map();
+  private jobCardUnsubscribes: Map<string, () => void> = new Map();
+  private tyreUnsubscribes: Map<string, () => void> = new Map();
   public syncStatus: SyncStatus = 'idle';
   public connectionStatus: ConnectionStatus = 'connected';
   private pendingChanges: Map<string, any> = new Map();
@@ -249,6 +240,16 @@ export class SyncService {
       this.globalUnsubscribes.get('allTrips')?.();
       this.globalUnsubscribes.delete('allTrips');
       console.log('🔄 Unsubscribed from trips collection');
+    }
+  }
+
+  // Unsubscribe from tyres collection subscription
+  public unsubscribeFromAllTyres(): void {
+    // Unsubscribe from global tyres listener if it exists
+    if (this.globalUnsubscribes.has('allTyres')) {
+      this.globalUnsubscribes.get('allTyres')?.();
+      this.globalUnsubscribes.delete('allTyres');
+      console.log('🔄 Unsubscribed from tyres collection');
     }
   }
 
@@ -943,6 +944,18 @@ export class SyncService {
     }
     this.auditLogUnsubscribes.clear();
 
+    // Unsubscribe from all individual job card listeners
+    for (const unsubscribe of this.jobCardUnsubscribes.values()) {
+      unsubscribe();
+    }
+    this.jobCardUnsubscribes.clear();
+
+    // Unsubscribe from all individual tyre listeners
+    for (const unsubscribe of this.tyreUnsubscribes.values()) {
+      unsubscribe();
+    }
+    this.tyreUnsubscribes.clear();
+
     // Unsubscribe from all global listeners
     for (const unsubscribe of this.globalUnsubscribes.values()) {
       unsubscribe();
@@ -970,6 +983,54 @@ export class SyncService {
       workshopInventoryCollection,
       orderBy('purchaseDate', 'desc')
     );
+
+    const unsubscribe = onSnapshot(
+      inventoryQuery,
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+
+          if (change.type === 'added') {
+            added++;
+            console.log(`Workshop inventory item added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Workshop inventory item modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Workshop inventory item removed: ${id}`);
+          }
+        });
+
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Workshop inventory changes: ${added} added, ${modified} modified, ${removed} removed`);
+
+          // Get all current documents for a full refresh
+          const inventory: TyreInventoryItem[] = [];
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            inventory.push({ id: doc.id, ...data } as TyreInventoryItem);
+          });
+
+          if (typeof this.dataCallbacks.setWorkshopInventory === 'function') {
+            this.dataCallbacks.setWorkshopInventory(inventory);
+          } else {
+            console.warn('⚠️ setWorkshopInventory callback not registered');
+          }
+          this.lastSynced = new Date();
+        }
+      },
+      (error) => {
+        console.error('Error in global workshop inventory listener:', error);
+      }
+    );
+
+    this.globalUnsubscribes.set('allWorkshopInventory', unsubscribe);
+  }
 
   // Add a workshop inventory item
   public async addWorkshopInventoryItem(data: Omit<TyreInventoryItem, 'id'>): Promise<string> {
@@ -1007,6 +1068,42 @@ export class SyncService {
       return itemId;
     } catch (error) {
       console.error(`Error adding workshop inventory item:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+  
+  // Update a workshop inventory item with real-time sync
+  public async updateWorkshopInventoryItem(itemId: string, data: Partial<TyreInventoryItem>): Promise<void> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(data);
+
+      // Add updatedAt timestamp
+      const updateData = {
+        ...cleanData,
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
+
+      if (this.isOnline) {
+        // Online - update directly
+        const inventoryRef = doc(db, 'workshopInventory', itemId);
+        await updateDoc(inventoryRef, updateData);
+        console.log(`✅ Workshop inventory item ${itemId} updated with real-time sync`);
+      } else {
+        // Offline - store for later sync
+        this.pendingChanges.set(`workshopInventory:${itemId}`, updateData);
+        console.log(`📝 Workshop inventory item ${itemId} update queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+    } catch (error) {
+      console.error(`Error updating workshop inventory item ${itemId}:`, error);
       this.setSyncStatus('error');
       throw error;
     }
@@ -1493,89 +1590,6 @@ export class SyncService {
       console.error('Error getting tyres:', error);
       callback([]);
     });
-  }
-    const unsubscribe = onSnapshot(
-      inventoryQuery,
-      (snapshot) => {
-        // Track changes for debugging
-        let added = 0, modified = 0, removed = 0;
-
-        // Process document changes
-        snapshot.docChanges().forEach(change => {
-          const id = change.doc.id;
-
-          if (change.type === 'added') {
-            added++;
-            console.log(`Workshop inventory item added: ${id}`);
-          } else if (change.type === 'modified') {
-            modified++;
-            console.log(`Workshop inventory item modified: ${id}`);
-          } else if (change.type === 'removed') {
-            removed++;
-            console.log(`Workshop inventory item removed: ${id}`);
-          }
-        });
-
-        if (added > 0 || modified > 0 || removed > 0) {
-          console.log(`🔄 Workshop inventory changes: ${added} added, ${modified} modified, ${removed} removed`);
-
-          // Get all current documents for a full refresh
-          const inventory: TyreInventoryItem[] = [];
-          snapshot.forEach(doc => {
-            const data = convertTimestamps(doc.data());
-            inventory.push({ id: doc.id, ...data } as TyreInventoryItem);
-          });
-
-          if (typeof this.dataCallbacks.setWorkshopInventory === 'function') {
-            this.dataCallbacks.setWorkshopInventory(inventory);
-          } else {
-            console.warn('⚠️ setWorkshopInventory callback not registered');
-          }
-          this.lastSynced = new Date();
-        }
-      },
-      (error) => {
-        console.error('Error in global workshop inventory listener:', error);
-      }
-    );
-
-    this.globalUnsubscribes.set('allWorkshopInventory', unsubscribe);
-  }
-  
-  // Update a workshop inventory item with real-time sync
-  public async updateWorkshopInventoryItem(itemId: string, data: Partial<TyreInventoryItem>): Promise<void> {
-    try {
-      this.setSyncStatus('syncing');
-
-      // Clean data for Firestore
-      const cleanData = cleanObjectForFirestore(data);
-
-      // Add updatedAt timestamp
-      const updateData = {
-        ...cleanData,
-        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
-      };
-
-      if (this.isOnline) {
-        // Online - update directly
-        const inventoryRef = doc(db, 'workshopInventory', itemId);
-        await updateDoc(inventoryRef, updateData);
-        console.log(`✅ Workshop inventory item ${itemId} updated with real-time sync`);
-      } else {
-        // Offline - store for later sync
-        this.pendingChanges.set(`workshopInventory:${itemId}`, updateData);
-        console.log(`📝 Workshop inventory item ${itemId} update queued for sync when online`);
-
-        // Store in localStorage as backup
-        this.storePendingChangesInLocalStorage();
-      }
-
-      this.setSyncStatus('success');
-    } catch (error) {
-      console.error(`Error updating workshop inventory item ${itemId}:`, error);
-      this.setSyncStatus('error');
-      throw error;
-    }
   }
 }
 

@@ -16,7 +16,8 @@ import {
   Users,
   Bell,
   User,
-  History
+  History,
+  Map
 } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
 
@@ -35,6 +36,7 @@ const Sidebar: FC<HeaderProps> = ({
     { id: 'dashboard', label: 'Dashboard', icon: Activity },
     { id: 'active-trips', label: 'Active Trips', icon: Truck },
     { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle },
+    { id: 'maps', label: 'Maps', icon: Map },
     { id: 'flags', label: 'Flags & Investigations', icon: Flag },
     { id: 'reports', label: 'Reports & Exports', icon: BarChart3 },
     { id: 'invoice-aging', label: 'Invoice Aging', icon: Clock },
