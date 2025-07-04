@@ -27,68 +27,22 @@ import { AuditLog } from './types/audit';
 import { firebaseConfig, firebaseApp } from './firebaseConfig';
 import { connectToEmulators } from './firebaseEmulators';
 
-// Initialize Firestore with offline persistence
+// Initialize Firestore with persistent local cache (modern approach)
 // DEBUG ONLY - Add diagnostic logs to track Firestore initialization issues
 console.log("🔍 DEBUG: About to initialize Firestore");
-let db: Firestore;
+const db: Firestore = initializeFirestore(firebaseApp, {
+  localCache: persistentLocalCache({
+    cacheSizeBytes: 104857600 // 100 MB
+  })
+});
+console.log("✅ Firestore initialized with persistent cache");
 
-try {
-  // Initialize Firestore with standard settings first
-  db = initializeFirestore(firebaseApp, {
-    localCache: persistentLocalCache({
-      cacheSizeBytes: 104857600 // 100 MB
-    })
-  });
-  
-  // Then enable multi-tab persistence explicitly through the Firestore instance
-  // This approach is compatible with TypeScript types
-  try {
-    // Using dynamic import to access enablePersistence with proper settings
-    import('firebase/firestore').then(async (firebaseModule) => {
-      try {
-        // Use the correct approach for Firebase v9+ - enableIndexedDbPersistence
-        // with proper type assertion for the module
-        const firestoreModule = firebaseModule as unknown as {
-          enableIndexedDbPersistence: (db: Firestore, options?: { synchronizeTabs?: boolean }) => Promise<void>;
-        };
-        
-        if (typeof firestoreModule.enableIndexedDbPersistence === 'function') {
-          await firestoreModule.enableIndexedDbPersistence(db, { synchronizeTabs: true });
-          console.log("✅ Multi-tab persistence enabled successfully");
-        }
-      } catch (error) {
-      // Handle common persistence errors gracefully with proper type guards
-      const persistenceError = error as { code?: string };
-        
-      if (persistenceError && typeof persistenceError === 'object' && persistenceError.code === 'failed-precondition') {
-        console.warn("⚠️ Multiple tabs open, persistence enabled in first tab only");
-      } else if (persistenceError && typeof persistenceError === 'object' && persistenceError.code === 'unimplemented') {
-        console.warn("⚠️ Browser doesn't support persistence");
-      } else {
-        console.error("❌ Error enabling persistence:", error);
-      }
-      }
-    }).catch(importError => {
-      console.warn("⚠️ Could not dynamically import Firebase persistence:", importError);
-    });
-  } catch (importError) {
-    console.warn("⚠️ Could not dynamically import Firebase persistence:", importError);
-  }
-
-  console.log("✅ Firestore initialized with persistent cache");
-
-  // Connect to emulators in development mode
-  if (import.meta.env.DEV) {
-    console.log("🧪 Checking for Firebase emulators...");
-    connectToEmulators();
-    console.log("⚠️ Firebase emulators connected. ALL OPERATIONS WILL USE EMULATED SERVICES!");
-    console.log("⚠️ Make sure the emulators are running with: firebase emulators:start");
-  }
-} catch (error) {
-  console.error("❌ Firestore initialization error:", error, typeof error === 'object' ? JSON.stringify(error) : '');
-  // Fallback to initialize without persistence to ensure the app works
-  db = initializeFirestore(firebaseApp, {});
-  console.warn("⚠️ Firestore initialized WITHOUT persistent cache due to error. Real-time sync may still work, but offline capabilities will be limited.");
+// Connect to emulators in development mode
+if (import.meta.env.DEV) {
+  console.log("🧪 Checking for Firebase emulators...");
+  connectToEmulators();
+  console.log("⚠️ Firebase emulators connected. ALL OPERATIONS WILL USE EMULATED SERVICES!");
+  console.log("⚠️ Make sure the emulators are running with: firebase emulators:start");
 }
 
 // Export the db instance after initialization
@@ -113,14 +67,12 @@ export { analytics };
 export const enableFirestoreNetwork = () => enableNetwork(db);
 export const disableFirestoreNetwork = () => disableNetwork(db);
 
-// Optionally, you can add a connection status monitor:
-
 /**
  * Helper function to convert Firestore Timestamps to ISO strings recursively
  * @param obj Any object or value that might contain Firestore Timestamp
  * @returns The object with all Timestamp instances converted to ISO strings
  */
-const convertTimestamps = (obj: any): any => {
+export const convertTimestamps = (obj: any): any => {
   if (obj === null || obj === undefined) {
     return null;
   }
