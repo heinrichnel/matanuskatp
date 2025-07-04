@@ -57,16 +57,16 @@ try {
           console.log("✅ Multi-tab persistence enabled successfully");
         }
       } catch (error) {
-        // Handle common persistence errors gracefully with proper type guards
-        const persistenceError = error as { code?: string };
+      // Handle common persistence errors gracefully with proper type guards
+      const persistenceError = error as { code?: string };
         
-        if (persistenceError && typeof persistenceError === 'object' && persistenceError.code === 'failed-precondition') {
-          console.warn("⚠️ Multiple tabs open, persistence enabled in first tab only");
-        } else if (persistenceError && typeof persistenceError === 'object' && persistenceError.code === 'unimplemented') {
-          console.warn("⚠️ Browser doesn't support persistence");
-        } else {
-          console.error("❌ Error enabling persistence:", error);
-        }
+      if (persistenceError && typeof persistenceError === 'object' && persistenceError.code === 'failed-precondition') {
+        console.warn("⚠️ Multiple tabs open, persistence enabled in first tab only");
+      } else if (persistenceError && typeof persistenceError === 'object' && persistenceError.code === 'unimplemented') {
+        console.warn("⚠️ Browser doesn't support persistence");
+      } else {
+        console.error("❌ Error enabling persistence:", error);
+      }
       }
     }).catch(importError => {
       console.warn("⚠️ Could not dynamically import Firebase persistence:", importError);
