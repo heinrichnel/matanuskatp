@@ -27,6 +27,14 @@ import { AuditLog } from './types/audit';
 import { firebaseConfig, firebaseApp } from './firebaseConfig';
 import { connectToEmulators } from './firebaseEmulators';
 
+// Connect to emulators in development mode BEFORE initializing Firestore
+if (import.meta.env.DEV) {
+  console.log("🧪 Checking for Firebase emulators...");
+  connectToEmulators();
+  console.log("⚠️ Firebase emulators connected. ALL OPERATIONS WILL USE EMULATED SERVICES!");
+  console.log("⚠️ Make sure the emulators are running with: firebase emulators:start");
+}
+
 // Initialize Firestore with persistent local cache (modern approach)
 // DEBUG ONLY - Add diagnostic logs to track Firestore initialization issues
 console.log("🔍 DEBUG: About to initialize Firestore");
@@ -36,14 +44,6 @@ const db: Firestore = initializeFirestore(firebaseApp, {
   })
 });
 console.log("✅ Firestore initialized with persistent cache");
-
-// Connect to emulators in development mode
-if (import.meta.env.DEV) {
-  console.log("🧪 Checking for Firebase emulators...");
-  connectToEmulators();
-  console.log("⚠️ Firebase emulators connected. ALL OPERATIONS WILL USE EMULATED SERVICES!");
-  console.log("⚠️ Make sure the emulators are running with: firebase emulators:start");
-}
 
 // Export the db instance after initialization
 export { db };
