@@ -18,12 +18,12 @@ export const connectToEmulators = (firestore: Firestore) => {
       const storage = getStorage(firebaseApp);
       
       // Connect to Firestore emulator
-      connectFirestoreEmulator(firestore, 'host.docker.internal', 8081);
-      console.log('✅ Connected to Firestore emulator at host.docker.internal:8081');
+      connectFirestoreEmulator(firestore, '127.0.0.1', 8081);
+      console.log('✅ Connected to Firestore emulator at 127.0.0.1:8081');
       
       // Connect to Storage emulator
-      connectStorageEmulator(storage, 'host.docker.internal', 9198);
-      console.log('✅ Connected to Storage emulator at host.docker.internal:9198');
+      connectStorageEmulator(storage, '127.0.0.1', 9198);
+      console.log('✅ Connected to Storage emulator at 127.0.0.1:9198');
       
       console.log('🔥 All Firebase emulators connected successfully');
       
