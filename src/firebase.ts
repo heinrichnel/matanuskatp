@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { firebaseConfig } from './firebaseConfig';
 
@@ -35,6 +35,23 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
     console.log('   firebase emulators:start --only firestore,storage');
   }
 }
+
+// Add audit log function
+export const addAuditLogToFirebase = async (auditLogData: any) => {
+  try {
+    const auditLogsRef = collection(firestore, 'auditLogs');
+    const docRef = await addDoc(auditLogsRef, {
+      ...auditLogData,
+      timestamp: serverTimestamp(),
+      createdAt: serverTimestamp()
+    });
+    console.log('Audit log added with ID:', docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding audit log:', error);
+    throw error;
+  }
+};
 
 export { firestore, storage };
 export { firestore as db };
