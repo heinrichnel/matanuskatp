@@ -1,11 +1,11 @@
-
-import { FleetStats } from "@/types/vehicle";
-import { 
-  getActiveVehicles, 
-  getVehiclesByStatus, 
-  getVehiclesByType, 
-  getVehiclesBySeries, 
-  getVehiclesByManufacturer 
+// Updated imports to resolve missing modules
+import { FleetStats } from "../types/vehicle";
+import {
+  getActiveVehicles,
+  getVehiclesByStatus,
+  getVehiclesByType,
+  getVehiclesBySeries,
+  getVehiclesByManufacturer
 } from "./vehicleUtils";
 import { FLEET_VEHICLES } from "./fleetVehicles";
 
@@ -38,7 +38,7 @@ export const getFleetStats = (): FleetStats => {
     ISUZU: getVehiclesByManufacturer('ISUZU').length,
     SINOTRUK: getVehiclesByManufacturer('SINOTRUK').length,
     SERCO: getVehiclesByManufacturer('SERCO').length,
-    OTHER: FLEET_VEHICLES.filter(v => 
+    OTHER: FLEET_VEHICLES.filter((v: { manufacturer: string }) =>
       !['SCANIA', 'SHACMAN', 'ISUZU', 'SINOTRUK', 'SERCO'].includes(v.manufacturer.toUpperCase())
     ).length
   };
