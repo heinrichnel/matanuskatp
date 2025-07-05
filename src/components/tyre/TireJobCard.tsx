@@ -1,7 +1,7 @@
 import React from 'react';
 
-const TireJobCard: React.FC = () => {
-    // TODO: Implement tyre job card UI, Firestore integration, and logic per requirements
+const TyreJobCard: React.FC = () => {
+    // TODO: Implement tyre job card UI, firestone integration, and logic per requirements
     return (
         <div>
             <h2>Tyre Job Card</h2>
@@ -11,4 +11,4 @@ const TireJobCard: React.FC = () => {
     );
 };
 
-export default TireJobCard;
+export default TyreJobCard;
