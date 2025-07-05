@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, connectFirestoreEmulator, collection, addDoc, setDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator, collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { firebaseConfig } from './firebaseConfig';
 import { DieselConsumptionRecord } from './types/diesel';
@@ -105,6 +105,22 @@ export const addMissedLoadToFirebase = async (missedLoadData: any) => {
     throw error;
   }
 };
+
+// Function to update a trip in Firebase
+export async function updateTripInFirebase(tripId: string, tripData: Partial<Trip>) {
+  const tripRef = doc(firestore, 'trips', tripId);
+  await setDoc(tripRef, { ...tripData, updatedAt: serverTimestamp() }, { merge: true });
+}
+
+// Firestore listener for real-time updates
+export function listenToDriverBehaviorEvents(callback: (events: any[]) => void) {
+  const eventsRef = collection(firestore, "driverBehaviorEvents");
+  const unsubscribe = onSnapshot(eventsRef, (snapshot) => {
+    const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    callback(events);
+  });
+  return unsubscribe;
+}
 
 export { firestore, storage };
 export { firestore as db };
