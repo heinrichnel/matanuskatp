@@ -30,7 +30,6 @@ import { connectToEmulators } from './firebaseEmulators';
 // Connect to emulators in development mode BEFORE initializing Firestore
 if (import.meta.env.DEV) {
   console.log("🧪 Checking for Firebase emulators...");
-  connectToEmulators();
   console.log("⚠️ Firebase emulators connected. ALL OPERATIONS WILL USE EMULATED SERVICES!");
   console.log("⚠️ Make sure the emulators are running with: firebase emulators:start");
 }
@@ -44,6 +43,11 @@ const db: Firestore = initializeFirestore(firebaseApp, {
   })
 });
 console.log("✅ Firestore initialized with persistent cache");
+
+// Connect to emulators AFTER initializing Firestore
+if (import.meta.env.DEV) {
+  connectToEmulators(db);
+}
 
 // Export the db instance after initialization
 export { db };

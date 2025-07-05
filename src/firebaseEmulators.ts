@@ -1,21 +1,18 @@
-import { connectFirestoreEmulator } from 'firebase/firestore';
-import { getFirestore } from 'firebase/firestore';
+import { connectFirestoreEmulator, Firestore } from 'firebase/firestore';
 import { connectStorageEmulator, getStorage } from 'firebase/storage';
 import { firebaseApp } from './firebaseConfig';
 
 /**
  * Connects the Firebase SDK to local emulators
+ * @param firestore - Already initialized Firestore instance
  * Call this function early in your application's initialization
  * to ensure all Firebase operations use the emulators
  */
-export const connectToEmulators = () => {
+export const connectToEmulators = (firestore: Firestore) => {
   try {
     // Check if we're in development mode
     if (import.meta.env.DEV) {
       console.log('🧪 Running in development mode - connecting to Firebase emulators');
-      
-      // Get Firestore instance
-      const firestore = getFirestore(firebaseApp);
       
       // Get Storage instance
       const storage = getStorage(firebaseApp);
