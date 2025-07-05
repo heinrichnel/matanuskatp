@@ -3,6 +3,7 @@ import { getFirestore, connectFirestoreEmulator, collection, addDoc, setDoc, doc
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { firebaseConfig } from './firebaseConfig';
 import { DieselConsumptionRecord } from './types/diesel';
+import { Trip } from './types';
 
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
@@ -67,6 +68,23 @@ export const addDieselToFirebase = async (dieselRecord: DieselConsumptionRecord)
     return dieselRecord.id;
   } catch (error) {
     console.error('Error adding diesel record:', error);
+    throw error;
+  }
+};
+
+// Add trip to Firebase
+export const addTripToFirebase = async (trip: Trip) => {
+  try {
+    const tripRef = doc(firestore, 'trips', trip.id);
+    await setDoc(tripRef, {
+      ...trip,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    console.log('Trip added with ID:', trip.id);
+    return trip.id;
+  } catch (error) {
+    console.error('Error adding trip:', error);
     throw error;
   }
 };
