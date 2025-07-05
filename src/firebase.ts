@@ -37,4 +37,5 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
 }
 
 export { firestore, storage };
+export { firestore as db };
 export default app;
