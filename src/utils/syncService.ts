@@ -27,7 +27,7 @@ import {
 } from '../types';
 import { TyreInventoryItem } from './tyreConstants';
 import { Tyre } from '../types/workshop-tyre-inventory';
-import { JobCard } from '../types/workshop-job-card';
+import { JobCard, EnhancedJobCard } from '../types/workshop-job-card';
 
 // Collection references
 // const tripsCollection = collection(db, 'trips'); // Unused
@@ -36,6 +36,7 @@ const driverBehaviorCollection = collection(db, 'driverBehaviorEvents');
 const auditLogsCollection = collection(db, 'auditLogs');
 const workshopInventoryCollection = collection(db, 'workshopInventory');
 const jobCardsCollection = collection(db, 'jobCards');
+const enhancedJobCardsCollection = collection(db, 'enhancedJobCards');
 const tyresCollection = collection(db, 'tyres');
 
 // Type for sync status
@@ -51,6 +52,7 @@ interface SyncListeners {
   onDriverBehaviorUpdate?: (event: DriverBehaviorEvent) => void;
   onAuditLogUpdate?: (log: AuditLog) => void;
   onJobCardUpdate?: (jobCard: JobCard) => void;
+  onEnhancedJobCardUpdate?: (jobCard: EnhancedJobCard) => void;
   onTyreUpdate?: (tyre: Tyre) => void;
 }
 
@@ -64,6 +66,7 @@ export class SyncService {
   private globalUnsubscribes: Map<string, Unsubscribe> = new Map();
   private auditLogUnsubscribes: Map<string, () => void> = new Map();
   private jobCardUnsubscribes: Map<string, () => void> = new Map();
+  private enhancedJobCardUnsubscribes: Map<string, () => void> = new Map();
   private tyreUnsubscribes: Map<string, () => void> = new Map();
   public syncStatus: SyncStatus = 'idle';
   public connectionStatus: ConnectionStatus = 'connected';
@@ -917,6 +920,180 @@ export class SyncService {
     }
   }
 
+  // Subscribe to all enhanced job cards (global listener)
+  public subscribeToAllEnhancedJobCards(): void {
+    // Clear any existing global enhanced job cards listeners
+    if (this.globalUnsubscribes.has('allEnhancedJobCards')) {
+      this.globalUnsubscribes.get('allEnhancedJobCards')?.();
+    }
+
+    const enhancedJobCardsQuery = query(
+      enhancedJobCardsCollection,
+      orderBy('workOrderInfo.date', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      enhancedJobCardsQuery,
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+
+          if (change.type === 'added') {
+            added++;
+            console.log(`Enhanced job card added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Enhanced job card modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Enhanced job card removed: ${id}`);
+          }
+        });
+
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Enhanced job cards changes: ${added} added, ${modified} modified, ${removed} removed`);
+
+          // Get all current documents for a full refresh
+          const enhancedJobCards: EnhancedJobCard[] = [];
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            enhancedJobCards.push({ id: doc.id, ...data } as EnhancedJobCard);
+          });
+
+          if (typeof this.dataCallbacks.setEnhancedJobCards === 'function') {
+            this.dataCallbacks.setEnhancedJobCards(enhancedJobCards);
+          } else {
+            console.warn('⚠️ setEnhancedJobCards callback not registered');
+          }
+          this.lastSynced = new Date();
+        }
+      },
+      (error) => {
+        console.error('Error in global enhanced job cards listener:', error);
+      }
+    );
+
+    this.globalUnsubscribes.set('allEnhancedJobCards', unsubscribe);
+  }
+
+  // Unsubscribe from enhanced job cards collection subscription
+  public unsubscribeFromAllEnhancedJobCards(): void {
+    // Unsubscribe from global enhanced job cards listener if it exists
+    if (this.globalUnsubscribes.has('allEnhancedJobCards')) {
+      this.globalUnsubscribes.get('allEnhancedJobCards')?.();
+      this.globalUnsubscribes.delete('allEnhancedJobCards');
+      console.log('🔄 Unsubscribed from enhanced job cards collection');
+    }
+  }
+
+  // Add an enhanced job card
+  public async addEnhancedJobCard(data: Omit<EnhancedJobCard, 'id'>): Promise<string> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(data);
+
+      // Add timestamps
+      const jobCardData = {
+        ...cleanData,
+        createdAt: this.isOnline ? serverTimestamp() : new Date().toISOString(),
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
+
+      let jobCardId: string;
+      
+      if (this.isOnline) {
+        // Online - add directly to Firestore
+        const docRef = await addDoc(enhancedJobCardsCollection, jobCardData);
+        jobCardId = docRef.id;
+        console.log(`✅ Enhanced job card added with ID: ${jobCardId}`);
+      } else {
+        // Offline - generate temporary ID and store for later sync
+        jobCardId = `temp-enhanced-jobcard-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        this.pendingChanges.set(`enhancedJobCards:${jobCardId}`, jobCardData);
+        console.log(`📝 Enhanced job card creation queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+      return jobCardId;
+    } catch (error) {
+      console.error(`Error adding enhanced job card:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
+  // Update an enhanced job card
+  public async updateEnhancedJobCard(jobCardId: string, data: Partial<EnhancedJobCard>): Promise<void> {
+    try {
+      this.setSyncStatus('syncing');
+
+      // Clean data for Firestore
+      const cleanData = cleanObjectForFirestore(data);
+
+      // Add updatedAt timestamp
+      const updateData = {
+        ...cleanData,
+        updatedAt: this.isOnline ? serverTimestamp() : new Date().toISOString()
+      };
+
+      if (this.isOnline) {
+        // Online - update directly
+        const jobCardRef = doc(db, 'enhancedJobCards', jobCardId);
+        await updateDoc(jobCardRef, updateData);
+        console.log(`✅ Enhanced job card ${jobCardId} updated with real-time sync`);
+      } else {
+        // Offline - store for later sync
+        this.pendingChanges.set(`enhancedJobCards:${jobCardId}`, updateData);
+        console.log(`📝 Enhanced job card ${jobCardId} update queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+    } catch (error) {
+      console.error(`Error updating enhanced job card ${jobCardId}:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
+  // Delete an enhanced job card
+  public async deleteEnhancedJobCard(jobCardId: string): Promise<void> {
+    try {
+      this.setSyncStatus('syncing');
+
+      if (this.isOnline) {
+        // Online - delete directly from Firestore
+        const jobCardRef = doc(db, 'enhancedJobCards', jobCardId);
+        await updateDoc(jobCardRef, { deleted: true, updatedAt: serverTimestamp() });
+        console.log(`✅ Enhanced job card ${jobCardId} marked as deleted`);
+      } else {
+        // Offline - store delete operation for later sync
+        this.pendingChanges.set(`enhancedJobCards:${jobCardId}:delete`, { deleted: true });
+        console.log(`📝 Enhanced job card deletion queued for sync when online`);
+
+        // Store in localStorage as backup
+        this.storePendingChangesInLocalStorage();
+      }
+
+      this.setSyncStatus('success');
+    } catch (error) {
+      console.error(`Error deleting enhanced job card ${jobCardId}:`, error);
+      this.setSyncStatus('error');
+      throw error;
+    }
+  }
+
   // Cleanup method to unsubscribe from all listeners
   public cleanup(): void {
     console.log("🧹 Cleaning up all SyncService listeners");
@@ -949,6 +1126,12 @@ export class SyncService {
       unsubscribe();
     }
     this.jobCardUnsubscribes.clear();
+
+    // Unsubscribe from all individual enhanced job card listeners
+    for (const unsubscribe of this.enhancedJobCardUnsubscribes.values()) {
+      unsubscribe();
+    }
+    this.enhancedJobCardUnsubscribes.clear();
 
     // Unsubscribe from all individual tyre listeners
     for (const unsubscribe of this.tyreUnsubscribes.values()) {
