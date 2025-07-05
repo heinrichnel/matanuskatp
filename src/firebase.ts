@@ -71,6 +71,23 @@ export const addDieselToFirebase = async (dieselRecord: DieselConsumptionRecord)
   }
 };
 
+// Add missed load to Firebase
+export const addMissedLoadToFirebase = async (missedLoadData: any) => {
+  try {
+    const missedLoadsRef = collection(firestore, 'missedLoads');
+    const docRef = await addDoc(missedLoadsRef, {
+      ...missedLoadData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    console.log('Missed load added with ID:', docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding missed load:', error);
+    throw error;
+  }
+};
+
 export { firestore, storage };
 export { firestore as db };
 export default app;
