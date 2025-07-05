@@ -22,14 +22,17 @@
 		"ghcr.io/devcontainers-extra/features/firebase-cli:2": {},
 		"ghcr.io/devcontainers-extra/features/npm-package:1": {},
 		"ghcr.io/coder/devcontainer-features/code-server:1": {}
-	}
-
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
+	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// This can be used to network with other containers or with the host.
-	// "forwardPorts": [3000, 5432],
+	"forwardPorts": [3000, 5432, 8081],
+
+	// Use 'postStartCommand' to start Firebase emulators after the container starts
+	"postStartCommand": "firebase emulators:start --only firestore &"
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "yarn install",
