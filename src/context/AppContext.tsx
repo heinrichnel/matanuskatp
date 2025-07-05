@@ -199,6 +199,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const loadGoogleMapsScript = () => {
         return new Promise<void>((resolve, reject) => {
           try {
+            // Check if Google Maps script is already in the DOM
+            const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
+            if (existingScript) {
+              console.log("✅ Google Maps script already exists in DOM, skipping");
+              setIsGoogleMapsLoaded(true);
+              resolve();
+              return;
+            }
+
             const script = document.createElement('script');
             script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g&libraries=places&v=weekly`;
             script.async = true;
