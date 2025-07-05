@@ -1,7 +1,8 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, connectFirestoreEmulator, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator, collection, addDoc, setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { firebaseConfig } from './firebaseConfig';
+import { DieselConsumptionRecord } from './types/diesel';
 
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
@@ -49,6 +50,23 @@ export const addAuditLogToFirebase = async (auditLogData: any) => {
     return docRef.id;
   } catch (error) {
     console.error('Error adding audit log:', error);
+    throw error;
+  }
+};
+
+// Add diesel record to Firebase
+export const addDieselToFirebase = async (dieselRecord: DieselConsumptionRecord) => {
+  try {
+    const dieselRef = doc(firestore, 'diesel', dieselRecord.id);
+    await setDoc(dieselRef, {
+      ...dieselRecord,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    console.log('Diesel record added with ID:', dieselRecord.id);
+    return dieselRecord.id;
+  } catch (error) {
+    console.error('Error adding diesel record:', error);
     throw error;
   }
 };
