@@ -138,6 +138,19 @@ export async function deleteDieselFromFirebase(dieselId: string) {
   }
 }
 
+// Function to delete a missed load from Firebase
+export async function deleteMissedLoadFromFirebase(missedLoadId: string) {
+  try {
+    const missedLoadRef = doc(firestore, 'missedLoads', missedLoadId);
+    await deleteDoc(missedLoadRef);
+    console.log('Missed load deleted with ID:', missedLoadId);
+    return missedLoadId;
+  } catch (error) {
+    console.error('Error deleting missed load:', error);
+    throw error;
+  }
+}
+
 // Function to update a missed load in Firebase
 export async function updateMissedLoadInFirebase(missedLoadId: string, missedLoadData: any) {
   try {
