@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, connectFirestoreEmulator, collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator, collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { firebaseConfig } from './firebaseConfig';
 import { DieselConsumptionRecord } from './types/diesel';
@@ -110,6 +110,35 @@ export const addMissedLoadToFirebase = async (missedLoadData: any) => {
 export async function updateTripInFirebase(tripId: string, tripData: Partial<Trip>) {
   const tripRef = doc(firestore, 'trips', tripId);
   await setDoc(tripRef, { ...tripData, updatedAt: serverTimestamp() }, { merge: true });
+}
+
+// Function to delete a trip from Firebase
+export async function deleteTripFromFirebase(tripId: string) {
+  try {
+    const tripRef = doc(firestore, 'trips', tripId);
+    await deleteDoc(tripRef);
+    console.log('Trip deleted with ID:', tripId);
+    return tripId;
+  } catch (error) {
+    console.error('Error deleting trip:', error);
+    throw error;
+  }
+}
+
+// Function to update a missed load in Firebase
+export async function updateMissedLoadInFirebase(missedLoadId: string, missedLoadData: any) {
+  try {
+    const missedLoadRef = doc(firestore, 'missedLoads', missedLoadId);
+    await setDoc(missedLoadRef, { 
+      ...missedLoadData, 
+      updatedAt: serverTimestamp() 
+    }, { merge: true });
+    console.log('Missed load updated with ID:', missedLoadId);
+    return missedLoadId;
+  } catch (error) {
+    console.error('Error updating missed load:', error);
+    throw error;
+  }
 }
 
 // Firestore listener for real-time updates

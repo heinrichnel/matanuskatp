@@ -8,7 +8,7 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Upload, X, WifiOff, RefreshCw, FileSpreadsheet } from 'lucide-react';
 import { useSyncContext } from '../../context/SyncContext';
-import { FLEET_VEHICLES } from '../../types/vehicle';
+import { FLEET_VEHICLES } from '../../data/vehicles/fleetVehicles';
 
 interface LoadImportModalProps {
   isOpen: boolean;
