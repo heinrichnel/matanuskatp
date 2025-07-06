@@ -125,6 +125,19 @@ export async function deleteTripFromFirebase(tripId: string) {
   }
 }
 
+// Function to delete a diesel record from Firebase
+export async function deleteDieselFromFirebase(dieselId: string) {
+  try {
+    const dieselRef = doc(firestore, 'diesel', dieselId);
+    await deleteDoc(dieselRef);
+    console.log('Diesel record deleted with ID:', dieselId);
+    return dieselId;
+  } catch (error) {
+    console.error('Error deleting diesel record:', error);
+    throw error;
+  }
+}
+
 // Function to update a missed load in Firebase
 export async function updateMissedLoadInFirebase(missedLoadId: string, missedLoadData: any) {
   try {
