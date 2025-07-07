@@ -4,9 +4,8 @@ import { Wrench, FileText, Clipboard, AlertTriangle, Info, Truck, Flag as FlagIc
 import ActionLog from '../components/actionlog/ActionLog';
 import TyreManagement from '../components/workshop/TyreManagement';
 import InspectionManagement from '../components/workshop/InspectionManagement';
-import JobCardManagement from '../components/workshop/JobCardManagement';
-import FaultTracking from '../components/workshop/FaultTracking';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import FleetTable from '../components/workshop/FleetTable';
 import FleetTable from '../components/workshop/FleetTable';
 
 const WorkshopPage: React.FC = () => {
@@ -62,10 +61,6 @@ const WorkshopPage: React.FC = () => {
             <Info className="w-4 h-4" />
             <span>Tyre Management</span>
           </TabsTrigger>
-          <TabsTrigger value="fleet" className="flex items-center gap-2">
-            <Truck className="w-4 h-4" />
-            <span>Fleet Management</span>
-          </TabsTrigger>
           <TabsTrigger value="actions" className="flex items-center gap-2">
             <FlagIcon className="w-4 h-4" />
             <span>Action Log</span>
@@ -101,14 +96,10 @@ const WorkshopPage: React.FC = () => {
           <InspectionManagement />
         </TabsContent>
         
-        <TabsContent value="jobcards" className="mt-6">
-          <JobCardManagement />
+        <TabsContent value="fleet" className="mt-6">
+          <FleetTable />
         </TabsContent>
         
-        <TabsContent value="faults" className="mt-6">
-          <FaultTracking />
-        </TabsContent>
-
         <TabsContent value="tires" className="mt-6">
           <TyreManagement />
         </TabsContent>
