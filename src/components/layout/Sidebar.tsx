@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import {
   Activity,
-  Bell, // Bell icon for notifications
+  Bell,
   Clipboard, 
   CheckCircle, 
   BarChart3,
@@ -27,7 +27,6 @@ import {
   TrendingUp,
   ShoppingCart,
   Warehouse,
-  User,
   DollarSign,
   List
 } from 'lucide-react';
