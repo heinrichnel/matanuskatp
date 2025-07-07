@@ -8,6 +8,7 @@ import { Select } from '../ui/FormElements';
 import { 
   Fuel, 
   Plus, 
+  Search,
   Upload, 
   Download, 
   Settings, 
@@ -23,8 +24,8 @@ import SyncIndicator from '../ui/SyncIndicator';
 import ManualDieselEntryModal from './ManualDieselEntryModal';
 import DieselImportModal from './DieselImportModal';
 import DieselNormsModal from './DieselNormsModal';
-import DieselDebriefModal from './DieselDebriefModal';
-import ProbeVerificationModal from './ProbeVerificationModal';
+import EnhancedDieselDebriefModal from './EnhancedDieselDebriefModal';
+import EnhancedProbeVerificationModal from './EnhancedProbeVerificationModal';
 import TripLinkageModal from './TripLinkageModal';
 import DieselEditModal from './DieselEditModal';
 
@@ -761,11 +762,13 @@ const DieselDashboard: React.FC = () => {
       <ManualDieselEntryModal
         isOpen={showManualEntryModal}
         onClose={() => setShowManualEntryModal(false)}
+        dieselRecords={dieselRecords}
       />
       
       <DieselImportModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
+        dieselRecords={dieselRecords}
       />
       
       <DieselNormsModal
@@ -775,7 +778,7 @@ const DieselDashboard: React.FC = () => {
         onUpdateNorms={handleUpdateNorms}
       />
       
-      <DieselDebriefModal
+      <EnhancedDieselDebriefModal
         isOpen={showDebriefModal}
         onClose={() => setShowDebriefModal(false)}
         records={recordsNeedingDebrief}
@@ -783,7 +786,7 @@ const DieselDashboard: React.FC = () => {
       />
       
       {showProbeModal && (
-        <ProbeVerificationModal
+        <EnhancedProbeVerificationModal
           isOpen={showProbeModal}
           onClose={() => setShowProbeModal(false)}
           dieselRecordId={selectedDieselId}
