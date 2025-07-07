@@ -6,7 +6,6 @@ import {
   CheckCircle,
   FileText,
   Flag,
-  Info,
   Shield,
   Settings,
   AlertTriangle,
@@ -14,10 +13,11 @@ import {
   Users,
   Wrench,
   Bell,
-  Plus,
   Target,
-  Clock,
   User,
+  Map,
+  Award,
+  BookOpen
   Award
 } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
@@ -36,27 +36,16 @@ const Sidebar: FC<HeaderProps> = ({
   const navCategories = [
     {
       id: 'main',
+      label: 'Main',
       items: [
-        { id: 'dashboard', label: 'Dashboard', icon: Activity },
-        { id: 'audit-log', label: 'Audit Log', icon: FileText }
+        { id: 'dashboard', label: 'Dashboard', icon: Activity }
       ]
     },
     {
       id: 'operations',
       label: 'Operations',
       items: [
-        { 
-          id: 'workshop',
-          label: 'Workshop',
-          icon: Wrench,
-          path: 'workshop?tab=dashboard',
-          children: [
-            { id: 'workshop-inspection', label: 'Inspection', path: 'workshop?tab=inspections' },
-            { id: 'workshop-jobcards', label: 'Job Cards', path: 'workshop?tab=jobcards' },
-            { id: 'workshop-faults', label: 'Fault List', path: 'workshop?tab=faults' },
-            { id: 'workshop-tires', label: 'Tyre Management', path: 'workshop?tab=tires' }
-          ]
-        }
+        { id: 'workshop', label: 'Workshop', icon: Wrench, path: 'workshop?tab=dashboard' }
       ]
     },
     {
@@ -66,7 +55,8 @@ const Sidebar: FC<HeaderProps> = ({
         { id: 'trips', label: 'All Trips', icon: Truck },
         { id: 'active-trips', label: 'Active Trips', icon: Truck },
         { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle },
-        { id: 'flags', label: 'Flags & Investigations', icon: Flag }
+        { id: 'flags', label: 'Flags & Investigations', icon: Flag },
+        { id: 'audit-log', label: 'Audit Log', icon: BookOpen }
       ]
     },
     {
@@ -75,27 +65,28 @@ const Sidebar: FC<HeaderProps> = ({
       items: [
         { id: 'fleet', label: 'Fleet Overview', icon: Truck },
         { id: 'driver-behavior', label: 'Driver Management', icon: Shield },
-        { id: 'diesel-dashboard', label: 'Diesel Management', icon: FileText },
+        { id: 'diesel-dashboard', label: 'Diesel Management', icon: Target },
+        { id: 'maps', label: 'Maps', icon: Map },
         { id: 'missed-loads', label: 'Missed Loads', icon: FileText }
       ]
     },
     {
-      id: 'system',
-      label: 'System',
+      id: 'reports',
+      label: 'Reports',
       items: [
-        { id: 'notifications', label: 'Notifications', icon: Bell },
-        { id: 'settings', label: 'Settings', icon: Settings },
+        { id: 'reports', label: 'Reports & Exports', icon: BarChart3 },
+        { id: 'invoice-aging', label: 'Invoice Aging', icon: FileText },
         { id: 'customer-retention', label: 'Customer Retention', icon: Users },
         { id: 'technician-leaderboard', label: 'Technician Performance', icon: Award }
       ]
     },
     {
-      id: 'maintenance',
-      label: 'Maintenance',
+      id: 'workshop',
+      label: 'Workshop',
       items: [
         {
           id: 'workshop',
-          label: 'Workshop',
+          label: 'Workshop Dashboard',
           path: 'workshop?tab=dashboard',
           icon: Wrench
         },
@@ -106,13 +97,17 @@ const Sidebar: FC<HeaderProps> = ({
           icon: Target 
         },
         { id: 'workshop-inspections', label: 'Inspections', path: 'workshop?tab=inspections', icon: Clipboard },
-        { id: 'workshop-jobcards', label: 'Job Cards', path: 'workshop?tab=jobcards', icon: FileText }
+        { id: 'workshop-jobcards', label: 'Job Cards', path: 'workshop?tab=jobcards', icon: FileText },
+        { id: 'workshop-faults', label: 'Fault List', path: 'workshop?tab=faults', icon: AlertTriangle },
+        { id: 'workshop-fleet', label: 'Fleet Management', path: 'workshop?tab=fleet', icon: Truck }
       ]
     },
     {
-      id: 'logs',
-      label: 'Logs & Actions',
+      id: 'system',
+      label: 'System',
       items: [
+        { id: 'notifications', label: 'Notifications', icon: Bell },
+        { id: 'settings', label: 'Settings', icon: Settings },
         { id: 'action-log', label: 'Action Log', path: 'workshop?tab=actions', icon: CheckCircle }
       ]
     }
@@ -201,7 +196,7 @@ const Sidebar: FC<HeaderProps> = ({
                       <Icon className="w-5 h-5" />
                       <span>{label}</span>
                     </button>
-                  </li>
+                    {children && children.map(child => {
                 );
               })}
             </ul>
