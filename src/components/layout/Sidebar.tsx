@@ -1,12 +1,9 @@
 import { FC, useState } from 'react';
 import {
   Activity,
+  User,
   AlertTriangle,
-  BarChart3,
-  Bell,
-  CheckCircle,
-  Clipboard,
-  CircleDot,
+  Truck,
   DollarSign,
   FileSpreadsheet,
   FileText,
@@ -15,9 +12,9 @@ import {
   Settings,
   Shield,
   Truck,
+  User,
   Users
 } from 'lucide-react';
-import { ChevronDown, ChevronRight } from 'lucide-react'; 
 import SyncIndicator from '../ui/SyncIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
 
