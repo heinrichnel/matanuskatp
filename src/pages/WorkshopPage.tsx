@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
-import { Wrench, FileText, Clipboard, AlertTriangle, Info, CheckCircle } from 'lucide-react';
+import { Wrench, FileText, Clipboard, AlertTriangle, Info, Truck } from 'lucide-react';
 import ActionLog from '../components/actionlog/ActionLog';
 import TyreManagement from '../components/workshop/TyreManagement';
 import InspectionManagement from '../components/workshop/InspectionManagement';
 import JobCardManagement from '../components/workshop/JobCardManagement';
 import FaultTracking from '../components/workshop/FaultTracking';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import FleetTable from '../components/workshop/FleetTable';
 
 const WorkshopPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -61,6 +62,10 @@ const WorkshopPage: React.FC = () => {
             <Info className="w-4 h-4" />
             <span>Tyre Management</span>
           </TabsTrigger>
+          <TabsTrigger value="fleet" className="flex items-center gap-2">
+            <Truck className="w-4 h-4" />
+            <span>Fleet Management</span>
+          </TabsTrigger>
           <TabsTrigger value="actions" className="flex items-center gap-2">
             <Flag className="w-4 h-4" />
             <span>Action Log</span>
@@ -106,6 +111,10 @@ const WorkshopPage: React.FC = () => {
 
         <TabsContent value="tires" className="mt-6">
           <TyreManagement />
+        </TabsContent>
+        
+        <TabsContent value="fleet" className="mt-6">
+          <FleetTable />
         </TabsContent>
         
         <TabsContent value="actions" className="mt-6">

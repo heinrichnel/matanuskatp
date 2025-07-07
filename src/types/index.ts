@@ -597,6 +597,102 @@ export const DRIVER_BEHAVIOR_EVENT_TYPES = [
   { value: 'other', label: 'Other', severity: 'medium', points: 2 }
 ];
 
+// Workshop and Job Card Types
+export interface JobCard {
+  id: string;
+  workOrderNumber: string;
+  vehicleId: string;
+  customerName: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'in_progress' | 'parts_pending' | 'completed' | 'closed';
+  createdAt: string;
+  createdDate: string;
+  scheduledDate?: string;
+  completedDate?: string;
+  assignedTechnician?: string;
+  estimatedCompletion?: string;
+  workDescription: string;
+  estimatedHours: number;
+  laborRate: number;
+  partsCost: number;
+  totalEstimate: number;
+  tasks: JobCardTask[];
+  totalLaborHours: number;
+  totalPartsValue: number;
+  notes: string;
+  faultIds: string[];
+  attachments: string[];
+  remarks: string[];
+  inspectionId?: string;
+}
+
+export interface JobCardTask {
+  id: string;
+  title: string;
+  description?: string;
+  category: string;
+  estimatedHours: number;
+  actualHours?: number;
+  status: 'pending' | 'in_progress' | 'completed' | 'not_applicable';
+  assignedTo?: string;
+  notes?: string;
+  parts?: {
+    partName: string;
+    quantity: number;
+    isRequired: boolean;
+  }[];
+  isCritical: boolean;
+}
+
+// Invoice type for job card invoicing
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  jobCardId: string;
+  vehicleId: string;
+  customerName: string;
+  issuedDate: string;
+  dueDate: string;
+  items: InvoiceItem[];
+  laborCost: number;
+  partsCost: number;
+  taxRate: number;
+  taxAmount: number;
+  totalAmount: number;
+  status: 'unpaid' | 'partial' | 'paid';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+  itemType: 'part' | 'labor' | 'service' | 'other';
+}
+
+// Fleet vehicle type
+export interface FleetVehicle {
+  fleetNumber: string;
+  registration: string;
+  make: string;
+  model: string;
+  chassisNo: string;
+  engineNo?: string;
+  vin?: string;
+  year?: string;
+  vehicleType: string;
+  status: string;
+  odometer?: number;
+  assignedDriver?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // NEW: CAR Report Types
 export const CAR_INCIDENT_TYPES = [
   { value: 'accident', label: 'Accident' },
