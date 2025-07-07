@@ -2,14 +2,19 @@ import React from 'react';
 import { useSyncContext } from '../../context/SyncContext';
 import { RefreshCw } from 'lucide-react';
 import ConnectionStatusIndicator from './ConnectionStatusIndicator';
+import ConnectionStatusIndicator from './ConnectionStatusIndicator';
 
 interface SyncIndicatorProps {
   className?: string;
+  showText?: boolean;
   showText?: boolean;
 }
 
 const SyncIndicator: React.FC<SyncIndicatorProps> = ({
   className = '',
+  showText = true 
+}) => {
+  const { syncStatus, lastSynced, pendingChangesCount } = useSyncContext();
   showText = true 
 }) => {
   const { syncStatus, lastSynced, pendingChangesCount } = useSyncContext();
@@ -46,6 +51,14 @@ const SyncIndicator: React.FC<SyncIndicatorProps> = ({
             {showText && (
               <span className={syncStatus === 'error' ? 'text-red-500' : 'text-gray-500'}>
                 {syncStatus === 'error'
+                  ? 'Sync error'
+                  : `Synced ${getTimeSinceSync()}`} 
+                {pendingChangesCount > 0 && ` (${pendingChangesCount} pending)`}
+              </span>
+            )}
+          </>
+        )}
+      </div>
                   ? 'Sync error'
                   : `Synced ${getTimeSinceSync()}`} 
                 {pendingChangesCount > 0 && ` (${pendingChangesCount} pending)`}

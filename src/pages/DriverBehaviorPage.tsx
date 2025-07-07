@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DriverBehaviorEvent } from '../types';
 import { useAppContext } from '../context/AppContext';
+import { useSyncContext } from '../context/SyncContext';
 import Button from '../components/ui/Button';
 import DriverPerformanceOverview from '../components/drivers/DriverPerformanceOverview';
 import DriverBehaviorEventForm from '../components/drivers/DriverBehaviorEventForm';
@@ -19,10 +21,26 @@ const DriverBehaviorPage: React.FC = () => {
   const [showCARForm, setShowCARForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<DriverBehaviorEvent | null>(null);
   const { 
-    importDriverBehaviorEventsFromWebhook, 
+    importDriverBehaviorEventsFromWebhook,
     isLoading, 
     driverBehaviorEvents 
   } = useAppContext();
+  
+  // Use the SyncContext to subscribe to driver behavior events
+  const { subscribeToDriverBehaviorEvents } = useSyncContext();
+  
+  // Subscribe to driver behavior events when the component mounts
+  useEffect(() => {
+    console.log("Subscribing to driver behavior events");
+    subscribeToDriverBehaviorEvents();
+    
+    // Check if we have any events, if not and we're online, trigger a sync
+    if (driverBehaviorEvents.length === 0 && navigator.onLine) {
+      handleSyncNow();
+    }
+    
+    // Cleanup function is not needed as the subscription is managed by the SyncContext
+  }, []);
   
   // Use the SyncContext to subscribe to driver behavior events
   const { subscribeToDriverBehaviorEvents } = useSyncContext();

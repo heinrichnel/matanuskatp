@@ -13,12 +13,14 @@ interface DriverPerformanceOverviewProps {
   onViewEvent: (event: DriverBehaviorEvent) => void;
   onEditEvent: (event: DriverBehaviorEvent) => void;
   onSyncNow?: () => void;
+  onSyncNow?: () => void;
 }
 
 const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
   onAddEvent,
   onViewEvent,
   onEditEvent,
+  onSyncNow
   onSyncNow
 }) => {
   const { driverBehaviorEvents, getAllDriversPerformance, isLoading } = useAppContext();
@@ -28,8 +30,22 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
   const [selectedSeverity, setSelectedSeverity] = useState<string>('');
   const [selectedStatus, setSelectedStatus] = useState<string>('');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
   
+  // Handle sync now with loading state
+  const handleSyncNow = async () => {
+    if (!onSyncNow) return;
+    
+    setIsSyncing(true);
+    try {
+      await onSyncNow();
+    } catch (error) {
+      console.error('Error syncing driver behavior events:', error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   // Get all driver performance data
   const driversPerformance = useMemo(() => {
     return getAllDriversPerformance();
@@ -154,9 +170,21 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
             onClick={onAddEvent}
             disabled={isSyncing || isLoading.importDriverBehavior}
             isLoading={isLoading.importDriverBehavior}
+            disabled={isSyncing || isLoading.importDriverBehavior}
+            isLoading={isLoading.importDriverBehavior}
           >
             {isSyncing || isLoading.importDriverBehavior ? 'Syncing...' : 'Sync Now'}
           </Button>
+          {onSyncNow && (
+            <Button
+              onClick={handleSyncNow}
+              icon={<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />}
+              variant="outline"
+              disabled={isSyncing}
+            >
+              {isSyncing ? 'Syncing...' : 'Sync Now'}
+            </Button>
+          )}
           {onSyncNow && (
             <Button
               onClick={handleSyncNow}
