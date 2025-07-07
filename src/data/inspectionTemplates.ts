@@ -40,7 +40,7 @@ export const preTrip: InspectionTemplate = {
     'Exterior', 
     'Engine Compartment', 
     'Interior', 
-    'Brakes & Tires', 
+    'Brakes & Tyres', 
     'Safety Equipment'
   ],
   items: [
@@ -155,12 +155,12 @@ export const preTrip: InspectionTemplate = {
       passFailOnly: true
     },
     
-    // Brakes & Tires
+    // Brakes & Tyres
     {
       id: uuidv4(),
-      title: 'Tire Pressure - Front Left',
-      description: 'Check tire pressure (PSI)',
-      category: 'Brakes & Tires',
+      title: 'Tyre Pressure - Front Left',
+      description: 'Check tyre pressure (PSI)',
+      category: 'Brakes & Tyres',
       requiredRole: 'driver',
       isCritical: true,
       passFailOnly: false,
@@ -171,9 +171,9 @@ export const preTrip: InspectionTemplate = {
     },
     {
       id: uuidv4(),
-      title: 'Tire Pressure - Front Right',
-      description: 'Check tire pressure (PSI)',
-      category: 'Brakes & Tires',
+      title: 'Tyre Pressure - Front Right',
+      description: 'Check tyre pressure (PSI)',
+      category: 'Brakes & Tyres',
       requiredRole: 'driver',
       isCritical: true,
       passFailOnly: false,
@@ -186,7 +186,7 @@ export const preTrip: InspectionTemplate = {
       id: uuidv4(),
       title: 'Brake Test',
       description: 'Perform stationary brake test',
-      category: 'Brakes & Tires',
+      category: 'Brakes & Tyres',
       requiredRole: 'driver',
       isCritical: true,
       passFailOnly: true
@@ -286,7 +286,7 @@ export const trailerInspection: InspectionTemplate = {
     'Coupling',
     'Brakes',
     'Lights & Electrical',
-    'Tires & Wheels',
+    'Tyres & Wheels',
     'Safety Equipment'
   ],
   items: [
@@ -333,12 +333,12 @@ export const trailerInspection: InspectionTemplate = {
       isCritical: true,
       passFailOnly: true
     },
-    // Tires & Wheels items
+    // Tyres & Wheels items
     {
       id: uuidv4(),
-      title: 'Tire Condition',
-      description: 'Check tires for damage, wear, or foreign objects',
-      category: 'Tires & Wheels',
+      title: 'Tyre Condition',
+      description: 'Check tyres for damage, wear, or foreign objects',
+      category: 'Tyres & Wheels',
       requiredRole: 'driver',
       isCritical: true,
       passFailOnly: true

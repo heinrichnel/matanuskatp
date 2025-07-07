@@ -1,33 +1,20 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  CircleDot, 
-  AlertTriangle, 
-  CheckCircle, 
-  Gauge,
-  Calendar,
-  DollarSign,
-  BarChart3,
-  Plus
-} from "lucide-react";
-import { TireDashboard } from './TireDashboard';
-import { TyreInspection } from './TireInspection';
-import { TireInventory } from './TireInventory';
-import { TireReports } from './TireReports';
-import { VehicleTireView } from './VehicleTireView';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'; // Fixed casing
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
+import TyreDashboard from './TyreDashboard'; // Updated to default import
+import TyreInspectionForm from './TyreInspection'; // Replaced with TyreInspectionForm
+import { TyreInventory } from './TyreInventory';
+import { TyreReports } from './TyreReports';
+import VehicleTyreView from './VehicleTyreView'; // Updated to default import
 
-const TireManagement: React.FC = () => {
+const TyreManagement: React.FC = () => {
   const [selectedVehicle, setSelectedVehicle] = useState<string>('');
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Tire Management System</h2>
-        <p className="text-gray-600">Comprehensive tire tracking, maintenance, and analytics</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Tyre Management System</h2>
+        <p className="text-gray-600">Comprehensive tyre tracking, maintenance, and analytics</p>
       </div>
 
       <Tabs defaultValue="dashboard" className="w-full">
@@ -41,26 +28,26 @@ const TireManagement: React.FC = () => {
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-4">
-          <TireDashboard />
+          <TyreDashboard />
         </TabsContent>
 
         <TabsContent value="vehicle-view" className="space-y-4">
-          <VehicleTireView 
+          <VehicleTyreView 
             selectedVehicle={selectedVehicle}
             onVehicleSelect={setSelectedVehicle}
           />
         </TabsContent>
 
         <TabsContent value="inspection" className="space-y-4">
-          <TyreInspection />
+          <TyreInspectionForm />
         </TabsContent>
 
         <TabsContent value="inventory" className="space-y-4">
-          <TireInventory />
+          <TyreInventory />
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-4">
-          <TireReports />
+          <TyreReports />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
@@ -77,7 +64,7 @@ const TireManagement: React.FC = () => {
             
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Average Tire Life</CardTitle>
+                <CardTitle className="text-sm font-medium">Average Tyre Life</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">95,000 km</div>
@@ -101,4 +88,4 @@ const TireManagement: React.FC = () => {
   );
 };
 
-export default TireManagement;
+export default TyreManagement;

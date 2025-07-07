@@ -1,14 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import { Button } from "@/components/ui/Button";
 import { 
   Truck, 
-  AlertTriangle, 
-  CheckCircle, 
-  Wrench,
   Search,
   Filter,
   Snowflake,
@@ -52,15 +49,6 @@ export const FleetDashboard: React.FC = () => {
 
     return vehicles;
   }, [searchQuery, statusFilter, typeFilter, manufacturerFilter, seriesFilter]);
-
-  const getStatusIcon = (status: Vehicle['status']) => {
-    switch (status) {
-      case 'active': return <CheckCircle className="w-4 h-4 text-green-600" />;
-      case 'maintenance': return <Wrench className="w-4 h-4 text-yellow-600" />;
-      case 'out_of_service': return <AlertTriangle className="w-4 h-4 text-red-600" />;
-      default: return <Truck className="w-4 h-4 text-gray-600" />;
-    }
-  };
 
   const getTypeIcon = (type: Vehicle['type']) => {
     switch (type) {
@@ -166,57 +154,57 @@ export const FleetDashboard: React.FC = () => {
             </div>
             
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="maintenance">Maintenance</SelectItem>
-                <SelectItem value="out_of_service">Out of Service</SelectItem>
-              </SelectContent>
+              <Select.Trigger>
+                <Select.Value placeholder="Status" />
+              </Select.Trigger>
+              <Select.Content>
+                <Select.Item value="all">All Status</Select.Item>
+                <Select.Item value="active">Active</Select.Item>
+                <Select.Item value="maintenance">Maintenance</Select.Item>
+                <Select.Item value="out_of_service">Out of Service</Select.Item>
+              </Select.Content>
             </Select>
             
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="heavy_truck">Heavy Truck</SelectItem>
-                <SelectItem value="light_vehicle">Light Vehicle</SelectItem>
-                <SelectItem value="trailer">Trailer</SelectItem>
-                <SelectItem value="reefer">Reefer</SelectItem>
-                <SelectItem value="generator">Generator</SelectItem>
-              </SelectContent>
+              <Select.Trigger>
+                <Select.Value placeholder="Type" />
+              </Select.Trigger>
+              <Select.Content>
+                <Select.Item value="all">All Types</Select.Item>
+                <Select.Item value="heavy_truck">Heavy Truck</Select.Item>
+                <Select.Item value="light_vehicle">Light Vehicle</Select.Item>
+                <Select.Item value="trailer">Trailer</Select.Item>
+                <Select.Item value="reefer">Reefer</Select.Item>
+                <Select.Item value="generator">Generator</Select.Item>
+              </Select.Content>
             </Select>
             
             <Select value={manufacturerFilter} onValueChange={setManufacturerFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Manufacturer" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Manufacturers</SelectItem>
-                <SelectItem value="SCANIA">SCANIA</SelectItem>
-                <SelectItem value="SHACMAN">SHACMAN</SelectItem>
-                <SelectItem value="ISUZU">ISUZU</SelectItem>
-                <SelectItem value="SINOTRUK">SINOTRUK</SelectItem>
-                <SelectItem value="SERCO">SERCO</SelectItem>
-              </SelectContent>
+              <Select.Trigger>
+                <Select.Value placeholder="Manufacturer" />
+              </Select.Trigger>
+              <Select.Content>
+                <Select.Item value="all">All Manufacturers</Select.Item>
+                <Select.Item value="SCANIA">SCANIA</Select.Item>
+                <Select.Item value="SHACMAN">SHACMAN</Select.Item>
+                <Select.Item value="ISUZU">ISUZU</Select.Item>
+                <Select.Item value="SINOTRUK">SINOTRUK</Select.Item>
+                <Select.Item value="SERCO">SERCO</Select.Item>
+              </Select.Content>
             </Select>
             
             <Select value={seriesFilter} onValueChange={setSeriesFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Series" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Series</SelectItem>
-                <SelectItem value="H">H-Series</SelectItem>
-                <SelectItem value="L">L-Series</SelectItem>
-                <SelectItem value="T">T-Series</SelectItem>
-                <SelectItem value="F">F-Series</SelectItem>
-                <SelectItem value="OTHER">Other</SelectItem>
-              </SelectContent>
+              <Select.Trigger>
+                <Select.Value placeholder="Series" />
+              </Select.Trigger>
+              <Select.Content>
+                <Select.Item value="all">All Series</Select.Item>
+                <Select.Item value="H">H-Series</Select.Item>
+                <Select.Item value="L">L-Series</Select.Item>
+                <Select.Item value="T">T-Series</Select.Item>
+                <Select.Item value="F">F-Series</Select.Item>
+                <Select.Item value="OTHER">Other</Select.Item>
+              </Select.Content>
             </Select>
             
             <Button variant="outline" onClick={clearFilters}>

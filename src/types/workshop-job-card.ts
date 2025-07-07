@@ -1,15 +1,3 @@
-/**
- * This file contains both legacy and enhanced workshop job card interfaces.
- * 
- * Legacy interfaces (JobCardItem and JobCard) are maintained for backward compatibility
- * with existing components.
- * 
- * Enhanced interfaces (EnhancedJobCard and related) provide a more comprehensive
- * structure for advanced workshop management functionality.
- */
-
-// ==== Legacy Interfaces ====
-
 export interface JobCardItem {
   id: string;
   type: 'repair' | 'maintenance' | 'inspection';

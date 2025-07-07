@@ -3,7 +3,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Select } from '../ui/FormElements';
-import { Clipboard, CheckCircle, X, Clock, Save, FileText, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { Clipboard, CheckCircle, Save, FileText, ArrowLeft, AlertTriangle } from 'lucide-react';
 import InspectionItemCard from './InspectionItemCard';
 import { inspectionTemplates } from '../../data/inspectionTemplates';
 import { FLEET_NUMBERS, DRIVERS } from '../../types';

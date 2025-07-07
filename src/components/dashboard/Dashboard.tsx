@@ -51,12 +51,6 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
 
   const [showFilters, setShowFilters] = useState(false);
 
-  // Helper function to convert USD to ZAR for multi-currency aggregation
-  const convertToZAR = (amount: number, currency: 'ZAR' | 'USD'): number => {
-    if (currency === 'ZAR') return amount;
-    return amount * exchangeRate;
-  };
-
   // Force refresh data when Dashboard mounts
   useEffect(() => {
     if (contextTrips.length === 0 && navigator.onLine) {
