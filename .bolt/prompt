@@ -1,224 +1,87 @@
-Unified System-Wide Bolt Instructions for TransportMat
-Objective: To ensure Bolt operates with a system-wide understanding of the app's complexity — respecting the full integration between UI, backend, user workflows, and the data ecosystem.
+# 🔧 SYSTEM INTEGRATION & ARCHITECTURE ENHANCEMENT GUIDELINES
 
-🧠 1. System-Wide Thinking, Not Code-Only Fixes
-Bolt must not operate as a code-fixer in isolation. Every change must be evaluated in the broader context of the system — including frontend usability, Firebase backend integrity, user flow continuity, visual alignment, and downstream impact.
+## Objective
+You are authorized and instructed to perform a **complete integration, optimization, and architectural enhancement** of this system — ensuring total alignment between **frontend components**, **backend logic**, **forms**, **data sources**, **import/export flows**, and **reporting outputs**.
 
-A trip entry form is not just a form. It's connected to backend data models, PDF generation, update modals, cost logic, reporting, debrief exports, syncing to dashboards, and flags. Bolt must simulate the full chain reaction of a change before finalizing it.
+This is a full-system integration initiative. Your goal is to **harmonize, strengthen, and complete** the functional and architectural flows across the entire application — **without breaking or removing any existing functionality**.
 
-Any “fix” that addresses only a single bug but breaks associated functionality (trip visibility, filter performance, cost sync, etc.) is a regression — not a success.
+---
 
-🔁 2. True Integration: Frontend ↔ Backend Must Be Authentically Synced
-The frontend (hosted via Netlify) and backend (hosted on Firebase) are not two separate applications. They are two faces of one platform.
+## ✅ Your Permissions
 
-Changing something in Netlify (like netlify.toml) without verifying that Firestore’s collections, functions, or rules still align with frontend queries is unacceptable. Likewise, backend validation or document structures cannot change without syncing the frontend data consumers (like onSnapshot, getDocs, filters, or modals).
+You are explicitly permitted to:
 
-Bolt must always assume that:
+- **Read from and write to any file** in the project (frontend or backend)
+- **Restructure, refactor, and optimize** code where it improves readability, maintainability, or performance
+- **Add integration logic** where it is missing or incomplete
+- **Introduce enhancements**, validation, or utility scripts to stabilize or extend workflows
+- **Reorganize folders, imports, exports**, or component relationships — as long as existing user functionality remains unchanged
+- **Enforce consistent architectural standards**, naming conventions, and shared logic across modules
+- **Build new linking mechanisms** between data sources and their visual output (e.g., tables, dashboards, reports)
 
-Every UI action needs a verified backend endpoint
+---
 
-Every backend write must reflect in a usable frontend state
+## 🔄 What You Must Ensure
 
-Every deployment must be visually and functionally confirmed
+### 1. Complete Functional Integration
 
-📄 3. Handle All Interfaces: Manual, CSV, Excel, PDF Uploads
-This system is not purely digital-input driven. Bolt must accommodate and preserve:
+- All frontend components must be connected to real backend data.
+- Manual input forms must persist data reliably and reflect state in the backend.
+- All components should respond to live or synced data.
+- No part of the system should operate in isolation — everything must be tied into the data model and user flows.
 
-✅ Manual form entry with validation
+### 2. Import/Export Consistency
 
-✅ CSV imports for bulk trip/diesel entries
+- Every import and export operation (CSV, JSON, Webhooks) must be aligned with the correct Firestore or backend collection structures.
+- All field names must match the actual data schema.
+- Filters, mappings, and data formatting should be consistent and validated.
 
-✅ Excel data parsing and feedback
+### 3. Reporting and Visualization
 
-✅ PDF generation and upload management (e.g. debriefs, invoices)
+- Where data is collected, it must also be visualized.
+- Ensure that statistical overviews, dashboards, summaries, and trend indicators are available and working.
+- You may build or enhance reporting views that give real-time visibility into operations.
 
-✅ File download actions with correct headers and naming
+### 4. Workflow Continuity
 
-✅ Upload feedback with confirmations and error states
+- The system must support complete workflows (e.g., inspection → fault → job card → cost → report).
+- All intermediate and dependent steps must be linked.
+- You must connect any gaps and document any exceptions.
 
-Each of these components must work seamlessly in parallel, and not be overwritten by code optimizations that do not test all formats.
+### 5. Architecture Optimization
 
-🎛 4. Filters, Views, and State Must Be Integrated Logically
-Filters are not visual candy — they’re core to operational control. Every table view (e.g. ActiveTrips, CompletedTrips, DieselLogs, Flags) must:
+- Directory structures, file groupings, shared components, and state logic should be reviewed and improved.
+- Duplicated or fragmented logic should be consolidated where appropriate.
+- Abstract logic into reusable hooks or utility functions where beneficial.
 
-Load reliably from Firestore using validated filters
+### 6. UI & UX Alignment
 
-Allow multi-criteria selection (e.g. date, driver, fleet, trip status)
+- Component rendering, visual consistency, spacing, and styling must be standardized.
+- Color schemes and design tokens (e.g., Tailwind configs) must reflect a consistent theme.
+- No visual or layout changes should disrupt the current user workflow.
 
-Be state-aware — meaning changes should reflect across all dashboards and modals
+---
 
-Avoid duplication or “ghost” data caused by mismatched state vs backend
+## 🛑 Critical Rules
 
-Bolt must confirm that filtered views, modals, and backend collections remain in sync — even when editing, deleting, or importing data.
+> You **may not break**, disable, or remove any working functionality.  
+> You **must preserve all current flows and user-facing features**.  
+> You **may extend, improve, connect, enhance, and clean** the architecture freely, provided that the system remains stable and usable.
 
-🧰 5. Coding Must Respect the Final Product — Not Just “Make It Work”
-A working backend that delivers broken UI is a failure. A UI that looks pretty but doesn’t bind properly to Firestore is a liability.
+---
 
-Bolt must care as much about:
+## ✅ Final Outcome
 
-Spacing
+Upon completion of your task, the system should:
 
-Input behavior
+- Be fully integrated across all modules and layers
+- Reflect complete end-to-end operational flow
+- Contain no dead routes, broken links, or disconnected components
+- Show all data consistently in both storage and presentation layers
+- Be easier to maintain, extend, and understand
 
-Button visibility
+All enhancements must be committed clearly and, where appropriate, include documentation or inline comments to explain what has been improved.
 
-Visual feedback (errors, success toasts, loaders)
+---
 
-Mobile responsiveness
-
-…as about whether a function returns 200 OK. Because users don’t see your Firestore query — they experience the interface.
-
-No change may be marked "complete" unless the final UI, form behavior, and state feedback reflect that change without compromise.
-
-🧱 6. Data Structure Changes Must Cascade System-Wide
-When Bolt updates a Firestore document structure (e.g. adding a field like tripStatus), it must:
-
-Reflect in all queries, filters, modals, and exports
-
-Be validated in trip form, edit modal, and CSV import
-
-Be used in visual cues (e.g. trip tags: Completed / Active / Flagged)
-
-Failure to update one place (e.g. the export PDF) creates invisible bugs that only emerge in production. Bolt must propagate changes system-wide.
-
-🧪 7. Testing Must Include the Chain Reaction
-Testing must not stop at one component.
-
-When Bolt fixes a TripForm, it must verify:
-
-Trip appears in ActiveTripsDashboard
-
-That same trip can be completed
-
-Costs can be added and saved
-
-Reports can export the data
-
-Flags (if any) still apply correctly
-
-PDF and Excel still handle that trip’s data
-
-Unit tests are not enough. Bolt must mentally simulate or actually walk the workflow — as an operations manager would.
-
-⚠️ 8. Visual Design Is Functional — Not Optional
-Theme, layout, spacing, and alignment must reflect a clean, modern, analytical interface. Bolt may not revert styling decisions or break Tailwind class hierarchies to "just make it work."
-
-Each page and modal must:
-
-Match layout expectations
-
-Use consistent card/grid structures
-
-Maintain responsive behavior across viewports
-
-The visual output is the product — not an afterthought.
-
-🔒 9. Data Integrity, Permissions & Sync Must Be Enforced
-Bolt must:
-
-Respect Firestore rules and auth boundaries
-
-Avoid unauthenticated writes unless explicitly public
-
-Prevent duplicate records during imports (via loadRef/ID checks)
-
-Use Firestore merge logic for updates, not overwrites
-
-Security, structure, and user clarity must come before coding shortcuts.
-
-✅ Final Instruction: Precision Before Performance, Purpose Before Patching
-Bolt’s goal is not to "make it work." The goal is to make it real, integrated, testable, maintainable, and consistent. Each part must fit with every other part — or it is a liability, not a feature.
-
-If a fix breaks something else, it is not a fix.
-If the code is clean but the UX breaks, it is not finished.
-If the backend syncs but the UI does not reflect it, it is not deployed.
-
-Every pull request, commit, and deployment must pass this filter.
-
- 10. Web Book Integrations: Real-Time System Entry Points
-The Web Books (Google Sheets + Apps Script deployments) are first-class data sources, not temporary tools. They power the core ingestion of trip, diesel, and driver behavior data into Firestore and therefore directly affect the live dashboards and reporting modules.
-
-Bolt must treat these as official system endpoints, equivalent in importance to frontend forms or API requests.
-
-🔁 Web Book Functions to Support
-Each Google Web Book integration must support the following user operations in full:
-
-✅ Edit: Change previously submitted rows and update Firestore accordingly
-
-✅ Delete: Remove entries from the Web Book and reflect the deletion in the app's Firestore data (if allowed)
-
-✅ View: Ensure accurate mapping from Google Sheets to app tables and reports
-
-✅ Update: Propagate changes in the Web Book to Firestore reliably
-
-✅ Submit: Initial ingestion from the Web Book must validate structure, type, and completeness
-
-Every one of these actions must function end-to-end, and not partially. Submitting data from the Web Book must result in visible, actionable records in the frontend dashboards. The reverse is also true: if a record is updated or deleted in the app, and that data originated from the Web Book, Bolt must preserve relational consistency.
-
-📡 Webhook Responsiveness and Debugging
-Bolt must verify that the Google Apps Script webhooks:
-
-Accept POST payloads without failure
-
-Return success/failure states clearly
-
-Log all skipped, imported, and errored entries for traceability
-
-Handle out-of-sync or repeated loadRefs gracefully (no duplicates or overwrite loops)
-
-This includes managing:
-
-importTripsFromWebBook
-
-importDriverBehaviorWebhook
-
-Any future endpoints like importDieselFromWebBook
-
-All changes to webhook logic must be mirrored in frontend expectations: if a tripStatus or driverName is changed in the Web Book, the frontend must reflect it instantly without refresh or manual reload.
-
-🛠️ Firestore Sync Must Be Atomic and Idempotent
-Web Book ingestion logic must:
-
-Use merge: true when writing to Firestore to avoid data loss
-
-Create only one document per unique loadRef or tripId
-
-Reject malformed data with structured error logging (in the GAS log and optionally in Firestore as a failedImports collection)
-
-Update only when there’s actual data change (Bolt must not create a new record on every webhook hit)
-
-🎛️ Frontend Integration with Web Book Entries
-Each entry from the Web Book must:
-
-Appear correctly in all dashboards (ActiveTrips, CompletedTrips, FlagsDashboard)
-
-Be editable inside modals with full form support (pre-filled fields, validation, backend update)
-
-Support status transitions: trip → costed → completed
-
-Be deletable or overrideable via UI with confirmation and full Firestore sync
-
-Trigger filters, reporting, and exports as normal system entries
-
-There must be no difference between data added via the Web Book and data entered manually via the Trip Form.
-
-🚦 Bolt’s Responsibilities for Web Book Integration
-Bolt must:
-
-Audit every webhook connection between Sheets and Firebase
-
-Verify Firestore writes are correctly shaped, typed, and timestamped
-
-Ensure frontend correctly renders, filters, and allows editing of Web Book–originated data
-
-Prevent data duplication across sources
-
-Respect any additional fields added in the Web Book (e.g., clientType, runnerFee, delayReason)
-
-Bolt must also provide:
-
-⚠️ Clear warning logs when data sync fails
-
-📈 Visual sync status indicators (e.g., “Imported from Web Book” or “Last Synced: X”)
-
-If any trip, diesel entry, or driver event is edited or updated in the Web Book, and this does not reflect in the app — the system is broken. Bolt must ensure two-way traceability and confidence in the integrity of Web Book data.
+_Maintainer Approval: ✅_  
