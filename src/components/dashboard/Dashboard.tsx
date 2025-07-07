@@ -2,8 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
+import FirestoreConnectionError from '../ui/FirestoreConnectionError';
 import { Tooltip } from '../ui/Tooltip';
-import { TrendingUp, Truck, DollarSign, TrendingDown, AlertTriangle, Flag, CheckCircle, User, Activity, Target, Award, Download, Filter, X } from 'lucide-react';
+import { TrendingUp, Truck, DollarSign, TrendingDown, AlertTriangle, Flag, CheckCircle, User, Activity, Target, Award, Download, Filter, X, RefreshCw } from 'lucide-react';
 import {
   formatCurrency,
   calculateTotalCosts,
@@ -23,7 +24,9 @@ interface DashboardProps {
 
 
 const Dashboard: React.FC<DashboardProps> = (props) => {
-  const { trips: contextTrips, missedLoads = [] } = useAppContext();
+  const { trips: contextTrips, missedLoads = [], refreshTrips, isLoading } = useAppContext();
+  const [refreshing, setRefreshing] = useState(false);
+  const [connectionError, setConnectionError] = useState<Error | null>(null);
 
   // DEBUG ONLY - Remove after verification
   useEffect(() => {
@@ -204,11 +207,35 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     });
   };
 
+  // Handle manual refresh
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setConnectionError(null);
+    try {
+      await refreshTrips();
+    } catch (error) {
+      console.error('Error refreshing trips:', error);
+      setConnectionError(error instanceof Error ? error : new Error('Failed to refresh data'));
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Dashboard Overview</h2>
         <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="md"
+            icon={<RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />}
+            onClick={handleRefresh}
+            isLoading={refreshing || isLoading.loadTrips}
+            disabled={refreshing || isLoading.loadTrips}
+          >
+            Refresh Data
+          </Button>
           <Button
             variant="outline"
             size="md"
@@ -220,6 +247,15 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
           <Button variant="primary" size="md" icon={<Download className="w-5 h-5" />}>Export Data</Button>
         </div>
       </div>
+
+      {/* Connection error message */}
+      {connectionError && (
+        <FirestoreConnectionError 
+          error={connectionError} 
+          onRetry={handleRefresh}
+          className="mb-4"
+        />
+      )}
 
       {/* Filter Panel */}
       {showFilters && (

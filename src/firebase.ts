@@ -1,58 +1,15 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, connectFirestoreEmulator, collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { firebaseConfig } from './firebaseConfig';
 import { DieselConsumptionRecord } from './types/diesel';
 import { Trip } from './types';
+import { firestore } from './utils/firebaseConnectionHandler';
 
 // Initialize Firebase app
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore
-const firestore = getFirestore(app);
 const storage = getStorage(app);
-
-// Connect to emulators in development mode
-if (import.meta.env.DEV && typeof window !== 'undefined') {
-  // Use a more robust connection approach
-  const connectToEmulators = async () => {
-    try {
-      // Check if we're already connected to avoid duplicate connections
-      if ((firestore as any)._delegate._databaseId?.projectId?.includes('demo-')) {
-        console.log('✅ Already connected to Firestore emulator');
-        return;
-      }
-
-      // Test if emulator is reachable before connecting
-      const testConnection = await fetch('http://127.0.0.1:8081', { 
-        method: 'GET',
-        signal: AbortSignal.timeout(2000) // 2 second timeout
-      }).catch(() => null);
-
-      if (!testConnection) {
-        throw new Error('Emulator not reachable');
-      }
-
-      // Connect to Firestore emulator
-      connectFirestoreEmulator(firestore, '127.0.0.1', 8081);
-      console.log('✅ Connected to Firestore emulator at 127.0.0.1:8081');
-      
-      // Connect to Storage emulator  
-      connectStorageEmulator(storage, '127.0.0.1', 9198);
-      console.log('✅ Connected to Storage emulator at 127.0.0.1:9198');
-      
-      console.log('🔥 Firebase emulators connected successfully');
-    } catch (error) {
-      console.warn('⚠️ Failed to connect to Firebase emulators:', error);
-      console.log('📡 Using production Firebase services');
-      console.log('💡 To use emulators, make sure Firebase emulators are running:');
-      console.log('   firebase emulators:start --only firestore,storage');
-    }
-  };
-  
-  // Connect to emulators asynchronously
-  connectToEmulators();
-}
 
 // Add audit log function
 export const addAuditLogToFirebase = async (auditLogData: any) => {
