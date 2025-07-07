@@ -505,8 +505,25 @@ const TyreManagement: React.FC = () => {
               options={[
                 { label: 'All Sizes', value: '' },
                 ...getUniqueTyreSizes().map(size => ({ label: size, value: size }))
+              ]}
+            />
+            
             <Select
               label="Location"
+              value={filters.location}
+              onChange={(value) => handleFilterChange('location', value)}
+              options={[
+                { label: 'All Locations', value: '' },
+                { label: 'Vichels Store', value: 'Vichels Store' },
+                { label: 'Holding Bay', value: 'Holding Bay' },
+                { label: 'RFR', value: 'RFR' },
+                { label: 'Scrapped', value: 'Scrapped' }
+              ]}
+            />
+          </div>
+        </CardContent>
+      </Card>
+      
       <TyreManagementView />
       
       {/* Inventory Table */}
