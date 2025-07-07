@@ -34,7 +34,6 @@ interface ManualDieselEntryModalProps {
 const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({ 
   isOpen,
   onClose
-}) => {
   const { addDieselRecord, trips, dieselRecords, connectionStatus } = useAppContext();
   
   const [formData, setFormData] = useState({
@@ -696,4 +695,4 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
   );
 };
 
-export default ManualDiesel
+export default ManualDieselEntryModal;
