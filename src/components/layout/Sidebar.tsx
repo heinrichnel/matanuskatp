@@ -12,7 +12,8 @@ import {
   Users,
   Wrench,
   Bell,
-  Plus
+  Plus,
+  Target
 } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
