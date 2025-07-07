@@ -6,16 +6,21 @@ import {
   ChevronDown,
   ChevronRight,
   CircleDot,
+  ChevronDown,
+  ChevronRight,
+  CircleDot,
   DollarSign,
   FileSpreadsheet,
   FileText,
   Flag,
-  Folder,
+  Map,
   Settings,
   Shield,
   Truck,
   User,
-  Users
+  Users,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
