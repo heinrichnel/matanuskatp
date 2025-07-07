@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
-import { Wrench, FileText, Clipboard, AlertTriangle, Info, Truck } from 'lucide-react';
+import { Wrench, FileText, Clipboard, AlertTriangle, Info, Truck, Flag } from 'lucide-react';
 import ActionLog from '../components/actionlog/ActionLog';
 import TyreManagement from '../components/workshop/TyreManagement';
 import InspectionManagement from '../components/workshop/InspectionManagement';
