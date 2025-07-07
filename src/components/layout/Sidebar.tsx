@@ -44,39 +44,10 @@ const Sidebar: FC<HeaderProps> = ({
       label: 'Operations',
       items: [
         {
-          id: 'workshop',
+          id: 'workshop', 
           label: 'Workshop',
           icon: Wrench,
-          path: 'workshop?tab=dashboard',
-          children: [
-            {
-              id: 'inspection',
-              label: 'Inspection',
-              icon: Clipboard,
-              children: [
-                { id: 'workshop-active-inspections', label: 'Active Inspections', path: 'workshop?tab=inspections' },
-                { id: 'workshop-completed-inspections', label: 'Completed Inspections', path: 'workshop?tab=inspections' },
-                { id: 'workshop-inspection-templates', label: 'Inspection Templates', path: 'workshop?tab=inspections' }
-              ]
-            },
-            {
-              id: 'jobcards',
-              label: 'Job Cards',
-              icon: FileText,
-              children: [
-                { id: 'workshop-open-jobcards', label: 'Open Job Cards', path: 'workshop?tab=jobcards' },
-                { id: 'workshop-jobcard-templates', label: 'Job Card Templates', path: 'workshop?tab=jobcards' }
-              ]
-            },
-            {
-              id: 'faults',
-              label: 'Faults',
-              icon: AlertTriangle,
-              children: [
-                { id: 'workshop-fault-list', label: 'Fault List', path: 'workshop?tab=faults' }
-              ]
-            }
-          ]
+          path: 'workshop?tab=dashboard'
         }
       ]
     },
@@ -96,16 +67,8 @@ const Sidebar: FC<HeaderProps> = ({
       items: [
         { id: 'fleet', label: 'Fleet Overview', icon: Truck },
         { id: 'driver-behavior', label: 'Driver Management', icon: Shield },
+        { id: 'diesel-dashboard', label: 'Diesel Management', icon: FileText },
         { id: 'missed-loads', label: 'Missed Loads', icon: FileText }
-      ]
-    },
-    {
-      id: 'reports',
-      label: 'Reporting',
-      items: [
-        { id: 'reports', label: 'Reports & Exports', icon: BarChart3 },
-        { id: 'invoice-aging', label: 'Invoice Aging', icon: FileText },
-        { id: 'customer-retention', label: 'Customer Retention', icon: Users }
       ]
     },
     {
@@ -114,12 +77,30 @@ const Sidebar: FC<HeaderProps> = ({
       items: [
         { id: 'notifications', label: 'Notifications', icon: Bell },
         { id: 'settings', label: 'Settings', icon: Settings },
-        { id: 'audit-log', label: 'Audit Log', icon: FileText }
+        { id: 'customer-retention', label: 'Customer Retention', icon: Users },
+        { id: 'technician-leaderboard', label: 'Technician Performance', icon: Award }
+      ]
+    },
+    {
+      id: 'maintenance',
+      label: 'Maintenance',
+      items: [
+        { id: 'workshop-fleet', label: 'Fleet Maintenance', path: 'workshop?tab=fleet', icon: Truck },
+        { id: 'workshop-tires', label: 'Tyre Management', path: 'workshop?tab=tires', icon: Target },
+        { id: 'workshop-inspections', label: 'Inspections', path: 'workshop?tab=inspections', icon: Clipboard },
+        { id: 'workshop-jobcards', label: 'Job Cards', path: 'workshop?tab=jobcards', icon: FileText }
+      ]
+    },
+    {
+      id: 'logs',
+      label: 'Logs & Actions',
+      items: [
+        { id: 'settings', label: 'Settings', icon: Settings }
       ]
     }
   ];
 
-  return (
+      label: 'Utilities',
     <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r shadow flex flex-col z-30">
       <div className="flex items-center justify-between px-6 py-4 border-b">
         <span className="text-xl font-bold text-primary-600 tracking-tight">TransportMat</span>

@@ -24,6 +24,7 @@ import InvoiceAgingDashboard from "./components/invoicing/InvoiceAgingDashboard"
 import CustomerRetentionDashboard from "./components/performance/CustomerRetentionDashboard";
 import MissedLoadsTracker from "./components/trips/MissedLoadsTracker";
 import DieselDashboard from "./components/diesel/DieselDashboard";
+import DieselTabbedDashboard from "./components/diesel/DieselTabbedDashboard";
 import DriverBehaviorPage from "./pages/DriverBehaviorPage";
 import ActionLog from "./components/actionlog/ActionLog";
 import AuditLogPage from "./pages/AuditLogPage";
@@ -106,6 +107,7 @@ const App: React.FC = () => {
                 {/* Fleet Management Section */}
                 <Route path="fleet" element={<FleetManagementPage />} />
                 <Route path="driver-behavior" element={<DriverBehaviorPage />} />
+                <Route path="diesel-dashboard" element={<DieselTabbedDashboard />} />
                 <Route path="missed-loads" element={<MissedLoadsTracker />} />
                 {/* Map view is now integrated into FleetManagementPage */}
                 
@@ -121,10 +123,8 @@ const App: React.FC = () => {
                 {/* System Section */}
                 <Route path="notifications" element={<Notifications />} />
                 <Route path="settings" element={<Settings />} />
-                <Route path="audit-log" element={<AuditLogPage />} />
                 {/* Legacy maps route should redirect to the new tabbed view */}
                 <Route path="maps" element={<Navigate to="/fleet?tab=maps" replace />} />
-                <Route path="diesel-dashboard" element={<DieselDashboard />} />
                 
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
