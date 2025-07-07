@@ -4,6 +4,7 @@ import { Wrench, FileText, Clipboard, AlertTriangle, Info, Truck, Flag as FlagIc
 import ActionLog from '../components/actionlog/ActionLog';
 import TyreManagement from '../components/workshop/TyreManagement';
 import InspectionManagement from '../components/workshop/InspectionManagement';
+import FleetTable from '../components/workshop/FleetTable';
 
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
@@ -59,6 +60,10 @@ const WorkshopPage = () => {
           <TabsTrigger value="tires" className="flex items-center gap-2">
             <Info className="w-4 h-4" />
             <span>Tyre Management</span>
+          </TabsTrigger>
+          <TabsTrigger value="fleet" className="flex items-center gap-2">
+            <Truck className="w-4 h-4" />
+            <span>Fleet Management</span>
           </TabsTrigger>
           <TabsTrigger value="actions" className="flex items-center gap-2">
             <FlagIcon className="w-4 h-4" />
