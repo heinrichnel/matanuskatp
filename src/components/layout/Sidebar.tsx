@@ -1,6 +1,7 @@
 import { FC, useState } from 'react';
 import {
   Activity,
+  Bell,
   Clipboard, 
   CheckCircle, 
   BarChart3,
@@ -28,7 +29,6 @@ import {
   Warehouse,
   User,
   Map,
-  Award,
   DollarSign,
   List
 } from 'lucide-react';
