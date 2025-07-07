@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
-import { Wrench, FileText, Clipboard, AlertTriangle, Info, Truck, Flag } from 'lucide-react';
+import { Wrench, FileText, Clipboard, AlertTriangle, Info, Truck, Flag as FlagIcon } from 'lucide-react';
 import ActionLog from '../components/actionlog/ActionLog';
 import TyreManagement from '../components/workshop/TyreManagement';
 import InspectionManagement from '../components/workshop/InspectionManagement';
@@ -67,7 +67,7 @@ const WorkshopPage: React.FC = () => {
             <span>Fleet Management</span>
           </TabsTrigger>
           <TabsTrigger value="actions" className="flex items-center gap-2">
-            <Flag className="w-4 h-4" />
+            <FlagIcon className="w-4 h-4" />
             <span>Action Log</span>
           </TabsTrigger>
         </TabsList>
