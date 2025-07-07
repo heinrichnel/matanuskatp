@@ -21,7 +21,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
   onEditEvent,
   onSyncNow
 }) => {
-  const { driverBehaviorEvents, getAllDriversPerformance } = useAppContext();
+  const { driverBehaviorEvents, getAllDriversPerformance, isLoading } = useAppContext();
   
   const [selectedDriver, setSelectedDriver] = useState<string>('');
   const [selectedEventType, setSelectedEventType] = useState<string>('');
@@ -152,9 +152,10 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
         <div className="flex space-x-2">
           <Button
             onClick={onAddEvent}
-            icon={<Plus className="w-4 h-4" />}
+            disabled={isSyncing || isLoading.importDriverBehavior}
+            isLoading={isLoading.importDriverBehavior}
           >
-            Record Behavior Event
+            {isSyncing || isLoading.importDriverBehavior ? 'Syncing...' : 'Sync Now'}
           </Button>
           {onSyncNow && (
             <Button

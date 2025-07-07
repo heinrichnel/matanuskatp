@@ -38,7 +38,7 @@ import { formatDate } from '../../utils/helpers';
 
 
 const CARReportList: React.FC = () => {
-  const { carReports = [], deleteCARReport } = useAppContext();
+  const { carReports = [], deleteCARReport, driverBehaviorEvents } = useAppContext();
   
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -101,6 +101,14 @@ const CARReportList: React.FC = () => {
   const handleEditReport = (report: CARReport) => {
     setSelectedReport(report);
     setShowAddModal(true);
+  };
+  
+  // Find linked driver behavior events
+  const getLinkedDriverEvent = (carReport: CARReport) => {
+    if (carReport.referenceEventId) {
+      return driverBehaviorEvents.find(event => event.id === carReport.referenceEventId);
+    }
+    return undefined;
   };
   
   // Handle delete report
@@ -409,6 +417,13 @@ const CARReportList: React.FC = () => {
                         <div className="mb-3">
                           <p className="text-sm text-gray-500">Problem</p>
                           <p className="text-sm line-clamp-2">{report.problemIdentification}</p>
+                          
+                          {/* Show reference event if available */}
+                          {report.referenceEventId && getLinkedDriverEvent(report) && (
+                            <div className="mt-2 text-xs text-blue-600">
+                              Linked to driver event: {getLinkedDriverEvent(report)?.eventType} on {formatDate(getLinkedDriverEvent(report)?.eventDate || '')}
+                            </div>
+                          )}
                         </div>
                         
                         {report.completedAt && (

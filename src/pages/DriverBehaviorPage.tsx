@@ -18,7 +18,7 @@ const DriverBehaviorPage: React.FC = () => {
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [showCARForm, setShowCARForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<DriverBehaviorEvent | null>(null);
-  const { importDriverBehaviorEventsFromWebhook } = useAppContext();
+  const { importDriverBehaviorEventsFromWebhook, isLoading } = useAppContext();
 
   // Handle initiating CAR from event
   const handleInitiateCAR = (event: DriverBehaviorEvent) => {
@@ -29,10 +29,16 @@ const DriverBehaviorPage: React.FC = () => {
   // Manual sync handler
   const handleSyncNow = async () => {
     try {
+      setIsSyncing(true);
       const result = await importDriverBehaviorEventsFromWebhook();
-      alert(`Manual sync complete. Imported: ${result.imported}, Skipped: ${result.skipped}`);
+      if (result) {
+        alert(`Manual sync complete. Imported: ${result.imported}, Skipped: ${result.skipped}`);
+      } else {
+        alert('Manual sync completed but no data was returned.');
+      }
     } catch (error) {
-      alert('Manual sync failed. Please try again.');
+      console.error('Error during manual sync:', error);
+      alert(`Manual sync failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSyncing(false);
     }
@@ -68,9 +74,10 @@ const DriverBehaviorPage: React.FC = () => {
             onClick={handleSyncNow}
             icon={<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />}
             variant="outline"
-            disabled={isSyncing}
+            disabled={isSyncing || isLoading.importDriverBehavior}
+            isLoading={isLoading.importDriverBehavior}
           >
-            {isSyncing ? 'Syncing...' : 'Sync Now'}
+            {isSyncing || isLoading.importDriverBehavior ? 'Syncing...' : 'Sync Now'}
           </Button>
         </div>
       </div>

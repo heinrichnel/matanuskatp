@@ -1,4 +1,3 @@
-import { FC, useState } from 'react';
 import { Activity, AlertOctagon, AlertTriangle, BarChart3, BarChartIcon, Building, ChevronDown, ChevronRight, CircleDot, DollarSign, FileText, FileSpreadsheet, Flag, Hammer, MapPin, Settings, Shield, PenToolIcon as ToolIcon, User, Users, Wifi, WifiOff } from 'lucide-react'cIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
 

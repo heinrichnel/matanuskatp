@@ -99,10 +99,11 @@ export async function sendTripEvent(payload: object): Promise<object> {
  * Sends a driver behavior event to the specified webhook URL.
  *
  * @param {object} payload - The event data payload to send.
+ * @returns {Promise<{imported: number, skipped: number, message: string}>} - The JSON response from the server.
  * @returns {Promise<object>} - The JSON response from the server.
  * @throws {Error} - If the request fails or the server returns an error.
  */
-export async function sendDriverBehaviorEvent(payload: object): Promise<object> {
+export async function sendDriverBehaviorEvent(payload: object): Promise<{imported: number, skipped: number, message: string}> {
     console.log(`📤 Sending driver behavior event to webhook: ${DRIVER_BEHAVIOR_WEBHOOK_URL}`);
 
     try {
@@ -167,7 +168,7 @@ export async function sendDriverBehaviorEvent(payload: object): Promise<object> 
         }
 
         console.log(`✅ Driver behavior event sent successfully:`, responseData);
-        return responseData;
+        return responseData as {imported: number, skipped: number, message: string};
     } catch (error) {
         console.error('Failed to send driver behavior event:', error);
         // Re-throw with more diagnostic info
