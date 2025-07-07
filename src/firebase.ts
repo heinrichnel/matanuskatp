@@ -112,6 +112,22 @@ export async function updateTripInFirebase(tripId: string, tripData: Partial<Tri
   await setDoc(tripRef, { ...tripData, updatedAt: serverTimestamp() }, { merge: true });
 }
 
+// Function to update a diesel record in Firebase
+export async function updateDieselInFirebase(dieselId: string, dieselData: Partial<DieselConsumptionRecord>) {
+  try {
+    const dieselRef = doc(firestore, 'diesel', dieselId);
+    await setDoc(dieselRef, { 
+      ...dieselData, 
+      updatedAt: serverTimestamp() 
+    }, { merge: true });
+    console.log('Diesel record updated with ID:', dieselId);
+    return dieselId;
+  } catch (error) {
+    console.error('Error updating diesel record:', error);
+    throw error;
+  }
+}
+
 // Function to delete a trip from Firebase
 export async function deleteTripFromFirebase(tripId: string) {
   try {
