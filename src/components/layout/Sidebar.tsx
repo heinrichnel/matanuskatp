@@ -13,7 +13,8 @@ import {
   Wrench,
   Bell,
   Plus,
-  Target
+  Target,
+  User
 } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
@@ -81,27 +82,6 @@ const Sidebar: FC<HeaderProps> = ({
         { id: 'audit-log', label: 'Audit Log', icon: FileText }
       ]
     }
-  ];
-
-  const navItems = [
-    { id: 'add-trip', label: 'Add Trip', icon: Plus },
-    { id: 'ytd-kpis', label: 'YTD KPIs', icon: Target },
-    { id: 'dashboard', label: 'Dashboard', icon: Activity },
-    { id: 'active-trips', label: 'Active Trips', icon: Truck },
-    { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle },
-    { id: 'maps', label: 'Maps', icon: Map },
-    { id: 'flags', label: 'Flags & Investigations', icon: Flag },
-    { id: 'reports', label: 'Reports & Exports', icon: BarChart3 },
-    { id: 'invoice-aging', label: 'Invoice Aging', icon: Clock },
-    { id: 'customer-retention', label: 'Customer Retention', icon: Users },
-    { id: 'missed-loads', label: 'Missed Loads', icon: ClipboardList },
-    { id: 'diesel-dashboard', label: 'Diesel Dashboard', icon: Fuel },
-    { id: 'driver-behavior', label: 'Driver Behavior', icon: User },
-    { id: 'action-log', label: 'Action Log', icon: Upload },
-    { id: 'audit-log', label: 'Audit Log', icon: History },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'settings', label: 'Settings', icon: Settings },
-    { id: 'profile', label: 'Profile', icon: Shield }
   ];
 
   return (
