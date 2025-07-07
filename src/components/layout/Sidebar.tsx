@@ -57,6 +57,9 @@ const Sidebar: FC<HeaderProps> = ({
             { id: 'workshop-tires', label: 'Tyre Management', path: 'workshop?tab=tires' }
           ]
         }
+      ]
+    },
+    {
       id: 'trips',
       label: 'Trip Management',
       items: [
