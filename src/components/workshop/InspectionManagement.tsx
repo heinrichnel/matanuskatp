@@ -5,9 +5,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
 import { Clipboard, ClipboardCheck, FileText, Plus, Search, RefreshCw } from 'lucide-react';
 import InspectionList from './InspectionList';
 
-const InspectionManagement: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('active');
-  
+interface InspectionManagementProps {
+  status?: 'active' | 'completed' | 'templates';
+}
+
+const InspectionManagement: React.FC<InspectionManagementProps> = ({ status = 'active' }) => {
+  const [activeTab, setActiveTab] = useState(status);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -30,7 +34,7 @@ const InspectionManagement: React.FC = () => {
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'completed' | 'templates')}>
         <TabsList>
           <TabsTrigger value="active" className="flex items-center gap-2">
             <Clipboard className="w-4 h-4" />

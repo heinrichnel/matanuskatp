@@ -41,7 +41,7 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
 
   // Navigate to a new route
   const handleNavigate = (view: string) => {
-    // Handle special cases like workshop?tab=tires
+    // Handle special cases like workshop?tab=tyres
     if (view.includes('?')) {
       const [path, query] = view.split('?');
       navigate(`/${path}?${query}`);

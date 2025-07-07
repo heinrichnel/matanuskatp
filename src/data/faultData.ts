@@ -198,23 +198,23 @@ export const faultCategories: FaultCategory[] = [
   },
   {
     id: uuidv4(),
-    name: 'Tires',
-    description: 'Tire-related issues',
+    name: 'Tyres',
+    description: 'Tyre-related issues',
     subcategories: [
       {
         id: uuidv4(),
-        name: 'Tire Puncture',
-        description: 'Tire has puncture or damage',
+        name: 'Tyre Puncture',
+        description: 'Tyre has puncture or damage',
         typicalSeverity: 'medium',
-        typicalPartsNeeded: ['Tire', 'Patch Kit'],
+        typicalPartsNeeded: ['Tyre', 'Patch Kit'],
         estimatedRepairHours: 1
       },
       {
         id: uuidv4(),
         name: 'Tread Worn Below Minimum',
-        description: 'Tire tread depth below legal minimum',
+        description: 'Tyre tread depth below legal minimum',
         typicalSeverity: 'high',
-        typicalPartsNeeded: ['Tire'],
+        typicalPartsNeeded: ['Tyre'],
         estimatedRepairHours: 1
       },
       {

@@ -59,7 +59,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
     'Body',
     'Transmission',
     'Cooling',
-    'Tires',
+    'Tyres',
     'General'
   ];
   

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { AlertCircle } from "lucide-react";
-import { TIRE_BRANDS } from "@/data/tireData";
-import { TyreInventoryStats } from "./tyre/TyreInventoryStats";
-import { TyreInventoryFilters } from "./tyre/TyreInventoryFilters";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { AlertCircle } from 'lucide-react';
+import { TyreInventoryStats } from './TyreInventoryStats';
+import { TyreInventoryFilters } from './TyreInventoryFilters';
 
-interface TireStock {
+interface TyreStock {
   id: string;
   brand: string;
   model: string;
@@ -19,7 +18,7 @@ interface TireStock {
   location: string;
 }
 
-const SAMPLE_INVENTORY: TireStock[] = [
+const SAMPLE_INVENTORY: TyreStock[] = [
   {
     id: '1',
     brand: 'Michelin',
@@ -58,8 +57,8 @@ const SAMPLE_INVENTORY: TireStock[] = [
   }
 ];
 
-export const TireInventory: React.FC = () => {
-  const [inventory] = useState<TireStock[]>(SAMPLE_INVENTORY);
+export const TyreInventory: React.FC = () => {
+  const [inventory] = useState<TyreStock[]>(SAMPLE_INVENTORY);
   const [searchTerm, setSearchTerm] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
 
@@ -71,7 +70,7 @@ export const TireInventory: React.FC = () => {
     return matchesSearch && matchesBrand;
   });
 
-  const getStockStatus = (item: TireStock) => {
+  const getStockStatus = (item: TyreStock) => {
     if (item.quantity <= item.minStock) return 'low';
     if (item.quantity <= item.minStock * 1.5) return 'warning';
     return 'good';
@@ -99,11 +98,13 @@ export const TireInventory: React.FC = () => {
         <CardContent className="p-4">
           <TyreInventoryFilters
             searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
             brandFilter={brandFilter}
+            setBrandFilter={setBrandFilter}
             onSearchChange={setSearchTerm}
             onBrandChange={setBrandFilter}
             onAddStock={() => console.log('Add stock clicked')}
-            brands={TIRE_BRANDS}
+            brands={['Michelin', 'Bridgestone', 'Continental']}
           />
         </CardContent>
       </Card>

@@ -11,7 +11,7 @@ interface CardComponent extends React.FC<CardProps> {
   Footer: typeof CardFooter;
 }
 
-const Card: CardComponent = ({ children, className = '' }) => {
+export const Card: CardComponent = ({ children, className = '' }) => {
   return (
     <div className={`bg-white rounded-lg shadow-md overflow-hidden ${className}`}>
       {children}
@@ -20,30 +20,23 @@ const Card: CardComponent = ({ children, className = '' }) => {
 };
 
 interface CardHeaderProps {
-  title: React.ReactNode;
-  subtitle?: React.ReactNode;
-  icon?: React.ReactNode;
-  action?: React.ReactNode;
+  title?: React.ReactNode;
+  action?: React.ReactNode; // Added action prop to support custom actions
+  children?: React.ReactNode;
   className?: string;
 }
 
 export const CardHeader: React.FC<CardHeaderProps> = ({ 
   title, 
-  subtitle, 
-  icon,
-  action,
+  action, // Destructure the action prop
+  children, 
   className = '' 
 }) => {
   return (
     <div className={`px-6 py-4 border-b border-slate-200 flex justify-between items-center ${className}`}>
-      <div className="flex items-center gap-2">
-        {icon && <span className="text-xl">{icon}</span>}
-        <div>
-          <h3 className="text-xl font-semibold text-slate-800">{title}</h3>
-          {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
-        </div>
-      </div>
-      {action && <div>{action}</div>}
+      {title && <h3 className="text-xl font-semibold text-slate-800">{title}</h3>}
+      {action && <div>{action}</div>} {/* Render the action prop */}
+      {children}
     </div>
   );
 };
@@ -85,3 +78,12 @@ Card.Content = CardContent;
 Card.Footer = CardFooter;
 
 export default Card;
+
+interface CardTitleProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const CardTitle: React.FC<CardTitleProps> = ({ children, className }) => {
+  return <h4 className={className}>{children}</h4>;
+};

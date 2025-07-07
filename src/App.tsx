@@ -9,7 +9,7 @@ import Modal from "./components/ui/Modal";
 import FirestoreConnectionError from "./components/ui/FirestoreConnectionError";
 import { getConnectionStatus, onConnectionStatusChanged } from "./utils/firebaseConnectionHandler";
 import { Trip } from "./types";
-import MapsView from "./components/maps/MapsView";
+import { useAppContext } from "./context/AppContext";
 
 // Workshop Components
 import FleetTable from "./components/workshop/FleetTable";
@@ -33,11 +33,9 @@ import CurrencyFleetReport from "./components/reports/CurrencyFleetReport";
 import InvoiceAgingDashboard from "./components/invoicing/InvoiceAgingDashboard";
 import CustomerRetentionDashboard from "./components/performance/CustomerRetentionDashboard";
 import MissedLoadsTracker from "./components/trips/MissedLoadsTracker";
-import DieselDashboard from "./components/diesel/DieselDashboard";
 import DieselTabbedDashboard from "./components/diesel/DieselTabbedDashboard";
 import DriverBehaviorPage from "./pages/DriverBehaviorPage";
 import ActionLog from "./components/actionlog/ActionLog";
-import AuditLogPage from "./pages/AuditLogPage";
 import TripManagementPage from "./pages/TripManagementPage";
 import FleetManagementPage from "./pages/FleetManagementPage";
 import WorkshopPage from "./pages/WorkshopPage";
@@ -77,38 +75,6 @@ const PartsOrdering = () => (
     </div>
   </div>
 );
-
-// Workshop placeholders
-const QRGenerator = () => (
-  <div className="bg-white p-6 rounded-lg shadow">
-    <h2 className="text-2xl font-bold mb-4">QR Code Generator</h2>
-    <p className="text-gray-600">Generate QR codes for fleet vehicles and equipment.</p>
-    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-      <p className="text-blue-700">This module is under development and will be available in the next update.</p>
-    </div>
-  </div>
-);
-
-const WorkshopAnalytics = () => (
-  <div className="bg-white p-6 rounded-lg shadow">
-    <h2 className="text-2xl font-bold mb-4">Workshop Analytics Dashboard</h2>
-    <p className="text-gray-600">View comprehensive analytics for workshop operations, costs, and efficiency.</p>
-    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-      <p className="text-blue-700">This module is under development and will be available in the next update.</p>
-    </div>
-  </div>
-);
-
-const PartsOrdering = () => (
-  <div className="bg-white p-6 rounded-lg shadow">
-    <h2 className="text-2xl font-bold mb-4">Parts Ordering</h2>
-    <p className="text-gray-600">Manage parts ordering, suppliers, and purchase orders.</p>
-    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-      <p className="text-blue-700">This module is under development and will be available in the next update.</p>
-    </div>
-  </div>
-);
-const Profile = () => <div>Profile Page</div>;
   
 // Main App component with Router implementation
 const App: React.FC = () => {

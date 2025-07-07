@@ -1,9 +1,9 @@
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TyreReportGenerator } from "./tyre/TyreReportGenerator";
-import { TireCostAnalysis } from './TireCostAnalysis';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'; // Fixed casing
+import TyreReportGenerator from './tyre/TyreReportGenerator'; // Updated to default import
+import { TyreCostAnalysis } from './TyreCostAnalysis';
 
-export const TireReports: React.FC = () => {
+export const TyreReports: React.FC = () => {
   const handleGenerateReport = (type: string, dateRange: string, brand: string) => {
     console.log('Generating report:', { type, dateRange, brand });
     alert(`Generating ${type} report for ${dateRange} days`);
@@ -27,7 +27,7 @@ export const TireReports: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="cost-analysis">
-          <TireCostAnalysis />
+          <TyreCostAnalysis />
         </TabsContent>
       </Tabs>
     </div>

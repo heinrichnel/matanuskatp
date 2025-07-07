@@ -1,10 +1,9 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input, Select, TextArea } from "@/components/ui/FormElements";
-import { AlertTriangle, CheckCircle, Plus } from "lucide-react";
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select } from '@/components/ui/FormElements';
+import { Plus } from 'lucide-react';
 
 interface Fault {
   id: string;
@@ -18,7 +17,7 @@ interface Fault {
 }
 
 export const FaultManagement: React.FC = () => {
-  const [faults, setFaults] = React.useState<Fault[]>([]);
+  const [faults] = React.useState<Fault[]>([]);
   const [filterStatus, setFilterStatus] = React.useState('all');
   const [filterPriority, setFilterPriority] = React.useState('all');
 

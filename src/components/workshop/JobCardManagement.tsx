@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import { FileText, ClipboardCheck, Wrench, Plus, Search, Filter, SlidersHorizontal } from 'lucide-react';
+import { FileText, ClipboardCheck, Wrench, Plus, Search, Filter } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
 import JobCardKanbanBoard from './JobCardKanbanBoard';
 import JobCard from './JobCard';
 import Modal from '../ui/Modal';
 
-const JobCardManagement: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('open');
+interface JobCardManagementProps {
+  activeTab?: 'open' | 'completed' | 'kanban';
+}
+
+const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = 'open' }) => {
+  const [currentTab, setCurrentTab] = useState(activeTab);
   const [showJobCardModal, setShowJobCardModal] = useState(false);
 
   return (
@@ -28,7 +32,7 @@ const JobCardManagement: React.FC = () => {
         </div>
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <Tabs value={currentTab} onValueChange={(value) => setCurrentTab(value as 'open' | 'completed' | 'kanban')}>
         <TabsList>
           <TabsTrigger value="open" className="flex items-center gap-2">
             <Wrench className="w-4 h-4" />

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Inbox, CheckCircle, Clock, AlertTriangle, Plus, Settings } from 'lucide-react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import JobCardCard from './JobCardCard';
 import JobCard from './JobCard';
 import Modal from '../ui/Modal';
@@ -78,7 +78,6 @@ const mockJobCards = [
 
 const JobCardKanbanBoard: React.FC = () => {
   const [jobCards, setJobCards] = useState(mockJobCards);
-  const [selectedJobCard, setSelectedJobCard] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   
   // Function to group job cards by status
@@ -113,7 +112,7 @@ const JobCardKanbanBoard: React.FC = () => {
   
   // Open the job card modal
   const handleCardClick = (jobCardId: string) => {
-    setSelectedJobCard(jobCardId);
+    console.log('Card clicked:', jobCardId);
     setShowModal(true);
   };
   
@@ -150,12 +149,12 @@ const JobCardKanbanBoard: React.FC = () => {
             } />
             <Droppable droppableId="open">
               {(provided) => (
-                <CardContent 
-                  className="p-2 min-h-[300px]" 
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
-                  <div className="space-y-2">
+                <CardContent className="p-2 min-h-[300px]">
+                  <div 
+                    className="space-y-2"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                  >
                     {groupedJobCards.open.map((card, index) => (
                       <Draggable key={card.id} draggableId={card.id} index={index}>
                         {(provided, snapshot) => (
@@ -193,12 +192,12 @@ const JobCardKanbanBoard: React.FC = () => {
             } />
             <Droppable droppableId="in_progress">
               {(provided) => (
-                <CardContent 
-                  className="p-2 min-h-[300px]" 
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
-                  <div className="space-y-2">
+                <CardContent className="p-2 min-h-[300px]">
+                  <div 
+                    className="space-y-2"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                  >
                     {groupedJobCards.in_progress.map((card, index) => (
                       <Draggable key={card.id} draggableId={card.id} index={index}>
                         {(provided, snapshot) => (
@@ -236,12 +235,12 @@ const JobCardKanbanBoard: React.FC = () => {
             } />
             <Droppable droppableId="completed">
               {(provided) => (
-                <CardContent 
-                  className="p-2 min-h-[300px]" 
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
-                  <div className="space-y-2">
+                <CardContent className="p-2 min-h-[300px]">
+                  <div 
+                    className="space-y-2"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                  >
                     {groupedJobCards.completed.map((card, index) => (
                       <Draggable key={card.id} draggableId={card.id} index={index}>
                         {(provided, snapshot) => (
@@ -279,12 +278,12 @@ const JobCardKanbanBoard: React.FC = () => {
             } />
             <Droppable droppableId="closed">
               {(provided) => (
-                <CardContent 
-                  className="p-2 min-h-[300px]" 
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                >
-                  <div className="space-y-2">
+                <CardContent className="p-2 min-h-[300px]">
+                  <div 
+                    className="space-y-2"
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                  >
                     {groupedJobCards.closed && groupedJobCards.closed.map((card, index) => (
                       <Draggable key={card.id} draggableId={card.id} index={index}>
                         {(provided, snapshot) => (
@@ -319,7 +318,6 @@ const JobCardKanbanBoard: React.FC = () => {
         isOpen={showModal}
         onClose={() => {
           setShowModal(false);
-          setSelectedJobCard(null);
         }}
         title="Job Card Details"
         maxWidth="2xl"

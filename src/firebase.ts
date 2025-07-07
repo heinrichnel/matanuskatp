@@ -1,16 +1,12 @@
-import { initializeApp } from 'firebase/app';
 import { collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
-import { getFirestore, connectFirestoreEmulator, collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
-import { getStorage, connectStorageEmulator } from 'firebase/storage';
-import { firebaseConfig } from './firebaseConfig';
+import { getStorage } from 'firebase/storage';
+import { firebaseApp } from './firebaseConfig';
 import { DieselConsumptionRecord } from './types/diesel';
 import { Trip } from './types';
 import { firestore } from './utils/firebaseConnectionHandler';
 
-// Initialize Firebase app
-const app = initializeApp(firebaseConfig);
-
-const storage = getStorage(app);
+// Use the storage service
+const storage = getStorage(firebaseApp);
 
 // Add audit log function
 export const addAuditLogToFirebase = async (auditLogData: any) => {
@@ -154,10 +150,6 @@ export async function updateMissedLoadInFirebase(missedLoadId: string, missedLoa
     console.error('Error updating missed load:', error);
     throw error;
   }
-// Function to delete a trip from Firebase
-export async function deleteTripFromFirebase(tripId: string) {
-  const tripRef = doc(firestore, 'trips', tripId);
-  await deleteDoc(tripRef);
 }
 // Firestore listener for real-time updates
 export function listenToDriverBehaviorEvents(callback: (events: any[]) => void) {
@@ -171,4 +163,4 @@ export function listenToDriverBehaviorEvents(callback: (events: any[]) => void) 
 
 export { firestore, storage };
 export { firestore as db };
-export default app;
+export default firebaseApp;

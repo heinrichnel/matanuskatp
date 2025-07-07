@@ -1,7 +1,7 @@
 /*
  KILO CODE RATIONALE // FILE: src/components/trips/TripForm.tsx
  --------------------------------------------------------------------------------
- // WHAT: Refactored the entire component's state management from multiple `useState` hooks to a single, robust `useReducer` hook.
+ // WHAT: Refactored the entyre component's state management from multiple `useState` hooks to a single, robust `useReducer` hook.
  // WHY:  Centralizing state logic into a reducer eliminates a class of bugs caused by out-of-sync state updates. Previously, `formData`, `errors`, and `touched` were managed separately, leading to redundant validation calls in `useEffect` and `handleSubmit`. The reducer ensures that state transitions are atomic and predictable. For example, changing a field and validating the form are now explicit, sequential actions, preventing race conditions and unnecessary re-renders. The `isSubmitting` state is now intrinsically part of the state machine, making the UI more reliable.
  // PREVENTION: This hardened structure prevents future developers from accidentally introducing state inconsistencies. Logic for validation, submission, and state changes is co-located and easier to audit. It also improves error handling by preserving form data on submission failure, fulfilling a key mission directive.
  */

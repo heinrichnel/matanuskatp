@@ -1,46 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    match /inspections/{inspectionId} {
-      allow read, write: if isInspector();
-      allow update: if isSupervisor();
-
-      match /items/{itemId} {
-        allow read, write: if isInspector();
-      }
-    }
-
-    match /faults/{faultId} {
-      allow read, write: if isInspector() || isSupervisor();
-      allow update: if isSupervisor();
-    }
-
-    match /jobCards/{jobCardId} {
-      allow read: if isInspector() || isSupervisor() || isTechnician();
-      allow write: if isSupervisor();
-      allow update: if isTechnician() || isSupervisor();
-    }
-
-    match /fleet/{fleetId} {
-      allow read: if true;
-      allow write: if isSupervisor();
-    }
-
-    match /users/{userId} {
-      allow read: if request.auth.uid == userId;
-    }
-
-    function isInspector() {
-      return request.auth.token.role == "inspector";
-    }
-
-    function isSupervisor() {
-      return request.auth.token.role == "supervisor";
-    }
-
-    function isTechnician() {
-      return request.auth.token.role == "technician";
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }

@@ -1,16 +1,9 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { VehicleSelector } from "@/components/common/VehicleSelector";
-import { 
-  CircleDot, 
-  AlertTriangle, 
-  CheckCircle, 
-  Gauge,
-  Wrench,
-  Eye
-} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/Button';
+import { VehicleSelector } from '@/components/common/VehicleSelector';
+import { CircleDot, Wrench, Eye } from "lucide-react";
 import { 
   getTyresByVehicle, 
   getTyreByPosition, 
@@ -83,7 +76,7 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Visual Vehicle Diagram */}
           <Card>
-            <CardHeader>
+            <CardHeader title="Vehicle Details">
               <CardTitle>
                 Vehicle Tyre Layout - {vehicle.fleetNo}
                 <div className="text-sm text-gray-600 font-normal">

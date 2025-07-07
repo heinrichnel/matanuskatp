@@ -1,55 +1,84 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/FormElements";
-import { Badge } from "@/components/ui/badge";
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  DollarSign, 
-  BarChart3,
-  Download
-} from "lucide-react";
-import { SAMPLE_TIRES, TIRE_BRANDS, TIRE_PATTERNS, Tire } from "@/data/tireData";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Select } from '@/components/ui/FormElements';
+import { Badge } from '@/components/ui/badge';
+import { SAMPLE_TYRES, TYRE_BRANDS, TYRE_PATTERNS, Tyre } from '@/data/tyreData';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DollarSign, TrendingUp, TrendingDown, BarChart3, Download } from 'lucide-react';
 
-interface TireCostMetrics {
+// DEBUG ONLY - Log import diagnostics
+useEffect(() => {
+  console.log('=== TYRE COMPONENT IMPORT DIAGNOSTICS ===');
+  
+  // Check UI component imports
+  console.log('UI Components:');
+  try {
+    console.log('Card imported:', !!Card);
+    console.log('Button imported:', !!Button);
+    console.log('Badge imported:', !!Badge);
+    console.log('Table imported:', !!Table);
+  } catch (error) {
+    console.error('UI component import error:', error);
+  }
+  
+  // Check data imports
+  console.log('Data imports:');
+  try {
+    console.log('SAMPLE_TYRES:', SAMPLE_TYRES ? SAMPLE_TYRES.length : 'undefined');
+    console.log('TYRE_BRANDS:', TYRE_BRANDS ? TYRE_BRANDS.length : 'undefined');
+    console.log('TYRE_PATTERNS:', TYRE_PATTERNS ? TYRE_PATTERNS.length : 'undefined');
+  } catch (error) {
+    console.error('Data import error:', error);
+  }
+  
+  // Log expected vs actual names
+  console.log('Import names check:');
+  try {
+    const dataModule = require('@/data/tyreData');
+    console.log('Available exports:', Object.keys(dataModule));
+  } catch (error) {
+    console.error('Module inspection error:', error);
+  }
+}, []);
+
+interface TyreCostMetrics {
   brand: string;
   pattern: string;
   averageCost: number;
   averageLifespan: number;
   costPerKm: number;
-  totalTires: number;
+  totalTyres: number;
   recommendationScore: number;
 }
 
-export const TireCostAnalysis: React.FC = () => {
+export const TyreCostAnalysis: React.FC = () => {
   const [filterBrand, setFilterBrand] = useState('');
   const [filterPattern, setFilterPattern] = useState('');
   const [sortBy, setSortBy] = useState('costPerKm');
 
-  const calculateTireMetrics = (): TireCostMetrics[] => {
+  const calculateTyreMetrics = (): TyreCostMetrics[] => {
     const metricsMap = new Map<string, {
       costs: number[];
       lifespans: number[];
-      tires: Tire[];
+      tyres: Tyre[];
     }>();
 
-    SAMPLE_TIRES.forEach(tire => {
-      const key = `${tire.brand}-${tire.pattern}`;
+    SAMPLE_TYRES.forEach((tyre: Tyre) => {
+      const key = `${tyre.brand}-${tyre.pattern}`;
       if (!metricsMap.has(key)) {
-        metricsMap.set(key, { costs: [], lifespans: [], tires: [] });
+        metricsMap.set(key, { costs: [], lifespans: [], tyres: [] });
       }
       
       const group = metricsMap.get(key)!;
-      group.costs.push(tire.purchaseDetails.cost);
-      group.tires.push(tire);
+      group.costs.push(tyre.purchaseDetails.cost);
+      group.tyres.push(tyre);
       
-      const estimatedLifespan = estimateTireLifespan(tire);
+      const estimatedLifespan = estimateTyreLifespan(tyre);
       group.lifespans.push(estimatedLifespan);
     });
 
-    const metrics: TireCostMetrics[] = [];
+    const metrics: TyreCostMetrics[] = [];
     metricsMap.forEach((data, key) => {
       const [brand, pattern] = key.split('-');
       const averageCost = data.costs.reduce((sum, cost) => sum + cost, 0) / data.costs.length;
@@ -64,7 +93,7 @@ export const TireCostAnalysis: React.FC = () => {
         averageCost: Math.round(averageCost),
         averageLifespan: Math.round(averageLifespan),
         costPerKm: Math.round(costPerKm * 100) / 100,
-        totalTires: data.tires.length,
+        totalTyres: data.tyres.length,
         recommendationScore: Math.round(recommendationScore)
       });
     });
@@ -72,9 +101,9 @@ export const TireCostAnalysis: React.FC = () => {
     return metrics;
   };
 
-  const estimateTireLifespan = (tire: Tire): number => {
+  const estimateTyreLifespan = (tyre: Tyre): number => {
     const newTreadDepth = 20;
-    const currentTread = tire.condition.treadDepth;
+    const currentTread = tyre.condition.treadDepth;
     const minimumTread = 3;
     
     const usedTread = newTreadDepth - currentTread;
@@ -88,7 +117,7 @@ export const TireCostAnalysis: React.FC = () => {
     return Math.max(remainingLife, 0);
   };
 
-  const metrics = calculateTireMetrics();
+  const metrics = calculateTyreMetrics();
 
   const filteredMetrics = metrics.filter(metric => {
     const brandMatch = !filterBrand || metric.brand === filterBrand;
@@ -120,9 +149,9 @@ export const TireCostAnalysis: React.FC = () => {
 
   const exportData = () => {
     const csvContent = [
-      ['Brand', 'Pattern', 'Avg Cost (R)', 'Est. Lifespan (km)', 'Cost per KM (R)', 'Total Tires', 'Score'].join(','),
+      ['Brand', 'Pattern', 'Avg Cost (R)', 'Est. Lifespan (km)', 'Cost per KM (R)', 'Total Tyres', 'Score'].join(','),
       ...sortedMetrics.map(m => 
-        [m.brand, m.pattern, m.averageCost, m.averageLifespan, m.costPerKm, m.totalTires, m.recommendationScore].join(',')
+        [m.brand, m.pattern, m.averageCost, m.averageLifespan, m.costPerKm, m.totalTyres, m.recommendationScore].join(',')
       )
     ].join('\n');
 
@@ -130,7 +159,7 @@ export const TireCostAnalysis: React.FC = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'tire-cost-analysis.csv';
+    a.download = 'tyre-cost-analysis.csv';
     a.click();
   };
 
@@ -160,7 +189,7 @@ export const TireCostAnalysis: React.FC = () => {
               onChange={setFilterBrand}
               options={[
                 { label: 'All Brands', value: '' },
-                ...TIRE_BRANDS.map(brand => ({ label: brand, value: brand }))
+              ...TYRE_BRANDS.map((brand: string) => ({ label: brand, value: brand }))
               ]}
             />
             <Select
@@ -169,7 +198,7 @@ export const TireCostAnalysis: React.FC = () => {
               onChange={setFilterPattern}
               options={[
                 { label: 'All Patterns', value: '' },
-                ...TIRE_PATTERNS.map(pattern => ({ label: pattern, value: pattern }))
+                ...TYRE_PATTERNS.map((pattern: string) => ({ label: pattern, value: pattern }))
               ]}
             />
             <Select
@@ -272,7 +301,7 @@ export const TireCostAnalysis: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedMetrics.map((metric, index) => (
+              {sortedMetrics.map((metric) => (
                 <TableRow key={`${metric.brand}-${metric.pattern}`}>
                   <TableCell className="font-medium">{metric.brand}</TableCell>
                   <TableCell>{metric.pattern}</TableCell>
@@ -281,7 +310,7 @@ export const TireCostAnalysis: React.FC = () => {
                   <TableCell className="font-semibold text-blue-600">
                     R{metric.costPerKm}
                   </TableCell>
-                  <TableCell>{metric.totalTires}</TableCell>
+                  <TableCell>{metric.totalTyres}</TableCell>
                   <TableCell>{getRecommendationBadge(metric.recommendationScore)}</TableCell>
                 </TableRow>
               ))}

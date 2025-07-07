@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Client, createNewClient, CLIENT_TYPES, CLIENT_STATUSES, CLIENT_INDUSTRIES } from '../../types/client';
+import { Client, CLIENT_TYPES, CLIENT_STATUSES, CLIENT_INDUSTRIES } from '../../types/client';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Input, Select, TextArea } from '../ui/FormElements';
-import { Save, X, Plus, Building } from 'lucide-react';
+import { Save, X, Building } from 'lucide-react';
 import { useAppContext } from '../../context/AppContext';
 
 interface ClientFormProps {

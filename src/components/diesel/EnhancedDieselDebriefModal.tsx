@@ -703,7 +703,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
                       <li>Encourage smooth acceleration and deceleration</li>
                       <li>Maintain consistent cruising speed on highways</li>
                       <li>Avoid excessive idling when stationary</li>
-                      <li>Ensure correct tire pressure for optimal rolling resistance</li>
+                      <li>Ensure correct tyre pressure for optimal rolling resistance</li>
                       <li>Check for proper load distribution to reduce aerodynamic drag</li>
                       <li>Consider route optimization to avoid steep gradients or traffic congestion</li>
                     </ul>
