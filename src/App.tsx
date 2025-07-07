@@ -99,10 +99,16 @@ const App: React.FC = () => {
                 <Route path="dashboard" element={<Navigate to="/" replace />} />
                 
                 {/* Trip Management Section */}
-                <Route path="trips" element={<TripManagementPage />} />
-                <Route path="active-trips" element={<ActiveTrips />} />
-                <Route path="completed-trips" element={<CompletedTrips />} />
-                <Route path="flags" element={<FlagsInvestigations />} />
+                <Route path="trips" element={<TripManagementPage />}>
+                  <Route index element={<ActiveTrips />} />
+                  <Route path="active" element={<ActiveTrips />} />
+                  <Route path="completed" element={<CompletedTrips />} />
+                  <Route path="flags" element={<FlagsInvestigations />} />
+                </Route>
+                {/* Redirect legacy routes to new nested routes */}
+                <Route path="active-trips" element={<Navigate to="/trips?tab=active" replace />} />
+                <Route path="completed-trips" element={<Navigate to="/trips?tab=completed" replace />} />
+                <Route path="flags" element={<Navigate to="/trips?tab=flags" replace />} />
                 
                 {/* Fleet Management Section */}
                 <Route path="fleet" element={<FleetManagementPage />} />

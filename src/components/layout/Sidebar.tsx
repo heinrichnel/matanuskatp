@@ -43,21 +43,36 @@ const Sidebar: FC<HeaderProps> = ({
       id: 'trips',
       label: 'Trip Management',
       items: [
-        { id: 'trips', label: 'All Trips', icon: Truck, path: 'trips?tab=active' },
-        { id: 'active-trips', label: 'Active Trips', icon: Truck, path: 'trips?tab=active' },
-        { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle, path: 'trips?tab=completed' },
-        { id: 'flags', label: 'Flags & Investigations', icon: Flag, path: 'trips?tab=flags' }
+        { 
+          id: 'trips', 
+          label: 'Trip Management', 
+          icon: Truck,
+          path: 'trips',
+          children: [
+            { id: 'active-trips', label: 'Active Trips', icon: Truck, path: 'trips?tab=active' },
+            { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle, path: 'trips?tab=completed' },
+            { id: 'flags', label: 'Flags & Investigations', icon: Flag, path: 'trips?tab=flags' }
+          ]
+        }
       ]
     },
     {
       id: 'fleet',
       label: 'Fleet Management',
       items: [
-        { id: 'fleet', label: 'Fleet Overview', icon: Truck, path: 'fleet?tab=overview' },
-        { id: 'driver-behavior', label: 'Driver Management', icon: Shield, path: 'fleet?tab=drivers' },
-        { id: 'diesel-dashboard', label: 'Diesel Management', icon: Target, path: 'fleet?tab=diesel' },
-        { id: 'maps', label: 'Maps', icon: Map, path: 'fleet?tab=maps' },
-        { id: 'missed-loads', label: 'Missed Loads', icon: FileText, path: 'fleet?tab=missed-loads' }
+        { 
+          id: 'fleet', 
+          label: 'Fleet Management', 
+          icon: Truck, 
+          path: 'fleet?tab=overview',
+          children: [
+            { id: 'fleet-overview', label: 'Fleet Overview', icon: Truck, path: 'fleet?tab=overview' },
+            { id: 'driver-behavior', label: 'Driver Management', icon: Shield, path: 'fleet?tab=drivers' },
+            { id: 'diesel-dashboard', label: 'Diesel Management', icon: Target, path: 'fleet?tab=diesel' },
+            { id: 'maps', label: 'Maps', icon: Map, path: 'fleet?tab=maps' },
+            { id: 'missed-loads', label: 'Missed Loads', icon: FileText, path: 'fleet?tab=missed-loads' }
+          ]
+        }
       ]
     },
     {
