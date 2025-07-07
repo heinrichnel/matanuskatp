@@ -124,7 +124,7 @@ const App: React.FC = () => {
                 <Route path="notifications" element={<Notifications />} />
                 <Route path="settings" element={<Settings />} />
                 {/* Legacy maps route should redirect to the new tabbed view */}
-                <Route path="maps" element={<Navigate to="/fleet?tab=maps" replace />} />
+                <Route path="maps" element={<Navigate to="/fleet" replace />} />
                 
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />

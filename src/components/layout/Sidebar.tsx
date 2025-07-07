@@ -17,7 +17,8 @@ import {
   Plus,
   Target,
   Clock,
-  User
+  User,
+  Award
 } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
@@ -36,7 +37,8 @@ const Sidebar: FC<HeaderProps> = ({
     {
       id: 'main',
       items: [
-        { id: 'dashboard', label: 'Dashboard', icon: Activity }
+        { id: 'dashboard', label: 'Dashboard', icon: Activity },
+        { id: 'audit-log', label: 'Audit Log', icon: FileText }
       ]
     },
     {
@@ -85,8 +87,18 @@ const Sidebar: FC<HeaderProps> = ({
       id: 'maintenance',
       label: 'Maintenance',
       items: [
-        { id: 'workshop-fleet', label: 'Fleet Maintenance', path: 'workshop?tab=fleet', icon: Truck },
-        { id: 'workshop-tires', label: 'Tyre Management', path: 'workshop?tab=tires', icon: Target },
+        {
+          id: 'workshop',
+          label: 'Workshop',
+          path: 'workshop?tab=dashboard',
+          icon: Wrench
+        },
+        { 
+          id: 'workshop-tires', 
+          label: 'Tyre Management', 
+          path: 'workshop?tab=tires', 
+          icon: Target 
+        },
         { id: 'workshop-inspections', label: 'Inspections', path: 'workshop?tab=inspections', icon: Clipboard },
         { id: 'workshop-jobcards', label: 'Job Cards', path: 'workshop?tab=jobcards', icon: FileText }
       ]
@@ -95,13 +107,8 @@ const Sidebar: FC<HeaderProps> = ({
       id: 'logs',
       label: 'Logs & Actions',
       items: [
-        { id: 'settings', label: 'Settings', icon: Settings }
+        { id: 'action-log', label: 'Action Log', path: 'workshop?tab=actions', icon: CheckCircle }
       ]
-    },
-    {
-      id: 'utilities',
-      label: 'Utilities',
-      items: []
     }
   ];
 
