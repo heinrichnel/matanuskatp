@@ -48,7 +48,8 @@ export const connectToEmulator = async (): Promise<boolean> => {
     if (!emulatorAvailable) {
       console.warn('⚠️ Firestore emulator is not accessible on 127.0.0.1:8081');
       console.warn('💡 Please ensure the emulator is running: firebase emulators:start --only firestore');
-      setConnectionStatus('error', new Error('Firestore emulator is not accessible'));
+      console.warn('🔧 Continuing with production Firebase configuration');
+      setConnectionStatus('connected'); // Allow app to continue with production Firebase
       return false;
     }
 
@@ -69,7 +70,8 @@ export const connectToEmulator = async (): Promise<boolean> => {
       return true;
     }
     
-    setConnectionStatus('error', error as Error);
+    console.warn('🔧 Emulator connection failed, continuing with production Firebase');
+    setConnectionStatus('connected'); // Allow app to continue with production Firebase
     return false;
   }
 };
@@ -148,12 +150,12 @@ export const initializeConnectionMonitoring = async () => {
   const emulatorConnected = await connectToEmulator();
   
   if (!emulatorConnected && import.meta.env.DEV) {
-    console.warn('⚠️ Emulator not connected - using production Firebase');
-    console.warn('🔧 To use emulator, run: firebase emulators:start --only firestore');
+    console.info('📡 Emulator not connected - using production Firebase');
+    console.info('💡 To use emulator, run: firebase emulators:start --only firestore,storage');
   }
   
-  // Set status to connected if everything is working
-  if (navigator.onLine && (emulatorConnected || !import.meta.env.DEV)) {
+  // Set status to connected if we're online (regardless of emulator status)
+  if (navigator.onLine) {
     setConnectionStatus('connected');
   }
 };

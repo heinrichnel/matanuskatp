@@ -24,11 +24,12 @@ const initializeApp = async () => {
       } else {
         console.log('⚠️ Firebase emulators status:', status);
         console.log('💡 Run "firebase emulators:start --only firestore,storage" to use emulators');
-        console.log('🔧 If emulators are already running, check:');
+      console.log('💡 Run "firebase emulators:start --only firestore,storage" to use local emulators');
         console.log('   - Port 8081 (Firestore) is not in use');
         console.log('   - Port 9198 (Storage) is not in use');
         console.log('   - Firewall settings allow local connections');
       }
+      console.log('📡 App will continue using production Firebase configuration');
     }
     
     // Render the app
@@ -42,11 +43,7 @@ const initializeApp = async () => {
     console.error('❌ Failed to initialize application:', error);
     
     // Show user-friendly error message
-    if (error instanceof Error && error.message.includes('emulator')) {
-      console.error('🔧 Emulator Connection Issue:');
-      console.error('   The Firebase emulator is not running or accessible.');
-      console.error('   Please run: firebase emulators:start --only firestore,storage');
-    }
+    console.error('🔧 Application initialization failed, but attempting to continue...');
     
     // Render error state
     ReactDOM.createRoot(document.getElementById('root')!).render(
