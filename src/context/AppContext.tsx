@@ -1448,6 +1448,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }];
   };
 
+  // Helper function to calculate total costs
+  const calculateTotalCosts = (costs: CostEntry[]): number => {
+    return costs.reduce((sum, cost) => sum + cost.amount, 0);
+  };
+
   const value = {
     // Google Maps
     isGoogleMapsLoaded,
