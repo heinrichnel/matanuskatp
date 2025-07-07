@@ -29,13 +29,11 @@ import { formatDate } from '../../utils/helpers';
 interface ManualDieselEntryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  dieselRecords?: DieselConsumptionRecord[];
 }
 
 const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({ 
   isOpen,
-  onClose,
-  dieselRecords = []
+  onClose
 }) => {
   const { addDieselRecord, trips, dieselRecords, connectionStatus } = useAppContext();
   
