@@ -65,17 +65,26 @@ const Sidebar: FC<HeaderProps> = ({
               icon: FileText,
               children: [
                 { id: 'workshop-open-jobcards', label: 'Open Job Cards', path: 'workshop?tab=jobcards' },
-                { id: 'workshop-completed-jobcards', label: 'Completed Job Cards', path: 'workshop?tab=jobcards' },
+              icon: Truck,
+              path: 'fleet'
                 { id: 'workshop-jobcard-templates', label: 'Job Card Templates', path: 'workshop?tab=jobcards' },
               ]
             },
             {
-              id: 'faults',
+              icon: Shield,
+              path: 'fleet?tab=drivers'
               label: 'Faults',
               icon: AlertTriangle,
               children: [
                 { id: 'workshop-fault-list', label: 'Fault List', path: 'workshop?tab=faults' },
-              ]
+              icon: FileText,
+              path: 'fleet?tab=missed-loads'
+            },
+            {
+              id: 'maps',
+              label: 'Maps',
+              icon: Map,
+              path: 'fleet?tab=maps'
             }
           ]
         }

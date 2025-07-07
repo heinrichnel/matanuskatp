@@ -107,6 +107,7 @@ const App: React.FC = () => {
                 <Route path="fleet" element={<FleetManagementPage />} />
                 <Route path="driver-behavior" element={<DriverBehaviorPage />} />
                 <Route path="missed-loads" element={<MissedLoadsTracker />} />
+                {/* Map view is now integrated into FleetManagementPage */}
                 
                 {/* Workshop Section */}
                 <Route path="workshop" element={<WorkshopPage />} />
@@ -121,9 +122,8 @@ const App: React.FC = () => {
                 <Route path="notifications" element={<Notifications />} />
                 <Route path="settings" element={<Settings />} />
                 <Route path="audit-log" element={<AuditLogPage />} />
-                
-                {/* Legacy routes kept for backward compatibility */}
-                <Route path="maps" element={<MapsView />} />
+                {/* Legacy maps route should redirect to the new tabbed view */}
+                <Route path="maps" element={<Navigate to="/fleet?tab=maps" replace />} />
                 <Route path="diesel-dashboard" element={<DieselDashboard />} />
                 
                 {/* Fallback */}
