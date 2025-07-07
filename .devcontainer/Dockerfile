@@ -10,6 +10,12 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH=$JAVA_HOME/bin:$PATH
 
+# Configure Java alternatives to ensure java and javac are in PATH
+RUN update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-openjdk-amd64/bin/java 1 \
+    && update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac 1 \
+    && update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java \
+    && update-alternatives --set javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac
+
 # Verify Java installation
 RUN java -version
 
