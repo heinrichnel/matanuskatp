@@ -29,7 +29,6 @@ import {
   User,
   Map,
   Award,
-  User,
   DollarSign,
   List
 } from 'lucide-react';
