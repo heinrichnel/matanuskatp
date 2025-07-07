@@ -1,27 +1,20 @@
 import { FC, useState } from 'react';
 import {
   Activity,
-  AlertTriangle,
+  AlertOctagon,
   AlertTriangle,
   BarChart3,
   Building,
   ChevronDown,
   ChevronRight,
   CircleDot,
-  ChevronDown,
-  ChevronRight,
-  CircleDot,
-  DollarSign,
-  FileSpreadsheet,
   DollarSign,
   FileText,
   FileSpreadsheet,
   Flag,
-  Map,
-  Map,
+  MapPin,
   Settings,
   Shield,
-  Truck,
   User,
   Users,
   Wifi,
@@ -30,6 +23,7 @@ import {
 import SyncIndicator from '../ui/SyncIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
 
+// Custom Truck component to avoid duplicate import
 interface HeaderProps {
   currentView: string;
   onNavigate: (view: string) => void;
