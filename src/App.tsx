@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import { AppProvider, useAppContext } from "./context/AppContext";
+import { AppProvider } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Layout from './components/layout/Layout';
@@ -10,6 +10,15 @@ import FirestoreConnectionError from "./components/ui/FirestoreConnectionError";
 import { getConnectionStatus, onConnectionStatusChanged } from "./utils/firebaseConnectionHandler";
 import { Trip } from "./types";
 import MapsView from "./components/maps/MapsView";
+
+// Workshop Components
+import FleetTable from './components/workshop/FleetTable';
+import JobCardManagement from './components/workshop/JobCardManagement';
+import JobCardKanbanBoard from './components/workshop/JobCardKanbanBoard';
+import InspectionManagement from './components/workshop/InspectionManagement';
+import InspectionForm from './components/workshop/InspectionForm';
+import FaultTracking from './components/workshop/FaultTracking';
+import TyreManagement from './components/workshop/TyreManagement';
 
 // UI Components
 // Removed Sidebar import as it will be used inside Layout
@@ -35,6 +44,37 @@ import WorkshopPage from "./pages/WorkshopPage";
 // Placeholder components for new routes
 const Notifications = () => <div>Notifications Page</div>;
 const Settings = () => <div>Settings Page</div>;
+
+// Workshop placeholders
+const QRGenerator = () => (
+  <div className="bg-white p-6 rounded-lg shadow">
+    <h2 className="text-2xl font-bold mb-4">QR Code Generator</h2>
+    <p className="text-gray-600">Generate QR codes for fleet vehicles and equipment.</p>
+    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+      <p className="text-blue-700">This module is under development and will be available in the next update.</p>
+    </div>
+  </div>
+);
+
+const WorkshopAnalytics = () => (
+  <div className="bg-white p-6 rounded-lg shadow">
+    <h2 className="text-2xl font-bold mb-4">Workshop Analytics Dashboard</h2>
+    <p className="text-gray-600">View comprehensive analytics for workshop operations, costs, and efficiency.</p>
+    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+      <p className="text-blue-700">This module is under development and will be available in the next update.</p>
+    </div>
+  </div>
+);
+
+const PartsOrdering = () => (
+  <div className="bg-white p-6 rounded-lg shadow">
+    <h2 className="text-2xl font-bold mb-4">Parts Ordering</h2>
+    <p className="text-gray-600">Manage parts ordering, suppliers, and purchase orders.</p>
+    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+      <p className="text-blue-700">This module is under development and will be available in the next update.</p>
+    </div>
+  </div>
+);
 const Profile = () => <div>Profile Page</div>;
   
 // Main App component with Router implementation
@@ -118,7 +158,52 @@ const App: React.FC = () => {
                 {/* Map view is now integrated into FleetManagementPage */}
                 
                 {/* Workshop Section */}
-                <Route path="workshop" element={<WorkshopPage />} />
+                <Route path="workshop" element={<WorkshopPage />}>
+                  <Route index element={<WorkshopAnalytics />} />
+                  <Route path="fleet-setup" element={<FleetTable />} />
+                  <Route path="qr-generator" element={<QRGenerator />} />
+                  
+                  {/* Inspections Routes */}
+                  <Route path="inspections" element={<InspectionManagement />} />
+                  <Route path="inspections/new" element={<InspectionForm onBack={() => {}} />} />
+                  <Route path="inspections/active" element={<InspectionManagement status="active" />} />
+                  <Route path="inspections/completed" element={<InspectionManagement status="completed" />} />
+                  <Route path="inspections/templates" element={<div>Inspection Templates</div>} />
+                  
+                  {/* Job Cards Routes */}
+                  <Route path="job-cards" element={<JobCardManagement />} />
+                  <Route path="job-cards/kanban" element={<JobCardKanbanBoard />} />
+                  <Route path="job-cards/open" element={<JobCardManagement activeTab="open" />} />
+                  <Route path="job-cards/completed" element={<JobCardManagement activeTab="completed" />} />
+                  <Route path="job-cards/templates" element={<div>Job Card Templates</div>} />
+                  
+                  {/* Faults Routes */}
+                  <Route path="faults" element={<FaultTracking />} />
+                  <Route path="faults/new" element={<div>Report New Fault</div>} />
+                  <Route path="faults/critical" element={<div>Critical Faults</div>} />
+                  
+                  {/* Tyre Management Routes */}
+                  <Route path="tyres" element={<TyreManagement />} />
+                  <Route path="tyres/inventory" element={<TyreManagement activeTab="inventory" />} />
+                  <Route path="tyres/stores" element={<TyreManagement activeTab="stores" />} />
+                  <Route path="tyres/fleet" element={<TyreManagement activeTab="position" />} />
+                  <Route path="tyres/history" element={<TyreManagement activeTab="inspection" />} />
+                  <Route path="tyres/performance" element={<TyreManagement activeTab="analytics" />} />
+                  <Route path="tyres/add" element={<TyreManagement activeTab="add" />} />
+                  
+                  {/* Inventory Management Routes */}
+                  <Route path="stock-alerts" element={<div>Stock Alerts</div>} />
+                  <Route path="parts-ordering" element={<PartsOrdering />} />
+                  <Route path="work-orders" element={<div>Work Orders</div>} />
+                  <Route path="purchase-orders" element={<div>Purchase Orders</div>} />
+                  <Route path="vendors" element={<div>Vendor Management</div>} />
+                  <Route path="inventory" element={<div>General Inventory</div>} />
+                  
+                  {/* Analytics & Reports */}
+                  <Route path="analytics" element={<WorkshopAnalytics />} />
+                  <Route path="reports" element={<div>Workshop Reports</div>} />
+                  <Route path="reports/costs" element={<div>Cost Analysis Reports</div>} />
+                </Route>
                 <Route path="action-log" element={<ActionLog />} />
                 
                 {/* Reports Section */}

@@ -1,41 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
-import Modal from '../ui/Modal'; 
-import { Truck, Search, Plus, Trash2, Edit, Filter, RefreshCw, Download, Target, Tag, AlertTriangle } from 'lucide-react';
+import { Target } from 'lucide-react';
 import TyreManagementView from './TyreManagementView';
-import { Input, Select, TextArea } from '../ui/FormElements';
-import TyreInventoryForm from './TyreInventoryForm';
-import { TyreInventoryItem, getUniqueTyreBrands, getUniqueTyreSizes, getUniqueTyrePatterns, VENDORS } from '../../utils/tyreConstants';
-
-interface AddEditTyreModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  item?: TyreInventoryItem;
-  onSave: (item: Omit<TyreInventoryItem, 'id'>) => Promise<void>;
-}
-
-const AddEditTyreModal: React.FC<AddEditTyreModalProps> = ({
-  isOpen,
-  onClose,
-  item,
-  onSave
-}) => {
-  const [formData, setFormData] = useState<any>({
-    brand: '',
-    model: '',
-    pattern: '',
-    size: '',
-    quantity: '0',
-    minStock: '0',
-    cost: '0',
-    supplier: '',
-    location: '',
-    notes: ''
-  });
   
-  const [errors, setErrors] = useState<Record<string, string>>({});
+interface TyreManagementProps {
+  activeTab?: string;
+}
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   useEffect(() => {
@@ -256,22 +226,7 @@ const AddEditTyreModal: React.FC<AddEditTyreModalProps> = ({
             onClick={onClose}
             disabled={isSubmitting}
           >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            isLoading={isSubmitting}
-            disabled={isSubmitting}
-          >
-            {item ? 'Update Item' : 'Add Item'}
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
-const TyreManagement: React.FC = () => {
+const TyreManagement: React.FC<TyreManagementProps> = ({ activeTab = 'dashboard' }) => {
   const {
     workshopInventory,
     addWorkshopInventoryItem,
@@ -446,113 +401,12 @@ const TyreManagement: React.FC = () => {
         </div>
       </div>
       
-      {/* Inventory Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {Object.entries(brandSummary).slice(0, 5).map(([brand, data]) => (
-          <Card key={brand}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800">{brand}</h3>
-                  <div className="text-sm text-gray-500 mt-1">{data.totalItems} tyres in stock</div>
-                </div>
-                <Tag className="w-8 h-8 text-blue-500" />
-              </div>
-              <div className="mt-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total Value:</span>
-                  <span className="font-medium">R{data.totalValue.toLocaleString()}</span>
-                </div>
-                {data.lowStock > 0 && (
-                  <div className="flex justify-between text-red-600">
-                    <span>Low Stock Items:</span>
-                    <span className="font-medium">{data.lowStock}</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      
-      {/* Filters */}
-      <Card>
-        <CardHeader title="Filter Inventory" />
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="md:col-span-2">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Search tyre inventory..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
             </div>
             
-            <Select
-              label="Brand"
-              value={filters.brand}
-              onChange={(value) => handleFilterChange('brand', value)}
-              options={[
-                { label: 'All Brands', value: '' },
-                ...getUniqueTyreBrands().map(brand => ({ label: brand, value: brand }))
-              ]}
-            />
-            
-            <Select
-              label="Size"
-              value={filters.size}
-              onChange={(value) => handleFilterChange('size', value)}
-              options={[
-                { label: 'All Sizes', value: '' },
-                ...getUniqueTyreSizes().map(size => ({ label: size, value: size }))
-              ]}
-            />
-            
-            <Select
-              label="Location"
-              value={filters.location}
-              onChange={(value) => handleFilterChange('location', value)}
-              options={[
-                { label: 'All Locations', value: '' },
-              ]}
-            />
-            <div className="flex items-center space-x-3 md:col-span-5">
-              <input
-                type="checkbox"
-                id="lowStock"
-                checked={filters.lowStock}
-                onChange={(e) => handleFilterChange('lowStock', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="lowStock" className="text-sm font-medium text-gray-700">
-                Show Only Low Stock Items
-              </label>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setFilters({
-                  brand: '',
-                  size: '',
-                  location: '',
-                  lowStock: false
-                })}
-                className="ml-auto"
-              >
-                Clear Filters
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
+    <div>
+      {/* Pass the active tab to the view component */}
       <TyreManagementView />
       
       {/* Inventory Table */}
@@ -657,22 +511,6 @@ const TyreManagement: React.FC = () => {
                     </tr>
                   ))}
                 </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      
-      {/* Add/Edit Modal */}
-      <AddEditTyreModal
-        isOpen={showAddModal}
-        onClose={() => {
-          setShowAddModal(false);
-          setEditingItem(undefined);
-        }}
-        item={editingItem}
-        onSave={editingItem ? handleUpdateItem : handleAddItem}
-      />
     </div>
   );
 };
