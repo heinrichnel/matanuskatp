@@ -17,7 +17,7 @@ import {
   User,
   Map,
   Award,
-  BookOpen
+  BookOpen,
   Award
 } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
@@ -196,7 +196,10 @@ const Sidebar: FC<HeaderProps> = ({
                       <Icon className="w-5 h-5" />
                       <span>{label}</span>
                     </button>
-                    {children && children.map(child => {
+                    {children && children.map(child => (
+                      <li key={child.id}></li>
+                    ))}
+                  </li>
                 );
               })}
             </ul>
