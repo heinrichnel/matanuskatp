@@ -2,16 +2,23 @@ import { FC, useState } from 'react';
 import {
   Activity,
   AlertTriangle,
+  AlertTriangle,
   BarChart3,
+  Building,
+  ChevronDown,
+  ChevronRight,
+  CircleDot,
   ChevronDown,
   ChevronRight,
   CircleDot,
   DollarSign,
   FileSpreadsheet,
+  DollarSign,
   FileText,
+  FileSpreadsheet,
   Flag,
   Map,
-  Building,
+  Map,
   Settings,
   Shield,
   Truck,
@@ -28,6 +35,26 @@ interface HeaderProps {
   onNavigate: (view: string) => void;
 }
 
+const Truck = (props: any) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={props.className}
+    {...props}
+  >
+    <path d="M10 17h4V5H2v12h3"></path>
+    <path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5v8h1"></path>
+    <path d="M14 17a2 2 0 1 0 4 0"></path>
+    <path d="M5 17a2 2 0 1 0 4 0"></path>
+  </svg>
+);
 const Sidebar: FC<HeaderProps> = ({
   currentView,
   onNavigate
