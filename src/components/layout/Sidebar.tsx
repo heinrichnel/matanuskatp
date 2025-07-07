@@ -45,15 +45,18 @@ const Sidebar: FC<HeaderProps> = ({
       id: 'operations',
       label: 'Operations',
       items: [
-        {
-          id: 'workshop', 
+        { 
+          id: 'workshop',
           label: 'Workshop',
           icon: Wrench,
-          path: 'workshop?tab=dashboard'
+          path: 'workshop?tab=dashboard',
+          children: [
+            { id: 'workshop-inspection', label: 'Inspection', path: 'workshop?tab=inspections' },
+            { id: 'workshop-jobcards', label: 'Job Cards', path: 'workshop?tab=jobcards' },
+            { id: 'workshop-faults', label: 'Fault List', path: 'workshop?tab=faults' },
+            { id: 'workshop-tires', label: 'Tyre Management', path: 'workshop?tab=tires' }
+          ]
         }
-      ]
-    },
-    {
       id: 'trips',
       label: 'Trip Management',
       items: [
