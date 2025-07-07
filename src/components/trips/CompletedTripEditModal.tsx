@@ -125,7 +125,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
       throw error;
     } finally {
       setIsSubmitting(false);
-    };
+    }
   };
 
   return (

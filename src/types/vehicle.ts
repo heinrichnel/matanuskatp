@@ -73,3 +73,20 @@ export interface VehicleFilters {
   series?: VehicleSeries[];
   manufacturer?: string[];
 }
+
+/**
+ * Inspection interface for vehicle inspections
+ */
+export interface Inspection {
+  id: string;
+  vehicleId: string;
+  inspectorName: string;
+  inspectionType: 'daily' | 'weekly' | 'monthly' | 'annual' | 'pre_trip' | 'post_trip';
+  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'requires_action';
+  scheduledDate: string;
+  completedDate?: string;
+  durationMinutes?: number;
+  defectsFound: number;
+  criticalIssues: number;
+  notes: string;
+}

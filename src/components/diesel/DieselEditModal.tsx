@@ -86,7 +86,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
       const costPerLitre = changedField === 'costPerLitre' ? numValue : parseFloat(prev.costPerLitre) || 0;
       const totalCost = changedField === 'totalCost' ? numValue : parseFloat(prev.totalCost) || 0;
 
-      let newData = { ...prev };
+      const newData = { ...prev };
 
       if (changedField === 'litresFilled' && costPerLitre > 0) {
         newData.totalCost = (litres * costPerLitre).toFixed(2);

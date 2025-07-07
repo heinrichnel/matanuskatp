@@ -1,0 +1,36 @@
+{
+  "firebaseUsage": [
+    {
+      "file": "src/context/AppContext.tsx",
+      "lines": [166, 303],
+      "usage": ["collection"]
+    },
+    {
+      "file": "src/components/tyre/VehicleTyreView.tsx",
+      "lines": [377, 378],
+      "usage": ["collection", "query"]
+    },
+    {
+      "file": "src/components/tyre/TyreInspection.tsx",
+      "lines": [405, 423, 431],
+      "usage": ["addDoc", "setDoc"]
+    },
+    {
+      "file": "src/components/dashboard/Fleetdashboard.tsx",
+      "lines": [26, 38, 39],
+      "usage": ["query"]
+    },
+    {
+      "file": "src/components/workshop/JobCard.tsx",
+      "lines": [87],
+      "usage": ["collection"]
+    },
+    {
+      "file": "src/components/workshop/EnhancedJobCard.tsx",
+      "lines": [150],
+      "usage": ["collection"]
+    }
+  ],
+  "missingImports": [],
+  "errorHandlingIssues": []
+}
