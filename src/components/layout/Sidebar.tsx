@@ -54,35 +54,27 @@ const Sidebar: FC<HeaderProps> = ({
               label: 'Inspection',
               icon: Clipboard,
               children: [
-                { id: 'workshop-inspection-report', label: 'Inspection Report', path: 'workshop?tab=inspections' },
-                { id: 'workshop-operator-daily', label: 'Operator Daily Reporting', path: 'workshop?tab=inspections' },
-                { id: 'workshop-incident-report', label: 'Incident Report', path: 'workshop?tab=inspections' },
-                { id: 'workshop-inspection-checklist', label: 'Inspection Checklist', path: 'workshop?tab=inspections' },
-                { id: 'workshop-reminder', label: 'Reminder', path: 'workshop?tab=inspections' },
+                { id: 'workshop-active-inspections', label: 'Active Inspections', path: 'workshop?tab=inspections' },
+                { id: 'workshop-completed-inspections', label: 'Completed Inspections', path: 'workshop?tab=inspections' },
+                { id: 'workshop-inspection-templates', label: 'Inspection Templates', path: 'workshop?tab=inspections' },
               ]
             },
             {
-              id: 'maintenance',
-              label: 'Maintenance',
-              icon: Wrench,
-              children: [
-                { id: 'workshop-workorder', label: 'Workorder', path: 'workshop?tab=jobcards' },
-                { id: 'workshop-request-maintenance', label: 'Request Maintenance', path: 'workshop?tab=jobcards' },
-                { id: 'workshop-service-schedule', label: 'Service Schedule', path: 'workshop?tab=jobcards' },
-                { id: 'workshop-parts-inventory', label: 'Parts Inventory', path: 'workshop?tab=jobcards' },
-                { id: 'workshop-labor-codes', label: 'Labor Codes', path: 'workshop?tab=jobcards' },
-                { id: 'workshop-task-master', label: 'Task Master', path: 'workshop?tab=jobcards' },
-              ]
-            },
-            {
-              id: 'purchase-order',
-              label: 'Purchase Order',
+              id: 'jobcards',
+              label: 'Job Cards',
               icon: FileText,
               children: [
-                { id: 'workshop-purchase-order', label: 'Purchase Order', path: 'workshop?tab=jobcards' },
-                { id: 'workshop-po-approval', label: 'PO Approval', path: 'workshop?tab=jobcards' },
-                { id: 'workshop-demand-parts', label: 'Demand Parts', path: 'workshop?tab=jobcards' },
-                { id: 'workshop-vendors', label: 'Vendors', path: 'workshop?tab=tires' },
+                { id: 'workshop-open-jobcards', label: 'Open Job Cards', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-completed-jobcards', label: 'Completed Job Cards', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-jobcard-templates', label: 'Job Card Templates', path: 'workshop?tab=jobcards' },
+              ]
+            },
+            {
+              id: 'faults',
+              label: 'Faults',
+              icon: AlertTriangle,
+              children: [
+                { id: 'workshop-fault-list', label: 'Fault List', path: 'workshop?tab=faults' },
               ]
             }
           ]
