@@ -6,6 +6,8 @@ import TyreManagement from '../components/workshop/TyreManagement';
 import InspectionManagement from '../components/workshop/InspectionManagement';
 
 import { useSearchParams, useNavigate } from 'react-router-dom';
+
+const WorkshopPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const defaultTab = searchParams.get('tab') || 'dashboard';
