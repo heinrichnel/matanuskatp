@@ -50,8 +50,7 @@ const Sidebar: FC<HeaderProps> = ({
           path: 'trips',
           children: [
             { id: 'active-trips', label: 'Active Trips', icon: Truck, path: 'trips?tab=active' },
-            { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle, path: 'trips?tab=completed' },
-            { id: 'flags', label: 'Flags & Investigations', icon: Flag, path: 'trips?tab=flags' }
+            { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle, path: 'trips?tab=completed' }
           ]
         }
       ]
