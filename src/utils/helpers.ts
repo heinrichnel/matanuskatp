@@ -326,12 +326,17 @@ export const generateCurrencyFleetReport = (trips: Trip[], currency: 'USD' | 'ZA
     const activeTrips = trips.filter(t => t.status === 'active').length;
     const completedTrips = trips.filter(t => t.status === 'completed' || t.status === 'invoiced' || t.status === 'paid').length;
 
-    const totalRevenue = trips.reduce((sum, trip) => sum + (trip.baseRevenue || 0), 0);
-    const totalExpenses = trips.reduce((sum, trip) => sum + calculateTotalCosts(trip.costs || []), 0);
+    // Calculate revenue and expenses for trips in this currency only
+    const totalRevenue = trips.filter(t => t.revenueCurrency === currency)
+      .reduce((sum, trip) => sum + (trip.baseRevenue || 0), 0);
+    const totalExpenses = trips.filter(t => t.revenueCurrency === currency)
+      .reduce((sum, trip) => sum + calculateTotalCosts(trip.costs || []), 0);
     const netProfit = totalRevenue - totalExpenses;
 
-    const avgRevenuePerTrip = totalTrips > 0 ? totalRevenue / totalTrips : 0;
-    const avgCostPerTrip = totalTrips > 0 ? totalExpenses / totalTrips : 0;
+    // Calculate per-trip averages for the specified currency only
+    const currencyTrips = trips.filter(t => t.revenueCurrency === currency).length;
+    const avgRevenuePerTrip = currencyTrips > 0 ? totalRevenue / currencyTrips : 0;
+    const avgCostPerTrip = currencyTrips > 0 ? totalExpenses / currencyTrips : 0;
     const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
     // Client type breakdown
@@ -372,7 +377,8 @@ export const generateCurrencyFleetReport = (trips: Trip[], currency: 'USD' | 'ZA
     let totalResolutionTime = 0;
     let resolvedFlagsCount = 0;
 
-    trips.forEach(trip => {
+    // Filter to only use trips in the specified currency
+    trips.filter(t => t.revenueCurrency === currency).forEach(trip => {
       if (!trip.costs) return;
 
       trip.costs.forEach(cost => {
@@ -391,7 +397,8 @@ export const generateCurrencyFleetReport = (trips: Trip[], currency: 'USD' | 'ZA
     // Driver statistics
     const driverStats: Record<string, any> = {};
 
-    trips.forEach(trip => {
+    // Filter to only use trips in the specified currency
+    trips.filter(t => t.revenueCurrency === currency).forEach(trip => {
       const driver = trip.driverName;
       if (!driverStats[driver]) {
         driverStats[driver] = {

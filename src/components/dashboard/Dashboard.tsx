@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
+import { useSyncContext } from '../../context/SyncContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import FirestoreConnectionError from '../ui/FirestoreConnectionError';
@@ -25,8 +26,10 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = (props) => {
   const { trips: contextTrips, missedLoads = [], refreshTrips, isLoading } = useAppContext();
+  const { syncStatus, lastSynced } = useSyncContext();
   const [refreshing, setRefreshing] = useState(false);
   const [connectionError, setConnectionError] = useState<Error | null>(null);
+  const [exchangeRate, setExchangeRate] = useState<number>(17.5); // Default ZAR/USD exchange rate
 
   // DEBUG ONLY - Remove after verification
   useEffect(() => {
@@ -47,6 +50,19 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
   });
 
   const [showFilters, setShowFilters] = useState(false);
+
+  // Helper function to convert USD to ZAR for multi-currency aggregation
+  const convertToZAR = (amount: number, currency: 'ZAR' | 'USD'): number => {
+    if (currency === 'ZAR') return amount;
+    return amount * exchangeRate;
+  };
+
+  // Force refresh data when Dashboard mounts
+  useEffect(() => {
+    if (contextTrips.length === 0 && navigator.onLine) {
+      handleRefresh();
+    }
+  }, []);
 
   const filteredTrips = useMemo(() => {
     let filtered = trips;
@@ -71,29 +87,43 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     const totalTrips = filteredTrips.length;
     const zarTrips = filteredTrips.filter(trip => trip.revenueCurrency === 'ZAR');
     const usdTrips = filteredTrips.filter(trip => trip.revenueCurrency === 'USD');
-
+    
+    // Multi-currency aggregation for revenue
     const zarRevenue = zarTrips.reduce((sum, trip) => sum + (trip.baseRevenue || 0), 0);
-    const zarCosts = zarTrips.reduce((sum, trip) => sum + calculateTotalCosts(trip.costs || []), 0);
-    const zarProfit = zarRevenue - zarCosts;
-
     const usdRevenue = usdTrips.reduce((sum, trip) => sum + (trip.baseRevenue || 0), 0);
+    const usdRevenueInZAR = usdRevenue * exchangeRate;
+    const totalRevenueInZAR = zarRevenue + usdRevenueInZAR;
+    
+    // Multi-currency aggregation for costs
+    const zarCosts = zarTrips.reduce((sum, trip) => sum + calculateTotalCosts(trip.costs || []), 0);
     const usdCosts = usdTrips.reduce((sum, trip) => sum + calculateTotalCosts(trip.costs || []), 0);
-    const usdProfit = usdRevenue - usdCosts;
+    const usdCostsInZAR = usdCosts * exchangeRate;
+    const totalCostsInZAR = zarCosts + usdCostsInZAR;
+    
+    // Calculate profit based on converted values
+    const totalProfitInZAR = totalRevenueInZAR - totalCostsInZAR;
 
     const totalEntries = filteredTrips.reduce((sum, trip) => sum + (trip.costs?.length || 0), 0);
 
     const allFlaggedCosts = getAllFlaggedCosts(filteredTrips);
     const unresolvedFlags = allFlaggedCosts.filter(cost => cost.investigationStatus !== 'resolved');
     const resolvedFlags = allFlaggedCosts.filter(cost => cost.investigationStatus === 'resolved');
+    
+    // Calculate average resolution time more accurately
+    let totalResolutionTimeInDays = 0;
+    let resolvedCount = 0;
 
     const avgResolutionTime = resolvedFlags.length > 0
       ? resolvedFlags.reduce((sum, flag) => {
         if (flag.flaggedAt && flag.resolvedAt) {
           const flaggedDate = new Date(flag.flaggedAt);
           const resolvedDate = new Date(flag.resolvedAt);
-          return sum + (resolvedDate.getTime() - flaggedDate.getTime()) / (1000 * 60 * 60 * 24);
+          const daysToResolve = (resolvedDate.getTime() - flaggedDate.getTime()) / (1000 * 60 * 60 * 24);
+          totalResolutionTimeInDays += daysToResolve;
+          resolvedCount++;
+          return sum + daysToResolve;
         }
-        return sum + 3;
+        return sum;
       }, 0) / resolvedFlags.length
       : 0;
 
@@ -171,10 +201,11 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
       totalTrips,
       zarRevenue,
       zarCosts,
-      zarProfit,
       usdRevenue,
       usdCosts,
-      usdProfit,
+      totalRevenueInZAR,
+      totalCostsInZAR,
+      totalProfitInZAR,
       totalEntries,
       allFlaggedCosts,
       unresolvedFlags,
@@ -213,6 +244,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     setConnectionError(null);
     try {
       await refreshTrips();
+      console.log('Dashboard data refreshed successfully');
     } catch (error) {
       console.error('Error refreshing trips:', error);
       setConnectionError(error instanceof Error ? error : new Error('Failed to refresh data'));
@@ -342,6 +374,29 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
       )}
 
       {/* Key Performance Metrics */}
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-sm text-gray-500">
+          <span className="font-medium">Data Status:</span> {
+            syncStatus === 'syncing' ? 
+              'Synchronizing...' : 
+              lastSynced ? 
+                `Last updated ${new Date(lastSynced).toLocaleTimeString()}` : 
+                'Not yet synchronized'
+          }
+        </div>
+        <div className="text-sm bg-blue-50 p-2 rounded border border-blue-100">
+          <span className="font-medium">Exchange Rate:</span> 1 USD = {exchangeRate} ZAR
+          <input 
+            type="number" 
+            value={exchangeRate} 
+            onChange={(e) => setExchangeRate(parseFloat(e.target.value) || 17.5)} 
+            className="ml-2 w-20 p-1 border rounded"
+            min="1"
+            step="0.01"
+          />
+        </div>
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <Card>
           <CardHeader
@@ -360,15 +415,15 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
         <Card>
           <CardHeader
             title={<span className="flex items-center gap-2"><DollarSign className="w-5 h-5 text-green-500" />Total Revenue</span>}
-            subtitle={<span className="text-xs text-gray-500">2025 YTD</span>}
+            subtitle={<span className="text-xs text-gray-500">All Currencies (ZAR Equivalent)</span>}
           />
           <CardContent>
             <div className="text-3xl font-bold text-gray-900">
-              {formatCurrency(stats.zarRevenue, 'ZAR')}
+              {formatCurrency(stats.totalRevenueInZAR, 'ZAR')}
             </div>
             {stats.usdRevenue > 0 && (
-              <div className="text-xl font-bold text-gray-900">
-                {formatCurrency(stats.usdRevenue, 'USD')}
+              <div className="text-base font-medium text-gray-600">
+                Includes {formatCurrency(stats.usdRevenue, 'USD')} ({formatCurrency(stats.usdRevenue * exchangeRate, 'ZAR')})
               </div>
             )}
             <div className="flex items-center gap-2 mt-2">
@@ -382,15 +437,18 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
         <Card>
           <CardHeader
             title={<span className="flex items-center gap-2"><Target className="w-5 h-5 text-purple-500" />Net Profit</span>}
-            subtitle={<span className="text-xs text-gray-500">Overall profitability</span>}
+            subtitle={<span className="text-xs text-gray-500">All Currencies (ZAR Equivalent)</span>}
           />
           <CardContent>
             <div className="text-3xl font-bold text-gray-900">
-              {formatCurrency(stats.zarProfit, 'ZAR')}
+              {formatCurrency(stats.totalProfitInZAR, 'ZAR')}
             </div>
-            {stats.usdProfit !== 0 && (
-              <div className="text-xl font-bold text-gray-900">
-                {formatCurrency(stats.usdProfit, 'USD')}
+            {stats.usdRevenue > 0 && (
+              <div className="text-base font-medium text-gray-600 flex items-center">
+                <div className={stats.usdRevenue - stats.usdCosts >= 0 ? "text-green-600" : "text-red-600"}>
+                  {formatCurrency(stats.usdRevenue - stats.usdCosts, 'USD')}
+                </div>
+                <Tooltip text="USD profit converted to ZAR at current exchange rate" />
               </div>
             )}
             <div className="flex items-center gap-2 mt-2">
