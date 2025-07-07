@@ -36,7 +36,7 @@ const Sidebar: FC<HeaderProps> = ({
     {
       id: 'main',
       items: [
-        { id: 'dashboard', label: 'Dashboard', icon: Activity },
+        { id: 'dashboard', label: 'Dashboard', icon: Activity }
       ]
     },
     {
@@ -56,7 +56,7 @@ const Sidebar: FC<HeaderProps> = ({
               children: [
                 { id: 'workshop-active-inspections', label: 'Active Inspections', path: 'workshop?tab=inspections' },
                 { id: 'workshop-completed-inspections', label: 'Completed Inspections', path: 'workshop?tab=inspections' },
-                { id: 'workshop-inspection-templates', label: 'Inspection Templates', path: 'workshop?tab=inspections' },
+                { id: 'workshop-inspection-templates', label: 'Inspection Templates', path: 'workshop?tab=inspections' }
               ]
             },
             {
@@ -65,26 +65,16 @@ const Sidebar: FC<HeaderProps> = ({
               icon: FileText,
               children: [
                 { id: 'workshop-open-jobcards', label: 'Open Job Cards', path: 'workshop?tab=jobcards' },
-              icon: Truck,
-              path: 'fleet'
-                { id: 'workshop-jobcard-templates', label: 'Job Card Templates', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-jobcard-templates', label: 'Job Card Templates', path: 'workshop?tab=jobcards' }
               ]
             },
             {
-              icon: Shield,
-              path: 'fleet?tab=drivers'
+              id: 'faults',
               label: 'Faults',
               icon: AlertTriangle,
               children: [
-                { id: 'workshop-fault-list', label: 'Fault List', path: 'workshop?tab=faults' },
-              icon: FileText,
-              path: 'fleet?tab=missed-loads'
-            },
-            {
-              id: 'maps',
-              label: 'Maps',
-              icon: Map,
-              path: 'fleet?tab=maps'
+                { id: 'workshop-fault-list', label: 'Fault List', path: 'workshop?tab=faults' }
+              ]
             }
           ]
         }
@@ -97,7 +87,7 @@ const Sidebar: FC<HeaderProps> = ({
         { id: 'trips', label: 'All Trips', icon: Truck },
         { id: 'active-trips', label: 'Active Trips', icon: Truck },
         { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle },
-        { id: 'flags', label: 'Flags & Investigations', icon: Flag },
+        { id: 'flags', label: 'Flags & Investigations', icon: Flag }
       ]
     },
     {
@@ -106,7 +96,7 @@ const Sidebar: FC<HeaderProps> = ({
       items: [
         { id: 'fleet', label: 'Fleet Overview', icon: Truck },
         { id: 'driver-behavior', label: 'Driver Management', icon: Shield },
-        { id: 'missed-loads', label: 'Missed Loads', icon: FileText },
+        { id: 'missed-loads', label: 'Missed Loads', icon: FileText }
       ]
     },
     {
