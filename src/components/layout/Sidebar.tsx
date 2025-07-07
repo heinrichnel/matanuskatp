@@ -14,6 +14,7 @@ import {
   Bell,
   Plus,
   Target,
+  Clock,
   User
 } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
