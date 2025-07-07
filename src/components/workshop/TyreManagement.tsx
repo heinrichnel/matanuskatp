@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import Modal from '../ui/Modal';
+import { Truck, Search, Plus, Trash2, Edit, Filter, RefreshCw, Download, Target } from 'lucide-react';
+import TyreManagementView from './TyreManagementView';
 import { Input, Select, TextArea } from '../ui/FormElements';
 import { Trash2, Edit, Plus, Download, RefreshCw, Tag, Truck, Search } from 'lucide-react';
 import { TyreInventoryItem, getUniqueTyreBrands, getUniqueTyreSizes, getUniqueTyrePatterns, VENDORS } from '../../utils/tyreConstants';
@@ -504,51 +505,9 @@ const TyreManagement: React.FC = () => {
               options={[
                 { label: 'All Sizes', value: '' },
                 ...getUniqueTyreSizes().map(size => ({ label: size, value: size }))
-              ]}
-            />
-            
             <Select
               label="Location"
-              value={filters.location}
-              onChange={(value) => handleFilterChange('location', value)}
-              options={[
-                { label: 'All Locations', value: '' },
-                { label: 'Vichels Store', value: 'Vichels Store' },
-                { label: 'Holding Bay', value: 'Holding Bay' },
-                { label: 'RFR', value: 'RFR' },
-                { label: 'Scrapped', value: 'Scrapped' }
-              ]}
-            />
-            
-            <div className="flex items-center space-x-3 md:col-span-5">
-              <input
-                type="checkbox"
-                id="lowStock"
-                checked={filters.lowStock}
-                onChange={(e) => handleFilterChange('lowStock', e.target.checked)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="lowStock" className="text-sm font-medium text-gray-700">
-                Show Only Low Stock Items
-              </label>
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setFilters({
-                  brand: '',
-                  size: '',
-                  location: '',
-                  lowStock: false
-                })}
-                className="ml-auto"
-              >
-                Clear Filters
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <TyreManagementView />
       
       {/* Inventory Table */}
       <Card>
