@@ -1,9 +1,6 @@
 import { initializeApp } from 'firebase/app';
-<<<<<<< HEAD
 import { collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
-=======
 import { getFirestore, connectFirestoreEmulator, collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
->>>>>>> 088b554 (Save current changes before pulling from main)
 import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { firebaseConfig } from './firebaseConfig';
 import { DieselConsumptionRecord } from './types/diesel';
@@ -88,8 +85,6 @@ export async function updateTripInFirebase(tripId: string, tripData: Partial<Tri
   const tripRef = doc(firestore, 'trips', tripId);
   await setDoc(tripRef, { ...tripData, updatedAt: serverTimestamp() }, { merge: true });
 }
-
-<<<<<<< HEAD
 // Function to update a diesel record in Firebase
 export async function updateDieselInFirebase(dieselId: string, dieselData: Partial<DieselConsumptionRecord>) {
   try {
@@ -159,14 +154,11 @@ export async function updateMissedLoadInFirebase(missedLoadId: string, missedLoa
     console.error('Error updating missed load:', error);
     throw error;
   }
-=======
 // Function to delete a trip from Firebase
 export async function deleteTripFromFirebase(tripId: string) {
   const tripRef = doc(firestore, 'trips', tripId);
   await deleteDoc(tripRef);
->>>>>>> 088b554 (Save current changes before pulling from main)
 }
-
 // Firestore listener for real-time updates
 export function listenToDriverBehaviorEvents(callback: (events: any[]) => void) {
   const eventsRef = collection(firestore, "driverBehaviorEvents");
