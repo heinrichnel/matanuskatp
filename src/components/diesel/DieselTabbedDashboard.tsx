@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
 import DieselDashboard from './DieselDashboard';
 import DieselAnalysis from './DieselAnalysis';
+import FuelAlertsTab from './FuelAlertsTab';
+import FuelReconciliationTab from './FuelReconciliationTab';
 import { useAppContext } from '../../context/AppContext';
 import { Fuel, FileText, BarChart3, Flag } from 'lucide-react';
 
@@ -45,23 +47,11 @@ const DieselTabbedDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="flags" className="mt-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Fuel Alerts</h2>
-            <p className="text-gray-600">
-              This module will display fuel consumption anomalies, theft alerts, and efficiency warnings.
-              The content is under development and will be available in the next update.
-            </p>
-          </div>
+          <FuelAlertsTab />
         </TabsContent>
 
         <TabsContent value="logs" className="mt-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Fuel Reconciliation</h2>
-            <p className="text-gray-600">
-              This module will provide fuel card reconciliation, transaction history, and discrepancy reports.
-              The content is under development and will be available in the next update.
-            </p>
-          </div>
+          <FuelReconciliationTab />
         </TabsContent>
       </Tabs>
     </div>
