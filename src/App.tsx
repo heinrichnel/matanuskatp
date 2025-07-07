@@ -16,7 +16,6 @@ import MapsView from "./components/maps/MapsView";
 
 // Feature Components
 import Dashboard from "./components/dashboard/Dashboard";
-import YearToDateKPIs from "./components/dashboard/YearToDateKPIs";
 import ActiveTrips from "./components/trips/ActiveTrips";
 import CompletedTrips from "./components/trips/CompletedTrips";
 import FlagsInvestigations from "./components/flags/FlagsInvestigations";
@@ -28,6 +27,9 @@ import DieselDashboard from "./components/diesel/DieselDashboard";
 import DriverBehaviorPage from "./pages/DriverBehaviorPage";
 import ActionLog from "./components/actionlog/ActionLog";
 import AuditLogPage from "./pages/AuditLogPage";
+import TripManagementPage from "./pages/TripManagementPage";
+import FleetManagementPage from "./pages/FleetManagementPage";
+import WorkshopPage from "./pages/WorkshopPage";
 
 // Placeholder components for new routes
 const Notifications = () => <div>Notifications Page</div>;
@@ -91,25 +93,41 @@ const App: React.FC = () => {
                   />
                 }
               >
-                <Route index element={<Navigate to="/ytd-kpis" replace />} />
-                <Route path="ytd-kpis" element={<YearToDateKPIs />} />
-                <Route path="dashboard" element={<Dashboard />} />
+                {/* Main dashboard is now the root route */}
+                <Route index element={<Dashboard />} />
+                <Route path="dashboard" element={<Navigate to="/" replace />} />
+                
+                {/* Trip Management Section */}
+                <Route path="trips" element={<TripManagementPage />} />
                 <Route path="active-trips" element={<ActiveTrips />} />
                 <Route path="completed-trips" element={<CompletedTrips />} />
-                <Route path="maps" element={<MapsView />} />
                 <Route path="flags" element={<FlagsInvestigations />} />
+                
+                {/* Fleet Management Section */}
+                <Route path="fleet" element={<FleetManagementPage />} />
+                <Route path="driver-behavior" element={<DriverBehaviorPage />} />
+                <Route path="missed-loads" element={<MissedLoadsTracker />} />
+                
+                {/* Workshop Section */}
+                <Route path="workshop" element={<WorkshopPage />} />
+                <Route path="action-log" element={<ActionLog />} />
+                
+                {/* Reports Section */}
                 <Route path="reports" element={<CurrencyFleetReport />} />
                 <Route path="invoice-aging" element={<InvoiceAgingDashboard />} />
                 <Route path="customer-retention" element={<CustomerRetentionDashboard />} />
-                <Route path="missed-loads" element={<MissedLoadsTracker />} />
-                <Route path="diesel-dashboard" element={<DieselDashboard />} />
-                <Route path="driver-behavior" element={<DriverBehaviorPage />} />
-                <Route path="action-log" element={<ActionLog />} />
-                <Route path="audit-log" element={<AuditLogPage />} />
+                
+                {/* System Section */}
                 <Route path="notifications" element={<Notifications />} />
                 <Route path="settings" element={<Settings />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="*" element={<Navigate to="/ytd-kpis" replace />} />
+                <Route path="audit-log" element={<AuditLogPage />} />
+                
+                {/* Legacy routes kept for backward compatibility */}
+                <Route path="maps" element={<MapsView />} />
+                <Route path="diesel-dashboard" element={<DieselDashboard />} />
+                
+                {/* Fallback */}
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Routes>
             
