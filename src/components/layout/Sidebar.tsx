@@ -1,9 +1,11 @@
 import { FC, useState } from 'react';
 import {
   Activity,
-  User,
   AlertTriangle,
-  Truck,
+  BarChart3,
+  ChevronDown,
+  ChevronRight,
+  CircleDot,
   DollarSign,
   FileSpreadsheet,
   FileText,
