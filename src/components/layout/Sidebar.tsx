@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import {
   Activity,
   BarChart3,
@@ -19,6 +19,7 @@ import {
   Award,
   BookOpen
 } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
 
@@ -31,6 +32,19 @@ const Sidebar: FC<HeaderProps> = ({
   currentView,
   onNavigate
 }) => {
+  // State to track which menu items are expanded
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+  
+  // Toggle expansion state for a menu item
+  const toggleExpand = (id: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setExpandedItems(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+  
   // Define navigation categories
   const navCategories = [
     {
@@ -125,18 +139,34 @@ const Sidebar: FC<HeaderProps> = ({
                 if (children) {
                   return (
                     <li key={id} className="mb-2">
-                      <button
+                      <div
                         className={`w-full flex items-center justify-between gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
                           currentView.startsWith(id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
                         }`}
-                        onClick={() => onNavigate(path || id)}
                       >
-                        <div className="flex items-center gap-3">
+                        <button 
+                          className="flex items-center gap-3 flex-grow text-left"
+                          onClick={() => onNavigate(path || id)}
+                        >
                           <Icon className="w-5 h-5" />
                           <span>{label}</span>
-                        </div>
-                      </button>
-                      {children.map(child => {
+                        </button>
+                        
+                        <button
+                          className="p-1 rounded-md hover:bg-gray-200 focus:outline-none"
+                          onClick={(e) => toggleExpand(id, e)}
+                          aria-label={expandedItems[id] ? 'Collapse menu' : 'Expand menu'}
+                        >
+                          {expandedItems[id] ? (
+                            <ChevronDown className="w-4 h-4" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                      
+                      {/* Only render children if this item is expanded */}
+                      {expandedItems[id] && children.map(child => {
                         if (child.children) {
                           return (
                             <div key={child.id} className="ml-6 mt-1">
