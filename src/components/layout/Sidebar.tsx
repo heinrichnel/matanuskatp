@@ -97,10 +97,15 @@ const Sidebar: FC<HeaderProps> = ({
       items: [
         { id: 'settings', label: 'Settings', icon: Settings }
       ]
+    },
+    {
+      id: 'utilities',
+      label: 'Utilities',
+      items: []
     }
   ];
 
-      label: 'Utilities',
+  return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r shadow flex flex-col z-30">
       <div className="flex items-center justify-between px-6 py-4 border-b">
         <span className="text-xl font-bold text-primary-600 tracking-tight">TransportMat</span>
