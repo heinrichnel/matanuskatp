@@ -150,6 +150,17 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
   const handleSubmit = () => {
     if (!validateForm()) return;
     
+    // Create a unique ID for attachments if files are selected
+    const processAttachments = selectedFiles ? Array.from(selectedFiles).map((file, index) => ({
+      id: `attachment-${Date.now()}-${index}`,
+      filename: file.name,
+      fileType: file.type,
+      fileSize: file.size,
+      // In a real app, this would be a proper URL after upload
+      fileUrl: URL.createObjectURL(file),
+      uploadedAt: new Date().toISOString()
+    })) : undefined;
+    
     const eventData: Omit<DriverBehaviorEvent, 'id'> = {
       driverId: formData.driverId,
       driverName: formData.driverName,
@@ -165,7 +176,8 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
       status: formData.status,
       actionTaken: formData.actionTaken,
       points: formData.points,
-      followUpRequired: formData.followUpRequired
+      followUpRequired: formData.followUpRequired,
+      attachments: processAttachments
     };
     
     if (event) {
@@ -177,7 +189,7 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
       alert('Driver behavior event updated successfully');
     } else {
       // Add new event
-      addDriverBehaviorEvent(eventData, selectedFiles || undefined);
+      addDriverBehaviorEvent(eventData);
       alert('Driver behavior event recorded successfully');
     }
     
