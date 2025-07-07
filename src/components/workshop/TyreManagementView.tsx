@@ -19,6 +19,8 @@ import { formatCurrency } from '../../utils/helpers';
 
 // Import type utilities from the tyreConstants file
 import { getUniqueTyreBrands, getUniqueTyreSizes, getUniqueTyrePatterns } from '../../utils/tyreConstants';
+import TyreInventoryForm from './TyreInventoryForm';
+import TyreInspectionModal from './TyreInspectionModal';
 
 interface TyreInventoryItem {
   id: string;
@@ -131,6 +133,10 @@ const TyreManagementView: React.FC = () => {
     status: '',
     lowStock: false
   });
+  const [showTyreForm, setShowTyreForm] = useState(false);
+  const [showInspectionModal, setShowInspectionModal] = useState(false);
+  const [selectedPosition, setSelectedPosition] = useState('');
+  const [selectedFleetNumber, setSelectedFleetNumber] = useState('');
   
   // Filter tyres based on the selected filters
   const filteredTyres = tyres.filter(tyre => {
@@ -164,6 +170,25 @@ const TyreManagementView: React.FC = () => {
     setExpandedTyre(expandedTyre === id ? null : id);
   };
   
+  // Handle form submissions
+  const handleTyreSubmit = (tyre: any) => {
+    // In a real app, this would add to Firestore
+    alert(`Tyre submitted: ${tyre.brand} ${tyre.model} (${tyre.tyreSize})`);
+    setShowTyreForm(false);
+  };
+
+  const handleInspectionSubmit = (inspection: any) => {
+    // In a real app, this would add to Firestore
+    alert(`Inspection submitted for ${inspection.fleetNumber} position ${inspection.tyrePosition}`);
+    setShowInspectionModal(false);
+  };
+
+  const openInspectionModal = (position: string, fleetNumber: string) => {
+    setSelectedPosition(position);
+    setSelectedFleetNumber(fleetNumber);
+    setShowInspectionModal(true);
+  };
+
   // Get unique brands, sizes from the tyre constants
   const brands = getUniqueTyreBrands();
   const sizes = getUniqueTyreSizes();
@@ -180,13 +205,13 @@ const TyreManagementView: React.FC = () => {
           <Button
             variant="outline"
             icon={<Download className="w-4 h-4" />}
-            onClick={() => alert('Export functionality would go here')}
+            onClick={() => alert('Export functionality would be implemented here')}
           >
             Export
           </Button>
           <Button
             icon={<Plus className="w-4 h-4" />}
-            onClick={() => alert('Add tyre functionality would go here')}
+            onClick={() => setShowTyreForm(true)}
           >
             Add Tyre Stock
           </Button>
@@ -516,7 +541,9 @@ const TyreManagementView: React.FC = () => {
             </div>
             
             <div className="mt-6 text-center">
-              <Button variant="outline">View Installation History</Button>
+              <Button variant="outline" onClick={() => openInspectionModal('Front Right', '21H')}>
+                Inspect Tyre (Demo)
+              </Button>
             </div>
           </div>
         </TabsContent>
@@ -549,7 +576,7 @@ const TyreManagementView: React.FC = () => {
             <div className="flex justify-between mb-4">
               <h4 className="text-lg font-medium text-gray-700">Recent Inspections</h4>
               <Button size="sm" icon={<Plus className="w-4 h-4" />}>
-                New Inspection
+                New Inspection Form
               </Button>
             </div>
             
@@ -871,6 +898,27 @@ const TyreManagementView: React.FC = () => {
             </div>
           </div>
         </TabsContent>
+        
+        {/* Add Tyre Inventory Form Modal */}
+        {showTyreForm && (
+          <Modal
+            isOpen={showTyreForm}
+            onClose={() => setShowTyreForm(false)}
+            title="Add New Tyre to Inventory"
+            maxWidth="lg"
+          >
+            <TyreInventoryForm onSubmit={handleTyreSubmit} />
+          </Modal>
+        )}
+        
+        {/* Tyre Inspection Modal */}
+        <TyreInspectionModal
+          open={showInspectionModal}
+          onClose={() => setShowInspectionModal(false)}
+          onSubmit={handleInspectionSubmit}
+          tyrePosition={selectedPosition}
+          fleetNumber={selectedFleetNumber}
+        />
       </Tabs>
     </div>
   );

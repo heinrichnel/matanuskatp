@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import { Truck, Search, Plus, Trash2, Edit, Filter, RefreshCw, Download, Target } from 'lucide-react';
+import { Truck, Search, Plus, Trash2, Edit, Filter, RefreshCw, Download, Target, Tag } from 'lucide-react';
 import TyreManagementView from './TyreManagementView';
-import { Input, Select, TextArea } from '../ui/FormElements';
-import { Trash2, Edit, Plus, Download, RefreshCw, Tag, Truck, Search } from 'lucide-react';
+import { Input, Select } from '../ui/FormElements';
+import TyreInventoryForm from './TyreInventoryForm';
 import { TyreInventoryItem, getUniqueTyreBrands, getUniqueTyreSizes, getUniqueTyrePatterns, VENDORS } from '../../utils/tyreConstants';
 
 interface AddEditTyreModalProps {
@@ -291,6 +291,12 @@ const TyreManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
   
+  const handleTyreSubmit = (tyreData: any) => {
+    console.log('Tyre submitted:', tyreData);
+    alert(`Tyre added: ${tyreData.brand} ${tyreData.model} (${tyreData.tyreSize})`);
+    // In a real app, this would save to Firestore
+  };
+
   // Apply filters to inventory
   const filteredInventory = workshopInventory.filter(item => {
     if (filters.brand && item.brand !== filters.brand) return false;
@@ -514,12 +520,34 @@ const TyreManagement: React.FC = () => {
               onChange={(value) => handleFilterChange('location', value)}
               options={[
                 { label: 'All Locations', value: '' },
-                { label: 'Vichels Store', value: 'Vichels Store' },
-                { label: 'Holding Bay', value: 'Holding Bay' },
-                { label: 'RFR', value: 'RFR' },
-                { label: 'Scrapped', value: 'Scrapped' }
               ]}
             />
+            <div className="flex items-center space-x-3 md:col-span-5">
+              <input
+                type="checkbox"
+                id="lowStock"
+                checked={filters.lowStock}
+                onChange={(e) => handleFilterChange('lowStock', e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <label htmlFor="lowStock" className="text-sm font-medium text-gray-700">
+                Show Only Low Stock Items
+              </label>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setFilters({
+                  brand: '',
+                  size: '',
+                  location: '',
+                  lowStock: false
+                })}
+                className="ml-auto"
+              >
+                Clear Filters
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -882,6 +882,41 @@ export const FLEETS_WITH_PROBES = [
   '21H', '23H', '24H', '26H', '28H', '30H', '31H'
 ];
 
+// Tyre related types for tyre management module
+export interface TyreInspection {
+  id?: string;
+  fleetNumber: string;
+  tyrePosition: string;
+  treadDepth: number;
+  pressure: number;
+  visualCondition: string;
+  comments?: string;
+  inspectedAt: string;
+  inspectedBy?: string;
+}
+
+export interface TyreInventory {
+  id?: string;
+  brand: string;
+  model: string;
+  dot: string;
+  tyreType: 'Steer' | 'Drive' | 'Trailer' | 'Spare';
+  tyreSize: string;
+  pressureRating: number;
+  initialTreadDepth: number;
+  currentTreadDepth?: number;
+  vendor: string;
+  purchaseCostZAR: number;
+  purchaseCostUSD: number;
+  depotLocation: string;
+  status: 'In Stock' | 'Fitted' | 'Scrapped' | 'Under Warranty';
+  installedOn?: string; // Fleet number if fitted
+  position?: string; // Position on vehicle if fitted
+  installDate?: string;
+  removalDate?: string;
+  inspectionHistory?: TyreInspection[];
+}
+
 export const FUEL_STATIONS = [
   "Kwa Nokeng Martins Drift",
   "MBT Groblersbrug",
