@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
-import { Truck, User, ClipboardList } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs'; 
+import { Truck, User, ClipboardList, Map } from 'lucide-react';
 import DriverBehaviorPage from './DriverBehaviorPage';
 import MissedLoadsTracker from '../components/trips/MissedLoadsTracker';
 import DieselDashboard from '../components/diesel/DieselDashboard';
+import MapsView from '../components/maps/MapsView';
+import { useSearchParams } from 'react-router-dom';
 
 const FleetManagementPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'overview';
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSearchParams(value === 'overview' ? {} : { tab: value });
+  };
 
   return (
     <div className="space-y-6">
@@ -19,7 +29,7 @@ const FleetManagementPage: React.FC = () => {
 
       <Tabs 
         value={activeTab} 
-        onValueChange={setActiveTab}
+        onValueChange={handleTabChange}
         className="w-full"
       >
         <TabsList className="mb-6">
@@ -38,6 +48,10 @@ const FleetManagementPage: React.FC = () => {
           <TabsTrigger value="missed-loads" className="flex items-center gap-2">
             <ClipboardList className="w-4 h-4" />
             <span>Missed Loads</span>
+          </TabsTrigger>
+          <TabsTrigger value="maps" className="flex items-center gap-2">
+            <Map className="w-4 h-4" />
+            <span>Maps</span>
           </TabsTrigger>
         </TabsList>
 
@@ -76,6 +90,10 @@ const FleetManagementPage: React.FC = () => {
 
         <TabsContent value="missed-loads" className="mt-6">
           <MissedLoadsTracker />
+        </TabsContent>
+        
+        <TabsContent value="maps" className="mt-6">
+          <MapsView />
         </TabsContent>
       </Tabs>
     </div>

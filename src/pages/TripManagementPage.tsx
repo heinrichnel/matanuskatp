@@ -6,7 +6,7 @@ import ActiveTrips from '../components/trips/ActiveTrips';
 import CompletedTrips from '../components/trips/CompletedTrips';
 import FlagsInvestigations from '../components/flags/FlagsInvestigations';
 import { useAppContext } from '../context/AppContext';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useSearchParams } from 'react-router-dom';
 import { Trip } from '../types';
 
 interface OutletContextType {
@@ -16,9 +16,17 @@ interface OutletContextType {
 }
 
 const TripManagementPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('active');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const defaultTab = searchParams.get('tab') || 'active';
+  const [activeTab, setActiveTab] = useState(defaultTab);
   const context = useOutletContext<OutletContextType>();
   const { isLoading } = useAppContext();
+
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSearchParams(value === 'active' ? {} : { tab: value });
+  };
 
   const handleAddTrip = () => {
     if (context.setEditingTrip) context.setEditingTrip(undefined);
@@ -45,7 +53,7 @@ const TripManagementPage: React.FC = () => {
 
       <Tabs 
         value={activeTab} 
-        onValueChange={setActiveTab}
+        onValueChange={handleTabChange}
         className="w-full"
       >
         <TabsList className="mb-6">
