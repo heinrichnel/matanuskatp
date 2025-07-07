@@ -2,12 +2,14 @@ import { FC } from 'react';
 import {
   Activity,
   BarChart3,
+  Clipboard,
   CheckCircle,
   FileText,
   Flag,
   Info,
   Shield,
   Settings,
+  AlertTriangle,
   Truck,
   Users,
   Wrench,
@@ -60,9 +62,12 @@ const Sidebar: FC<HeaderProps> = ({
       id: 'workshop',
       label: 'Workshop Operations',
       items: [
-        { id: 'workshop', label: 'Workshop Dashboard', icon: Wrench },
-        { id: 'workshop-tires', label: 'Tire Management', icon: Info, path: 'workshop?tab=tires' },
-        { id: 'action-log', label: 'Action Log', icon: FileText },
+        { id: 'workshop', label: 'Workshop Dashboard', icon: Wrench, path: 'workshop?tab=dashboard' },
+        { id: 'workshop-inspections', label: 'Inspections', icon: Clipboard, path: 'workshop?tab=inspections' },
+        { id: 'workshop-jobcards', label: 'Job Cards', icon: FileText, path: 'workshop?tab=jobcards' },
+        { id: 'workshop-faults', label: 'Fault List', icon: AlertTriangle, path: 'workshop?tab=faults' },
+        { id: 'workshop-tires', label: 'Tyre Management', icon: Info, path: 'workshop?tab=tires' },
+        { id: 'action-log', label: 'Action Log', icon: Flag, path: 'workshop?tab=actions' },
       ]
     },
     {

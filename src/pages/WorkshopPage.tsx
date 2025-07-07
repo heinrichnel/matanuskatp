@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
-import { Wrench, FileText, Info } from 'lucide-react';
+import { Wrench, FileText, Clipboard, Flag, AlertTriangle, Info } from 'lucide-react';
 import ActionLog from '../components/actionlog/ActionLog';
 import TyreManagement from '../components/workshop/TyreManagement';
+import InspectionManagement from '../components/workshop/InspectionManagement';
+import JobCardManagement from '../components/workshop/JobCardManagement';
+import FaultTracking from '../components/workshop/FaultTracking';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const WorkshopPage: React.FC = () => {
@@ -40,14 +43,26 @@ const WorkshopPage: React.FC = () => {
         <TabsList className="mb-6">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <Wrench className="w-4 h-4" />
-            <span>Workshop Dashboard</span>
+            <span>Dashboard</span>
+          </TabsTrigger>
+          <TabsTrigger value="inspections" className="flex items-center gap-2">
+            <Clipboard className="w-4 h-4" />
+            <span>Inspections</span>
+          </TabsTrigger>
+          <TabsTrigger value="jobcards" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            <span>Job Cards</span>
+          </TabsTrigger>
+          <TabsTrigger value="faults" className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4" />
+            <span>Fault List</span>
           </TabsTrigger>
           <TabsTrigger value="tires" className="flex items-center gap-2">
             <Info className="w-4 h-4" />
-            <span>Tire Management</span>
+            <span>Tyre Management</span>
           </TabsTrigger>
           <TabsTrigger value="actions" className="flex items-center gap-2">
-            <FileText className="w-4 h-4" />
+            <Flag className="w-4 h-4" />
             <span>Action Log</span>
           </TabsTrigger>
         </TabsList>
@@ -75,6 +90,18 @@ const WorkshopPage: React.FC = () => {
               </div>
             </div>
           </div>
+        </TabsContent>
+        
+        <TabsContent value="inspections" className="mt-6">
+          <InspectionManagement />
+        </TabsContent>
+        
+        <TabsContent value="jobcards" className="mt-6">
+          <JobCardManagement />
+        </TabsContent>
+        
+        <TabsContent value="faults" className="mt-6">
+          <FaultTracking />
         </TabsContent>
 
         <TabsContent value="tires" className="mt-6">
