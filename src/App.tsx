@@ -28,6 +28,7 @@ import Dashboard from "./components/dashboard/Dashboard";
 import ActiveTrips from "./components/trips/ActiveTrips";
 import CompletedTrips from "./components/trips/CompletedTrips";
 import FlagsInvestigations from "./components/flags/FlagsInvestigations";
+import ClientManagementPage from "./pages/ClientManagementPage";
 import CurrencyFleetReport from "./components/reports/CurrencyFleetReport";
 import InvoiceAgingDashboard from "./components/invoicing/InvoiceAgingDashboard";
 import CustomerRetentionDashboard from "./components/performance/CustomerRetentionDashboard";
@@ -156,6 +157,10 @@ const App: React.FC = () => {
                 <Route path="diesel-dashboard" element={<DieselTabbedDashboard />} />
                 <Route path="missed-loads" element={<MissedLoadsTracker />} />
                 {/* Map view is now integrated into FleetManagementPage */}
+                
+                {/* Client Management Section */}
+                <Route path="clients/*" element={<ClientManagementPage />} />
+                
                 
                 {/* Workshop Section */}
                 <Route path="workshop" element={<WorkshopPage />}>
