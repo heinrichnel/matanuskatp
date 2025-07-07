@@ -17,8 +17,7 @@ import {
   User,
   Map,
   Award,
-  BookOpen,
-  Award
+  BookOpen
 } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
@@ -36,38 +35,42 @@ const Sidebar: FC<HeaderProps> = ({
   const navCategories = [
     {
       id: 'main',
-      label: 'Main',
       items: [
         { id: 'dashboard', label: 'Dashboard', icon: Activity }
-      ]
-    },
-    {
-      id: 'operations',
-      label: 'Operations',
-      items: [
-        { id: 'workshop', label: 'Workshop', icon: Wrench, path: 'workshop?tab=dashboard' }
       ]
     },
     {
       id: 'trips',
       label: 'Trip Management',
       items: [
-        { id: 'trips', label: 'All Trips', icon: Truck },
-        { id: 'active-trips', label: 'Active Trips', icon: Truck },
-        { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle },
-        { id: 'flags', label: 'Flags & Investigations', icon: Flag },
-        { id: 'audit-log', label: 'Audit Log', icon: BookOpen }
+        { id: 'trips', label: 'All Trips', icon: Truck, path: 'trips?tab=active' },
+        { id: 'active-trips', label: 'Active Trips', icon: Truck, path: 'trips?tab=active' },
+        { id: 'completed-trips', label: 'Completed Trips', icon: CheckCircle, path: 'trips?tab=completed' },
+        { id: 'flags', label: 'Flags & Investigations', icon: Flag, path: 'trips?tab=flags' }
       ]
     },
     {
       id: 'fleet',
       label: 'Fleet Management',
       items: [
-        { id: 'fleet', label: 'Fleet Overview', icon: Truck },
-        { id: 'driver-behavior', label: 'Driver Management', icon: Shield },
-        { id: 'diesel-dashboard', label: 'Diesel Management', icon: Target },
-        { id: 'maps', label: 'Maps', icon: Map },
-        { id: 'missed-loads', label: 'Missed Loads', icon: FileText }
+        { id: 'fleet', label: 'Fleet Overview', icon: Truck, path: 'fleet?tab=overview' },
+        { id: 'driver-behavior', label: 'Driver Management', icon: Shield, path: 'fleet?tab=drivers' },
+        { id: 'diesel-dashboard', label: 'Diesel Management', icon: Target, path: 'fleet?tab=diesel' },
+        { id: 'maps', label: 'Maps', icon: Map, path: 'fleet?tab=maps' },
+        { id: 'missed-loads', label: 'Missed Loads', icon: FileText, path: 'fleet?tab=missed-loads' }
+      ]
+    },
+    {
+      id: 'workshop',
+      label: 'Workshop',
+      items: [
+        { id: 'workshop', label: 'Workshop Dashboard', path: 'workshop?tab=dashboard', icon: Wrench },
+        { id: 'workshop-tires', label: 'Tyre Management', path: 'workshop?tab=tires', icon: Target },
+        { id: 'workshop-inspections', label: 'Inspections', path: 'workshop?tab=inspections', icon: Clipboard },
+        { id: 'workshop-jobcards', label: 'Job Cards', path: 'workshop?tab=jobcards', icon: FileText },
+        { id: 'workshop-faults', label: 'Fault List', path: 'workshop?tab=faults', icon: AlertTriangle },
+        { id: 'workshop-fleet', label: 'Fleet Management', path: 'workshop?tab=fleet', icon: Truck },
+        { id: 'workshop-actions', label: 'Action Log', path: 'workshop?tab=actions', icon: CheckCircle }
       ]
     },
     {
@@ -77,29 +80,7 @@ const Sidebar: FC<HeaderProps> = ({
         { id: 'reports', label: 'Reports & Exports', icon: BarChart3 },
         { id: 'invoice-aging', label: 'Invoice Aging', icon: FileText },
         { id: 'customer-retention', label: 'Customer Retention', icon: Users },
-        { id: 'technician-leaderboard', label: 'Technician Performance', icon: Award }
-      ]
-    },
-    {
-      id: 'workshop',
-      label: 'Workshop',
-      items: [
-        {
-          id: 'workshop',
-          label: 'Workshop Dashboard',
-          path: 'workshop?tab=dashboard',
-          icon: Wrench
-        },
-        { 
-          id: 'workshop-tires', 
-          label: 'Tyre Management', 
-          path: 'workshop?tab=tires', 
-          icon: Target 
-        },
-        { id: 'workshop-inspections', label: 'Inspections', path: 'workshop?tab=inspections', icon: Clipboard },
-        { id: 'workshop-jobcards', label: 'Job Cards', path: 'workshop?tab=jobcards', icon: FileText },
-        { id: 'workshop-faults', label: 'Fault List', path: 'workshop?tab=faults', icon: AlertTriangle },
-        { id: 'workshop-fleet', label: 'Fleet Management', path: 'workshop?tab=fleet', icon: Truck }
+        { id: 'audit-log', label: 'Audit Log', icon: BookOpen }
       ]
     },
     {
@@ -107,8 +88,7 @@ const Sidebar: FC<HeaderProps> = ({
       label: 'System',
       items: [
         { id: 'notifications', label: 'Notifications', icon: Bell },
-        { id: 'settings', label: 'Settings', icon: Settings },
-        { id: 'action-log', label: 'Action Log', path: 'workshop?tab=actions', icon: CheckCircle }
+        { id: 'settings', label: 'Settings', icon: Settings }
       ]
     }
   ];
@@ -147,7 +127,7 @@ const Sidebar: FC<HeaderProps> = ({
                           return (
                             <div key={child.id} className="ml-6 mt-1">
                               <div className="flex items-center gap-2 px-6 py-1 text-sm font-medium text-gray-600">
-                                <child.icon className="w-4 h-4" />
+                                {child.icon && <child.icon className="w-4 h-4" />}
                                 <span>{child.label}</span>
                               </div>
                               <ul className="pl-10 mt-1 space-y-1">
@@ -175,7 +155,7 @@ const Sidebar: FC<HeaderProps> = ({
                               }`}
                               onClick={() => onNavigate(child.path || child.id)}
                             >
-                              <child.icon className="w-4 h-4" />
+                              {child.icon && <child.icon className="w-4 h-4" />}
                               <span>{child.label}</span>
                             </button>
                           </li>
