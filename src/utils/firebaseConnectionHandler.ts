@@ -11,20 +11,65 @@ export type ConnectionStatus = 'connected' | 'disconnected' | 'connecting' | 'er
 let connectionStatus: ConnectionStatus = 'connecting';
 let connectionError: Error | null = null;
 let connectionListeners: ((status: ConnectionStatus, error?: Error | null) => void)[] = [];
+let emulatorConnected = false;
+
+/**
+ * Check if emulator is accessible
+ */
+const checkEmulatorHealth = async (host: string = '127.0.0.1', port: number = 8081): Promise<boolean> => {
+  try {
+    const response = await fetch(`http://${host}:${port}`, {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-cache',
+    });
+    return response.ok;
+  } catch (error) {
+    console.warn(`⚠️ Emulator health check failed: ${error}`);
+    return false;
+  }
+};
 
 /**
  * Connect to Firestore emulator in development mode
  */
-export const connectToEmulator = () => {
-  if (import.meta.env.DEV) {
-    try {
-      console.log('🔄 Connecting to Firestore emulator...');
-      connectFirestoreEmulator(firestore, '127.0.0.1', 8081);
-      console.log('✅ Connected to Firestore emulator');
-    } catch (error) {
-      console.error('❌ Failed to connect to Firestore emulator:', error);
-      setConnectionStatus('error', error as Error);
+export const connectToEmulator = async (): Promise<boolean> => {
+  if (!import.meta.env.DEV || emulatorConnected) {
+    return emulatorConnected;
+  }
+
+  try {
+    console.log('🔄 Checking Firestore emulator availability...');
+    
+    // First check if emulator is running
+    const emulatorAvailable = await checkEmulatorHealth();
+    
+    if (!emulatorAvailable) {
+      console.warn('⚠️ Firestore emulator is not accessible on 127.0.0.1:8081');
+      console.warn('💡 Please ensure the emulator is running: firebase emulators:start --only firestore');
+      setConnectionStatus('error', new Error('Firestore emulator is not accessible'));
+      return false;
     }
+
+    console.log('🔄 Connecting to Firestore emulator...');
+    connectFirestoreEmulator(firestore, '127.0.0.1', 8081);
+    emulatorConnected = true;
+    console.log('✅ Connected to Firestore emulator');
+    setConnectionStatus('connected');
+    return true;
+  } catch (error) {
+    console.error('❌ Failed to connect to Firestore emulator:', error);
+    
+    // Check if this is a "already connected" error
+    if (error instanceof Error && error.message.includes('already')) {
+      console.log('📍 Firestore emulator connection already established');
+      emulatorConnected = true;
+      setConnectionStatus('connected');
+      return true;
+    }
+    
+    setConnectionStatus('error', error as Error);
+    return false;
   }
 };
 
@@ -77,12 +122,13 @@ export const getConnectionStatus = (): { status: ConnectionStatus; error: Error 
  * Initialize connection monitoring
  * This sets up listeners for online/offline status and Firestore connectivity
  */
-export const initializeConnectionMonitoring = () => {
+export const initializeConnectionMonitoring = async () => {
   // Listen for browser online/offline events
   window.addEventListener('online', () => {
     console.log('🌐 Browser reports online status');
     if (connectionStatus === 'disconnected') {
       setConnectionStatus('connecting');
+      attemptReconnect();
     }
   });
   
@@ -94,14 +140,24 @@ export const initializeConnectionMonitoring = () => {
   // Initial status based on navigator.onLine
   if (!navigator.onLine) {
     setConnectionStatus('disconnected');
+    return;
   }
   
   // Connect to emulator in development mode
-  connectToEmulator();
+  const emulatorConnected = await connectToEmulator();
   
-  // Set initial status to connected if we're online
-  // In a real implementation, we would check Firestore connectivity here
-  if (navigator.onLine && connectionStatus === 'connecting') {
+  if (!emulatorConnected && import.meta.env.DEV) {
+    // If emulator connection failed, show helpful message
+    console.warn('⚠️ Failed to connect to Firestore emulator');
+    console.warn('🔧 Troubleshooting steps:');
+    console.warn('   1. Check if emulator is running: firebase emulators:start --only firestore');
+    console.warn('   2. Verify port 8081 is not in use by another process');
+    console.warn('   3. Check your firewall settings');
+    return;
+  }
+  
+  // Set status to connected if everything is working
+  if (navigator.onLine && (emulatorConnected || !import.meta.env.DEV)) {
     setConnectionStatus('connected');
   }
 };
@@ -118,24 +174,33 @@ export const attemptReconnect = async (): Promise<boolean> => {
   setConnectionStatus('connecting');
   
   try {
-    // In a real implementation, we would perform a test query here
-    // For now, we'll just simulate a connection attempt
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    if (navigator.onLine) {
-      setConnectionStatus('connected');
-      return true;
-    } else {
+    // Check if we're online
+    if (!navigator.onLine) {
       setConnectionStatus('disconnected');
       return false;
     }
+    
+    // In development, try to reconnect to emulator
+    if (import.meta.env.DEV) {
+      const emulatorConnected = await connectToEmulator();
+      if (emulatorConnected) {
+        setConnectionStatus('connected');
+        return true;
+      } else {
+        setConnectionStatus('error', new Error('Failed to connect to Firestore emulator'));
+        return false;
+      }
+    }
+    
+    // For production, assume connection is working if online
+    setConnectionStatus('connected');
+    return true;
+    
   } catch (error) {
     setConnectionStatus('error', error as Error);
     return false;
   }
 };
 
-// Initialize connection monitoring
-if (typeof window !== 'undefined') {
-  initializeConnectionMonitoring();
-}
+// Export the initialized firestore instance
+export default firestore;
