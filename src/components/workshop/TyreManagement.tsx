@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import Modal from '../ui/Modal';
-import { Truck, Search, Plus, Trash2, Edit, Filter, RefreshCw, Download, Target, Tag } from 'lucide-react';
+import Modal from '../ui/Modal'; 
+import { Truck, Search, Plus, Trash2, Edit, Filter, RefreshCw, Download, Target, Tag, AlertTriangle } from 'lucide-react';
 import TyreManagementView from './TyreManagementView';
 import { Input, Select, TextArea } from '../ui/FormElements';
 import TyreInventoryForm from './TyreInventoryForm';
@@ -22,7 +22,7 @@ const AddEditTyreModal: React.FC<AddEditTyreModalProps> = ({
   item,
   onSave
 }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     brand: '',
     model: '',
     pattern: '',
@@ -137,7 +137,7 @@ const AddEditTyreModal: React.FC<AddEditTyreModalProps> = ({
   };
   
   return (
-    <Modal
+    <Modal 
       isOpen={isOpen}
       onClose={onClose}
       title={item ? 'Edit Tyre Inventory Item' : 'Add New Tyre Inventory Item'}
