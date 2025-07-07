@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import { Modal } from '../ui/Modal';
+import Modal from '../ui/Modal';
 import { Truck, Search, Plus, Trash2, Edit, Filter, RefreshCw, Download, Target, Tag } from 'lucide-react';
 import TyreManagementView from './TyreManagementView';
 import { Input, Select, TextArea } from '../ui/FormElements';
