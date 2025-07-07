@@ -1,0 +1,33 @@
+{
+  // Versteek of wys sekere vouers
+  "files.exclude": {
+    "out": false,
+    "dist": false
+  },
+  "search.exclude": {
+    "out": true,
+    "dist": true
+  },
+
+  // Skakel tsc taak outo-detectie af
+  "typescript.tsc.autoDetect": "off",
+
+  // 🔍 Firebase Scanner Custom Settings
+  "firebaseScanner.scanFolders": [
+    "src",
+    "functions",
+    "components",
+    "scripts",
+    "webhooks"
+  ],
+  "firebaseScanner.collectionKeywords": [
+    "collection",
+    "addDoc",
+    "setDoc",
+    "onSnapshot",
+    "updateDoc"
+  ],
+  "firebaseScanner.enableAudit": true,
+  "firebaseScanner.enableTelemetryBindingCheck": true,
+  "firebaseScanner.generateJsonReport": true
+}

@@ -1,14 +1,14 @@
-
-
-
-
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Upload, X, WifiOff, RefreshCw, FileSpreadsheet } from 'lucide-react';
 import { useSyncContext } from '../../context/SyncContext';
+<<<<<<< HEAD
 import { FLEET_VEHICLES } from '../../data/vehicles/fleetVehicles';
+=======
+>>>>>>> 088b554 (Save current changes before pulling from main)
 
 interface LoadImportModalProps {
   isOpen: boolean;
@@ -16,9 +16,9 @@ interface LoadImportModalProps {
 }
 
 // Create a fleet master mapping object for quick lookups
-const createFleetMasterMapping = () => {
+const createFleetMasterMapping = (vehicles: { registrationNo: string; fleetNo: string }[]) => {
   const mapping: { [key: string]: string } = {};
-  FLEET_VEHICLES.forEach(vehicle => {
+  vehicles.forEach(vehicle => {
     mapping[vehicle.registrationNo] = vehicle.fleetNo;
   });
   return mapping;
@@ -85,7 +85,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         let currentValue = '';
         let inQuotes = false;
         
-        for (let char of lines[i]) {
+        for (const char of lines[i]) {
           if (char === '"') {
             inQuotes = !inQuotes;
           } else if (char === ',' && !inQuotes) {
@@ -120,7 +120,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
       const data = parseCSV(text);
       
       // Create fleet master mapping
-      const fleetMasterMapping = createFleetMasterMapping();
+      const fleetMasterMapping = createFleetMasterMapping([]);
       
       // Track mapping results
       let mappedCount = 0;
@@ -184,7 +184,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
           paymentStatus: 'unpaid' as 'unpaid' | 'partial' | 'paid',
           additionalCosts: [],
           followUpHistory: [],
-          status: 'active' as 'active', // Ensure trips are set to active status
+          status: 'active' as const, // Ensure trips are set to active status
         };
       });
       

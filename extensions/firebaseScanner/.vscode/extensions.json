@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Firebase Scanner Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/extensions/firebaseScanner",
+        "--extensionTestsPath=${workspaceFolder}/extensions/firebaseScanner/out/test"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/extensions/firebaseScanner/dist/**/*.js"
+      ],
+      "preLaunchTask": "npm: compile",
+      "cwd": "${workspaceFolder}/extensions/firebaseScanner"
+    }
+  ]
+}

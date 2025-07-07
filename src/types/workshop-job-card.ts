@@ -35,10 +35,13 @@ export interface JobCardItem {
 export interface JobCard {
   id: string;
   vehicleId: string;
-  vehicleRegNumber: string;
-  jobNumber: string;
-  status: 'open' | 'in_progress' | 'completed' | 'cancelled';
+  vehicleRegNumber?: string;
+  jobNumber?: string;
+  workOrderNumber?: string;
+  inspectionId?: string;
+  customerName: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
+  status: 'open' | 'in_progress' | 'completed' | 'cancelled';
   description: string;
   reportedIssues?: string;
   items: JobCardItem[];
@@ -48,19 +51,10 @@ export interface JobCard {
   mechanicNotes?: string;
   customerNotes?: string;
   createdDate: string;
-  updatedDate?: string;
-  createdBy: string;
-  assignedTo?: string;
-  images?: string[];
-  documents?: string[];
-  totalCost?: number;
-  currency?: string;
-  invoiceNumber?: string;
-  invoiceDate?: string;
-  paymentStatus?: 'pending' | 'partial' | 'paid';
-  deleted?: boolean;
   createdAt?: string;
-  updatedAt?: string;
+  estimatedCompletion?: string;
+  laborRate?: number;
+  partsCost?: number;
 }
 
 // ==== Enhanced Workshop Job Card Interfaces ====
