@@ -40,6 +40,56 @@ const Sidebar: FC<HeaderProps> = ({
       ]
     },
     {
+      id: 'operations',
+      label: 'Operations',
+      items: [
+        {
+          id: 'workshop',
+          label: 'Workshop',
+          icon: Wrench,
+          path: 'workshop?tab=dashboard',
+          children: [
+            {
+              id: 'inspection',
+              label: 'Inspection',
+              icon: Clipboard,
+              children: [
+                { id: 'workshop-inspection-report', label: 'Inspection Report', path: 'workshop?tab=inspections' },
+                { id: 'workshop-operator-daily', label: 'Operator Daily Reporting', path: 'workshop?tab=inspections' },
+                { id: 'workshop-incident-report', label: 'Incident Report', path: 'workshop?tab=inspections' },
+                { id: 'workshop-inspection-checklist', label: 'Inspection Checklist', path: 'workshop?tab=inspections' },
+                { id: 'workshop-reminder', label: 'Reminder', path: 'workshop?tab=inspections' },
+              ]
+            },
+            {
+              id: 'maintenance',
+              label: 'Maintenance',
+              icon: Wrench,
+              children: [
+                { id: 'workshop-workorder', label: 'Workorder', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-request-maintenance', label: 'Request Maintenance', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-service-schedule', label: 'Service Schedule', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-parts-inventory', label: 'Parts Inventory', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-labor-codes', label: 'Labor Codes', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-task-master', label: 'Task Master', path: 'workshop?tab=jobcards' },
+              ]
+            },
+            {
+              id: 'purchase-order',
+              label: 'Purchase Order',
+              icon: FileText,
+              children: [
+                { id: 'workshop-purchase-order', label: 'Purchase Order', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-po-approval', label: 'PO Approval', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-demand-parts', label: 'Demand Parts', path: 'workshop?tab=jobcards' },
+                { id: 'workshop-vendors', label: 'Vendors', path: 'workshop?tab=tires' },
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       id: 'trips',
       label: 'Trip Management',
       items: [
@@ -56,18 +106,6 @@ const Sidebar: FC<HeaderProps> = ({
         { id: 'fleet', label: 'Fleet Overview', icon: Truck },
         { id: 'driver-behavior', label: 'Driver Management', icon: Shield },
         { id: 'missed-loads', label: 'Missed Loads', icon: FileText },
-      ]
-    },
-    {
-      id: 'workshop',
-      label: 'Workshop Operations',
-      items: [
-        { id: 'workshop', label: 'Workshop Dashboard', icon: Wrench, path: 'workshop?tab=dashboard' },
-        { id: 'workshop-inspections', label: 'Inspections', icon: Clipboard, path: 'workshop?tab=inspections' },
-        { id: 'workshop-jobcards', label: 'Job Cards', icon: FileText, path: 'workshop?tab=jobcards' },
-        { id: 'workshop-faults', label: 'Fault List', icon: AlertTriangle, path: 'workshop?tab=faults' },
-        { id: 'workshop-tires', label: 'Tyre Management', icon: Info, path: 'workshop?tab=tires' },
-        { id: 'action-log', label: 'Action Log', icon: Flag, path: 'workshop?tab=actions' },
       ]
     },
     {
@@ -104,19 +142,78 @@ const Sidebar: FC<HeaderProps> = ({
               </h3>
             )}
             <ul className="space-y-1">
-              {category.items.map(({ id, label, icon: Icon, path }) => (
-                <li key={id}>
-                  <button
-                    className={`w-full flex items-center gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
-                      currentView === id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                    onClick={() => onNavigate(path || id)}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span>{label}</span>
-                  </button>
-                </li>
-              ))}
+              {category.items.map(({ id, label, icon: Icon, path, children }) => {
+                if (children) {
+                  return (
+                    <li key={id} className="mb-2">
+                      <button
+                        className={`w-full flex items-center justify-between gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
+                          currentView.startsWith(id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                        }`}
+                        onClick={() => onNavigate(path || id)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className="w-5 h-5" />
+                          <span>{label}</span>
+                        </div>
+                      </button>
+                      {children.map(child => {
+                        if (child.children) {
+                          return (
+                            <div key={child.id} className="ml-6 mt-1">
+                              <div className="flex items-center gap-2 px-6 py-1 text-sm font-medium text-gray-600">
+                                <child.icon className="w-4 h-4" />
+                                <span>{child.label}</span>
+                              </div>
+                              <ul className="pl-10 mt-1 space-y-1">
+                                {child.children.map(subitem => (
+                                  <li key={subitem.id}>
+                                    <button
+                                      className={`w-full text-left px-2 py-1 text-xs rounded transition-colors ${
+                                        currentView === subitem.id ? 'bg-gray-100 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                                      }`}
+                                      onClick={() => onNavigate(subitem.path || subitem.id)}
+                                    >
+                                      {subitem.label}
+                                    </button>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          );
+                        }
+                        return (
+                          <li key={child.id} className="ml-6 mt-1">
+                            <button
+                              className={`w-full flex items-center gap-2 px-6 py-1 text-sm rounded transition-colors text-left ${
+                                currentView === child.id ? 'bg-gray-100 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                              }`}
+                              onClick={() => onNavigate(child.path || child.id)}
+                            >
+                              <child.icon className="w-4 h-4" />
+                              <span>{child.label}</span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </li>
+                  );
+                }
+                
+                return (
+                  <li key={id}>
+                    <button
+                      className={`w-full flex items-center gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
+                        currentView === id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                      onClick={() => onNavigate(path || id)}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span>{label}</span>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}
