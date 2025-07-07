@@ -23,7 +23,8 @@ import {
   AuditLog,
   MissedLoad,
   ActionItem,
-  CARReport
+  CARReport,
+  Client
 } from '../types';
 import { TyreInventoryItem } from './tyreConstants';
 import { Tyre } from '../types/workshop-tyre-inventory';
@@ -844,6 +845,66 @@ export class SyncService {
     );
 
     this.globalUnsubscribes.set('allActionItems', unsubscribe);
+  }
+
+  // Subscribe to all clients (global listener)
+  public subscribeToAllClients(): void {
+    // Clear any existing global clients listeners
+    if (this.globalUnsubscribes.has('allClients')) {
+      this.globalUnsubscribes.get('allClients')?.();
+    }
+
+    const clientsQuery = query(
+      collection(db, 'clients'),
+      orderBy('name', 'asc')
+    );
+
+    const unsubscribe = onSnapshot(
+      clientsQuery,
+      (snapshot) => {
+        // Track changes for debugging
+        let added = 0, modified = 0, removed = 0;
+
+        // Process document changes
+        snapshot.docChanges().forEach(change => {
+          const id = change.doc.id;
+
+          if (change.type === 'added') {
+            added++;
+            console.log(`Client added: ${id}`);
+          } else if (change.type === 'modified') {
+            modified++;
+            console.log(`Client modified: ${id}`);
+          } else if (change.type === 'removed') {
+            removed++;
+            console.log(`Client removed: ${id}`);
+          }
+        });
+
+        if (added > 0 || modified > 0 || removed > 0) {
+          console.log(`🔄 Clients changes: ${added} added, ${modified} modified, ${removed} removed`);
+
+          // Get all current documents for a full refresh
+          const clients: Client[] = [];
+          snapshot.forEach(doc => {
+            const data = convertTimestamps(doc.data());
+            clients.push({ id: doc.id, ...data } as Client);
+          });
+
+          if (typeof this.dataCallbacks.setClients === 'function') {
+            this.dataCallbacks.setClients(clients);
+          } else {
+            console.warn('⚠️ setClients callback not registered');
+          }
+          this.lastSynced = new Date();
+        }
+      },
+      (error) => {
+        console.error('Error in global clients listener:', error);
+      }
+    );
+
+    this.globalUnsubscribes.set('allClients', unsubscribe);
   }
 
   // Subscribe to all CAR reports (global listener)
