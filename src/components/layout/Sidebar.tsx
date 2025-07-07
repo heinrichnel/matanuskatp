@@ -11,7 +11,8 @@ import {
   Truck,
   Users,
   Wrench,
-  Bell
+  Bell,
+  Plus
 } from 'lucide-react';
 import SyncIndicator from '../ui/SyncIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
