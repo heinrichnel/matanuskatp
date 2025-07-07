@@ -300,7 +300,59 @@ export const trailerInspection: InspectionTemplate = {
       isCritical: true,
       passFailOnly: true
     },
-    // Add more items for other categories
+    // Coupling items
+    {
+      id: uuidv4(),
+      title: 'King Pin Condition',
+      description: 'Check king pin for wear or damage',
+      category: 'Coupling',
+      requiredRole: 'driver',
+      isCritical: true,
+      passFailOnly: true
+    },
+    // Brakes items
+    {
+      id: uuidv4(),
+      title: 'Brake Pad Thickness',
+      description: 'Check brake pad thickness',
+      category: 'Brakes',
+      requiredRole: 'mechanic',
+      isCritical: true,
+      passFailOnly: false,
+      valueType: 'numeric',
+      minimumValue: 5,
+      unitOfMeasure: 'mm'
+    },
+    // Lights & Electrical items
+    {
+      id: uuidv4(),
+      title: 'Marker Lights',
+      description: 'Check all marker lights are working',
+      category: 'Lights & Electrical',
+      requiredRole: 'driver',
+      isCritical: true,
+      passFailOnly: true
+    },
+    // Tires & Wheels items
+    {
+      id: uuidv4(),
+      title: 'Tire Condition',
+      description: 'Check tires for damage, wear, or foreign objects',
+      category: 'Tires & Wheels',
+      requiredRole: 'driver',
+      isCritical: true,
+      passFailOnly: true
+    },
+    // Safety Equipment items
+    {
+      id: uuidv4(),
+      title: 'Load Restraints',
+      description: 'Check load restraints are present and in good condition',
+      category: 'Safety Equipment',
+      requiredRole: 'driver',
+      isCritical: true,
+      passFailOnly: true
+    }
   ],
   version: '1.0',
   createdAt: new Date().toISOString(),

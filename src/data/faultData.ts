@@ -110,7 +110,7 @@ export const faultCategories: FaultCategory[] = [
       {
         id: uuidv4(),
         name: 'Brake Pads Worn',
-        description: 'Brake pads worn beyond minimum thickness',
+        description: 'Brake pads worn below minimum thickness',
         typicalSeverity: 'high',
         typicalPartsNeeded: ['Brake Pads'],
         estimatedRepairHours: 2
