@@ -15,9 +15,6 @@ const SyncIndicator: React.FC<SyncIndicatorProps> = ({
   showText = true 
 }) => {
   const { syncStatus, lastSynced, pendingChangesCount } = useSyncContext();
-  showText = true 
-}) => {
-  const { syncStatus, lastSynced, pendingChangesCount } = useSyncContext();
 
   // Format time since last sync
   const getTimeSinceSync = () => {
@@ -51,14 +48,6 @@ const SyncIndicator: React.FC<SyncIndicatorProps> = ({
             {showText && (
               <span className={syncStatus === 'error' ? 'text-red-500' : 'text-gray-500'}>
                 {syncStatus === 'error'
-                  ? 'Sync error'
-                  : `Synced ${getTimeSinceSync()}`} 
-                {pendingChangesCount > 0 && ` (${pendingChangesCount} pending)`}
-              </span>
-            )}
-          </>
-        )}
-      </div>
                   ? 'Sync error'
                   : `Synced ${getTimeSinceSync()}`} 
                 {pendingChangesCount > 0 && ` (${pendingChangesCount} pending)`}
