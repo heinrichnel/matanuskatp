@@ -19,11 +19,8 @@ import {
 } from '../types';
 import { AuditLog as AuditLogType } from '../types/audit';
 import { TyreInventoryItem } from '../utils/tyreConstants';
-<<<<<<< HEAD
 import { Client } from '../types/client';
-=======
 import { JobCard as JobCardType } from '../types/workshop-job-card';
->>>>>>> 088b554 (Save current changes before pulling from main)
 
 import {
   addTripToFirebase,
@@ -208,12 +205,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [carReports, setCARReports] = useState<CARReport[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogType[]>([]);
   const [workshopInventory, setWorkshopInventory] = useState<TyreInventoryItem[]>([]);
-<<<<<<< HEAD
   const [clients, setClients] = useState<Client[]>([]);
-=======
   const [inspections, setInspections] = useState<VehicleInspection[]>([]);
   const [jobCards, setJobCards] = useState<JobCardType[]>([]);
->>>>>>> 088b554 (Save current changes before pulling from main)
   const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected'); // TODO: Implement actual connection status monitoring
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   
@@ -363,11 +357,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCarReports: setCARReports,
       setAuditLogs,
       setWorkshopInventory,
-<<<<<<< HEAD
       setClients
-=======
       setJobCards // Register job cards state
->>>>>>> 088b554 (Save current changes before pulling from main)
     });
 
   // Subscribe to all collections
@@ -920,7 +911,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
-<<<<<<< HEAD
   // Trip Template functions
   const addTripTemplate = async (template: Omit<TripTemplate, 'id' | 'createdAt'>): Promise<string> => {
     try {
@@ -1515,7 +1505,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }];
   };
 
-=======
   // Add inspection-related methods
   const addInspection = async (inspection: Omit<VehicleInspection, 'id'>): Promise<string> => {
     try {
@@ -1600,7 +1589,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
->>>>>>> 088b554 (Save current changes before pulling from main)
   const value = {
     // Google Maps
     isGoogleMapsLoaded,
@@ -2142,7 +2130,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     completeTrip,
     auditLogs,
     isLoading,
-<<<<<<< HEAD
     // Trip Templates
     tripTemplates,
     addTripTemplate,
@@ -2177,9 +2164,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     calculateFleetUtilization,
     getFleetUtilizationMetrics,
     
-=======
     getJobCard: (id: string) => jobCards.find(jobCard => jobCard.id === id),
->>>>>>> 088b554 (Save current changes before pulling from main)
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
