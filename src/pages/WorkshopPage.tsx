@@ -6,7 +6,6 @@ import TyreManagement from '../components/workshop/TyreManagement';
 import InspectionManagement from '../components/workshop/InspectionManagement';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import FleetTable from '../components/workshop/FleetTable';
-import FleetTable from '../components/workshop/FleetTable';
 
 const WorkshopPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
