@@ -3,7 +3,10 @@ import JobCardHeader from './JobCardHeader';
 import TaskManager from './TaskManager';
 import InventoryPanel from './InventoryPanel';
 import JobCardNotes from './JobCardNotes';
-import CompletionPanel from './CompletionPanel';
+import QAReviewPanel from './QAReviewPanel';
+import CompletionPanel from './CompletionPanel'; 
+import { v4 as uuidv4 } from 'uuid';
+import { JobCardTask, TaskHistoryEntry } from '../../types';
 
 // Mock data for a job card
 const mockJobCard = {
@@ -26,7 +29,7 @@ const mockJobCard = {
 };
 
 // Mock tasks for the job card
-const mockTasks = [
+const mockTasks: JobCardTask[] = [
   {
     id: 't1',
     title: 'Remove wheels',
@@ -71,6 +74,28 @@ const mockTasks = [
   }
 ];
 
+// Mock task history
+const mockTaskHistory: TaskHistoryEntry[] = [
+  {
+    id: 'th1',
+    taskId: 't1',
+    event: 'statusChanged',
+    previousStatus: 'pending',
+    newStatus: 'in_progress',
+    by: 'John Smith - Senior Mechanic',
+    at: '2025-06-28T10:15:00Z'
+  },
+  {
+    id: 'th2',
+    taskId: 't1',
+    event: 'statusChanged',
+    previousStatus: 'in_progress',
+    newStatus: 'completed',
+    by: 'John Smith - Senior Mechanic',
+    at: '2025-06-28T11:30:00Z'
+  }
+];
+
 // Mock parts
 const mockAssignedParts = [
   {
@@ -104,8 +129,11 @@ const mockNotes = [
 const JobCard: React.FC = () => {
   const [jobCard, setJobCard] = useState(mockJobCard);
   const [tasks, setTasks] = useState(mockTasks);
+  const [taskHistory, setTaskHistory] = useState(mockTaskHistory);
   const [assignedParts, setAssignedParts] = useState(mockAssignedParts);
   const [notes, setNotes] = useState(mockNotes);
+  const [userRole, setUserRole] = useState<'technician' | 'supervisor'>('technician');
+  const [isLoading, setIsLoading] = useState(false);
   
   // Handler functions for tasks
   const handleTaskUpdate = (taskId: string, updates: any) => {
@@ -119,13 +147,100 @@ const JobCard: React.FC = () => {
   const handleTaskAdd = (task: any) => {
     const newTask = {
       ...task,
-      id: `t${Date.now()}`
+      id: uuidv4()
     };
     setTasks(prevTasks => [...prevTasks, newTask]);
   };
   
   const handleTaskDelete = (taskId: string) => {
     setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+  };
+  
+  // Log task history entry
+  const handleLogTaskHistory = (entry: Omit<TaskHistoryEntry, 'id'>) => {
+    const newEntry: TaskHistoryEntry = {
+      ...entry,
+      id: uuidv4()
+    };
+    setTaskHistory(prev => [newEntry, ...prev]);
+  };
+
+  // Handler for verifying a task (supervisor only)
+  const handleVerifyTask = async (taskId: string) => {
+    if (userRole !== 'supervisor') return;
+    
+    try {
+      setIsLoading(true);
+      
+      const task = tasks.find(t => t.id === taskId);
+      if (!task) throw new Error('Task not found');
+      
+      // Update task to verified status
+      const updates: Partial<JobCardTask> = {
+        status: 'verified',
+        verifiedBy: 'Current Supervisor',
+        verifiedAt: new Date().toISOString()
+      };
+      
+      handleTaskUpdate(taskId, updates);
+      
+      // Log the verification action
+      handleLogTaskHistory({
+        taskId,
+        event: 'verified',
+        by: 'Current Supervisor',
+        at: new Date().toISOString(),
+        notes: 'Task verified by supervisor'
+      });
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error verifying task:', error);
+      return Promise.reject(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handler for verifying all tasks at once (supervisor only)
+  const handleVerifyAllTasks = async () => {
+    if (userRole !== 'supervisor') return;
+    
+    try {
+      setIsLoading(true);
+      
+      // Get all completed tasks that haven't been verified
+      const tasksToVerify = tasks.filter(
+        task => task.status === 'completed' && !task.verifiedBy
+      );
+      
+      // Update each task
+      for (const task of tasksToVerify) {
+        const updates: Partial<JobCardTask> = {
+          status: 'verified',
+          verifiedBy: 'Current Supervisor',
+          verifiedAt: new Date().toISOString()
+        };
+        
+        handleTaskUpdate(task.id, updates);
+        
+        // Log the verification action
+        handleLogTaskHistory({
+          taskId: task.id,
+          event: 'verified',
+          by: 'Current Supervisor',
+          at: new Date().toISOString(),
+          notes: 'Task verified in batch by supervisor'
+        });
+      }
+      
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error verifying all tasks:', error);
+      return Promise.reject(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   // Handler functions for parts
@@ -181,6 +296,13 @@ const JobCard: React.FC = () => {
   const handleCompleteJob = async (jobCardId: string) => {
     setJobCard(prev => ({ ...prev, status: 'completed' }));
     // In a real implementation, this would update Firestore
+    
+    // Log the job card completion
+    if (jobCard.faultId) {
+      // Also mark the associated fault as resolved
+      console.log(`Fault ${jobCard.faultId} marked as resolved`);
+    }
+    
     return Promise.resolve();
   };
   
@@ -188,11 +310,32 @@ const JobCard: React.FC = () => {
   const handleGenerateInvoice = async (jobCardId: string) => {
     // In a real implementation, this would create an invoice in Firestore
     alert(`Invoice generated for job card: ${jobCardId}`);
+    
+    // After generating an invoice, you might want to update the job card status
+    setJobCard(prev => ({ ...prev, status: 'invoiced' }));
+    
     return Promise.resolve();
+  };
+  
+  // Toggle user role for demo purposes
+  const toggleUserRole = () => {
+    setUserRole(prev => prev === 'technician' ? 'supervisor' : 'technician');
   };
   
   return (
     <div className="space-y-6">
+      {/* Role toggle for demo */}
+      <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 flex justify-between items-center">
+        <span className="text-blue-700">Current Role: <strong>{userRole === 'technician' ? 'Technician' : 'Supervisor'}</strong></span>
+        <Button 
+          size="sm" 
+          onClick={toggleUserRole} 
+          variant="outline"
+        >
+          Switch to {userRole === 'technician' ? 'Supervisor' : 'Technician'} View
+        </Button>
+      </div>
+      
       <JobCardHeader 
         jobCard={jobCard}
         onBack={() => {}} // No-op for demo
@@ -205,6 +348,9 @@ const JobCard: React.FC = () => {
             onTaskUpdate={handleTaskUpdate}
             onTaskAdd={handleTaskAdd}
             onTaskDelete={handleTaskDelete}
+            taskHistory={taskHistory}
+            onLogTaskHistory={handleLogTaskHistory}
+            userRole={userRole}
           />
           
           <JobCardNotes
@@ -216,6 +362,18 @@ const JobCard: React.FC = () => {
         </div>
         
         <div className="space-y-6">
+          {userRole === 'supervisor' && (
+            <QAReviewPanel
+              jobCardId={jobCard.id}
+              tasks={tasks}
+              taskHistory={taskHistory}
+              onVerifyTask={handleVerifyTask}
+              canVerifyAllTasks={tasks.some(task => task.status === 'completed' && !task.verifiedBy)}
+              onVerifyAllTasks={handleVerifyAllTasks}
+              isLoading={isLoading}
+            />
+          )}
+        
           <InventoryPanel
             jobCardId={jobCard.id}
             assignedParts={assignedParts}
@@ -224,13 +382,15 @@ const JobCard: React.FC = () => {
             onUpdatePart={handleUpdatePart}
           />
           
-          <CompletionPanel
-            jobCardId={jobCard.id}
-            status={jobCard.status}
-            tasks={tasks}
-            onComplete={handleCompleteJob}
-            onGenerateInvoice={handleGenerateInvoice}
-          />
+          {userRole === 'supervisor' && (
+            <CompletionPanel
+              jobCardId={jobCard.id}
+              status={jobCard.status}
+              tasks={tasks}
+              onComplete={handleCompleteJob}
+              onGenerateInvoice={handleGenerateInvoice}
+            />
+          )}
         </div>
       </div>
     </div>

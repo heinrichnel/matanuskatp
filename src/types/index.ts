@@ -633,15 +633,31 @@ export interface JobCardTask {
   category: string;
   estimatedHours: number;
   actualHours?: number;
-  status: 'pending' | 'in_progress' | 'completed' | 'not_applicable';
+  status: 'pending' | 'in_progress' | 'completed' | 'verified' | 'not_applicable';
   assignedTo?: string;
   notes?: string;
+  completedBy?: string;
+  completedAt?: string;
+  verifiedBy?: string;
+  verifiedAt?: string;
   parts?: {
     partName: string;
     quantity: number;
     isRequired: boolean;
   }[];
   isCritical: boolean;
+}
+
+// Task history log entry
+export interface TaskHistoryEntry {
+  id: string;
+  taskId: string;
+  event: 'statusChanged' | 'assigned' | 'verified' | 'edited';
+  previousStatus?: string;
+  newStatus?: string;
+  by: string;
+  at: string;
+  notes?: string;
 }
 
 // Invoice type for job card invoicing
