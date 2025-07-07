@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import {
   Trip,
   CostEntry,
+  TripTemplate,
+  LoadPlan,
+  TripFinancialAnalysis,
+  RoutePoint,
   Attachment,
   AdditionalCost,
   DelayReason,
@@ -44,6 +48,46 @@ interface AppContextType {
   deleteTrip: (id: string) => Promise<void>;
   getTrip: (id: string) => Trip | undefined;
   refreshTrips: () => Promise<void>;
+
+  // Trip Templates
+  tripTemplates: TripTemplate[];
+  addTripTemplate: (template: Omit<TripTemplate, 'id' | 'createdAt'>) => Promise<string>;
+  updateTripTemplate: (template: TripTemplate) => Promise<void>;
+  deleteTripTemplate: (id: string) => Promise<void>;
+  getTripTemplate: (id: string) => TripTemplate | undefined;
+
+  // Load Plans
+  loadPlans: LoadPlan[];
+  addLoadPlan: (plan: Omit<LoadPlan, 'id' | 'createdAt'>) => Promise<string>;
+  updateLoadPlan: (plan: LoadPlan) => Promise<void>;
+  deleteLoadPlan: (id: string) => Promise<void>;
+  getLoadPlan: (id: string) => LoadPlan | undefined;
+
+  // Route Planning & Optimization
+  planRoute: (tripId: string, origin: string, destination: string, waypoints?: string[]) => Promise<void>;
+  optimizeRoute: (tripId: string) => Promise<void>;
+  
+  // Trip Progress & Delivery
+  updateTripProgress: (tripId: string, status: Trip['tripProgressStatus']) => Promise<void>;
+  confirmDelivery: (tripId: string, confirmationData: {
+    status: 'confirmed' | 'disputed';
+    notes?: string;
+    deliveryDateTime: string;
+    attachments?: File[];
+  }) => Promise<void>;
+
+  // Trip Financials
+  generateTripFinancialAnalysis: (tripId: string) => Promise<TripFinancialAnalysis>;
+  getTripFinancialAnalysis: (tripId: string) => TripFinancialAnalysis | undefined;
+
+  // PDF Generation
+  generateQuoteConfirmationPdf: (tripId: string) => Promise<string>;
+  generateLoadConfirmationPdf: (tripId: string) => Promise<string>;
+  
+  // Fleet Utilization
+  calculateFleetUtilization: (tripId: string) => Promise<void>;
+  getFleetUtilizationMetrics: (fleetNumber: string, startDate?: string, endDate?: string) => 
+    {fleetNumber: string; utilizationRate: number; revenuePerKm: number; costPerKm: number}[];
   
   addCostEntry: (costEntry: Omit<CostEntry, 'id' | 'attachments'>, files?: FileList) => Promise<string>;
   updateCostEntry: (costEntry: CostEntry) => Promise<void>;
@@ -138,6 +182,9 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [trips, setTrips] = useState<Trip[]>([]);
+  const [tripTemplates, setTripTemplates] = useState<TripTemplate[]>([]);
+  const [loadPlans, setLoadPlans] = useState<LoadPlan[]>([]);
+  const [tripFinancials, setTripFinancials] = useState<TripFinancialAnalysis[]>([]);
   const [missedLoads, setMissedLoads] = useState<MissedLoad[]>([]);
   const [dieselRecords, setDieselRecords] = useState<DieselConsumptionRecord[]>([]);
   const [driverBehaviorEvents, setDriverBehaviorEvents] = useState<DriverBehaviorEvent[]>([]);
@@ -266,6 +313,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Register all data callbacks with SyncService
     syncService.registerDataCallbacks({
       setTrips,
+      setTripTemplates,
+      setLoadPlans,
       setMissedLoads,
       setDieselRecords,
       setDriverBehaviorEvents,
@@ -805,6 +854,600 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
   };
 
+  // Trip Template functions
+  const addTripTemplate = async (template: Omit<TripTemplate, 'id' | 'createdAt'>): Promise<string> => {
+    try {
+      setIsLoading(prev => ({ ...prev, addTripTemplate: true }));
+      
+      const newTemplate = {
+        ...template,
+        id: `template-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // In a real implementation, this would save to Firestore
+      setTripTemplates(prev => [...prev, newTemplate]);
+      
+      return newTemplate.id;
+    } catch (error) {
+      console.error("Error adding trip template:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, addTripTemplate: false }));
+    }
+  };
+
+  const updateTripTemplate = async (template: TripTemplate): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, updateTripTemplate: true }));
+      
+      // In a real implementation, this would update Firestore
+      setTripTemplates(prev => 
+        prev.map(t => t.id === template.id ? {...template, updatedAt: new Date().toISOString()} : t)
+      );
+    } catch (error) {
+      console.error("Error updating trip template:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, updateTripTemplate: false }));
+    }
+  };
+
+  const deleteTripTemplate = async (id: string): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, [`deleteTripTemplate-${id}`]: true }));
+      
+      // In a real implementation, this would delete from Firestore
+      setTripTemplates(prev => prev.filter(t => t.id !== id));
+    } catch (error) {
+      console.error('Error deleting trip template:', error);
+      throw error;
+    } finally {
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`deleteTripTemplate-${id}`];
+        return newState;
+      });
+    }
+  };
+
+  const getTripTemplate = (id: string): TripTemplate | undefined => {
+    return tripTemplates.find(t => t.id === id);
+  };
+
+  // Load Plan functions
+  const addLoadPlan = async (plan: Omit<LoadPlan, 'id' | 'createdAt'>): Promise<string> => {
+    try {
+      setIsLoading(prev => ({ ...prev, addLoadPlan: true }));
+      
+      const newPlan = {
+        ...plan,
+        id: `load-plan-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // In a real implementation, this would save to Firestore
+      setLoadPlans(prev => [...prev, newPlan]);
+      
+      // Update the associated trip with the load plan ID
+      const trip = trips.find(t => t.id === plan.tripId);
+      if (trip) {
+        await updateTrip({
+          ...trip,
+          loadPlanId: newPlan.id
+        });
+      }
+      
+      return newPlan.id;
+    } catch (error) {
+      console.error("Error adding load plan:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, addLoadPlan: false }));
+    }
+  };
+
+  const updateLoadPlan = async (plan: LoadPlan): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, updateLoadPlan: true }));
+      
+      // In a real implementation, this would update Firestore
+      setLoadPlans(prev => 
+        prev.map(p => p.id === plan.id ? {...plan, updatedAt: new Date().toISOString()} : p)
+      );
+    } catch (error) {
+      console.error("Error updating load plan:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, updateLoadPlan: false }));
+    }
+  };
+
+  const deleteLoadPlan = async (id: string): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, [`deleteLoadPlan-${id}`]: true }));
+      
+      // Get the load plan to find its associated trip
+      const loadPlan = loadPlans.find(p => p.id === id);
+      if (loadPlan) {
+        // Update the associated trip to remove the load plan ID reference
+        const trip = trips.find(t => t.id === loadPlan.tripId);
+        if (trip && trip.loadPlanId === id) {
+          await updateTrip({
+            ...trip,
+            loadPlanId: undefined
+          });
+        }
+      }
+      
+      // In a real implementation, this would delete from Firestore
+      setLoadPlans(prev => prev.filter(p => p.id !== id));
+    } catch (error) {
+      console.error('Error deleting load plan:', error);
+      throw error;
+    } finally {
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`deleteLoadPlan-${id}`];
+        return newState;
+      });
+    }
+  };
+
+  const getLoadPlan = (id: string): LoadPlan | undefined => {
+    return loadPlans.find(p => p.id === id);
+  };
+
+  // Route Planning & Optimization functions
+  const planRoute = async (
+    tripId: string, 
+    origin: string, 
+    destination: string, 
+    waypoints?: string[]
+  ): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, [`planRoute-${tripId}`]: true }));
+      
+      const trip = trips.find(t => t.id === tripId);
+      if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
+      
+      // In a real implementation, this would call Google Maps API or similar
+      // For now, we'll simulate route planning with dummy data
+      const simulatedCoordinates = [
+        {lat: 40.7128, lng: -74.0060}, // Example: NYC coordinates
+        {lat: 41.8781, lng: -87.6298}, // Example: Chicago coordinates
+      ];
+      
+      const plannedRoute = {
+        origin,
+        destination,
+        waypoints: waypoints || [],
+        coordinates: simulatedCoordinates,
+        estimatedDistance: 1200, // km
+        estimatedDuration: 720, // minutes
+      };
+      
+      await updateTrip({
+        ...trip,
+        plannedRoute,
+        distanceKm: plannedRoute.estimatedDistance // Update trip distance based on route
+      });
+      
+      console.log(`Route planned for trip ${tripId}`);
+    } catch (error) {
+      console.error("Error planning route:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`planRoute-${tripId}`];
+        return newState;
+      });
+    }
+  };
+
+  const optimizeRoute = async (tripId: string): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, [`optimizeRoute-${tripId}`]: true }));
+      
+      const trip = trips.find(t => t.id === tripId);
+      if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
+      if (!trip.plannedRoute) throw new Error(`Trip ${tripId} has no planned route to optimize`);
+      
+      // In a real implementation, this would call a route optimization API
+      // For now, we'll simulate optimization with improved metrics
+      
+      // Copy planned route and add optimization improvements
+      const optimizedRoute = {
+        ...trip.plannedRoute,
+        // Simulate 10% improvement in distance and duration
+        estimatedDistance: Math.round(trip.plannedRoute.estimatedDistance * 0.9),
+        estimatedDuration: Math.round(trip.plannedRoute.estimatedDuration * 0.9),
+        // Add optimization metrics
+        fuelSavings: Math.round(trip.plannedRoute.estimatedDistance * 0.1 * 0.3), // Assume 0.3L/km
+        timeSavings: Math.round(trip.plannedRoute.estimatedDuration * 0.1), // 10% time savings
+        optimizationDate: new Date().toISOString()
+      };
+      
+      await updateTrip({
+        ...trip,
+        optimizedRoute,
+        distanceKm: optimizedRoute.estimatedDistance // Update trip distance to optimized value
+      });
+      
+      console.log(`Route optimized for trip ${tripId}`);
+    } catch (error) {
+      console.error("Error optimizing route:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`optimizeRoute-${tripId}`];
+        return newState;
+      });
+    }
+  };
+
+  // Trip Progress & Delivery functions
+  const updateTripProgress = async (
+    tripId: string, 
+    status: Trip['tripProgressStatus']
+  ): Promise<void> => {
+    try {
+      const trip = trips.find(t => t.id === tripId);
+      if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
+      
+      await updateTrip({
+        ...trip,
+        tripProgressStatus: status,
+        // If the status is 'completed', also update the main trip status
+        status: status === 'completed' ? 'completed' : trip.status
+      });
+      
+      console.log(`Trip ${tripId} progress updated to ${status}`);
+    } catch (error) {
+      console.error("Error updating trip progress:", error);
+      throw error;
+    }
+  };
+
+  const confirmDelivery = async (
+    tripId: string, 
+    confirmationData: {
+      status: 'confirmed' | 'disputed';
+      notes?: string;
+      deliveryDateTime: string;
+      attachments?: File[];
+    }
+  ): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, [`confirmDelivery-${tripId}`]: true }));
+      
+      const trip = trips.find(t => t.id === tripId);
+      if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
+      
+      // In a real implementation, we would upload the attachments to storage
+      // and get back URLs to store in the trip record
+      const proofOfDeliveryAttachments: Attachment[] = confirmationData.attachments ? 
+        confirmationData.attachments.map(file => ({
+          id: `pod-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          tripId: tripId,
+          filename: file.name,
+          fileUrl: URL.createObjectURL(file), // This is temporary and not suitable for production
+          fileType: file.type,
+          fileSize: file.size,
+          uploadedAt: new Date().toISOString()
+        })) : [];
+      
+      await updateTrip({
+        ...trip,
+        deliveryConfirmationStatus: confirmationData.status,
+        deliveryConfirmationNotes: confirmationData.notes,
+        actualDeliveryDateTime: confirmationData.deliveryDateTime,
+        proofOfDeliveryAttachments: [
+          ...(trip.proofOfDeliveryAttachments || []),
+          ...proofOfDeliveryAttachments
+        ],
+        tripProgressStatus: 'delivered',
+        // If confirmed, mark the trip as completed
+        status: confirmationData.status === 'confirmed' ? 'completed' : trip.status
+      });
+      
+      console.log(`Delivery confirmed for trip ${tripId}`);
+    } catch (error) {
+      console.error("Error confirming delivery:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`confirmDelivery-${tripId}`];
+        return newState;
+      });
+    }
+  };
+
+  // Trip Financials functions
+  const generateTripFinancialAnalysis = async (tripId: string): Promise<TripFinancialAnalysis> => {
+    try {
+      setIsLoading(prev => ({ ...prev, [`generateFinancials-${tripId}`]: true }));
+      
+      const trip = trips.find(t => t.id === tripId);
+      if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
+      
+      // Calculate costs
+      const totalCosts = calculateTotalCosts(trip.costs);
+      const additionalCostsTotal = trip.additionalCosts?.reduce((sum, cost) => sum + cost.amount, 0) || 0;
+      
+      // Calculate fuel costs specifically - assume fuel is 30% of total costs for simplified analysis
+      const fuelCosts = totalCosts * 0.3;
+      
+      // Calculate border costs - filter costs with 'Border Costs' category
+      const borderCosts = trip.costs
+        .filter(cost => cost.category === 'Border Costs')
+        .reduce((sum, cost) => sum + cost.amount, 0);
+      
+      // Calculate driver allowance - filter costs with 'Trip Allowances' category
+      const driverAllowance = trip.costs
+        .filter(cost => cost.category === 'Trip Allowances')
+        .reduce((sum, cost) => sum + cost.amount, 0);
+      
+      // Calculate toll fees - filter costs with 'Tolls' category
+      const tollFees = trip.costs
+        .filter(cost => cost.category === 'Tolls')
+        .reduce((sum, cost) => sum + cost.amount, 0);
+      
+      // Remaining costs are classified as maintenance and miscellaneous
+      const maintenanceCosts = totalCosts * 0.2; // Assume 20% of total costs
+      const miscellaneousCosts = totalCosts - fuelCosts - borderCosts - driverAllowance - tollFees - maintenanceCosts;
+      
+      // Financial calculations
+      const totalRevenue = trip.baseRevenue;
+      const grossProfit = totalRevenue - totalCosts - additionalCostsTotal;
+      const grossProfitMargin = (grossProfit / totalRevenue) * 100;
+      
+      // Assume net profit is 90% of gross (after taxes, overhead, etc.)
+      const netProfit = grossProfit * 0.9;
+      const netProfitMargin = (netProfit / totalRevenue) * 100;
+      
+      // Calculate per km metrics
+      const distanceKm = trip.distanceKm || 1; // Avoid division by zero
+      const revenuePerKm = totalRevenue / distanceKm;
+      const costPerKm = (totalCosts + additionalCostsTotal) / distanceKm;
+      const profitPerKm = netProfit / distanceKm;
+      
+      // Create the financial analysis object
+      const analysis: TripFinancialAnalysis = {
+        tripId,
+        revenueSummary: {
+          baseRevenue: trip.baseRevenue,
+          additionalRevenue: 0, // Placeholder for future implementation
+          totalRevenue,
+          currency: trip.revenueCurrency
+        },
+        costBreakdown: {
+          fuelCosts,
+          borderCosts,
+          driverAllowance,
+          maintenanceCosts,
+          tollFees,
+          miscellaneousCosts,
+          totalCosts: totalCosts + additionalCostsTotal
+        },
+        profitAnalysis: {
+          grossProfit,
+          grossProfitMargin,
+          netProfit,
+          netProfitMargin,
+          returnOnInvestment: (netProfit / (totalCosts + additionalCostsTotal)) * 100
+        },
+        perKmMetrics: {
+          revenuePerKm,
+          costPerKm,
+          profitPerKm
+        },
+        comparisonMetrics: {
+          industryAvgCostPerKm: 2.5, // Placeholder values for demonstration
+          companyAvgCostPerKm: 2.3,
+          variance: ((costPerKm - 2.3) / 2.3) * 100
+        },
+        calculatedAt: new Date().toISOString()
+      };
+      
+      // Store the analysis in state
+      setTripFinancials(prev => {
+        const existing = prev.findIndex(a => a.tripId === tripId);
+        if (existing >= 0) {
+          const updated = [...prev];
+          updated[existing] = analysis;
+          return updated;
+        }
+        return [...prev, analysis];
+      });
+      
+      return analysis;
+    } catch (error) {
+      console.error("Error generating financial analysis:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`generateFinancials-${tripId}`];
+        return newState;
+      });
+    }
+  };
+
+  const getTripFinancialAnalysis = (tripId: string): TripFinancialAnalysis | undefined => {
+    return tripFinancials.find(a => a.tripId === tripId);
+  };
+
+  // PDF Generation functions
+  const generateQuoteConfirmationPdf = async (tripId: string): Promise<string> => {
+    try {
+      setIsLoading(prev => ({ ...prev, [`generateQuotePdf-${tripId}`]: true }));
+      
+      const trip = trips.find(t => t.id === tripId);
+      if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
+      
+      // In a real implementation, this would generate a PDF using jspdf
+      // For now, we'll simulate PDF generation with a delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Simulate a PDF URL
+      const pdfUrl = `https://example.com/quote_${tripId}.pdf`;
+      
+      // Update the trip with the PDF URL
+      await updateTrip({
+        ...trip,
+        quoteConfirmationPdfUrl: pdfUrl
+      });
+      
+      return pdfUrl;
+    } catch (error) {
+      console.error("Error generating quote confirmation PDF:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`generateQuotePdf-${tripId}`];
+        return newState;
+      });
+    }
+  };
+
+  const generateLoadConfirmationPdf = async (tripId: string): Promise<string> => {
+    try {
+      setIsLoading(prev => ({ ...prev, [`generateLoadPdf-${tripId}`]: true }));
+      
+      const trip = trips.find(t => t.id === tripId);
+      if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
+      
+      // In a real implementation, this would generate a PDF using jspdf
+      // For now, we'll simulate PDF generation with a delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Simulate a PDF URL
+      const pdfUrl = `https://example.com/load_${tripId}.pdf`;
+      
+      // Update the trip with the PDF URL
+      await updateTrip({
+        ...trip,
+        loadConfirmationPdfUrl: pdfUrl
+      });
+      
+      return pdfUrl;
+    } catch (error) {
+      console.error("Error generating load confirmation PDF:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`generateLoadPdf-${tripId}`];
+        return newState;
+      });
+    }
+  };
+
+  // Fleet Utilization functions
+  const calculateFleetUtilization = async (tripId: string): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, [`calculateUtilization-${tripId}`]: true }));
+      
+      const trip = trips.find(t => t.id === tripId);
+      if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
+      
+      // Calculate metrics
+      // 1. Calculate capacity utilization
+      // Assume 70% capacity utilization for demo purposes
+      // In a real implementation, this would be calculated based on the load plan
+      const capacityUtilization = 70;
+      
+      // 2. Calculate fuel efficiency
+      // Get diesel records for this trip
+      const tripDieselRecords = dieselRecords.filter(r => r.tripId === tripId);
+      const totalLitres = tripDieselRecords.reduce((sum, r) => sum + r.litresFilled, 0);
+      const fuelEfficiency = trip.distanceKm && totalLitres ? trip.distanceKm / totalLitres : 3.0; // Default to 3.0 km/L
+      
+      // 3. Calculate revenue and cost per km
+      const revenuePerKm = trip.distanceKm ? trip.baseRevenue / trip.distanceKm : 0;
+      const totalCosts = calculateTotalCosts(trip.costs);
+      const costPerKm = trip.distanceKm ? totalCosts / trip.distanceKm : 0;
+      
+      // 4. Calculate idle time (stub - in real implementation would be based on GPS data)
+      const idleTime = 2.5; // hours
+      
+      // Update the trip with the utilization metrics
+      await updateTrip({
+        ...trip,
+        fleetUtilizationMetrics: {
+          capacityUtilization,
+          fuelEfficiency,
+          revenuePerKm,
+          costPerKm,
+          idleTime
+        }
+      });
+      
+      console.log(`Fleet utilization calculated for trip ${tripId}`);
+    } catch (error) {
+      console.error("Error calculating fleet utilization:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`calculateUtilization-${tripId}`];
+        return newState;
+      });
+    }
+  };
+
+  const getFleetUtilizationMetrics = (
+    fleetNumber: string, 
+    startDate?: string, 
+    endDate?: string
+  ): {fleetNumber: string; utilizationRate: number; revenuePerKm: number; costPerKm: number}[] => {
+    // Filter trips by fleet number and date range
+    const filteredTrips = trips.filter(trip => {
+      if (trip.fleetNumber !== fleetNumber) return false;
+      if (startDate && trip.startDate < startDate) return false;
+      if (endDate && trip.endDate > endDate) return false;
+      if (!trip.fleetUtilizationMetrics) return false;
+      return true;
+    });
+    
+    if (filteredTrips.length === 0) {
+      return [{
+        fleetNumber,
+        utilizationRate: 0,
+        revenuePerKm: 0,
+        costPerKm: 0
+      }];
+    }
+    
+    // Calculate average metrics
+    const totalUtilizationRate = filteredTrips.reduce(
+      (sum, trip) => sum + (trip.fleetUtilizationMetrics?.capacityUtilization || 0), 
+      0
+    );
+    const totalRevenuePerKm = filteredTrips.reduce(
+      (sum, trip) => sum + (trip.fleetUtilizationMetrics?.revenuePerKm || 0), 
+      0
+    );
+    const totalCostPerKm = filteredTrips.reduce(
+      (sum, trip) => sum + (trip.fleetUtilizationMetrics?.costPerKm || 0), 
+      0
+    );
+    
+    return [{
+      fleetNumber,
+      utilizationRate: totalUtilizationRate / filteredTrips.length,
+      revenuePerKm: totalRevenuePerKm / filteredTrips.length,
+      costPerKm: totalCostPerKm / filteredTrips.length
+    }];
+  };
+
   const value = {
     // Google Maps
     isGoogleMapsLoaded,
@@ -1316,6 +1959,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     completeTrip,
     auditLogs,
     isLoading
+    // Trip Templates
+    tripTemplates,
+    addTripTemplate,
+    updateTripTemplate,
+    deleteTripTemplate,
+    getTripTemplate,
+    
+    // Load Plans
+    loadPlans,
+    addLoadPlan,
+    updateLoadPlan,
+    deleteLoadPlan,
+    getLoadPlan,
+    
+    // Route Planning & Optimization
+    planRoute,
+    optimizeRoute,
+    
+    // Trip Progress & Delivery
+    updateTripProgress,
+    confirmDelivery,
+    
+    // Trip Financials
+    generateTripFinancialAnalysis,
+    getTripFinancialAnalysis,
+    
+    // PDF Generation
+    generateQuoteConfirmationPdf,
+    generateLoadConfirmationPdf,
+    
+    // Fleet Utilization
+    calculateFleetUtilization,
+    getFleetUtilizationMetrics,
+    
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
