@@ -41,6 +41,7 @@ import AuditLogPage from "./pages/AuditLogPage";
 import TripManagementPage from "./pages/TripManagementPage";
 import FleetManagementPage from "./pages/FleetManagementPage";
 import WorkshopPage from "./pages/WorkshopPage";
+import RoutePlanningPage from "./pages/RoutePlanningPage";
 
 // Placeholder components for new routes
 const Notifications = () => <div>Notifications Page</div>;
@@ -150,6 +151,10 @@ const App: React.FC = () => {
                 <Route path="active-trips" element={<Navigate to="/trips?tab=active" replace />} />
                 <Route path="completed-trips" element={<Navigate to="/trips?tab=completed" replace />} />
                 <Route path="flags" element={<Navigate to="/trips?tab=flags" replace />} />
+                
+                {/* New Route Planning Routes */}
+                <Route path="route-planning" element={<RoutePlanningPage />} />
+                <Route path="route-planning/:tripId" element={<RoutePlanningPage />} />
                 
                 {/* Fleet Management Section */}
                 <Route path="fleet" element={<FleetManagementPage />} />

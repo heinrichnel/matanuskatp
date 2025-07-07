@@ -1,6 +1,41 @@
 // Base types for the application
 export interface Trip {
   id: string;
+  plannedRoute?: {
+    origin: string;
+    destination: string;
+    waypoints: string[];
+    coordinates?: {lat: number; lng: number}[];
+    estimatedDistance?: number; // km
+    estimatedDuration?: number; // minutes
+  };
+  optimizedRoute?: {
+    origin: string;
+    destination: string;
+    waypoints: string[];
+    coordinates?: {lat: number; lng: number}[];
+    estimatedDistance?: number; // km
+    estimatedDuration?: number; // minutes
+    fuelSavings?: number; // liters
+    timeSavings?: number; // minutes
+    optimizationDate?: string;
+  };
+  loadPlanId?: string;
+  deliveryConfirmationStatus?: 'pending' | 'confirmed' | 'disputed';
+  deliveryConfirmationNotes?: string;
+  proofOfDeliveryAttachments?: Attachment[];
+  actualDeliveryDateTime?: string;
+  tripTemplateId?: string;
+  fleetUtilizationMetrics?: {
+    capacityUtilization: number; // percentage
+    fuelEfficiency: number; // km/l
+    revenuePerKm: number;
+    costPerKm: number;
+    idleTime?: number; // hours
+  };
+  tripProgressStatus?: 'booked' | 'confirmed' | 'loaded' | 'in_transit' | 'delivered' | 'completed';
+  quoteConfirmationPdfUrl?: string;
+  loadConfirmationPdfUrl?: string;
   fleetNumber: string;
   driverName: string;
   clientName: string;
@@ -506,6 +541,125 @@ export interface UserPermission {
   granted: boolean;
 }
 export type NoUserPermissionAllowed = never;
+
+// NEW: Trip Template interface for pre-defined trip configurations
+export interface TripTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  defaultFleetNumber: string;
+  defaultDriverName: string;
+  defaultRoute: string;
+  defaultDistanceKm?: number;
+  defaultBaseRevenue?: number;
+  defaultRevenueCurrency: 'USD' | 'ZAR';
+  defaultClientName: string;
+  defaultClientType: 'internal' | 'external';
+  defaultCosts?: Partial<CostEntry>[];
+  plannedRoute?: {
+    origin: string;
+    destination: string;
+    waypoints: string[];
+  };
+  createdBy: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// NEW: Load Plan interface for cargo planning and optimization
+export interface LoadPlan {
+  id: string;
+  tripId: string;
+  vehicleCapacity: {
+    weight: number; // kg
+    volume: number; // cubic meters
+    length?: number; // meters
+    width?: number; // meters
+    height?: number; // meters
+  };
+  cargoItems: {
+    id: string;
+    description: string;
+    weight: number; // kg
+    volume: number; // cubic meters
+    quantity: number;
+    stackable: boolean;
+    hazardous: boolean;
+    category: string;
+    priorityLevel: 'low' | 'medium' | 'high';
+  }[];
+  loadingSequence?: string[]; // IDs of cargo items in loading order
+  optimizedArrangement?: string; // JSON string of 3D arrangement or reference to external data
+  axleWeightDistribution?: {
+    frontAxle: number; // kg
+    rearAxle: number; // kg
+    trailerAxles: number[]; // kg per axle
+  };
+  utilisationRate?: number; // percentage
+  notes?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+// NEW: Trip Route Point interface for detailed route information
+export interface RoutePoint {
+  id: string;
+  name: string;
+  address: string;
+  coordinates: {lat: number; lng: number};
+  type: 'origin' | 'destination' | 'waypoint' | 'rest_stop' | 'border_crossing' | 'fuel_stop';
+  estimatedArrivalTime?: string;
+  estimatedDepartureTime?: string;
+  actualArrivalTime?: string;
+  actualDepartureTime?: string;
+  notes?: string;
+  border?: {
+    name: string;
+    estimatedCrossingTime: number; // minutes
+    requiredDocuments: string[];
+    fees: {description: string; amount: number; currency: 'USD' | 'ZAR'}[];
+  };
+}
+
+// NEW: Trip Financial Analysis interface
+export interface TripFinancialAnalysis {
+  tripId: string;
+  revenueSummary: {
+    baseRevenue: number;
+    additionalRevenue: number;
+    totalRevenue: number;
+    currency: 'USD' | 'ZAR';
+  };
+  costBreakdown: {
+    fuelCosts: number;
+    borderCosts: number;
+    driverAllowance: number;
+    maintenanceCosts: number;
+    tollFees: number;
+    miscellaneousCosts: number;
+    totalCosts: number;
+  };
+  profitAnalysis: {
+    grossProfit: number;
+    grossProfitMargin: number; // percentage
+    netProfit: number;
+    netProfitMargin: number; // percentage
+    returnOnInvestment: number; // percentage
+  };
+  perKmMetrics: {
+    revenuePerKm: number;
+    costPerKm: number;
+    profitPerKm: number;
+  };
+  comparisonMetrics?: {
+    industryAvgCostPerKm: number;
+    companyAvgCostPerKm: number;
+    variance: number; // percentage
+  };
+  calculatedAt: string;
+}
+
 // Constants for form options
 export const CLIENTS = [
   'Teralco', 'SPF', 'Deep Catch', 'DS Healthcare', 'HFR', 'Aspen', 'DP World', 'FX Logistics',
@@ -828,6 +982,28 @@ export const TRIP_DELETION_REASONS = [
   'Merged with another trip record', 'Client contract cancellation', 'Regulatory compliance requirement',
   'Other (specify in comments)'
 ];
+
+// NEW: Trip Template Categories
+export const TRIP_TEMPLATE_CATEGORIES = [
+  { value: 'standard_delivery', label: 'Standard Delivery' },
+  { value: 'cross_border', label: 'Cross Border' },
+  { value: 'specialized', label: 'Specialized Cargo' },
+  { value: 'regular_route', label: 'Regular Route' },
+  { value: 'contract', label: 'Contract Route' }
+];
+
+// NEW: Load Categories
+export const LOAD_CATEGORIES = [
+  { value: 'general_cargo', label: 'General Cargo' },
+  { value: 'perishable', label: 'Perishable Goods' },
+  { value: 'hazardous', label: 'Hazardous Materials' },
+  { value: 'fragile', label: 'Fragile Items' },
+  { value: 'oversized', label: 'Oversized Cargo' },
+  { value: 'refrigerated', label: 'Refrigerated' },
+  { value: 'bulk', label: 'Bulk Materials' },
+  { value: 'containers', label: 'Containers' }
+];
+
 /*
  KILO CODE RATIONALE // FILE: src/types/index.ts
  --------------------------------------------------------------------------------
