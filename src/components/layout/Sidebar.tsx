@@ -4,6 +4,7 @@ import {
   AlertOctagon,
   AlertTriangle,
   BarChart3,
+  BarChartIcon,
   Building,
   ChevronDown,
   ChevronRight,
@@ -12,9 +13,11 @@ import {
   FileText,
   FileSpreadsheet,
   Flag,
+  Hammer,
   MapPin,
   Settings,
   Shield,
+  ToolIcon,
   User,
   Users,
   Wifi,
@@ -76,7 +79,7 @@ const Sidebar: FC<HeaderProps> = ({
         { id: 'dashboard', label: 'Dashboard', icon: Activity }
       ]
     },
-    
+
     // Trip Management
     {
       id: 'core',
@@ -159,6 +162,58 @@ const Sidebar: FC<HeaderProps> = ({
             { id: 'customer-reports', label: 'Customer Reports', path: 'clients?tab=analytics' },
             { id: 'customer-retention', label: 'Customer Retention', path: 'customers/retention' },
             { id: 'client-relationships', label: 'Client Relationships', path: 'clients?tab=relationships' },
+          ]
+        }
+      ]
+    },
+    
+    // Workshop & Maintenance
+    {
+      id: 'workshop',
+      label: 'Workshop & Maintenance',
+      items: [
+        {
+          id: 'workshop', 
+          label: 'Workshop Management', 
+          icon: Hammer,
+          children: [
+            { id: 'workshop-dashboard', label: 'Workshop Dashboard', path: 'workshop' },
+            { id: 'fleet-setup', label: 'Fleet Setup', path: 'workshop/fleet-setup' },
+            { id: 'qr-generator', label: 'QR Generator', path: 'workshop/qr-generator' },
+            
+            // Inspections Routes
+            { id: 'inspections', label: 'Inspections', path: 'workshop/inspections' },
+            { id: 'inspections-active', label: 'Active Inspections', path: 'workshop/inspections/active' },
+            { id: 'inspections-completed', label: 'Completed Inspections', path: 'workshop/inspections/completed' },
+            { id: 'inspections-templates', label: 'Inspection Templates', path: 'workshop/inspections/templates' },
+            
+            // Job Cards Routes
+            { id: 'job-cards', label: 'Job Cards', path: 'workshop/job-cards' },
+            { id: 'job-cards-kanban', label: 'Job Card Board', path: 'workshop/job-cards/kanban' },
+            { id: 'job-cards-open', label: 'Open Job Cards', path: 'workshop/job-cards/open' },
+            { id: 'job-cards-completed', label: 'Completed Job Cards', path: 'workshop/job-cards/completed' },
+            
+            // Faults Routes
+            { id: 'faults', label: 'Fault Tracking', path: 'workshop/faults' },
+            { id: 'faults-new', label: 'Report New Fault', path: 'workshop/faults/new' },
+            { id: 'faults-critical', label: 'Critical Faults', path: 'workshop/faults/critical' },
+            
+            // Tyre Management Routes
+            { id: 'tyres', label: 'Tyre Management', path: 'workshop/tyres' },
+            { id: 'tyres-inventory', label: 'Tyre Inventory', path: 'workshop/tyres/inventory' },
+            { id: 'tyres-position', label: 'Position Mapping', path: 'workshop/tyres/fleet' },
+            { id: 'tyres-inspection', label: 'Tyre Inspections', path: 'workshop/tyres/inspection' },
+            { id: 'tyres-analysis', label: 'Tyre Cost Analysis', path: 'workshop/tyres/analytics' },
+            
+            // Parts & Stock
+            { id: 'inventory', label: 'Parts Inventory', path: 'workshop/inventory' },
+            { id: 'stock-alerts', label: 'Stock Alerts', path: 'workshop/stock-alerts' },
+            { id: 'parts-ordering', label: 'Parts Ordering', path: 'workshop/parts-ordering' },
+            { id: 'purchase-orders', label: 'Purchase Orders', path: 'workshop/purchase-orders' },
+            
+            // Analytics & Reports
+            { id: 'workshop-analytics', label: 'Workshop Analytics', path: 'workshop/analytics' },
+            { id: 'workshop-reports', label: 'Workshop Reports', path: 'workshop/reports' }
           ]
         }
       ]
