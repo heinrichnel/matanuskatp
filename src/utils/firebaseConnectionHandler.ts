@@ -148,13 +148,8 @@ export const initializeConnectionMonitoring = async () => {
   const emulatorConnected = await connectToEmulator();
   
   if (!emulatorConnected && import.meta.env.DEV) {
-    // If emulator connection failed, show helpful message
-    console.warn('⚠️ Failed to connect to Firestore emulator');
-    console.warn('🔧 Troubleshooting steps:');
-    console.warn('   1. Check if emulator is running: firebase emulators:start --only firestore');
-    console.warn('   2. Verify port 8081 is not in use by another process');
-    console.warn('   3. Check your firewall settings');
-    return;
+    console.warn('⚠️ Emulator not connected - using production Firebase');
+    console.warn('🔧 To use emulator, run: firebase emulators:start --only firestore');
   }
   
   // Set status to connected if everything is working
