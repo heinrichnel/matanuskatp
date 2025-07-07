@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import { Truck, CheckCircle, Flag, Plus } from 'lucide-react';
 import Button from '../components/ui/Button';
@@ -6,7 +6,7 @@ import ActiveTrips from '../components/trips/ActiveTrips';
 import CompletedTrips from '../components/trips/CompletedTrips';
 import FlagsInvestigations from '../components/flags/FlagsInvestigations';
 import { useAppContext } from '../context/AppContext';
-import { useOutletContext, useSearchParams } from 'react-router-dom';
+import { Outlet, useSearchParams, useNavigate, Navigate, useOutletContext, useLocation } from 'react-router-dom';
 import { Trip } from '../types';
 
 interface OutletContextType {
@@ -21,12 +21,38 @@ const TripManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(defaultTab);
   const context = useOutletContext<OutletContextType>();
   const { isLoading } = useAppContext();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     setSearchParams(value === 'active' ? {} : { tab: value });
+    
+    // Navigate to the corresponding nested route
+    switch(value) {
+      case 'active':
+        navigate('/trips/active');
+        break;
+      case 'completed':
+        navigate('/trips/completed');
+        break;
+      case 'flags':
+        navigate('/trips/flags');
+        break;
+    }
   };
+  
+  // Effect to handle initial tab selection from URL params
+  useEffect(() => {
+    const tab = searchParams.get('tab') || 'active';
+    setActiveTab(tab);
+    
+    // Navigate to the appropriate child route if we're at the parent route
+    if (location.pathname === '/trips') {
+      navigate(`/trips/${tab}`);
+    }
+  }, [searchParams, navigate, location.pathname]);
 
   const handleAddTrip = () => {
     if (context.setEditingTrip) context.setEditingTrip(undefined);
@@ -72,15 +98,15 @@ const TripManagementPage: React.FC = () => {
         </TabsList>
 
         <TabsContent value="active" className="mt-6">
-          <ActiveTrips />
+          <Outlet />
         </TabsContent>
 
         <TabsContent value="completed" className="mt-6">
-          <CompletedTrips />
+          {activeTab === 'completed' && <Outlet />}
         </TabsContent>
 
         <TabsContent value="flags" className="mt-6">
-          <FlagsInvestigations />
+          {activeTab === 'flags' && <Outlet />}
         </TabsContent>
       </Tabs>
     </div>
