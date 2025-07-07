@@ -1958,7 +1958,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setTrips,
     completeTrip,
     auditLogs,
-    isLoading
+    isLoading,
     // Trip Templates
     tripTemplates,
     addTripTemplate,

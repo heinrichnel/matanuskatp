@@ -5,7 +5,7 @@ import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer, Autocomplete } f
 import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Select, Input } from '../components/ui/FormElements';
-import { MapPin, RotateCw, Save, Navigation, Clock, TrendingDown, Route, ChevronRight, ChevronDown, Fuel } from 'lucide-react';
+import { MapPin, RotateCw, Save, Navigation, Clock, TrendingDown, Route, ChevronRight, ChevronDown, ChevronUp, Fuel } from 'lucide-react';
 import LoadingIndicator from '../components/ui/LoadingIndicator';
 
 // Map container styles
@@ -564,43 +564,5 @@ const RoutePlanningPage: React.FC = () => {
     </div>
   );
 };
-
-function ChevronUp(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <polyline points="18 15 12 9 6 15" />
-    </svg>
-  );
-}
-
-function ChevronDown(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
 
 export default RoutePlanningPage;
