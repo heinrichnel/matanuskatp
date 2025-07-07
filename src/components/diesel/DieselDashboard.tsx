@@ -16,7 +16,6 @@ import {
   AlertTriangle,
   CheckCircle,
   Link,
-  Search,
   Trash2
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/helpers';
