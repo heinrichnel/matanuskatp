@@ -1,4 +1,4 @@
-import { Activity, AlertOctagon, AlertTriangle, BarChart3, BarChartIcon, Building, ChevronDown, ChevronRight, CircleDot, DollarSign, FileText, FileSpreadsheet, Flag, Hammer, MapPin, Settings, Shield, PenToolIcon as ToolIcon, User, Users, Wifi, WifiOff } from 'lucide-react'cIndicator';
+import { Activity, AlertOctagon, AlertTriangle, BarChart3, BarChartIcon, Building, ChevronDown, ChevronRight, CircleDot, DollarSign, FileText, FileSpreadsheet, Flag, Hammer, MapPin, Settings, Shield, PenToolIcon as ToolIcon, User, Users, Wifi, WifiOff } from 'lucide-react\'cIndicator';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
 
 // Custom Truck component to avoid duplicate import
