@@ -35,6 +35,7 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
   isOpen,
   onClose
 }) => {
+}) => {
   const { addDieselRecord, trips, dieselRecords, connectionStatus } = useAppContext();
   
   const [formData, setFormData] = useState({
@@ -613,7 +614,7 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
                         <p><span className="font-medium">Station:</span> {record.fuelStation}</p>
                         <p><span className="font-medium">Driver:</span> {record.driverName}</p>
                         <p><span className="font-medium">Litres:</span> {record.litresFilled.toFixed(1)} L</p>
-                        <p><span className="font-medium">Cost:</span> {formatCurrency(record.totalCost, record.currency || 'ZAR')}</p>
+                        <p><span className="font-medium">Cost:</span> {(record.currency === 'USD' ? '$' : 'R') + record.totalCost.toFixed(2)}</p>
                       </div>
                     </div>
                   ))}
@@ -696,4 +697,4 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
   );
 };
 
-export default ManualDiesel
+export default ManualDieselEntryModal;
