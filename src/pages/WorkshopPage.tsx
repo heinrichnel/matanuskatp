@@ -4,9 +4,8 @@ import { Wrench, FileText, Clipboard, AlertTriangle, Info, Truck, Flag as FlagIc
 import ActionLog from '../components/actionlog/ActionLog';
 import TyreManagement from '../components/workshop/TyreManagement';
 import InspectionManagement from '../components/workshop/InspectionManagement';
-import { useSearchParams, useNavigate } from 'react-router-dom';
 
-const WorkshopPage: React.FC = () => {
+import { useSearchParams, useNavigate } from 'react-router-dom';
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const defaultTab = searchParams.get('tab') || 'dashboard';
@@ -101,11 +100,7 @@ const WorkshopPage: React.FC = () => {
         <TabsContent value="tires" className="mt-6">
           <TyreManagement />
         </TabsContent>
-        
-        <TabsContent value="fleet" className="mt-6">
-          <FleetTable />
-        </TabsContent>
-        
+
         <TabsContent value="actions" className="mt-6">
           <ActionLog />
         </TabsContent>
