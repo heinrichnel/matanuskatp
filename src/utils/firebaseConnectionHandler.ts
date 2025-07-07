@@ -20,10 +20,11 @@ const checkEmulatorHealth = async (host: string = '127.0.0.1', port: number = 80
   try {
     const response = await fetch(`http://${host}:${port}`, {
       method: 'GET',
-      mode: 'cors',
+      mode: 'no-cors',
       cache: 'no-cache',
     });
-    return response.ok;
+    // With no-cors mode, we can't check response.ok, but if fetch succeeds, emulator is accessible
+    return true;
   } catch (error) {
     console.warn(`⚠️ Emulator health check failed: ${error}`);
     return false;
