@@ -17,6 +17,7 @@ import TripStatusUpdateModal from './TripStatusUpdateModal';
 import { useAppContext } from '../../context/AppContext';
 import SyncIndicator from '../ui/SyncIndicator';
 import { useOutletContext } from 'react-router-dom';
+import FirestoreConnectionError from '../ui/FirestoreConnectionError';
 import LoadingIndicator from '../ui/LoadingIndicator';
 import ErrorMessage from '../ui/ErrorMessage';
 
@@ -76,11 +77,16 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
     try {
       setIsRefreshing(true);
       setError(null);
+      setConnectionError(null);
       await refreshTrips();
       console.log('Trip data refreshed successfully');
     } catch (err) {
       console.error('Error refreshing trip data:', err);
-      setError('Failed to refresh trip data. Please try again.');
+      if (err instanceof Error && err.message.includes('Could not reach Cloud Firestore backend')) {
+        setConnectionError(err);
+      } else {
+        setError('Failed to refresh trip data. Please try again.');
+      }
     } finally {
       setIsRefreshing(false);
     }
@@ -93,6 +99,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   const statusUpdateType: 'shipped' | 'delivered' = 'shipped';
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [connectionError, setConnectionError] = useState<Error | null>(null);
   <Button
     variant="outline"
     size="md"
@@ -223,6 +230,15 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
           </Button>
         </div>
       </div>
+
+      {/* Connection error message */}
+      {connectionError && (
+        <FirestoreConnectionError
+          error={connectionError}
+          onRetry={handleRefreshData}
+          className="mb-4"
+        />
+      )}
 
       {/* Error message */}
       {error && (

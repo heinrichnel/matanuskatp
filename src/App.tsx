@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AppProvider, useAppContext } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundary from "./components/ErrorBoundary";
 import Layout from './components/layout/Layout';
 import TripForm from "./components/trips/TripForm";
 import Modal from "./components/ui/Modal";
+import FirestoreConnectionError from "./components/ui/FirestoreConnectionError";
+import { getConnectionStatus, onConnectionStatusChanged } from "./utils/firebaseConnectionHandler";
 import { Trip } from "./types";
 import MapsView from "./components/maps/MapsView";
 
@@ -36,6 +38,22 @@ const Profile = () => <div>Profile Page</div>;
 const App: React.FC = () => {
   const [showAddTripModal, setShowAddTripModal] = useState(false);
   const [editingTrip, setEditingTrip] = useState<Trip | undefined>(undefined);
+  const [connectionError, setConnectionError] = useState<Error | null>(
+    getConnectionStatus().status === 'error' ? getConnectionStatus().error : null
+  );
+
+  // Listen for connection status changes
+  useEffect(() => {
+    const unsubscribe = onConnectionStatusChanged((status, error) => {
+      if (status === 'error') {
+        setConnectionError(error || new Error('Unknown connection error'));
+      } else if (status === 'connected') {
+        setConnectionError(null);
+      }
+    });
+    
+    return unsubscribe;
+  }, []);
 
   // Function to handle trip form submission
   const handleTripSubmit = async (tripData: Omit<Trip, 'id' | 'costs' | 'status'>) => {
@@ -57,6 +75,11 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <AppProvider>
         <SyncProvider>
+          {connectionError && (
+            <div className="fixed top-0 left-0 right-0 z-50 p-4">
+              <FirestoreConnectionError error={connectionError} />
+            </div>
+          )}
           <Router>
             <Routes>
               <Route 

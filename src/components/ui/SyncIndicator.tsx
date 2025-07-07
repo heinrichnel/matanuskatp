@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSyncContext } from '../../context/SyncContext';
-import { RefreshCw, WifiOff } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import ConnectionStatusIndicator from './ConnectionStatusIndicator';
 
 interface SyncIndicatorProps {
   className?: string;
@@ -11,8 +12,7 @@ const SyncIndicator: React.FC<SyncIndicatorProps> = ({
   className = '',
   showText = true 
 }) => {
-  const syncContext = useSyncContext();
-  const { syncStatus, isOnline, lastSynced, pendingChangesCount } = syncContext;
+  const { syncStatus, lastSynced, pendingChangesCount } = useSyncContext();
 
   // Format time since last sync
   const getTimeSinceSync = () => {
@@ -29,36 +29,31 @@ const SyncIndicator: React.FC<SyncIndicatorProps> = ({
 
   return (
     <div className={`flex items-center space-x-2 text-xs ${className}`}>
-      {syncStatus === 'syncing' ? (
-        <>
-          <RefreshCw className="w-3 h-3 animate-spin text-blue-500" />
-          {showText && <span className="text-blue-600">Syncing data...</span>} 
-        </>
-      ) : !isOnline ? (
-        <>
-          <WifiOff className="w-3 h-3 text-red-500" />
-          {showText && (
-            <span className="text-red-500">
-              Offline
-              {pendingChangesCount > 0 && ` (${pendingChangesCount} pending)`}
-            </span>
-          )}
-        </>
-      ) : ( 
-        <>
-          <div className={`w-3 h-3 rounded-full ${
-            syncStatus === 'error' ? 'bg-red-500' : 'bg-green-500'
-          }`} />
+      <ConnectionStatusIndicator showText={false} />
+      
+      <div className="flex items-center space-x-2">
+        {syncStatus === 'syncing' ? (
+          <>
+            <RefreshCw className="w-3 h-3 animate-spin text-blue-500" />
+            {showText && <span className="text-blue-600">Syncing data...</span>} 
+          </>
+        ) : (
+          <>
+            <div className={`w-3 h-3 rounded-full ${
+              syncStatus === 'error' ? 'bg-red-500' : 'bg-green-500'
+            }`} />
 
-          {showText && (
-            <span className={syncStatus === 'error' ? 'text-red-500' : 'text-gray-500'}>
-              {syncStatus === 'error'
-                ? 'Sync error'
-                : `Synced ${getTimeSinceSync()}`} 
-            </span>
-          )}
-        </>
-      )}
+            {showText && (
+              <span className={syncStatus === 'error' ? 'text-red-500' : 'text-gray-500'}>
+                {syncStatus === 'error'
+                  ? 'Sync error'
+                  : `Synced ${getTimeSinceSync()}`} 
+                {pendingChangesCount > 0 && ` (${pendingChangesCount} pending)`}
+              </span>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

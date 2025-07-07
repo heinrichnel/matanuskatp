@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react';
 import syncService from '../utils/syncService';
 import type { SyncService } from '../utils/syncService';
+import { getConnectionStatus } from '../utils/firebaseConnectionHandler';
 
 const SyncContext = createContext<SyncService | undefined>(undefined);
 
@@ -22,6 +23,11 @@ export const useSyncContext = (): SyncService => {
   if (!context) {
     throw new Error('useSyncContext must be used within a SyncProvider');
   }
+  
+  // Update isOnline property based on connection status
+  const connectionStatus = getConnectionStatus();
+  context.isOnline = connectionStatus.status === 'connected';
+  
   return context;
 };
 
