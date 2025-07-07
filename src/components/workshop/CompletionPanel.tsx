@@ -8,7 +8,7 @@ interface CompletionPanelProps {
   status: string;
   tasks: {
     id: string;
-    status: 'pending' | 'in_progress' | 'completed' | 'not_applicable';
+    status: 'pending' | 'in_progress' | 'completed' | 'verified' | 'not_applicable';
   }[];
   faultId?: string;
   onComplete: (jobCardId: string) => Promise<void>;
@@ -29,16 +29,16 @@ const CompletionPanel: React.FC<CompletionPanelProps> = ({
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  // Check if all tasks are completed or N/A
-  const allTasksCompleted = tasks.every(
-    task => task.status === 'completed' || task.status === 'not_applicable'
+  // Check if all tasks are verified or N/A (for supervisors)
+  const allTasksVerified = tasks.every(
+    task => task.status === 'verified' || task.status === 'not_applicable'
   );
   
   // Check if the job card is already completed
   const isCompleted = status === 'completed';
 
   const handleCompleteClick = () => {
-    if (!allTasksCompleted) return;
+    if (!allTasksVerified) return;
     setShowConfirmation(true);
   };
 
@@ -76,27 +76,27 @@ const CompletionPanel: React.FC<CompletionPanelProps> = ({
         {!isCompleted ? (
           <div className="space-y-4">
             <div className={`p-4 rounded-lg border ${
-              allTasksCompleted ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'
+              allTasksVerified ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'
             }`}>
               <div className="flex items-start space-x-3">
-                {allTasksCompleted ? (
+                {allTasksVerified ? (
                   <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
                 ) : (
                   <AlertTriangle className="w-5 h-5 text-yellow-600 mt-0.5" />
                 )}
                 <div>
                   <h4 className="text-sm font-medium text-gray-800">
-                    {allTasksCompleted ? 'Ready for Completion' : 'Completion Requirements'}
+                    {allTasksVerified ? 'Ready for Completion' : 'Completion Requirements'}
                   </h4>
-                  {allTasksCompleted ? (
+                  {allTasksVerified ? (
                     <p className="text-sm text-green-700 mt-1">
-                      All tasks are completed. This job card is ready to be marked as completed.
+                      All tasks are completed and verified. This job card is ready to be marked as completed.
                     </p>
                   ) : (
                     <div className="text-sm text-yellow-700 mt-1">
                       <p>The following requirements must be met before completing the job:</p>
                       <ul className="list-disc pl-5 mt-1">
-                        <li>All tasks must be marked as completed or not applicable</li>
+                        <li>All tasks must be marked as verified or not applicable by a supervisor</li>
                       </ul>
                     </div>
                   )}
@@ -107,7 +107,7 @@ const CompletionPanel: React.FC<CompletionPanelProps> = ({
             <div className="flex justify-center">
               <Button
                 onClick={handleCompleteClick}
-                disabled={!allTasksCompleted || isLoading || isCompleting}
+                disabled={!allTasksVerified || isLoading || isCompleting}
                 isLoading={isCompleting}
                 icon={<CheckCircle className="w-4 h-4" />}
                 size="lg"
@@ -122,7 +122,7 @@ const CompletionPanel: React.FC<CompletionPanelProps> = ({
               <div className="flex items-start space-x-3">
                 <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
                 <div>
-                  <h4 className="text-sm font-medium text-green-800">Job Completed</h4>
+                  <h4 className="text-sm font-medium text-green-800">Job Completed & Verified</h4>
                   <p className="text-sm text-green-700 mt-1">
                     This job card has been completed. You can now generate an invoice.
                   </p>
@@ -157,8 +157,9 @@ const CompletionPanel: React.FC<CompletionPanelProps> = ({
               <ul className="list-disc pl-5 mb-4 text-sm text-gray-600 space-y-1">
                 <li>Set the job status to "completed"</li>
                 <li>Record the completion timestamp</li>
-                {faultId && <li>Automatically resolve the linked fault</li>}
+                {faultId && <li>Automatically mark the linked fault as resolved</li>}
                 <li>Allow invoice generation</li>
+                <li>Create a completion audit entry</li>
               </ul>
               
               <div className="flex justify-end space-x-3 pt-4">
