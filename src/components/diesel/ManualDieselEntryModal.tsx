@@ -29,11 +29,13 @@ import { formatDate } from '../../utils/helpers';
 interface ManualDieselEntryModalProps {
   isOpen: boolean;
   onClose: () => void;
+  dieselRecords?: DieselConsumptionRecord[];
 }
 
-const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
+const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({ 
   isOpen,
-  onClose
+  onClose,
+  dieselRecords = []
 }) => {
   const { addDieselRecord, trips, dieselRecords, connectionStatus } = useAppContext();
   
@@ -58,6 +60,7 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [autoCalculate, setAutoCalculate] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [possibleDuplicates, setPossibleDuplicates] = useState<DieselConsumptionRecord[]>([]);
 
   // Get available trips for the selected fleet
   const availableTrips = trips.filter(trip => 
@@ -71,6 +74,21 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
       !record.isReeferUnit && 
       ['4H', '6H', '21H', '22H', '23H', '24H', '26H', '28H', '29H', '30H', '31H', '32H', '33H', 'UD'].includes(record.fleetNumber)
     ) : [];
+
+  // Check for possible duplicates when fields change
+  useEffect(() => {
+    if (formData.fleetNumber && formData.date) {
+      // Find records with the same fleet and date
+      const potentialDuplicates = dieselRecords.filter(record => 
+        record.fleetNumber === formData.fleetNumber && 
+        record.date === formData.date
+      );
+      
+      setPossibleDuplicates(potentialDuplicates);
+    } else {
+      setPossibleDuplicates([]);
+    }
+  }, [formData.fleetNumber, formData.date, dieselRecords]);
 
   const handleChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -575,6 +593,33 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
                   Refrigeration trailers are measured in litres per hour instead of kilometers per litre.
                   Please enter the number of hours the reefer unit was operated.
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Possible Duplicates Warning */}
+        {possibleDuplicates.length > 0 && (
+          <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-4">
+            <div className="flex items-start space-x-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-medium text-amber-800">Possible Duplicate Entries</h4>
+                <p className="text-sm text-amber-700 mt-1">
+                  {possibleDuplicates.length} diesel {possibleDuplicates.length === 1 ? 'record' : 'records'} already exist for this fleet on {formData.date}.
+                </p>
+                <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
+                  {possibleDuplicates.map(record => (
+                    <div key={record.id} className="p-2 bg-amber-100 rounded text-xs text-amber-800">
+                      <div className="grid grid-cols-2 gap-2">
+                        <p><span className="font-medium">Station:</span> {record.fuelStation}</p>
+                        <p><span className="font-medium">Driver:</span> {record.driverName}</p>
+                        <p><span className="font-medium">Litres:</span> {record.litresFilled.toFixed(1)} L</p>
+                        <p><span className="font-medium">Cost:</span> {formatCurrency(record.totalCost, record.currency || 'ZAR')}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
