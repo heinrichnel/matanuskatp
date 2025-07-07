@@ -14,6 +14,7 @@ import {
 } from '../types';
 import { AuditLog as AuditLogType } from '../types/audit';
 import { TyreInventoryItem } from '../utils/tyreConstants';
+import { Client } from '../types/client';
 
 import {
   addTripToFirebase,
@@ -114,6 +115,15 @@ interface AppContextType {
   setTrips: React.Dispatch<React.SetStateAction<Trip[]>>;
   completeTrip: (tripId: string) => Promise<void>;
   auditLogs: AuditLogType[];
+  
+  // Client Management
+  clients: Client[];
+  addClient: (client: Omit<Client, 'id'>) => Promise<string>;
+  updateClient: (client: Client) => Promise<void>;
+  deleteClient: (id: string) => Promise<void>;
+  getClient: (id: string) => Client | undefined;
+  addClientRelationship: (clientId: string, relatedClientId: string, relationType: string, notes?: string) => Promise<void>;
+  removeClientRelationship: (clientId: string, relationshipId: string) => Promise<void>;
 
   // Add isLoading property to fix TypeScript error in ActiveTrips component
   isLoading: {
@@ -135,6 +145,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [carReports, setCARReports] = useState<CARReport[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogType[]>([]);
   const [workshopInventory, setWorkshopInventory] = useState<TyreInventoryItem[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected'); // TODO: Implement actual connection status monitoring
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   
@@ -261,7 +272,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setActionItems,
       setCarReports: setCARReports,
       setAuditLogs,
-      setWorkshopInventory
+      setWorkshopInventory,
+      setClients
     });
 
   // Subscribe to all collections
@@ -344,6 +356,178 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       throw error;
     } finally {
       setIsLoading(prev => ({ ...prev, deleteWorkshopInventoryItem: false }));
+    }
+  };
+
+  // Client Management Functions
+  const addClient = async (clientData: Omit<Client, 'id'>): Promise<string> => {
+    try {
+      setIsLoading(prev => ({ ...prev, addClient: true }));
+      const newClient: Client = {
+        ...clientData,
+        id: uuidv4()
+      };
+      
+      // In a real implementation, this would add to Firestore
+      setClients(prev => [...prev, newClient]);
+      
+      // Log client creation for audit trail
+      await addAuditLogToFirebase({
+        id: uuidv4(),
+        timestamp: new Date().toISOString(),
+        user: 'system', // Replace with actual user
+        action: 'create',
+        entity: 'client',
+        entityId: newClient.id,
+        details: `Client ${newClient.name} created`,
+        changes: newClient
+      });
+      
+      return newClient.id;
+    } catch (error) {
+      console.error("Error adding client:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, addClient: false }));
+    }
+  };
+
+  const updateClient = async (client: Client): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, updateClient: true }));
+      
+      // Get the original client for audit logging
+      const originalClient = clients.find(c => c.id === client.id);
+      
+      // In a real implementation, this would update Firestore
+      setClients(prev => prev.map(c => c.id === client.id ? {...client, updatedAt: new Date().toISOString()} : c));
+      
+      // Log client update for audit trail
+      if (originalClient) {
+        await addAuditLogToFirebase({
+          id: uuidv4(),
+          timestamp: new Date().toISOString(),
+          user: 'system', // Replace with actual user
+          action: 'update',
+          entity: 'client',
+          entityId: client.id,
+          details: `Client ${client.name} updated`,
+          changes: {
+            before: originalClient,
+            after: client
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error updating client:", error);
+      throw error;
+    } finally {
+      setIsLoading(prev => ({ ...prev, updateClient: false }));
+    }
+  };
+
+  const deleteClient = async (id: string): Promise<void> => {
+    try {
+      setIsLoading(prev => ({ ...prev, [`deleteClient-${id}`]: true }));
+      
+      const clientToDelete = clients.find(c => c.id === id);
+      
+      if (clientToDelete) {
+        // Check if client is referenced in trips
+        const clientTrips = trips.filter(t => t.clientName === clientToDelete.name);
+        
+        if (clientTrips.length > 0) {
+          throw new Error(`Cannot delete client: ${clientToDelete.name} is referenced in ${clientTrips.length} trips`);
+        }
+        
+        // Log client deletion for audit trail
+        await addAuditLogToFirebase({
+          id: uuidv4(),
+          timestamp: new Date().toISOString(),
+          user: 'system', // Replace with actual user
+          action: 'delete',
+          entity: 'client',
+          entityId: id,
+          details: `Client ${clientToDelete.name} deleted`,
+          changes: clientToDelete
+        });
+      }
+      
+      // In a real implementation, this would delete from Firestore
+      setClients(prev => prev.filter(c => c.id !== id));
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      throw error;
+    } finally {
+      setIsLoading(prev => {
+        const newState = { ...prev };
+        delete newState[`deleteClient-${id}`];
+        return newState;
+      });
+    }
+  };
+
+  const getClient = (id: string): Client | undefined => {
+    return clients.find(c => c.id === id);
+  };
+
+  const addClientRelationship = async (
+    clientId: string,
+    relatedClientId: string, 
+    relationType: string,
+    notes?: string
+  ): Promise<void> => {
+    try {
+      const client = clients.find(c => c.id === clientId);
+      if (!client) throw new Error(`Client with ID ${clientId} not found`);
+      
+      // Check if relationship already exists
+      const existingRelationship = client.relationships.find(r => r.relatedClientId === relatedClientId);
+      if (existingRelationship) {
+        throw new Error('Relationship already exists between these clients');
+      }
+      
+      // Create the new relationship
+      const relationship = {
+        id: uuidv4(),
+        relatedClientId,
+        relationType: relationType as any,
+        notes,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Update the client with the new relationship
+      const updatedClient = {
+        ...client,
+        relationships: [...client.relationships, relationship],
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Update the client in state
+      await updateClient(updatedClient);
+    } catch (error) {
+      console.error("Error adding client relationship:", error);
+      throw error;
+    }
+  };
+
+  const removeClientRelationship = async (clientId: string, relationshipId: string): Promise<void> => {
+    try {
+      const client = clients.find(c => c.id === clientId);
+      if (!client) throw new Error(`Client with ID ${clientId} not found`);
+      
+      // Filter out the relationship
+      const updatedClient = {
+        ...client,
+        relationships: client.relationships.filter(r => r.id !== relationshipId),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Update the client in state
+      await updateClient(updatedClient);
+    } catch (error) {
+      console.error("Error removing client relationship:", error);
+      throw error;
     }
   };
 
@@ -1097,6 +1281,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteWorkshopInventoryItem,
     refreshWorkshopInventory,
     connectionStatus,
+    // Client Management
+    clients,
+    addClient,
+    updateClient,
+    deleteClient, 
+    getClient,
+    addClientRelationship,
+    removeClientRelationship,
     bulkDeleteTrips: placeholder,
     updateTripStatus: async (tripId: string, status: 'shipped' | 'delivered', notes: string): Promise<void> => {
       try {
