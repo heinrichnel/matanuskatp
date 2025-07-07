@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Button from '../ui/Button';
-import { CheckCircle, Clock, AlertTriangle, Tool, X, Edit, Plus, Trash2, Save } from 'lucide-react';
+import { CheckCircle, Clock, AlertTriangle, PenTool as Tool, X, Edit, Plus, Trash2, Save } from 'lucide-react';
 
 interface Task {
   id: string;
