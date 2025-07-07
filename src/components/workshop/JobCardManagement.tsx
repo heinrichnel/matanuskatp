@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
+import { FileText, ClipboardCheck, Wrench, Plus, Search, Filter, SlidersHorizontal } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
-import { FileText, ClipboardCheck, Wrench, Plus, Search, Filter, SlidersHorizontal, Download } from 'lucide-react';
+import JobCardKanbanBoard from './JobCardKanbanBoard';
+import JobCard from './JobCard';
+import Modal from '../ui/Modal';
 
 const JobCardManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('open');
-  
+  const [showJobCardModal, setShowJobCardModal] = useState(false);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -16,13 +20,8 @@ const JobCardManagement: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           <Button
-            variant="outline"
-            icon={<Download className="w-4 h-4" />}
-          >
-            Export Report
-          </Button>
-          <Button
             icon={<Plus className="w-4 h-4" />}
+            onClick={() => setShowJobCardModal(true)}
           >
             New Job Card
           </Button>
@@ -36,12 +35,12 @@ const JobCardManagement: React.FC = () => {
             <span>Open Job Cards</span>
           </TabsTrigger>
           <TabsTrigger value="completed" className="flex items-center gap-2">
-            <ClipboardCheck className="w-4 h-4" />
-            <span>Completed Job Cards</span>
-          </TabsTrigger>
-          <TabsTrigger value="templates" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             <span>Job Card Templates</span>
+          </TabsTrigger>
+          <TabsTrigger value="kanban" className="flex items-center gap-2">
+            <ClipboardCheck className="w-4 h-4" />
+            <span>Kanban Board</span>
           </TabsTrigger>
         </TabsList>
         
@@ -79,6 +78,7 @@ const JobCardManagement: React.FC = () => {
                 <div className="mt-6">
                   <Button
                     icon={<Plus className="w-4 h-4" />}
+                    onClick={() => setShowJobCardModal(true)}
                   >
                     Create Job Card
                   </Button>
@@ -88,40 +88,8 @@ const JobCardManagement: React.FC = () => {
           </Card>
         </TabsContent>
         
-        <TabsContent value="completed" className="mt-6">
-          <Card>
-            <CardHeader 
-              title="Completed Job Cards" 
-              action={
-                <div className="flex items-center space-x-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    icon={<Filter className="w-4 h-4" />}
-                  >
-                    Filter
-                  </Button>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Search className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      type="text"
-                      placeholder="Search job cards..."
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    />
-                  </div>
-                </div>
-              }
-            />
-            <CardContent>
-              <div className="text-center py-8">
-                <ClipboardCheck className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No completed job cards</h3>
-                <p className="mt-1 text-sm text-gray-500">Completed job cards will appear here</p>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="kanban" className="mt-6">
+          <JobCardKanbanBoard />
         </TabsContent>
         
         <TabsContent value="templates" className="mt-6">
@@ -129,12 +97,9 @@ const JobCardManagement: React.FC = () => {
             <CardHeader 
               title="Job Card Templates" 
               action={
-                <Button
-                  size="sm"
-                  icon={<Plus className="w-4 h-4" />}
-                >
-                  Create Template
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Button size="sm" icon={<Plus className="w-4 h-4" />}>Create Template</Button>
+                </div>
               }
             />
             <CardContent>
@@ -172,6 +137,16 @@ const JobCardManagement: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Job Card Modal */}
+      <Modal
+        isOpen={showJobCardModal}
+        onClose={() => setShowJobCardModal(false)}
+        title="Job Card"
+        maxWidth="2xl"
+      >
+        <JobCard />
+      </Modal>
     </div>
   );
 };
