@@ -1,6 +1,0 @@
-driverId,timestamp,eventType,speed_kmh,location_geopoint
-d001,2023-10-27T10:00:00Z,hard_braking,85,40.7128,-74.0060
-d002,2023-10-27T10:05:00Z,rapid_acceleration,92,34.0522,-118.2437
-d001,2023-10-27T10:15:00Z,cornering,60,40.7150,-74.0080
-d003,2023-10-27T10:20:00Z,hard_braking,110,51.5074,-0.1278
-d002,2023-10-27T10:25:00Z,rapid_acceleration,105,34.0550,-118.2450
