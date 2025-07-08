@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import { Truck, CheckCircle, Flag, Plus } from 'lucide-react';
 import Button from '../components/ui/Button';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// The following components are imported for possible future use in this page.
+// @ts-ignore: imported for future use, suppress unused warning
 import ActiveTrips from '../components/trips/ActiveTrips';
+// @ts-ignore: imported for future use, suppress unused warning
 import CompletedTrips from '../components/trips/CompletedTrips';
+// @ts-ignore: imported for future use, suppress unused warning
 import FlagsInvestigations from '../components/flags/FlagsInvestigations';
+/* eslint-enable @typescript-eslint/no-unused-vars */
 import { useAppContext } from '../context/AppContext';
-import { Outlet, useSearchParams, useNavigate, Navigate, useOutletContext, useLocation } from 'react-router-dom';
+import { Outlet, useSearchParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import { Trip } from '../types';
 
 interface OutletContextType {

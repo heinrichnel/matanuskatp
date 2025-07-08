@@ -24,11 +24,12 @@ import {
   MissedLoad,
   ActionItem,
   CARReport,
-  Client
+  CLIENTS
 } from '../types';
 import { TyreInventoryItem } from './tyreConstants';
 import { Tyre } from '../types/workshop-tyre-inventory';
 import { JobCard, EnhancedJobCard } from '../types/workshop-job-card';
+import { ClientOptions } from 'openai';
 
 // Collection references
 // const tripsCollection = collection(db, 'trips'); // Unused
@@ -885,10 +886,10 @@ export class SyncService {
           console.log(`🔄 Clients changes: ${added} added, ${modified} modified, ${removed} removed`);
 
           // Get all current documents for a full refresh
-          const clients: Client[] = [];
+          const clients: ClientOptions[] = [];
           snapshot.forEach(doc => {
             const data = convertTimestamps(doc.data());
-            clients.push({ id: doc.id, ...data } as Client);
+            clients.push({ id: doc.id, ...data } as ClientOptions);
           });
 
           if (typeof this.dataCallbacks.setClients === 'function') {

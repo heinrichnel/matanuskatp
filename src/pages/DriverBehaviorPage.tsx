@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DriverBehaviorEvent } from '../types';
 import { useAppContext } from '../context/AppContext';
 import { useSyncContext } from '../context/SyncContext';
@@ -41,9 +40,6 @@ const DriverBehaviorPage: React.FC = () => {
     
     // Cleanup function is not needed as the subscription is managed by the SyncContext
   }, []);
-  
-  // Use the SyncContext to subscribe to driver behavior events
-  const { subscribeToDriverBehaviorEvents } = useSyncContext();
   
   // Subscribe to driver behavior events when the component mounts
   useEffect(() => {

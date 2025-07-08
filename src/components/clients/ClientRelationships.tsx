@@ -300,7 +300,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
                                 size="xs"
                                 variant="outline"
                                 icon={<Trash2 className="w-3 h-3" />}
-                                onClick={() => handleRemoveRelationship(rel.relationship.id)}
+                                onClick={() => rel.relationship?.id && handleRemoveRelationship(rel.relationship.id)}
                               >
                                 Remove
                               </Button>
@@ -386,7 +386,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
                             size="xs"
                             variant="outline"
                             icon={<Trash2 className="w-3 h-3" />}
-                            onClick={() => handleRemoveRelationship(rel.relationship.id)}
+                            onClick={() => rel.relationship?.id && handleRemoveRelationship(rel.relationship.id)}
                           >
                             Remove
                           </Button>
@@ -460,7 +460,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
             <Select
               label="Related Client *"
               value={newRelationship.relatedClientId}
-              onChange={(value) => setNewRelationship(prev => ({ ...prev, relatedClientId: value }))}
+              onChange={(e) => setNewRelationship(prev => ({ ...prev, relatedClientId: e.target.value }))}
               options={[
                 { label: 'Select a client...', value: '' },
                 ...availableClients.map(client => ({ label: client.name, value: client.id }))
@@ -471,7 +471,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
             <Select
               label="Relationship Type *"
               value={newRelationship.relationType}
-              onChange={(value) => setNewRelationship(prev => ({ ...prev, relationType: value }))}
+              onChange={(e) => setNewRelationship(prev => ({ ...prev, relationType: e.target.value }))}
               options={[
                 { label: 'Select relationship type...', value: '' },
                 ...CLIENT_RELATIONSHIP_TYPES.map(type => ({ label: type.label, value: type.value }))
@@ -482,7 +482,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
             <TextArea
               label="Notes (Optional)"
               value={newRelationship.notes}
-              onChange={(value) => setNewRelationship(prev => ({ ...prev, notes: value }))}
+              onChange={(e) => setNewRelationship(prev => ({ ...prev, notes: e.target.value }))}
               placeholder="Add any notes about this relationship..."
               rows={3}
             />

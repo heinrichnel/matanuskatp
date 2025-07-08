@@ -6,7 +6,6 @@ import { VehicleSelector } from '@/components/common/VehicleSelector';
 import { CircleDot, Wrench, Eye } from "lucide-react";
 import { 
   getTyresByVehicle, 
-  getTyreByPosition, 
   getTyreStatusColor, 
   getTyreConditionColor,
   getVehicleTyreConfiguration,
@@ -31,9 +30,9 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
   // derive mapping of permitted positions for this vehicle
   const tyreConfig: FleetTyreMapping | null = getVehicleTyreConfiguration(selectedVehicle);
 
-  const getTyreAtPosition = (position: string) => {
-    return getTyreByPosition(selectedVehicle, position);
-  };
+  // const getTyreAtPosition = (position: string) => {
+  //   return getTyreByPosition(selectedVehicle, position);
+  // };
 
 
   const getVehicleTypeLabel = (type: string) => {

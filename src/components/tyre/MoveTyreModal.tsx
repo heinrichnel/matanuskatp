@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/Modal';
+import Modal from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { Select, Input } from '@/components/ui/FormElements';
 import type { StockEntry, TyreStore } from '@/types/tyre';
@@ -56,38 +56,33 @@ export const MoveTyreModal: React.FC<MoveTyreModalProps> = ({ isOpen, onClose, f
   const storeOptions = stores.map((s: TyreStore) => ({ label: s.name, value: s.id }));
 
   return (
-    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Move Tyre {entry?.tyreId}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <Select
-            label="From Store"
-            value={fromStoreId}
-            onChange={() => {}}
-            options={storeOptions}
-            disabled
-          />
-          <Select
-            label="To Store"
-            value={toStoreId}
-            onChange={(e) => setToStoreId(e.target.value)}
-            options={[{ label: 'Select store...', value: '' }, ...storeOptions.filter(o => o.value !== fromStoreId)]}
-          />
-          <Input
-            label="Odometer (km)"
-            type="number"
-            value={odometer}
-            onChange={(e) => setOdometer(Number(e.target.value))}
-          />
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={!toStoreId}>Move</Button>
-          </div>
+    <Modal isOpen={isOpen} onClose={onClose} title={`Move Tyre ${entry?.tyreId}`} maxWidth="sm">
+      <div className="space-y-4">
+        <Select
+          label="From Store"
+          value={fromStoreId}
+          onChange={() => {}}
+          options={storeOptions}
+          disabled
+        />
+        <Select
+          label="To Store"
+          value={toStoreId}
+          onChange={(e) => setToStoreId(e.target.value)}
+          options={[{ label: 'Select store...', value: '' }, ...storeOptions.filter(o => o.value !== fromStoreId)]}
+        />
+        <Input
+          label="Odometer (km)"
+          type="number"
+          value={odometer}
+          onChange={(e) => setOdometer(Number(e.target.value))}
+        />
+        <div className="flex justify-end space-x-2">
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={!toStoreId}>Move</Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </Modal>
   );
 };
 

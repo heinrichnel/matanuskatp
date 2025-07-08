@@ -1,0 +1,14 @@
+[build]
+  base = "/"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Firebase configuration
+  # Note: In production, set these in the Netlify UI instead of this file
+  NODE_VERSION = "20.x"
+
+[dev]
+  command = "npm run dev"
+  port = 3000
+  targetPort = 5173

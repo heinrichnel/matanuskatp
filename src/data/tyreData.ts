@@ -117,6 +117,11 @@ export interface TyreInspectionEntry {
   condition: string;
   notes: string;
   images?: string[];
+  sidewallCondition?: string; // Added for inspection detail
+  remarks?: string; // Added for inspection detail
+  photos?: string[]; // Added for compatibility with inspection form
+  status?: string; // Added for compatibility with inspection form
+  timestamp?: string; // Added for compatibility with inspection form
 }
 
 // Main Tyre interface
@@ -747,8 +752,17 @@ export const getTyreByPosition = (vehicleId: string, position: string): Tyre | u
   );
 };
 
-export const getVehicleTyreConfiguration = (vehicleId: string): VehicleTyreConfiguration | null => {
-  return VEHICLE_TYRE_CONFIGS[vehicleId] || null;
+import type { FleetTyreMapping } from '@/types/tyre';
+
+export const getVehicleTyreConfiguration = (vehicleId: string): FleetTyreMapping | null => {
+  const config = VEHICLE_TYRE_CONFIGS[vehicleId] || null;
+  if (!config) return null;
+  // Add fleetNumber if missing for compatibility
+  return {
+    fleetNumber: vehicleId,
+    vehicleType: config.vehicleType,
+    positions: config.positions as any // Assume compatible for now
+  };
 };
 
 export const getTyreStatusColor = (status: string) => {

@@ -5,13 +5,13 @@ import React, { useState } from 'react';
 import { Trip, CostEntry, AdditionalCost, DelayReason } from '../../types';
 
 // ─── Context ─────────────────────────────────────────────────────
-import { useAppContext } from '../../context/AppContext.tsx';
+import { useAppContext } from '../../context/AppContext';
 
 // ─── UI Components ───────────────────────────────────────────────
 import Modal from '../ui/Modal.tsx';
 import Button from '../ui/Button.tsx';
 import Card, { CardContent, CardHeader } from '../ui/Card.tsx';
-import { Input, Select, TextArea, FileUpload } from '../ui/FormElements.tsx';
+import { AlertTriangle, ArrowLeft, BarChart3, Calendar, Calculator, CheckCircle, Clock, Flag, Plus, Send } from 'lucide-react';
 
 // ─── Custom Modules ──────────────────────────────────────────────
 import CostForm from '../cost/CostForm';
@@ -23,9 +23,6 @@ import TripReport from '../reports/TripReport';
 
 // ─── Helpers ─────────────────────────────────────────────────────
 import { formatCurrency, formatDateTime, calculateKPIs, getFlaggedCostsCount, getUnresolvedFlagsCount, canCompleteTrip } from '../../utils/helpers';
-
-// ─── Icons ───────────────────────────────────────────────────────
-import { AlertTriangle, ArrowLeft, BarChart3, Calendar, Calculator, CheckCircle, Clock, Flag, Plus, Send, X } from 'lucide-react';
 
 
 interface TripDetailsProps {
@@ -45,7 +42,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
   // Enhanced handleAddCost with file support
   const handleAddCost = (costData: Omit<CostEntry, 'id' | 'attachments'>, files?: FileList) => {
     try {
-      const costId = addCostEntry(costData, files);
+      addCostEntry(costData, files);
       setShowCostForm(false);
       
       // Show success message with cost details

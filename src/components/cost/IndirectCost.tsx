@@ -10,9 +10,6 @@ import { Calculator, Clock, Navigation, AlertTriangle } from 'lucide-react';
 // ─── Utilities ───────────────────────────────────────────────────
 import { formatCurrency } from '../../utils/helpers';
 
-// ─── Context ─────────────────────────────────────────────────────
-import { useAppContext } from '../>../context/AppContext';
-
 
 interface SystemCostGeneratorProps {
   trip: Trip;

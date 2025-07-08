@@ -357,7 +357,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCarReports: setCARReports,
       setAuditLogs,
       setWorkshopInventory,
-      setClients
+      setClients,
       setJobCards // Register job cards state
     });
 
