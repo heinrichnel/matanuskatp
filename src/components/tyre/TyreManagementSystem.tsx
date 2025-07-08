@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { Input, Select, TextArea } from "@/components/ui/FormElements";
-import { TyreInventoryFilters } from './tyre/TyreInventoryFilters';
+import TyreInventoryFilters from './TyreInventoryFilters';
 import { TYRE_REFERENCE_DATA } from '@/data/tyreReferenceData';
 // Placeholder for missing module
 import {
@@ -76,8 +76,8 @@ interface Tyre {
 
 // Replace hardcoded values with TYRE_REFERENCE_DATA
 const TYRE_BRANDS = TYRE_REFERENCE_DATA.brands;
-const TYRE_PATTERNS = TYRE_REFERENCE_DATA.patterns;
-const TYRE_SIZES = TYRE_REFERENCE_DATA.sizes;
+// const TYRE_PATTERNS = TYRE_REFERENCE_DATA.patterns;
+// const TYRE_SIZES = TYRE_REFERENCE_DATA.sizes;
 
 const TYRE_TYPES = [
   { label: 'Steer', value: 'steer' },
@@ -159,9 +159,6 @@ export const TyreManagementSystem: React.FC = () => {
   const [activeTab, setActiveTab] = useState('inventory');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBrand, setFilterBrand] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterCondition, setFilterCondition] = useState('all');
-  const [filterVehicle, setFilterVehicle] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
 
   const [newTyre, setNewTyre] = useState<Partial<Tyre>>({
@@ -191,7 +188,6 @@ export const TyreManagementSystem: React.FC = () => {
   });
 
   const [availablePatterns, setAvailablePatterns] = useState<string[]>([]);
-  const [availableSizes, setAvailableSizes] = useState<string[]>([]);
 
   const getConditionColor = (status: string) => {
     switch (status) {
@@ -236,15 +232,9 @@ export const TyreManagementSystem: React.FC = () => {
   const filteredTyres = tyres.filter(tyre => {
     const matchesSearch = searchTerm === '' || 
       tyre.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tyre.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tyre.installation.vehicleId.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      tyre.brand.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesBrand = filterBrand === '' || tyre.brand === filterBrand;
-    const matchesStatus = filterStatus === 'all' || tyre.status === filterStatus;
-    const matchesCondition = filterCondition === 'all' || tyre.condition.status === filterCondition;
-    const matchesVehicle = filterVehicle === '' || tyre.installation.vehicleId === filterVehicle;
-    
-    return matchesSearch && matchesBrand && matchesStatus && matchesCondition && matchesVehicle;
+    return matchesSearch && matchesBrand;
   });
 
   const handleAddTyre = () => {
@@ -353,16 +343,16 @@ export const TyreManagementSystem: React.FC = () => {
     a.click();
   };
 
-  const handleBrandChange = (value: string) => {
-    setNewTyre((prev) => ({ ...prev, brand: value }));
-    const patterns = TYRE_REFERENCE_LIST.filter((item) => item.brand === value).map((item) => item.pattern);
+  const handleBrandChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setNewTyre(prev => ({ ...prev, brand: value }));
+    const patterns = TYRE_REFERENCE_LIST.filter(item => item.brand === value).map(item => item.pattern);
     setAvailablePatterns(patterns);
   };
 
-  const handlePatternChange = (value: string) => {
-    setNewTyre((prev) => ({ ...prev, pattern: value }));
-    const sizes = TYRE_REFERENCE_LIST.filter((item) => item.pattern === value).map((item) => item.size);
-    setAvailableSizes(sizes);
+  const handlePatternChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    setNewTyre(prev => ({ ...prev, pattern: value }));
   };
 
   return (
@@ -397,30 +387,10 @@ export const TyreManagementSystem: React.FC = () => {
             <CardContent className="p-4">
               <TyreInventoryFilters
                 searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
                 brandFilter={filterBrand}
-                statusFilter={filterStatus}
-                conditionFilter={filterCondition}
-                vehicleFilter={filterVehicle}
-                onSearchChange={setSearchTerm}
-                onBrandChange={setFilterBrand}
-                onStatusChange={setFilterStatus}
-                onConditionChange={setFilterCondition}
-                onVehicleChange={setFilterVehicle}
+                setBrandFilter={setFilterBrand}
                 brands={TYRE_BRANDS}
-                statuses={[
-                  { label: 'All Status', value: 'all' },
-                  { label: 'New', value: 'new' },
-                  { label: 'Used', value: 'used' },
-                  { label: 'Retreaded', value: 'retreaded' },
-                  { label: 'Scrapped', value: 'scrapped' }
-                ]}
-                conditions={[
-                  { label: 'All Conditions', value: 'all' },
-                  { label: 'Good', value: 'good' },
-                  { label: 'Warning', value: 'warning' },
-                  { label: 'Critical', value: 'critical' },
-                  { label: 'Needs Replacement', value: 'needs_replacement' }
-                ]}
               />
             </CardContent>
           </Card>
@@ -584,7 +554,7 @@ export const TyreManagementSystem: React.FC = () => {
                 <Input
                   label="Serial Number *"
                   value={newTyre.serialNumber || ''}
-                  onChange={(value) => setNewTyre(prev => ({ ...prev, serialNumber: value }))}
+                  onChange={(e) => setNewTyre(prev => ({ ...prev, serialNumber: e.target.value }))}
                   placeholder="Enter serial number"
                 />
                 <Select
@@ -602,7 +572,7 @@ export const TyreManagementSystem: React.FC = () => {
                 <Input
                   label="Model"
                   value={newTyre.model || ''}
-                  onChange={(value) => setNewTyre(prev => ({ ...prev, model: value }))}
+                  onChange={(e) => setNewTyre(prev => ({ ...prev, model: e.target.value }))}
                   placeholder="Enter model"
                 />
                 <Select
@@ -621,29 +591,28 @@ export const TyreManagementSystem: React.FC = () => {
                   label="Width (mm)"
                   type="number"
                   value={String(newTyre.size?.width || 315)}
-                  onChange={(value) => setNewTyre(prev => ({ 
-                    ...prev, 
-                    size: { ...prev.size!, width: parseInt(value) || 315 }
-                  }))}
+                  onChange={(e) => {
+                    const width = parseInt(e.target.value) || 315;
+                    setNewTyre(prev => ({ ...prev, size: { ...prev.size!, width } }));
+                  }}
                 />
                 <Input
                   label="Aspect Ratio (%)"
                   type="number"
                   value={String(newTyre.size?.aspectRatio || 80)}
-                  onChange={(value) => setNewTyre(prev => ({ 
-                    ...prev, 
-                    size: { ...prev.size!, aspectRatio: parseInt(value) || 80 }
-                  }))}
+                  onChange={(e) => {
+                    const aspectRatio = parseInt(e.target.value) || 80;
+                    setNewTyre(prev => ({ ...prev, size: { ...prev.size!, aspectRatio } }));
+                  }}
                 />
                 <Input
                   label="Rim Diameter (in)"
                   type="number"
-                  step="0.5"
                   value={String(newTyre.size?.rimDiameter || 22.5)}
-                  onChange={(value) => setNewTyre(prev => ({ 
-                    ...prev, 
-                    size: { ...prev.size!, rimDiameter: parseFloat(value) || 22.5 }
-                  }))}
+                  onChange={(e) => {
+                    const rimDiameter = parseFloat(e.target.value) || 22.5;
+                    setNewTyre(prev => ({ ...prev, size: { ...prev.size!, rimDiameter } }));
+                  }}
                 />
               </div>
 
@@ -651,16 +620,16 @@ export const TyreManagementSystem: React.FC = () => {
                 <Select
                   label="Type"
                   value={newTyre.type || 'drive'}
-                  onChange={(value) => setNewTyre(prev => ({ ...prev, type: value as any }))}
+                  onChange={(e) => setNewTyre(prev => ({ ...prev, type: e.target.value as any }))}
                   options={TYRE_TYPES}
                 />
                 <Input
                   label="Purchase Cost"
                   type="number"
                   value={String(newTyre.purchaseDetails?.cost || 0)}
-                  onChange={(value) => setNewTyre(prev => ({ 
+                  onChange={(e) => setNewTyre(prev => ({ 
                     ...prev, 
-                    purchaseDetails: { ...prev.purchaseDetails!, cost: parseFloat(value) || 0 }
+                    purchaseDetails: { ...prev.purchaseDetails!, cost: parseFloat(e.target.value) || 0 }
                   }))}
                 />
               </div>
@@ -668,9 +637,8 @@ export const TyreManagementSystem: React.FC = () => {
               <TextArea
                 label="Notes"
                 value={newTyre.notes || ''}
-                onChange={(value) => setNewTyre(prev => ({ ...prev, notes: value }))}
-                placeholder="Additional notes..."
-                rows={3}
+                onChange={(e) => setNewTyre(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Additional notes"
               />
 
               <div className="flex justify-end space-x-2">

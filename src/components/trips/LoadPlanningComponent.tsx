@@ -4,7 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Input, Select, TextArea } from '../ui/FormElements';
-import { Package, Plus, Save, X, AlertTriangle, CheckCircle, Scale, Box, ChevronDown, ChevronUp } from 'lucide-react';
+import { Package, Plus, X, AlertTriangle, CheckCircle, Scale, Box, ChevronDown, ChevronUp } from 'lucide-react';
 import LoadingIndicator from '../ui/LoadingIndicator';
 
 interface LoadPlanningComponentProps {
@@ -24,7 +24,7 @@ interface CargoItem {
 }
 
 const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId }) => {
-  const { getTrip, getLoadPlan, addLoadPlan, updateLoadPlan, isLoading } = useAppContext();
+  const { getTrip, getLoadPlan, addLoadPlan, updateLoadPlan } = useAppContext();
   
   const [trip, setTrip] = useState<Trip | undefined>(undefined);
   const [loadPlan, setLoadPlan] = useState<LoadPlan | undefined>(undefined);
@@ -46,7 +46,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
   });
   
   // Vehicle capacity defaults (would ideally come from vehicle data)
-  const [vehicleCapacity, setVehicleCapacity] = useState({
+  const [vehicleCapacity] = useState({
     weight: 34000, // kg
     volume: 86,    // cubic meters
     length: 13.6,  // meters
@@ -393,7 +393,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                     min="0"
                     step="1"
                     value={newItem.weight.toString()}
-                    onChange={(value) => updateNewItemField('weight', parseFloat(value) || 0)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateNewItemField('weight', parseFloat(e.target.value) || 0)}
                   />
                   
                   <Input
@@ -402,7 +402,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                     min="0"
                     step="0.1"
                     value={newItem.volume.toString()}
-                    onChange={(value) => updateNewItemField('volume', parseFloat(value) || 0)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateNewItemField('volume', parseFloat(e.target.value) || 0)}
                   />
                 </div>
                 
@@ -412,7 +412,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                   min="1"
                   step="1"
                   value={newItem.quantity.toString()}
-                  onChange={(value) => updateNewItemField('quantity', parseInt(value) || 1)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateNewItemField('quantity', parseInt(e.target.value) || 1)}
                 />
                 
                 <div className="grid grid-cols-2 gap-4">
@@ -598,11 +598,17 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
               <h3 className="text-lg font-medium text-gray-900 mb-3">Load Notes</h3>
               <TextArea
                 value={loadPlan.notes || ''}
-                onChange={(value) => {
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement> | string) => {
+                  let notesValue: string;
+                  if (typeof e === 'string') {
+                    notesValue = e;
+                  } else {
+                    notesValue = e.target.value;
+                  }
                   if (loadPlan) {
                     const updatedPlan = {
                       ...loadPlan,
-                      notes: value,
+                      notes: notesValue,
                       updatedAt: new Date().toISOString()
                     };
                     

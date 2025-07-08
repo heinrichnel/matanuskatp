@@ -1,4 +1,4 @@
-import { collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot, deleteDoc } from 'firebase/firestore';
+import { collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot, deleteDoc, getDoc, updateDoc } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { firebaseApp } from './firebaseConfig';
 import { DieselConsumptionRecord } from './types/diesel';
@@ -160,6 +160,50 @@ export function listenToDriverBehaviorEvents(callback: (events: any[]) => void) 
   });
   return unsubscribe;
 }
+
+// --- New TyreStores Helpers ---
+import type { TyreStore, StockEntry } from './types/tyre';
+
+/**
+ * Add a new TyreStore document
+ */
+export async function addTyreStore(store: TyreStore): Promise<void> {
+  const storeRef = doc(firestore, 'tyreStores', store.id);
+  await setDoc(storeRef, {
+    ...store,
+    dateAdded: serverTimestamp()
+  });
+}
+
+/**
+ * Update or insert a stock entry in a specific TyreStore
+ */
+export async function updateTyreStoreEntry(storeId: string, entry: StockEntry): Promise<void> {
+  const storeRef = doc(firestore, 'tyreStores', storeId);
+  const snap = await getDoc(storeRef);
+  if (!snap.exists()) throw new Error(`TyreStore ${storeId} does not exist`);
+  const data = snap.data() as TyreStore;
+  const entries = data.entries || [];
+  const idx = entries.findIndex(e => e.tyreId === entry.tyreId);
+  if (idx >= 0) {
+    entries[idx] = entry;
+  } else {
+    entries.push(entry);
+  }
+  await updateDoc(storeRef, { entries });
+}
+
+/**
+ * Listen to all TyreStore documents in real time
+ */
+export function listenToTyreStores(onChange: (stores: TyreStore[]) => void) {
+  const collRef = collection(firestore, 'tyreStores');
+  return onSnapshot(collRef, snapshot => {
+    const stores: TyreStore[] = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Omit<TyreStore, 'id'>) }));
+    onChange(stores);
+  });
+}
+// --- End TyreStores Helpers ---
 
 export { firestore, storage };
 export { firestore as db };

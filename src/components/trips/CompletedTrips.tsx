@@ -121,30 +121,30 @@ const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
               label="Start Date"
               type="date"
               value={filters.startDate}
-              onChange={value => handleFilterChange('startDate', value)}
+              onChange={e => handleFilterChange('startDate', e.target.value)}
             />
             <Input
               label="End Date"
               type="date"
               value={filters.endDate}
-              onChange={value => handleFilterChange('endDate', value)}
+              onChange={e => handleFilterChange('endDate', e.target.value)}
             />
             <Select
               label="Client"
               value={filters.client}
-              onChange={value => handleFilterChange('client', value)}
+              onChange={e => handleFilterChange('client', e.target.value)}
               options={[{ label: 'All Clients', value: '' }, ...uniqueClients.map(c => ({ label: c, value: c }))]}
             />
             <Select
               label="Driver"
               value={filters.driver}
-              onChange={value => handleFilterChange('driver', value)}
+              onChange={e => handleFilterChange('driver', e.target.value)}
               options={[{ label: 'All Drivers', value: '' }, ...uniqueDrivers.map(d => ({ label: d, value: d }))]}
             />
             <Select
               label="Currency"
               value={filters.currency}
-              onChange={value => handleFilterChange('currency', value)}
+              onChange={e => handleFilterChange('currency', e.target.value)}
               options={[
                 { label: 'All Currencies', value: '' },
                 { label: 'ZAR (R)', value: 'ZAR' },
@@ -173,8 +173,14 @@ const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
         {filteredTrips.map(trip => (
           <Card key={trip.id}>
             <CardHeader
-              title={<span className="flex items-center gap-2"><Truck className="w-5 h-5 text-blue-500" />Fleet {trip.fleetNumber}</span>}
-              subtitle={<span className="text-xs text-gray-500">{trip.route}</span>}
+              title={
+                <div>
+                  <span className="flex items-center gap-2">
+                    <Truck className="w-5 h-5 text-blue-500" />Fleet {trip.fleetNumber}
+                  </span>
+                  <span className="text-xs text-gray-500">{trip.route}</span>
+                </div>
+              }
               action={
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4 text-blue-500" />} onClick={() => onView(trip)}>

@@ -2,8 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
-import { Form } from '@/components/ui/form';
+import Form from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { Save, X } from "lucide-react";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
@@ -33,7 +32,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
   onClose,
   initialData
 }) => {
-  const form = useForm<TyrePerformanceData>({
+  const methods = useForm<TyrePerformanceData>({
     defaultValues: {
       fleetNumber: '',
       tyrePosition: '',
@@ -52,7 +51,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
 
   const handleSubmit = (data: TyrePerformanceData) => {
     onSubmit(data);
-    form.reset();
+    methods.reset();
   };
 
   return (
@@ -60,17 +59,16 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Tyre Performance Entry</CardTitle>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="outline" size="sm" onClick={onClose}>
             <X className="w-4 h-4" />
           </Button>
         </div>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        <Form onSubmit={methods.handleSubmit(handleSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={methods.control}
                 name="fleetNumber"
                 render={({ field }: { field: any }) => (
                   <FormField>
@@ -86,7 +84,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
               />
 
               <FormField
-                control={form.control}
+                control={methods.control}
                 name="tyrePosition"
                 render={({ field }: { field: any }) => (
                   <FormField>
@@ -113,7 +111,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField
-                control={form.control}
+                control={methods.control}
                 name="brand"
                 render={({ field }: { field: any }) => (
                   <FormField>
@@ -129,7 +127,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
               />
 
               <FormField
-                control={form.control}
+                control={methods.control}
                 name="model"
                 render={({ field }: { field: any }) => (
                   <FormField>
@@ -145,7 +143,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
               />
 
               <FormField
-                control={form.control}
+                control={methods.control}
                 name="serialNumber"
                 render={({ field }: { field: any }) => (
                   <FormField>
@@ -163,7 +161,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
-                control={form.control}
+                control={methods.control}
                 name="installationDate"
                 render={({ field }: { field: any }) => (
                   <FormField>
@@ -179,7 +177,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
               />
 
               <FormField
-                control={form.control}
+                control={methods.control}
                 name="currentMileage"
                 render={({ field }: { field: any }) => (
                   <FormField>
@@ -202,7 +200,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormField
-                control={form.control}
+                control={methods.control}
                 name="treadDepth"
                 render={({ field }: { field: any }) => (
                   <FormField>
@@ -224,7 +222,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
               />
 
               <FormField
-                control={form.control}
+                control={methods.control}
                 name="pressure"
                 render={({ field }: { field: any }) => (
                   <FormField>
@@ -245,7 +243,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
               />
 
               <FormField
-                control={form.control}
+                control={methods.control}
                 name="condition"
                 render={({ field }: { field: any }) => (
                   <FormField>
@@ -267,7 +265,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
             </div>
 
             <FormField
-              control={form.control}
+              control={methods.control}
               name="notes"
               render={({ field }: { field: any }) => (
                 <FormField>
@@ -286,16 +284,14 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
               )}
             />
 
-            <div className="flex gap-4 pt-4">
-              <Button type="submit" className="flex items-center gap-2">
-                <Save className="w-4 h-4" />
-                Save Performance Data
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" size="sm" onClick={onClose}>
+                <X className="w-4 h-4" />
               </Button>
-              <Button type="button" variant="outline" size="sm" onClick={onClose}>
-                Close
+              <Button size="sm" type="submit">
+                <Save className="w-4 h-4 mr-1" /> Save
               </Button>
             </div>
-          </form>
         </Form>
       </CardContent>
     </Card>

@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { initializeConnectionMonitoring } from './utils/firebaseConnectionHandler';
+import { TyreStoresProvider } from './context/TyreStoresContext';
 import './index.css';
 
 // Initialize Firebase and check emulator status
@@ -35,7 +36,9 @@ const initializeApp = async () => {
     // Render the app
     ReactDOM.createRoot(document.getElementById('root')!).render(
       <React.StrictMode>
-        <App />
+        <TyreStoresProvider>
+          <App />
+        </TyreStoresProvider>
       </React.StrictMode>
     );
     

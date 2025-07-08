@@ -3,7 +3,7 @@ import React from 'react';
 interface InputProps {
   label: React.ReactNode;
   value: string | number;
-  onChange: (value: string) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   type?: string;
   placeholder?: string;
   required?: boolean;
@@ -36,7 +36,7 @@ export const Input: React.FC<InputProps> = ({
     <input
       type={type}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onChange(e)}
       placeholder={placeholder}
       required={required}
       onBlur={onBlur}
@@ -57,7 +57,7 @@ interface SelectOption {
 interface SelectProps {
   label: React.ReactNode;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   options: SelectOption[];
   required?: boolean;
   error?: string | false;
@@ -83,7 +83,7 @@ export const Select: React.FC<SelectProps> = ({
     </label>
     <select
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onChange(e)}
       required={required}
       onBlur={onBlur}
       disabled={disabled}
@@ -100,7 +100,7 @@ export const Select: React.FC<SelectProps> = ({
 interface TextAreaProps {
   label?: string;
   value: string;
-  onChange: (value: string) => void;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   placeholder?: string;
   rows?: number;
   required?: boolean;
@@ -128,7 +128,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
     )}
     <textarea
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => onChange(e)}
       placeholder={placeholder}
       rows={rows}
       disabled={disabled}

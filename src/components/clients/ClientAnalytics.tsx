@@ -10,7 +10,8 @@ import {
   Calendar, 
   Users, 
   Clock, 
-  Flag
+  Flag, 
+  Building 
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { Badge } from '../ui/Badge';
@@ -48,7 +49,7 @@ const ClientAnalytics: React.FC<ClientAnalyticsProps> = ({
   const selectedClient = clients.find(client => client.id === selectedClientId);
   
   // Calculate metrics for the selected client
-  const clientMetrics = useMemo(() => {
+  const clientMetrics: ClientMetrics | null = useMemo(() => {
     if (!selectedClient) return null;
     
     // Filter trips for this client

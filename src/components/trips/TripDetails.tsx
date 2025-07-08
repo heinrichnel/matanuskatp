@@ -1,626 +1,744 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAppContext } from '../../context/AppContext';
-import { Trip } from '../../types';
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
-import { formatCurrency, formatDate } from '../../utils/helpers';
-import { 
-  Route as RouteIcon, 
-  Truck, 
-  User, 
-  DollarSign, 
-  Calendar, 
-  Package, 
-  Edit, 
-  Clock, 
-  ArrowLeft,
-  FileText
-} from 'lucide-react';
-import TripFinancialsPanel from './TripFinancialsPanel';
-import LoadPlanningComponent from './LoadPlanningComponent';
-import LoadingIndicator from '../ui/LoadingIndicator';
+// ─── React & State ───────────────────────────────────────────────
+import React, { useState } from 'react';
 
-// This is a new component that shows detailed trip information 
-// and integrates the new components we've implemented
-const TripDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { 
-    getTrip, 
-    updateTrip, 
-    updateTripProgress,
-    generateTripFinancialAnalysis,
-    generateQuoteConfirmationPdf,
-    generateLoadConfirmationPdf,
-    isLoading 
-  } = useAppContext();
-  
-  const [trip, setTrip] = useState<Trip | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'financials' | 'load' | 'route'>('overview');
-  
-  // Fetch trip data
-  useEffect(() => {
-    if (id) {
-      const tripData = getTrip(id);
-      if (tripData) {
-        setTrip(tripData);
-      } else {
-        setError(`Trip with ID ${id} not found`);
-      }
-    }
-  }, [id, getTrip]);
-  
-  // Handle trip progress update
-  const handleUpdateProgress = async (status: Trip['tripProgressStatus']) => {
-    if (!trip || !id) return;
-    
+// ─── Types ───────────────────────────────────────────────────────
+import { Trip, CostEntry, AdditionalCost, DelayReason } from '../../types';
+
+// ─── Context ─────────────────────────────────────────────────────
+import { useAppContext } from '../../context/AppContext.tsx';
+
+// ─── UI Components ───────────────────────────────────────────────
+import Modal from '../ui/Modal.tsx';
+import Button from '../ui/Button.tsx';
+import Card, { CardContent, CardHeader } from '../ui/Card.tsx';
+import { Input, Select, TextArea, FileUpload } from '../ui/FormElements.tsx';
+
+// ─── Custom Modules ──────────────────────────────────────────────
+import CostForm from '../cost/CostForm';
+import CostList from '../cost/CostList';
+import SystemCostGenerator from '../cost/IndirectCost';
+import TripPlanningForm from '../planning/TripPlanningForm';
+import InvoiceSubmissionModal from './InvoiceSubmissionModal';
+import TripReport from '../reports/TripReport';
+
+// ─── Helpers ─────────────────────────────────────────────────────
+import { formatCurrency, formatDateTime, calculateKPIs, getFlaggedCostsCount, getUnresolvedFlagsCount, canCompleteTrip } from '../../utils/helpers';
+
+// ─── Icons ───────────────────────────────────────────────────────
+import { AlertTriangle, ArrowLeft, BarChart3, Calendar, Calculator, CheckCircle, Clock, Flag, Plus, Send, X } from 'lucide-react';
+
+
+interface TripDetailsProps {
+  trip: Trip;
+  onBack: () => void;
+}
+
+const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
+  const { addCostEntry, updateCostEntry, deleteCostEntry, updateTrip, addAdditionalCost, removeAdditionalCost, addDelayReason } = useAppContext();
+  const [showCostForm, setShowCostForm] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [showSystemCostGenerator, setShowSystemCostGenerator] = useState(false);
+  const [showInvoiceSubmission, setShowInvoiceSubmission] = useState(false);
+  const [showTripPlanning, setShowTripPlanning] = useState(false);
+  const [editingCost, setEditingCost] = useState<CostEntry | undefined>();
+
+  // Enhanced handleAddCost with file support
+  const handleAddCost = (costData: Omit<CostEntry, 'id' | 'attachments'>, files?: FileList) => {
     try {
-      await updateTripProgress(id, status);
+      const costId = addCostEntry(costData, files);
+      setShowCostForm(false);
       
-      // Refresh trip data
-      const updatedTrip = getTrip(id);
-      if (updatedTrip) {
-        setTrip(updatedTrip);
-      }
-      
-      alert(`Trip progress updated to: ${status}`);
-    } catch (err: any) {
-      setError(err.message || "Failed to update trip progress");
+      // Show success message with cost details
+      alert(`Cost entry added successfully!\n\nCategory: ${costData.category}\nAmount: ${formatCurrency(costData.amount, costData.currency)}\nReference: ${costData.referenceNumber}`);
+    } catch (error) {
+      console.error('Error adding cost entry:', error);
+      alert('Error adding cost entry. Please try again.');
     }
   };
-  
-  // Handle generating quote PDF
-  const handleGenerateQuote = async () => {
-    if (!trip || !id) return;
-    
-    try {
-      const pdfUrl = await generateQuoteConfirmationPdf(id);
-      
-      // Refresh trip data
-      const updatedTrip = getTrip(id);
-      if (updatedTrip) {
-        setTrip(updatedTrip);
+
+  // Enhanced handleUpdateCost with file support
+  const handleUpdateCost = (costData: Omit<CostEntry, 'id' | 'attachments'>, files?: FileList) => {
+    if (editingCost) {
+      try {
+        // Process new files if provided
+        const newAttachments = files ? Array.from(files).map((file, index) => ({
+          id: `A${Date.now()}-${index}`,
+          costEntryId: editingCost.id,
+          filename: file.name,
+          fileUrl: URL.createObjectURL(file),
+          fileType: file.type,
+          fileSize: file.size,
+          uploadedAt: new Date().toISOString(),
+          fileData: ''
+        })) : [];
+
+        const updatedCost: CostEntry = {
+          ...editingCost,
+          ...costData,
+          attachments: [...editingCost.attachments, ...newAttachments]
+        };
+
+        updateCostEntry(updatedCost);
+        setEditingCost(undefined);
+        setShowCostForm(false);
+        
+        alert('Cost entry updated successfully!');
+      } catch (error) {
+        console.error('Error updating cost entry:', error);
+        alert('Error updating cost entry. Please try again.');
       }
-      
-      // Open PDF in new tab
-      window.open(pdfUrl, '_blank');
-    } catch (err: any) {
-      setError(err.message || "Failed to generate quote PDF");
     }
   };
-  
-  // Handle generating load confirmation PDF
-  const handleGenerateLoadConfirmation = async () => {
-    if (!trip || !id) return;
-    
-    try {
-      const pdfUrl = await generateLoadConfirmationPdf(id);
-      
-      // Refresh trip data
-      const updatedTrip = getTrip(id);
-      if (updatedTrip) {
-        setTrip(updatedTrip);
+
+  const handleEditCost = (cost: CostEntry) => {
+    setEditingCost(cost);
+    setShowCostForm(true);
+  };
+
+  const handleDeleteCost = (id: string) => {
+    if (confirm('Are you sure you want to delete this cost entry? This action cannot be undone.')) {
+      try {
+        deleteCostEntry(id);
+        alert('Cost entry deleted successfully!');
+      } catch (error) {
+        console.error('Error deleting cost entry:', error);
+        alert('Error deleting cost entry. Please try again.');
       }
-      
-      // Open PDF in new tab
-      window.open(pdfUrl, '_blank');
-    } catch (err: any) {
-      setError(err.message || "Failed to generate load confirmation PDF");
     }
   };
+
+  const handleGenerateSystemCosts = (systemCosts: Omit<CostEntry, 'id' | 'attachments'>[]) => {
+    try {
+      // Add each system cost entry individually
+      for (const costData of systemCosts) {
+        addCostEntry(costData);
+      }
+      
+      setShowSystemCostGenerator(false);
+      
+      // Show detailed success message
+      alert(`System costs generated successfully!\n\n${systemCosts.length} cost entries have been added:\n\n${systemCosts.map(cost => `• ${cost.subCategory}: ${formatCurrency(cost.amount, cost.currency)}`).join('\n')}\n\nTotal system costs: ${formatCurrency(systemCosts.reduce((sum, cost) => sum + cost.amount, 0), trip.revenueCurrency)}`);
+    } catch (error) {
+      console.error('Error generating system costs:', error);
+      alert('Error generating system costs. Please try again.');
+    }
+  };
+
+  const handleCompleteTrip = () => {
+    const unresolvedFlags = getUnresolvedFlagsCount(trip.costs);
+    
+    if (unresolvedFlags > 0) {
+      alert(`Cannot complete trip: ${unresolvedFlags} unresolved flagged items must be resolved before completing the trip.\n\nPlease go to the Flags & Investigations section to resolve all outstanding issues.`);
+      return;
+    }
+
+    const confirmMessage = `Are you sure you want to mark this trip as COMPLETED?\n\n` +
+      `This will:\n` +
+      `• Lock the trip from further editing\n` +
+      `• Move it to the Completed Trips section\n` +
+      `• Make it available for invoicing\n\n` +
+      `This action cannot be undone.`;
+
+    if (confirm(confirmMessage)) {
+      try {
+        updateTrip({
+          ...trip,
+          status: 'completed',
+          completedAt: new Date().toISOString().split('T')[0],
+          completedBy: 'Current User' // In a real app, this would be the logged-in user
+        });
+        
+        alert('Trip has been successfully completed and is now ready for invoicing.');
+        onBack();
+      } catch (error) {
+        console.error('Error completing trip:', error);
+        alert('Error completing trip. Please try again.');
+      }
+    }
+  };
+
+  // Handle invoice submission
+  const handleInvoiceSubmission = (invoiceData: {
+    invoiceNumber: string;
+    invoiceDate: string;
+    invoiceDueDate: string;
+    finalTimeline: {
+      finalArrivalDateTime: string;
+      finalOffloadDateTime: string;
+      finalDepartureDateTime: string;
+    };
+    validationNotes: string;
+    proofOfDelivery: FileList | null;
+    signedInvoice: FileList | null;
+  }) => {
+    try {
+      // Create proof of delivery attachments
+      const podAttachments = invoiceData.proofOfDelivery ? Array.from(invoiceData.proofOfDelivery).map((file, index) => ({
+        id: `POD${Date.now()}-${index}`,
+        tripId: trip.id,
+        filename: file.name,
+        fileUrl: URL.createObjectURL(file),
+        fileType: file.type,
+        fileSize: file.size,
+        uploadedAt: new Date().toISOString(),
+        fileData: ''
+      })) : [];
+
+      // Create signed invoice attachments
+      const invoiceAttachments = invoiceData.signedInvoice ? Array.from(invoiceData.signedInvoice).map((file, index) => ({
+        id: `INV${Date.now()}-${index}`,
+        tripId: trip.id,
+        filename: file.name,
+        fileUrl: URL.createObjectURL(file),
+        fileType: file.type,
+        fileSize: file.size,
+        uploadedAt: new Date().toISOString(),
+        fileData: ''
+      })) : [];
+
+      const updatedTrip: Trip = {
+        ...trip,
+        status: 'invoiced',
+        invoiceNumber: invoiceData.invoiceNumber,
+        invoiceDate: invoiceData.invoiceDate,
+        invoiceDueDate: invoiceData.invoiceDueDate,
+        invoiceSubmittedAt: new Date().toISOString(),
+        invoiceSubmittedBy: 'Current User',
+        invoiceValidationNotes: invoiceData.validationNotes,
+        finalArrivalDateTime: invoiceData.finalTimeline.finalArrivalDateTime,
+        finalOffloadDateTime: invoiceData.finalTimeline.finalOffloadDateTime,
+        finalDepartureDateTime: invoiceData.finalTimeline.finalDepartureDateTime,
+        timelineValidated: true,
+        timelineValidatedBy: 'Current User',
+        timelineValidatedAt: new Date().toISOString(),
+        proofOfDelivery: podAttachments,
+        signedInvoice: invoiceAttachments,
+        paymentStatus: 'unpaid'
+      };
+
+      updateTrip(updatedTrip);
+      setShowInvoiceSubmission(false);
+      
+      alert(`Trip successfully submitted for invoicing!\n\nInvoice Number: ${invoiceData.invoiceNumber}\nDue Date: ${invoiceData.invoiceDueDate}\n\nThe trip is now in the invoicing workflow and payment tracking has begun.`);
+      onBack();
+    } catch (error) {
+      console.error('Error submitting invoice:', error);
+      alert('Error submitting invoice. Please try again.');
+    }
+  };
+
+  // Handle additional cost management
+  const handleAddAdditionalCost = (cost: Omit<AdditionalCost, 'id'>, files?: FileList) => {
+    try {
+      addAdditionalCost(trip.id, cost, files);
+    } catch (error) {
+      console.error('Error adding additional cost:', error);
+      alert('Error adding additional cost. Please try again.');
+    }
+  };
+
+  const handleRemoveAdditionalCost = (costId: string) => {
+    try {
+      removeAdditionalCost(trip.id, costId);
+    } catch (error) {
+      console.error('Error removing additional cost:', error);
+      alert('Error removing additional cost. Please try again.');
+    }
+  };
+
+  const closeCostForm = () => {
+    setShowCostForm(false);
+    setEditingCost(undefined);
+  };
+
+  const kpis = calculateKPIs(trip);
+  const flaggedCount = getFlaggedCostsCount(trip.costs);
+  const unresolvedFlags = getUnresolvedFlagsCount(trip.costs);
+  const canComplete = canCompleteTrip(trip);
   
-  if (!trip) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        {error ? (
-          <div className="text-center">
-            <p className="text-red-600 text-lg">{error}</p>
-            <Button 
-              variant="outline" 
-              className="mt-4"
-              onClick={() => navigate('/trips')}
-            >
-              Go Back to Trips
-            </Button>
-          </div>
-        ) : (
-          <LoadingIndicator text="Loading trip details..." />
-        )}
-      </div>
-    );
-  }
-  
+  // Check if system costs have been generated
+  const hasSystemCosts = trip.costs.some(cost => cost.isSystemGenerated);
+  const systemCosts = trip.costs.filter(cost => cost.isSystemGenerated);
+  const manualCosts = trip.costs.filter(cost => !cost.isSystemGenerated);
+
+  // Calculate timeline discrepancies for display
+  const hasTimelineDiscrepancies = () => {
+    if (!trip.plannedArrivalDateTime || !trip.actualArrivalDateTime) return false;
+    
+    const planned = new Date(trip.plannedArrivalDateTime);
+    const actual = new Date(trip.actualArrivalDateTime);
+    const diffHours = Math.abs((actual.getTime() - planned.getTime()) / (1000 * 60 * 60));
+    
+    return diffHours > 1; // More than 1 hour difference
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
+      {/* Header with Navigation and Actions */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <Button variant="outline" onClick={onBack} icon={<ArrowLeft className="w-4 h-4" />}>
+          Back to Trips
+        </Button>
+        
+        <div className="flex flex-wrap gap-3">
           <Button 
             variant="outline" 
-            size="sm"
-            className="mr-4"
-            onClick={() => navigate('/trips')}
-            icon={<ArrowLeft className="w-4 h-4" />}
+            onClick={() => setShowReport(true)} 
+            icon={<BarChart3 className="w-4 h-4" />}
           >
-            Back to Trips
+            View Report
           </Button>
           
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Trip Details: {trip.fleetNumber} - {trip.route}</h1>
-            <p className="text-gray-600">
-              {formatDate(trip.startDate)} to {formatDate(trip.endDate)}
-            </p>
+          {trip.status === 'active' && (
+            <>
+              <Button 
+                variant="outline"
+                onClick={() => setShowTripPlanning(true)} 
+                icon={<Calendar className="w-4 h-4" />}
+              >
+                Trip Planning
+              </Button>
+
+              {!hasSystemCosts && (
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowSystemCostGenerator(true)} 
+                  icon={<Calculator className="w-4 h-4" />}
+                >
+                  Generate System Costs
+                </Button>
+              )}
+              
+              <Button 
+                onClick={() => setShowCostForm(true)} 
+                icon={<Plus className="w-4 h-4" />}
+              >
+                Add Cost Entry
+              </Button>
+              
+              <Button 
+                onClick={handleCompleteTrip}
+                disabled={!canComplete}
+                icon={<CheckCircle className="w-4 h-4" />}
+                className={!canComplete ? 'opacity-50 cursor-not-allowed' : ''}
+                title={!canComplete ? `Cannot complete: ${unresolvedFlags} unresolved flags` : 'Mark trip as completed'}
+              >
+                Complete Trip
+              </Button>
+            </>
+          )}
+
+          {trip.status === 'completed' && (
+            <Button 
+              onClick={() => setShowInvoiceSubmission(true)}
+              icon={<Send className="w-4 h-4" />}
+            >
+              Submit for Invoicing
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Status Alerts */}
+      {trip.status === 'invoiced' && (
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
+          <div className="flex items-start">
+            <Send className="w-5 h-5 text-blue-600 mt-0.5 mr-3" />
+            <div>
+              <h4 className="text-sm font-medium text-blue-800">
+                Trip Invoiced - Payment Tracking Active
+              </h4>
+              <p className="text-sm text-blue-700 mt-1">
+                Invoice #{trip.invoiceNumber} submitted on {formatDateTime(trip.invoiceSubmittedAt!)} by {trip.invoiceSubmittedBy}. 
+                Due date: {trip.invoiceDueDate}. Payment status: {trip.paymentStatus.toUpperCase()}.
+              </p>
+              {trip.timelineValidated && (
+                <p className="text-sm text-blue-600 mt-1">
+                  ✓ Timeline validated on {formatDateTime(trip.timelineValidatedAt!)}
+                </p>
+              )}
+            </div>
           </div>
         </div>
-        
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate(`/route-planning/${id}`)}
-            icon={<RouteIcon className="w-4 h-4" />}
-          >
-            Route Planning
-          </Button>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              // Navigate to edit trip (using existing EditTripModal or TripForm component)
-              // Implementation would depend on your app's navigation structure
-              alert("Edit trip functionality would be implemented here");
-            }}
-            icon={<Edit className="w-4 h-4" />}
-          >
-            Edit Trip
-          </Button>
+      )}
+
+      {/* Timeline Discrepancy Alert */}
+      {hasTimelineDiscrepancies() && trip.status === 'active' && (
+        <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-md">
+          <div className="flex items-start">
+            <Clock className="w-5 h-5 text-amber-600 mt-0.5 mr-3" />
+            <div>
+              <h4 className="text-sm font-medium text-amber-800">
+                Timeline Discrepancies Detected
+              </h4>
+              <p className="text-sm text-amber-700 mt-1">
+                Significant differences found between planned and actual times. Review timeline in Trip Planning section before completion.
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-      
-      {/* Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'overview'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-            onClick={() => setActiveTab('overview')}
-          >
-            Overview
-          </button>
-          
-          <button
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'financials'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-            onClick={() => setActiveTab('financials')}
-          >
-            Financials
-          </button>
-          
-          <button
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'load'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-            onClick={() => setActiveTab('load')}
-          >
-            Load Planning
-          </button>
-          
-          <button
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'route'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-            onClick={() => setActiveTab('route')}
-          >
-            Route
-          </button>
-        </nav>
-      </div>
-      
-      {/* Tab Content */}
-      <div className="mt-4">
-        {activeTab === 'overview' && (
-          <div className="space-y-6">
-            {/* Trip Details Card */}
-            <Card>
-              <CardHeader title="Trip Details" />
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div className="flex items-start space-x-3">
-                    <Truck className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Fleet</h3>
-                      <p className="mt-1 text-lg text-gray-900">{trip.fleetNumber}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3">
-                    <User className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Driver</h3>
-                      <p className="mt-1 text-lg text-gray-900">{trip.driverName}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3">
-                    <RouteIcon className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Route</h3>
-                      <p className="mt-1 text-lg text-gray-900">{trip.route}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3">
-                    <DollarSign className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Revenue</h3>
-                      <p className="mt-1 text-lg text-gray-900">{formatCurrency(trip.baseRevenue, trip.revenueCurrency)}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3">
-                    <Calendar className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Dates</h3>
-                      <p className="mt-1 text-lg text-gray-900">{formatDate(trip.startDate)} - {formatDate(trip.endDate)}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-start space-x-3">
-                    <Package className="w-5 h-5 text-gray-400 mt-0.5" />
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Distance</h3>
-                      <p className="mt-1 text-lg text-gray-900">{trip.distanceKm?.toLocaleString() || 0} km</p>
-                    </div>
-                  </div>
+      )}
+
+      {/* Auto-completion notification */}
+      {trip.autoCompletedAt && (
+        <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-md">
+          <div className="flex items-start">
+            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 mr-3" />
+            <div>
+              <h4 className="text-sm font-medium text-green-800">
+                Trip Auto-Completed
+              </h4>
+              <p className="text-sm text-green-700 mt-1">
+                This trip was automatically completed on {new Date(trip.autoCompletedAt).toLocaleDateString()} 
+                because all investigations were resolved. Reason: {trip.autoCompletedReason}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* System Costs Alert */}
+      {trip.status === 'active' && !hasSystemCosts && (
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
+          <div className="flex items-start">
+            <Calculator className="w-5 h-5 text-blue-600 mt-0.5 mr-3" />
+            <div>
+              <h4 className="text-sm font-medium text-blue-800">
+                System Costs Not Generated
+              </h4>
+              <p className="text-sm text-blue-700 mt-1">
+                Automatic operational overhead costs have not been applied to this trip. 
+                Generate system costs to ensure accurate profitability assessment including per-kilometer and per-day fixed costs.
+              </p>
+              <div className="mt-2">
+                <Button 
+                  size="sm"
+                  onClick={() => setShowSystemCostGenerator(true)} 
+                  icon={<Calculator className="w-4 h-4" />}
+                >
+                  Generate System Costs Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* System Costs Summary */}
+      {hasSystemCosts && (
+        <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-md">
+          <div className="flex items-start">
+            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 mr-3" />
+            <div>
+              <h4 className="text-sm font-medium text-green-800">
+                System Costs Applied ({systemCosts.length} entries)
+              </h4>
+              <p className="text-sm text-green-700 mt-1">
+                Automatic operational overhead costs have been applied: {formatCurrency(systemCosts.reduce((sum, cost) => sum + cost.amount, 0), trip.revenueCurrency)} total system costs.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Trip Status Alerts */}
+      {trip.status === 'active' && unresolvedFlags > 0 && (
+        <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-md">
+          <div className="flex items-start">
+            <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5 mr-3" />
+            <div>
+              <h4 className="text-sm font-medium text-amber-800">
+                {unresolvedFlags} Unresolved Flag{unresolvedFlags !== 1 ? 's' : ''} - Trip Cannot Be Completed
+              </h4>
+              <p className="text-sm text-amber-700 mt-1">
+                All flagged cost entries must be investigated and resolved before this trip can be marked as completed. 
+                Visit the <strong>Flags & Investigations</strong> section to resolve outstanding issues.
+              </p>
+              <div className="mt-2">
+                <span className="text-xs text-amber-600">
+                  Flagged items: {flaggedCount} total • {unresolvedFlags} unresolved • {flaggedCount - unresolvedFlags} resolved
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {trip.status === 'completed' && (
+        <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-md">
+          <div className="flex items-center">
+            <CheckCircle className="w-5 h-5 text-green-600 mr-3" />
+            <div>
+              <h4 className="text-sm font-medium text-green-800">Trip Completed - Ready for Invoicing</h4>
+              <p className="text-sm text-green-700">
+                This trip was completed on {trip.completedAt} by {trip.completedBy}. 
+                All cost entries are finalized and the trip is ready for invoice submission.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Trip Summary with Enhanced KPIs */}
+      <Card>
+        <CardHeader title={`Fleet ${trip.fleetNumber} - Trip Details`}> 
+          <p className="text-sm text-gray-500">
+            {trip.status === 'completed' ? `Completed ${trip.completedAt}` : 
+             trip.status === 'invoiced' ? `Invoiced ${trip.invoiceDate}` :
+             'Active Trip'}
+          </p>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Trip Information */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900 border-b pb-2">Trip Information</h4>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-500">Driver</p>
+                  <p className="font-medium">{trip.driverName}</p>
                 </div>
-                
-                {/* Additional Info */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h3 className="text-sm font-medium text-gray-500 mb-4">Additional Information</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="text-xs text-gray-500">Client</h4>
-                      <p className="text-sm text-gray-900">{trip.clientName}</p>
-                      <p className="text-xs text-gray-500">
-                        {trip.clientType === 'internal' ? 'Internal Client' : 'External Client'}
-                      </p>
+                <div>
+                  <p className="text-sm text-gray-500">Client</p>
+                  <p className="font-medium">{trip.clientName}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Client Type</p>
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                    trip.clientType === 'internal' 
+                      ? 'bg-blue-100 text-blue-800' 
+                      : 'bg-purple-100 text-purple-800'
+                  }`}>
+                    {trip.clientType === 'internal' ? 'Internal Client' : 'External Client'}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Route</p>
+                  <p className="font-medium">{trip.route}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Duration</p>
+                  <p className="font-medium">{trip.startDate} to {trip.endDate}</p>
+                </div>
+                {trip.distanceKm && (
+                  <div>
+                    <p className="text-sm text-gray-500">Distance</p>
+                    <p className="font-medium">{trip.distanceKm} km</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-gray-500">Status</p>
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                    trip.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                    trip.status === 'invoiced' ? 'bg-blue-100 text-blue-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {trip.status === 'completed' ? 'Completed' : 
+                     trip.status === 'invoiced' ? 'Invoiced' : 'Active'}
+                  </span>
+                </div>
+                {trip.description && (
+                  <div>
+                    <p className="text-sm text-gray-500">Description</p>
+                    <p className="font-medium text-gray-700">{trip.description}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Financial Summary */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900 border-b pb-2">Financial Summary</h4>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-gray-500">Currency</p>
+                  <p className="font-medium">{kpis.currency} ({kpis.currency === 'USD' ? '$' : 'R'})</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Base Revenue</p>
+                  <p className="font-medium text-green-600">{formatCurrency(kpis.totalRevenue, kpis.currency)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Total Costs</p>
+                  <p className="font-medium text-red-600">{formatCurrency(kpis.totalExpenses, kpis.currency)}</p>
+                  {hasSystemCosts && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Manual: {formatCurrency(manualCosts.reduce((sum, cost) => sum + cost.amount, 0), kpis.currency)} • 
+                      System: {formatCurrency(systemCosts.reduce((sum, cost) => sum + cost.amount, 0), kpis.currency)}
                     </div>
-                    
-                    <div>
-                      <h4 className="text-xs text-gray-500">Status</h4>
-                      <p className="text-sm text-gray-900 capitalize">{trip.status}</p>
-                      {trip.completedAt && (
-                        <p className="text-xs text-gray-500">Completed: {formatDate(trip.completedAt)}</p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Net Profit/Loss</p>
+                  <p className={`font-bold text-lg ${kpis.netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatCurrency(kpis.netProfit, kpis.currency)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Profit Margin</p>
+                  <p className={`font-medium ${kpis.profitMargin >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {kpis.profitMargin.toFixed(2)}%
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* KPIs and Status */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-gray-900 border-b pb-2">Key Metrics & Status</h4>
+              <div className="space-y-3">
+                {kpis.costPerKm > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-500">Cost per Kilometer</p>
+                    <p className="font-medium">{formatCurrency(kpis.costPerKm, kpis.currency)}/km</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-gray-500">Cost Entries</p>
+                  <p className="font-medium">{trip.costs.length} entries</p>
+                  {hasSystemCosts && (
+                    <div className="text-xs text-gray-500">
+                      {manualCosts.length} manual • {systemCosts.length} system
+                    </div>
+                  )}
+                </div>
+                {flaggedCount > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-500">Flagged Items</p>
+                    <div className="flex items-center space-x-2">
+                      <Flag className="w-4 h-4 text-amber-500" />
+                      <span className="font-medium text-amber-600">
+                        {flaggedCount} flagged
+                      </span>
+                      {unresolvedFlags > 0 && (
+                        <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+                          {unresolvedFlags} unresolved
+                        </span>
                       )}
-                    </div>
-                    
-                    {trip.description && (
-                      <div className="md:col-span-2">
-                        <h4 className="text-xs text-gray-500">Description</h4>
-                        <p className="text-sm text-gray-900">{trip.description}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Trip Progress Card */}
-            <Card>
-              <CardHeader title="Trip Progress" />
-              <CardContent>
-                <div className="mb-6">
-                  <div className="relative">
-                    <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-200">
-                      <div 
-                        className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500`}
-                        style={{ 
-                          width: `${
-                            trip.tripProgressStatus === 'completed' ? '100' :
-                            trip.tripProgressStatus === 'delivered' ? '80' :
-                            trip.tripProgressStatus === 'in_transit' ? '60' :
-                            trip.tripProgressStatus === 'loaded' ? '40' :
-                            trip.tripProgressStatus === 'confirmed' ? '20' :
-                            '10'
-                          }%` 
-                        }}
-                      ></div>
-                    </div>
-                    
-                    <div className="flex justify-between text-xs text-gray-600">
-                      <span>Booked</span>
-                      <span>Confirmed</span>
-                      <span>Loaded</span>
-                      <span>In Transit</span>
-                      <span>Delivered</span>
-                      <span>Completed</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => handleUpdateProgress('confirmed')}
-                    icon={<Clock className="w-4 h-4" />}
-                  >
-                    Mark as Confirmed
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => handleUpdateProgress('loaded')}
-                    icon={<Package className="w-4 h-4" />}
-                  >
-                    Mark as Loaded
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => handleUpdateProgress('in_transit')}
-                    icon={<Truck className="w-4 h-4" />}
-                  >
-                    Mark as In Transit
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => handleUpdateProgress('delivered')}
-                    icon={<CheckCircle className="w-4 h-4" />}
-                  >
-                    Mark as Delivered
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => handleUpdateProgress('completed')}
-                    icon={<CheckSquare className="w-4 h-4" />}
-                  >
-                    Mark as Completed
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Documents Card */}
-            <Card>
-              <CardHeader title="Trip Documents" />
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Quote Confirmation */}
-                  <div className={`p-4 rounded-lg ${trip.quoteConfirmationPdfUrl ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
-                    <div className="flex items-start">
-                      <FileText className={`w-6 h-6 ${trip.quoteConfirmationPdfUrl ? 'text-green-500' : 'text-gray-400'} mr-3`} />
-                      <div>
-                        <h3 className="text-md font-medium text-gray-900">Quote Confirmation</h3>
-                        {trip.quoteConfirmationPdfUrl ? (
-                          <div className="mt-2">
-                            <p className="text-sm text-green-700 mb-2">Quote confirmation PDF is available.</p>
-                            <Button
-                              size="sm"
-                              onClick={() => window.open(trip.quoteConfirmationPdfUrl, '_blank')}
-                              icon={<Eye className="w-3 h-3" />}
-                            >
-                              View PDF
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="mt-2">
-                            <p className="text-sm text-gray-600 mb-2">No quote confirmation PDF available.</p>
-                            <Button
-                              size="sm"
-                              onClick={handleGenerateQuote}
-                              isLoading={isLoading[`generateQuotePdf-${id}`]}
-                              disabled={isLoading[`generateQuotePdf-${id}`]}
-                              icon={<FileText className="w-3 h-3" />}
-                            >
-                              Generate PDF
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Load Confirmation */}
-                  <div className={`p-4 rounded-lg ${trip.loadConfirmationPdfUrl ? 'bg-green-50 border border-green-200' : 'bg-gray-50 border border-gray-200'}`}>
-                    <div className="flex items-start">
-                      <FileText className={`w-6 h-6 ${trip.loadConfirmationPdfUrl ? 'text-green-500' : 'text-gray-400'} mr-3`} />
-                      <div>
-                        <h3 className="text-md font-medium text-gray-900">Load Confirmation</h3>
-                        {trip.loadConfirmationPdfUrl ? (
-                          <div className="mt-2">
-                            <p className="text-sm text-green-700 mb-2">Load confirmation PDF is available.</p>
-                            <Button
-                              size="sm"
-                              onClick={() => window.open(trip.loadConfirmationPdfUrl, '_blank')}
-                              icon={<Eye className="w-3 h-3" />}
-                            >
-                              View PDF
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="mt-2">
-                            <p className="text-sm text-gray-600 mb-2">No load confirmation PDF available.</p>
-                            <Button
-                              size="sm"
-                              onClick={handleGenerateLoadConfirmation}
-                              isLoading={isLoading[`generateLoadPdf-${id}`]}
-                              disabled={isLoading[`generateLoadPdf-${id}`]}
-                              icon={<FileText className="w-3 h-3" />}
-                            >
-                              Generate PDF
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-        
-        {activeTab === 'financials' && id && (
-          <TripFinancialsPanel tripId={id} />
-        )}
-        
-        {activeTab === 'load' && id && (
-          <LoadPlanningComponent tripId={id} />
-        )}
-        
-        {activeTab === 'route' && (
-          <div className="bg-white rounded-lg shadow p-6">
-            {trip.plannedRoute ? (
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-gray-900">Route Information</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h3 className="text-sm font-medium text-blue-700 mb-2">Origin</h3>
-                    <p className="text-gray-800">{trip.plannedRoute.origin}</p>
-                  </div>
-                  
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h3 className="text-sm font-medium text-blue-700 mb-2">Destination</h3>
-                    <p className="text-gray-800">{trip.plannedRoute.destination}</p>
-                  </div>
-                  
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h3 className="text-sm font-medium text-blue-700 mb-2">Distance</h3>
-                    <p className="text-gray-800">{trip.plannedRoute.estimatedDistance?.toLocaleString()} km</p>
-                  </div>
-                  
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h3 className="text-sm font-medium text-blue-700 mb-2">Duration</h3>
-                    <p className="text-gray-800">{Math.round(trip.plannedRoute.estimatedDuration || 0)} minutes</p>
-                  </div>
-                </div>
-                
-                {trip.plannedRoute.waypoints && trip.plannedRoute.waypoints.length > 0 && (
-                  <div className="mt-4">
-                    <h3 className="text-md font-medium text-gray-800 mb-2">Waypoints</h3>
-                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                      <ul className="space-y-2">
-                        {trip.plannedRoute.waypoints.map((waypoint, index) => (
-                          <li key={index} className="flex items-center">
-                            <div className="flex-shrink-0 h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center mr-2">
-                              <span className="text-xs text-blue-600">{index + 1}</span>
-                            </div>
-                            <span>{waypoint}</span>
-                          </li>
-                        ))}
-                      </ul>
                     </div>
                   </div>
                 )}
-                
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => navigate(`/route-planning/${id}`)}
-                    icon={<RouteIcon className="w-4 h-4" />}
-                  >
-                    View Route Details
-                  </Button>
+                <div>
+                  <p className="text-sm text-gray-500">Documentation Status</p>
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span>With receipts:</span>
+                      <span className="text-green-600 font-medium">
+                        {trip.costs.filter(c => c.attachments.length > 0).length}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Missing receipts:</span>
+                      <span className="text-red-600 font-medium">
+                        {trip.costs.filter(c => c.attachments.length === 0).length}
+                      </span>
+                    </div>
+                  </div>
                 </div>
+                {trip.status === 'active' && (
+                  <div>
+                    <p className="text-sm text-gray-500">Completion Status</p>
+                    <p className={`font-medium ${canComplete ? 'text-green-600' : 'text-red-600'}`}>
+                      {canComplete ? 'Ready to Complete' : 'Cannot Complete'}
+                    </p>
+                    {!canComplete && (
+                      <p className="text-xs text-red-500 mt-1">
+                        Resolve {unresolvedFlags} flag{unresolvedFlags !== 1 ? 's' : ''} first
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="text-center py-8">
-                <RouteIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-lg font-medium text-gray-900">No Route Planned</h3>
-                <p className="mt-1 text-gray-500">
-                  Plan a route for this trip to see detailed routing information.
-                </p>
-                
-                <div className="mt-6">
-                  <Button
-                    onClick={() => navigate(`/route-planning/${id}`)}
-                    icon={<RouteIcon className="w-4 h-4" />}
-                  >
-                    Plan Route
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
+
+      {/* Cost Entries Section */}
+      <Card>
+        <CardHeader
+          title={`Cost Entries (${trip.costs.length})`}
+          action={
+            trip.status === 'active' && (
+              <Button size="sm" onClick={() => setShowCostForm(true)} icon={<Plus className="w-4 h-4" />}>
+                Add Cost Entry
+              </Button>
+            )
+          }
+        />
+        <CardContent>
+          <CostList 
+            costs={trip.costs} 
+            onEdit={trip.status === 'active' ? handleEditCost : undefined}
+            onDelete={trip.status === 'active' ? handleDeleteCost : undefined}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Modals */}
+      {trip.status === 'active' && (
+        <>
+          <Modal
+            isOpen={showCostForm}
+            onClose={closeCostForm}
+            title={editingCost ? 'Edit Cost Entry' : 'Add Cost Entry'}
+            maxWidth="lg"
+          >
+            <CostForm
+              tripId={trip.id}
+              cost={editingCost}
+              onSubmit={editingCost ? handleUpdateCost : handleAddCost}
+              onCancel={closeCostForm}
+            />
+          </Modal>
+
+          <Modal
+            isOpen={showSystemCostGenerator}
+            onClose={() => setShowSystemCostGenerator(false)}
+            title="Generate System Costs"
+            maxWidth="2xl"
+          >
+            <SystemCostGenerator
+              trip={trip}
+              onGenerateSystemCosts={handleGenerateSystemCosts}
+            />
+          </Modal>
+
+          <Modal
+            isOpen={showTripPlanning}
+            onClose={() => setShowTripPlanning(false)}
+            title="Trip Planning & Timeline"
+            maxWidth="2xl"
+          >
+            <TripPlanningForm
+              trip={trip}
+              onUpdate={updateTrip}
+              onAddDelay={(delay: Omit<DelayReason, 'id'>) => addDelayReason(trip.id, delay)}
+            />
+          </Modal>
+        </>
+      )}
+
+      {trip.status === 'completed' && (
+        <InvoiceSubmissionModal
+          isOpen={showInvoiceSubmission}
+          trip={trip}
+          onClose={() => setShowInvoiceSubmission(false)}
+          onSubmit={handleInvoiceSubmission}
+          onAddAdditionalCost={handleAddAdditionalCost}
+          onRemoveAdditionalCost={handleRemoveAdditionalCost}
+        />
+      )}
+
+      <Modal
+        isOpen={showReport}
+        onClose={() => setShowReport(false)}
+        title="Trip Report"
+        maxWidth="2xl"
+      >
+        <TripReport trip={trip} />
+      </Modal>
     </div>
   );
 };
-
-function CheckSquare(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <polyline points="9 11 12 14 22 4"></polyline>
-      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-    </svg>
-  );
-}
-
-function CheckCircle(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-    </svg>
-  );
-}
-
-function Eye(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-      <circle cx="12" cy="12" r="3"></circle>
-    </svg>
-  );
-}
-
 export default TripDetails;

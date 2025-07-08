@@ -1,22 +1,6 @@
-import React, { useState, useEffect } from "react";
-import {
-  Tyre,
-  TyreSize,
-  TyreInspectionEntry,
-} from "../../types/workshop-tyre-inventory";
-import { Input, Select, TextArea } from "../ui/FormElements";
-import Button from "../ui/Button";
-import ErrorMessage from "../ui/ErrorMessage";
-import {
-  AlertTriangle,
-  Camera,
-  CheckCircle2,
-  Save,
-  Upload,
-  ShoppingBag,
-  History,
-  Ruler,
-} from "lucide-react";
+import React, { useState, useEffect, ChangeEvent } from "react";
+import { VehicleSelector } from '../common/VehicleSelector';
+import { Tyre } from '../../data/tyreData'; // Correct Tyre import
 
 // Import the VehicleTyreView component for reuse
 import VehicleTyreView from "./VehicleTyreView";
@@ -310,11 +294,12 @@ const TyreInspection: React.FC = () => {
   };
 
   // Fleet number change handler
-  const handleFleetChange = (value: string) => {
+  const handleFleetChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
     setFormData((prevData) => ({
       ...prevData,
       fleetNumber: value,
-      tyrePosition: "", // Reset tyre position when fleet changes
+      tyrePosition: "",
     }));
     setSelectedTyre(null);
   };
@@ -534,24 +519,19 @@ const TyreInspection: React.FC = () => {
             <h2 className="text-lg font-semibold mb-4">Vehicle Selection</h2>
 
             <div className="space-y-4">
-              <Select
-                label="Fleet Number"
+              <VehicleSelector
                 value={formData.fleetNumber}
-                onChange={handleFleetChange}
-                options={[
-                  { label: "Select vehicle...", value: "" },
-                  ...FLEET_VEHICLES.map((v) => ({
-                    label: v.name,
-                    value: v.id,
-                  })),
-                ]}
-                required
+                onChange={(value) => setFormData((prev) => ({ ...prev, fleetNumber: value }))}
+                label="Fleet Number"
+                placeholder="Select vehicle for inspection..."
+                activeOnly={false}
+                showDetails={true}
               />
 
               <Input
                 label="Inspector"
                 value={formData.inspector}
-                onChange={(value) => handleChange("inspector", value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange("inspector", e.target.value)}
                 placeholder="Your name"
                 required
               />
@@ -560,7 +540,7 @@ const TyreInspection: React.FC = () => {
                 label="Date"
                 type="date"
                 value={formData.date}
-                onChange={(value) => handleChange("date", value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange("date", e.target.value)}
                 required
               />
             </div>
@@ -768,7 +748,7 @@ const TyreInspection: React.FC = () => {
                           label="Size"
                           value={formData.size}
                           onChange={(value) => handleChange("size", value)}
-                          options={sizeOptions.map((size) => ({ label: size, value: size }))}
+                          options={tyreSizes.map((size) => ({ label: size, value: size }))}
                         />
 
                         <div className="grid grid-cols-3 gap-2">
@@ -776,10 +756,13 @@ const TyreInspection: React.FC = () => {
                             label="Width"
                             type="number"
                             value={formData.tyreSize.width.toString()}
-                            onChange={(value) =>
+                            onChange={(e) =>
                               handleChange("tyreSize", {
                                 ...formData.tyreSize,
-                                width: parseInt(value, 10) || 0,
+                                width: parseInt(
+                                  (e.target ? e.target.value : e) as string,
+                                  10
+                                ) || 0,
                               })
                             }
                             placeholder="e.g., 315"
@@ -788,12 +771,18 @@ const TyreInspection: React.FC = () => {
                             label="Aspect Ratio"
                             type="number"
                             value={formData.tyreSize.aspectRatio.toString()}
-                            onChange={(value) =>
+                            onChange={(e) => {
+                              const value =
+                                typeof e === "string"
+                                  ? e
+                                  : e && e.target
+                                  ? e.target.value
+                                  : "";
                               handleChange("tyreSize", {
                                 ...formData.tyreSize,
                                 aspectRatio: parseInt(value, 10) || 0,
-                              })
-                            }
+                              });
+                            }}
                             placeholder="e.g., 80"
                           />
                           <Input
@@ -801,12 +790,18 @@ const TyreInspection: React.FC = () => {
                             type="number"
                             step="0.1"
                             value={formData.tyreSize.rimDiameter.toString()}
-                            onChange={(value) =>
+                            onChange={(e) => {
+                              const value =
+                                typeof e === "string"
+                                  ? e
+                                  : e && e.target
+                                  ? e.target.value
+                                  : "";
                               handleChange("tyreSize", {
                                 ...formData.tyreSize,
                                 rimDiameter: parseFloat(value) || 0,
-                              })
-                            }
+                              });
+                            }}
                             placeholder="e.g., 22.5"
                           />
                         </div>
@@ -829,6 +824,11 @@ const TyreInspection: React.FC = () => {
 
                         <Input
                           label="Serial Number"
+                          value={formData.serialNumber}
+                          onChange={(value) =>
+                            handleChange("serialNumber", value)
+                          }
+                          placeholder="Tyre serial number"
                           value={formData.serialNumber}
                           onChange={(value) =>
                             handleChange("serialNumber", value)
@@ -913,15 +913,6 @@ const TyreInspection: React.FC = () => {
                     }
                   />
 
-                  <Input
-                    label="Pressure (PSI)"
-                    type="number"
-                    value={formData.pressure}
-                      formData.detected.treadDepthIssue
-                        ? "Tread depth below threshold"
-                        : undefined
-                    }
-                  />
 
                   <Input
                     label="Pressure (PSI)"
@@ -1065,7 +1056,7 @@ const TyreInspection: React.FC = () => {
         <div className="lg:col-span-2">
           {formData.fleetNumber ? (
             <VehicleTyreView
-              vehicleId={formData.fleetNumber}
+              selectedVehicle={formData.fleetNumber}
               onTyreSelect={handleTyreSelect}
             />
           ) : (
@@ -1087,11 +1078,11 @@ const TyreInspection: React.FC = () => {
   );
 };
 
-// Correct the VehicleTyreViewProps interface
-interface VehicleTyreViewProps {
-  vehicleId: string;
-  onTyreSelect: (tyre: Tyre | null) => void;
-}
+// Removed incorrect VehicleTyreViewProps interface
+// interface VehicleTyreViewProps {
+//   vehicleId: string;
+//   onTyreSelect: (tyre: Tyre | null) => void;
+// }
 
 // Correct the TyreInspectionData interface
 export interface TyreInspectionData {
@@ -1115,8 +1106,8 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
     vehicleId: '',
     position: '',
     inspectorName: '',
-    treadDepth: 0, // Default to 0
-    pressure: 0, // Default to 0
+    treadDepth: '', // Default to empty string
+    pressure: '', // Default to empty string
     condition: 'good', // Default to 'good'
     damage: '',
     notes: '',
@@ -1158,8 +1149,8 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
       vehicleId: '',
       position: '',
       inspectorName: '',
-      treadDepth: 0,
-      pressure: 0,
+      treadDepth: '',
+      pressure: '',
       condition: 'good',
       damage: '',
       notes: '',
@@ -1180,14 +1171,14 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
       <Select
         label="Tyre Position"
         value={inspectionData.position}
-        onChange={(value) => setInspectionData(prev => ({ ...prev, position: value }))}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) => setInspectionData(prev => ({ ...prev, position: e.target.value }))}
         options={tyrePositions}
       />
 
       <Input
         label="Inspector Name"
         value={inspectionData.inspectorName}
-        onChange={(value) => setInspectionData(prev => ({ ...prev, inspectorName: value }))}
+        onChange={(e: ChangeEvent<HTMLInputElement>) => setInspectionData(prev => ({ ...prev, inspectorName: e.target.value }))}
         placeholder="Enter inspector name"
       />
 
@@ -1197,7 +1188,7 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
           type="number"
           step="0.1"
           value={inspectionData.treadDepth}
-          onChange={(value) => setInspectionData(prev => ({ ...prev, treadDepth: value }))}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setInspectionData(prev => ({ ...prev, treadDepth: e.target.value }))}
           placeholder="0.0"
         />
 
@@ -1205,7 +1196,7 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
           label="Tyre Pressure (PSI)"
           type="number"
           value={inspectionData.pressure}
-          onChange={(value) => setInspectionData(prev => ({ ...prev, pressure: value }))}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setInspectionData(prev => ({ ...prev, pressure: e.target.value }))}
           placeholder="0"
         />
       </div>
@@ -1213,21 +1204,21 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
       <Select
         label="Overall Condition"
         value={inspectionData.condition}
-        onChange={(value) => setInspectionData(prev => ({ ...prev, condition: value as TyreConditionStatus | '' }))}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) => setInspectionData(prev => ({ ...prev, condition: e.target.value as TyreConditionStatus | '' }))}
         options={conditionOptions}
       />
 
       <Select
         label="Damage Type"
         value={inspectionData.damage}
-        onChange={(value) => setInspectionData(prev => ({ ...prev, damage: value }))}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) => setInspectionData(prev => ({ ...prev, damage: e.target.value }))}
         options={damageTypes}
       />
 
       <TextArea
         label="Additional Notes"
         value={inspectionData.notes}
-        onChange={(value) => setInspectionData(prev => ({ ...prev, notes: value }))}
+        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setInspectionData(prev => ({ ...prev, notes: e.target.value }))}
         placeholder="Any additional observations or recommendations..."
         rows={4}
       />
