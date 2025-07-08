@@ -1,87 +1,119 @@
+/**
+ * Main entry point for Firebase Functions
+ * Properly integrates all TypeScript and JavaScript webhooks
+ * with consistent error handling and configuration
+ */
+
 import { setGlobalOptions } from "firebase-functions/v2";
-import { onRequest } from "firebase-functions/v2/https";
+import { onRequest, HttpsOptions } from "firebase-functions/v2/https";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
 
-// Import enhanced TypeScript webhook implementations
-import {
-  enhancedDriverBehaviorWebhook,
-} from "./enhanced-driver-behavior-webhook";
+// --- Import the fixed webhooks ---
+import { enhancedDriverBehaviorWebhook } from "./enhanced-driver-behavior-webhook";
 import { enhancedWebBookImport } from "./enhanced-webbook-import";
 
-// Register webhook URLs (should ideally be in environment variables)
+// Register webhook URLs for schedule/manual import triggers
 const WEBHOOK_URLS = {
-  DRIVER_BEHAVIOR:
-    process.env.DRIVER_BEHAVIOR_WEBHOOK_URL ||
+  DRIVER_BEHAVIOR: process.env.DRIVER_BEHAVIOR_WEBHOOK_URL ||
     "https://script.google.com/macros/s/AKfycbx2LuGtG7E8XYNafq37D0JK4SfYYUqGrOnXgpLOsWF1uNYoOlErqaiAYGf7vsCKKLTWJA/exec",
-  TRIPS_WEBBOOK:
-    process.env.TRIPS_WEBBOOK_WEBHOOK_URL ||
+  TRIPS_WEBBOOK: process.env.TRIPS_WEBBOOK_WEBHOOK_URL ||
     "https://script.google.com/macros/s/AKfycbx6R9oVjDYKkCitLNRXH42NcwzNnGETWWSk4Bl87We98fzWcz8uDWIF7h5zFbbda3A/exec",
 };
 
-// Initialize Firebase only if not already initialized
+// Initialize Firebase (if not already initialized)
 try {
   admin.initializeApp();
 } catch (e) {
   console.log("Firebase already initialized");
 }
 
-const httpsOpts = { maxInstances: 10 };
+// Common configuration for HTTP functions
+const httpsOpts: HttpsOptions = {
+  maxInstances: 10,
+};
+
+// For cost control and performance, limit the number of instances
 setGlobalOptions({ maxInstances: 10 });
 
 // =============================================
 // EXPORT ENHANCED WEBHOOK IMPLEMENTATIONS
 // =============================================
 
+// Export as expected for Firebase deployment (exported as endpoints)
 export const importDriverBehaviorWebhook = enhancedDriverBehaviorWebhook;
 export const importTripsFromWebBook = enhancedWebBookImport;
+
+// =============================================
+// ADDITIONAL FUNCTIONS & LEGACY SUPPORT
+// =============================================
+
+// Define TripUpdateData interface to fix property errors
+interface TripUpdateData {
+  updatedAt: admin.firestore.FieldValue;
+  startedAt?: string;
+  driverId?: string;
+  vehicleId?: string;
+  startLocation?: any;
+  shippedStatus?: boolean;
+  shippedDate?: string;
+  status?: string;
+  endedAt?: string;
+  endLocation?: any;
+  deliveredStatus?: boolean;
+  deliveredDate?: string;
+  lastUpdated?: string;
+}
 
 // Telematics trip update webhook
 export const telematicsTripUpdateWebhook = onRequest(httpsOpts, async (req, res) => {
   try {
     console.log("[telematicsTripUpdateWebhook] Received request:", JSON.stringify(req.body, null, 2));
+
     const { tripId, status, timestamp, driverId, vehicleId, location, endLocation } = req.body;
+
     if (!tripId || !status) {
       res.status(400).json({ error: "Missing required fields: tripId and status" });
       return;
     }
+
     const tripRef = admin.firestore().collection("trips").doc(String(tripId));
-    const updateData = { updatedAt: admin.firestore.FieldValue.serverTimestamp() };
+
+    const updateData: TripUpdateData = { updatedAt: admin.firestore.FieldValue.serverTimestamp() };
 
     if (status === "trip_started") {
       if (!driverId || !vehicleId || !location) {
         res.status(400).json({ error: "Missing required fields for trip_started status" });
         return;
       }
+
       const timestampISO = new Date(timestamp).toISOString();
-      Object.assign(updateData, {
-        startedAt: timestampISO,
-        driverId,
-        vehicleId,
-        startLocation: location,
-        shippedStatus: true,
-        shippedDate: timestampISO,
-        status: "active",
-      });
+      updateData.startedAt = timestampISO;
+      updateData.driverId = driverId;
+      updateData.vehicleId = vehicleId;
+      updateData.startLocation = location;
+      updateData.shippedStatus = true;
+      updateData.shippedDate = timestampISO;
+      updateData.status = "active";
     } else if (status === "trip_ended") {
       if (!endLocation) {
         res.status(400).json({ error: "Missing required field endLocation for trip_ended status" });
         return;
       }
+
       const timestampISO = new Date(timestamp).toISOString();
-      Object.assign(updateData, {
-        endedAt: timestampISO,
-        endLocation,
-        deliveredStatus: true,
-        deliveredDate: timestampISO,
-        status: "completed",
-      });
+      updateData.endedAt = timestampISO;
+      updateData.endLocation = endLocation;
+      updateData.deliveredStatus = true;
+      updateData.deliveredDate = timestampISO;
+      updateData.status = "completed";
     } else {
       updateData.lastUpdated = new Date(timestamp).toISOString();
     }
 
     console.log(`[telematicsTripUpdateWebhook] Updating trip ${tripId} with status ${status}`, updateData);
     await tripRef.set(updateData, { merge: true });
+
     res.status(200).json({
       message: `Trip ${tripId} updated with status: ${status}`,
       timestamp: new Date().toISOString(),
@@ -93,47 +125,52 @@ export const telematicsTripUpdateWebhook = onRequest(httpsOpts, async (req, res)
 });
 
 // Import Driver Behavior Events from Web Book (automatic sync)
-export const importDriverEventsFromWebBook = onSchedule(
-  {
-    schedule: "every 5 minutes",
-    maxInstances: 1,
-  },
-  async () => {
-    try {
-      const fetch = (await import("node-fetch")).default;
-      const response = await fetch(WEBHOOK_URLS.DRIVER_BEHAVIOR);
-      if (!response.ok) throw new Error("Failed to fetch from Driver Behavior Web Book");
-      const events = await response.json();
-      const db = admin.firestore();
-      let imported = 0;
-      let skipped = 0;
-      for (const event of events) {
-        if (!event || event.eventType === "UNKNOWN" || !event.id) {
-          skipped++;
-          continue;
-        }
-        const existing = await db
-          .collection("driverBehaviorEvents")
-          .where("id", "==", event.id)
-          .limit(1)
-          .get();
-        if (!existing.empty) {
-          skipped++;
-          continue;
-        }
-        await db.collection("driverBehaviorEvents").add(event);
-        imported++;
+export const importDriverEventsFromWebBook = onSchedule({
+  schedule: "every 5 minutes",
+  maxInstances: 1,
+}, async (event) => {
+  try {
+    const fetch = (await import("node-fetch")).default;
+    const response = await fetch(WEBHOOK_URLS.DRIVER_BEHAVIOR);
+
+    if (!response.ok) throw new Error("Failed to fetch from Driver Behavior Web Book");
+
+    const events = await response.json();
+    const db = admin.firestore();
+    let imported = 0;
+    let skipped = 0;
+
+    for (const event of events) {
+      if (!event || event.eventType === "UNKNOWN" || !event.id) {
+        skipped++;
+        continue;
       }
-      console.log(`DriverBehavior Sync: Imported ${imported}, Skipped ${skipped}`);
-    } catch (error) {
-      console.error("[importDriverEventsFromWebBook] Error:", error);
+
+      // Check for duplicate by event.id
+      const existing = await db.collection("driverBehaviorEvents").where("id", "==", event.id).limit(1).get();
+      if (!existing.empty) {
+        skipped++;
+        continue;
+      }
+
+      await db.collection("driverBehaviorEvents").add(event);
+      imported++;
     }
-  },
-);
+
+    console.log(`DriverBehavior Sync: Imported ${imported}, Skipped ${skipped}`);
+    // Don't return a value to comply with void | Promise<void> return type
+  } catch (error) {
+    console.error("[importDriverEventsFromWebBook] Error:", error);
+    // Don't rethrow, just log the error to comply with void return type
+    console.error(error instanceof Error ? error.message : "Unknown error");
+  }
+});
 
 // Manual trigger for driver behavior events import
 export const manualImportDriverEvents = onRequest(httpsOpts, async (req, res) => {
   try {
+    // In V2, we need to manually call the scheduled function logic
+    // Store the result in a variable to return to the client, but don't return from the scheduled function
     const result = await importDriverEventsFromWebBookLogic();
     res.status(200).json(result);
   } catch (error) {
@@ -145,31 +182,35 @@ export const manualImportDriverEvents = onRequest(httpsOpts, async (req, res) =>
   }
 });
 
+// Extracted function logic to be reused
 async function importDriverEventsFromWebBookLogic() {
   const fetch = (await import("node-fetch")).default;
   const response = await fetch(WEBHOOK_URLS.DRIVER_BEHAVIOR);
+
   if (!response.ok) throw new Error("Failed to fetch from Driver Behavior Web Book");
+
   const events = await response.json();
   const db = admin.firestore();
   let imported = 0;
   let skipped = 0;
+
   for (const event of events) {
     if (!event || event.eventType === "UNKNOWN" || !event.id) {
       skipped++;
       continue;
     }
-    const existing = await db
-      .collection("driverBehaviorEvents")
-      .where("id", "==", event.id)
-      .limit(1)
-      .get();
+
+    // Check for duplicate by event.id
+    const existing = await db.collection("driverBehaviorEvents").where("id", "==", event.id).limit(1).get();
     if (!existing.empty) {
       skipped++;
       continue;
     }
+
     await db.collection("driverBehaviorEvents").add(event);
     imported++;
   }
+
   console.log(`DriverBehavior Sync: Imported ${imported}, Skipped ${skipped}`);
   return { imported, skipped };
 }
@@ -179,22 +220,29 @@ export const manualImportTrips = onRequest(httpsOpts, async (req, res) => {
   try {
     const fetch = (await import("node-fetch")).default;
     const response = await fetch(WEBHOOK_URLS.TRIPS_WEBBOOK);
+
     if (!response.ok) throw new Error("Failed to fetch from Google Sheets Web App");
+
     const trips = await response.json();
     const db = admin.firestore();
     let imported = 0;
     let skipped = 0;
+
     for (const trip of trips) {
       const loadRef = trip.loadRef || trip.id;
       if (!loadRef) {
         skipped++;
         continue;
       }
+
+      // Check for duplicate by loadRef
       const existing = await db.collection("trips").where("loadRef", "==", loadRef).limit(1).get();
       if (!existing.empty) {
         skipped++;
         continue;
       }
+
+      // Process the trip data
       const processedTrip = {
         id: trip.id || loadRef,
         fleetNumber: trip.fleetNumber || "",
@@ -215,9 +263,11 @@ export const manualImportTrips = onRequest(httpsOpts, async (req, res) => {
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       };
+
       await db.collection("trips").doc(loadRef).set(processedTrip);
       imported++;
     }
+
     res.status(200).json({
       imported,
       skipped,
@@ -235,7 +285,8 @@ export const manualImportTrips = onRequest(httpsOpts, async (req, res) => {
 // Manual import endpoint for driver behavior events (can be triggered from the UI)
 export const manualImportDriverBehavior = onRequest(httpsOpts, async (req, res) => {
   try {
-    // Use enhanced TypeScript webhook implementation directly
+    // Use our enhanced TypeScript webhook implementation directly
+    // Create a proper Express Request-compatible object
     const mockRequest = {
       body: { events: [] },
       method: "POST",
@@ -244,13 +295,8 @@ export const manualImportDriverBehavior = onRequest(httpsOpts, async (req, res) 
         "x-source": "manual-trigger",
         "x-request-id": `manual-${Date.now()}`,
       },
-      get(header) {
-        const normalizedHeader = header.toLowerCase();
-        return (
-          Object.keys(this.headers).find(
-            (key) => key.toLowerCase() === normalizedHeader,
-          ) || undefined
-        );
+      get: function(header: string): string | undefined {
+        return undefined; // Placeholder, will be replaced below
       },
       params: {},
       query: {},
@@ -263,14 +309,28 @@ export const manualImportDriverBehavior = onRequest(httpsOpts, async (req, res) 
       rawBody: Buffer.from(JSON.stringify({ events: [] })),
     };
 
+    // Define type-safe headers with proper lookup support
+    const headers = mockRequest.headers as Record<string, string>;
+
+    // Implement the get method with proper case-insensitive lookup
+    mockRequest.get = function(header: string): string | undefined {
+      const normalizedHeader = header.toLowerCase();
+      return Object.keys(headers).find(
+        (key) => key.toLowerCase() === normalizedHeader,
+      ) ? headers[Object.keys(headers).find(
+        (key) => key.toLowerCase() === normalizedHeader,
+      ) as string] : undefined;
+    };
+
     let responseStatus = 200;
     let responseData = {};
+
     const mockResponse = {
-      status: (code) => {
+      status: (code: number) => {
         responseStatus = code;
         return mockResponse;
       },
-      json: (data) => {
+      json: (data: any) => {
         responseData = data;
         return mockResponse;
       },
@@ -278,7 +338,9 @@ export const manualImportDriverBehavior = onRequest(httpsOpts, async (req, res) 
       send: () => mockResponse,
       end: () => mockResponse,
     };
-    await enhancedDriverBehaviorWebhook(mockRequest, mockResponse);
+
+    await enhancedDriverBehaviorWebhook(mockRequest as any, mockResponse as any);
+
     res.status(responseStatus).json({
       message: "Manual driver behavior import triggered",
       result: responseData,
@@ -291,3 +353,6 @@ export const manualImportDriverBehavior = onRequest(httpsOpts, async (req, res) 
     });
   }
 });
+
+// Now using the enhanced TypeScript implementation via importTripsFromWebBook
+
