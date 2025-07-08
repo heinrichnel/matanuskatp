@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tyre } from '../../types';
+import { Tyre } from '../../data/tyreData';
 
 interface VehicleTyreViewProps {
   selectedVehicle: string;

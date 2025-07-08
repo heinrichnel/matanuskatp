@@ -34,6 +34,7 @@ interface ManualDieselEntryModalProps {
 const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({ 
   isOpen,
   onClose
+}) => {
   const { addDieselRecord, trips, dieselRecords, connectionStatus } = useAppContext();
   
   const [formData, setFormData] = useState({
@@ -87,7 +88,9 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
     }
   }, [formData.fleetNumber, formData.date, dieselRecords]);
 
-  const handleChange = (field: string, value: string | boolean) => {
+  const handleChange = (field: string, event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement> | string | boolean) => {
+    const value = typeof event === 'object' ? (event as React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>).target.value : event;
+    
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear errors

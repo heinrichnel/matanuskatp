@@ -9,7 +9,8 @@ export interface InvoiceSubmissionModalProps {
   onRemoveAdditionalCost: (costId: string) => void;
 }
 
-const InvoiceSubmissionModal: React.FC<InvoiceSubmissionModalProps> = ({ isOpen, onClose, trip, onSubmit }) => {
+const InvoiceSubmissionModal: React.FC<InvoiceSubmissionModalProps> = (props) => {
+  const { isOpen } = props;
   if (!isOpen) return null;
   return <div />;
 };

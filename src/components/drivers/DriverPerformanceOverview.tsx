@@ -13,14 +13,12 @@ interface DriverPerformanceOverviewProps {
   onViewEvent: (event: DriverBehaviorEvent) => void;
   onEditEvent: (event: DriverBehaviorEvent) => void;
   onSyncNow?: () => void;
-  onSyncNow?: () => void;
 }
 
 const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
   onAddEvent,
   onViewEvent,
   onEditEvent,
-  onSyncNow
   onSyncNow
 }) => {
   const { driverBehaviorEvents, getAllDriversPerformance, isLoading } = useAppContext();
@@ -140,20 +138,6 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
     }
   };
 
-  // Handle sync now with loading state
-  const handleSyncNow = async () => {
-    if (!onSyncNow) return;
-    
-    setIsSyncing(true);
-    try {
-      await onSyncNow();
-    } catch (error) {
-      console.error('Error syncing driver behavior events:', error);
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-  
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -170,21 +154,9 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
             onClick={onAddEvent}
             disabled={isSyncing || isLoading.importDriverBehavior}
             isLoading={isLoading.importDriverBehavior}
-            disabled={isSyncing || isLoading.importDriverBehavior}
-            isLoading={isLoading.importDriverBehavior}
           >
-            {isSyncing || isLoading.importDriverBehavior ? 'Syncing...' : 'Sync Now'}
+            Add Event
           </Button>
-          {onSyncNow && (
-            <Button
-              onClick={handleSyncNow}
-              icon={<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />}
-              variant="outline"
-              disabled={isSyncing}
-            >
-              {isSyncing ? 'Syncing...' : 'Sync Now'}
-            </Button>
-          )}
           {onSyncNow && (
             <Button
               onClick={handleSyncNow}
@@ -263,7 +235,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
             <Select
               label="Driver"
               value={selectedDriver}
-              onChange={(value: string) => setSelectedDriver(value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedDriver(e.target.value)}
               options={[
                 { label: 'All Drivers', value: '' },
                 ...DRIVERS.map(driver => ({ label: driver, value: driver }))
@@ -273,7 +245,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
             <Select
               label="Event Type"
               value={selectedEventType}
-              onChange={(value: string) => setSelectedEventType(value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedEventType(e.target.value)}
               options={[
                 { label: 'All Event Types', value: '' },
                 ...DRIVER_BEHAVIOR_EVENT_TYPES.map(type => ({ label: type.label, value: type.value }))
@@ -283,7 +255,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
             <Select
               label="Severity"
               value={selectedSeverity}
-              onChange={(value: string) => setSelectedSeverity(value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedSeverity(e.target.value)}
               options={[
                 { label: 'All Severities', value: '' },
                 { label: 'Critical', value: 'critical' },
@@ -296,7 +268,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
             <Select
               label="Status"
               value={selectedStatus}
-              onChange={(value: string) => setSelectedStatus(value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedStatus(e.target.value)}
               options={[
                 { label: 'All Statuses', value: '' },
                 { label: 'Pending', value: 'pending' },
@@ -311,13 +283,13 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
                 label="From Date"
                 type="date"
                 value={dateRange.start}
-                onChange={(value: string) => setDateRange(prev => ({ ...prev, start: value }))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
               />
               <Input
                 label="To Date"
                 type="date"
                 value={dateRange.end}
-                onChange={(value: string) => setDateRange(prev => ({ ...prev, end: value }))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
               />
             </div>
           </div>
