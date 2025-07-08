@@ -1,12 +1,97 @@
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'; // Fixed casing
-import TyreReportGenerator from './tyre/TyreReportGenerator'; // Updated to default import
-import { TyreCostAnalysis } from './TyreCostAnalysis';
+import React, { useEffect, useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
+import TyreReportGenerator from '@/components/tyre/TyreReportGenerator';
+import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
+import { Tyre } from '@/data/tyreData';
+import { TyrePerformanceForm } from '@/components/tyre/TyrePerformanceForm';
+import { getBestTyres, getTyrePerformanceStats, RankedTyre } from '@/utils/tyreAnalytics';
+import { tyreSizes, tyreBrands, tyrePatterns } from '@/data/tyreData';
 
 export const TyreReports: React.FC = () => {
+  const [tyreData, setTyreData] = useState<Tyre[]>([]);
+  const [bestTyres, setBestTyres] = useState<RankedTyre[]>([]);
+  const [performanceStats, setPerformanceStats] = useState<any>(null);
+  const [filterBrand, setFilterBrand] = useState<string>('');
+  const [filterPattern, setFilterPattern] = useState<string>('');
+  const [filterSize, setFilterSize] = useState<string>('');
+
+  useEffect(() => {
+    const db = getFirestore();
+    const tyresCollection = collection(db, 'tyres');
+
+    const unsubscribe = onSnapshot(tyresCollection, (snapshot) => {
+      const tyres = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        tyreId: doc.data().tyreId || 'Unknown',
+        serialNumber: doc.data().serialNumber || 'Unknown',
+        dotCode: doc.data().dotCode || 'Unknown',
+        manufacturingDate: doc.data().manufacturingDate || 'Unknown',
+        brand: doc.data().brand || 'Unknown',
+        model: doc.data().model || 'Unknown',
+        size: doc.data().size || { width: 0, aspectRatio: 0, rimDiameter: 0 },
+        pattern: doc.data().pattern || 'Unknown',
+        loadIndex: doc.data().loadIndex || 0,
+        speedRating: doc.data().speedRating || 'Unknown',
+        type: doc.data().type || 'Unknown',
+        purchaseDetails: doc.data().purchaseDetails || {
+          date: 'Unknown',
+          cost: 0,
+          supplier: 'Unknown',
+          warranty: 'Unknown',
+        },
+        installation: doc.data().installation || {
+          vehicleId: 'Unknown',
+          position: 'Unknown',
+          mileageAtInstallation: 0,
+          installationDate: 'Unknown',
+          installedBy: 'Unknown',
+        },
+        condition: doc.data().condition || {
+          treadDepth: 0,
+          pressure: 0,
+          temperature: 0,
+          status: 'good',
+          lastInspectionDate: 'Unknown',
+          nextInspectionDue: 'Unknown',
+        },
+        status: doc.data().status || 'Unknown',
+        mountStatus: doc.data().mountStatus || 'Unknown',
+        maintenanceHistory: doc.data().maintenanceHistory || [],
+        milesRun: doc.data().milesRun || 0,
+        kmRunLimit: doc.data().kmRunLimit || 0,
+        notes: doc.data().notes || 'None',
+      }));
+      setTyreData(tyres);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Adjust transformation logic to derive `totalDistance` and `totalCost`
+  const transformedTyreData = tyreData.map((tyre) => ({
+    brand: tyre.brand,
+    model: tyre.model,
+    totalDistance: tyre.installation.mileageAtInstallation || 0, // Derived from installation data
+    totalCost: tyre.purchaseDetails.cost || 0,                  // Derived from purchase details
+  }));
+
+  useEffect(() => {
+    if (tyreData.length > 0) {
+      const best = getBestTyres(transformedTyreData);
+      const stats = getTyrePerformanceStats(transformedTyreData);
+      setBestTyres(best);
+      setPerformanceStats(stats);
+    }
+  }, [tyreData]);
+
   const handleGenerateReport = (type: string, dateRange: string, brand: string) => {
     console.log('Generating report:', { type, dateRange, brand });
     alert(`Generating ${type} report for ${dateRange} days`);
+  };
+
+  const handlePerformanceSubmit = (data: any) => {
+    console.log('Performance data submitted:', data);
+    alert('Performance data saved successfully!');
   };
 
   return (
@@ -16,20 +101,94 @@ export const TyreReports: React.FC = () => {
         <p className="text-gray-600">Generate comprehensive tyre performance and cost reports</p>
       </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Brand Filter */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+          <select
+            className="w-full p-2 border border-gray-300 rounded-md"
+            value={filterBrand}
+            onChange={(e) => setFilterBrand(e.target.value)}
+          >
+            <option value="">All Brands</option>
+            {tyreBrands.map((brand) => (
+              <option key={brand} value={brand}>{brand}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Pattern Filter */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Pattern</label>
+          <select
+            className="w-full p-2 border border-gray-300 rounded-md"
+            value={filterPattern}
+            onChange={(e) => setFilterPattern(e.target.value)}
+          >
+            <option value="">All Patterns</option>
+            {tyrePatterns.map((pattern) => (
+              <option key={pattern} value={pattern}>{pattern}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Size Filter */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Size</label>
+          <select
+            className="w-full p-2 border border-gray-300 rounded-md"
+            value={filterSize}
+            onChange={(e) => setFilterSize(e.target.value)}
+          >
+            <option value="">All Sizes</option>
+            {tyreSizes.map((size) => (
+              <option key={size} value={size}>{size}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <button
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
+        onClick={() => handleGenerateReport('Performance', '30', filterBrand)}
+      >
+        Generate Report
+      </button>
+
       <Tabs defaultValue="reports" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="reports">Standard Reports</TabsTrigger>
-          <TabsTrigger value="cost-analysis">Cost per KM Analysis</TabsTrigger>
+          <TabsTrigger value="performance">Performance Entry</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="reports" className="space-y-6">
           <TyreReportGenerator onGenerateReport={handleGenerateReport} />
         </TabsContent>
-        
-        <TabsContent value="cost-analysis">
-          <TyreCostAnalysis />
+
+        <TabsContent value="performance">
+          <TyrePerformanceForm onSubmit={handlePerformanceSubmit} onClose={() => alert('Form closed')} />
         </TabsContent>
       </Tabs>
+
+      {bestTyres.length > 0 && (
+        <div className="space-y-6">
+          <h3 className="text-lg font-semibold">Analytics</h3>
+          <div>
+            <h4 className="font-medium">Top Performing Tyres</h4>
+            <ul>
+              {bestTyres.map((tyre, index) => (
+                <li key={index}>{tyre.brand} {tyre.model} - Rank: {tyre.rank}, Rating: {tyre.performanceRating}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-medium">Performance Statistics</h4>
+            <pre>{JSON.stringify(performanceStats, null, 2)}</pre>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+export default TyreReports;

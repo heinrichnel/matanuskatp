@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/FormElements';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/Badge';
 import { SAMPLE_TYRES, TYRE_BRANDS, TYRE_PATTERNS, Tyre } from '@/data/tyreData';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DollarSign, TrendingUp, TrendingDown, BarChart3, Download } from 'lucide-react';
@@ -52,7 +52,11 @@ interface TyreCostMetrics {
   recommendationScore: number;
 }
 
-export const TyreCostAnalysis: React.FC = () => {
+interface TyreCostAnalysisProps {
+  tyreData: Tyre[];
+}
+
+export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) => {
   const [filterBrand, setFilterBrand] = useState('');
   const [filterPattern, setFilterPattern] = useState('');
   const [sortBy, setSortBy] = useState('costPerKm');
@@ -161,6 +165,10 @@ export const TyreCostAnalysis: React.FC = () => {
     a.href = url;
     a.download = 'tyre-cost-analysis.csv';
     a.click();
+  };
+
+  const calculateCostPerKm = (tyre: Tyre) => {
+    return tyre.purchaseDetails.cost / estimateTyreLifespan(tyre);
   };
 
   return (
@@ -318,6 +326,18 @@ export const TyreCostAnalysis: React.FC = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Cost per KM Analysis - DEBUG ONLY */}
+      <div className="mt-10">
+        <h3 className="text-lg font-bold">Cost per KM Analysis</h3>
+        <ul>
+          {tyreData.map((tyre) => (
+            <li key={tyre.id}>
+              {tyre.brand} {tyre.model} ({String(tyre.size)}): ${calculateCostPerKm(tyre).toFixed(2)} per KM
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };

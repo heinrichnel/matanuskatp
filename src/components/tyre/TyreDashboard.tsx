@@ -20,13 +20,13 @@ import LoadingIndicator from '../ui/LoadingIndicator';
 
 // Import tyre reference data and inventory types
 import {
-  getUniqueTyreBrands,
-  getUniqueTyreSizes,
   VENDORS,
   TyreInventoryItem,
   TyreStoreLocation,
   TYRE_REFERENCES,
-  TyreReference
+  TyreReference,
+  tyreSizes,
+  tyreBrands
 } from '../../utils/tyreConstants';
 
 // Mock data for fallback if Firebase has no data
@@ -597,7 +597,7 @@ const TyreDashboard: React.FC = () => {
 
   // Update a specific filter criterion
   const updateFilter = (key: string, value: string) => {
-    setFilterCriteria(prev => ({
+    setFilterCriteria((prev) => ({
       ...prev,
       [key]: value === 'all' ? undefined : value,
     }));
@@ -959,7 +959,7 @@ const TyreDashboard: React.FC = () => {
                     onChange={(e) => updateFilter('brand', e.target.value)}
                   >
                     <option value="all">All Brands</option>
-                    {getUniqueTyreBrands().map(brand => (
+                    {tyreBrands.map((brand: string) => (
                       <option key={brand} value={brand}>{brand}</option>
                     ))}
                   </select>
@@ -975,7 +975,7 @@ const TyreDashboard: React.FC = () => {
                     onChange={(e) => updateFilter('size', e.target.value)}
                   >
                     <option value="all">All Sizes</option>
-                    {getUniqueTyreSizes().map(size => (
+                    {tyreSizes.map((size: string) => (
                       <option key={size} value={size}>{size}</option>
                     ))}
                   </select>
@@ -1068,7 +1068,7 @@ const TyreDashboard: React.FC = () => {
                     onChange={(e) => updateFilter('size', e.target.value)}
                   >
                     <option value="all">All Sizes</option>
-                    {getUniqueTyreSizes().map(size => (
+                    {tyreSizes.map((size: string) => (
                       <option key={size} value={size}>{size}</option>
                     ))}
                   </select>
@@ -1085,7 +1085,7 @@ const TyreDashboard: React.FC = () => {
                     onChange={(e) => updateFilter('brand', e.target.value)}
                   >
                     <option value="all">All Brands</option>
-                    {getUniqueTyreBrands().map(brand => (
+                    {tyreBrands.map((brand: string) => (
                       <option key={brand} value={brand}>{brand}</option>
                     ))}
                   </select>

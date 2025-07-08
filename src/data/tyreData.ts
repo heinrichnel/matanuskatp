@@ -1,3 +1,79 @@
+// Centralized lists for tyre sizes, brands, types, and patterns
+
+export const tyreSizes = [
+  "315/80R22.5",
+  "385/65R22.5",
+];
+
+export const tyreBrands = [
+  "Firemax",
+  "Triangle",
+  "Terraking",
+  "Compasal",
+  "Windforce",
+  "Pirelli",
+  "Powertrac",
+  "Sunfull",
+  "Formula",
+  "Wellplus",
+  "Dunlop",
+  "Sonix",
+  "Techshield",
+  "Aplus",
+  "Macroyal",
+  "Jinyu",
+];
+
+export const tyreTypes = [
+  "SP",
+  "Multi",
+  "Steer",
+  "Drive",
+  "Trailer",
+];
+
+export const tyrePatterns = [
+  "CPS60",
+  "TRACTION PRO",
+  "WH1020",
+  "CPD82",
+  "FM07",
+  "VIGOROUS TM901",
+  "CPT76",
+  "FM188",
+  "POWER WDM816",
+  "POWER WDM916",
+  "CP560",
+  "WD2060",
+  "POWERMAN666",
+  "D802",
+  "JY589",
+  "JY711",
+  "CONFORT EXP",
+  "TR688",
+  "SP580",
+  "FM19",
+  "HS268",
+  "WA1060",
+  "SP320A",
+  "SX668",
+  "FM66",
+  "WDM916",
+  "FM166",
+  "WDM16",
+  "HF638",
+  "HF768",
+  "FG01S",
+  "HS102",
+  "WD2020",
+  "FM18",
+  "Tracpro",
+  "HF660",
+  "ST011",
+  "FM06",
+  "TS778",
+];
+
 // Tyre brands available in the system
 export const TYRE_BRANDS = [
   'Michelin', 'Bridgestone', 'Continental', 'Goodyear', 'Pirelli',
@@ -709,6 +785,7 @@ export const estimateRemainingLife = (tyre: Tyre): number => {
   
   const usedTread = newTyreDepth - currentTread;
   const remainingTread = currentTread - minimumTread;
+  console.log('Remaining Tread:', remainingTread);
   
   if (usedTread <= 0) return 100000; // New tyre
   

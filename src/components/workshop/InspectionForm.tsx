@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
 import { Select } from '../ui/FormElements';
 import { Clipboard, CheckCircle, Save, FileText, ArrowLeft, AlertTriangle } from 'lucide-react';
 import InspectionItemCard from './InspectionItemCard';
@@ -103,12 +103,22 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
   };
   
   // Handle complete inspection
-  const handleComplete = () => {
+  const handleCompleteInspection = () => {
     if (!canComplete) {
-      alert('Cannot complete inspection. All items must be checked.');
+      alert('Please complete all pending items before submitting.');
       return;
     }
-    
+
+    const failedItems = formState.items.filter((item: any) => item.status === 'fail');
+    const criticalFaults = failedItems.filter((item: any) => item.isCritical);
+
+    if (criticalFaults.length > 0) {
+      if (window.confirm(`${criticalFaults.length} critical faults found. Would you like to create a job card?`)) {
+        setJobCardItem(criticalFaults);
+        setShowJobCardModal(true);
+      }
+    }
+
     if (onComplete) {
       onComplete({
         ...formState,
@@ -116,8 +126,6 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
         completedAt: new Date().toISOString()
       });
     }
-    alert('Inspection completed successfully.');
-    onBack();
   };
   
   // Create mock job card from failed item
@@ -128,6 +136,23 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
     setShowJobCardModal(false);
   };
   
+  // Render job card modal if needed
+  const renderJobCardModal = () => {
+    if (!showJobCardModal || !jobCardItem) return null;
+
+    return (
+      <div className="modal">
+        <h2>Create Job Card</h2>
+        <p>Critical fault detected: {jobCardItem.description}</p>
+        <button onClick={() => setShowJobCardModal(false)}>Cancel</button>
+        <button onClick={() => {
+          console.log('Job card created for:', jobCardItem);
+          setShowJobCardModal(false);
+        }}>Create Job Card</button>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -155,7 +180,7 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
           </Button>
           <Button
             icon={<CheckCircle className="w-4 h-4" />}
-            onClick={handleComplete}
+            onClick={handleCompleteInspection}
             disabled={!canComplete}
           >
             Complete Inspection
@@ -361,6 +386,9 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
           </div>
         </div>
       )}
+      
+      {/* Render Job Card Modal */}
+      {renderJobCardModal()}
     </div>
   );
 };

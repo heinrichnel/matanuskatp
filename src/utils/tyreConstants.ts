@@ -299,3 +299,7 @@ export const generateMockInventory = (): TyreInventoryItem[] => {
 };
 
 export const MOCK_INVENTORY = generateMockInventory();
+
+// Exported tyreSizes and tyreBrands for use in TyreDashboard
+export const tyreSizes = getUniqueTyreSizes();
+export const tyreBrands = getUniqueTyreBrands();
