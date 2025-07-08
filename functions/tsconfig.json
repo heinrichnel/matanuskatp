@@ -1,18 +1,19 @@
 {
-  "compileOnSave": true,
-  "include": [
-    "src"
-  ],
   "compilerOptions": {
-    "module": "NodeNext",
-    "noImplicitReturns": true,
+    "target": "es2019",
+    "module": "commonjs",             // For Firebase Functions
+    "lib": ["es2019"],
+    "moduleResolution": "node",
     "outDir": "lib",
+    "rootDir": "src",
     "sourceMap": true,
-    "strict": true,
-    "target": "es2017",
+    "esModuleInterop": true,          // CRITICAL for node-fetch and modern imports
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "moduleResolution": "nodenext",
-    "noUnusedLocals": true
-  }
+    "strict": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "lib"]
 }
