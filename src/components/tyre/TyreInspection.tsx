@@ -23,14 +23,11 @@ import VehicleTyreView from "./VehicleTyreView";
 
 // Import tyre reference data
 import {
-  getUniqueTyreBrands,
-  getUniqueTyreSizes,
   getTyresByBrand,
   getTyresBySize,
   VENDORS,
   getPositionsByFleet,
 } from "../../utils/tyreConstants";
-import { TYRE_REFERENCE_DATA } from "@/data/tyreReferenceData";
 import { tyreSizes, tyreBrands, tyrePatterns } from '@/data/tyreData';
 
 // Mock data for fleet vehicles (would come from Firestore in production)
@@ -116,12 +113,6 @@ interface TyreInspectionFormData {
   };
 }
 
-// Update VehicleTyreViewProps to include vehicleId
-interface VehicleTyreViewProps {
-  vehicleId: string;
-  onTyreSelect: (tyre: Tyre | null) => void;
-}
-
 // Define TyreConditionStatus
 export type TyreConditionStatus = "good" | "warning" | "critical" | "needs_replacement";
 
@@ -145,7 +136,6 @@ const TyreInspection: React.FC = () => {
   // Filtered tyre options based on selections
   const [brandOptions, setBrandOptions] = useState<string[]>(tyreBrands);
   const [patternOptions, setPatternOptions] = useState<string[]>(tyrePatterns);
-  const [sizeOptions, setSizeOptions] = useState<string[]>(tyreSizes);
   // Track available positions for the selected fleet
   const [_, setPositionOptions] = useState<string[]>([]);
 
@@ -917,6 +907,16 @@ const TyreInspection: React.FC = () => {
                     step="0.1"
                     required
                     error={
+                      formData.detected.treadDepthIssue
+                        ? "Tread depth below threshold"
+                        : undefined
+                    }
+                  />
+
+                  <Input
+                    label="Pressure (PSI)"
+                    type="number"
+                    value={formData.pressure}
                       formData.detected.treadDepthIssue
                         ? "Tread depth below threshold"
                         : undefined
