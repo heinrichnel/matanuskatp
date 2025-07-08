@@ -8,18 +8,6 @@ import { formatCurrency } from '../../utils/helpers';
 import LoadingIndicator from '../ui/LoadingIndicator';
 
 // Define charts and chart options
-const barChartOptions = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top' as const,
-    },
-    title: {
-      display: true,
-      text: 'Cost Breakdown',
-    },
-  },
-};
 
 interface TripFinancialsPanelProps {
   tripId: string;

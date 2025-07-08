@@ -260,19 +260,19 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
             <Select
               label="Fleet"
               value={filterFleet}
-              onChange={setFilterFleet}
+              onChange={e => setFilterFleet(e.target.value)}
               options={[{ label: 'All Fleets', value: '' }, ...uniqueFleets.map(f => ({ label: f, value: f }))]}
             />
             <Select
               label="Driver"
               value={filterDriver}
-              onChange={setFilterDriver}
+              onChange={e => setFilterDriver(e.target.value)}
               options={[{ label: 'All Drivers', value: '' }, ...uniqueDrivers.map(d => ({ label: d, value: d }))]}
             />
             <Select
               label="Client"
               value={filterClient}
-              onChange={setFilterClient}
+              onChange={e => setFilterClient(e.target.value)}
               options={[{ label: 'All Clients', value: '' }, ...uniqueClients.map(c => ({ label: c, value: c }))]}
             />
           </div>

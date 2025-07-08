@@ -13,6 +13,7 @@ import {
   Tyre 
 } from "@/data/tyreData";
 import { FLEET_VEHICLES } from "@/data/vehicles";
+import type { FleetTyreMapping, TyreAllocation } from '@/types/tyre';
 
 interface VehicleTyreViewProps {
   selectedVehicle: string;
@@ -27,24 +28,13 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
   
   const vehicle = FLEET_VEHICLES.find(v => v.fleetNo === selectedVehicle);
   const vehicleTyres = selectedVehicle ? getTyresByVehicle(selectedVehicle) : [];
-  const tyreConfig = selectedVehicle ? getVehicleTyreConfiguration(selectedVehicle) : null;
+  // derive mapping of permitted positions for this vehicle
+  const tyreConfig: FleetTyreMapping | null = getVehicleTyreConfiguration(selectedVehicle);
 
   const getTyreAtPosition = (position: string) => {
     return getTyreByPosition(selectedVehicle, position);
   };
 
-  const getPositionStatusColor = (position: string) => {
-    const tyre = getTyreAtPosition(position);
-    if (!tyre) return 'bg-gray-300';
-    
-    switch (tyre.condition.status) {
-      case 'good': return 'bg-green-500';
-      case 'warning': return 'bg-yellow-500';
-      case 'critical': return 'bg-red-500';
-      case 'needs_replacement': return 'bg-red-700';
-      default: return 'bg-gray-400';
-    }
-  };
 
   const getVehicleTypeLabel = (type: string) => {
     switch (type) {
@@ -72,82 +62,39 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
         </div>
       </div>
 
-      {selectedVehicle && vehicle && tyreConfig && (
+      {selectedVehicle && tyreConfig && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Visual Vehicle Diagram */}
           <Card>
-            <CardHeader title="Vehicle Details">
-              <CardTitle>
-                Vehicle Tyre Layout - {vehicle.fleetNo}
-                <div className="text-sm text-gray-600 font-normal">
-                  {getVehicleTypeLabel(tyreConfig.vehicleType)} ({tyreConfig.positions.length} positions)
-                </div>
-              </CardTitle>
+            <CardHeader title="Tyre Layout">
             </CardHeader>
             <CardContent>
-              <div className="relative bg-gray-100 rounded-lg p-8 min-h-96">
-                {/* Vehicle Outline */}
-                <div className="absolute inset-4 border-2 border-gray-400 rounded-lg bg-white">
-                  <div className="absolute top-2 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-600">
-                    {vehicle.manufacturer} {vehicle.model}
-                  </div>
-                  
-                  {/* Tyre Positions */}
-                  {tyreConfig.positions.map(position => {
-                    const tyre = getTyreAtPosition(position.position);
-                    return (
-                      <div
-                        key={position.position}
-                        className={`absolute w-8 h-12 rounded cursor-pointer border-2 transition-all hover:scale-110 ${
-                          position.isSpare 
-                            ? 'border-purple-600 bg-purple-200' 
-                            : 'border-gray-600'
-                        } ${getPositionStatusColor(position.position)}`}
-                        style={{
-                          left: `${position.coordinates.x}%`,
-                          top: `${position.coordinates.y}%`,
-                          transform: 'translate(-50%, -50%)'
-                        }}
-                        onClick={() => tyre && setSelectedTyre(tyre)}
-                        title={`${position.displayName}${tyre ? ` - ${tyre.brand} ${tyre.model}` : ' - No tyre data'}`}
-                      >
-                        <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-medium text-gray-700">
-                          {position.position}
-                        </div>
-                        {position.isSpare && (
-                          <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 text-xs text-purple-600 font-bold">
-                            S
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                
-                {/* Legend */}
-                <div className="absolute bottom-4 right-4 space-y-1 text-xs">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-500 rounded"></div>
-                    <span>Good</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                    <span>Warning</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-red-500 rounded"></div>
-                    <span>Critical</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-purple-200 border border-purple-600 rounded"></div>
-                    <span>Spare</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-gray-300 rounded"></div>
-                    <span>No Data</span>
-                  </div>
-                </div>
-              </div>
+              <table className="w-full text-sm text-left">
+                <thead>
+                  <tr>
+                    <th className="px-2 py-1">Position</th>
+                    <th className="px-2 py-1">Tyre Code</th>
+                    <th className="px-2 py-1">Brand</th>
+                    <th className="px-2 py-1">Pattern</th>
+                    <th className="px-2 py-1">Size</th>
+                    <th className="px-2 py-1">Tread (mm)</th>
+                    <th className="px-2 py-1">Odometer (km)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tyreConfig.positions.map((pos: TyreAllocation) => (
+                    <tr key={pos.position} className="border-t">
+                      <td className="px-2 py-1">{pos.position}</td>
+                      <td className="px-2 py-1">{pos.tyreCode || 'Empty'}</td>
+                      <td className="px-2 py-1">{pos.brand || '-'}</td>
+                      <td className="px-2 py-1">{pos.pattern || '-'}</td>
+                      <td className="px-2 py-1">{pos.size || '-'}</td>
+                      <td className="px-2 py-1">{pos.treadDepth ?? '-'}</td>
+                      <td className="px-2 py-1">{pos.odometerAtFitment ?? '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </CardContent>
           </Card>
 
@@ -232,7 +179,7 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
                     <div className="mt-4 text-sm">
                       <p><strong>{getVehicleTypeLabel(tyreConfig.vehicleType)}</strong></p>
                       <p>{tyreConfig.positions.length} tyre positions</p>
-                      <p>{tyreConfig.positions.filter(p => p.isSpare).length} spare tyre(s)</p>
+                      <p>{tyreConfig.positions.filter(p => p.position === 'SP').length} spare tyre(s)</p>
                     </div>
                   )}
                 </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
@@ -13,14 +13,19 @@ import {
   Calendar,
   Filter,
   ChevronDown,
-  ChevronRight 
+  ChevronRight,
+  AlertTriangle,
+  DollarSign
 } from 'lucide-react';
-import { formatCurrency } from '../../utils/helpers';
+import Modal from '../ui/Modal';
 
 // Import type utilities from the tyreConstants file
-import { getUniqueTyreBrands, getUniqueTyreSizes, getUniqueTyrePatterns } from '../../utils/tyreConstants';
+import { getUniqueTyreBrands } from '../../utils/tyreConstants';
 import TyreInventoryForm from './TyreInventoryForm';
 import TyreInspectionModal from './TyreInspectionModal';
+import { useTyreStores } from '@/context/TyreStoresContext';
+import MoveTyreModal from '@/components/tyre/MoveTyreModal';
+import type { StockEntry } from '@/types/tyre';
 
 interface TyreInventoryItem {
   id: string;
@@ -123,9 +128,13 @@ const mockTyres: TyreInventoryItem[] = [
   }
 ];
 
-const TyreManagementView: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('inventory');
-  const [tyres, setTyres] = useState<TyreInventoryItem[]>(mockTyres);
+interface TyreManagementViewProps {
+  activeTab?: string;
+}
+
+const TyreManagementView: React.FC<TyreManagementViewProps> = ({ activeTab = 'inventory' }) => {
+  const [activeTabState, setActiveTab] = useState(activeTab);
+  const [tyres, _setTyres] = useState<TyreInventoryItem[]>(mockTyres);
   const [expandedTyre, setExpandedTyre] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     brand: '',
@@ -133,10 +142,16 @@ const TyreManagementView: React.FC = () => {
     status: '',
     lowStock: false
   });
+  // Inventory form modal state
   const [showTyreForm, setShowTyreForm] = useState(false);
   const [showInspectionModal, setShowInspectionModal] = useState(false);
-  const [selectedPosition, setSelectedPosition] = useState('');
-  const [selectedFleetNumber, setSelectedFleetNumber] = useState('');
+  const [selectedPosition, setSelectedPosition] = useState<string>('');
+  const [selectedFleetNumber, setSelectedFleetNumber] = useState<string>('');
+  // TyreStores modal state
+  const { stores } = useTyreStores();
+  const [showMoveModal, setShowMoveModal] = useState(false);
+  const [moveFromStoreId, setMoveFromStoreId] = useState<string>('');
+  const [moveEntryData, setMoveEntryData] = useState<StockEntry | null>(null);
   
   // Filter tyres based on the selected filters
   const filteredTyres = tyres.filter(tyre => {
@@ -170,16 +185,13 @@ const TyreManagementView: React.FC = () => {
     setExpandedTyre(expandedTyre === id ? null : id);
   };
   
-  // Handle form submissions
+  // Handlers for inventory and inspection
   const handleTyreSubmit = (tyre: any) => {
-    // In a real app, this would add to Firestore
-    alert(`Tyre submitted: ${tyre.brand} ${tyre.model} (${tyre.tyreSize})`);
+    console.log('New tyre submitted', tyre);
     setShowTyreForm(false);
   };
-
   const handleInspectionSubmit = (inspection: any) => {
-    // In a real app, this would add to Firestore
-    alert(`Inspection submitted for ${inspection.fleetNumber} position ${inspection.tyrePosition}`);
+    console.log('Inspection submitted', inspection);
     setShowInspectionModal(false);
   };
 
@@ -189,11 +201,44 @@ const TyreManagementView: React.FC = () => {
     setShowInspectionModal(true);
   };
 
-  // Get unique brands, sizes from the tyre constants
-  const brands = getUniqueTyreBrands();
-  const sizes = getUniqueTyreSizes();
-  const statuses = ['in_stock', 'on_order', 'backordered', 'depleted'];
+  const openMoveModal = (storeId: string, entry: StockEntry) => {
+    setMoveFromStoreId(storeId);
+    setMoveEntryData(entry);
+    setShowMoveModal(true);
+  };
+  const closeMoveModal = () => {
+    setShowMoveModal(false);
+    setMoveEntryData(null);
+    setMoveFromStoreId('');
+  };
 
+  // Get unique brands from the tyre constants
+  const brands = getUniqueTyreBrands();
+  const statuses = ['in_stock', 'on_order', 'backordered', 'depleted'];
+  // Get unique sizes from tyres
+  const sizes = Array.from(new Set(tyres.map(tyre => tyre.size)));
+
+  function formatCurrency(amount: number, currency: string): React.ReactNode {
+    // Support 'ZAR', 'USD', or 'ZAR/USD' for display
+    let symbol = '';
+    if (currency === 'ZAR' || currency === 'ZAR/USD') symbol = 'R';
+    else if (currency === 'USD') symbol = '$';
+
+    // Format with 2 decimals, thousands separator
+    const formatted = amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    if (currency === 'ZAR/USD') {
+      // Show both ZAR and USD (mock conversion, e.g. 1 USD = 18 ZAR)
+      const usdValue = amount / 18;
+      return (
+        <span>
+          R{formatted} <span className="text-xs text-gray-500">(${usdValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</span>
+        </span>
+      );
+    }
+
+    return `${symbol}${formatted}`;
+  }
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -240,6 +285,10 @@ const TyreManagementView: React.FC = () => {
             <Calendar className="w-4 h-4" />
             <span>Replacement Schedule</span>
           </TabsTrigger>
+          <TabsTrigger value="stores" className="flex items-center gap-2">
+            <Tag className="w-4 h-4" />
+            <span>Stores</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="inventory" className="mt-6">
@@ -265,9 +314,9 @@ const TyreManagementView: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-gray-500">Total Value</p>
-                    <p className="text-2xl font-bold text-green-600">{formatCurrency(totalValue, 'ZAR')}</p>
+                    <p className="text-2xl font-bold text-green-600">{formatCurrency(totalValue, 'ZAR/USD')}</p>
                     <p className="text-xs text-gray-400">
-                      {formatCurrency(totalValue / Math.max(1, totalQuantity), 'ZAR')} avg per tyre
+                      {formatCurrency(totalValue / Math.max(1, totalQuantity), 'ZAR/USD')} avg per tyre
                     </p>
                   </div>
                   <DollarSign className="w-8 h-8 text-green-500" />
@@ -510,6 +559,33 @@ const TyreManagementView: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* VehicleTyreStore Live Entries */}
+          {stores.length > 0 && (
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold">Vehicle Tyre Store Entries</h3>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {stores.find(s => s.id === 'VehicleTyreStore')?.entries.map(entry => (
+                    <div key={entry.tyreId} className="flex items-center justify-between border p-2 rounded">
+                      <div>
+                        <p className="font-medium">{entry.tyreId}</p>
+                        <p className="text-sm text-gray-600">Status: {entry.status}</p>
+                      </div>
+                      <Button size="sm" onClick={() => openMoveModal('VehicleTyreStore', entry)}>
+                        Move
+                      </Button>
+                    </div>
+                  ))}
+                  {stores.find(s => s.id === 'VehicleTyreStore')?.entries.length === 0 && (
+                    <p className="text-gray-500">No entries in Vehicle Tyre Store</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="position" className="mt-6">
@@ -525,7 +601,7 @@ const TyreManagementView: React.FC = () => {
                 <option value="21H">21H - SCANIA G460</option>
                 <option value="22H">22H - SCANIA G460</option>
                 <option value="23H">23H - SHACMAN X3000</option>
-                <option value="24H">24H - SHACMAN X3000</option>
+                <option value="24H">24H - SCANIA G460</option>
                 <option value="1T">1T - AFRIT FLAT DECK</option>
                 <option value="4F">4F - SERCO REEFER</option>
               </select>
@@ -899,19 +975,52 @@ const TyreManagementView: React.FC = () => {
           </div>
         </TabsContent>
         
-        {/* Add Tyre Inventory Form Modal */}
-        {showTyreForm && (
-          <Modal
-            isOpen={showTyreForm}
-            onClose={() => setShowTyreForm(false)}
-            title="Add New Tyre to Inventory"
-            maxWidth="lg"
-          >
-            <TyreInventoryForm onSubmit={handleTyreSubmit} />
-          </Modal>
-        )}
-        
-        {/* Tyre Inspection Modal */}
+        <TabsContent value="stores" className="mt-6">
+          <h3 className="text-lg font-semibold mb-4">Tyre Stores</h3>
+          {stores.map(store => (
+            <div key={store.id} className="mb-6">
+              <h4 className="font-medium mb-2">{store.name}</h4>
+              <div className="space-y-2">
+                {store.entries.map(entry => (
+                  <div key={entry.tyreId} className="flex items-center justify-between border p-2 rounded">
+                    <div>
+                      <p className="font-medium">{entry.tyreId}</p>
+                      <p className="text-sm text-gray-600">Status: {entry.status}</p>
+                    </div>
+                    <Button size="sm" onClick={() => openMoveModal(store.id, entry)}>
+                      Move
+                    </Button>
+                  </div>
+                ))}
+                {store.entries.length === 0 && (
+                  <p className="text-gray-500">No entries in {store.name}</p>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* Move Modal */}
+          {moveEntryData && (
+            <MoveTyreModal
+              isOpen={showMoveModal}
+              onClose={closeMoveModal}
+              fromStoreId={moveFromStoreId}
+              entry={moveEntryData}
+            />
+          )}
+        </TabsContent>
+
+      </Tabs>
+
+      {/* Add Tyre Inventory Form Modal */}
+      {showTyreForm && (
+        <Modal isOpen={showTyreForm} onClose={() => setShowTyreForm(false)} title="Add New Tyre to Inventory" maxWidth="lg">
+          <TyreInventoryForm onSubmit={handleTyreSubmit} />
+        </Modal>
+      )}
+      
+      {/* Tyre Inspection Modal */}
+      {showInspectionModal && (
         <TyreInspectionModal
           open={showInspectionModal}
           onClose={() => setShowInspectionModal(false)}
@@ -919,29 +1028,9 @@ const TyreManagementView: React.FC = () => {
           tyrePosition={selectedPosition}
           fleetNumber={selectedFleetNumber}
         />
-      </Tabs>
+      )}
     </div>
   );
 };
 
 export default TyreManagementView;
-
-function DollarSign(props: any) {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      width="24"
-      height="24"
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={props.className}
-    >
-      <line x1="12" y1="1" x2="12" y2="23"></line>
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-    </svg>
-  );
-}

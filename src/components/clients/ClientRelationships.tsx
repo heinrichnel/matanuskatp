@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Client, ClientRelationship, CLIENT_RELATIONSHIP_TYPES } from '../../types/client';
+import { Client, CLIENT_RELATIONSHIP_TYPES } from '../../types/client';
+import type { ClientRelationship } from '../../types/client';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
@@ -24,6 +25,14 @@ interface ClientRelationshipsProps {
   isModal?: boolean;
   isOpen?: boolean;
   onClose?: () => void;
+}
+
+interface RelationshipNode {
+  source: string;
+  target: string;
+  type: string;
+  relationship?: ClientRelationship;
+  direction?: 'inverse';
 }
 
 const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
@@ -58,28 +67,27 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
     : [];
   
   // Get all relationships for visualization
-  const getAllRelationships = () => {
-    // Direct relationships of the selected client
+  const getAllRelationships = (): RelationshipNode[] => {
     const directRelationships = selectedClient?.relationships.map(rel => ({
-      source: selectedClientId,
+      source: selectedClientId!,              // non-null asserted
       target: rel.relatedClientId,
       type: rel.relationType,
-      relationship: rel
+      relationship: rel,
+      direction: undefined                    // uniform shape
     })) || [];
-    
-    // Relationships where the selected client is the target
-    const inverseRelationships = selectedClientId ? clients.flatMap(client => 
+
+    const inverseRelationships = selectedClientId ? clients.flatMap(client =>
       client.relationships
         .filter(rel => rel.relatedClientId === selectedClientId)
         .map(rel => ({
           source: client.id,
-          target: selectedClientId,
+          target: selectedClientId!,           // non-null asserted
           type: rel.relationType,
           relationship: rel,
-          direction: 'inverse'
+          direction: 'inverse' as const
         }))
     ) : [];
-    
+
     return [...directRelationships, ...inverseRelationships];
   };
   

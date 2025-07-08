@@ -1,15 +1,24 @@
+// ─── React & Utilities ───────────────────────────────────────────
 import React, { useState } from 'react';
+
+// ─── Types & Constants ───────────────────────────────────────────
+import { MissedLoad, MISSED_LOAD_REASONS, CLIENTS } from '../../types';
+import { formatCurrency, formatDate } from '../../utils/helpers';
+
+// ─── UI Components ───────────────────────────────────────────────
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
-import { Input, Select, TextArea } from '../ui/FormElements';
-import { 
-  DollarSign, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  AlertTriangle, 
-  TrendingDown, 
+import { Input, Select, Textarea } from '../ui/FormElements';
+
+// ─── Icons ───────────────────────────────────────────────────────
+import {
+  DollarSign,
+  Plus,
+  Edit,
+  Trash2,
+  AlertTriangle,
+  TrendingDown,
   Calendar,
   MapPin,
   User,
@@ -18,30 +27,25 @@ import {
   CheckCircle,
   FileText
 } from 'lucide-react';
-import { MissedLoad, MISSED_LOAD_REASONS, CLIENTS } from '../../types';
-import { formatCurrency, formatDate } from '../../utils/helpers';
-import { useAppContext } from '../../context/AppContext';
+
 
 interface MissedLoadsTrackerProps {
-  missedLoads?: MissedLoad[];
-  onAddMissedLoad?: (missedLoad: Omit<MissedLoad, 'id'>) => Promise<string>;
-  onUpdateMissedLoad?: (missedLoad: MissedLoad) => Promise<void>;
-  onDeleteMissedLoad?: (id: string) => Promise<void>;
+  missedLoads: MissedLoad[];
+  onAddMissedLoad: (missedLoad: Omit<MissedLoad, 'id'>) => void;
+  onUpdateMissedLoad: (missedLoad: MissedLoad) => void;
+  onDeleteMissedLoad?: (id: string) => void;
 }
 
-const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
-  const { missedLoads: contextMissedLoads, addMissedLoad, updateMissedLoad, deleteMissedLoad, connectionStatus } = useAppContext();
-  
-  // Use props if provided, otherwise use context
-  const missedLoads = props.missedLoads || contextMissedLoads;
-  const onAddMissedLoad = props.onAddMissedLoad || addMissedLoad;
-  const onUpdateMissedLoad = props.onUpdateMissedLoad || updateMissedLoad;
-  const onDeleteMissedLoad = props.onDeleteMissedLoad || deleteMissedLoad;
+const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
+  missedLoads,
+  onAddMissedLoad,
+  onUpdateMissedLoad,
+  onDeleteMissedLoad
+}) => {
   const [showModal, setShowModal] = useState(false);
   const [showResolutionModal, setShowResolutionModal] = useState(false);
   const [editingLoad, setEditingLoad] = useState<MissedLoad | null>(null);
   const [resolvingLoad, setResolvingLoad] = useState<MissedLoad | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
     loadRequestDate: new Date().toISOString().split('T')[0],
@@ -65,19 +69,14 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleChange = (field: string, value: string | boolean) => {
-    // Always coerce to string for string fields
-    if (typeof formData[field as keyof typeof formData] === 'string') {
-      setFormData(prev => ({ ...prev, [field]: String(value ?? '') }));
-    } else {
-      setFormData(prev => ({ ...prev, [field]: value }));
-    }
+    setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
   const handleResolutionChange = (field: string, value: string) => {
-    setResolutionData(prev => ({ ...prev, [field]: String(value ?? '') }));
+    setResolutionData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -85,7 +84,8 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!String(formData.customerName ?? '').trim()) {
+    
+    if (!formData.customerName.trim()) {
       newErrors.customerName = 'Customer name is required';
     }
     if (!formData.loadRequestDate) {
@@ -97,7 +97,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
     if (!formData.requestedDeliveryDate) {
       newErrors.requestedDeliveryDate = 'Requested delivery date is required';
     }
-    if (!String(formData.route ?? '').trim()) {
+    if (!formData.route.trim()) {
       newErrors.route = 'Route is required';
     }
     if (!formData.estimatedRevenue || Number(formData.estimatedRevenue) <= 0) {
@@ -106,81 +106,79 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
     if (!formData.reason) {
       newErrors.reason = 'Reason for missing load is required';
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validateResolutionForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!String(resolutionData.resolutionNotes ?? '').trim()) {
+    
+    if (!resolutionData.resolutionNotes.trim()) {
       newErrors.resolutionNotes = 'Resolution notes are required';
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!validateForm()) return;
-    try {
-      const missedLoadData: Omit<MissedLoad, 'id'> = {
-        customerName: String(formData.customerName ?? '').trim(),
-        loadRequestDate: formData.loadRequestDate,
-        requestedPickupDate: formData.requestedPickupDate,
-        requestedDeliveryDate: formData.requestedDeliveryDate,
-        route: String(formData.route ?? '').trim(),
-        estimatedRevenue: Number(formData.estimatedRevenue),
-        currency: formData.currency,
-        reason: formData.reason as any,
-        reasonDescription: String(formData.reasonDescription ?? '').trim() || undefined,
-        resolutionStatus: formData.resolutionStatus,
-        followUpRequired: formData.followUpRequired,
-        competitorWon: formData.competitorWon,
-        recordedBy: 'Current User',
-        recordedAt: new Date().toISOString(),
-        impact: formData.impact
-      };
-      
-      if (editingLoad) {
-        await onUpdateMissedLoad({ ...missedLoadData, id: editingLoad.id });
-        alert('Missed load updated successfully!');
-      } else {
-        await onAddMissedLoad(missedLoadData);
-        alert('Missed load recorded successfully!');
-      }
-      handleClose();
-    } catch (error) {
-      console.error("Error saving missed load:", error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+
+    const missedLoadData: Omit<MissedLoad, 'id'> = {
+      customerName: formData.customerName.trim(),
+      loadRequestDate: formData.loadRequestDate,
+      requestedPickupDate: formData.requestedPickupDate,
+      requestedDeliveryDate: formData.requestedDeliveryDate,
+      route: formData.route.trim(),
+      estimatedRevenue: Number(formData.estimatedRevenue),
+      currency: formData.currency,
+      reason: formData.reason as any,
+      reasonDescription: formData.reasonDescription.trim() || undefined,
+      resolutionStatus: formData.resolutionStatus,
+      followUpRequired: formData.followUpRequired,
+      competitorWon: formData.competitorWon,
+      recordedBy: 'Current User',
+      recordedAt: new Date().toISOString(),
+      impact: formData.impact
+    };
+
+    if (editingLoad) {
+      onUpdateMissedLoad({ ...missedLoadData, id: editingLoad.id });
+      alert('Missed load updated successfully!');
+    } else {
+      onAddMissedLoad(missedLoadData);
+      alert('Missed load recorded successfully!');
     }
+
+    handleClose();
   };
 
-  const handleResolutionSubmit = async () => {
+  const handleResolutionSubmit = () => {
     if (!validateResolutionForm() || !resolvingLoad) return;
-    try {
-      const updatedLoad: MissedLoad = {
-        ...resolvingLoad,
-        resolutionStatus: 'resolved',
-        resolutionNotes: String(resolutionData.resolutionNotes ?? '').trim(),
-        resolvedAt: new Date().toISOString(),
-        resolvedBy: 'Current User',
-        compensationOffered: resolutionData.compensationOffered ? Number(resolutionData.compensationOffered) : undefined,
-        compensationNotes: String(resolutionData.compensationNotes ?? '').trim() || undefined
-      };
-      
-      await onUpdateMissedLoad(updatedLoad);
-      alert(`Missed load resolved successfully!\n\nResolution: ${resolutionData.resolutionNotes}\n${resolutionData.compensationOffered ? `Compensation offered: ${formatCurrency(Number(resolutionData.compensationOffered), resolvingLoad.currency)}` : ''}`);
-      setShowResolutionModal(false);
-      setResolvingLoad(null);
-      setResolutionData({
-        resolutionNotes: '',
-        compensationOffered: '',
-        compensationNotes: ''
-      });
-      setErrors({});
-    } catch (error) {
-      console.error("Error resolving missed load:", error);
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
-    }
+
+    const updatedLoad: MissedLoad = {
+      ...resolvingLoad,
+      resolutionStatus: 'resolved',
+      resolutionNotes: resolutionData.resolutionNotes.trim(),
+      resolvedAt: new Date().toISOString(),
+      resolvedBy: 'Current User',
+      compensationOffered: resolutionData.compensationOffered ? Number(resolutionData.compensationOffered) : undefined,
+      compensationNotes: resolutionData.compensationNotes.trim() || undefined
+    };
+
+    onUpdateMissedLoad(updatedLoad);
+    
+    alert(`Missed load resolved successfully!\n\nResolution: ${resolutionData.resolutionNotes}\n${resolutionData.compensationOffered ? `Compensation offered: ${formatCurrency(Number(resolutionData.compensationOffered), resolvingLoad.currency)}` : ''}`);
+    
+    setShowResolutionModal(false);
+    setResolvingLoad(null);
+    setResolutionData({
+      resolutionNotes: '',
+      compensationOffered: '',
+      compensationNotes: ''
+    });
+    setErrors({});
   };
 
   const handleEdit = (load: MissedLoad) => {
@@ -213,10 +211,8 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
     setShowResolutionModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!onDeleteMissedLoad) return;
-    
-    const load = missedLoads?.find(l => l.id === id);
+  const handleDelete = (id: string) => {
+    const load = missedLoads.find(l => l.id === id);
     if (!load) return;
 
     const confirmMessage = `Are you sure you want to delete this missed load?\n\n` +
@@ -226,36 +222,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
       `This action cannot be undone.`;
 
     if (confirm(confirmMessage)) {
-      try {
-        setIsDeleting(id); // Track which specific load is being deleted
-        
-        
-        
-        // Delete the missed load
-        await onDeleteMissedLoad(id);
-        
-        // Update the local state to reflect the deletion
-        setMissedLoads(prev => prev.filter(load => load.id !== id));
-        
-        alert('Missed load deleted successfully!');
-        // Optimistically update the local UI state (this is redundant if AppContext already handles it,
-        // but it ensures the UI updates immediately regardless)
-        const updatedLoads = missedLoads.filter(load => load.id !== id);
-        if (props.missedLoads) {
-          props.missedLoads = updatedLoads;
-        }
-        
-        
-        // Update the local state to reflect the deletion
-        setMissedLoads(prev => prev.filter(load => load.id !== id));
-        
-        alert('Missed load deleted successfully!');
-      } catch (error) {
-        console.error("Error deleting missed load:", error);
-        alert(`Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
-      } finally {
-        setIsDeleting(null); // Clear deletion state when done
-      }
+      onDeleteMissedLoad?.(id);
     }
   };
 
@@ -330,7 +297,6 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
         <Button
           onClick={handleNewMissedLoad}
           icon={<Plus className="w-4 h-4" />}
-          disabled={connectionStatus !== 'connected'}
         >
           Record Missed Load
         </Button>
@@ -422,134 +388,127 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
             </div>
           ) : (
             <div className="space-y-4">
-              {missedLoads.map((load) => {
-                const safeResolutionNotes = typeof load.resolutionNotes === 'string' ? load.resolutionNotes : '';
-                return (
-                  <div key={load.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h3 className="text-lg font-medium text-gray-900">{load.customerName}</h3>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(load.resolutionStatus)}`}>
-                            {load.resolutionStatus.replace('_', ' ').toUpperCase()}
+              {missedLoads.map((load) => (
+                <div key={load.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-3 mb-2">
+                        <h3 className="text-lg font-medium text-gray-900">{load.customerName}</h3>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(load.resolutionStatus)}`}>
+                          {load.resolutionStatus.replace('_', ' ').toUpperCase()}
+                        </span>
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(load.impact)}`}>
+                          {load.impact.toUpperCase()} IMPACT
+                        </span>
+                        {load.competitorWon && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            COMPETITOR WON
                           </span>
-                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(load.impact)}`}>
-                            {load.impact.toUpperCase()} IMPACT
+                        )}
+                        {load.resolutionStatus === 'resolved' && (
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            RESOLVED
                           </span>
-                          {load.competitorWon && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              COMPETITOR WON
-                            </span>
-                          )}
-                          {load.resolutionStatus === 'resolved' && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              <CheckCircle className="w-3 h-3 mr-1" />
-                              RESOLVED
-                            </span>
-                          )}
-                        </div>
+                        )}
+                      </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
-                          <div className="flex items-center space-x-2">
-                            <MapPin className="w-4 h-4 text-gray-400" />
-                            <div>
-                              <p className="text-sm text-gray-500">Route</p>
-                              <p className="font-medium">{load.route}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Calendar className="w-4 h-4 text-gray-400" />
-                            <div>
-                              <p className="text-sm text-gray-500">Requested Dates</p>
-                              <p className="font-medium text-sm">
-                                {formatDate(load.requestedPickupDate)} - {formatDate(load.requestedDeliveryDate)}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <DollarSign className="w-4 h-4 text-gray-400" />
-                            <div>
-                              <p className="text-sm text-gray-500">Estimated Revenue</p>
-                              <p className="font-medium text-red-600">
-                                {formatCurrency(load.estimatedRevenue, load.currency)}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <User className="w-4 h-4 text-gray-400" />
-                            <div>
-                              <p className="text-sm text-gray-500">Recorded By</p>
-                              <p className="font-medium text-sm">{load.recordedBy}</p>
-                            </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-3">
+                        <div className="flex items-center space-x-2">
+                          <MapPin className="w-4 h-4 text-gray-400" />
+                          <div>
+                            <p className="text-sm text-gray-500">Route</p>
+                            <p className="font-medium">{load.route}</p>
                           </div>
                         </div>
-
-                        <div className="mb-3">
-                          <p className="text-sm text-gray-500">Reason</p>
-                          <p className="font-medium">
-                            {MISSED_LOAD_REASONS.find((r: { value: string; label: string }) => r.value === load.reason)?.label || load.reason}
-                          </p>
-                          {load.reasonDescription && (
-                            <p className="text-sm text-gray-600 mt-1">{load.reasonDescription}</p>
-                          )}
-                        </div>
-
-                        {load.resolutionStatus === 'resolved' && safeResolutionNotes && (
-                          <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded">
-                            <p className="text-sm font-medium text-green-800">Resolution Notes:</p>
-                            <p className="text-sm text-green-700">{safeResolutionNotes}</p>
-                            {load.compensationOffered && (
-                              <p className="text-sm text-green-700 mt-1">
-                                <strong>Compensation Offered:</strong> {formatCurrency(load.compensationOffered, load.currency)}
-                              </p>
-                            )}
-                            <p className="text-xs text-green-600 mt-1">
-                              Resolved by {load.resolvedBy} on {load.resolvedAt ? formatDate(load.resolvedAt) : 'Unknown'}
+                        <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                          <div>
+                            <p className="text-sm text-gray-500">Requested Dates</p>
+                            <p className="font-medium text-sm">
+                              {formatDate(load.requestedPickupDate)} - {formatDate(load.requestedDeliveryDate)}
                             </p>
                           </div>
-                        )}
-
-                        <div className="text-xs text-gray-500">
-                          Recorded on {formatDate(load.recordedAt)} • 
-                          {load.followUpRequired && <span className="text-amber-600 font-medium ml-1">Follow-up required</span>}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <DollarSign className="w-4 h-4 text-gray-400" />
+                          <div>
+                            <p className="text-sm text-gray-500">Estimated Revenue</p>
+                            <p className="font-medium text-red-600">
+                              {formatCurrency(load.estimatedRevenue, load.currency)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <User className="w-4 h-4 text-gray-400" />
+                          <div>
+                            <p className="text-sm text-gray-500">Recorded By</p>
+                            <p className="font-medium text-sm">{load.recordedBy}</p>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex space-x-2 ml-4">
-                        {load.resolutionStatus !== 'resolved' && (
-                          <Button
-                            size="sm"
-                            onClick={() => handleResolve(load)}
-                            icon={<FileText className="w-3 h-3" />}
-                            disabled={connectionStatus !== 'connected'}
-                          >
-                            Resolve
-                          </Button>
+                      <div className="mb-3">
+                        <p className="text-sm text-gray-500">Reason</p>
+                        <p className="font-medium">
+                          {MISSED_LOAD_REASONS.find(r => r.value === load.reason)?.label || load.reason}
+                        </p>
+                        {load.reasonDescription && (
+                          <p className="text-sm text-gray-600 mt-1">{load.reasonDescription}</p>
                         )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEdit(load)}
-                          icon={<Edit className="w-3 h-3" />}
-                          disabled={connectionStatus !== 'connected'}
-                        >
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="danger"
-                          onClick={() => handleDelete(load.id)} 
-                          icon={isDeleting === load.id ? undefined : <Trash2 className="w-3 h-3" />}
-                          disabled={isDeleting !== null || connectionStatus !== 'connected'}
-                          isLoading={isDeleting === load.id}
-                        >
-                          Delete
-                        </Button>
+                      </div>
+
+                      {load.resolutionStatus === 'resolved' && load.resolutionNotes && (
+                        <div className="mb-3 p-2 bg-green-50 border border-green-200 rounded">
+                          <p className="text-sm font-medium text-green-800">Resolution Notes:</p>
+                          <p className="text-sm text-green-700">{load.resolutionNotes}</p>
+                          {load.compensationOffered && (
+                            <p className="text-sm text-green-700 mt-1">
+                              <strong>Compensation Offered:</strong> {formatCurrency(load.compensationOffered, load.currency)}
+                            </p>
+                          )}
+                          <p className="text-xs text-green-600 mt-1">
+                            Resolved by {load.resolvedBy} on {load.resolvedAt ? formatDate(load.resolvedAt) : 'Unknown'}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="text-xs text-gray-500">
+                        Recorded on {formatDate(load.recordedAt)} • 
+                        {load.followUpRequired && <span className="text-amber-600 font-medium ml-1">Follow-up required</span>}
                       </div>
                     </div>
+
+                    <div className="flex space-x-2 ml-4">
+                      {load.resolutionStatus !== 'resolved' && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleResolve(load)}
+                          icon={<FileText className="w-3 h-3" />}
+                        >
+                          Resolve
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(load)}
+                        icon={<Edit className="w-3 h-3" />}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => handleDelete(load.id)}
+                        icon={<Trash2 className="w-3 h-3" />}
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           )}
         </CardContent>
@@ -580,7 +539,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
             <Select
               label="Customer Name *"
               value={formData.customerName}
-              onChange={value => handleChange('customerName', value)}
+              onChange={(e) => handleChange('customerName', e.target.value)}
               options={[
                 { label: 'Select customer...', value: '' },
                 ...CLIENTS.map(c => ({ label: c, value: c })),
@@ -593,7 +552,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
               label="Load Request Date *"
               type="date"
               value={formData.loadRequestDate}
-              onChange={value => handleChange('loadRequestDate', value)}
+              onChange={(e) => handleChange('loadRequestDate', e.target.value)}
               error={errors.loadRequestDate}
             />
 
@@ -601,7 +560,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
               label="Requested Pickup Date *"
               type="date"
               value={formData.requestedPickupDate}
-              onChange={value => handleChange('requestedPickupDate', value)}
+              onChange={(e) => handleChange('requestedPickupDate', e.target.value)}
               error={errors.requestedPickupDate}
             />
 
@@ -609,14 +568,14 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
               label="Requested Delivery Date *"
               type="date"
               value={formData.requestedDeliveryDate}
-              onChange={value => handleChange('requestedDeliveryDate', value)}
+              onChange={(e) => handleChange('requestedDeliveryDate', e.target.value)}
               error={errors.requestedDeliveryDate}
             />
 
             <Input
               label="Route *"
               value={formData.route}
-              onChange={value => handleChange('route', value)}
+              onChange={(e) => handleChange('route', e.target.value)}
               placeholder="e.g., Johannesburg to Cape Town"
               error={errors.route}
             />
@@ -625,7 +584,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
               <Select
                 label="Currency *"
                 value={formData.currency}
-                onChange={value => handleChange('currency', value)}
+                onChange={(e) => handleChange('currency', e.target.value)}
                 options={[
                   { label: 'ZAR (R)', value: 'ZAR' },
                   { label: 'USD ($)', value: 'USD' }
@@ -637,7 +596,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
                 step="0.01"
                 min="0"
                 value={formData.estimatedRevenue}
-                onChange={value => handleChange('estimatedRevenue', value)}
+                onChange={(e) => handleChange('estimatedRevenue', e.target.value)}
                 placeholder="0.00"
                 error={errors.estimatedRevenue}
               />
@@ -646,7 +605,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
             <Select
               label="Reason for Missing Load *"
               value={formData.reason}
-              onChange={value => handleChange('reason', value)}
+              onChange={(e) => handleChange('reason', e.target.value)}
               options={[
                 { label: 'Select reason...', value: '' },
                 ...MISSED_LOAD_REASONS
@@ -657,7 +616,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
             <Select
               label="Business Impact"
               value={formData.impact}
-              onChange={value => handleChange('impact', value)}
+              onChange={(e) => handleChange('impact', e.target.value)}
               options={[
                 { label: 'Low Impact', value: 'low' },
                 { label: 'Medium Impact', value: 'medium' },
@@ -668,7 +627,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
             <Select
               label="Resolution Status"
               value={formData.resolutionStatus}
-              onChange={value => handleChange('resolutionStatus', value)}
+              onChange={(e) => handleChange('resolutionStatus', e.target.value)}
               options={[
                 { label: 'Pending', value: 'pending' },
                 { label: 'Resolved', value: 'resolved' },
@@ -678,10 +637,10 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
             />
           </div>
 
-          <TextArea
+          <Textarea
             label="Additional Details"
             value={formData.reasonDescription}
-            onChange={value => handleChange('reasonDescription', value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange('reasonDescription', e.target.value)}
             placeholder="Provide additional context about why this load was missed and any lessons learned..."
             rows={3}
           />
@@ -692,7 +651,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
                 type="checkbox"
                 id="followUpRequired"
                 checked={formData.followUpRequired}
-                onChange={e => handleChange('followUpRequired', e.target.checked)}
+                onChange={(e) => handleChange('followUpRequired', e.target.checked)}
                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <label htmlFor="followUpRequired" className="text-sm font-medium text-gray-700">
@@ -705,7 +664,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
                 type="checkbox"
                 id="competitorWon"
                 checked={formData.competitorWon}
-                onChange={e => handleChange('competitorWon', e.target.checked)}
+                onChange={(e) => handleChange('competitorWon', e.target.checked)}
                 className="rounded border-gray-300 text-red-600 focus:ring-red-500"
               />
               <label htmlFor="competitorWon" className="text-sm font-medium text-gray-700">
@@ -768,15 +727,15 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
                 <p><strong>Customer:</strong> {resolvingLoad.customerName}</p>
                 <p><strong>Route:</strong> {resolvingLoad.route}</p>
                 <p><strong>Estimated Revenue:</strong> {formatCurrency(resolvingLoad.estimatedRevenue, resolvingLoad.currency)}</p>
-                <p><strong>Reason:</strong> {MISSED_LOAD_REASONS.find((r: { value: string; label: string }) => r.value === resolvingLoad.reason)?.label || resolvingLoad.reason}</p>
+                <p><strong>Reason:</strong> {MISSED_LOAD_REASONS.find(r => r.value === resolvingLoad.reason)?.label || resolvingLoad.reason}</p>
               </div>
             </div>
 
             <div className="space-y-4">
-              <TextArea
+              <Textarea
                 label="Resolution Notes *"
                 value={resolutionData.resolutionNotes}
-                onChange={value => handleResolutionChange('resolutionNotes', value)}
+                onChange={(e) => handleResolutionChange('resolutionNotes', e.target.value)}
                 placeholder="Describe how this missed load was resolved, what actions were taken, and the outcome..."
                 rows={4}
                 error={errors.resolutionNotes}
@@ -789,16 +748,16 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = (props) => {
                   step="0.01"
                   min="0"
                   value={resolutionData.compensationOffered}
-                  onChange={value => handleResolutionChange('compensationOffered', value)}
+                  onChange={(e) => handleResolutionChange('compensationOffered', e.target.value)}
                   placeholder="0.00"
                 />
                 <div></div>
               </div>
 
-              <TextArea
+              <Textarea
                 label="Compensation Notes"
                 value={resolutionData.compensationNotes}
-                onChange={value => handleResolutionChange('compensationNotes', value)}
+                onChange={(e) => handleResolutionChange('compensationNotes', e.target.value)}
                 placeholder="Details about any compensation or goodwill gestures offered..."
                 rows={3}
               />

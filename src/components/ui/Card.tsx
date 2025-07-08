@@ -21,6 +21,7 @@ export const Card: CardComponent = ({ children, className = '' }) => {
 
 interface CardHeaderProps {
   title?: React.ReactNode;
+  icon?: React.ReactNode;
   action?: React.ReactNode; // Added action prop to support custom actions
   children?: React.ReactNode;
   className?: string;
@@ -28,12 +29,14 @@ interface CardHeaderProps {
 
 export const CardHeader: React.FC<CardHeaderProps> = ({ 
   title, 
+  icon, // Destructure the icon prop
   action, // Destructure the action prop
   children, 
   className = '' 
 }) => {
   return (
     <div className={`px-6 py-4 border-b border-slate-200 flex justify-between items-center ${className}`}>
+      {icon && <div className="mr-2">{icon}</div>}
       {title && <h3 className="text-xl font-semibold text-slate-800">{title}</h3>}
       {action && <div>{action}</div>} {/* Render the action prop */}
       {children}

@@ -1,0 +1,172 @@
+{
+  "copilot-agent": {
+    "version": "1.0.0",
+    "projectType": "react-firebase-app",
+    "language": "typescript",
+    "root": "src",
+    "tasks": [
+      {
+        "description": "🧩 Validate all route-to-component bindings in Sidebar.tsx",
+        "type": "route-validation",
+        "entryFile": "src/components/layout/Sidebar.tsx",
+        "expectedRoutes": [
+          "/trips",
+          "/trips/active",
+          "/trips/completed",
+          "/trips/missed-loads",
+          "/trips/import",
+          "/drivers",
+          "/drivers/performance",
+          "/drivers/behavior",
+          "/invoicing",
+          "/invoicing/aging",
+          "/invoicing/follow-ups",
+          "/workshop",
+          "/workshop/fleet-setup",
+          "/workshop/qr-generator",
+          "/workshop/inspections",
+          "/workshop/job-cards",
+          "/workshop/faults",
+          "/workshop/tyres",
+          "/workshop/inventory",
+          "/workshop/vendors",
+          "/workshop/analytics",
+          "/workshop/reports"
+        ],
+        "linkedComponentsDirectory": "src/pages",
+        "fallbackComponentGenerator": {
+          "enabled": true,
+          "template": "standard-react-page",
+          "useExistingImports": true,
+          "fileSuffix": "Page.tsx"
+        }
+      },
+      {
+        "description": "📁 Validate Firestore collection bindings and schema alignment",
+        "type": "firestore-schema-check",
+        "collections": [
+          "trips",
+          "drivers",
+          "driverBehavior",
+          "diesel",
+          "invoices",
+          "jobCards",
+          "inspections",
+          "faults",
+          "tyres",
+          "vendors",
+          "inventory",
+          "workOrders",
+          "actionItems",
+          "carReports",
+          "flagInvestigations"
+        ],
+        "typesDirectory": "src/types",
+        "allowMissingTypes": false,
+        "autogenerateMissingTypes": true
+      },
+      {
+        "description": "🛠 Ensure all Workshop and Maintenance components are implemented and rendered",
+        "type": "component-audit",
+        "directory": "src/components/workshop",
+        "requiredComponents": [
+          "InspectionForm",
+          "InspectionList",
+          "InspectionManagement",
+          "JobCardManagement",
+          "JobCardKanbanBoard",
+          "WorkOrderManagement",
+          "FaultManagement",
+          "FleetTable",
+          "TyreInventoryForm",
+          "QAReviewPanel",
+          "PurchaseOrderModule",
+          "WorkshopOperations",
+          "TaskManager",
+          "CompletionPanel"
+        ],
+        "autoLinkToPages": true,
+        "pagesDirectory": "src/pages"
+      },
+      {
+        "description": "🛞 Validate and link Tyre module files to workshop + inventory logic",
+        "type": "component-audit",
+        "directory": "src/components/tyre",
+        "requiredComponents": [
+          "TyreDashboard",
+          "TyreInspection",
+          "TyreInventory",
+          "TyreManagementSystem",
+          "TyreCostAnalysis",
+          "TyreReports",
+          "VehicleTyreView",
+          "TyreReportGenerator"
+        ],
+        "autoLinkToPages": true
+      },
+      {
+        "description": "🔄 Bidirectional scan of all imports and Firestore writes",
+        "type": "integration-scan",
+        "mode": "bidirectional",
+        "targets": [
+          "src/pages/**/*.tsx",
+          "src/components/**/*.tsx"
+        ],
+        "autoFixImports": true,
+        "validateFirebaseCalls": true
+      },
+      {
+        "description": "🧠 Agent Mode: Suggest missing flows, components, and UIs for logic gaps",
+        "type": "agent-prompt-enhancer",
+        "scope": "full",
+        "priorityModules": [
+          "trip costing",
+          "driver scoring",
+          "flag escalation",
+          "job card tracking",
+          "tyre lifecycle",
+          "inventory PO to GRN",
+          "diesel audit and linkage",
+          "driver compliance alerts"
+        ],
+        "allowCodeGen": true,
+        "checkLiveState": true
+      }
+    ],
+    "uiLinkingRules": {
+      "TripManagementPage.tsx": [
+        "ActiveTrips.tsx",
+        "CompletedTrips.tsx",
+        "MissedLoadsTracker.tsx",
+        "TripForm.tsx",
+        "TripFinancialsPanel.tsx"
+      ],
+      "DriverBehaviorPage.tsx": [
+        "DriverBehaviorEventForm.tsx",
+        "DriverPerformanceOverview.tsx",
+        "CARReportList.tsx",
+        "FlagResolutionModal.tsx"
+      ],
+      "WorkshopPage.tsx": [
+        "WorkshopOperations.tsx",
+        "InspectionManagement.tsx",
+        "JobCardManagement.tsx",
+        "WorkOrderManagement.tsx",
+        "FleetTable.tsx",
+        "FaultTracking.tsx"
+      ],
+      "ClientManagementPage.tsx": [
+        "ClientList.tsx",
+        "ClientForm.tsx",
+        "ClientDetail.tsx",
+        "ClientRelationships.tsx"
+      ]
+    },
+    "debug": {
+      "breakpointSupport": true,
+      "validateLiveFirestore": true,
+      "autoLogFirebaseWrites": true,
+      "trackComponentRenderOrder": true
+    }
+  }
+}

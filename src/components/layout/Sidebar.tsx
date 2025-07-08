@@ -34,12 +34,12 @@ const Truck = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 interface SidebarProps {
-  currentPath: string;
+  currentView: string;
   onNavigate: (path: string) => void;
 }
 
 const Sidebar: FC<SidebarProps> = ({
-  currentPath,
+  currentView,
   onNavigate
 }) => {
   // State to track which menu items are expanded
@@ -282,7 +282,7 @@ const Sidebar: FC<SidebarProps> = ({
                     <li key={id} className="mb-2">
                       <div
                         className={`w-full flex items-center justify-between gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
-                          currentPath.startsWith(id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                          currentView.startsWith(id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
                         <div 
@@ -290,15 +290,7 @@ const Sidebar: FC<SidebarProps> = ({
                         >
                           <div 
                             className="flex items-center gap-3 flex-grow text-left cursor-pointer"
-                            onClick={() => {
-                              if (path) {
-                                onNavigate(path);
-                              } else if (children?.length) {
-                                toggleExpand(id, new CustomEvent('click') as any);
-                              } else {
-                                onNavigate(id);
-                              }
-                            }}
+                            onClick={() => path ? onNavigate(path) : toggleExpand(id, new CustomEvent('click') as any)}
                           >
                             {Icon && <Icon className="w-5 h-5" />}
                             <span>{label}</span>
@@ -319,15 +311,19 @@ const Sidebar: FC<SidebarProps> = ({
                       </div>
                       
                       {/* Only render children if this item is expanded */}
-                      {expandedItems[id] && children.map((child: NavItem) => {
-                        return (
-                          <li key={child.id}>
-                            {child.children?.map((subitem: NavItem) => (
-                              <div key={subitem.id}>{subitem.label}</div>
-                            ))}
-                          </li>
-                        );
-                      })}
+                      {expandedItems[id] && children.map((child: NavItem) => (
+                        <li key={child.id}>
+                          <button
+                            className={`w-full flex items-center gap-3 px-12 py-2 rounded-lg transition-colors text-left ${
+                              (currentView === child.id || currentView.startsWith(child.id)) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                            }`}
+                            onClick={() => onNavigate(child.path || child.id)}
+                          >
+                            {child.icon && <child.icon className="w-5 h-5" />}
+                            <span>{child.label}</span>
+                          </button>
+                        </li>
+                      ))}
                     </li>
                   );
                 }
@@ -336,7 +332,7 @@ const Sidebar: FC<SidebarProps> = ({
                   <li key={id}>
                     <button
                       className={`w-full flex items-center gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
-                        currentPath === id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                        currentView === id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
                       }`}
                       onClick={() => onNavigate(path || id)}
                     >

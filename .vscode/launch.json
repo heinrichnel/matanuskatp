@@ -1,0 +1,96 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    allowDebuggingForBreakpoints: true,
+    {
+      "name": "🛠️ Run Backend (Node)",
+      "type": "pwa-node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["--loader", "ts-node/esm"],
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/**/*.ts"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🔄 Run Backend (Nodemon)",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["nodemon", "--watch", ".", "--exec", "ts-node", "--loader", "ts-node/esm"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🔍 Debug Backend (Node)",
+      "type": "pwa-node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/index.ts",
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["--loader", "ts-node/esm"],
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/**/*.ts"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "🧪 Run Tests (Mocha)",
+      "type": "pwa-node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "args": ["--require", "ts-node/register", "--watch-extensions", ".ts", "--watch", "${workspaceFolder}/test/**/*.test.ts"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "🚀 Run Frontend (Vite)",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/src",
+      "preLaunchTask": "Run Frontend (Vite)",
+      "postDebugTask": "Stop Frontend"
+    },
+    {
+      "name": "🐍 Python Debug",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    
+
+    {
+      "name": "🧠 General Node Debug (TS)",
+      "type": "pwa-node",
+      "request": "launch",
+      "program": "${file}",
+      "cwd": "${workspaceFolder}",
+      "runtimeArgs": ["--loader", "ts-node/esm"],
+      "skipFiles": ["<node_internals>/**"],
+      "outFiles": ["${workspaceFolder}/**/*.ts"]
+    },
+    {
+      "name": "🔥 Firebase Functions (watch mode)",
+      "type": "pwa-node",
+      "request": "launch",
+      "command": "npm run shell",
+      "cwd": "${workspaceFolder}/functions",
+      "runtimeExecutable": "npm",
+      "args": ["run", "shell"],
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "⚡️ Debug Vite Frontend in Chrome",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/src",
+      "preLaunchTask": "Run Frontend (Vite)",
+      "postDebugTask": "Stop Frontend"
+    }
+  ]
+}
+
