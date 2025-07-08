@@ -1,6 +1,12 @@
 {
-    "recommendations": [
-        "davidanson.vscode-markdownlint",
-        "kodu-ai.claude-dev-experimental"
-    ]
+  "recommendations": [
+    "GitHub.copilot",
+    "GitHub.copilot-chat",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "firebase.firebase-tools",
+    "ms-vsliveshare.vsliveshare",
+    "streetsidesoftware.code-spell-checker",
+    "bradlc.vscode-tailwindcss"
+  ]
 }

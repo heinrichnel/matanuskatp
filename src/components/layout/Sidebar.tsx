@@ -1,13 +1,18 @@
-import { Activity, AlertOctagon, AlertTriangle, BarChart3, BarChartIcon, Building, ChevronDown, ChevronRight, CircleDot, DollarSign, FileText, FileSpreadsheet, Flag, Hammer, MapPin, Settings, Shield, PenToolIcon as ToolIcon, User, Users, Wifi, WifiOff } from 'lucide-react\'cIndicator';
+import React, { FC, useState } from 'react';
+import { Activity, BarChart3, ChevronDown, ChevronRight, CircleDot, FileText, Users } from 'lucide-react';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
+import SyncIndicator from '../ui/SyncIndicator';
 
-// Custom Truck component to avoid duplicate import
-interface HeaderProps {
-  currentView: string;
-  onNavigate: (view: string) => void;
+// Refine the NavItem type to ensure icons support SVG props
+interface NavItem {
+  id: string;
+  label: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  path?: string;
+  children?: NavItem[];
 }
 
-const Truck = (props: any) => (
+const Truck = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -27,13 +32,19 @@ const Truck = (props: any) => (
     <path d="M5 17a2 2 0 1 0 4 0"></path>
   </svg>
 );
-const Sidebar: FC<HeaderProps> = ({
-  currentView,
+
+interface SidebarProps {
+  currentPath: string;
+  onNavigate: (path: string) => void;
+}
+
+const Sidebar: FC<SidebarProps> = ({
+  currentPath,
   onNavigate
 }) => {
   // State to track which menu items are expanded
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
-  
+
   // Toggle expansion state for a menu item
   const toggleExpand = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,9 +54,9 @@ const Sidebar: FC<HeaderProps> = ({
       [id]: !prev[id]
     }));
   };
-  
+
   // Define navigation categories
-  const navCategories = [
+  const navCategories: { id: string; label: string; items: NavItem[] }[] = [
     // Main Navigation
     {
       id: 'main',
@@ -151,7 +162,7 @@ const Sidebar: FC<HeaderProps> = ({
         {
           id: 'drivers',
           label: 'Driver Management',
-          icon: Shield,
+          icon: BarChart3,
           children: [
             { id: 'driver-dashboard', label: 'Driver Dashboard', path: 'drivers' },
             { id: 'add-new-driver', label: 'Add New Driver', path: 'drivers/new' },
@@ -172,7 +183,7 @@ const Sidebar: FC<HeaderProps> = ({
         {
           id: 'compliance',
           label: 'Compliance & Safety',
-          icon: Shield,
+          icon: BarChart3,
           children: [
             { id: 'compliance-dashboard', label: 'Compliance Dashboard', path: 'compliance' },
             { id: 'dot-compliance', label: 'DOT Compliance', path: 'compliance/dot' },
@@ -207,7 +218,48 @@ const Sidebar: FC<HeaderProps> = ({
           ]
         }
       ]
-    }
+    },
+
+    // Workshop Management
+    {
+      id: 'workshop',
+      label: 'Workshop Management',
+      items: [
+        { id: 'fleet-setup', label: 'Fleet Setup', path: 'workshop/fleet-setup', icon: BarChart3 },
+        { id: 'qr-generator', label: 'QR Generator', path: 'workshop/qr-generator', icon: BarChart3 },
+        { id: 'inspections', label: 'Inspections', path: 'workshop/inspections', icon: BarChart3 },
+        { id: 'job-cards', label: 'Job Cards', path: 'workshop/job-cards', icon: BarChart3 },
+        { id: 'faults', label: 'Faults', path: 'workshop/faults', icon: BarChart3 },
+        { id: 'tyres', label: 'Tyres', path: 'workshop/tyres', icon: BarChart3 },
+        { id: 'inventory', label: 'Inventory', path: 'workshop/inventory', icon: BarChart3 },
+        { id: 'vendors', label: 'Vendors', path: 'workshop/vendors', icon: BarChart3 },
+        { id: 'analytics', label: 'Analytics', path: 'workshop/analytics', icon: BarChart3 },
+        { id: 'reports', label: 'Reports', path: 'workshop/reports', icon: BarChart3 }
+      ]
+    },
+
+    // Tyre Management
+    {
+      id: 'tyres',
+      label: 'Tyre Management',
+      items: [
+        { id: 'tyre-dashboard', label: 'Tyre Dashboard', path: 'tyres/dashboard', icon: BarChart3 },
+        { id: 'tyre-inspection', label: 'Tyre Inspection', path: 'tyres/inspection', icon: BarChart3 },
+        { id: 'tyre-inventory', label: 'Tyre Inventory', path: 'tyres/inventory', icon: BarChart3 },
+        { id: 'tyre-reports', label: 'Tyre Reports', path: 'tyres/reports', icon: BarChart3 }
+      ]
+    },
+
+    // Inventory Management
+    {
+      id: 'inventory',
+      label: 'Inventory Management',
+      items: [
+        { id: 'inventory-dashboard', label: 'Inventory Dashboard', path: 'inventory/dashboard', icon: BarChart3 },
+        { id: 'inventory-stock', label: 'Stock Management', path: 'inventory/stock', icon: BarChart3 },
+        { id: 'inventory-reports', label: 'Inventory Reports', path: 'inventory/reports', icon: BarChart3 }
+      ]
+    },
   ];
 
   return (
@@ -230,7 +282,7 @@ const Sidebar: FC<HeaderProps> = ({
                     <li key={id} className="mb-2">
                       <div
                         className={`w-full flex items-center justify-between gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
-                          currentView.startsWith(id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                          currentPath.startsWith(id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
                         }`}
                       >
                         <div 
@@ -248,7 +300,7 @@ const Sidebar: FC<HeaderProps> = ({
                               }
                             }}
                           >
-                            <Icon className="w-5 h-5" />
+                            {Icon && <Icon className="w-5 h-5" />}
                             <span>{label}</span>
                           </div>
                         </div>
@@ -267,42 +319,12 @@ const Sidebar: FC<HeaderProps> = ({
                       </div>
                       
                       {/* Only render children if this item is expanded */}
-                      {expandedItems[id] && children.map(child => {
-                        if (child.children) {
-                          return (
-                            <div key={child.id} className="ml-6 mt-1">
-                              <div className="flex items-center gap-2 px-6 py-1 text-sm font-medium text-gray-600">
-                                {child.icon && <child.icon className="w-4 h-4" />}
-                                <span>{child.label}</span>
-                              </div>
-                              <ul className="pl-10 mt-1 space-y-1">
-                                {child.children.map(subitem => (
-                                  <li key={subitem.id}>
-                                    <button
-                                      className={`w-full text-left px-2 py-1 text-xs rounded transition-colors ${
-                                        currentView === subitem.id ? 'bg-gray-100 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'
-                                      }`}
-                                      onClick={() => onNavigate(subitem.path || subitem.id)}
-                                    >
-                                      {subitem.label}
-                                    </button>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          );
-                        }
+                      {expandedItems[id] && children.map((child: NavItem) => {
                         return (
-                          <li key={child.id} className="ml-6 mt-1">
-                            <button
-                              className={`w-full flex items-center gap-2 px-6 py-1 text-sm rounded transition-colors text-left ${
-                                currentView === child.id ? 'bg-gray-100 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50'
-                              }`}
-                              onClick={() => onNavigate(child.path || child.id)}
-                            >
-                              {child.icon && <child.icon className="w-4 h-4" />}
-                              <span>{child.label}</span>
-                            </button>
+                          <li key={child.id}>
+                            {child.children?.map((subitem: NavItem) => (
+                              <div key={subitem.id}>{subitem.label}</div>
+                            ))}
                           </li>
                         );
                       })}
@@ -314,11 +336,11 @@ const Sidebar: FC<HeaderProps> = ({
                   <li key={id}>
                     <button
                       className={`w-full flex items-center gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
-                        currentView === id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                        currentPath === id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
                       }`}
                       onClick={() => onNavigate(path || id)}
                     >
-                      <Icon className="w-5 h-5" />
+                      {Icon && <Icon className="w-5 h-5" />}
                       <span>{label}</span>
                     </button>
                   </li>

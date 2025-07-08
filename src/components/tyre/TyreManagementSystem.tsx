@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { Input, Select, TextArea } from "@/components/ui/FormElements";
 import { TyreInventoryFilters } from './tyre/TyreInventoryFilters';
+import { TYRE_REFERENCE_DATA } from '@/data/tyreReferenceData';
+// Placeholder for missing module
 import {
   Plus,
   Download,
-  Upload,
-  Search,
   Eye,
   Edit,
   AlertTriangle,
@@ -17,7 +16,7 @@ import {
   Package,
   BarChart3
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Badge } from '@/components/ui/Badge';
 
 interface TyreSize {
   width: number;
@@ -75,16 +74,10 @@ interface Tyre {
   notes: string;
 }
 
-const TYRE_BRANDS = [
-  'Michelin', 'Bridgestone', 'Continental', 'Goodyear', 'Pirelli',
-  'Dunlop', 'Yokohama', 'Hankook', 'Toyo', 'Kumho', 'Firemax',
-  'TRIANGLE', 'Terraking', 'Compasal', 'Windforce'
-];
-
-const TYRE_PATTERNS = [
-  'TR688', 'HS102', 'WD2020', 'WD2060', 'CPD82', 'FG01S',
-  'HF660', 'CPS60', 'SX668', 'FM66', 'WDM916', 'FM166'
-];
+// Replace hardcoded values with TYRE_REFERENCE_DATA
+const TYRE_BRANDS = TYRE_REFERENCE_DATA.brands;
+const TYRE_PATTERNS = TYRE_REFERENCE_DATA.patterns;
+const TYRE_SIZES = TYRE_REFERENCE_DATA.sizes;
 
 const TYRE_TYPES = [
   { label: 'Steer', value: 'steer' },
@@ -93,10 +86,23 @@ const TYRE_TYPES = [
   { label: 'Spare', value: 'spare' }
 ];
 
-const MOUNT_STATUS = [
-  { label: 'On Vehicle', value: 'on_vehicle' },
-  { label: 'In Store', value: 'in_store' },
-  { label: 'Spare', value: 'spare' }
+// Add the provided tyre reference list
+const TYRE_REFERENCE_LIST = [
+  { brand: 'Firemax', pattern: '', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'TRIANGLE', pattern: 'TR688', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'Terraking', pattern: 'HS102', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'Compasal', pattern: 'TR688', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'Windforce', pattern: 'WD2020', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'Windforce', pattern: 'WD2060', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'Compasal', pattern: 'CPD82', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'Perelli', pattern: 'FG01S', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'POWERTRAC', pattern: 'TractionPro', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'SUNFULL', pattern: 'HF638', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'SUNFULL', pattern: 'HF768', size: '315/80R22.5', position: 'Drive' },
+  { brand: 'FORMULA', pattern: '', size: '315/80R22.16', position: 'Drive' },
+  { brand: 'PIRELLI', pattern: '', size: '315/80R22.17', position: 'Drive' },
+  { brand: 'Wellplus', pattern: 'WDM16', size: '315/80R22.5', position: 'Drive' },
+  // Add more entries as needed
 ];
 
 export const TyreManagementSystem: React.FC = () => {
@@ -150,7 +156,6 @@ export const TyreManagementSystem: React.FC = () => {
     }
   ]);
 
-  const [selectedTyre, setSelectedTyre] = useState<Tyre | null>(null);
   const [activeTab, setActiveTab] = useState('inventory');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterBrand, setFilterBrand] = useState('');
@@ -158,7 +163,6 @@ export const TyreManagementSystem: React.FC = () => {
   const [filterCondition, setFilterCondition] = useState('all');
   const [filterVehicle, setFilterVehicle] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
-  const { toast } = useToast();
 
   const [newTyre, setNewTyre] = useState<Partial<Tyre>>({
     serialNumber: '',
@@ -185,6 +189,9 @@ export const TyreManagementSystem: React.FC = () => {
     kmRunLimit: 100000,
     notes: ''
   });
+
+  const [availablePatterns, setAvailablePatterns] = useState<string[]>([]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>([]);
 
   const getConditionColor = (status: string) => {
     switch (status) {
@@ -242,11 +249,8 @@ export const TyreManagementSystem: React.FC = () => {
 
   const handleAddTyre = () => {
     if (!newTyre.serialNumber || !newTyre.brand) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in required fields",
-        variant: "destructive"
-      });
+      // Replace with UI-based error display
+      console.error("Please fill in required fields");
       return;
     }
 
@@ -308,10 +312,8 @@ export const TyreManagementSystem: React.FC = () => {
       notes: ''
     });
 
-    toast({
-      title: "Tyre Added",
-      description: "New tyre has been added to inventory",
-    });
+    // Replace with UI-based success message
+    console.log("New tyre has been added to inventory");
   };
 
   const exportToCSV = () => {
@@ -349,6 +351,18 @@ export const TyreManagementSystem: React.FC = () => {
     a.href = url;
     a.download = 'tyre-inventory.csv';
     a.click();
+  };
+
+  const handleBrandChange = (value: string) => {
+    setNewTyre((prev) => ({ ...prev, brand: value }));
+    const patterns = TYRE_REFERENCE_LIST.filter((item) => item.brand === value).map((item) => item.pattern);
+    setAvailablePatterns(patterns);
+  };
+
+  const handlePatternChange = (value: string) => {
+    setNewTyre((prev) => ({ ...prev, pattern: value }));
+    const sizes = TYRE_REFERENCE_LIST.filter((item) => item.pattern === value).map((item) => item.size);
+    setAvailableSizes(sizes);
   };
 
   return (
@@ -468,7 +482,7 @@ export const TyreManagementSystem: React.FC = () => {
                       </div>
 
                       <div className="flex space-x-2 ml-4">
-                        <Button variant="outline" size="sm" onClick={() => setSelectedTyre(tyre)}>
+                        <Button variant="outline" size="sm">
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button variant="outline" size="sm">
@@ -576,10 +590,10 @@ export const TyreManagementSystem: React.FC = () => {
                 <Select
                   label="Brand *"
                   value={newTyre.brand || ''}
-                  onChange={(value) => setNewTyre(prev => ({ ...prev, brand: value }))}
+                  onChange={handleBrandChange}
                   options={[
                     { label: 'Select brand...', value: '' },
-                    ...TYRE_BRANDS.map(brand => ({ label: brand, value: brand }))
+                    ...TYRE_REFERENCE_LIST.map((item) => ({ label: item.brand, value: item.brand })).filter((v, i, a) => a.findIndex((t) => t.value === v.value) === i),
                   ]}
                 />
               </div>
@@ -594,10 +608,10 @@ export const TyreManagementSystem: React.FC = () => {
                 <Select
                   label="Pattern"
                   value={newTyre.pattern || ''}
-                  onChange={(value) => setNewTyre(prev => ({ ...prev, pattern: value }))}
+                  onChange={handlePatternChange}
                   options={[
                     { label: 'Select pattern...', value: '' },
-                    ...TYRE_PATTERNS.map(pattern => ({ label: pattern, value: pattern }))
+                    ...availablePatterns.map((pattern) => ({ label: pattern, value: pattern })),
                   ]}
                 />
               </div>

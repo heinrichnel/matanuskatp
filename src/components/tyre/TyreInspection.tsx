@@ -30,6 +30,8 @@ import {
   VENDORS,
   getPositionsByFleet,
 } from "../../utils/tyreConstants";
+import { TYRE_REFERENCE_DATA } from "@/data/tyreReferenceData";
+import { tyreSizes, tyreBrands, tyrePatterns } from '@/data/tyreData';
 
 // Mock data for fleet vehicles (would come from Firestore in production)
 const FLEET_VEHICLES = [
@@ -61,8 +63,6 @@ const SIDEWALL_CONDITIONS = [
   { value: "bulge", label: "Bulge Present - Requires immediate attention" },
   { value: "severe_damage", label: "Severe Damage - Replace immediately" },
 ];
-
-// Note: These helper functions were removed as they're not used in the component
 
 // Function to parse tyre size from string (e.g., '315/80R22.5')
 const parseTyreSize = (sizeStr: string): TyreSize => {
@@ -116,15 +116,36 @@ interface TyreInspectionFormData {
   };
 }
 
+// Update VehicleTyreViewProps to include vehicleId
+interface VehicleTyreViewProps {
+  vehicleId: string;
+  onTyreSelect: (tyre: Tyre | null) => void;
+}
+
+// Define TyreConditionStatus
+export type TyreConditionStatus = "good" | "warning" | "critical" | "needs_replacement";
+
+// Define TyreInspectionData
+export interface TyreInspectionData {
+  vehicleId: string;
+  position: string;
+  inspectorName: string;
+  treadDepth: string;
+  pressure: string;
+  condition: TyreConditionStatus | '';
+  damage: string;
+  notes: string;
+  photos: string[];
+}
+
 const TyreInspection: React.FC = () => {
   // Selected tyre for inspection
   const [selectedTyre, setSelectedTyre] = useState<Tyre | null>(null);
 
   // Filtered tyre options based on selections
-  const [brandOptions, setBrandOptions] = useState<string[]>(
-    getUniqueTyreBrands()
-  );
-  const [patternOptions, setPatternOptions] = useState<string[]>([]);
+  const [brandOptions, setBrandOptions] = useState<string[]>(tyreBrands);
+  const [patternOptions, setPatternOptions] = useState<string[]>(tyrePatterns);
+  const [sizeOptions, setSizeOptions] = useState<string[]>(tyreSizes);
   // Track available positions for the selected fleet
   const [_, setPositionOptions] = useState<string[]>([]);
 
@@ -757,13 +778,7 @@ const TyreInspection: React.FC = () => {
                           label="Size"
                           value={formData.size}
                           onChange={(value) => handleChange("size", value)}
-                          options={[
-                            { label: "Select size...", value: "" },
-                            ...getUniqueTyreSizes().map((size) => ({
-                              label: size,
-                              value: size,
-                            })),
-                          ]}
+                          options={sizeOptions.map((size) => ({ label: size, value: size }))}
                         />
 
                         <div className="grid grid-cols-3 gap-2">
@@ -810,13 +825,7 @@ const TyreInspection: React.FC = () => {
                           label="Brand"
                           value={formData.brand}
                           onChange={(value) => handleChange("brand", value)}
-                          options={[
-                            { label: "Select brand...", value: "" },
-                            ...brandOptions.map((brand) => ({
-                              label: brand,
-                              value: brand,
-                            })),
-                          ]}
+                          options={brandOptions.map((brand) => ({ label: brand, value: brand }))}
                         />
 
                         {formData.brand && (
@@ -824,13 +833,7 @@ const TyreInspection: React.FC = () => {
                             label="Pattern"
                             value={formData.pattern}
                             onChange={(value) => handleChange("pattern", value)}
-                            options={[
-                              { label: "Select pattern...", value: "" },
-                              ...patternOptions.map((pattern) => ({
-                                label: pattern,
-                                value: pattern,
-                              })),
-                            ]}
+                            options={patternOptions.map((pattern) => ({ label: pattern, value: pattern }))}
                           />
                         )}
 
@@ -1084,7 +1087,14 @@ const TyreInspection: React.FC = () => {
   );
 };
 
+// Correct the VehicleTyreViewProps interface
+interface VehicleTyreViewProps {
+  vehicleId: string;
+  onTyreSelect: (tyre: Tyre | null) => void;
+}
 
+// Correct the TyreInspectionData interface
+export interface TyreInspectionData {
   vehicleId: string;
   position: string;
   inspectorName: string;
@@ -1105,9 +1115,9 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
     vehicleId: '',
     position: '',
     inspectorName: '',
-    treadDepth: '',
-    pressure: '',
-    condition: '',
+    treadDepth: 0, // Default to 0
+    pressure: 0, // Default to 0
+    condition: 'good', // Default to 'good'
     damage: '',
     notes: '',
     photos: []
@@ -1148,9 +1158,9 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
       vehicleId: '',
       position: '',
       inspectorName: '',
-      treadDepth: '',
-      pressure: '',
-      condition: '',
+      treadDepth: 0,
+      pressure: 0,
+      condition: 'good',
       damage: '',
       notes: '',
       photos: []
@@ -1161,7 +1171,7 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
     <div className="space-y-4">
       <VehicleSelector
         value={inspectionData.vehicleId}
-        onChange={(value) => setInspectionData(prev => ({ ...prev, vehicleId: value }))}
+        onChange={(value: string) => setInspectionData((prev: TyreInspectionData) => ({ ...prev, vehicleId: value }))}
         label="Vehicle"
         placeholder="Select vehicle for inspection..."
         activeOnly={false}

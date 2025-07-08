@@ -7,6 +7,9 @@ import QAReviewPanel from './QAReviewPanel';
 import CompletionPanel from './CompletionPanel'; 
 import { v4 as uuidv4 } from 'uuid';
 import { JobCardTask, TaskHistoryEntry } from '../../types';
+import Button from '../ui/Button';
+import { updateDoc, doc } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 // Mock data for a job card
 const mockJobCard = {
@@ -25,7 +28,8 @@ const mockJobCard = {
   laborRate: 250,
   partsCost: 1500,
   totalEstimate: 2500,
-  notes: []
+  notes: [],
+  faultId: 'f123' // Added faultId property
 };
 
 // Mock tasks for the job card
@@ -175,16 +179,20 @@ const JobCard: React.FC = () => {
       const task = tasks.find(t => t.id === taskId);
       if (!task) throw new Error('Task not found');
       
-      // Update task to verified status
-      const updates: Partial<JobCardTask> = {
+      // Update task in Firestore
+      const taskRef = doc(db, 'tasks', taskId);
+      await updateDoc(taskRef, {
         status: 'verified',
         verifiedBy: 'Current Supervisor',
         verifiedAt: new Date().toISOString()
-      };
+      });
+
+      handleTaskUpdate(taskId, {
+        status: 'verified',
+        verifiedBy: 'Current Supervisor',
+        verifiedAt: new Date().toISOString()
+      });
       
-      handleTaskUpdate(taskId, updates);
-      
-      // Log the verification action
       handleLogTaskHistory({
         taskId,
         event: 'verified',
@@ -192,11 +200,8 @@ const JobCard: React.FC = () => {
         at: new Date().toISOString(),
         notes: 'Task verified by supervisor'
       });
-      
-      return Promise.resolve();
     } catch (error) {
       console.error('Error verifying task:', error);
-      return Promise.reject(error);
     } finally {
       setIsLoading(false);
     }
@@ -275,7 +280,7 @@ const JobCard: React.FC = () => {
       text,
       createdBy: 'Current User',
       createdAt: new Date().toISOString(),
-      type
+      type: type as 'technician' | 'customer' // Ensure type compatibility
     };
     setNotes(prevNotes => [...prevNotes, newNote]);
   };
@@ -293,28 +298,49 @@ const JobCard: React.FC = () => {
   };
   
   // Handler for job completion
-  const handleCompleteJob = async (jobCardId: string) => {
-    setJobCard(prev => ({ ...prev, status: 'completed' }));
-    // In a real implementation, this would update Firestore
-    
-    // Log the job card completion
-    if (jobCard.faultId) {
-      // Also mark the associated fault as resolved
-      console.log(`Fault ${jobCard.faultId} marked as resolved`);
+  const handleCompleteJob = async () => {
+    try {
+      setIsLoading(true);
+
+      // Update job card status in Firestore
+      const jobCardRef = doc(db, 'jobCards', jobCard.id);
+      await updateDoc(jobCardRef, { status: 'completed' });
+
+      setJobCard(prev => ({ ...prev, status: 'completed' as 'in_progress' }));
+
+      // Log the job card completion
+      if (jobCard.faultId) {
+        console.log(`Fault ${jobCard.faultId} marked as resolved`);
+      }
+    } catch (error) {
+      console.error('Error completing job card:', error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    return Promise.resolve();
   };
   
   // Handler for invoice generation
-  const handleGenerateInvoice = async (jobCardId: string) => {
-    // In a real implementation, this would create an invoice in Firestore
-    alert(`Invoice generated for job card: ${jobCardId}`);
-    
-    // After generating an invoice, you might want to update the job card status
-    setJobCard(prev => ({ ...prev, status: 'invoiced' }));
-    
-    return Promise.resolve();
+  const handleGenerateInvoice = async () => {
+    try {
+      setIsLoading(true);
+
+      // Create an invoice in Firestore
+      const invoiceRef = doc(db, 'invoices', jobCard.id);
+      await updateDoc(invoiceRef, {
+        jobCardId: jobCard.id,
+        status: 'generated',
+        totalAmount: jobCard.totalEstimate,
+        createdAt: new Date().toISOString()
+      });
+
+      alert(`Invoice generated for job card: ${jobCard.id}`);
+
+      setJobCard(prev => ({ ...prev, status: 'invoiced' as 'in_progress' }));
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
   
   // Toggle user role for demo purposes

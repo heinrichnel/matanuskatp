@@ -5,7 +5,8 @@ import { Input, TextArea } from '../ui/FormElements';
 import { useAppContext } from '../../context/AppContext';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { CheckCircle, X, Save, AlertTriangle, Info } from 'lucide-react';
-import { DieselConsumptionRecord, FLEETS_WITH_PROBES } from '../../types';
+import { FLEETS_WITH_PROBES } from '../../types';
+import { addAuditLogToFirebase } from '../../firebase';
 
 interface EnhancedProbeVerificationModalProps {
   isOpen: boolean;
@@ -18,7 +19,7 @@ const EnhancedProbeVerificationModal: React.FC<EnhancedProbeVerificationModalPro
   onClose,
   dieselRecordId
 }) => {
-  const { dieselRecords, updateDieselRecord, addAuditLog } = useAppContext();
+  const { dieselRecords, updateDieselRecord } = useAppContext();
   const [probeReading, setProbeReading] = useState('');
   const [verificationNotes, setVerificationNotes] = useState('');
   const [photoEvidence, setPhotoEvidence] = useState<File | null>(null);
@@ -160,7 +161,7 @@ const EnhancedProbeVerificationModal: React.FC<EnhancedProbeVerificationModalPro
 
       // Add audit log for serious discrepancies
       if (isSeriousDiscrepancy) {
-        await addAuditLog({
+        await addAuditLogToFirebase({
           id: `audit-${Date.now()}`,
           timestamp: new Date().toISOString(),
           user: 'Current User', // Use logged-in user in real app

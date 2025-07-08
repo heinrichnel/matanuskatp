@@ -1,23 +1,8 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input, Select, TextArea } from "@/components/ui/FormElements";
-import { VehicleSelector } from "@/components/common/VehicleSelector";
-import { 
-  Plus, 
-  Play, 
-  CheckCircle, 
-  Clock, 
-  AlertTriangle,
-  FileText,
-  Paperclip,
-  Download,
-  Edit,
-  Eye
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from '@/components/ui/Card';
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 
 interface WorkOrder {
   workOrderId: string;
@@ -184,7 +169,6 @@ export const WorkOrderManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('list');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterPriority, setFilterPriority] = useState('all');
-  const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -221,11 +205,6 @@ export const WorkOrderManagement: React.FC = () => {
           }
         : wo
     ));
-    
-    toast({
-      title: "Work Order Started",
-      description: `Work order ${workOrderId} has been started.`,
-    });
   };
 
   const handleCompleteWorkOrder = (workOrderId: string) => {
@@ -234,11 +213,6 @@ export const WorkOrderManagement: React.FC = () => {
 
     // Check if RCA is required
     if (workOrder.rcaRequired && !workOrder.rcaCompleted) {
-      toast({
-        title: "RCA Required",
-        description: "Please complete the Root Cause Analysis before closing this work order.",
-        variant: "destructive"
-      });
       return;
     }
 
@@ -248,11 +222,6 @@ export const WorkOrderManagement: React.FC = () => {
     );
 
     if (incompleteTasks.length > 0) {
-      toast({
-        title: "Tasks Incomplete",
-        description: `${incompleteTasks.length} tasks still need to be completed.`,
-        variant: "destructive"
-      });
       return;
     }
 
@@ -271,11 +240,6 @@ export const WorkOrderManagement: React.FC = () => {
           }
         : wo
     ));
-    
-    toast({
-      title: "Work Order Completed",
-      description: `Work order ${workOrderId} has been completed.`,
-    });
   };
 
   const filteredWorkOrders = workOrders.filter(wo => {
@@ -306,7 +270,6 @@ export const WorkOrderManagement: React.FC = () => {
           <p className="text-gray-600">Manage work orders from initiation to completion</p>
         </div>
         <Button>
-          <Plus className="w-4 h-4 mr-2" />
           Create Work Order
         </Button>
       </div>
@@ -322,29 +285,33 @@ export const WorkOrderManagement: React.FC = () => {
           <Card>
             <CardContent className="p-4">
               <div className="flex gap-4">
-                <Select
-                  label="Status"
-                  value={filterStatus}
-                  onChange={setFilterStatus}
-                  options={[
-                    { label: 'All Status', value: 'all' },
-                    { label: 'Initiated', value: 'initiated' },
-                    { label: 'In Progress', value: 'in_progress' },
-                    { label: 'Completed', value: 'completed' }
-                  ]}
-                />
-                <Select
-                  label="Priority"
-                  value={filterPriority}
-                  onChange={setFilterPriority}
-                  options={[
-                    { label: 'All Priorities', value: 'all' },
-                    { label: 'Critical', value: 'critical' },
-                    { label: 'High', value: 'high' },
-                    { label: 'Medium', value: 'medium' },
-                    { label: 'Low', value: 'low' }
-                  ]}
-                />
+                <div>
+                  <label className="text-sm text-gray-600">Status</label>
+                  <select 
+                    value={filterStatus} 
+                    onChange={e => setFilterStatus(e.target.value)} 
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="initiated">Initiated</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm text-gray-600">Priority</label>
+                  <select 
+                    value={filterPriority} 
+                    onChange={e => setFilterPriority(e.target.value)} 
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50"
+                  >
+                    <option value="all">All Priorities</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -366,7 +333,6 @@ export const WorkOrderManagement: React.FC = () => {
                         </Badge>
                         {workOrder.rcaRequired && !workOrder.rcaCompleted && (
                           <Badge className="bg-red-100 text-red-800 flex items-center space-x-1">
-                            <AlertTriangle className="w-3 h-3" />
                             <span>RCA Required</span>
                           </Badge>
                         )}
@@ -413,7 +379,6 @@ export const WorkOrderManagement: React.FC = () => {
 
                     <div className="flex flex-col space-y-2 ml-4">
                       <Button variant="outline" size="sm" onClick={() => setSelectedWorkOrder(workOrder)}>
-                        <Eye className="w-4 h-4 mr-1" />
                         View
                       </Button>
                       
@@ -422,7 +387,6 @@ export const WorkOrderManagement: React.FC = () => {
                           size="sm"
                           onClick={() => handleStartWorkOrder(workOrder.workOrderId)}
                         >
-                          <Play className="w-4 h-4 mr-1" />
                           Start
                         </Button>
                       )}
@@ -433,7 +397,6 @@ export const WorkOrderManagement: React.FC = () => {
                           onClick={() => handleCompleteWorkOrder(workOrder.workOrderId)}
                           className={workOrder.rcaRequired && !workOrder.rcaCompleted ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
                         >
-                          <CheckCircle className="w-4 h-4 mr-1" />
                           Complete
                         </Button>
                       )}
@@ -450,7 +413,6 @@ export const WorkOrderManagement: React.FC = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
-                  <FileText className="w-5 h-5 text-blue-600" />
                   <div>
                     <p className="text-sm font-medium">Total Work Orders</p>
                     <p className="text-2xl font-bold">{workOrders.length}</p>
@@ -462,7 +424,6 @@ export const WorkOrderManagement: React.FC = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
-                  <Clock className="w-5 h-5 text-yellow-600" />
                   <div>
                     <p className="text-sm font-medium">In Progress</p>
                     <p className="text-2xl font-bold text-yellow-600">
@@ -476,7 +437,6 @@ export const WorkOrderManagement: React.FC = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
                   <div>
                     <p className="text-sm font-medium">Completed</p>
                     <p className="text-2xl font-bold text-green-600">
@@ -490,7 +450,6 @@ export const WorkOrderManagement: React.FC = () => {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center space-x-2">
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
                   <div>
                     <p className="text-sm font-medium">RCA Required</p>
                     <p className="text-2xl font-bold text-red-600">

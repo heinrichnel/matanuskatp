@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
-import { Clipboard, ClipboardCheck, FileText, Plus, Search, RefreshCw } from 'lucide-react';
+import { Clipboard, ClipboardCheck, FileText, Plus, RefreshCw } from 'lucide-react';
 import InspectionList from './InspectionList';
 
 interface InspectionManagementProps {
@@ -11,23 +11,48 @@ interface InspectionManagementProps {
 
 const InspectionManagement: React.FC<InspectionManagementProps> = ({ status = 'active' }) => {
   const [activeTab, setActiveTab] = useState(status);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleError = (message: string) => {
+    setErrorMessage(message);
+    setTimeout(() => setErrorMessage(null), 5000); // Clear error after 5 seconds
+  };
 
   return (
     <div className="space-y-6">
+      {errorMessage && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <span className="block sm:inline">{errorMessage}</span>
+        </div>
+      )}
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Inspection Management</h2>
           <p className="text-gray-600">Create, track and manage vehicle inspections</p>
         </div>
         <div className="flex space-x-2">
+          <input
+            type="text"
+            placeholder="Search inspections..."
+            value={searchTerm}
+            onChange={handleSearchChange}
+            className="border rounded px-2 py-1"
+          />
           <Button
             variant="outline"
             icon={<RefreshCw className="w-4 h-4" />}
+            onClick={() => handleError('Refresh failed. Please try again.')}
           >
             Refresh
           </Button>
           <Button
             icon={<Plus className="w-4 h-4" />}
+            onClick={() => handleError('Failed to create a new inspection.')}
           >
             New Inspection
           </Button>
@@ -69,6 +94,7 @@ const InspectionManagement: React.FC<InspectionManagementProps> = ({ status = 'a
                 <div className="mt-6">
                   <Button
                     icon={<Plus className="w-4 h-4" />}
+                    onClick={() => handleError('Failed to create a template.')}
                   >
                     Create Template
                   </Button>
