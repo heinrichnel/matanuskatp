@@ -5,6 +5,7 @@ import SyncIndicator from '../ui/SyncIndicator';
 import { useAppContext } from '../../context/AppContext';
 import { collection, onSnapshot, query, where, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import * as XLSX from 'xlsx';
 
 interface StockItem {
   id: string;
@@ -243,15 +244,171 @@ const StockManager: React.FC = () => {
     document.body.removeChild(a);
 
     // Show success notification
-    setNotification({
-      show: true,
-      message: 'Stock report exported successfully',
-      type: 'success'
-    });
+  };
+  
+  // Export stock items as Excel
+  const handleExportExcel = () => {
+    try {
+      // Prepare data for Excel export
+      const excelData = filteredItems.map(item => ({
+        'Name': item.name,
+        'SKU': item.sku,
+        'Category': item.category,
+        'Quantity': item.quantity,
+        'Reorder Level': item.reorderLevel,
+        'Supplier': item.supplier,
+        'Location': item.location,
+        'Last Order Date': item.lastOrderDate || '',
+        'Unit Cost': item.unitCost,
+        'Stock Value': item.quantity * item.unitCost,
+        'Notes': item.notes || ''
+      }));
+      
+      // Create workbook and worksheet
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Inventory');
+      
+      // Add some styling to headers
+      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const address = XLSX.utils.encode_col(C) + '1';
+        if (!ws[address]) continue;
+        ws[address].s = {
+          font: { bold: true },
+          fill: { fgColor: { rgb: "EFEFEF" } }
+        };
+      }
+      
+      // Save to file
+      XLSX.writeFile(wb, `inventory_stock_${new Date().toISOString().split('T')[0]}.xlsx`);
+      
+      // Show success notification
+      alert('Excel file exported successfully!');
+    } catch (error) {
+      console.error('Failed to export Excel file:', error);
+      alert('Failed to export Excel file. Please try again.');
+    }
+  };
+  
+  // Import stock items from CSV or Excel
+  const handleFileImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     
-    setTimeout(() => {
-      setNotification({ show: false, message: '', type: '' });
-    }, 3000);
+    const reader = new FileReader();
+    
+    reader.onload = async (event) => {
+      try {
+        const data = event.target?.result;
+        let parsedData: Partial<StockItem>[] = [];
+        
+        if (file.name.endsWith('.csv')) {
+          // Handle CSV import
+          const text = data as string;
+          const rows = text.split('\n');
+          const headers = rows[0].split(',').map(h => h.trim());
+          
+          // Map CSV rows to StockItem objects
+          parsedData = rows.slice(1).map(row => {
+            if (!row.trim()) return {}; // Skip empty rows
+            
+            const values = row.split(',').map(v => v.trim());
+            const item: Partial<StockItem> = {};
+            
+            headers.forEach((header, index) => {
+              if (index < values.length) {
+                const value = values[index];
+                // Convert numeric values
+                if (header === 'Quantity' || header === 'Reorder Level' || header === 'Unit Cost') {
+                  item[header.toLowerCase().replace(' ', '') as keyof StockItem] = parseFloat(value) as any;
+                } else {
+                  item[header.toLowerCase().replace(' ', '') as keyof StockItem] = value as any;
+                }
+              }
+            });
+            
+            return item;
+          }).filter(item => Object.keys(item).length > 0);
+        } else {
+          // Handle Excel import
+          const workbook = XLSX.read(data, { type: 'binary' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const excelData = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet);
+          
+          // Map Excel rows to StockItem objects
+          parsedData = excelData.map(row => {
+            const item: Partial<StockItem> = {
+              name: String(row['Name'] || row['name'] || ''),
+              sku: String(row['SKU'] || row['sku'] || ''),
+              category: String(row['Category'] || row['category'] || ''),
+              quantity: Number(row['Quantity'] || row['quantity'] || 0),
+              reorderLevel: Number(row['Reorder Level'] || row['reorderLevel'] || 10),
+              supplier: String(row['Supplier'] || row['supplier'] || ''),
+              location: String(row['Location'] || row['location'] || ''),
+              lastOrderDate: row['Last Order Date'] || row['lastOrderDate'] || null,
+              unitCost: Number(row['Unit Cost'] || row['unitCost'] || 0),
+              notes: row['Notes'] || row['notes'] || ''
+            };
+            return item;
+          });
+        }
+        
+        // Validate the data
+        if (parsedData.length === 0) {
+          throw new Error('No valid data found in the file');
+        }
+        
+        // Add the imported items to Firestore
+        let added = 0;
+        let updated = 0;
+        let skipped = 0;
+        
+        for (const item of parsedData) {
+          if (!item.name || !item.sku) {
+            skipped++;
+            continue; // Skip items without required fields
+          }
+          
+          // Check if item with same SKU exists
+          const existingItemIndex = stockItems.findIndex(i => i.sku === item.sku);
+          
+          if (existingItemIndex >= 0) {
+            // Update existing item
+            const existingItem = stockItems[existingItemIndex];
+            await updateDoc(doc(db, 'inventory', existingItem.id), {
+              ...item,
+              updatedAt: new Date().toISOString()
+            });
+            updated++;
+          } else {
+            // Add new item
+            await addDoc(collection(db, 'inventory'), {
+              ...item,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            });
+            added++;
+          }
+        }
+        
+        alert(`Import successful: ${added} items added, ${updated} items updated, ${skipped} items skipped.`);
+        
+        // Reset the input field so the same file can be imported again if needed
+        e.target.value = '';
+      } catch (error) {
+        console.error('Error importing file:', error);
+        alert(`Error importing file: ${(error as Error).message || 'Unknown error'}`);
+        e.target.value = '';
+      }
+    };
+    
+    if (file.name.endsWith('.csv')) {
+      reader.readAsText(file);
+    } else {
+      reader.readAsBinaryString(file);
+    }
   };
 
   return (
@@ -272,6 +429,21 @@ const StockManager: React.FC = () => {
           >
             Export CSV
           </Button>
+          <Button 
+            onClick={handleExportExcel}
+            variant="secondary"
+          >
+            Export Excel
+          </Button>
+          <label className="cursor-pointer px-3 py-2 bg-blue-100 text-blue-800 rounded-md hover:bg-blue-200">
+            Import CSV/Excel
+            <input 
+              type="file" 
+              className="hidden" 
+              accept=".csv,.xlsx,.xls"
+              onChange={handleFileImport}
+            />
+          </label>
         </div>
       </div>
       

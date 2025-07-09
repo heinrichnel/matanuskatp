@@ -3,6 +3,7 @@ import Card, { CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import { format } from 'date-fns';
 import { Camera, Download, Upload, Trash2, Check, X } from 'lucide-react';
+import { generateInspectionPDF } from '../../utils/pdfGenerators';
 
 export interface InspectionItem {
   id: string;
@@ -134,7 +135,10 @@ const InspectionReportForm: React.FC<InspectionReportFormProps> = ({
   };
 
   const handleGeneratePDF = () => {
-    onGeneratePDF(data.id);
+    // Use our custom PDF generator for professional output with photos
+    generateInspectionPDF(data);
+    // Also call the provided callback if needed
+    onGeneratePDF?.(data.id);
   };
 
   const renderStatusClass = (status: string) => {
