@@ -265,7 +265,7 @@ const Sidebar: FC<SidebarProps> = ({
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r shadow flex flex-col z-30">
       <div className="flex items-center justify-between px-6 py-4 border-b">
-        <span className="text-xl font-bold text-primary-600 tracking-tight">TransportMat</span>
+        <span className="text-xl font-bold text-primary-600 tracking-tight">MATANUSKA TRANSPORT</span>
       </div>
       <nav className="flex-1 overflow-y-auto py-2 max-h-[calc(100vh-160px)]">
         {navCategories.map((category) => (

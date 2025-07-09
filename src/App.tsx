@@ -28,6 +28,7 @@ import CompletedTrips from "./components/trips/CompletedTrips";
 import FlagsInvestigations from "./components/flags/FlagsInvestigations";
 import ClientManagementPage from "./pages/ClientManagementPage";
 import CurrencyFleetReport from "./components/reports/CurrencyFleetReport";
+import TripDashboard from "./components/trips/TripDashboard";
 import InvoiceAgingDashboard from "./components/invoicing/InvoiceAgingDashboard";
 import CustomerRetentionDashboard from "./components/performance/CustomerRetentionDashboard";
 import MissedLoadsTracker from "./components/trips/MissedLoadsTracker";
@@ -99,6 +100,18 @@ const App: React.FC = () => {
                   <Route path="active" element={<ActiveTrips />} />
                   <Route path="completed" element={<CompletedTrips />} />
                   <Route path="flags" element={<FlagsInvestigations />} />
+                  <Route path="dashboard" element={<TripDashboard />} />
+                  <Route path="optimization" element={<div>Route Optimization</div>} />
+                  <Route path="load-planning" element={<div>Load Planning</div>} />
+                  <Route path="new" element={<div>Add New Trip</div>} />
+                  <Route path="calendar" element={<div>Trip Calendar</div>} />
+                  <Route path="driver-performance" element={<div>Driver Performance</div>} />
+                  <Route path="cost-analysis" element={<div>Trip Cost Analysis</div>} />
+                  <Route path="utilization" element={<div>Fleet Utilization</div>} />
+                  <Route path="confirmations" element={<div>Delivery Confirmations</div>} />
+                  <Route path="templates" element={<div>Trip Templates</div>} />
+                  <Route path="reports" element={<div>Trip Reports</div>} />
+                  <Route path="maps" element={<div>Maps & Tracking</div>} />
                 </Route>
                 {/* Redirect legacy routes to new nested routes */}
                 <Route path="active-trips" element={<Navigate to="/trips?tab=active" replace />} />
