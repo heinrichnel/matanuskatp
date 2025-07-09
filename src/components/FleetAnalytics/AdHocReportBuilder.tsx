@@ -311,10 +311,11 @@ const AdHocReportBuilder: React.FC = () => {
             let value = data;
             
             for (const part of parts) {
-              if (value && typeof value === 'object') {
+              if (value && typeof value === 'object' && part in value) {
                 value = value[part];
               } else {
-                value = undefined;
+                // If the path does not exist, stop and set value to null
+                value = {};
                 break;
               }
             }
@@ -474,7 +475,7 @@ const AdHocReportBuilder: React.FC = () => {
         };
         
         // Add all Y-axis fields
-        reportConfig.chartConfig.yAxis?.forEach(yFieldId => {
+        reportConfig.chartConfig?.yAxis?.forEach(yFieldId => {
           const yField = getFieldById(yFieldId);
           if (yField) {
             result[yField.name] = parseFloat(item[yField.name]) || 0;
@@ -567,9 +568,9 @@ const AdHocReportBuilder: React.FC = () => {
                 outerRadius={150}
                 fill="#8884d8"
                 dataKey="value"
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name}: ${percent ? (percent * 100).toFixed(0) : 0}%`}
               >
-                {chartData.map((entry, index) => (
+                {chartData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -841,7 +842,7 @@ const AdHocReportBuilder: React.FC = () => {
                         <option value="">Select field</option>
                         {reportConfig.fields.map(fieldId => {
                           const field = getFieldById(fieldId);
-                          return field?.dataType !== 'number' ? (
+                          return field && field.dataType !== 'number' ? (
                             <option key={field.id} value={field.id}>{field.displayName}</option>
                           ) : null;
                         })}

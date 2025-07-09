@@ -3,6 +3,7 @@ import { Card, CardContent } from '../../components/ui/Card';
 import Button from '../ui/Button';
 import SyncIndicator from '../ui/SyncIndicator';
 import { Search, Download, Filter, Network, Plus, X, ZoomIn, ZoomOut, Maximize, Users } from 'lucide-react';
+// We'll add the d3 types
 import * as d3 from 'd3';
 
 interface Node {
@@ -10,11 +11,15 @@ interface Node {
   name: string;
   type: 'client' | 'partner' | 'supplier' | 'competitor';
   size: number;
+  x?: number;
+  y?: number;
+  fx?: number | null;
+  fy?: number | null;
 }
 
 interface Link {
-  source: string;
-  target: string;
+  source: string | Node;
+  target: string | Node;
   strength: number;
   type: 'business' | 'referral' | 'potential' | 'competitive';
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, query, orderBy, getDocs, where, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, 
@@ -128,14 +128,18 @@ const ROIReportView: React.FC = () => {
           selectedReport.filters.categories?.includes(project.category));
       }
       
-      if (selectedReport.filters.startDate) {
+      if (selectedReport.filters?.startDate && selectedReport.filters.startDate.seconds) {
+        const startSeconds = selectedReport.filters.startDate.seconds;
         filtered = filtered.filter(project => 
-          project.startDate.seconds >= selectedReport.filters.startDate.seconds);
+          project.startDate.seconds >= startSeconds);
       }
       
-      if (selectedReport.filters.endDate) {
-        filtered = filtered.filter(project => 
-          !project.endDate || project.endDate.seconds <= selectedReport.filters.endDate.seconds);
+      if (selectedReport.filters?.endDate) {
+        const endDateSeconds = selectedReport.filters.endDate.seconds;
+        if (endDateSeconds !== undefined) {
+          filtered = filtered.filter(project => 
+            !project.endDate || project.endDate.seconds <= endDateSeconds);
+        }
       }
       
       if (selectedReport.filters.minROI !== undefined) {
@@ -547,12 +551,12 @@ const ROIReportView: React.FC = () => {
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {prepareCategoryData().map((entry, index) => (
+                      {prepareCategoryData().map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
