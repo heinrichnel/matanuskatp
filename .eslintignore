@@ -1,5 +1,18 @@
-# Ignore CSV and data files
+# Ignore CSV, Markdown, and ZIP exports
 *.csv
-driver_behaviors.csv
-tyrestock.md
-fleet-details.md
+*.md
+*.zip
+
+# Ignore enhancement bundle and planning files
+transportmat_integration_map.json
+initiative_component_bundle.tsx
+SchemaDashboard.tsx
+SidebarConfig.tsx
+
+# Ignore GitHub workflow files
+.github/workflows/*.tsx
+.github/workflows/*.md
+.github/workflows/initiativecomponentbundle.tsx
+.github/workflows/schemadashboard1.tsx
+.github/workflows/SidebarConfig.tsx
+.github/workflows/confirmation_receipt.md

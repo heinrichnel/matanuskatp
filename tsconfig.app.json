@@ -34,5 +34,16 @@
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "node_modules",
+    ".github",
+    ".github/workflows",
+    ".github/workflows/*.tsx",
+    ".github/workflows/*.md",
+    ".github/workflows/initiativecomponentbundle.tsx",
+    ".github/workflows/schemadashboard1.tsx",
+    ".github/workflows/SidebarConfig.tsx",
+    ".github/workflows/confirmation_receipt.md"
   ]
 }

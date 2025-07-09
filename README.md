@@ -1,23 +1,125 @@
-# Fleet Management System
+# MATANUSKA TRANSPORT Dashboard
 
-A comprehensive fleet management system built with React, TypeScript, and Firebase.
+A comprehensive fleet management and transportation operations dashboard built with React, TypeScript, and Firebase, designed for MATANUSKA TRANSPORT.
 
 ## Features
 
-- Trip Management
-- Driver Behavior Monitoring
-- Vehicle Maintenance
-- Fuel Consumption Tracking
-- Client Management
-- Workshop Management
-- Tyre Management
-- Reporting & Analytics
+- **Trip Management**: Track active and completed trips, optimize routes, and monitor delivery confirmations
+- **Driver Behavior Monitoring**: Real-time driver behavior events tracking and safety analysis
+- **Vehicle Maintenance**: Workshop management with job cards, inspections, and fault tracking
+- **Diesel Management**: Fuel consumption tracking, theft detection, and carbon footprint analysis
+- **Client Management**: Customer acquisition, retention metrics, and relationship visualization
+- **Invoice Management**: Create, track, and manage customer invoices with approval workflows
+- **Tyre Management**: Track tyre inventory, wear patterns, and performance analytics
+- **Fleet Analytics**: KPI dashboards, predictive maintenance, and ROI reporting
+- **Inventory & Purchasing**: Stock management, vendor scorecards, and indirect cost analysis
 
 ## Tech Stack
 
 - **Frontend**: React, TypeScript, Vite, TailwindCSS
 - **Backend**: Firebase (Firestore, Functions, Storage)
 - **Hosting**: Netlify (Frontend), Firebase (Backend)
+
+## System Architecture
+
+### Core Contexts
+
+#### TripContext
+
+The TripContext provides real-time synchronization with the trips collection in Firestore.
+
+**Core Responsibilities:**
+- Real-time syncing of trips via `onSnapshot()`
+- Filtering logic:
+  - `activeTrips`: Trips where status is not "completed"
+  - `completedTrips`: Trips where status is "completed"
+- Loading and error state management
+
+**Usage:**
+```tsx
+const { trips, activeTrips, completedTrips, loading, error } = useTrips();
+```
+
+#### DriverBehaviorContext
+
+The DriverBehaviorContext manages driver behavior events synchronization with Firestore.
+
+**Core Responsibilities:**
+- Real-time syncing of driverBehavior collection via `onSnapshot()`
+- Filtering logic based on:
+  - `fleetNumber`
+  - `eventDate`
+  - `eventType`
+  - `severity`
+- Loading and error state management
+
+**Usage:**
+```tsx
+const { events, loading, error } = useDriverBehavior();
+```
+
+### Component Organization
+
+The dashboard is organized into modular sections, each with its own set of components:
+
+1. **Trip Management**
+   - TripOverviewPanel
+   - OptimizedRouteSuggestion
+   - FleetUtilizationHeatmap
+   - DeliveryConfirmationPanel
+   - TripTemplateManager
+
+2. **Diesel Management**
+   - DieselDashboardComponent
+   - FuelLogs
+   - FuelCardManager
+   - FuelEfficiencyReport
+   - FuelTheftDetection
+   - CarbonFootprintCalc
+   - DriverFuelBehavior
+
+3. **Customer Management**
+   - CustomerDashboard
+   - CustomerReports
+   - RetentionMetrics
+   - ClientNetworkMap
+
+4. **Invoice Management**
+   - InvoiceDashboard
+   - InvoiceBuilder
+   - InvoiceApprovalFlow
+   - InvoiceTemplateStore
+   - TaxReportExport
+
+5. **Fleet Analytics**
+   - AnalyticsDashboard
+   - KPIOverview
+   - PredictiveModels
+   - ROIReportView
+   - AdHocReportBuilder
+
+6. **Workshop Management**
+   - FaultTracker
+   - WorkshopAnalytics
+   - FleetVisualSetup
+
+7. **Tyre Management**
+   - TyreInventoryManager
+   - TyrePerformanceReport
+
+8. **Inventory & Purchasing**
+   - InventoryDashboard
+   - StockManager
+   - PurchaseOrderTracker
+   - VendorScorecard
+   - IndirectCostBreakdown
+
+### Integration Points
+
+- **Webhooks**: External systems push data to Firestore via webhook endpoints
+- **Real-time UI**: Components consume context data and automatically update when Firestore changes
+- **Firestore Backend**: All data is stored and synchronized through Firebase Firestore
+- **UI Feedback**: Sync indicators and error handling are implemented across all components
 
 ## Prerequisites
 
@@ -141,6 +243,68 @@ For local development, you can use Firebase emulators:
    ```bash
    npm run dev
    ```
+
+## Dashboard Workflows
+
+### Trip Management Workflow
+
+1. **Create Trip**: Use TripTemplateManager or TripForm to create a new trip
+2. **Plan Route**: Use the OptimizedRouteSuggestion to get optimal routing
+3. **Monitor Active Trips**: Track trips in real-time through ActiveTrips
+4. **Confirm Delivery**: Use DeliveryConfirmationPanel to confirm trip completion
+5. **Analyze Performance**: View fleet utilization through FleetUtilizationHeatmap
+
+### Driver Behavior Workflow
+
+1. **Monitor Events**: View real-time driver behavior events through DriverBehaviorEvents
+2. **Analyze Patterns**: Identify problem areas through Driver Performance Analytics
+3. **Take Action**: Create action items and follow-up through ActionLog
+4. **Track Improvement**: Monitor driver improvement over time with trend analysis
+
+### Invoice Management Workflow
+
+1. **Create Invoice**: Use InvoiceBuilder with trip data to generate invoices
+2. **Approval Process**: Send through InvoiceApprovalFlow for multi-step approval
+3. **Payment Tracking**: Track payment status and follow up on overdue invoices
+4. **Reporting**: Generate tax reports and financial analytics with TaxReportExport
+
+### Workshop Management Workflow
+
+1. **Vehicle Inspection**: Schedule and perform vehicle inspections
+2. **Issue Identification**: Track vehicle faults with FaultTracker
+3. **Job Card Creation**: Create workshop job cards for maintenance
+4. **Parts Management**: Order and track parts through inventory system
+5. **Analytics**: Monitor workshop performance through WorkshopAnalytics
+
+## Authentication & Authorization
+
+The system uses Firebase Authentication with role-based access control:
+
+- **Admin**: Full access to all dashboard features
+- **Operations Manager**: Access to trip management and analytics
+- **Fleet Manager**: Access to vehicle maintenance and driver management
+- **Finance**: Access to invoicing and financial reporting
+- **Workshop Manager**: Access to workshop components only
+- **Driver**: Limited access to their own trips and performance data
+
+## System Requirements
+
+- **Browser**: Chrome 80+, Firefox 72+, Safari 13+, Edge 80+
+- **Screen Resolution**: Minimum 1280x720, recommended 1920x1080
+- **Internet Connection**: Minimum 2 Mbps for real-time data syncing
+- **Devices**: Responsive design works on desktop, tablet, and mobile devices
+
+## Future Enhancements
+
+1. **Mobile App**: Native mobile application for drivers
+2. **AI Integration**: Predictive analytics for maintenance and fuel consumption
+3. **IoT Integration**: Direct integration with vehicle telematics systems
+4. **Advanced Reporting**: Customizable report builder with export capabilities
+5. **Client Portal**: External portal for customers to track their shipments
+
+## Support & Documentation
+
+For technical support and detailed documentation, please contact the system administrator or refer to the internal documentation portal.
 
 ## License
 
