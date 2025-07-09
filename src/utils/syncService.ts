@@ -263,6 +263,12 @@ export class SyncService {
     // Clear any existing global trip listeners
     this.unsubscribeFromTrips();
 
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to trips - user not authenticated');
+      return;
+    }
+
     const tripsQuery = query(collection(db, 'trips'), orderBy('startDate', 'desc'));
 
     const unsubscribe = onSnapshot(
@@ -405,6 +411,12 @@ export class SyncService {
     if (this.globalUnsubscribes.has('allDriverBehavior')) {
       this.globalUnsubscribes.get('allDriverBehavior')?.();
     }
+    
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to driver behavior events - user not authenticated');
+      return;
+    }
 
     const eventsQuery = query(
       collection(db, 'driverBehaviorEvents'),
@@ -466,6 +478,12 @@ export class SyncService {
       this.globalUnsubscribes.get('allDiesel')?.();
     }
 
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to diesel records - user not authenticated');
+      return;
+    }
+
     const recordsQuery = query(
       collection(db, 'diesel'),
       orderBy('date', 'desc')
@@ -521,6 +539,12 @@ export class SyncService {
 
   // Subscribe to audit logs
   public subscribeToAuditLogs(): void {
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to audit logs - user not authenticated');
+      return;
+    }
+
     const unsubscribe = onSnapshot(
       query(auditLogsCollection, orderBy('timestamp', 'desc')),
       (snapshot) => {
@@ -735,6 +759,12 @@ export class SyncService {
       this.globalUnsubscribes.get('allMissedLoads')?.();
     }
 
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to missed loads - user not authenticated');
+      return;
+    }
+
     const missedLoadsQuery = query(
       collection(db, 'missedLoads'),
       orderBy('date', 'desc')
@@ -793,6 +823,12 @@ export class SyncService {
     // Clear any existing global action items listeners
     if (this.globalUnsubscribes.has('allActionItems')) {
       this.globalUnsubscribes.get('allActionItems')?.();
+    }
+
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to action items - user not authenticated');
+      return;
     }
 
     const actionItemsQuery = query(
@@ -855,6 +891,12 @@ export class SyncService {
       this.globalUnsubscribes.get('allClients')?.();
     }
 
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to clients - user not authenticated');
+      return;
+    }
+
     const clientsQuery = query(
       collection(db, 'clients'),
       orderBy('name', 'asc')
@@ -913,6 +955,12 @@ export class SyncService {
     // Clear any existing global CAR reports listeners
     if (this.globalUnsubscribes.has('allCARReports')) {
       this.globalUnsubscribes.get('allCARReports')?.();
+    }
+
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to CAR reports - user not authenticated');
+      return;
     }
 
     const carReportsQuery = query(
@@ -987,6 +1035,12 @@ export class SyncService {
     // Clear any existing global enhanced job cards listeners
     if (this.globalUnsubscribes.has('allEnhancedJobCards')) {
       this.globalUnsubscribes.get('allEnhancedJobCards')?.();
+    }
+
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to enhanced job cards - user not authenticated');
+      return;
     }
 
     const enhancedJobCardsQuery = query(
@@ -1217,11 +1271,44 @@ export class SyncService {
     return this.connectionStatus;
   }
   
+  // Check if the user is authenticated
+  private isAuthenticated(): boolean {
+    // This is a simplified check that could be expanded based on your auth implementation
+    // For demo purposes, we'll just check if we're in development mode
+    if (import.meta.env.DEV) {
+      // In development mode, always return true to allow subscriptions
+      return true;
+    }
+
+    // In production, we should check for actual authentication
+    // This is where you'd add your Firebase Auth check
+    try {
+      // Example (assuming there's a global auth object or function):
+      // return firebase.auth().currentUser != null;
+      
+      // For now, we'll just return true as a fallback
+      return true;
+      
+      // In a real implementation, you'd want to check if the user is signed in:
+      // const user = getAuth().currentUser;
+      // return !!user;
+    } catch (error) {
+      console.error("Error checking authentication status:", error);
+      return false;
+    }
+  }
+
   // Subscribe to all workshop inventory items (global listener)
   public subscribeToAllWorkshopInventory(): void {
     // Clear any existing global workshop inventory listeners
     if (this.globalUnsubscribes.has('allWorkshopInventory')) {
       this.globalUnsubscribes.get('allWorkshopInventory')?.();
+    }
+
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to workshop inventory - user not authenticated');
+      return;
     }
 
     const inventoryQuery = query(
@@ -1388,6 +1475,12 @@ export class SyncService {
       this.globalUnsubscribes.get('allJobCards')?.();
     }
 
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to job cards - user not authenticated');
+      return;
+    }
+
     const jobCardsQuery = query(
       jobCardsCollection,
       orderBy('createdDate', 'desc')
@@ -1550,6 +1643,12 @@ export class SyncService {
     // Clear any existing global tyres listeners
     if (this.globalUnsubscribes.has('allTyres')) {
       this.globalUnsubscribes.get('allTyres')?.();
+    }
+
+    // Check if user is authenticated before subscribing
+    if (!this.isAuthenticated()) {
+      console.warn('⚠️ Cannot subscribe to tyres - user not authenticated');
+      return;
     }
 
     const tyresQuery = query(

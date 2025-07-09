@@ -40,39 +40,13 @@ import WorkshopPage from "./pages/WorkshopPage";
 import RoutePlanningPage from "./pages/RoutePlanningPage";
 
 // Placeholder components for new routes
-const Notifications = () => <div>Notifications Page</div>;
-const Settings = () => <div>Settings Page</div>;
+import NotificationsPage from "./pages/NotificationsPage";
+import SettingsPage from "./pages/SettingsPage";
 
 // Workshop placeholders
-const QRGenerator = () => (
-  <div className="bg-white p-6 rounded-lg shadow">
-    <h2 className="text-2xl font-bold mb-4">QR Code Generator</h2>
-    <p className="text-gray-600">Generate QR codes for fleet vehicles and equipment.</p>
-    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-      <p className="text-blue-700">This module is under development and will be available in the next update.</p>
-    </div>
-  </div>
-);
-
-const WorkshopAnalytics = () => (
-  <div className="bg-white p-6 rounded-lg shadow">
-    <h2 className="text-2xl font-bold mb-4">Workshop Analytics Dashboard</h2>
-    <p className="text-gray-600">View comprehensive analytics for workshop operations, costs, and efficiency.</p>
-    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-      <p className="text-blue-700">This module is under development and will be available in the next update.</p>
-    </div>
-  </div>
-);
-
-const PartsOrdering = () => (
-  <div className="bg-white p-6 rounded-lg shadow">
-    <h2 className="text-2xl font-bold mb-4">Parts Ordering</h2>
-    <p className="text-gray-600">Manage parts ordering, suppliers, and purchase orders.</p>
-    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-      <p className="text-blue-700">This module is under development and will be available in the next update.</p>
-    </div>
-  </div>
-);
+import QRGenerator from "./components/workshop/QRGenerator";
+import WorkshopAnalytics from "./components/workshop/WorkshopAnalytics";
+import PartsOrdering from "./components/workshop/PartsOrdering";
   
 // Main App component with Router implementation
 const App: React.FC = () => {
@@ -210,8 +184,8 @@ const App: React.FC = () => {
                 <Route path="customer-retention" element={<CustomerRetentionDashboard />} />
                 
                 {/* System Section */}
-                <Route path="notifications" element={<Notifications />} />
-                <Route path="settings" element={<Settings />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
                 {/* Legacy maps route should redirect to the new tabbed view */}
                 <Route path="maps" element={<Navigate to="/fleet" replace />} />
                 
