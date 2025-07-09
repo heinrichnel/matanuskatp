@@ -137,7 +137,7 @@ const QRGenerator: React.FC = () => {
                   <Select
                     label="Fleet Number *"
                     value={fleetNumber}
-                    onChange={setFleetNumber}
+                    onChange={e => setFleetNumber(e.target.value)}
                     options={[
                       { label: 'Select fleet number...', value: '' },
                       ...fleetNumbers.map(fleet => ({ label: fleet, value: fleet }))
@@ -150,7 +150,7 @@ const QRGenerator: React.FC = () => {
                     <Select
                       label="Fleet Number *"
                       value={fleetNumber}
-                      onChange={setFleetNumber}
+                      onChange={e => setFleetNumber(e.target.value)}
                       options={[
                         { label: 'Select fleet number...', value: '' },
                         ...fleetNumbers.map(fleet => ({ label: fleet, value: fleet }))
@@ -160,7 +160,7 @@ const QRGenerator: React.FC = () => {
                     <Select
                       label="Tyre Position *"
                       value={position}
-                      onChange={setPosition}
+                      onChange={e => setPosition(e.target.value)}
                       options={[
                         { label: 'Select position...', value: '' },
                         ...positions.map(pos => ({ label: pos, value: pos }))
@@ -173,7 +173,7 @@ const QRGenerator: React.FC = () => {
                   <Input
                     label="Part Number *"
                     value={partNumber}
-                    onChange={setPartNumber}
+                    onChange={e => setPartNumber(e.target.value)}
                     placeholder="Enter part number (e.g. BP-1234)"
                   />
                 )}

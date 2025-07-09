@@ -69,9 +69,9 @@ const ClientList: React.FC<ClientListProps> = ({
     const strB = String(valueB).toLowerCase();
     
     if (sortDirection === 'asc') {
-      return strA.localeCompan(strB);
+      return strA.localeCompare(strB);
     } else {
-      return strB.localeCompan(strA);
+      return strB.localeCompare(strA);
     }
   });
   

@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AppProvider } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import { TyreStoresProvider } from "./context/TyreStoresContext";
+import { TripProvider } from "./context/TripContext";
+import { DriverBehaviorProvider } from "./context/DriverBehaviorContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Layout from './components/layout/Layout';
 import TripForm from "./components/trips/TripForm";
@@ -31,14 +33,52 @@ import CurrencyFleetReport from "./components/reports/CurrencyFleetReport";
 import TripDashboard from "./components/trips/TripDashboard";
 import InvoiceAgingDashboard from "./components/invoicing/InvoiceAgingDashboard";
 import CustomerRetentionDashboard from "./components/performance/CustomerRetentionDashboard";
-import MissedLoadsTracker from "./components/trips/MissedLoadsTracker";
-import DieselTabbedDashboard from "./components/diesel/DieselTabbedDashboard";
-import DriverBehaviorPage from "./pages/DriverBehaviorPage";
 import ActionLog from "./components/actionlog/ActionLog";
 import TripManagementPage from "./pages/TripManagementPage";
-import FleetManagementPage from "./pages/FleetManagementPage";
 import WorkshopPage from "./pages/WorkshopPage";
 import RoutePlanningPage from "./pages/RoutePlanningPage";
+import InvoiceManagementPage from "./pages/InvoiceManagementPage";
+import DieselManagementPage from "./pages/DieselManagementPage";
+import DriverManagementPage from "./pages/DriverManagementPage";
+import ComplianceManagementPage from "./pages/ComplianceManagementPage";
+
+// Invoice Management Components
+import InvoiceDashboard from "./components/InvoiceManagement/InvoiceDashboard";
+import InvoiceBuilder from "./components/InvoiceManagement/InvoiceBuilder";
+import InvoiceApprovalFlow from "./components/InvoiceManagement/InvoiceApprovalFlow";
+import TaxReportExport from "./components/InvoiceManagement/TaxReportExport";
+import CreateInvoicePage from "./pages/invoices/CreateInvoice";
+import PendingInvoicesPage from "./pages/invoices/PendingInvoices";
+import PaidInvoicesPage from "./pages/invoices/PaidInvoices";
+import InvoiceTemplatesPage from "./pages/invoices/InvoiceTemplates";
+import DriverBehaviorEvents from "./components/DriverBehavior/DriverBehaviorEvents";
+
+// Diesel Management Components
+import DieselDashboardComponent from "./components/DieselManagement/DieselDashboardComponent";
+import FuelLogs from "./components/DieselManagement/FuelLogs";
+import FuelCardManager from "./components/DieselManagement/FuelCardManager";
+import FuelEfficiencyReport from "./components/DieselManagement/FuelEfficiencyReport";
+import FuelTheftDetection from "./components/DieselManagement/FuelTheftDetection";
+import CarbonFootprintCalc from "./components/DieselManagement/CarbonFootprintCalc";
+import DriverFuelBehavior from "./components/DieselManagement/DriverFuelBehavior";
+import AddFuelEntryPage from "./pages/diesel/AddFuelEntry";
+
+// Driver Management Components
+import DriverDashboard from "./components/DriverManagement/DriverDashboard";
+import AddNewDriver from "./pages/drivers/AddNewDriver";
+import DriverProfiles from "./pages/drivers/DriverProfiles";
+
+// Customer Management Components
+import RetentionMetrics from "./components/CustomerManagement/RetentionMetrics";
+import ClientNetworkMap from "./components/CustomerManagement/ClientNetworkMap";
+
+// Compliance & Safety Components
+import ComplianceDashboard from "./components/ComplianceSafety/ComplianceDashboard";
+import IncidentManagement from "./pages/compliance/IncidentManagement";
+
+// Fleet Analytics Components
+import FleetAnalyticsPage from "./pages/FleetAnalyticsPage";
+import AnalyticsDashboard from "./components/FleetAnalytics/AnalyticsDashboard";
 
 // Placeholder components for new routes
 import NotificationsPage from "./pages/NotificationsPage";
@@ -48,14 +88,30 @@ import SettingsPage from "./pages/SettingsPage";
 import QRGenerator from "./components/workshop/QRGenerator";
 import WorkshopAnalytics from "./components/workshop/WorkshopAnalytics";
 import PartsOrdering from "./components/workshop/PartsOrdering";
+
+// Inventory Components
+import VendorScorecard from "./components/Inventory/VendorScorecard";
+import IndirectCostBreakdown from "./components/Inventory/IndirectCostBreakdown";
+import InventoryDashboard from "./components/Inventory/InventoryDashboard";
+import StockManager from "./components/Inventory/StockManager";
+import PurchaseOrderTracker from "./components/Inventory/PurchaseOrderTracker";
   
 // Main App component with Router implementation
 const App: React.FC = () => {
-  const [editingTrip, setEditingTrip] = useState<Trip | undefined>(undefined);
-  const [showTripForm, setShowTripForm] = useState<boolean>(false);
   const [connectionError, setConnectionError] = useState<Error | null>(
     getConnectionStatus().status === 'error' ? getConnectionStatus().error : null
   );
+  // Define state handlers required by Layout component
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
+  const [showTripForm, setShowTripForm] = useState(false);
+  
+  const handleSetEditingTrip = (trip: Trip | undefined) => {
+    setEditingTrip(trip ? trip : null);
+  };
+  
+  const handleShowTripForm = (show: boolean) => {
+    setShowTripForm(show);
+  };
 
   // Listen for connection status changes
   useEffect(() => {
@@ -77,18 +133,20 @@ const App: React.FC = () => {
       <AppProvider>
         <SyncProvider>
           <TyreStoresProvider>
-           {connectionError && (
-             <div className="fixed top-0 left-0 right-0 z-50 p-4">
-               <FirestoreConnectionError error={connectionError} />
-             </div>
-           )}
-           <Router>
-             <Routes>
+            <TripProvider>
+              <DriverBehaviorProvider>
+                {connectionError && (
+                  <div className="fixed top-0 left-0 right-0 z-50 p-4">
+                    <FirestoreConnectionError error={connectionError} />
+                  </div>
+                )}
+                <Router>
+                  <Routes>
               <Route 
                 element={
                   <Layout 
-                    setEditingTrip={setEditingTrip}
-                    setShowTripForm={setShowTripForm}
+                    setEditingTrip={handleSetEditingTrip}
+                    setShowTripForm={handleShowTripForm}
                   />
                 }
               >
@@ -118,28 +176,100 @@ const App: React.FC = () => {
                 <Route path="completed-trips" element={<Navigate to="/trips?tab=completed" replace />} />
                 <Route path="flags" element={<Navigate to="/trips?tab=flags" replace />} />
                 
-                {/* New Route Planning Routes */}
+                {/* Route Planning Routes */}
                 <Route path="route-planning" element={<RoutePlanningPage />} />
                 <Route path="route-planning/:tripId" element={<RoutePlanningPage />} />
                 
+                {/* Invoice Management Section */}
+                <Route path="invoices" element={<InvoiceManagementPage />}>
+                  <Route index element={<InvoiceDashboard />} />
+                  <Route path="new" element={<InvoiceBuilder />} />
+                  <Route path="pending" element={<PendingInvoicesPage />} />
+                  <Route path="paid" element={<PaidInvoicesPage />} />
+                  <Route path="overdue" element={<div>Overdue Invoices</div>} />
+                  <Route path="approval" element={<InvoiceApprovalFlow />} />
+                  <Route path="reminders" element={<div>Payment Reminders</div>} />
+                  <Route path="credit-notes" element={<div>Credit Notes</div>} />
+                  <Route path="templates" element={<InvoiceTemplatesPage />} />
+                  <Route path="payments" element={<div>Payment Tracking</div>} />
+                  <Route path="tax-reports" element={<TaxReportExport />} />
+                  <Route path="analytics" element={<div>Invoice Analytics</div>} />
+                </Route>
+                
+                {/* Diesel Management Section */}
+                <Route path="diesel" element={<DieselManagementPage />}>
+                  <Route index element={<DieselDashboardComponent />} />
+                  <Route path="logs" element={<FuelLogs />} />
+                  <Route path="new" element={<AddFuelEntryPage />} />
+                  <Route path="fuel-cards" element={<FuelCardManager />} />
+                  <Route path="analytics" element={<div>Fuel Analytics</div>} />
+                  <Route path="stations" element={<div>Fuel Stations</div>} />
+                  <Route path="costs" element={<div>Cost Analysis</div>} />
+                  <Route path="efficiency" element={<FuelEfficiencyReport />} />
+                  <Route path="theft-detection" element={<FuelTheftDetection />} />
+                  <Route path="carbon-tracking" element={<CarbonFootprintCalc />} />
+                  <Route path="budget" element={<div>Budget Planning</div>} />
+                  <Route path="driver-behavior" element={<DriverFuelBehavior />} />
+                </Route>
+                
                 {/* Fleet Management Section */}
-                <Route path="fleet" element={<FleetManagementPage />} />
-                <Route path="driver-behavior" element={<DriverBehaviorPage />} />
-                <Route path="diesel-dashboard" element={<DieselTabbedDashboard />} />
-                <Route
-                  path="missed-loads"
-                  element={
-                    <MissedLoadsTracker
-                      missedLoads={[]} // Replace with actual missed loads data from context or state
-                      onAddMissedLoad={() => {}} // Replace with actual handler
-                      onUpdateMissedLoad={() => {}} // Replace with actual handler
-                    />
-                  }
-                />
+                <Route path="fleet" element={<div>Fleet Management</div>} />
+                <Route path="driver-behavior" element={<div>Driver Behavior</div>} />
+                <Route path="diesel-dashboard" element={<div>Legacy Diesel Dashboard</div>} />
+                <Route path="missed-loads" element={<div>Missed Loads Tracker</div>} />
                 {/* Map view is now integrated into FleetManagementPage */}
                 
-                {/* Client Management Section */}
+                {/* Customer Management Section */}
                 <Route path="clients/*" element={<ClientManagementPage />} />
+                <Route path="customers/retention" element={<RetentionMetrics />} />
+                <Route path="clients/network" element={<ClientNetworkMap />} />
+                
+                {/* Driver Management Section */}
+                <Route path="drivers" element={<DriverManagementPage />}>
+                  <Route index element={<DriverDashboard />} />
+                  <Route path="new" element={<AddNewDriver />} />
+                  <Route path="profiles" element={<DriverProfiles />} />
+                  <Route path="profiles/:id" element={<div>Driver Details</div>} />
+                  <Route path="profiles/:id/edit" element={<div>Edit Driver</div>} />
+                  <Route path="licenses" element={<div>License Management</div>} />
+                  <Route path="training" element={<div>Training Records</div>} />
+                  <Route path="performance" element={<div>Performance Analytics</div>} />
+                  <Route path="scheduling" element={<div>Driver Scheduling</div>} />
+                  <Route path="hours" element={<div>Hours of Service</div>} />
+                  <Route path="violations" element={<div>Driver Violations</div>} />
+                  <Route path="rewards" element={<div>Driver Rewards</div>} />
+                  <Route path="behavior" element={<DriverBehaviorEvents />} />
+                  <Route path="safety-scores" element={<div>Safety Scores</div>} />
+                </Route>
+                
+                {/* Compliance & Safety Section */}
+                <Route path="compliance" element={<ComplianceManagementPage />}>
+                  <Route index element={<ComplianceDashboard />} />
+                  <Route path="dot" element={<div>DOT Compliance</div>} />
+                  <Route path="safety-inspections" element={<div>Safety Inspections</div>} />
+                  <Route path="incidents" element={<IncidentManagement />} />
+                  <Route path="incidents/new" element={<div>Report New Incident</div>} />
+                  <Route path="incidents/:id" element={<div>Incident Details</div>} />
+                  <Route path="incidents/:id/edit" element={<div>Edit Incident</div>} />
+                  <Route path="training" element={<div>Safety Training</div>} />
+                  <Route path="audits" element={<div>Audit Management</div>} />
+                  <Route path="violations" element={<div>Violation Tracking</div>} />
+                  <Route path="insurance" element={<div>Insurance Management</div>} />
+                </Route>
+                
+                {/* Fleet Analytics Section */}
+                <Route path="analytics" element={<FleetAnalyticsPage />}>
+                  <Route index element={<AnalyticsDashboard />} />
+                  <Route path="kpi" element={<div>KPI Overview</div>} />
+                  <Route path="predictive" element={<div>Predictive Analytics</div>} />
+                  <Route path="costs" element={<div>Cost Analysis</div>} />
+                  <Route path="roi" element={<div>ROI Reports</div>} />
+                  <Route path="benchmarks" element={<div>Performance Benchmarks</div>} />
+                  <Route path="custom-reports" element={<div>Custom Reports</div>} />
+                  <Route path="custom-reports/new" element={<div>Create Custom Report</div>} />
+                  <Route path="insights" element={<div>Analytics Insights</div>} />
+                  <Route path="vehicle-performance" element={<div>Vehicle Performance</div>} />
+                </Route>
                 
                 
                 {/* Workshop Section */}
@@ -180,9 +310,11 @@ const App: React.FC = () => {
                   <Route path="stock-alerts" element={<div>Stock Alerts</div>} />
                   <Route path="parts-ordering" element={<PartsOrdering />} />
                   <Route path="work-orders" element={<div>Work Orders</div>} />
-                  <Route path="purchase-orders" element={<div>Purchase Orders</div>} />
-                  <Route path="vendors" element={<div>Vendor Management</div>} />
-                  <Route path="inventory" element={<div>General Inventory</div>} />
+                  <Route path="purchase-orders" element={<PurchaseOrderTracker />} />
+                  <Route path="vendors" element={<VendorScorecard />} />
+                  <Route path="inventory" element={<InventoryDashboard />} />
+                  <Route path="stock" element={<StockManager />} />
+                  <Route path="indirect-costs" element={<IndirectCostBreakdown />} />
                   
                   {/* Analytics & Reports */}
                   <Route path="analytics" element={<WorkshopAnalytics />} />
@@ -206,7 +338,9 @@ const App: React.FC = () => {
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Routes>
-           </Router>
+                </Router>
+              </DriverBehaviorProvider>
+            </TripProvider>
           </TyreStoresProvider>
         </SyncProvider>
       </AppProvider>
