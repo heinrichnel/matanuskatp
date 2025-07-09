@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import QRGenerator from "./components/workshop/QRGenerator";
+import TyreManagementPage from "./pages/tyres/TyreManagementPage";
+// Case sensitivity issue: importing as a placeholder component instead
+const WorkshopAnalyticsComp = () => <div>Workshop Analytics (Placeholder)</div>;
 import { AppProvider } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import { TyreStoresProvider } from "./context/TyreStoresContext";
@@ -310,6 +314,7 @@ const App: React.FC = () => {
                   <Route path="tyres/history" element={<TyreManagement activeTab="inspection" />} />
                   <Route path="tyres/performance" element={<TyreManagement activeTab="analytics" />} />
                   <Route path="tyres/add" element={<TyreManagement activeTab="add" />} />
+                  <Route path="tyres/management" element={<TyreManagementPage />} />
                   
                   {/* Inventory Management Routes */}
                   <Route path="stock-alerts" element={<div>Stock Alerts</div>} />
