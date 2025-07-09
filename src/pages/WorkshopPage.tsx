@@ -1,7 +1,7 @@
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 import { 
-  BarChart3, FileText, Wrench, Truck, 
+  BarChart3, FileText, Truck, 
   Clipboard, AlertTriangle, HardDrive,
   Package, ShoppingBag, QrCode, FileBarChart2 
 } from 'lucide-react';
