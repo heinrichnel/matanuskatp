@@ -3,7 +3,7 @@ import { Card, CardHeader, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import SyncIndicator from '../ui/SyncIndicator';
 import { useAppContext } from '../../context/AppContext';
-import { collection, onSnapshot, query, where, orderBy, addDoc, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import * as XLSX from 'xlsx';
 
