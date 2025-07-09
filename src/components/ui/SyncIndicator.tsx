@@ -2,11 +2,9 @@ import React from 'react';
 import { useSyncContext } from '../../context/SyncContext';
 import { RefreshCw } from 'lucide-react';
 import ConnectionStatusIndicator from './ConnectionStatusIndicator';
-import ConnectionStatusIndicator from './ConnectionStatusIndicator';
 
 interface SyncIndicatorProps {
   className?: string;
-  showText?: boolean;
   showText?: boolean;
 }
 
