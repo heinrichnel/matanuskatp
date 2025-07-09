@@ -44,5 +44,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "Firebase Cloud Function to fetch Wialon tracking data securely",
+  "type": "module"
 }

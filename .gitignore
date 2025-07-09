@@ -59,3 +59,8 @@ SidebarConfig.tsx
 firebaseEmulators.ts
 webhookSenders.ts
 schemadashboard1.tsx
+firebaserc
+firebase.json
+.qodo
+.bolt
+firebase-debug.log

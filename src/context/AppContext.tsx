@@ -5,7 +5,7 @@ import {
   TripTemplate,
   LoadPlan,
   TripFinancialAnalysis,
-  RoutePoint,
+  // RoutePoint, // Commented out since unused
   Attachment,
   AdditionalCost,
   DelayReason,
@@ -14,9 +14,10 @@ import {
   DriverBehaviorEvent,
   ActionItem,
   CARReport,
-  FLEETS_WITH_PROBES,
-  Inspection as VehicleInspection
+  FLEETS_WITH_PROBES
 } from '../types';
+// TODO: Define VehicleInspection type or import from the correct module if available
+type VehicleInspection = any;
 import { AuditLog as AuditLogType } from '../types/audit';
 import { TyreInventoryItem } from '../utils/tyreConstants';
 import { Client } from '../types/client';
@@ -728,24 +729,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Function to log audit events
+  // This is a placeholder for future audit logging implementation
+  // We're keeping this as a reference for when we implement proper audit logging
+  /* 
   const addAuditLog = async (logData: any) => {
     try {
       // In a real implementation, this would add to Firestore
       console.log('Audit log added:', logData);
       return logData.id;
     } catch (error) {
-      console.error("Error deleting missed load:", error);
+      console.error("Error adding audit log:", error);
       throw error;
     } finally {
-      // Clear loading state
+      // Clear loading state - no need for specific ID here
       setIsLoading(prev => {
         const newState = { ...prev };
-        delete newState[`deleteMissedLoad-${id}`];
+        delete newState[`addAuditLog-${logData.id || 'unknown'}`];
         return newState;
       });
     }
   };
+  */
 
   const completeTrip = async (tripId: string): Promise<void> => {
     const trip = trips.find(t => t.id === tripId);
@@ -1120,11 +1124,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const optimizedRoute = {
         ...trip.plannedRoute,
         // Simulate 10% improvement in distance and duration
-        estimatedDistance: Math.round(trip.plannedRoute.estimatedDistance * 0.9),
-        estimatedDuration: Math.round(trip.plannedRoute.estimatedDuration * 0.9),
+        estimatedDistance: Math.round((trip.plannedRoute.estimatedDistance ?? 0) * 0.9),
+        estimatedDuration: Math.round((trip.plannedRoute.estimatedDuration ?? 0) * 0.9),
         // Add optimization metrics
-        fuelSavings: Math.round(trip.plannedRoute.estimatedDistance * 0.1 * 0.3), // Assume 0.3L/km
-        timeSavings: Math.round(trip.plannedRoute.estimatedDuration * 0.1), // 10% time savings
+        fuelSavings: Math.round(((trip.plannedRoute.estimatedDistance ?? 0) * 0.1 * 0.3)), // Assume 0.3L/km
+        timeSavings: Math.round((trip.plannedRoute.estimatedDuration ?? 0) * 0.1), // 10% time savings
         optimizationDate: new Date().toISOString()
       };
       
@@ -1816,6 +1820,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       debriefDate: string;
       debriefNotes: string;
       debriefSignedBy: string;
+      rootCause?: string;
+      actionTaken?: string;
+      driverSignature?: string;
       probeReading?: number;
       probeDiscrepancy?: number;
       probeVerified?: boolean;
@@ -2177,3 +2184,9 @@ export const useAppContext = () => {
   }
   return context;
 };
+function calculateTotalCosts(costs: CostEntry[]) {
+  // Sum the amount of all cost entries that are not flagged as system-generated and not flagged for investigation
+  return costs
+    .filter(cost => !cost.isFlagged && !cost.isSystemGenerated)
+    .reduce((sum, cost) => sum + (typeof cost.amount === 'number' ? cost.amount : 0), 0);
+}

@@ -49,7 +49,7 @@ const CostAnalysisPage: React.FC = () => {
         <div className="flex items-center space-x-3">
           <SyncIndicator />
           <Select
-            id="timeframe"
+            label="Timeframe"
             value={timeframe}
             onChange={(e) => setTimeframe(e.target.value)}
             options={[
@@ -180,7 +180,7 @@ const CostAnalysisPage: React.FC = () => {
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold">Recent Trip Costs</h2>
             <Select
-              id="filterType"
+              label="Filter"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               options={[

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
-         PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+// Firestore imports available for future implementation
+// import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+// import { db } from '../../firebase';
+import { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Package, AlertTriangle, TrendingUp, TrendingDown, Search, Filter, RefreshCw, Clock, Truck, ShoppingBag } from 'lucide-react';
 
 interface InventorySummary {
@@ -330,9 +330,9 @@ const InventoryDashboard: React.FC = () => {
                   fill="#8884d8"
                   dataKey="value"
                   nameKey="category"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name} ${percent ? (percent * 100).toFixed(0) : 0}%`}
                 >
-                  {dashboardData.categoryBreakdown.map((entry, index) => (
+                  {dashboardData.categoryBreakdown.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

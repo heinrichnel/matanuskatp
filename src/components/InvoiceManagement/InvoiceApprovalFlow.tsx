@@ -198,7 +198,7 @@ const InvoiceApprovalFlow: React.FC = () => {
           if (index === invoice.currentStep - 1) {
             return {
               ...step,
-              status: 'approved',
+              status: 'approved' as 'approved',
               completedDate: new Date().toISOString().split('T')[0],
               comments: approvalComment || 'Approved.'
             };
@@ -213,7 +213,7 @@ const InvoiceApprovalFlow: React.FC = () => {
           ...invoice,
           approvalFlow: updatedApprovalFlow,
           currentStep: isLastStep ? invoice.currentStep : invoice.currentStep + 1,
-          status: isLastStep ? 'approved' : 'in_review'
+          status: (isLastStep ? 'approved' : 'in_review') as 'approved' | 'in_review'
         };
       }
       return invoice;
@@ -236,7 +236,7 @@ const InvoiceApprovalFlow: React.FC = () => {
           if (index === invoice.currentStep - 1) {
             return {
               ...step,
-              status: 'rejected',
+              status: 'rejected' as 'rejected',
               completedDate: new Date().toISOString().split('T')[0],
               comments: rejectionReason
             };
@@ -247,7 +247,7 @@ const InvoiceApprovalFlow: React.FC = () => {
         return {
           ...invoice,
           approvalFlow: updatedApprovalFlow,
-          status: 'rejected'
+          status: 'rejected' as 'rejected'
         };
       }
       return invoice;
