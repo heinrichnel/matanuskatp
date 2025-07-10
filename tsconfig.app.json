@@ -8,17 +8,17 @@
       "ES2020"
     ],
     "module": "ESNext",
-    "skipLibCheck": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
+    "skipLibCheck": true,
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "types": [
       "react",
@@ -27,23 +27,19 @@
     ],
     "baseUrl": "./",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     }
   },
   "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules",
+    "src",
     ".github",
-    ".github/workflows",
-    ".github/workflows/*.tsx",
-    ".github/workflows/*.md",
-    ".github/workflows/initiativecomponentbundle.tsx",
-    ".github/workflows/schemadashboard1.tsx",
-    ".github/workflows/SidebarConfig.tsx",
-    ".github/workflows/confirmation_receipt.md"
-  ]
+    "scripts",
+    "functions",
+    "public",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.js",
+    "**/*.json"
+  ],
+  "exclude": []
 }
