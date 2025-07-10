@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
 import TyreDashboard, { TyreEntry } from '../../components/workshop/TyreDashboard';
 import Button from '../../components/ui/Button';
 import Card, { CardContent } from '../../components/ui/Card';
@@ -116,6 +114,8 @@ const TyreManagementPage: React.FC = () => {
   const [tyres, setTyres] = useState<TyreEntry[]>(mockTyreData);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'analytics'>('inventory');
+  
+  // Loading state is now used directly in the JSX
 
   useEffect(() => {
     // In a real implementation, we would fetch from Firestore
@@ -231,10 +231,7 @@ const TyreManagementPage: React.FC = () => {
           headers.forEach((header, index) => {
             let value = values[index]?.trim();
             
-            // Handle numeric fields
-            if (header === 'Miles Run' || header === 'Tread Depth' || header === 'Cost/KM') {
-              value = parseFloat(value) || 0;
-            }
+            // No pre-processing needed here as we handle types in the field assignment below
             
             // Map header to field name
             const fieldMapping: Record<string, keyof TyreEntry> = {
@@ -257,7 +254,16 @@ const TyreManagementPage: React.FC = () => {
             
             const field = fieldMapping[header];
             if (field) {
-              tyre[field] = value;
+              // Handle specific field types
+              if (header === 'Miles Run' || header === 'Tread Depth' || header === 'Cost/KM') {
+                const numericValue = parseFloat(value) || 0;
+                tyre[field] = numericValue;
+              } else if (field === 'axlePosition') {
+                // Ensure axlePosition is a string when assigning
+                tyre[field] = String(value);
+              } else {
+                tyre[field] = value;
+              }
             }
           });
           
@@ -341,6 +347,10 @@ const TyreManagementPage: React.FC = () => {
           onAdd={handleAddTyre}
           onImport={handleImport}
         />
+      ) : isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>

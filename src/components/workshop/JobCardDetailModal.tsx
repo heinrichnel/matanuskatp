@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { format } from 'date-fns';
 import Button from "../ui/Button";
 import Card, { CardContent } from "../ui/Card";
-import { Tab, TabList, TabPanel, Tabs } from "../ui/Tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/Tabs";
 import { Printer, Download, Edit2, Check, X, FileText } from "lucide-react";
 import { RCAModal, RCAEntry } from "./RCAModal";
 
@@ -124,7 +124,7 @@ export const JobCardDetailModal: React.FC<Props> = ({
 }) => {
   const [editMode, setEditMode] = useState(false);
   const [data, setData] = useState(jobCard);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState("general");
   const [rcaModalOpen, setRcaModalOpen] = useState(false);
 
   const handleEdit = () => setEditMode(true);
@@ -194,17 +194,6 @@ export const JobCardDetailModal: React.FC<Props> = ({
       addedBy: userName
     };
     setData(d => ({ ...d, labor: [...d.labor, newLabor] }));
-  };
-
-  const handleAddRemark = (remark: string) => {
-    if (!remark.trim()) return;
-    const newRemark: RemarkItem = {
-      id: `remark-${Date.now()}`,
-      remark,
-      date: new Date().toISOString(),
-      by: userName
-    };
-    setData(d => ({ ...d, remarks: [...d.remarks, newRemark] }));
   };
 
   const handleSave = () => {
@@ -283,24 +272,29 @@ export const JobCardDetailModal: React.FC<Props> = ({
             <span className="ml-2 text-gray-400">ODO: {data.odometer} km</span>
           </div>
           <div className="flex space-x-2">
-            <Button onClick={() => onPrint(data.id)} size="sm" variant="outline" leftIcon={<Printer size={16} />}>
+            <Button onClick={() => onPrint(data.id)} size="sm" variant="outline">
+              <Printer size={16} className="mr-2" />
               Print
             </Button>
-            <Button onClick={() => onPDF(data.id)} size="sm" variant="outline" leftIcon={<Download size={16} />}>
+            <Button onClick={() => onPDF(data.id)} size="sm" variant="outline">
+              <Download size={16} className="mr-2" />
               PDF
             </Button>
             {editMode ? (
               <>
-                <Button onClick={handleSave} size="sm" variant="primary" leftIcon={<Check size={16} />}>
+                <Button onClick={handleSave} size="sm" variant="primary">
+                  <Check size={16} className="mr-2" />
                   Save
                 </Button>
-                <Button onClick={handleCancel} size="sm" variant="secondary" leftIcon={<X size={16} />}>
+                <Button onClick={handleCancel} size="sm" variant="secondary">
+                  <X size={16} className="mr-2" />
                   Cancel
                 </Button>
               </>
             ) : (
               data.canEdit && (
-                <Button onClick={handleEdit} size="sm" variant="primary" leftIcon={<Edit2 size={16} />}>
+                <Button onClick={handleEdit} size="sm" variant="primary">
+                  <Edit2 size={16} className="mr-2" />
                   Edit
                 </Button>
               )
@@ -313,22 +307,21 @@ export const JobCardDetailModal: React.FC<Props> = ({
 
         <Tabs
           value={activeTab}
-          onChange={setActiveTab}
           className="p-4"
         >
-          <TabList className="mb-4">
-            <Tab>General</Tab>
-            <Tab>Tasks</Tab>
-            <Tab>Parts</Tab>
-            <Tab>Labor</Tab>
-            <Tab>Costs</Tab>
-            <Tab>Attachments</Tab>
-            <Tab>Remarks</Tab>
-            <Tab>Time Log</Tab>
-            <Tab>Audit</Tab>
-          </TabList>
+          <TabsList className="mb-4">
+            <TabsTrigger value="general" onClick={() => setActiveTab("general")}>General</TabsTrigger>
+            <TabsTrigger value="tasks" onClick={() => setActiveTab("tasks")}>Tasks</TabsTrigger>
+            <TabsTrigger value="parts" onClick={() => setActiveTab("parts")}>Parts</TabsTrigger>
+            <TabsTrigger value="labor" onClick={() => setActiveTab("labor")}>Labor</TabsTrigger>
+            <TabsTrigger value="costs" onClick={() => setActiveTab("costs")}>Costs</TabsTrigger>
+            <TabsTrigger value="attachments" onClick={() => setActiveTab("attachments")}>Attachments</TabsTrigger>
+            <TabsTrigger value="remarks" onClick={() => setActiveTab("remarks")}>Remarks</TabsTrigger>
+            <TabsTrigger value="timelog" onClick={() => setActiveTab("timelog")}>Time Log</TabsTrigger>
+            <TabsTrigger value="audit" onClick={() => setActiveTab("audit")}>Audit</TabsTrigger>
+          </TabsList>
 
-          <TabPanel>
+          <TabsContent value="general">
             {/* General Tab */}
             <Card>
               <CardContent>
@@ -544,9 +537,9 @@ export const JobCardDetailModal: React.FC<Props> = ({
                 </div>
               </CardContent>
             </Card>
-          </TabPanel>
+          </TabsContent>
 
-          <TabPanel>
+          <TabsContent value="tasks">
             {/* Tasks Tab */}
             <Card>
               <CardContent>
@@ -664,9 +657,9 @@ export const JobCardDetailModal: React.FC<Props> = ({
                 </table>
               </CardContent>
             </Card>
-          </TabPanel>
+          </TabsContent>
 
-          <TabPanel>
+          <TabsContent value="parts">
             {/* Parts Tab */}
             <Card>
               <CardContent>
@@ -785,9 +778,9 @@ export const JobCardDetailModal: React.FC<Props> = ({
                 </table>
               </CardContent>
             </Card>
-          </TabPanel>
+          </TabsContent>
 
-          <TabPanel>
+          <TabsContent value="labor">
             {/* Labor Tab */}
             <Card>
               <CardContent>
@@ -907,32 +900,32 @@ export const JobCardDetailModal: React.FC<Props> = ({
                 </table>
               </CardContent>
             </Card>
-          </TabPanel>
+          </TabsContent>
 
-          <TabPanel>
+          <TabsContent value="costs">
             {/* Additional Costs Tab */}
             <div>Additional costs section</div>
-          </TabPanel>
+          </TabsContent>
 
-          <TabPanel>
+          <TabsContent value="attachments">
             {/* Attachments Tab */}
             <div>Attachments section</div>
-          </TabPanel>
+          </TabsContent>
 
-          <TabPanel>
+          <TabsContent value="remarks">
             {/* Remarks Tab */}
             <div>Remarks section</div>
-          </TabPanel>
+          </TabsContent>
 
-          <TabPanel>
+          <TabsContent value="timelog">
             {/* Time Log Tab */}
             <div>Time log section</div>
-          </TabPanel>
+          </TabsContent>
 
-          <TabPanel>
+          <TabsContent value="audit">
             {/* Audit Log Tab */}
             <div>Audit log section</div>
-          </TabPanel>
+          </TabsContent>
         </Tabs>
       </div>
 

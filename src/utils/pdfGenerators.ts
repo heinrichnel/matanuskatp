@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { InspectionItem, InspectionReport } from '../components/workshop/InspectionReportForm';
+import { InspectionReport } from '../components/workshop/InspectionReportForm';
 
 // Add the autotable plugin to the jsPDF type
 declare module 'jspdf' {
@@ -77,7 +77,13 @@ export const generateInspectionPDF = (report: InspectionReport): void => {
       1: { cellWidth: 30, halign: 'center' },
       2: { cellWidth: 'auto' }
     },
-    didDrawCell: (data) => {
+    didDrawCell: (data: {
+      section: string;
+      column: { index: number };
+      row: { index: number };
+      cell: any;
+      pageCount: number;
+    }) => {
       // Custom styling for status cells
       if (data.section === 'body' && data.column.index === 1) {
         const status = tableRows[data.row.index][1];
@@ -192,7 +198,10 @@ export const generateInspectionPDF = (report: InspectionReport): void => {
   }
   
   // Add footer with page numbers
-  const totalPages = doc.internal.getNumberOfPages();
+  // Using any here because the jsPDF typings don't properly expose internal.getNumberOfPages
+  const doc_internal = doc.internal as any;
+  const totalPages = doc_internal.getNumberOfPages ? doc_internal.getNumberOfPages() : doc_internal.pages.length;
+  
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
     doc.setFontSize(8);

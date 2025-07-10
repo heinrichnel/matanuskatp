@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Activity, TrendingUp, AlertTriangle, Calendar, MapPin, Truck } from 'lucide-react';
+import { Activity, AlertTriangle, Calendar, MapPin, Truck } from 'lucide-react';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { useAppContext } from '../../context/AppContext';
@@ -15,8 +15,11 @@ interface TripOverviewStats {
 }
 
 const TripOverviewPanel: React.FC = () => {
-  const { isLoading, refreshTrips } = useAppContext();
-  const [stats, setStats] = useState<TripOverviewStats>({
+  // Using context to access refresh functionality
+  const { refreshTrips } = useAppContext();
+  
+  // Using useState with initial values
+  const [stats] = useState<TripOverviewStats>({
     activeTrips: 24,
     completedThisMonth: 157,
     delayedTrips: 5,
@@ -55,6 +58,13 @@ const TripOverviewPanel: React.FC = () => {
         </div>
         <div className="flex space-x-2 items-center">
           <SyncIndicator />
+          <Button 
+            variant="outline"
+            onClick={() => refreshTrips()}
+            icon={<Activity className="w-4 h-4" />}
+          >
+            Refresh Data
+          </Button>
           <Button 
             variant="outline"
             icon={<Activity className="w-4 h-4" />}
