@@ -13,7 +13,9 @@
         "GitHub.copilot-chat",
         "ms-vsliveshare.vsliveshare",
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "Cooder.cooder-ai",
+        "kodu-ai.killo-koder"
       ]
     }
   }
