@@ -1,23 +1,24 @@
-# Ignore CSV, Markdown, and ZIP exports
-*.csv
-*.md
-*.zip
-
-# Ignore enhancement bundle and planning files
-transportmat_integration_map.json
-initiative_component_bundle.tsx
-SchemaDashboard.tsx
-SidebarConfig.tsx
-
-# Ignore GitHub workflow files
-.github/workflows/*.tsx
+# ─── Ignore GitHub workflow files ───────────────────────────
+.github/
+.github/workflows/
 .github/workflows/*.md
+.github/workflows/*.tsx
 .github/workflows/initiativecomponentbundle.tsx
 .github/workflows/schemadashboard1.tsx
 .github/workflows/SidebarConfig.tsx
 .github/workflows/confirmation_receipt.md
 
-# In .eslintignore
-.github/
+# ─── Ignore CI/CD config files ──────────────────────────────
 *.yml
 *.yaml
+
+# ─── Ignore markdown and export bundles ─────────────────────
+*.md
+*.csv
+*.zip
+
+# ─── Ignore planning/component stubs ────────────────────────
+initiative_component_bundle.tsx
+transportmat_integration_map.json
+SchemaDashboard.tsx
+SidebarConfig.tsx
