@@ -1,33 +1,32 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
 {
-	"name": "Node.js & TypeScript",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
-	"features": {
-		"ghcr.io/devcontainers-extra/features/ts-node:1": {},
-		"ghcr.io/devcontainers-extra/features/tsx:1": {}
-	},
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"GitHub.copilot"
-			]
-		}
-	}
+  "name": "Node.js & TypeScript",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm",
+  "features": {
+	"ghcr.io/devcontainers-extra/features/ts-node:1": {},
+   	 "ghcr.io/devcontainers-extra/features/tsx:1": {}
+	  "ghcr.io/casl0/devcontainer-features/android-sdk:1": {}
 
-	// Features to add to the dev container. More info: https://containers.dev/features.
-	// "features": {},
-
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
-
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "yarn install",
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",                         // 🤖 Copilot
+        "kodu-ai.claude-dev-experimental",        // 🤖 Claude AI (indien versoenbaar)
+        "killokoder.killokoder-vscode",           // 🔥 Killokoder (jy moet dalk .vsix gebruik)
+        "cooder-ai.cooder",                       // 💡 Cooder AI (Kodu gebaseer)
+        "ms-python.python",                       // 🐍 Python ondersteuning
+        "esbenp.prettier-vscode",                 // 🎨 Formatter
+        "dbaeumer.vscode-eslint",                 // ✅ Linter
+        "mhutchie.git-graph",                     // 🔀 Git beheer
+        "eamodio.gitlens",                        // 👁️ GitLens
+        "formulahendry.auto-close-tag",           // ✅ HTML tag ondersteuning
+        "formulahendry.auto-rename-tag",          // 🔄 Rename paired tags
+        "streetsidesoftware.code-spell-checker",  // 🔍 Spelling
+        "gruntfuggly.todo-tree"                   // 📋 TODOs
+      ]
+    }
+  },
+  "forwardPorts": [5173, 5001], // Vite & Firebase
+  "postCreateCommand": "npm install",
+  "remoteUser": "root"
 }
