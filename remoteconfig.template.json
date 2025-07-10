@@ -1,1 +1,121 @@
-{}
+{
+  "conditions": [
+    {
+      "name": "isDevelopmentDevice",
+      "expression": "device.country in ['ZA'] && device.os in ['Android', 'iOS']",
+      "tagColor": "BLUE"
+    },
+    {
+      "name": "isWebUser",
+      "expression": "device.browser in ['Chrome', 'Firefox', 'Edge']",
+      "tagColor": "GREEN"
+    }
+  ],
+  "parameters": {
+    "gps_tracking_enabled": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Controls whether GPS tracking is active for drivers."
+    },
+    "trip_sync_interval_minutes": {
+      "defaultValue": {
+        "value": "10"
+      },
+      "description": "Interval (in minutes) to sync trip status and positions."
+    },
+    "app_update_required": {
+      "defaultValue": {
+        "value": "false"
+      },
+      "description": "Force update prompt if true – applies to mobile users."
+    },
+    "driver_behavior_alerts": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "If true, flag logic will run for behavior scoring."
+    },
+    "diesel_reporting_mode": {
+      "defaultValue": {
+        "value": "manual"
+      },
+      "conditionalValues": {
+        "isDevelopmentDevice": {
+          "value": "debug"
+        }
+      },
+      "description": "Controls diesel entry mode: manual, probe, debug."
+    },
+    "enable_trip_completion_checks": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Enables scheduled or event-based trip completion logic."
+    },
+    "allow_slip_upload": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "If true, allows drivers to upload slips manually from mobile."
+    },
+    "notification_channel_driver_alerts": {
+      "defaultValue": {
+        "value": "driver_alerts"
+      },
+      "description": "Defines FCM topic/channel for driver alerts (Web + Android)."
+    },
+    "low_score_threshold": {
+      "defaultValue": {
+        "value": "60"
+      },
+      "description": "Minimum safety score before red flagging occurs."
+    },
+    "show_driver_leaderboard": {
+      "defaultValue": {
+        "value": "true"
+      },
+      "description": "Displays performance ranking module in dashboard."
+    }
+  },
+  "parameterGroups": {
+    "tracking": {
+      "description": "Controls location tracking and sync frequency",
+      "parameters": {
+        "gps_tracking_enabled": {},
+        "trip_sync_interval_minutes": {},
+        "enable_trip_completion_checks": {}
+      }
+    },
+    "driver_behavior": {
+      "description": "Driver scoring, flags, and leaderboard visibility",
+      "parameters": {
+        "driver_behavior_alerts": {},
+        "low_score_threshold": {},
+        "show_driver_leaderboard": {}
+      }
+    },
+    "diesel": {
+      "description": "Diesel reporting controls",
+      "parameters": {
+        "diesel_reporting_mode": {},
+        "allow_slip_upload": {}
+      }
+    },
+    "notifications": {
+      "description": "Controls notification targeting",
+      "parameters": {
+        "notification_channel_driver_alerts": {}
+      }
+    },
+    "app_updates": {
+      "description": "App-level control toggles",
+      "parameters": {
+        "app_update_required": {}
+      }
+    }
+  },
+  "version": {
+    "description": "TransportMat Remote Config Template v1.0 for Web + Android"
+  }
+}
