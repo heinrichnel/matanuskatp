@@ -1,29 +1,15 @@
 {
-  "hosting": {
-    "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json",
+    "database": "(default)",
+    "location": "nam5"
   },
   "database": {
     "rules": "database.rules.json"
   },
   "storage": {
     "rules": "storage.rules"
-  },
-  "firestore": {
-    "database": "(default)",
-    "location": "nam5",
-    "rules": "firestore.rules",
-    "indexes": "firestore.indexes.json"
   },
   "functions": [
     {
@@ -42,19 +28,10 @@
     }
   ],
   "emulators": {
-    "functions": {
-      "host": "127.0.0.1",
-      "port": 8888
-    },
     "firestore": {
       "host": "127.0.0.1",
       "port": 8081
     },
-    "ui": {
-      "host": "127.0.0.1",
-      "port": 4001
-    },
-    "singleProjectMode": true,
     "database": {
       "host": "127.0.0.1",
       "port": 9001
@@ -63,49 +40,29 @@
       "host": "127.0.0.1",
       "port": 9198
     },
-    "dataconnect": {
+    "functions": {
       "host": "127.0.0.1",
-      "port": 9399,
-      "dataDir": "dataconnect/.dataconnect/pgliteData"
+      "port": 8888
     },
-    "tasks": {
+    "ui": {
       "host": "127.0.0.1",
-      "port": 9499
-    },
-    "eventarc": {
-      "host": "127.0.0.1",
-      "port": 9299
-    },
-    "hub": {
-      "host": "127.0.0.1",
-      "port": 4400
+      "port": 4001
     },
     "logging": {
       "host": "127.0.0.1",
       "port": 4500
     },
-    "apphosting": {
-      "port": 5002,
-      "rootDirectory": "./",
-      "startCommand": "npm run dev"
+    "hub": {
+      "host": "127.0.0.1",
+      "port": 4400
     },
     "pubsub": {
       "port": 8085
-    }
-  },
-  "dataconnect": {
-    "source": "dataconnect"
-  },
-  "apphosting": {
-    "backendId": "mat1-9e6b3",
-    "rootDir": "main",
-    "ignore": [
-      "node_modules",
-      ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.log",
-      "functions"
-    ]
+    },
+    "eventarc": {
+      "port": 9299
+    },
+    "singleProjectMode": true
   },
   "remoteconfig": {
     "template": "remoteconfig.template.json"
