@@ -1004,17 +1004,7 @@ export const LOAD_CATEGORIES = [
   { value: 'containers', label: 'Containers' }
 ];
 
-/*
- KILO CODE RATIONALE // FILE: src/types/index.ts
- --------------------------------------------------------------------------------
- // WHAT: Introduced a new specific type `TripFormData` derived from the base `Trip` type.
- // WHY:  The `TripForm` component deals with form data where numeric fields (like distance and revenue) are temporarily held as strings. Creating a dedicated type for this shape enforces type safety within the form's context and makes the boundary between string-based form data and number-based application data explicit and safe. It eliminates ambiguity and prevents runtime errors from unexpected data types during form handling.
- // PREVENTION: This prevents bugs where a developer might incorrectly pass a string value to a function expecting a number, or vice-versa. It forces clear data transformation (e.g., `parseFloat`) at the point of submission, not scattered throughout the component.
-*/
-/**
- * Represents the shape of the data within the TripForm.
- * Numeric fields are strings to accommodate user input before validation/parsing.
- */
+
 export type TripFormData = Omit<
   Trip,
   'id' | 'status' | 'costs' | 'distanceKm' | 'baseRevenue'

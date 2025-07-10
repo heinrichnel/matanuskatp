@@ -1,11 +1,12 @@
 import React from 'react';
+import PageWrapper from '../components/ui/PageWrapper';
 import AuditLog from '../components/audit/AuditLog';
 
 const AuditLogPage: React.FC = () => {
   return (
-    <div className="container mx-auto p-4">
+    <PageWrapper title="Audit Log">
       <AuditLog />
-    </div>
+    </PageWrapper>
   );
 };
 

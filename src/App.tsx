@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import QRGenerator from "./components/workshop/QRGenerator";
 import TyreManagementPage from "./pages/tyres/TyreManagementPage";
-// Case sensitivity issue: importing as a placeholder component instead
-const WorkshopAnalyticsComp = () => <div>Workshop Analytics (Placeholder)</div>;
 import { AppProvider } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import { TyreStoresProvider } from "./context/TyreStoresContext";
@@ -88,10 +85,9 @@ import AnalyticsDashboard from "./components/FleetAnalytics/AnalyticsDashboard";
 import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
 
-// Workshop placeholders
+// Workshop components
 import QRGenerator from "./components/workshop/QRGenerator";
-// Case sensitivity issue: importing as a placeholder component instead
-const WorkshopAnalyticsComp = () => <div>Workshop Analytics (Placeholder)</div>;
+import WorkshopAnalyticsComp from "./components/workshop/WorkshopAnalytics";
 import PartsOrdering from "./components/workshop/PartsOrdering";
 
 // Inventory Components
@@ -101,6 +97,7 @@ import InventoryDashboard from "./components/Inventory/InventoryDashboard";
 import StockManager from "./components/Inventory/StockManager";
 import PurchaseOrderTracker from "./components/Inventory/PurchaseOrderTracker";
 import MapsView from "./components/maps/MapsView";
+import InventoryPage from "./pages/InventoryPage";
   
 // Main App component with Router implementation
 const App: React.FC = () => {
