@@ -190,7 +190,7 @@ export interface DelayReason {
 }
 
 // NEW: Enhanced Follow-up Tracking
-interface FollowUpRecord {
+export interface FollowUpRecord {
   id: string;
   tripId: string;
   followUpDate: string;

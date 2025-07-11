@@ -105,7 +105,14 @@ interface AppContextType {
   updateMissedLoad: (missedLoad: MissedLoad) => Promise<void>;
   deleteMissedLoad: (id: string) => Promise<void>;
 
-  updateInvoicePayment: (tripId: string, paymentData: any) => Promise<void>;
+  updateInvoicePayment: (tripId: string, paymentData: {
+    paymentStatus: 'unpaid' | 'partial' | 'paid';
+    paymentAmount?: number;
+    paymentReceivedDate?: string;
+    paymentNotes?: string;
+    paymentMethod?: string;
+    bankReference?: string;
+  }) => Promise<void>;
 
   importTripsFromCSV: (trips: Omit<Trip, 'id' | 'costs' | 'status'>[]) => Promise<void>;
   triggerTripImport: () => Promise<void>;
@@ -283,21 +290,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       setIsLoading(prev => ({ ...prev, loadGoogleMaps: true }));
       
+      // Import the isGoogleMapsAPILoaded function to check if Maps is already loaded
+      const { isGoogleMapsAPILoaded } = await import('../utils/googleMapsLoader');
+      
       // If Google Maps is already loaded, don't load it again
-      if (window.google && window.google.maps) {
+      if (isGoogleMapsAPILoaded()) {
         setIsGoogleMapsLoaded(true);
         return;
       }
       
-      // Use centralized Google Maps loader
-      const { loadGoogleMapsAPI } = await import('../utils/googleMapsLoader');
-      await loadGoogleMapsAPI({
-        libraries: ['places'],
-        version: 'weekly'
+      // Use the useLoadGoogleMaps hook indirectly by importing it
+      // Note: Since we can't use hooks directly in callbacks, we'll use the function
+      // that the hook would use internally
+      const { useLoadGoogleMaps } = await import('../utils/googleMapsLoader');
+      
+      // Create a script element to load Google Maps
+      // This mimics what the hook does but in a non-hook context
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      const libraries = ['places'];
+      
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libraries.join(',')}`;
+      script.async = true;
+      script.defer = true;
+      
+      // Create a promise to wait for the script to load
+      const loadPromise = new Promise<void>((resolve, reject) => {
+        script.addEventListener('load', () => {
+          setIsGoogleMapsLoaded(true);
+          console.log("✅ Google Maps API loaded via script");
+          resolve();
+        });
+        
+        script.addEventListener('error', (e) => {
+          const errorMsg = "Failed to load Google Maps API script";
+          setGoogleMapsError(errorMsg);
+          console.error(errorMsg, e);
+          reject(new Error(errorMsg));
+        });
       });
       
-      setIsGoogleMapsLoaded(true);
-      console.log("✅ Google Maps API loaded via centralized loader");
+      // Append the script to the document body
+      document.body.appendChild(script);
+      
+      // Wait for the script to load
+      await loadPromise;
       
     } catch (error) {
       console.error("❌ Error loading Google Maps API:", error);
@@ -308,11 +345,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
   
-  // Load Google Maps when the app starts
+  // Check if Google Maps is loaded when the app starts
   useEffect(() => {
-    loadGoogleMaps().catch(err => {
-      console.error("Failed to load Google Maps on initial load:", err);
-    });
+    const checkGoogleMapsLoaded = async () => {
+      try {
+        const { isGoogleMapsAPILoaded } = await import('../utils/googleMapsLoader');
+        if (isGoogleMapsAPILoaded()) {
+          setIsGoogleMapsLoaded(true);
+        } else {
+          // If not loaded, try to load it
+          loadGoogleMaps().catch(err => {
+            console.error("Failed to load Google Maps on initial load:", err);
+          });
+        }
+      } catch (err) {
+        console.error("Error checking Google Maps loaded status:", err);
+      }
+    };
+    
+    checkGoogleMapsLoaded();
   }, [loadGoogleMaps]);
 
   useEffect(() => {
@@ -1587,7 +1638,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     addMissedLoad,
     updateMissedLoad,
     deleteMissedLoad,
-    updateInvoicePayment: placeholder,
+    updateInvoicePayment: async (tripId: string, paymentData: {
+      paymentStatus: 'unpaid' | 'partial' | 'paid';
+      paymentAmount?: number;
+      paymentReceivedDate?: string;
+      paymentNotes?: string;
+      paymentMethod?: string;
+      bankReference?: string;
+    }): Promise<void> => {
+      try {
+        setIsLoading(prev => ({ ...prev, [`updatePayment-${tripId}`]: true }));
+        
+        const trip = trips.find(t => t.id === tripId);
+        if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
+        
+        const updatedTrip = {
+          ...trip,
+          paymentStatus: paymentData.paymentStatus,
+          paymentAmount: paymentData.paymentAmount,
+          paymentReceivedDate: paymentData.paymentReceivedDate,
+          paymentNotes: paymentData.paymentNotes,
+          paymentMethod: paymentData.paymentMethod,
+          bankReference: paymentData.bankReference,
+          status: paymentData.paymentStatus === 'paid' ? 'paid' : trip.status,
+          lastUpdated: new Date().toISOString()
+        };
+        
+        await updateTripInFirebase(tripId, updatedTrip);
+        
+        // Update local state
+        setTrips(prev => 
+          prev.map(t => (t.id === tripId ? updatedTrip : t))
+        );
+        
+        // Add audit log entry
+        await addAuditLogToFirebase({
+          id: uuidv4(),
+          timestamp: new Date().toISOString(),
+          user: 'system', // In a real app, use the actual logged-in user
+          action: 'update',
+          entity: 'trip',
+          entityId: tripId,
+          details: `Payment status updated to ${paymentData.paymentStatus}`,
+          changes: {
+            paymentStatus: {
+              previous: trip.paymentStatus,
+              new: paymentData.paymentStatus
+            },
+            paymentAmount: {
+              previous: trip.paymentAmount,
+              new: paymentData.paymentAmount
+            }
+          }
+        });
+        
+        console.log(`✅ Payment updated for trip ${tripId}`);
+      } catch (error) {
+        console.error('❌ Error updating payment:', error);
+        throw error;
+      } finally {
+        setIsLoading(prev => {
+          const newState = { ...prev };
+          delete newState[`updatePayment-${tripId}`];
+          return newState;
+        });
+      }
+    },
     importTripsFromCSV: async (newTrips: Omit<Trip, 'id' | 'costs' | 'status'>[]) => {
       for (const trip of newTrips) {
         await addTrip(trip);

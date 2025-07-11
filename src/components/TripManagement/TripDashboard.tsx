@@ -3,7 +3,7 @@ import { useAppContext } from '../../context/AppContext';
 import { getTripsByStatus, analyzeTripData } from '../../utils/tripDebugger';
 import { formatCurrency } from '../../utils/helpers';
 import Card, { CardContent, CardHeader } from '../ui/Card';
-import { BarChart, PieChart, TrendingUp, Truck, Calendar, AlertTriangle } from 'lucide-react';
+import { BarChart, PieChart, TrendingUp, Truck, Calendar, AlertTriangle, Globe } from 'lucide-react';
 
 const TripDashboard: React.FC = () => {
   const { trips } = useAppContext();

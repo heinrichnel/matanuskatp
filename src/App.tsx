@@ -43,6 +43,7 @@ import InvoiceManagementPage from "./pages/InvoiceManagementPage";
 import DieselManagementPage from "./pages/DieselManagementPage";
 import DriverManagementPage from "./pages/DriverManagementPage";
 import ComplianceManagementPage from "./pages/ComplianceManagementPage";
+import TripTimelinePage from "./pages/TripTimelinePage";
 
 // Invoice Management Components
 import InvoiceDashboard from "./components/InvoiceManagement/InvoiceDashboard";
@@ -166,6 +167,7 @@ const App: React.FC = () => {
                   <Route path="completed" element={<CompletedTrips />} />
                   <Route path="flags" element={<FlagsInvestigations />} />
                   <Route path="dashboard" element={<TripDashboard />} />
+                  <Route path="timeline" element={<TripTimelinePage />} />
                   <Route path="optimization" element={<div>Route Optimization</div>} />
                   <Route path="load-planning" element={<div>Load Planning</div>} />
                   <Route path="new" element={<div>Add New Trip</div>} />
