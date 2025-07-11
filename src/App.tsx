@@ -8,10 +8,10 @@ import { TripProvider } from "./context/TripContext";
 import { DriverBehaviorProvider } from "./context/DriverBehaviorContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Layout from './components/layout/Layout';
-// import TripForm from "./components/trips/TripForm"; // Uncomment if needed
+import TripFormModal from "./components/TripManagement/TripFormModal";
 import FirestoreConnectionError from "./components/ui/FirestoreConnectionError";
 import { getConnectionStatus, onConnectionStatusChanged } from "./utils/firebaseConnectionHandler";
-// import { Trip } from "./types"; // Uncomment when needed
+import { Trip } from "./types";
 
 // Workshop Components
 import FleetTable from "./components/Workshop Management/FleetTable";
@@ -100,26 +100,25 @@ import StockManager from "./components/Inventory Management/StockManager";
 import PurchaseOrderTracker from "./components/Inventory Management/PurchaseOrderTracker";
 import MapsView from "./components/maps/MapsView";
 import InventoryPage from "./pages/InventoryPage";
+import MyMapComponent from "./components/MyMapComponent";
   
 // Main App component with Router implementation
 const App: React.FC = () => {
   const [connectionError, setConnectionError] = useState<Error | null>(
     getConnectionStatus().status === 'error' ? getConnectionStatus().error : null
   );
-  // These state variables are kept for future use but commented out to avoid linting warnings
-  // const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
-  // const [showTripForm, setShowTripForm] = useState(false);
+  // State variables for trip form management
+  const [editingTrip, setEditingTrip] = useState<Trip | undefined>(undefined);
+  const [showTripForm, setShowTripForm] = useState(false);
   
-  // These handler functions are commented out since their state variables are also commented out
-  /*
+  // Handler functions for trip form
   const handleSetEditingTrip = (trip: Trip | undefined) => {
-    setEditingTrip(trip ? trip : null);
+    setEditingTrip(trip);
   };
   
   const handleShowTripForm = (show: boolean) => {
     setShowTripForm(show);
   };
-  */
 
   // Listen for connection status changes
   useEffect(() => {
@@ -153,8 +152,8 @@ const App: React.FC = () => {
               <Route 
                 element={
                   <Layout 
-                    setEditingTrip={()=>{}} // Placeholder empty function
-                    setShowTripForm={()=>{}} // Placeholder empty function
+                    setEditingTrip={handleSetEditingTrip} 
+                    setShowTripForm={handleShowTripForm}
                   />
                 }
               >
@@ -347,6 +346,13 @@ const App: React.FC = () => {
               </Route>
             </Routes>
                 </Router>
+                
+                {/* Trip Form Modal */}
+                <TripFormModal
+                  isOpen={showTripForm}
+                  onClose={() => setShowTripForm(false)}
+                  editingTrip={editingTrip}
+                />
               </DriverBehaviorProvider>
             </TripProvider>
           </TyreStoresProvider>
@@ -355,5 +361,14 @@ const App: React.FC = () => {
     </ErrorBoundary>
   );
 };
+
+function GoogleMapDemo() {
+  return (
+    <div>
+      <h1>My Google Map (TypeScript)</h1>
+      <MyMapComponent />
+    </div>
+  );
+}
 
 export default App;

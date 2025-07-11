@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { isGoogleMapsAPILoaded } from '../utils/googleMapsLoader';
 import {
   Trip,
   CostEntry,
@@ -290,27 +291,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       setIsLoading(prev => ({ ...prev, loadGoogleMaps: true }));
       
-      // Import the isGoogleMapsAPILoaded function to check if Maps is already loaded
-      const { isGoogleMapsAPILoaded } = await import('../utils/googleMapsLoader');
-      
       // If Google Maps is already loaded, don't load it again
       if (isGoogleMapsAPILoaded()) {
         setIsGoogleMapsLoaded(true);
         return;
       }
       
-      // Use the useLoadGoogleMaps hook indirectly by importing it
-      // Note: Since we can't use hooks directly in callbacks, we'll use the function
-      // that the hook would use internally
-      const { useLoadGoogleMaps } = await import('../utils/googleMapsLoader');
+      // Get maps service URL from environment 
+      const mapsServiceUrl = import.meta.env.VITE_MAPS_SERVICE_URL || 'https://maps-250085264089.africa-south1.run.app';
       
-      // Create a script element to load Google Maps
-      // This mimics what the hook does but in a non-hook context
-      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+      // Format the URL properly with protocol
+      const formatUrl = (url: string): string => {
+        if (!url) return '';
+        let formattedUrl = url;
+        if (!formattedUrl.startsWith('http')) {
+          formattedUrl = `https://${formattedUrl}`;
+        }
+        return formattedUrl;
+      };
+      
+      const formattedMapsServiceUrl = formatUrl(mapsServiceUrl);
       const libraries = ['places'];
       
+      // Create a script element to load Google Maps via our proxy service
+      // API key is managed by the service
       const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libraries.join(',')}`;
+      script.src = `${formattedMapsServiceUrl}/maps-api?libraries=${libraries.join(',')}`;
       script.async = true;
       script.defer = true;
       
@@ -347,9 +353,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   
   // Check if Google Maps is loaded when the app starts
   useEffect(() => {
-    const checkGoogleMapsLoaded = async () => {
+    const checkGoogleMapsLoaded = () => {
       try {
-        const { isGoogleMapsAPILoaded } = await import('../utils/googleMapsLoader');
         if (isGoogleMapsAPILoaded()) {
           setIsGoogleMapsLoaded(true);
         } else {
