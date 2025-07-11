@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Timeline from "react-calendar-timeline";
-import "react-calendar-timeline/lib/Timeline.css";
+import "react-calendar-timeline/dist/style.css";
 import moment from "moment";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase"; // Adjust to your path
