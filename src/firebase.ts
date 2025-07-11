@@ -3,7 +3,7 @@ import { getStorage } from 'firebase/storage';
 import { firebaseApp } from './firebaseConfig';
 import { DieselConsumptionRecord } from './types/diesel';
 import { Trip } from './types';
-import { firestore } from './utils/firebaseConnectionHandler';
+import { firestore, handleFirestoreError } from './utils/firebaseConnectionHandler';
 
 // Use the storage service
 const storage = getStorage(firebaseApp);
@@ -21,6 +21,7 @@ export const addAuditLogToFirebase = async (auditLogData: any) => {
     return docRef.id;
   } catch (error) {
     console.error('Error adding audit log:', error);
+    await handleFirestoreError(error);
     throw error;
   }
 };

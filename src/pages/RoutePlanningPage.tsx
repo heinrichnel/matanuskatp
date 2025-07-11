@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer, Autocomplete } from '@react-google-maps/api';
+import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer, Autocomplete, Libraries } from '@react-google-maps/api';
 import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Select, Input } from '../components/ui/FormElements';
@@ -22,7 +22,7 @@ const center = {
 };
 
 // Libraries to load with Google Maps
-const libraries: ("places" | "drawing" | "geometry" | "localContext" | "visualization")[] = ["places"];
+const libraries: Libraries = ["places"];
 
 const RoutePlanningPage: React.FC = () => {
   const { tripId } = useParams<{ tripId: string }>();
@@ -54,7 +54,7 @@ const RoutePlanningPage: React.FC = () => {
   // Load Google Maps JS API
   const { isLoaded: isApiLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: 'AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g', // Should be in .env in production
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
     libraries,
   });
 

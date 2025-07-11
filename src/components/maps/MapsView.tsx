@@ -25,7 +25,7 @@ const MapsView: React.FC = () => {
           return;
         }
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&v=beta&libraries=maps`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&v=beta&libraries=maps&loading=async`;
         script.async = true;
         script.defer = true;
         script.onload = () => {

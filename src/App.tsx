@@ -14,25 +14,26 @@ import { getConnectionStatus, onConnectionStatusChanged } from "./utils/firebase
 // import { Trip } from "./types"; // Uncomment when needed
 
 // Workshop Components
-import FleetTable from "./components/workshop/FleetTable";
-import JobCardManagement from "./components/workshop/JobCardManagement";
-import JobCardKanbanBoard from "./components/workshop/JobCardKanbanBoard";
-import InspectionManagement from "./components/workshop/InspectionManagement";
-import InspectionForm from "./components/workshop/InspectionForm";
-import FaultTracking from "./components/workshop/FaultTracking";
-import TyreManagement from "./components/workshop/TyreManagement";
+import FleetTable from "./components/Workshop Management/FleetTable";
+import JobCardManagement from "./components/Workshop Management/JobCardManagement";
+import JobCardKanbanBoard from "./components/Workshop Management/JobCardKanbanBoard";
+import InspectionManagement from "./components/Workshop Management/InspectionManagement";
+import InspectionForm from "./components/Workshop Management/InspectionForm";
+import FaultTracking from "./components/Workshop Management/FaultTracking";
+import TyreManagement from "./components/Workshop Management/TyreManagement";
 
 // UI Components
 // Removed Sidebar import as it will be used inside Layout
 
 // Feature Components
-import ActiveTrips from "./components/trips/ActiveTrips";
-import CompletedTrips from "./components/trips/CompletedTrips";
+import ActiveTrips from "./components/TripManagement/ActiveTrips";
+import ActiveTripsPage from "./pages/ActiveTripsPage";
+import CompletedTrips from "./components/TripManagement/CompletedTrips";
 import FlagsInvestigations from "./components/flags/FlagsInvestigations";
 import ClientManagementPage from "./pages/ClientManagementPage";
-import CurrencyFleetReport from "./components/reports/CurrencyFleetReport";
-import TripDashboard from "./components/trips/TripDashboard";
-import InvoiceAgingDashboard from "./components/invoicing/InvoiceAgingDashboard";
+import CurrencyFleetReport from "./components/InvoiceManagement/CurrencyFleetReport";
+import TripDashboard from "./components/TripManagement/TripDashboard";
+import InvoiceAgingDashboard from "./components/InvoiceManagement/InvoiceAgingDashboard";
 import CustomerRetentionDashboard from "./components/performance/CustomerRetentionDashboard";
 import ActionLog from "./components/actionlog/ActionLog";
 import TripManagementPage from "./pages/TripManagementPage";
@@ -52,7 +53,7 @@ import TaxReportExport from "./components/InvoiceManagement/TaxReportExport";
 import PendingInvoicesPage from "./pages/invoices/PendingInvoices";
 import PaidInvoicesPage from "./pages/invoices/PaidInvoices";
 import InvoiceTemplatesPage from "./pages/invoices/InvoiceTemplates";
-import DriverBehaviorEvents from "./components/DriverBehavior/DriverBehaviorEvents";
+import DriverBehaviorEvents from "./components/DriverManagement/DriverBehaviorEvents";
 
 // Diesel Management Components
 import DieselDashboardComponent from "./components/DieselManagement/DieselDashboardComponent";
@@ -86,16 +87,16 @@ import NotificationsPage from "./pages/NotificationsPage";
 import SettingsPage from "./pages/SettingsPage";
 
 // Workshop components
-import QRGenerator from "./components/workshop/QRGenerator";
-import WorkshopAnalyticsComp from "./components/workshop/WorkshopAnalytics";
-import PartsOrdering from "./components/workshop/PartsOrdering";
+import QRGenerator from "./components/Workshop Management/QRGenerator";
+import WorkshopAnalyticsComp from "./components/Workshop Management/WorkshopAnalytics";
+import PartsOrdering from "./components/Workshop Management/PartsOrdering";
 
 // Inventory Components
-import VendorScorecard from "./components/Inventory/VendorScorecard";
-import IndirectCostBreakdown from "./components/Inventory/IndirectCostBreakdown";
-import InventoryDashboard from "./components/Inventory/InventoryDashboard";
-import StockManager from "./components/Inventory/StockManager";
-import PurchaseOrderTracker from "./components/Inventory/PurchaseOrderTracker";
+import VendorScorecard from "./components/Inventory Management/VendorScorecard";
+import IndirectCostBreakdown from "./components/Inventory Management/IndirectCostBreakdown";
+import InventoryDashboard from "./components/Inventory Management/InventoryDashboard";
+import StockManager from "./components/Inventory Management/StockManager";
+import PurchaseOrderTracker from "./components/Inventory Management/PurchaseOrderTracker";
 import MapsView from "./components/maps/MapsView";
 import InventoryPage from "./pages/InventoryPage";
   
@@ -160,8 +161,8 @@ const App: React.FC = () => {
                 
                 {/* Trip Management Section */}
                 <Route path="trips" element={<TripManagementPage />}>
-                  <Route index element={<ActiveTrips />} />
-                  <Route path="active" element={<ActiveTrips />} />
+                  <Route index element={<ActiveTripsPage />} />
+                  <Route path="active" element={<ActiveTripsPage />} />
                   <Route path="completed" element={<CompletedTrips />} />
                   <Route path="flags" element={<FlagsInvestigations />} />
                   <Route path="dashboard" element={<TripDashboard />} />

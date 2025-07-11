@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { InspectionReport } from '../components/workshop/InspectionReportForm';
+import { InspectionReport } from '../components/Workshop Management/InspectionReportForm';
 
 // Add the autotable plugin to the jsPDF type
 declare module 'jspdf' {

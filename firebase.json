@@ -5,9 +5,6 @@
     "database": "(default)",
     "location": "nam5"
   },
-  "database": {
-    "rules": "database.rules.json"
-  },
   "storage": {
     "rules": "storage.rules"
   },
@@ -31,10 +28,6 @@
     "firestore": {
       "host": "127.0.0.1",
       "port": 8081
-    },
-    "database": {
-      "host": "127.0.0.1",
-      "port": 9001
     },
     "storage": {
       "host": "127.0.0.1",

@@ -5,9 +5,9 @@ import Button from '../components/ui/Button';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // The following components are imported for possible future use in this page.
 // @ts-ignore: imported for future use, suppress unused warning
-import ActiveTrips from '../components/trips/ActiveTrips';
+import ActiveTrips from '../components/TripManagement/ActiveTrips';
 // @ts-ignore: imported for future use, suppress unused warning
-import CompletedTrips from '../components/trips/CompletedTrips';
+import CompletedTrips from '../components/TripManagement/CompletedTrips';
 // @ts-ignore: imported for future use, suppress unused warning
 import FlagsInvestigations from '../components/flags/FlagsInvestigations';
 /* eslint-enable @typescript-eslint/no-unused-vars */

@@ -102,15 +102,35 @@ export const fixTripStatusIssues = (trips: Trip[]): Trip[] => {
       updatedTrip.status = 'active';
     }
     
-    // Fix case sensitivity issues (e.g., "Active" should be "active")
+    // Fix case sensitivity and map web import statuses
     if (typeof updatedTrip.status === 'string') {
       const status = updatedTrip.status.toLowerCase();
-      if (status === 'active' || status === 'completed' || status === 'invoiced' || status === 'paid') {
-        if (updatedTrip.status !== status) {
-          console.log(`Fixing status case for trip ${trip.id}: ${updatedTrip.status} -> ${status}`);
-          updatedTrip.status = status as 'active' | 'completed' | 'invoiced' | 'paid';
-        }
+      
+      // Map web import statuses to our standard statuses
+      const statusMapping: Record<string, 'active' | 'completed' | 'invoiced' | 'paid'> = {
+        'active': 'active',
+        'completed': 'completed',
+        'invoiced': 'invoiced', 
+        'paid': 'paid',
+        'delivered': 'completed', // Map delivered to completed
+        'shipped': 'active', // Map shipped to active
+        'in_transit': 'active', // Map in_transit to active
+        'pending': 'active', // Map pending to active
+        'booked': 'active', // Map booked to active
+        'confirmed': 'active' // Map confirmed to active
+      };
+      
+      const mappedStatus = statusMapping[status];
+      if (mappedStatus && updatedTrip.status !== mappedStatus) {
+        console.log(`Mapping status for trip ${trip.id}: ${updatedTrip.status} -> ${mappedStatus}`);
+        updatedTrip.status = mappedStatus;
       }
+    }
+    
+    // Fix client name mapping for web imports
+    if (!updatedTrip.clientName && (updatedTrip as any).customer) {
+      console.log(`Mapping customer to clientName for trip ${trip.id}`);
+      updatedTrip.clientName = (updatedTrip as any).customer;
     }
     
     return updatedTrip;

@@ -1,4 +1,4 @@
-import TyreDashboard from '@/components/tyre/TyreDashboard';
+import TyreDashboard from '@/components/TyreManagement/TyreDashboard';
 
 const DashboardPage = () => {
   return (

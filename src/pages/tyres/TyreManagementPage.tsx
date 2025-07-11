@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import TyreDashboard, { TyreEntry } from '../../components/workshop/TyreDashboard';
+import TyreDashboard, { TyreEntry } from '../../components/Workshop Management/TyreDashboard';
 import Button from '../../components/ui/Button';
 import Card, { CardContent } from '../../components/ui/Card';
 import { Download, BarChart, PieChart } from 'lucide-react';

@@ -57,7 +57,7 @@
       "command": "rm -rf node_modules package-lock.json && npm install",
       "label": "Clean Install",
       "detail": "Removes node_modules and reinstalls all dependencies",
-      "group": "clean",
+      "group": "build",
       "problemMatcher": []
     },
     {
@@ -67,17 +67,7 @@
       "problemMatcher": [],
       "detail": "Check that each route path in Sidebar.tsx has a matching .tsx file"
     },
-    {
-      "label": "🧠 Validate Sidebar Routes ↔ Page Components",
-      "type": "shell",
-      "command": "node scripts/validateRoutes.js",
-      "problemMatcher": [],
-      "detail": "Checks that each route in Sidebar.tsx has a matching .tsx component in src/pages.",
-      "group": {
-        "kind": "build",
-        "isDefault": false
-      }
-    },
+
     {
       "label": "Sync Workshop Sidebar",
       "type": "shell",

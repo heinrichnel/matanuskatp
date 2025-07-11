@@ -289,44 +289,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return;
       }
       
-      // The Google Maps loading script is defined in a function
-      const loadGoogleMapsScript = () => {
-        return new Promise<void>((resolve, reject) => {
-          try {
-            // Check if Google Maps script is already in the DOM
-            const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
-            if (existingScript) {
-              console.log("✅ Google Maps script already exists in DOM, skipping");
-              setIsGoogleMapsLoaded(true);
-              resolve();
-              return;
-            }
-
-            const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g&libraries=places&v=weekly`;
-            script.async = true;
-            script.defer = true;
-            
-            script.onload = () => {
-              setIsGoogleMapsLoaded(true);
-              resolve();
-            };
-            
-            script.onerror = () => {
-              setGoogleMapsError("Failed to load Google Maps API script");
-              reject(new Error("Failed to load Google Maps API script"));
-            };
-            
-            document.head.appendChild(script);
-          } catch (error) {
-            setGoogleMapsError("Error setting up Google Maps: " + (error as Error).message);
-            reject(error);
-          }
-        });
-      };
+      // Use centralized Google Maps loader
+      const { loadGoogleMapsAPI } = await import('../utils/googleMapsLoader');
+      await loadGoogleMapsAPI({
+        libraries: ['places'],
+        version: 'weekly'
+      });
       
-      await loadGoogleMapsScript();
-      console.log("✅ Google Maps API loaded successfully");
+      setIsGoogleMapsLoaded(true);
+      console.log("✅ Google Maps API loaded via centralized loader");
       
     } catch (error) {
       console.error("❌ Error loading Google Maps API:", error);

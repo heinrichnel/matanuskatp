@@ -1,4 +1,4 @@
-import TyreManagement from '@/components/tyre/TyreManagement';
+import TyreManagement from '@/components/TyreManagement/TyreManagement';
 
 const TyresPage = () => {
   return (

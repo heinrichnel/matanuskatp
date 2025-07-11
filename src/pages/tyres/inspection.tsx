@@ -1,4 +1,4 @@
-import TyreInspection from '@/components/tyre/TyreInspection';
+import TyreInspection from '@/components/TyreManagement/TyreInspection';
 
 const InspectionPage = () => {
   return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import TripDashboard from '../../components/trips/TripDashboard';
+import TripDashboard from '../../components/TripManagement/TripDashboard';
 
 const TripDashboardPage: React.FC = () => {
   return <TripDashboard />;

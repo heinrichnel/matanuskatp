@@ -14,7 +14,7 @@ const defaultConfig = {
 
 // Use environment variables from .env with fallback to default config
 export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API || defaultConfig.apiKey,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || defaultConfig.apiKey,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || defaultConfig.authDomain,
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || defaultConfig.databaseURL,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || defaultConfig.projectId,
@@ -27,7 +27,7 @@ export const firebaseConfig = {
 // DEBUG ONLY – To detect missing environment variables during development
 if (import.meta.env.DEV) {
   console.log('Firebase Config:', {
-    apiKey: import.meta.env.VITE_FIREBASE_API ? '✓ Present' : '✗ Missing',
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? '✓ Present' : '✗ Missing',
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? '✓ Present' : '✗ Missing',
     databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL ? '✓ Present' : '✗ Missing',
     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ? '✓ Present' : '✗ Missing',

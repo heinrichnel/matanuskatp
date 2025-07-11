@@ -1,5 +1,5 @@
 import React from 'react';
-import TripForm from '../../components/trips/TripForm';
+import TripForm from '../../components/TripManagement/TripForm';
 import { useAppContext } from '../../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
