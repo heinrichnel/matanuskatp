@@ -103,6 +103,23 @@ export interface Trip {
   deliveredAt?: string;
   deliveredNotes?: string;
   statusNotes?: string; // Added for storing notes when updating trip status
+  
+  // NEW: Metadata and audit trail
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
+  
+  // NEW: Web booking integration  
+  loadRef?: string; // Reference from web booking system
+  webBookingId?: string; // ID from external booking system
+  bookingSource?: 'manual' | 'web' | 'api' | 'import'; // How the trip was created
+  
+  // Additional web import fields (for compatibility)
+  importSource?: string; // e.g., "web_book"
+  importedVia?: string; // e.g., "enhancedWebBookImport"
+  importedAt?: string; // When the trip was imported
+  customer?: string; // Alternative to clientName for web imports
 }
 
 export interface CostEntry {

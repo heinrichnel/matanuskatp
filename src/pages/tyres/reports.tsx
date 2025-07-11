@@ -1,4 +1,4 @@
-import { TyreReports } from '@/components/tyre/TyreReports';
+import { TyreReports } from '@/components/TyreManagement/TyreReports';
 
 const ReportsPage = () => {
   return (

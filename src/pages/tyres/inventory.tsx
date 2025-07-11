@@ -1,4 +1,4 @@
-import { TyreInventory } from '@/components/tyre/TyreInventory';
+import { TyreInventory } from '@/components/TyreManagement/TyreInventory';
 
 const InventoryPage = () => {
   return (

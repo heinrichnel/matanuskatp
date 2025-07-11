@@ -1,4 +1,4 @@
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { firebaseApp } from '../firebaseConfig';
 
 // Initialize Firestore
@@ -12,6 +12,8 @@ let connectionStatus: ConnectionStatus = 'connecting';
 let connectionError: Error | null = null;
 let connectionListeners: ((status: ConnectionStatus, error?: Error | null) => void)[] = [];
 let emulatorConnected = false;
+let networkRetryCount = 0;
+const MAX_RETRY_ATTEMPTS = 3;
 
 /**
  * Check if emulator is accessible
@@ -126,6 +128,11 @@ export const getConnectionStatus = (): { status: ConnectionStatus; error: Error 
  * This sets up listeners for online/offline status and Firestore connectivity
  */
 export const initializeConnectionMonitoring = async () => {
+  console.log('🔄 Initializing Firestore connection monitoring...');
+  
+  // Start health monitoring
+  startConnectionHealthMonitor();
+  
   // Listen for browser online/offline events
   window.addEventListener('online', () => {
     console.log('🌐 Browser reports online status');
@@ -198,6 +205,75 @@ export const attemptReconnect = async (): Promise<boolean> => {
     setConnectionStatus('error', error as Error);
     return false;
   }
+};
+
+/**
+ * Handle network-related Firestore errors with retry logic
+ */
+export const handleFirestoreError = async (error: any): Promise<void> => {
+  console.warn('🔄 Firestore operation failed, analyzing error:', error);
+  
+  // Check if it's a network-related error
+  if (error?.code === 'unavailable' || 
+      error?.message?.includes('transport errored') ||
+      error?.message?.includes('WebChannelConnection') ||
+      error?.message?.includes('RPC')) {
+    
+    networkRetryCount++;
+    console.warn(`⚠️ Network error detected (attempt ${networkRetryCount}/${MAX_RETRY_ATTEMPTS})`);
+    
+    if (networkRetryCount <= MAX_RETRY_ATTEMPTS) {
+      console.log('🔄 Attempting automatic retry in 2 seconds...');
+      
+      // Disable and re-enable network to force reconnection
+      try {
+        await disableNetwork(firestore);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await enableNetwork(firestore);
+        
+        setConnectionStatus('connected');
+        networkRetryCount = 0; // Reset on successful reconnection
+        console.log('✅ Network reconnection successful');
+      } catch (retryError) {
+        console.error('❌ Network reconnection failed:', retryError);
+        setConnectionStatus('error', retryError as Error);
+      }
+    } else {
+      console.error('❌ Max retry attempts reached, switching to offline mode');
+      setConnectionStatus('disconnected', error);
+      networkRetryCount = 0; // Reset counter
+    }
+  } else {
+    // Not a network error, handle normally
+    setConnectionStatus('error', error);
+  }
+};
+
+/**
+ * Monitor Firestore connection health
+ */
+export const startConnectionHealthMonitor = () => {
+  console.log('🔍 Starting Firestore connection health monitor...');
+  
+  // Monitor online/offline status
+  window.addEventListener('online', () => {
+    console.log('🌐 Network connection restored');
+    networkRetryCount = 0;
+    setConnectionStatus('connected');
+  });
+  
+  window.addEventListener('offline', () => {
+    console.log('📡 Network connection lost');
+    setConnectionStatus('disconnected');
+  });
+  
+  // Periodic health check (every 30 seconds)
+  setInterval(async () => {
+    if (connectionStatus === 'error' && navigator.onLine) {
+      console.log('🔄 Periodic health check: attempting reconnection...');
+      await attemptReconnect();
+    }
+  }, 30000);
 };
 
 // Export the initialized firestore instance

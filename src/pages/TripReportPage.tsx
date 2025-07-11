@@ -1,4 +1,4 @@
-import TripReport from "../components/reports/TripReport";
+import TripReport from "../components/TripManagement/TripReport";
 import { useParams } from "react-router-dom";
 import { useFirestoreDoc } from "../hooks/useFirestoreDoc";
 
