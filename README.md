@@ -19,8 +19,37 @@ A comprehensive fleet management and transportation operations dashboard built w
 - **Frontend**: React, TypeScript, Vite, TailwindCSS
 - **Backend**: Firebase (Firestore, Functions, Storage)
 - **Hosting**: Netlify (Frontend), Firebase (Backend)
+- **Maps Services**: Google Cloud Run microservice (Maps API proxy)
 
 ## System Architecture
+
+### Maps Integration
+
+The application uses a secure microservice architecture for maps integration:
+
+- **Cloud Run Maps Service**: A dedicated service running on Google Cloud Run that proxies requests to Google Maps APIs
+- **Service URL**: https://maps-250085264089.africa-south1.run.app (configurable via environment variables)
+- **Security Benefits**: 
+  - API keys are kept secure on the server side
+  - Reduced risk of API key abuse/theft
+  - Centralized usage tracking and quota management
+  
+The Maps components connect to this service instead of directly using the Google Maps JavaScript API with a client-side key.
+
+#### Configuration
+
+1. Set the Maps service URL in your `.env` file:
+   ```
+   VITE_MAPS_SERVICE_URL=https://maps-250085264089.africa-south1.run.app
+   VITE_MAPS_SERVICE_PORT=8081
+   ```
+
+2. The Maps components will automatically connect to this service for all maps-related functionality.
+
+3. If you need to troubleshoot connection issues:
+   - Check the browser console for connection errors
+   - Verify the Cloud Run service is running and accessible
+   - Test the service's health endpoint directly (e.g., https://maps-250085264089.africa-south1.run.app/health)
 
 ### Core Contexts
 
@@ -144,9 +173,11 @@ The dashboard is organized into modular sections, each with its own set of compo
    ```
 
 3. Set up environment variables
-   Create a `.env` file in the project root with your Firebase configuration:
+   Create a `.env` file in the project root with your Firebase and Maps configuration:
    ```
    VITE_FIREBASE_API=your-api-key
+   VITE_MAPS_SERVICE_URL=https://maps-250085264089.africa-south1.run.app
+   VITE_MAPS_SERVICE_PORT=8081
    VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
    VITE_FIREBASE_DATABASE_URL=https://your-project-id.firebaseio.com
    VITE_FIREBASE_PROJECT_ID=your-project-id

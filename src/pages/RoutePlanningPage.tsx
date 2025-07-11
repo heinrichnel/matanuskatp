@@ -51,11 +51,28 @@ const RoutePlanningPage: React.FC = () => {
   const [destinationRef, setDestinationRef] = useState<google.maps.places.Autocomplete | null>(null);
   const [waypointRefs, setWaypointRefs] = useState<(google.maps.places.Autocomplete | null)[]>([null]);
 
-  // Load Google Maps JS API
+  // Get maps service URL from env
+  const mapsServiceUrl = import.meta.env.VITE_MAPS_SERVICE_URL || 'https://maps-250085264089.africa-south1.run.app';
+  
+  // Format the URL properly with protocol
+  const formatServiceUrl = (url: string): string => {
+    if (!url) return '';
+    let formattedUrl = url;
+    if (!formattedUrl.startsWith('http')) {
+      formattedUrl = `https://${formattedUrl}`;
+    }
+    return formattedUrl;
+  };
+
+  const formattedMapsServiceUrl = formatServiceUrl(mapsServiceUrl);
+
+  // Load Google Maps JS API through our service instead of directly
   const { isLoaded: isApiLoaded } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+    googleMapsApiKey: '',  // No API key needed as our service handles this
     libraries,
+    // The Maps service should be configured to proxy requests at /maps-api
+    googleMapsUrl: `${formattedMapsServiceUrl}/maps-api`,
   });
 
   // Fetch trip data on component mount
