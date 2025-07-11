@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { Trip, FollowUpRecord } from '../../types';
+import { Trip } from '../../types';
 
 // ─── UI Components ───────────────────────────────────────────────
 import Modal from '../ui/Modal';
@@ -45,25 +45,17 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
   onClose,
   onUpdatePayment
 }) => {
-  const [formData, setFormData] = useState<{
-    paymentStatus: PaymentStatus;
-    paymentAmount: string;
-    paymentReceivedDate: string;
-    paymentNotes: string;
-    paymentMethod: string;
-    bankReference: string;
-  }>({
-    paymentStatus: (trip.paymentStatus as PaymentStatus) || 'unpaid',
+  const [formData, setFormData] = useState({
+    paymentStatus: trip.paymentStatus || 'unpaid' as PaymentStatus,
     paymentAmount: trip.paymentAmount?.toString() || '',
     paymentReceivedDate: trip.paymentReceivedDate || new Date().toISOString().split('T')[0],
     paymentNotes: '',
-    paymentMethod: 'bank_transfer',
+    paymentMethod: 'bank_transfer' as string,
     bankReference: ''
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (field: keyof typeof formData, value: string) => {
+  const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -117,7 +109,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
     return invoiceAmount - paidAmount;
   };
 
-  const getPaymentStatusColor = (status: PaymentStatus) => {
+  const getPaymentStatusColor = (status: string) => {
     switch (status) {
       case 'paid': return 'text-green-600 bg-green-50 border-green-200';
       case 'partial': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
@@ -125,9 +117,8 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
     }
   };
 
-  const agingDays = trip.invoiceDueDate
-    ? Math.floor((new Date().getTime() - new Date(trip.invoiceDueDate).getTime()) / (1000 * 60 * 60 * 24))
-    : 0;
+  const agingDays = trip.invoiceDueDate ? 
+    Math.floor((new Date().getTime() - new Date(trip.invoiceDueDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
 
   return (
     <Modal
@@ -149,8 +140,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
             <div>
               <p><strong>Invoice Date:</strong> {formatDate(trip.invoiceDate!)}</p>
               <p><strong>Due Date:</strong> {formatDate(trip.invoiceDueDate!)}</p>
-              <p>
-                <strong>Aging:</strong>
+              <p><strong>Aging:</strong> 
                 <span className={`ml-1 font-bold ${agingDays > 30 ? 'text-red-600' : agingDays > 0 ? 'text-orange-600' : 'text-green-600'}`}>
                   {agingDays} days
                 </span>
@@ -163,8 +153,8 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
         <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
           <h4 className="text-sm font-medium text-gray-800 mb-2">Current Payment Status</h4>
           <div className="flex items-center space-x-3">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getPaymentStatusColor(trip.paymentStatus as PaymentStatus)}`}>
-              {(trip.paymentStatus as string).toUpperCase()}
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getPaymentStatusColor(trip.paymentStatus)}`}>
+              {trip.paymentStatus.toUpperCase()}
             </span>
             {trip.paymentAmount && (
               <span className="text-sm text-gray-600">
@@ -182,11 +172,11 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
         {/* Payment Update Form */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900">Update Payment Information</h3>
-
+          
           <Select
             label="Payment Status *"
             value={formData.paymentStatus}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleChange('paymentStatus', e.target.value)}
+            onChange={(value: string) => handleChange('paymentStatus', value)}
             options={[
               { label: 'Unpaid', value: 'unpaid' },
               { label: 'Partial Payment', value: 'partial' },
@@ -203,7 +193,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
                   step="0.01"
                   min="0.01"
                   value={formData.paymentAmount}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('paymentAmount', e.target.value)}
+                  onChange={(value: string) => handleChange('paymentAmount', value)}
                   placeholder="0.00"
                   error={errors.paymentAmount}
                 />
@@ -211,7 +201,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
                   label="Payment Received Date *"
                   type="date"
                   value={formData.paymentReceivedDate}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('paymentReceivedDate', e.target.value)}
+                  onChange={(value: string) => handleChange('paymentReceivedDate', value)}
                   error={errors.paymentReceivedDate}
                 />
               </div>
@@ -220,7 +210,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
                 <Select
                   label="Payment Method *"
                   value={formData.paymentMethod}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleChange('paymentMethod', e.target.value)}
+                  onChange={(value: string) => handleChange('paymentMethod', value)}
                   options={[
                     { label: 'Bank Transfer', value: 'bank_transfer' },
                     { label: 'Cash', value: 'cash' },
@@ -233,7 +223,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
                 <Input
                   label="Bank Reference / Transaction ID"
                   value={formData.bankReference}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('bankReference', e.target.value)}
+                  onChange={(value: string) => handleChange('bankReference', value)}
                   placeholder="e.g., TXN123456789"
                 />
               </div>
@@ -291,7 +281,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
           <Textarea
             label="Payment Notes"
             value={formData.paymentNotes}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange('paymentNotes', e.target.value)}
+            onChange={(value: string) => handleChange('paymentNotes', value)}
             placeholder="Add any notes about this payment (e.g., late payment reason, payment terms, etc.)..."
             rows={3}
           />
@@ -302,7 +292,7 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
           <div className="bg-gray-50 border border-gray-200 rounded-md p-4">
             <h4 className="text-sm font-medium text-gray-800 mb-2">Recent Follow-ups ({trip.followUpHistory.length})</h4>
             <div className="max-h-32 overflow-y-auto space-y-2">
-              {trip.followUpHistory.slice(-3).map((followUp: FollowUpRecord, index: number) => (
+              {trip.followUpHistory.slice(-3).map((followUp, index) => (
                 <div key={index} className="text-xs bg-white p-2 rounded border">
                   <div className="flex justify-between items-start">
                     <div>

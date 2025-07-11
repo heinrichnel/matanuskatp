@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useLoadGoogleMaps, isGoogleMapsAPILoaded } from '../../utils/googleMapsLoader';
 
 // Wialon SDK types available on window.wialon
 declare global { interface Window { wialon: any } }
@@ -15,27 +16,11 @@ const MapsView: React.FC = () => {
   // keep track overlays
   const trackOverlaysRef = useRef<Record<number, google.maps.ImageMapType>>({});
 
+  // Load Google Maps API using the recommended hook
+  useLoadGoogleMaps();
+
   useEffect(() => {
-    if (mapRef.current && !map) {
-      // Dynamically load Google Maps script if not already loaded
-      if (!window.google) {
-        const key = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        if (!key) {
-          setError("Google Maps API key is missing. Check your .env configuration.");
-          return;
-        }
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${key}&v=beta&libraries=maps&loading=async`;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => {
-          // Once script is loaded, retry initialization
-          setMap(null); // trigger useEffect again
-        };
-        script.onerror = () => setError('Failed to load Google Maps script.');
-        document.head.appendChild(script);
-        return;
-      }
+    if (mapRef.current && !map && isGoogleMapsAPILoaded()) {
       const initializeMap = async () => {
         try {
           // Import the maps library
@@ -57,6 +42,16 @@ const MapsView: React.FC = () => {
       };
 
       initializeMap();
+    } else if (!isGoogleMapsAPILoaded()) {
+      // Google Maps not loaded yet, wait for it
+      const checkGoogleMapsInterval = setInterval(() => {
+        if (isGoogleMapsAPILoaded()) {
+          clearInterval(checkGoogleMapsInterval);
+          setMap(null); // trigger useEffect again
+        }
+      }, 500);
+      
+      return () => clearInterval(checkGoogleMapsInterval);
     }
   }, [mapRef, map]);
 

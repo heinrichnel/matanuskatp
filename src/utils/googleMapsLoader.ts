@@ -1,128 +1,99 @@
 /**
  * Centralized Google Maps API loader utility
- * Ensures the Google Maps API is loaded only once and with optimal performance settings
+ * Implements the recommended pattern for loading Google Maps JavaScript API
  */
+import { useEffect } from 'react';
 
+// Track if Google Maps is already loaded to prevent duplicate loading
 let isGoogleMapsLoaded = false;
-let isGoogleMapsLoading = false;
-let googleMapsPromise: Promise<void> | null = null;
 
 /**
- * Load Google Maps JavaScript API with optimal performance settings
- * @param options - Configuration options for the Google Maps API
+ * React hook to load Google Maps JavaScript API
+ * 
+ * @param apiKey - Google Maps API key (optional, will use env variable if not provided)
+ * @param libraries - Array of libraries to load (defaults to ['places'])
+ * @returns void
+ * 
+ * Example usage:
+ * ```
+ * // In your component:
+ * useLoadGoogleMaps(); // Uses API key from environment
+ * 
+ * // Or with custom API key and libraries:
+ * useLoadGoogleMaps('YOUR_API_KEY', ['places', 'geometry']);
+ * ```
  */
-export interface GoogleMapsLoadOptions {
-  apiKey?: string;
-  libraries?: string[];
-  version?: string;
-  callback?: string;
-}
-
-export const loadGoogleMapsAPI = (options: GoogleMapsLoadOptions = {}): Promise<void> => {
-  // Return existing promise if already loading or loaded
-  if (googleMapsPromise) {
-    return googleMapsPromise;
-  }
-
-  // If already loaded, return resolved promise
-  if (isGoogleMapsLoaded && window.google?.maps) {
-    return Promise.resolve();
-  }
-
-  // Set loading flag
-  isGoogleMapsLoading = true;
-
-  googleMapsPromise = new Promise<void>((resolve, reject) => {
-    try {
-      // Check if script already exists
-      const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
-      if (existingScript) {
-        console.log("✅ Google Maps script already exists in DOM");
-        isGoogleMapsLoaded = true;
-        isGoogleMapsLoading = false;
-        resolve();
-        return;
-      }
-
-      // Get configuration
-      const apiKey = options.apiKey || import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-      const libraries = options.libraries || ['places'];
-      const version = options.version || 'weekly';
-      const callback = options.callback || 'initGoogleMaps';
-
-      if (!apiKey) {
-        const error = "Google Maps API key is missing. Please set VITE_GOOGLE_MAPS_API_KEY in your .env file.";
-        console.error(error);
-        isGoogleMapsLoading = false;
-        reject(new Error(error));
-        return;
-      }
-
-      // Create callback function
-      (window as any)[callback] = () => {
-        console.log("✅ Google Maps API loaded successfully");
-        isGoogleMapsLoaded = true;
-        isGoogleMapsLoading = false;
-        resolve();
-      };
-
-      // Create script element with optimal loading
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=${libraries.join(',')}&v=${version}&loading=async&callback=${callback}`;
-      script.async = true;
-      script.defer = true;
-      
-      script.onerror = () => {
-        const error = "Failed to load Google Maps API script";
-        console.error(error);
-        isGoogleMapsLoading = false;
-        googleMapsPromise = null;
-        reject(new Error(error));
-      };
-
-      document.head.appendChild(script);
-      console.log("🗺️ Loading Google Maps API with optimal performance settings...");
-      
-    } catch (error) {
-      console.error("Error loading Google Maps API:", error);
-      isGoogleMapsLoading = false;
-      googleMapsPromise = null;
-      reject(error);
+export function useLoadGoogleMaps(
+  apiKey?: string, 
+  libraries: string[] = ['places']
+): void {
+  useEffect(() => {
+    // If Google Maps is already loaded, don't load it again
+    if (window.google && window.google.maps) {
+      isGoogleMapsLoaded = true;
+      return;
     }
-  });
+    
+    // If script is already in the DOM but not loaded yet, wait for it
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]');
+    if (existingScript) {
+      return;
+    }
 
-  return googleMapsPromise;
-};
+    // Get API key from props or environment variable
+    const mapsApiKey = apiKey || import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    
+    if (!mapsApiKey) {
+      console.error("Google Maps API key is missing. Please set VITE_GOOGLE_MAPS_API_KEY in your .env file.");
+      return;
+    }
+
+    // Create the script element
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=${libraries.join(',')}`;
+    script.async = true;
+    script.defer = true;
+    
+    // Add event listeners for load and error
+    script.addEventListener('load', () => {
+      console.log("✅ Google Maps API loaded successfully");
+      isGoogleMapsLoaded = true;
+    });
+    
+    script.addEventListener('error', () => {
+      console.error("Failed to load Google Maps API script");
+      // Remove the script on error to allow retry
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    });
+
+    // Append the script to the document body
+    document.body.appendChild(script);
+    console.log("🗺️ Loading Google Maps API...");
+
+    // Cleanup function to remove the script when component unmounts
+    return () => {
+      // Only remove if it's the script we added and Google Maps isn't fully loaded yet
+      if (script.parentNode && !isGoogleMapsLoaded) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, [apiKey, libraries.join(',')]); // Re-run if apiKey or libraries change
+}
 
 /**
  * Check if Google Maps API is loaded
  */
 export const isGoogleMapsAPILoaded = (): boolean => {
-  return isGoogleMapsLoaded && !!window.google?.maps;
-};
-
-/**
- * Check if Google Maps API is currently loading
- */
-export const isGoogleMapsAPILoading = (): boolean => {
-  return isGoogleMapsLoading;
-};
-
-/**
- * Get the current Google Maps API loading status
- */
-export const getGoogleMapsAPIStatus = () => {
-  return {
-    isLoaded: isGoogleMapsAPILoaded(),
-    isLoading: isGoogleMapsAPILoading(),
-    isAvailable: !!window.google?.maps
-  };
+  return !!window.google?.maps;
 };
 
 // Global window interface extension
 declare global {
   interface Window {
-    google?: typeof google;
-    initGoogleMaps?: () => void;
+    google?: {
+      maps: any;
+    };
   }
 }
