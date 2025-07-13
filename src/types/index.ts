@@ -1061,8 +1061,7 @@ export const FOLLOW_UP_THRESHOLDS = {
 // (Removed unused INVOICE_SUBMISSION_STATUSES to resolve compile error)
 
 export const FLEETS_WITH_PROBES = [
-  // Add your fleet numbers that have probes here, e.g.:
-  '21H', '23H', '24H', '26H', '28H', '30H', '31H'
+  '21H', '22H', '23H', '24H', '26H', '28H', '30H', '31H'
 ];
 
 // Tyre related types for tyre management module
