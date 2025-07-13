@@ -1,7 +1,7 @@
 import { setGlobalOptions } from "firebase-functions/v2";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
-import { fetchWialonGPSData } from "./lib/wialon-gps.js";
+import { fetchWialonGPSData } from "./lib/wialon-gps";
 
 // Initialize Firebase only if not already initialized
 try {

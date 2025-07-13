@@ -1,14 +1,13 @@
-// ─── React & Context ─────────────────────────────────────────────
+// ─── // ─── UI Components ───────────────────────────────────────────────────
+import Modal from '../ui/Modal';
+import Button from '../ui/Button';
+import { Input, Select, TextArea } from '../ui/FormElements';
+import FleetSelector from '../common/FleetSelector';
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 
 // ─── Types ───────────────────────────────────────────────────────
 import { DRIVERS, FUEL_STATIONS, FLEET_NUMBERS, DieselConsumptionRecord, FLEETS_WITH_PROBES } from '../../types';
-
-// ─── UI Components ───────────────────────────────────────────────
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Input, Select, TextArea } from '../ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import { 
@@ -365,18 +364,14 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
 
         {/* Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Select
-            label="Fleet Number *"
+          <FleetSelector
+            label="Fleet Number"
             value={formData.fleetNumber}
-            onChange={val => handleChange('fleetNumber', val)}
-            options={[
-              { label: 'Select fleet...', value: '' },
-              ...FLEET_NUMBERS.map(f => ({ 
-                label: `${f}${FLEETS_WITH_PROBES.includes(f) ? ' (Probe)' : ['4F', '5F', '6F', '7F', '8F'].includes(f) ? ' (Reefer)' : ''}`, 
-                value: f 
-              }))
-            ]}
+            onChange={(value: string) => handleChange('fleetNumber', value)}
+            required
+            filterType={formData.isReeferUnit ? 'Reefer' : 'Truck'} // Filter by vehicle type
             error={errors.fleetNumber}
+            className="w-full px-3 py-2 border rounded-md"
           />
 
           <Input

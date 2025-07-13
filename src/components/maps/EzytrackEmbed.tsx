@@ -14,6 +14,6 @@ export const EzytrackEmbed: React.FC = () => {
       />
     </div>
   );
-};
+}
 
 export default EzytrackEmbed;

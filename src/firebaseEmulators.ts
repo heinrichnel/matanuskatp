@@ -105,3 +105,4 @@ export const checkEmulatorsStatus = async () => {
     storage: storageStatus
   };
 };
+

@@ -8,6 +8,7 @@
     "ms-vsliveshare.vsliveshare",
     "streetsidesoftware.code-spell-checker",
     "bradlc.vscode-tailwindcss",
-    "kodu-ai.claude-dev-experimental"
+    "kodu-ai.claude-dev-experimental",
+    "google.geminicodeassist"
   ]
 }

@@ -206,7 +206,7 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
               step="0.01"
               min="0.01"
               value={formData.amount}
-              onChange={(value) => handleChange('amount', value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('amount', e.target.value)}
               error={errors.amount}
             />
             {hasAmountChange && (
@@ -228,7 +228,7 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
             <TextArea
               label="Updated Notes"
               value={formData.notes}
-              onChange={(value) => handleChange('notes', value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange('notes', e.target.value)}
               placeholder="Add or update notes for this cost entry..."
               rows={3}
             />
@@ -269,7 +269,7 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
             <TextArea
               label="Resolution Comment (Required) *"
               value={formData.resolutionComment}
-              onChange={(value) => handleChange('resolutionComment', value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange('resolutionComment', e.target.value)}
               placeholder="Explain what was corrected and why..."
               rows={3}
               error={errors.resolutionComment}

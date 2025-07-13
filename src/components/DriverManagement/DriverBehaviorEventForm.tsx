@@ -343,7 +343,7 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
               type="number"
               min="0"
               value={formData.points.toString()}
-              onChange={(value) => handleChange('points', parseInt(value))}
+              onChange={(e) => handleChange('points', parseInt(e.target.value))}
               className="w-20"
             />
             <span className="text-sm text-gray-500">points</span>
@@ -353,7 +353,7 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
         {/* Supporting Documents */}
         <div>
           {/* Use FileUp icon in file upload section */}
-          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+          <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
             <FileUp className="w-4 h-4 text-blue-500" /> Supporting Documents (Optional)
           </label>
           <input

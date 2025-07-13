@@ -124,7 +124,7 @@ const FuelReconciliationTab: React.FC = () => {
               alert('Failed to parse CSV file. Please check the format and try again.');
             }
           },
-          error: (error) => {
+          error: (error: any) => {
             console.error('Error parsing CSV:', error);
             setIsProcessing(false);
             alert('Failed to parse CSV file. Please check the format and try again.');

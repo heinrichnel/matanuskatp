@@ -89,6 +89,37 @@ export const isGoogleMapsAPILoaded = (): boolean => {
   return !!window.google?.maps;
 };
 
+/**
+ * Check if Google Maps Places library is loaded
+ */
+export const isPlacesLibraryLoaded = (): boolean => {
+  return isGoogleMapsAPILoaded() && !!window.google?.maps.places;
+};
+
+/**
+ * Safe access to Google Maps API
+ * @returns The Google Maps API object or null if not available
+ */
+export const getGoogleMapsApi = () => {
+  if (!isGoogleMapsAPILoaded()) {
+    console.error('Google Maps API is not loaded');
+    return null;
+  }
+  return window.google.maps;
+};
+
+/**
+ * Safe access to Places API
+ * @returns The Places API object or null if not available
+ */
+export const getPlacesApi = () => {
+  if (!isPlacesLibraryLoaded()) {
+    console.error('Google Maps Places library is not loaded');
+    return null;
+  }
+  return window.google.maps.places;
+};
+
 // Global window interface extension
 declare global {
   interface Window {
