@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { isGoogleMapsAPILoaded } from '../utils/googleMapsLoader';
+import { loadGoogleMapsScript } from '../utils/googleMapsLoader';
 import {
   Trip,
   CostEntry,
@@ -288,87 +288,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Google Maps initialization function
   const loadGoogleMaps = useCallback(async (): Promise<void> => {
+    if (isGoogleMapsLoaded) return;
+
+    setIsLoading(prev => ({ ...prev, loadGoogleMaps: true }));
+    setGoogleMapsError(null);
+
     try {
-      setIsLoading(prev => ({ ...prev, loadGoogleMaps: true }));
-      
-      // If Google Maps is already loaded, don't load it again
-      if (isGoogleMapsAPILoaded()) {
-        setIsGoogleMapsLoaded(true);
-        return;
-      }
-      
-      // Get maps service URL from environment 
-      const mapsServiceUrl = import.meta.env.VITE_MAPS_SERVICE_URL || 'https://maps-250085264089.africa-south1.run.app';
-      
-      // Format the URL properly with protocol
-      const formatUrl = (url: string): string => {
-        if (!url) return '';
-        let formattedUrl = url;
-        if (!formattedUrl.startsWith('http')) {
-          formattedUrl = `https://${formattedUrl}`;
-        }
-        return formattedUrl;
-      };
-      
-      const formattedMapsServiceUrl = formatUrl(mapsServiceUrl);
-      const libraries = ['places'];
-      
-      // Create a script element to load Google Maps via our proxy service
-      // API key is managed by the service
-      const script = document.createElement("script");
-      script.src = `${formattedMapsServiceUrl}/maps-api?libraries=${libraries.join(',')}`;
-      script.async = true;
-      script.defer = true;
-      
-      // Create a promise to wait for the script to load
-      const loadPromise = new Promise<void>((resolve, reject) => {
-        script.addEventListener('load', () => {
-          setIsGoogleMapsLoaded(true);
-          console.log("✅ Google Maps API loaded via script");
-          resolve();
-        });
-        
-        script.addEventListener('error', (e) => {
-          const errorMsg = "Failed to load Google Maps API script";
-          setGoogleMapsError(errorMsg);
-          console.error(errorMsg, e);
-          reject(new Error(errorMsg));
-        });
-      });
-      
-      // Append the script to the document body
-      document.body.appendChild(script);
-      
-      // Wait for the script to load
-      await loadPromise;
-      
+      await loadGoogleMapsScript();
+      setIsGoogleMapsLoaded(true);
+      console.log("✅ Google Maps API loaded via singleton utility.");
     } catch (error) {
-      console.error("❌ Error loading Google Maps API:", error);
-      setGoogleMapsError("Failed to load Google Maps: " + (error as Error).message);
+      const errorMsg = "Failed to load Google Maps API script. Please check your network connection and API key.";
+      setGoogleMapsError(errorMsg);
+      console.error(errorMsg, error);
       throw error;
     } finally {
       setIsLoading(prev => ({ ...prev, loadGoogleMaps: false }));
     }
-  }, []);
+  }, [isGoogleMapsLoaded]);
   
-  // Check if Google Maps is loaded when the app starts
+  // Load Google Maps on initial app load
   useEffect(() => {
-    const checkGoogleMapsLoaded = () => {
-      try {
-        if (isGoogleMapsAPILoaded()) {
-          setIsGoogleMapsLoaded(true);
-        } else {
-          // If not loaded, try to load it
-          loadGoogleMaps().catch(err => {
-            console.error("Failed to load Google Maps on initial load:", err);
-          });
-        }
-      } catch (err) {
-        console.error("Error checking Google Maps loaded status:", err);
-      }
-    };
-    
-    checkGoogleMapsLoaded();
+    loadGoogleMaps().catch(err => {
+      console.error("AppContext: Initial Google Maps load failed.", err.message);
+    });
   }, [loadGoogleMaps]);
 
   useEffect(() => {
