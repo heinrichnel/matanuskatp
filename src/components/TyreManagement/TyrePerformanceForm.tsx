@@ -5,6 +5,7 @@ import Input from '@/components/ui/Input';
 import Form from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { Save, X } from "lucide-react";
+import { VehicleSelector } from '../common/VehicleSelector';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 
 interface TyrePerformanceData {
@@ -75,7 +76,13 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
                     <FormItem>
                       <FormLabel>Fleet Number</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. 21H" {...field} />
+                        <VehicleSelector
+                          value={field.value}
+                          onChange={(value) => field.onChange(value)}
+                          label=""
+                          filterType={['Truck', 'Trailer']} // Only trucks and trailers have tyres
+                          className="w-full"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

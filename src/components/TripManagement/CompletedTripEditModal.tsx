@@ -139,14 +139,18 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
             label="Base Revenue"
             type="number"
             value={formData.baseRevenue}
-            onChange={val => setFormData(p => ({ ...p, baseRevenue: val }))}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData(p => ({ ...p, baseRevenue: e.target.value }))
+            }
             error={errors.baseRevenue}
           />
           <Input
             label="Distance (km)"
             type="number"
             value={formData.distanceKm}
-            onChange={val => setFormData(p => ({ ...p, distanceKm: val }))}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setFormData(p => ({ ...p, distanceKm: e.target.value }))
+            }
             error={errors.distanceKm}
           />
         </div>
@@ -157,7 +161,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
           <Select
             label="Reason for Edit *"
             value={editReason}
-            onChange={setEditReason}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEditReason(e.target.value)}
             options={[
               { label: 'Select reason...', value: '' },
               ...TRIP_EDIT_REASONS.map(reason => ({ label: reason, value: reason }))
@@ -168,7 +172,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
             <TextArea
               label="Please specify reason"
               value={customReason}
-              onChange={setCustomReason}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setCustomReason(e.target.value)}
               error={errors.editReason}
               rows={2}
             />

@@ -18,6 +18,7 @@ import {
   Link,
   Trash2
 } from 'lucide-react';
+import FleetSelector from '../common/FleetSelector';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import SyncIndicator from '../ui/SyncIndicator';
 import ManualDieselEntryModal from './ManualDieselEntryModal';
@@ -499,20 +500,22 @@ const DieselDashboard: React.FC = () => {
         />
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <Select
-              label="Fleet"
-              value={filterFleet}
-              onChange={setFilterFleet}
-              options={[
-                { label: 'All Fleets', value: '' },
-                ...uniqueFleets.map(f => ({ label: f, value: f }))
-              ]}
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Fleet
+              </label>
+              <FleetSelector 
+                value={filterFleet}
+                onChange={(value) => setFilterFleet(value)}
+                placeholder="All Fleets"
+                className="w-full"
+              />
+            </div>
             
             <Select
               label="Driver"
               value={filterDriver}
-              onChange={setFilterDriver}
+              onChange={(e) => setFilterDriver(e.target.value)}
               options={[
                 { label: 'All Drivers', value: '' },
                 ...uniqueDrivers.map(d => ({ label: d, value: d }))
@@ -522,7 +525,7 @@ const DieselDashboard: React.FC = () => {
             <Select
               label="Fuel Station"
               value={filterFuelStation}
-              onChange={setFilterFuelStation}
+              onChange={(e) => setFilterFuelStation(e.target.value)}
               options={[
                 { label: 'All Stations', value: '' },
                 ...uniqueFuelStations.map(s => ({ label: s, value: s }))
@@ -532,7 +535,7 @@ const DieselDashboard: React.FC = () => {
             <Select
               label="Type"
               value={filterType}
-              onChange={setFilterType}
+              onChange={(e) => setFilterType(e.target.value)}
               options={[
                 { label: 'All Types', value: 'all' },
                 { label: 'Horse Only', value: 'horse' },

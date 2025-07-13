@@ -1,12 +1,11 @@
-// ─── React ───────────────────────────────────────────────────────
+// ───// ─── UI Components ───────────────────────────────────────────────────
+import { Input, Select, Textarea } from '../ui/FormElements.tsx';
+import Button from '../ui/Button.tsx';
+import FleetSelector from '../common/FleetSelector';
 import React, { useState, useEffect } from 'react';
 
 // ─── Types & Constants ───────────────────────────────────────────
 import { Trip, CLIENTS, DRIVERS } from '../../types/index.ts';
-
-// ─── UI Components ───────────────────────────────────────────────
-import { Input, Select, Textarea } from '../ui/FormElements.tsx';
-import Button from '../ui/Button.tsx';
 
 
 interface TripFormProps {
@@ -92,12 +91,17 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        <Input 
-          label="Fleet Number" 
-          value={fleetNumber} 
-          onChange={e => setFleetNumber(e.target.value)} 
-          required 
-        />
+        {/* Replace the text input with our new FleetSelector component */}
+        <div className="col-span-1">
+          <FleetSelector 
+            label="Fleet Number"
+            value={fleetNumber} 
+            onChange={(value) => setFleetNumber(value)}
+            required
+            filterType={['Truck', 'Reefer', 'Trailer']} // Allow all vehicle types
+            className="w-full px-3 py-2 border rounded-md"
+          />
+        </div>
         <Select
           label="Client Name"
           value={clientName}

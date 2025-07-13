@@ -29,12 +29,12 @@ import TyreManagement from "./components/Workshop Management/TyreManagement";
 import ActiveTrips from "./components/TripManagement/ActiveTrips";
 import ActiveTripsPage from "./pages/ActiveTripsPage";
 import CompletedTrips from "./components/TripManagement/CompletedTrips";
-import FlagsInvestigations from "./components/flags/FlagsInvestigations";
+import FlagsInvestigations from "./components/Flags/FlagsInvestigations";
 import ClientManagementPage from "./pages/ClientManagementPage";
 import CurrencyFleetReport from "./components/InvoiceManagement/CurrencyFleetReport";
 import TripDashboard from "./components/TripManagement/TripDashboard";
 import InvoiceAgingDashboard from "./components/InvoiceManagement/InvoiceAgingDashboard";
-import CustomerRetentionDashboard from "./components/performance/CustomerRetentionDashboard";
+import CustomerRetentionDashboard from "./components/Performance/CustomerRetentionDashboard";
 import ActionLog from "./components/actionlog/ActionLog";
 import TripManagementPage from "./pages/TripManagementPage";
 import WorkshopPage from "./pages/WorkshopPage";
@@ -99,6 +99,7 @@ import InventoryDashboard from "./components/Inventory Management/InventoryDashb
 import StockManager from "./components/Inventory Management/StockManager";
 import PurchaseOrderTracker from "./components/Inventory Management/PurchaseOrderTracker";
 import MapsView from "./components/maps/MapsView";
+import FleetLocationMapPage from "./pages/FleetLocationMapPage";
 import InventoryPage from "./pages/InventoryPage";
 import MyMapComponent from "./components/MyMapComponent";
   
@@ -178,6 +179,7 @@ const App: React.FC = () => {
                   <Route path="templates" element={<div>Trip Templates</div>} />
                   <Route path="reports" element={<div>Trip Reports</div>} />
                   <Route path="maps" element={<MapsView />} />
+                  <Route path="fleet-location" element={<FleetLocationMapPage />} />
                 </Route>
                 {/* Redirect legacy routes to new nested routes */}
                 <Route path="active-trips" element={<Navigate to="/trips?tab=active" replace />} />

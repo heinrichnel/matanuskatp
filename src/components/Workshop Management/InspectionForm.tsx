@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button, { Button } from '../ui/Button';
+import Button from '../ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
 import { Select } from '../ui/FormElements';
 import { Clipboard, CheckCircle, Save, FileText, ArrowLeft, AlertTriangle } from 'lucide-react';
+import FleetSelector from '../common/FleetSelector';
 import InspectionItemCard from './InspectionItemCard';
 import { inspectionTemplates } from '../../data/inspectionTemplates';
 import { FLEET_NUMBERS, DRIVERS } from '../../types';
@@ -193,14 +194,13 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
         <CardHeader title="Inspection Details" />
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Select
-              label="Fleet Number *"
+            <FleetSelector
+              label="Fleet Number"
               value={formState.fleetNumber}
-              onChange={(value) => setFormState(prev => ({ ...prev, fleetNumber: value }))}
-              options={[
-                { label: 'Select fleet...', value: '' },
-                ...FLEET_NUMBERS.map(f => ({ label: f, value: f }))
-              ]}
+              onChange={(value: string) => setFormState(prev => ({ ...prev, fleetNumber: value }))}
+              required
+              filterType={['Truck', 'Trailer', 'Reefer']} // Allow all vehicle types
+              className="w-full px-3 py-2 border rounded-md"
             />
             
             <Select

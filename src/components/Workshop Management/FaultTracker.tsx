@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, orderBy, Timestamp, addDoc, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Truck, AlertTriangle, CheckCircle, MoreHorizontal, Search, Filter, Plus } from 'lucide-react';
+import FleetSelector from '../common/FleetSelector';
 
 interface Fault {
   id: string;
@@ -212,14 +213,13 @@ const FaultTracker: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vehicle Registration*
+                Vehicle*
               </label>
-              <input
-                type="text"
+              <FleetSelector 
                 value={newFault.vehicleReg}
-                onChange={(e) => setNewFault({...newFault, vehicleReg: e.target.value})}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="e.g. ABC123"
+                onChange={(value) => setNewFault({...newFault, vehicleReg: value, vehicleId: value})}
+                placeholder="Select vehicle"
+                className="w-full"
               />
             </div>
             

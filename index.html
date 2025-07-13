@@ -24,7 +24,10 @@
 
     <!-- Wialon SDK -->
     <script src="//hst-api.wialon.com/wsdk/script/wialon.js"></script>
-
+    
+    <!-- Google Maps API is loaded dynamically in googleMapsLoader.ts instead of here -->
+    <!-- This approach prevents API key exposure in HTML source and allows for better error handling -->
+    
     <!-- React app mount point -->
     <script type="module" src="/src/main.tsx"></script>
   </body>

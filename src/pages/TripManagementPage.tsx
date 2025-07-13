@@ -9,7 +9,7 @@ import ActiveTrips from '../components/TripManagement/ActiveTrips';
 // @ts-ignore: imported for future use, suppress unused warning
 import CompletedTrips from '../components/TripManagement/CompletedTrips';
 // @ts-ignore: imported for future use, suppress unused warning
-import FlagsInvestigations from '../components/flags/FlagsInvestigations';
+import FlagsInvestigations from '../components/Flags/FlagsInvestigations';
 /* eslint-enable @typescript-eslint/no-unused-vars */
 import { useAppContext } from '../context/AppContext';
 import { Outlet, useSearchParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
