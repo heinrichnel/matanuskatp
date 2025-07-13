@@ -20,6 +20,7 @@
     "@googlemaps/markerclusterer": "^2.6.2",
     "@googlemaps/polyline-codec": "^1.0.28",
     "@react-google-maps/api": "^2.20.7",
+    "autoprefixer": "^10.4.21",
     "express": "^5.1.0",
     "firebase": "^11.10.0",
     "firebase-admin": "^12.7.0",
@@ -28,7 +29,9 @@
     "geofirestore": "^5.2.0",
     "mapbox-gl": "^3.13.0",
     "node-fetch": "^2.7.0",
-    "react-map-gl": "^8.0.4"
+    "postcss": "^8.5.6",
+    "react-map-gl": "^8.0.4",
+    "tailwindcss": "^4.1.11"
   },
   "devDependencies": {
     "@types/google.maps": "^3.58.1",
