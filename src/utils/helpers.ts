@@ -2,34 +2,12 @@ import { Trip, CostEntry, FlaggedCost } from '../types/index';
 import { v4 as uuidv4 } from 'uuid';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
+// import { MapIconType } from '../types/mapIcons'; // Removed because module does not exist
+import { PlaceResult } from '../types/mapTypes';
+import { cleanObjectForFirestore } from './firestoreUtils';
+// -------------------- Utility Functions --------------------
 
-// Export the cleanObjectForFirestore function to be used throughout the app
-export const cleanObjectForFirestore = (obj: any): any => {
-  if (obj === null || obj === undefined) {
-    return null;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(cleanObjectForFirestore);
-  }
-
-  if (typeof obj === 'object') {
-    // Check if it's a Date object
-    if (obj instanceof Date) {
-      return obj;
-    }
-
-    const cleaned: any = {};
-    for (const [key, value] of Object.entries(obj)) {
-      if (value !== undefined) {
-        cleaned[key] = cleanObjectForFirestore(value);
-      }
-    }
-    return cleaned;
-  }
-
-  return obj;
-};
+// Use cleanObjectForFirestore from './firestoreUtils'
 
 // -------------------- ID Generation --------------------
 
