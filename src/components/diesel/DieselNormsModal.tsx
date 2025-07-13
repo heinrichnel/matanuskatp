@@ -21,10 +21,7 @@ import {
 } from 'lucide-react';
 
 // ─── Constants / Types ───────────────────────────────────────────
-import { FLEET_NUMBERS } from '../../types';
-
-// Define which fleets have probes
-const FLEETS_WITH_PROBES = ['22H', '23H', '24H', '26H', '28H', '31H', '30H'];
+import { FLEET_NUMBERS, FLEETS_WITH_PROBES } from '../../types';
 
 interface DieselNorms {
   fleetNumber: string;

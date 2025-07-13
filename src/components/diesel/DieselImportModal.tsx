@@ -19,8 +19,7 @@ import {
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────
-// import { FUEL_STATIONS } from '../../types'; // Removed unused and non-existent import
-// import { FLEETS_WITH_PROBES } from '../../types'; // Removed because it does not exist
+import { FLEETS_WITH_PROBES } from '../../types';
 
 
 interface DieselImportModalProps {
@@ -138,7 +137,7 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
           driverName: row.driverName || '',
           notes: row.notes || '',
           currency: row.currency || 'ZAR',
-          probeReading: false && row.probeReading ? parseFloat(row.probeReading) : undefined,
+          probeReading: FLEETS_WITH_PROBES.includes(row.fleetNumber) && row.probeReading ? parseFloat(row.probeReading) : undefined,
           isReeferUnit,
           hoursOperated: isReeferUnit && row.hoursOperated ? parseFloat(row.hoursOperated) : undefined
           // Derived fields will be added below
@@ -171,7 +170,10 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
       const formData = new FormData();
       formData.append('records', JSON.stringify(dieselRecords));
       
-      // Removed the importDieselRecords call, as it's not supported in context
+      // TODO: The `importDieselRecords` function from AppContext was removed.
+      // You need to implement the actual upload logic here, for example,
+      // by calling a Firebase Function with the `formData`.
+      // For now, this will just show a success message without uploading.
       // You may want to implement your own upload logic here or disable the upload button
 
       setSuccess(`Successfully imported ${dieselRecords.length} diesel records.`);

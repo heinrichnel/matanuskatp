@@ -97,6 +97,29 @@ export interface VehicleSensorData {
 }
 
 /**
+ * Parses the sensor description string to find the maximum fuel capacity.
+ * The 'd' property string is in the format: |x1:y1:x2:y2:...
+ * @param d The sensor description string.
+ * @returns The maximum capacity in liters.
+ */
+const getMaxCapacityFromSensor = (d: string): number => {
+  if (!d || !d.includes(':')) {
+    return 450; // Default fallback
+  }
+
+  const parts = d.split(':').map(p => p.replace('|', '')).map(parseFloat);
+  let maxCapacity = 0;
+
+  // y-values (liters) are at odd indices (1, 3, 5, ...)
+  for (let i = 1; i < parts.length; i += 2) {
+    if (!isNaN(parts[i]) && parts[i] > maxCapacity) {
+      maxCapacity = parts[i];
+    }
+  }
+  return maxCapacity > 0 ? maxCapacity : 450; // Return found max or default
+};
+
+/**
  * Get AVL unit data for a specific fleet number
  * @param fleetNumber The fleet number to search for (e.g., '21H')
  * @returns Promise resolving to the vehicle sensor data
@@ -167,10 +190,7 @@ export const getVehicleSensorData = async (fleetNumber: string): Promise<Vehicle
         
         if (sensorValue !== undefined) {
           // Find the max capacity from the calibration table
-          const calibrationTable = sensor.tbl || [];
-          const maxCapacity = calibrationTable.length > 0 
-            ? Math.max(...calibrationTable.map(entry => entry.x))
-            : 450; // Default max capacity if not found
+          const maxCapacity = getMaxCapacityFromSensor(sensor.d);
           
           fuelTanks.push({
             tankName,
@@ -251,4 +271,3 @@ export const isSensorDataRecent = (sensorData: VehicleSensorData, maxAgeMinutes:
   const dataAge = (now.getTime() - sensorData.lastUpdated.getTime()) / (1000 * 60); // in minutes
   return dataAge <= maxAgeMinutes;
 };
-

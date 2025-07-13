@@ -64,3 +64,6 @@ storage.rules
 functions/node_modules/
 functions/lib/
 functions/.tsbuildinfo
+
+# Local Netlify folder
+.netlify
