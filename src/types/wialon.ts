@@ -1,5 +1,3 @@
-// src/types/wialon.ts
-
 /** Wialon Unit (vehicle/tracker) */
 export interface WialonUnit {
   getId(): number | string;

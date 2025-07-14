@@ -5,6 +5,7 @@ export const WialonContext = createContext<any>(null);
 export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const TOKEN = import.meta.env.VITE_WIALON_SESSION_TOKEN;
 
   useEffect(() => {
     if (!window.wialon) return;
@@ -12,10 +13,10 @@ export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
     setSession(sess);
   }, []);
 
-  const login = (token: string) => {
+  const login = () => {
     if (!session) return;
     session.initSession("https://hst-api.wialon.com");
-    session.loginToken(token, "", (code: number) => {
+    session.loginToken(TOKEN, "", (code: number) => {
       setLoggedIn(code === 0);
     });
   };

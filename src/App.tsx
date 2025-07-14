@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import TyreManagementPage from "./pages/tyres/TyreManagementPage";
+import TyreInspection from "./pages/tyres/inspection";
+import TyreInventory from "./pages/tyres/inventory";
+import TyreReports from "./pages/tyres/reports";
 import { AppProvider } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import { TyreStoresProvider } from "./context/TyreStoresContext";
@@ -102,7 +105,7 @@ import FleetLocationMapPage from "./pages/FleetLocationMapPage";
 import InventoryPage from "./pages/InventoryPage";
 import MyMapComponent from "./components/MyMapComponent";
 import WialonUnitList from './components/WialonUnitList';
-import MapsView from "./components/mapsa/MapsView"; // Fixed path to correct directory
+import MapsView from "./components/maps/MapsView"; // Fixed path to correct directory
   
 // Main App component with Router implementation
 const App: React.FC = () => {
@@ -151,7 +154,7 @@ const App: React.FC = () => {
                 )}
                 <Router>
                   <Routes>
-              <Route 
+                    <Route 
                 element={
                   <Layout 
                     setEditingTrip={handleSetEditingTrip} 
@@ -333,6 +336,19 @@ const App: React.FC = () => {
                   <Route path="reports" element={<div>Workshop Reports</div>} />
                   <Route path="reports/costs" element={<div>Cost Analysis Reports</div>} />
                 </Route>
+                
+                {/* Standalone Tyres Management Section */}
+                <Route path="tyres/dashboard" element={<TyreManagementPage />} />
+                <Route path="tyres/inspection" element={<TyreInspection />} />
+                <Route path="tyres/inventory" element={<TyreInventory />} />
+                <Route path="tyres/reports" element={<TyreReports />} />
+                
+                {/* Standalone Inventory Management Section */}
+                <Route path="inventory/dashboard" element={<InventoryPage />} />
+                <Route path="inventory/stock" element={<StockManager />} />
+                <Route path="inventory/reports" element={<div>Inventory Reports</div>} />
+                
+                
                 <Route path="action-log" element={<ActionLog />} />
                 
                 {/* Reports Section */}
@@ -346,8 +362,8 @@ const App: React.FC = () => {
                 
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
-              </Route>
-            </Routes>
+                    </Route>
+                  </Routes>
                 </Router>
                 
                 {/* Trip Form Modal */}

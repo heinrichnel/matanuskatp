@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => ({
+export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
@@ -18,21 +18,15 @@ export default defineConfig(({ command }) => ({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'), // Use '@' for cleaner imports like '@/components/TripForm'
+      '@': resolve(__dirname, 'src'),
     },
-  },
-  define: {
-    // Set Firestore emulator host for development mode
-    ...(command === 'serve' && {
-      'process.env.FIREBASE_FIRESTORE_EMULATOR_HOST': JSON.stringify('127.0.0.1:8081'),
-    }),
   },
   optimizeDeps: {
     include: [
-      'firebase/app', 
-      'firebase/firestore', 
-      'jspdf', 
-      'jspdf-autotable', 
+      'firebase/app',
+      'firebase/firestore',
+      'jspdf',
+      'jspdf-autotable',
       'xlsx',
       'date-fns'
     ],
@@ -55,4 +49,4 @@ export default defineConfig(({ command }) => ({
       },
     },
   },
-}));
+});

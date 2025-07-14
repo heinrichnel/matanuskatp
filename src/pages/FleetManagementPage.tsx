@@ -4,7 +4,7 @@ import { Truck, User, ClipboardList, Map } from 'lucide-react';
 import DriverBehaviorPage from './DriverBehaviorPage';
 import MissedLoadsTracker from '../components/TripManagement/MissedLoadsTracker';
 import DieselDashboard from '../components/diesel/DieselDashboard';
-import MapsView from '../components/mapsa/MapsView';
+import MapsView from '../components/maps/MapsView';
 import { useSearchParams } from 'react-router-dom';
 
 const FleetManagementPage: React.FC = () => {

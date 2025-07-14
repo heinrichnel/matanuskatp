@@ -6,7 +6,7 @@ const defaultConfig = {
   authDomain: "mat1-9e6b3.firebaseapp.com",
   databaseURL: "https://mat1-9e6b3-default-rtdb.firebaseio.com",
   projectId: "mat1-9e6b3",
-  storageBucket: "mat1-9e6b3.firebasestorage.app",
+  storageBucket: "mat1-9e6b3.appspot.com",  // <<--- REG GEMAAK
   messagingSenderId: "250085264089",
   appId: "1:250085264089:web:51c2b209e0265e7d04ccc8",
   measurementId: "G-YHQHSJN5CQ"
@@ -18,7 +18,7 @@ export const firebaseConfig = {
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || defaultConfig.authDomain,
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || defaultConfig.databaseURL,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || defaultConfig.projectId,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || defaultConfig.storageBucket,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || defaultConfig.storageBucket, // <<--- REG GEMAAK
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || defaultConfig.messagingSenderId,
   appId: import.meta.env.VITE_FIREBASE_APP_ID || defaultConfig.appId,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || defaultConfig.measurementId
@@ -38,23 +38,15 @@ if (import.meta.env.DEV) {
   });
 }
 
-// Validate required Firebase configuration
 const validateConfig = () => {
   const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
   const missingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
-
   if (missingFields.length > 0) {
     console.warn('⚠️ Using fallback values for Firebase configuration:', missingFields);
-    // Don't throw an error, as we're using fallback values
     return false;
   }
   return true;
 };
-
-// Validate configuration before initializing
 validateConfig();
 
-// Initialize Firebase app
 export const firebaseApp = initializeApp(firebaseConfig);
-
-// Analytics initialization is handled in firebase.ts to avoid redundancy.
