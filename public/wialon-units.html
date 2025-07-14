@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Wialon Units Listing</title>
+  <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+  <script src="https://hst-api.wialon.com/wsdk/script/wialon.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    #log { margin: 20px 0; }
+    .unit { margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Wialon Units Listing</h1>
+  <div id="log"></div>
+  <ul id="units"></ul>
+  <script>
+    const TOKEN = "c1099bc37c906fd0832d8e783b60ae0d462BADEC45A6E5503B1BEADDE71E232800E9C406"; // <--- YOUR TOKEN
+
+    function msg(text) { $("#log").prepend(text + "<br/>"); }
+
+    function initUnitsList() {
+      const sess = wialon.core.Session.getInstance();
+      const flags = wialon.item.Item.dataFlag.base | wialon.item.Unit.dataFlag.lastMessage;
+
+      sess.loadLibrary("itemIcon");
+      sess.updateDataFlags([{type: "type", data: "avl_unit", flags, mode: 0}], function(code) {
+        if (code) { msg(wialon.core.Errors.getErrorText(code)); return; }
+
+        const units = sess.getItems("avl_unit");
+        if (!units || !units.length) { msg("No units found."); return; }
+
+        const $ul = $("#units").empty();
+        units.forEach(function(u) {
+          const name = u.getName();
+          const pos = u.getPosition ? u.getPosition() : null;
+          let details = `<b>${name}</b>`;
+          if (pos) {
+            details += ` (Lat: ${pos.y}, Lon: ${pos.x}) `;
+            details += `<a href="https://maps.google.com/?q=${pos.y},${pos.x}" target="_blank">[Map]</a>`;
+          }
+          $ul.append(`<li class="unit">${details}</li>`);
+        });
+      });
+    }
+
+    $(document).ready(function() {
+      wialon.core.Session.getInstance().initSession("https://hst-api.wialon.com");
+      wialon.core.Session.getInstance().loginToken(TOKEN, "", function(code) {
+        if (code) { msg(wialon.core.Errors.getErrorText(code)); return; }
+        msg("Logged in successfully.");
+        initUnitsList();
+      });
+    });
+  </script>
+</body>
+</html>

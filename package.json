@@ -1,20 +1,20 @@
 {
-  "name": "vite-react-typescript-starter",
+  "name": "transportmat-monorepo",
   "version": "1.0.0",
   "private": true,
   "type": "module",
+  "description": "Fleet Management (Vite React + Express API)",
+  "main": "index.js",
   "scripts": {
-    "dev": "vite --host",
+    "dev": "concurrently \"vite --host\" \"nodemon index.js\"",
+    "frontend": "vite --host",
+    "frontend:build": "vite build",
+    "backend": "nodemon index.js",
+    "start": "node index.js",
     "build": "tsc --noEmit --skipLibCheck && vite build",
-    "build:debug": "tsc --noEmit && vite build",
-    "build:force": "tsc --noEmit --skipLibCheck && vite build",
-    "build:production": "VITE_ENV_MODE=production npm run build",
+    "build:all": "tsc --noEmit --skipLibCheck && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "deploy": "./deploy.sh trigger",
-    "deploy:local": "./deploy.sh local",
-    "deploy:full": "./deploy.sh both",
-    "netlify:env": "echo 'Copy variables from .env.production to Netlify environment settings'"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -29,13 +29,17 @@
     "@react-pdf/renderer": "^4.3.0",
     "@types/d3": "^7.4.3",
     "chart.js": "^4.5.0",
+    "concurrently": "^8.2.2",
     "d3": "^7.9.0",
     "date-fns": "^4.1.0",
+    "express": "^4.19.2",
     "firebase": "^11.10.0",
     "firebase-admin": "^13.4.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3",
     "lucide-react": "^0.525.0",
     "mapbox-gl": "^3.13.0",
     "moment": "^2.30.1",
@@ -49,15 +53,18 @@
     "react-dropzone": "^14.3.8",
     "react-google-recaptcha-v3": "^1.11.0",
     "react-hook-form": "^7.60.0",
+    "react-leaflet": "^5.0.0",
     "react-map-gl": "^8.0.4",
     "react-router-dom": "^7.6.3",
     "react-to-print": "^3.1.1",
     "recharts": "^3.1.0",
     "uuid": "^11.1.0",
+    "wialon": "^2.0.2",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/google.maps": "^3.58.1",
+    "@types/leaflet": "^1.9.20",
     "@types/node": "^24.0.13",
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19.1.8",
@@ -73,11 +80,16 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "firebase-tools": "^14.10.1",
     "netlify-cli": "^22.2.2",
+    "nodemon": "^3.1.0",
     "postcss": "^8.5.6",
     "postcss-nesting": "^12.0.1",
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "vite": "^7.0.2"
-  }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "license": "MIT"
 }

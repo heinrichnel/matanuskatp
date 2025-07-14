@@ -1,12 +1,10 @@
-// ───// ─── UI Components ───────────────────────────────────────────────────
+import React, { useState, useEffect } from "react";
 import { Input, Select, Textarea } from '../ui/FormElements.tsx';
 import Button from '../ui/Button.tsx';
-import FleetSelector from '../common/FleetSelector';
-import React, { useState, useEffect } from 'react';
+// import FleetSelector from '../common/FleetSelector'; // REMOVE this line, Wialon units will be used instead
 
-// ─── Types & Constants ───────────────────────────────────────────
 import { Trip, CLIENTS, DRIVERS } from '../../types/index.ts';
-
+import { useWialonUnits } from "../../hooks/useWialonUnits";
 
 interface TripFormProps {
   trip?: Trip;
@@ -15,7 +13,10 @@ interface TripFormProps {
 }
 
 const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
+  const { units: wialonUnits, loading: unitsLoading, error: unitsError } = useWialonUnits(true);
+
   const [fleetNumber, setFleetNumber] = useState('');
+  const [fleetUnitId, setFleetUnitId] = useState<number | "">("");
   const [clientName, setClientName] = useState('');
   const [driverName, setDriverName] = useState('');
   const [route, setRoute] = useState('');
@@ -26,16 +27,13 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
   const [baseRevenue, setBaseRevenue] = useState(0);
   const [revenueCurrency, setRevenueCurrency] = useState<'USD' | 'ZAR'>('ZAR');
   const [clientType, setClientType] = useState<'internal' | 'external'>('external');
-  const [plannedRoute, setPlannedRoute] = useState<{
-    origin: string;
-    destination: string;
-    waypoints: string[];
-  }>({
+  const [plannedRoute, setPlannedRoute] = useState<{ origin: string; destination: string; waypoints: string[]; }>({
     origin: '',
     destination: '',
     waypoints: []
   });
 
+  // Set form state on edit
   useEffect(() => {
     if (trip) {
       setFleetNumber(trip.fleetNumber || '');
@@ -49,22 +47,26 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
       setBaseRevenue(trip.baseRevenue || 0);
       setRevenueCurrency(trip.revenueCurrency || 'ZAR');
       setClientType(trip.clientType || 'external');
-      
-      // Set planned route if available
-      if (trip.plannedRoute) {
-        setPlannedRoute({
-          origin: trip.plannedRoute.origin || '',
-          destination: trip.plannedRoute.destination || '',
-          waypoints: trip.plannedRoute.waypoints || []
-        });
-      }
+      setPlannedRoute({
+        origin: trip.plannedRoute?.origin || '',
+        destination: trip.plannedRoute?.destination || '',
+        waypoints: trip.plannedRoute?.waypoints || []
+      });
+      // If you have fleetUnitId in trip, set it here
     }
   }, [trip]);
 
+  // When Wialon units load, sync the fleet number for compatibility with your other logic if needed
+  useEffect(() => {
+    if (fleetUnitId && wialonUnits.length > 0) {
+      const match = wialonUnits.find(u => u.id === fleetUnitId);
+      if (match) setFleetNumber(match.name);
+    }
+  }, [fleetUnitId, wialonUnits]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Create a valid Trip object with required properties
+    // Use fleetNumber and optionally fleetUnitId for downstream analytics
     onSubmit({
       fleetNumber,
       clientName,
@@ -82,26 +84,45 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
         destination: plannedRoute.destination,
         waypoints: plannedRoute.waypoints,
       },
-      // Add required fields with default values
       paymentStatus: 'unpaid',
-      followUpHistory: []
+      followUpHistory: [],
+      // Optionally add: fleetUnitId (not in base Trip but could be helpful for telemetry links)
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
-        {/* Replace the text input with our new FleetSelector component */}
+
+        {/* ─────────────── DYNAMIC WIALON UNIT SELECTION ─────────────── */}
         <div className="col-span-1">
-          <FleetSelector 
-            label="Fleet Number"
-            value={fleetNumber} 
-            onChange={(value) => setFleetNumber(value)}
-            required
-            filterType={['Truck', 'Reefer', 'Trailer']} // Allow all vehicle types
+          <label className="block text-sm font-medium text-gray-700">
+            Fleet Unit (Telematics)
+            {unitsLoading && <span className="ml-2 text-xs text-blue-600">Loading units…</span>}
+          </label>
+          <select
             className="w-full px-3 py-2 border rounded-md"
-          />
+            value={fleetUnitId}
+            onChange={e => {
+              const id = Number(e.target.value) || "";
+              setFleetUnitId(id);
+              const selected = wialonUnits.find(u => u.id === id);
+              setFleetNumber(selected ? selected.name : "");
+            }}
+            required
+            disabled={unitsLoading}
+          >
+            <option value="">Select Unit</option>
+            {wialonUnits.map(u => (
+              <option key={u.id} value={u.id}>
+                {u.name} {u.pos ? `(${u.pos.y?.toFixed(4)}, ${u.pos.x?.toFixed(4)})` : ""}
+              </option>
+            ))}
+          </select>
+          {unitsError && <div className="text-xs text-red-600">{unitsError}</div>}
         </div>
+
+        {/* Existing fields */}
         <Select
           label="Client Name"
           value={clientName}
@@ -133,8 +154,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
           placeholder="Route description (e.g. Johannesburg to Cape Town)" 
           required 
         />
-        
-        {/* Planned Route Section */}
+
         <Input 
           label="Origin" 
           value={plannedRoute.origin} 
@@ -147,7 +167,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
           onChange={e => setPlannedRoute({...plannedRoute, destination: e.target.value})} 
           required 
         />
-        
+
         <Input
           label="Start Date"
           type="date"
@@ -162,7 +182,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
           onChange={e => setEndDate(e.target.value)}
           required
         />
-        
+
         <Input
           label="Distance (KM)"
           type="number"

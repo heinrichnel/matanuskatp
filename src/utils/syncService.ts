@@ -16,6 +16,7 @@ import {
   Unsubscribe,
   Timestamp
 } from 'firebase/firestore';
+import { cleanObjectForFirestore, convertTimestamps } from './firestoreUtils';
 import {
   Trip,
   CostEntry,
@@ -1938,79 +1939,9 @@ export class SyncService {
   }
 }
 
-// Helper function to clean objects for Firestore (remove undefined values)
-export const cleanObjectForFirestore = (obj: any): any => {
-  if (obj === null || obj === undefined) {
-    return null;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map(item => cleanObjectForFirestore(item));
-  }
-
-  if (typeof obj === 'object') {
-    const cleaned: any = {};
-    for (const [key, value] of Object.entries(obj)) {
-      if (value !== undefined) {
-        cleaned[key] = cleanObjectForFirestore(value);
-      }
-    }
-    return cleaned;
-  }
-
-  return obj;
-};
-
-// Helper function to convert Firestore timestamps to ISO strings
-export const convertTimestamps = (obj: any): any => {
-  if (obj === null || obj === undefined) {
-    return obj;
-  }
-
-  // Handle Firestore Timestamp objects
-  try {
-    if (obj instanceof Timestamp) {
-      return obj.toDate().toISOString();
-    }
-
-    // Also check for a toDate() method to handle different Timestamp implementations
-    if (obj && typeof obj.toDate === 'function') {
-      return obj.toDate().toISOString();
-    }
-  } catch (err) {
-    console.error("Error converting timestamp:", err);
-    // Return the original object if conversion fails
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    // Safely convert array items
-    try {
-      return obj.map(item => convertTimestamps(item));
-    } catch (err) {
-      console.error("Error converting array items:", err);
-      return obj;
-    }
-  }
-
-  if (typeof obj === 'object') {
-    // Handle regular objects
-    try {
-      const converted: Record<string, any> = {};
-      Object.entries(obj).forEach(([key, value]) => {
-        if (value !== undefined) {
-          converted[key] = convertTimestamps(value);
-        }
-      });
-      return converted;
-    } catch (err) {
-      console.error("Error converting object properties:", err);
-      return obj;
-    }
-  }
-
-  return obj;
-};
+// The cleanObjectForFirestore and convertTimestamps functions have been moved
+// to a shared utility file at ./firestoreUtils.ts
+// They are now imported at the top of this file.
 
 // Create and export a singleton instance
 export const syncService = new SyncService();

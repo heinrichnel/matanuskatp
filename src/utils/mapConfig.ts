@@ -347,48 +347,18 @@ export const getZoomLevelForBounds = (bounds: any, mapWidth: number, mapHeight: 
 };
 
 // Interface for window global
-declare global {
-  interface Window {
-    google?: {
-      maps: any;
-    };
-  }
-}
+// Import Google Maps utilities from the centralized loader
+import { 
+  isGoogleMapsAPILoaded,
+  loadGoogleMapsScript, 
+  useLoadGoogleMaps 
+} from './googleMapsLoader';
 
-export const isGoogleMapsAPILoaded = (): boolean => {
-  return !!(window.google && window.google.maps);
-};
-
-export const loadGoogleMapsScript = (libraries: string = 'places'): Promise<void> => {
-  if (isGoogleMapsAPILoaded()) {
-    return Promise.resolve();
-  }
-
-  const script = document.createElement('script');
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=${libraries}`;
-  script.async = true;
-  script.defer = true;
-
-  return new Promise((resolve, reject) => {
-    script.onload = () => resolve();
-    script.onerror = (error) => reject(new Error("Failed to load Google Maps API script: " + error.message));
-    document.head.appendChild(script);
-  });
-};
-
-export const useLoadGoogleMaps = (libraries: string = 'places') => {
-  const [isLoaded, setIsLoaded] = useState(isGoogleMapsAPILoaded());
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    if (isLoaded) return;
-
-    loadGoogleMapsScript(libraries)
-      .then(() => setIsLoaded(true))
-      .catch(err => setError(err));
-  }, [libraries, isLoaded]);
-
-  return { isLoaded, error };
+// Re-export for backward compatibility
+export { 
+  isGoogleMapsAPILoaded, 
+  loadGoogleMapsScript, 
+  useLoadGoogleMaps 
 };
 
 

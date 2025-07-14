@@ -98,10 +98,11 @@ import IndirectCostBreakdown from "./components/Inventory Management/IndirectCos
 import InventoryDashboard from "./components/Inventory Management/InventoryDashboard";
 import StockManager from "./components/Inventory Management/StockManager";
 import PurchaseOrderTracker from "./components/Inventory Management/PurchaseOrderTracker";
-import MapsView from "./components/maps/MapsView";
 import FleetLocationMapPage from "./pages/FleetLocationMapPage";
 import InventoryPage from "./pages/InventoryPage";
 import MyMapComponent from "./components/MyMapComponent";
+import WialonUnitList from './components/WialonUnitList';
+import MapsView from "./components/mapsa/MapsView"; // Fixed path to correct directory
   
 // Main App component with Router implementation
 const App: React.FC = () => {
@@ -364,13 +365,6 @@ const App: React.FC = () => {
   );
 };
 
-function GoogleMapDemo() {
-  return (
-    <div>
-      <h1>My Google Map (TypeScript)</h1>
-      <MyMapComponent />
-    </div>
-  );
-}
+// Removed duplicate components that were causing TypeScript errors
 
 export default App;

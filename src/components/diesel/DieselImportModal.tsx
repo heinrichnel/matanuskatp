@@ -19,12 +19,13 @@ import {
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { FLEETS_WITH_PROBES } from '../../types';
+import { FLEETS_WITH_PROBES, DieselConsumptionRecord } from '../../types';
 
 
 interface DieselImportModalProps {
   isOpen: boolean;
   onClose: () => void;
+  dieselRecords?: DieselConsumptionRecord[];
 }
 
 // Define a type for imported diesel records to include derived fields

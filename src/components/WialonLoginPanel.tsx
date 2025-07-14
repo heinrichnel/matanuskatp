@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { loginWialon, logoutWialon, getCurrentWialonUser, loadWialonSDK } from "../utils/wialonAuth";
+import { WIALON_SESSION_TOKEN, openWialonLogin } from "../utils/wialonConfig";
 
-// Use the provided token
-const DEFAULT_TOKEN = "c1099bc37c906fd0832d8e783b60ae0d30936747FF150CC77961EAF35CBC1E2E71BD55AF";
+// Use the token from environment variables or fallback to default
+const DEFAULT_TOKEN = WIALON_SESSION_TOKEN || "c1099bc37c906fd0832d8e783b60ae0d30936747FF150CC77961EAF35CBC1E2E71BD55AF";
 
 export const WialonLoginPanel: React.FC = () => {
   const [token, setToken] = useState(DEFAULT_TOKEN);
@@ -76,6 +77,12 @@ export const WialonLoginPanel: React.FC = () => {
     else appendLog("Not logged in.");
     setUser(username);
   };
+  
+  // Handler for direct login via Wialon hosting
+  const handleDirectLogin = () => {
+    appendLog("Opening Wialon direct login in a new tab...");
+    openWialonLogin(token);
+  };
 
   return (
     <div className="bg-white border rounded p-4 shadow max-w-md">
@@ -89,13 +96,20 @@ export const WialonLoginPanel: React.FC = () => {
           placeholder="Wialon API Token"
         />
       </div>
-      <div className="flex gap-2 mb-3">
+      <div className="flex flex-wrap gap-2 mb-3">
         <button 
           className="bg-blue-600 text-white px-3 py-1 rounded" 
           onClick={handleLogin}
           disabled={isLoading || !!user}
         >
-          Login
+          Login API
+        </button>
+        <button 
+          className="bg-purple-600 text-white px-3 py-1 rounded" 
+          onClick={handleDirectLogin}
+          disabled={isLoading}
+        >
+          Direct Login
         </button>
         <button 
           className="bg-gray-600 text-white px-3 py-1 rounded" 
