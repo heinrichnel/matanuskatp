@@ -1,135 +1,97 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { GoogleMap, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
-import { Location, RouteOptions } from '@/types/mapTypes';
+import React from 'react';
+import { Location } from '../../types/mapTypes';
 
-interface RouteDrawerProps {
-  origin: Location;
-  destination: Location;
-  waypoints?: Location[];
-  options?: RouteOptions;
-  onRouteCalculated?: (result: any) => void;
-  onError?: (error: any) => void;
-  className?: string;
+interface LocationDetailPanelProps {
+  selectedLocation: Location;
+  onClose: () => void;
+  onViewDirections: (location: Location) => void;
 }
 
 /**
- * RouteDrawer - A component to draw routes between locations on a Google Map
+ * LocationDetailPanel - A component to display detailed information about a selected location
  * 
  * Features:
- * - Calculates and draws routes between two points
- * - Supports waypoints for multi-stop routes
- * - Configurable route options (stroke color, opacity, mode, etc.)
- * - Provides route data (distance, duration) through callbacks
+ * - Shows detailed info about a location
+ * - Provides options to view directions, close the panel, etc.
+ * - Customizable styling
  */
-const RouteDrawer: React.FC<RouteDrawerProps> = ({
-  origin,
-  destination,
-  waypoints = [],
-  options = {},
-  onRouteCalculated,
-  onError,
-  className = ''
+const LocationDetailPanel: React.FC<LocationDetailPanelProps> = ({
+  selectedLocation,
+  onClose,
+  onViewDirections
 }) => {
-  const [directions, setDirections] = useState<any>(null);
-  const [calculating, setCalculating] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Default route options
-  const defaultOptions: RouteOptions = {
-    strokeColor: '#3B82F6',
-    strokeOpacity: 0.8,
-    strokeWeight: 5,
-    mode: 'driving',
-    optimizeWaypoints: true,
-    avoidHighways: false,
-    avoidTolls: false
-  };
-  
-  // Merge default and provided options
-  const routeOptions = { ...defaultOptions, ...options };
-  
-  // Effect to calculate route when inputs change
-  useEffect(() => {
-    if (!origin || !destination) return;
-    
-    setCalculating(true);
-    setError(null);
-    
-    // Convert waypoints to Google Maps waypoint format
-    const formattedWaypoints = waypoints.map(waypoint => ({
-      location: { lat: waypoint.lat, lng: waypoint.lng },
-      stopover: true
-    }));
-    
-    // Create directions request
-    const directionsRequest = {
-      origin: { lat: origin.lat, lng: origin.lng },
-      destination: { lat: destination.lat, lng: destination.lng },
-      waypoints: formattedWaypoints,
-      travelMode: routeOptions.mode?.toUpperCase() as any,
-      optimizeWaypoints: routeOptions.optimizeWaypoints,
-      avoidHighways: routeOptions.avoidHighways,
-      avoidTolls: routeOptions.avoidTolls
-    };
-    
-    // Call DirectionsService
-    const directionsService = new window.google.maps.DirectionsService();
-    directionsService.route(
-      directionsRequest,
-      (result: google.maps.DirectionsResult | null, status: google.maps.DirectionsStatus) => {
-        setCalculating(false);
+  if (!selectedLocation) return null;
 
-        if (status === 'OK' && result) {
-          setDirections(result);
-          if (onRouteCalculated) onRouteCalculated(result);
-        } else {
-          const errorMessage = `Route calculation failed: ${status}`;
-          setError(errorMessage);
-          if (onError) onError(errorMessage);
-        }
-      }
-    );
-  }, [origin, destination, waypoints, routeOptions.mode, 
-      routeOptions.optimizeWaypoints, routeOptions.avoidHighways, routeOptions.avoidTolls]);
-  
-  // Render the route on the map
   return (
-    <>
-      {directions && (
-        <DirectionsRenderer
-          directions={directions}
-          options={{
-            polylineOptions: {
-              strokeColor: routeOptions.strokeColor,
-              strokeOpacity: routeOptions.strokeOpacity,
-              strokeWeight: routeOptions.strokeWeight
-            },
-            suppressMarkers: false,
-          }}
-        />
-      )}
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
+        <h3 className="font-medium text-gray-800">{selectedLocation.title || 'Location Details'}</h3>
+        <button 
+          onClick={onClose}
+          className="text-gray-500 hover:text-gray-700"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
       
-      {calculating && (
-        <div className="absolute bottom-4 left-4 bg-white p-2 rounded shadow z-10">
-          <div className="flex items-center">
-            <div className="animate-spin h-4 w-4 border-t-2 border-blue-500 rounded-full mr-2"></div>
-            <span className="text-sm">Calculating route...</span>
+      <div className="p-4">
+        {selectedLocation.info && (
+          <div className="mb-3">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Information</h4>
+            <p className="text-gray-800">{selectedLocation.info}</p>
           </div>
-        </div>
-      )}
-      
-      {error && (
-        <div className="absolute bottom-4 left-4 bg-red-50 p-2 rounded shadow z-10">
-          <div className="flex items-center text-red-600">
+        )}
+        
+        {selectedLocation.address && (
+          <div className="mb-3">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Address</h4>
+            <p className="text-gray-800">{selectedLocation.address}</p>
+          </div>
+        )}
+        
+        {selectedLocation.customFields?.phone && (
+          <div className="mb-3">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Phone</h4>
+            <p className="text-gray-800">
+              <a href={`tel:${selectedLocation.customFields.phone}`} className="text-blue-600 hover:underline">
+                {selectedLocation.customFields.phone}
+              </a>
+            </p>
+          </div>
+        )}
+        
+        {selectedLocation.customFields?.website && (
+          <div className="mb-3">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Website</h4>
+            <p className="text-gray-800">
+              <a 
+                href={selectedLocation.customFields.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                {selectedLocation.customFields.website}
+              </a>
+            </p>
+          </div>
+        )}
+        
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={() => onViewDirections(selectedLocation)}
+            className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center text-sm"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <path fillRule="evenodd" d="M12.586 4.586a2 2 0 112.828 2.828l-3 3a2 2 0 01-2.828 0 1 1 0 00-1.414 1.414 4 4 0 005.656 0l3-3a4 4 0 00-5.656-5.656l-1.5 1.5a1 1 0 101.414 1.414l1.5-1.5zm-5 5a2 2 0 012.828 0 1 1 0 101.414-1.414 4 4 0 00-5.656 0l-3 3a4 4 0 105.656 5.656l1.5-1.5a1 1 0 10-1.414-1.414l-1.5 1.5a2 2 0 11-2.828-2.828l3-3z" clipRule="evenodd" />
             </svg>
-            <span className="text-sm">{error}</span>
-          </div>
+            Directions
+          </button>
         </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 };
 
-export default RouteDrawer;
+export default LocationDetailPanel;
