@@ -253,13 +253,11 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
             </InfoWindow>
           )}
         </GoogleMap>
-      )}
-
-      {/* Location detail panel */}
+      )}          {/* Location detail panel */}
       {selectedLocation && (
         <div className="mt-4">
-          <LocationDetailPanel
-            location={selectedLocation}
+          <LocationDetailPanel 
+            selectedLocation={selectedLocation}
             onClose={() => setSelectedLocation(null)}
             onViewDirections={(location: Location) => {
               // Open directions in Google Maps
