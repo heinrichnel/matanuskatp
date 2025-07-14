@@ -5,7 +5,7 @@ import { DieselConsumptionRecord } from './types/diesel';
 import { Trip } from './types';
 import { firestore, handleFirestoreError } from './utils/firebaseConnectionHandler';
 
-// Use the storage service
+// Gebruik Storage service
 const storage = getStorage(firebaseApp);
 
 // Add audit log function
@@ -82,13 +82,14 @@ export async function updateTripInFirebase(tripId: string, tripData: Partial<Tri
   const tripRef = doc(firestore, 'trips', tripId);
   await setDoc(tripRef, { ...tripData, updatedAt: serverTimestamp() }, { merge: true });
 }
+
 // Function to update a diesel record in Firebase
 export async function updateDieselInFirebase(dieselId: string, dieselData: Partial<DieselConsumptionRecord>) {
   try {
     const dieselRef = doc(firestore, 'diesel', dieselId);
-    await setDoc(dieselRef, { 
-      ...dieselData, 
-      updatedAt: serverTimestamp() 
+    await setDoc(dieselRef, {
+      ...dieselData,
+      updatedAt: serverTimestamp()
     }, { merge: true });
     console.log('Diesel record updated with ID:', dieselId);
     return dieselId;
@@ -141,9 +142,9 @@ export async function deleteMissedLoadFromFirebase(missedLoadId: string) {
 export async function updateMissedLoadInFirebase(missedLoadId: string, missedLoadData: any) {
   try {
     const missedLoadRef = doc(firestore, 'missedLoads', missedLoadId);
-    await setDoc(missedLoadRef, { 
-      ...missedLoadData, 
-      updatedAt: serverTimestamp() 
+    await setDoc(missedLoadRef, {
+      ...missedLoadData,
+      updatedAt: serverTimestamp()
     }, { merge: true });
     console.log('Missed load updated with ID:', missedLoadId);
     return missedLoadId;
@@ -152,6 +153,7 @@ export async function updateMissedLoadInFirebase(missedLoadId: string, missedLoa
     throw error;
   }
 }
+
 // Firestore listener for real-time updates
 export function listenToDriverBehaviorEvents(callback: (events: any[]) => void) {
   const eventsRef = collection(firestore, "driverBehaviorEvents");

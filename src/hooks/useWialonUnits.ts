@@ -1,8 +1,5 @@
-// src/hooks/useWialonUnits.ts
-
 import { useEffect, useState } from "react";
 
-// These types can be expanded as needed for your application
 export interface WialonUnitData {
   id: number;
   name: string;
@@ -10,28 +7,12 @@ export interface WialonUnitData {
 }
 
 const WIALON_API_URL = "https://hst-api.wialon.com";
-const TOKEN = "c1099bc37c906fd0832d8e783b60ae0d462BADEC45A6E5503B1BEADDE71E232800E9C406"; // Put in .env for production
+const TOKEN = import.meta.env.VITE_WIALON_SESSION_TOKEN;
 
-/**
- * useWialonUnits
- * Loads the Wialon SDK, logs in, and retrieves all AVL units with last known positions.
- * 
- * @param sdkReady boolean - set true if you know the SDK is loaded, or auto-load
- */
 export function useWialonUnits(sdkReady: boolean = true) {
   const [units, setUnits] = useState<WialonUnitData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Optional: Only log in if not already logged in
-  function isLoggedIn(sess: any) {
-    try {
-      const user = sess.getCurrUser?.();
-      return Boolean(user && user.getName && user.getName());
-    } catch {
-      return false;
-    }
-  }
 
   useEffect(() => {
     if (!sdkReady) return;
@@ -74,8 +55,7 @@ export function useWialonUnits(sdkReady: boolean = true) {
       );
     }
 
-    // If not logged in, login and then fetch
-    if (!isLoggedIn(sess)) {
+    if (!sess.getCurrUser?.()) {
       sess.initSession(WIALON_API_URL);
       sess.loginToken(TOKEN, "", (code: number) => {
         if (code) {
@@ -90,7 +70,5 @@ export function useWialonUnits(sdkReady: boolean = true) {
     }
   }, [sdkReady]);
 
-  // You may want to add a "refresh" function for reloading the units
   return { units, loading, error };
 }
-

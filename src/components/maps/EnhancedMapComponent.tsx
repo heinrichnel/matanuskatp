@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
-  GoogleMap, 
-  LoadScript, 
-  Marker, 
-  InfoWindow
+// src/components/maps/EnhancedMapComponent.tsx
+
+import React, { useState, useEffect } from 'react';
+import {
+  GoogleMap,
+  Marker,
+  InfoWindow,
 } from '@react-google-maps/api';
 import { Location, RouteOptions } from '../../types/mapTypes';
-import { 
-  DEFAULT_MAP_CENTER, 
+import {
+  DEFAULT_MAP_CENTER,
   DEFAULT_MAP_OPTIONS,
   MAP_STYLES,
   createMarkerIcon,
-  getBoundsForLocations
+  getBoundsForLocations,
 } from '../../utils/mapConfig';
 import { useLoadGoogleMaps, isGoogleMapsAPILoaded } from '../../utils/googleMapsLoader';
 import { initPlacesService, searchPlacesByText, placeToLocation } from '../../utils/placesService';
@@ -36,19 +37,9 @@ interface EnhancedMapProps {
   routeOptions?: RouteOptions;
   showPlacesSearch?: boolean;
   onLocationSelect?: (location: Location) => void;
-  onMapLoad?: (map: any) => void;
+  onMapLoad?: (map: google.maps.Map) => void;
 }
 
-/**
- * EnhancedMapComponent - A feature-rich map component with routes and places search
- * 
- * Features:
- * - All the features of the basic MyMapComponent
- * - Route drawing between locations
- * - Places search with autocomplete
- * - Detailed location information panel
- * - Support for different types of markers
- */
 const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
   locations = [],
   center = DEFAULT_MAP_CENTER,
@@ -67,27 +58,25 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
   routeOptions = {},
   showPlacesSearch = false,
   onLocationSelect,
-  onMapLoad
+  onMapLoad,
 }) => {
-  const [mapInstance, setMapInstance] = useState<any>(null);
+  const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   const [placesService, setPlacesService] = useState<any>(null);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<Location[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   const [loadError, setLoadError] = useState<Error | null>(null);
-  
-  // Load Google Maps API
+
   useLoadGoogleMaps();
-  
-  // Container style
+
   const containerStyle = {
     width,
     height,
     borderRadius: '0.375rem',
-    position: 'relative' as const
+    position: 'relative' as const,
   };
-  
+
   // Initialize Places service when map is loaded
   useEffect(() => {
     if (mapInstance && showPlacesSearch && isGoogleMapsAPILoaded()) {
@@ -95,26 +84,24 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
       setPlacesService(service);
     }
   }, [mapInstance, showPlacesSearch]);
-  
+
   // Handle search
   const handleSearch = async () => {
     if (!placesService || !searchQuery.trim()) return;
-    
+
     setIsSearching(true);
     try {
       const results = await searchPlacesByText(placesService, searchQuery, {
         locationBias: {
           lat: center.lat,
           lng: center.lng,
-          radius: 10000 // 10km radius
-        }
+          radius: 10000,
+        },
       });
-      
-      // Convert results to Location objects
       const locationResults = results.map(placeToLocation);
       setSearchResults(locationResults);
-      
-      // Auto-fit map to show all results
+
+      // Fit bounds to results
       if (mapInstance && locationResults.length > 0) {
         const bounds = getBoundsForLocations(locationResults);
         if (bounds) {
@@ -122,46 +109,43 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
         }
       }
     } catch (error) {
-      console.error("Place search failed:", error);
+      console.error('Place search failed:', error);
     } finally {
       setIsSearching(false);
     }
   };
-  
+
   // Render error state if loading fails
-  const renderErrorState = () => {
-    return (
-      <div className="flex items-center justify-center h-[400px] bg-red-50 rounded-md border border-red-200">
-        <div className="text-center p-4">
-          <div className="text-red-500 text-xl mb-2">⚠️</div>
-          <h3 className="text-lg font-medium text-red-700 mb-1">Map Loading Error</h3>
-          <p className="text-sm text-red-600 mb-3">
-            {loadError?.message || "Failed to load the Google Maps API. Please check your internet connection and try again."}
-          </p>
-          <button 
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-            onClick={() => window.location.reload()}
-          >
-            Retry
-          </button>
-        </div>
+  const renderErrorState = () => (
+    <div className="flex items-center justify-center h-[400px] bg-red-50 rounded-md border border-red-200">
+      <div className="text-center p-4">
+        <div className="text-red-500 text-xl mb-2">⚠️</div>
+        <h3 className="text-lg font-medium text-red-700 mb-1">Map Loading Error</h3>
+        <p className="text-sm text-red-600 mb-3">
+          {loadError?.message || 'Failed to load the Google Maps API. Please check your internet connection and try again.'}
+        </p>
+        <button
+          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </button>
       </div>
-    );
-  };
-  
+    </div>
+  );
+
   // Handle map load
-  const handleMapLoad = (map: any) => {
+  const handleMapLoad = (map: google.maps.Map) => {
     setMapInstance(map);
     if (onMapLoad) onMapLoad(map);
   };
-  
+
   // All visible locations (original + search results)
   const allLocations = [...locations, ...searchResults];
-  
+
   // Determine if we should show routes
   const showRoutePaths = showRoutes && allLocations.length >= 2;
-  
-  // Render map
+
   return (
     <div className={`relative ${className}`}>
       {/* Places search input */}
@@ -175,7 +159,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
               placeholder="Search places..."
               className="flex-1 border-0 focus:ring-0 text-sm"
             />
-            <button 
+            <button
               onClick={handleSearch}
               disabled={isSearching}
               className="ml-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
@@ -185,7 +169,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
           </div>
         </div>
       )}
-      
+
       {/* Google Map */}
       {!isGoogleMapsAPILoaded() ? (
         <div className="flex items-center justify-center h-[400px] bg-gray-100 rounded-md">
@@ -207,14 +191,14 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
             mapTypeControl: showMapTypeControl,
             streetViewControl: showStreetViewControl,
             zoomControl: showZoomControl,
-            styles: customMapStyles || MAP_STYLES
+            styles: customMapStyles || MAP_STYLES,
           }}
           onLoad={handleMapLoad}
           onUnmount={() => setMapInstance(null)}
         >
           {/* Markers */}
           {allLocations.map((location, index) => (
-            <Marker 
+            <Marker
               key={`marker-${index}`}
               position={location}
               title={location.title}
@@ -238,9 +222,9 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
               })()}
             />
           ))}
-          
+
           {/* Routes between locations */}
-          {showRoutePaths && allLocations.length >= 2 && (
+          {showRoutePaths && (
             <RouteDrawer
               origin={allLocations[0]}
               destination={allLocations[allLocations.length - 1]}
@@ -248,7 +232,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
               options={routeOptions}
             />
           )}
-          
+
           {/* Info window for selected location */}
           {selectedLocation && (
             <InfoWindow
@@ -270,14 +254,14 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
           )}
         </GoogleMap>
       )}
-      
+
       {/* Location detail panel */}
       {selectedLocation && (
         <div className="mt-4">
-          <LocationDetailPanel 
-            location={selectedLocation} 
+          <LocationDetailPanel
+            location={selectedLocation}
             onClose={() => setSelectedLocation(null)}
-            onViewDirections={(location) => {
+            onViewDirections={(location: Location) => {
               // Open directions in Google Maps
               const url = `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
               window.open(url, '_blank');
@@ -290,4 +274,3 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
 };
 
 export default EnhancedMapComponent;
-
