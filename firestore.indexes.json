@@ -47,6 +47,20 @@
       ]
     },
     {
+      "collectionGroup": "analytics",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "category",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "date",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "auditLogs",
       "queryScope": "COLLECTION",
       "fields": [
@@ -163,6 +177,108 @@
       ]
     },
     {
+      "collectionGroup": "inspectionReports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "inspector",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "inspectionDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "inspectionReports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "vehicleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "inspectionDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "inventory",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "category",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "inventory",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "lastUpdated",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "jobCards",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "assignedTechnician",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "jobCards",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "priority",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dueDate",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "jobCards",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "vehicleId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "missedLoads",
       "queryScope": "COLLECTION",
       "fields": [
@@ -172,6 +288,34 @@
         },
         {
           "fieldPath": "recordedAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "purchaseOrders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "purchaseOrders",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "supplierId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
           "order": "DESCENDING"
         }
       ]
@@ -237,7 +381,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "tyreNumber",
+          "fieldPath": "mountStatus",
           "order": "ASCENDING"
         },
         {
@@ -251,7 +395,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "mountStatus",
+          "fieldPath": "tyreNumber",
           "order": "ASCENDING"
         },
         {
@@ -275,150 +419,6 @@
       ]
     },
     {
-      "collectionGroup": "inventory",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "category",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "inventory",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "lastUpdated",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "jobCards",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "vehicleId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "jobCards",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "priority",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "dueDate",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "jobCards",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "assignedTechnician",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "inspectionReports",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "vehicleId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "inspectionDate",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "inspectionReports",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "inspector",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "inspectionDate",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "purchaseOrders",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "status",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "purchaseOrders",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "supplierId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "createdAt",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "webhookEntries",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "source",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "timestamp",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
       "collectionGroup": "webhookEntries",
       "queryScope": "COLLECTION",
       "fields": [
@@ -433,15 +433,15 @@
       ]
     },
     {
-      "collectionGroup": "analytics",
+      "collectionGroup": "webhookEntries",
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "category",
+          "fieldPath": "source",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "date",
+          "fieldPath": "timestamp",
           "order": "DESCENDING"
         }
       ]
