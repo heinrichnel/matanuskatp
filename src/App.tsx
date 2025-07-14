@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import TyreManagementPage from "./pages/tyres/TyreManagementPage";
 import TyreInspection from "./pages/tyres/inspection";
 import TyreInventory from "./pages/tyres/inventory";
 import TyreReports from "./pages/tyres/reports";
+import ReportNewIncidentPage from "./pages/compliance/ReportNewIncidentPage";
+import ReceivePartsPage from "./pages/inventory/receive-parts";
+import AddNewTyrePage from "./pages/tyres/add-new-tyre";
+// Lazy load workshop pages
+const RequestPartsPage = lazy(() => import("./pages/workshop/request-parts"));
+const VehicleInspectionPage = lazy(() => import("./pages/workshop/vehicle-inspection"));
+const CreatePurchaseOrderPage = lazy(() => import("./pages/workshop/create-purchase-order"));
 import { AppProvider } from "./context/AppContext";
 import { SyncProvider } from "./context/SyncContext";
 import { TyreStoresProvider } from "./context/TyreStoresContext";
@@ -262,7 +269,7 @@ const App: React.FC = () => {
                   <Route path="dot" element={<div>DOT Compliance</div>} />
                   <Route path="safety-inspections" element={<div>Safety Inspections</div>} />
                   <Route path="incidents" element={<IncidentManagement />} />
-                  <Route path="incidents/new" element={<div>Report New Incident</div>} />
+                  <Route path="incidents/new" element={<ReportNewIncidentPage />} />
                   <Route path="incidents/:id" element={<div>Incident Details</div>} />
                   <Route path="incidents/:id/edit" element={<div>Edit Incident</div>} />
                   <Route path="training" element={<div>Safety Training</div>} />
@@ -324,6 +331,21 @@ const App: React.FC = () => {
                   {/* Inventory Management Routes */}
                   <Route path="stock-alerts" element={<div>Stock Alerts</div>} />
                   <Route path="parts-ordering" element={<PartsOrdering />} />
+                  <Route path="request-parts" element={
+                    <Suspense fallback={<div>Loading parts request form...</div>}>
+                      <RequestPartsPage />
+                    </Suspense>
+                  } />
+                  <Route path="vehicle-inspection" element={
+                    <Suspense fallback={<div>Loading inspection form...</div>}>
+                      <VehicleInspectionPage />
+                    </Suspense>
+                  } />
+                  <Route path="create-purchase-order" element={
+                    <Suspense fallback={<div>Loading purchase order form...</div>}>
+                      <CreatePurchaseOrderPage />
+                    </Suspense>
+                  } />
                   <Route path="work-orders" element={<div>Work Orders</div>} />
                   <Route path="purchase-orders" element={<PurchaseOrderTracker />} />
                   <Route path="vendors" element={<VendorScorecard />} />
@@ -342,11 +364,13 @@ const App: React.FC = () => {
                 <Route path="tyres/inspection" element={<TyreInspection />} />
                 <Route path="tyres/inventory" element={<TyreInventory />} />
                 <Route path="tyres/reports" element={<TyreReports />} />
+                <Route path="tyres/add-new" element={<AddNewTyrePage />} />
                 
                 {/* Standalone Inventory Management Section */}
                 <Route path="inventory/dashboard" element={<InventoryPage />} />
                 <Route path="inventory/stock" element={<StockManager />} />
                 <Route path="inventory/reports" element={<div>Inventory Reports</div>} />
+                <Route path="inventory/receive-parts" element={<ReceivePartsPage />} />
                 
                 
                 <Route path="action-log" element={<ActionLog />} />

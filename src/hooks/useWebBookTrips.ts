@@ -35,7 +35,7 @@ export function useWebBookTrips() {
         setLoading(true);
         setError(null);
         
-        // Query for trips with importSource "web_book"
+        // Query Firestore for trips with importSource "web_book"
         const q = query(
           collection(firestore, "trips"),
           where("importSource", "==", "web_book")
@@ -51,8 +51,10 @@ export function useWebBookTrips() {
             ...data 
           } as WebBookTrip);
         });
-        
-        console.log(`📊 Fetched ${result.length} web book trips from Firestore`);
+
+        // Debug: log fetched trips to console
+        console.log('📊 Fetched trips from Firestore:', result);
+
         setTrips(result);
       } catch (err) {
         console.error("Error fetching web book trips:", err);
@@ -65,7 +67,7 @@ export function useWebBookTrips() {
     fetchTrips();
   }, []);
 
-  // Filter functions for different statuses
+  // Filter trips by status
   const getActiveTrips = () => trips.filter(trip => 
     trip.status === "active" || trip.status === "shipped" || trip.status === "in_transit"
   );
