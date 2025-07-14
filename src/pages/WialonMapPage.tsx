@@ -1,5 +1,5 @@
 import React from 'react';
-import WialonMapDashboard from '../components/maps/WialonMapDashboard';
+import WialonMapDashboard from '../components/mapsa/WialonMapDashboard';
 
 const WialonMapPage: React.FC = () => {
   return (

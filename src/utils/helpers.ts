@@ -4,10 +4,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 // import { MapIconType } from '../types/mapIcons'; // Removed because module does not exist
 import { PlaceResult } from '../types/mapTypes';
-import { cleanObjectForFirestore } from './firestoreUtils';
 // -------------------- Utility Functions --------------------
-
-// Use cleanObjectForFirestore from './firestoreUtils'
 
 // -------------------- ID Generation --------------------
 

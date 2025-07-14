@@ -216,7 +216,7 @@ const MyMapComponent: React.FC<MyMapComponentProps> = ({
             onMouseOver={() => showInfoOnHover && setSelectedLocation(location)}
             onMouseOut={() => showInfoOnHover && setSelectedLocation(null)}
             icon={(() => {
-              const icon = createMarkerIcon(location.iconType || defaultIconType || 'default', window.google?.maps);
+              const icon = createMarkerIcon(location.iconType || defaultIconType || 'default');
               if (
                 icon &&
                 icon.anchor &&

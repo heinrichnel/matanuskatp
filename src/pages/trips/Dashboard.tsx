@@ -1,8 +1,6 @@
 import React from 'react';
-import TripOverviewPanel from '../../components/TripManagement/TripOverviewPanel';
+import TripDashboard from '../../components/TripManagement/TripDashboard';
 
-const Dashboard: React.FC = () => {
-  return <TripOverviewPanel />;
-};
+const TripDashboardPage: React.FC = () => <TripDashboard />;
 
-export default Dashboard;
+export default TripDashboardPage;

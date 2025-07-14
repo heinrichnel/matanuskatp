@@ -1,5 +1,5 @@
 import React from 'react';
-import { Location } from '@/types/mapTypes';
+import { Location } from '../../types/mapTypes';
 
 interface LocationDetailPanelProps {
   location: Location | null;

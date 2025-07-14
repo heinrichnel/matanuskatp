@@ -41,6 +41,6 @@
     "**/*.tsx",
     "**/*.js",
     "**/*.json"
-  ],
+, "route-component-map.cjs", "sidebar-validator.cjs", "find-form-usage.js"  ],
   "exclude": []
 }

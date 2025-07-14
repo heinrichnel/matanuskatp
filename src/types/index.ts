@@ -1,6 +1,7 @@
 // Base types for the application
 export interface Trip {
   id: string;
+  fleetUnitId?: string | number; // Wialon tracking unit ID for telematics
   plannedRoute?: {
     origin: string;
     destination: string;

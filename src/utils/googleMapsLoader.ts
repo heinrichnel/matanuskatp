@@ -30,11 +30,6 @@ export const isGoogleMapsAPILoaded = (): boolean => {
   return !!(window.google && window.google.maps);
 };
 
-/**
- * Loads the Google Maps script and resolves when the script is loaded.
- * @param libraries - A comma-separated string of libraries to load (e.g., 'places,geometry').
- * @returns A promise that resolves when the script is loaded.
- */
 export const loadGoogleMapsScript = (libraries: string = 'places'): Promise<void> => {
   if (promise) {
     return promise;

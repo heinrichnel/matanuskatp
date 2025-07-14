@@ -1,4 +1,5 @@
 // src/utils/wialonAuth.ts
+import { WIALON_SDK_URL, WIALON_API_URL } from './wialonConfig';
 
 declare global {
   interface Window {
@@ -27,7 +28,7 @@ export function loadWialonSDK(): Promise<void> {
 
     // Create script element
     const script = document.createElement('script');
-    script.src = "https://hst-api.wialon.com/wsdk/script/wialon.js";
+    script.src = WIALON_SDK_URL;
     script.async = true;
     script.defer = true;
     
@@ -63,7 +64,7 @@ export async function loginWialon(token: string): Promise<string> {
       resolve(`Already logged in as ${user.getName()}`);
       return;
     }
-    sess.initSession("https://hst-api.wialon.com");
+    sess.initSession(WIALON_API_URL);
     sess.loginToken(token, "", (code: number) => {
       if (code) reject(window.wialon.core.Errors.getErrorText(code));
       else resolve("Logged in successfully");
