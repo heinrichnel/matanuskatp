@@ -9,7 +9,8 @@ export interface DriverBehaviorEvent {
   eventDate: string | Date;
   eventType: string;
   severity: string;
-  [key: string]: any; // Allow other fields
+  importSource?: string;    // <--- Add this field for clarity
+  [key: string]: any;       // Allow other fields
 }
 
 // Create context type
@@ -17,13 +18,15 @@ interface DriverBehaviorContextType {
   events: DriverBehaviorEvent[];
   loading: boolean;
   error: Error | null;
+  webBookEvents: DriverBehaviorEvent[];   // <--- Added here
 }
 
 // Create context with default values
 const DriverBehaviorContext = createContext<DriverBehaviorContextType>({
   events: [],
   loading: true,
-  error: null
+  error: null,
+  webBookEvents: []
 });
 
 // Provider props interface
@@ -39,7 +42,7 @@ export const DriverBehaviorProvider: React.FC<DriverBehaviorProviderProps> = ({ 
 
   useEffect(() => {
     setLoading(true);
-    
+
     // Initialize Firestore
     const db = getFirestore(firebaseApp);
 
@@ -56,10 +59,11 @@ export const DriverBehaviorProvider: React.FC<DriverBehaviorProviderProps> = ({ 
               eventDate: data.eventDate || new Date(),
               eventType: data.eventType || 'unknown',
               severity: data.severity || 'medium',
+              importSource: data.importSource || undefined,
               ...data
             };
           });
-          
+
           setEvents(eventsData);
           setLoading(false);
         },
@@ -69,7 +73,7 @@ export const DriverBehaviorProvider: React.FC<DriverBehaviorProviderProps> = ({ 
           setLoading(false);
         }
       );
-      
+
       // Clean up subscription on unmount
       return () => unsubscribe();
     } catch (err: any) {
@@ -80,11 +84,15 @@ export const DriverBehaviorProvider: React.FC<DriverBehaviorProviderProps> = ({ 
     }
   }, []);
 
+  // --- Add webBookEvents filtering ---
+  const webBookEvents = events.filter(e => e.importSource === "web_book");
+
   // Value to provide to context consumers
   const value = {
     events,
     loading,
-    error
+    error,
+    webBookEvents   // Now available in all consumers
   };
 
   return (

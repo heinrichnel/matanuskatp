@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, Filter, Search, Calendar, Download } from 'lucide-react';
+import { AlertTriangle, Filter, Search, Calendar, Download, BookOpen } from 'lucide-react';
 import { useDriverBehavior, DriverBehaviorEvent } from '../../context/DriverBehaviorContext';
 
 /**
@@ -7,34 +7,37 @@ import { useDriverBehavior, DriverBehaviorEvent } from '../../context/DriverBeha
  * Displays driver behavior events from Firestore with filtering capabilities
  */
 const DriverBehaviorEvents: React.FC = () => {
-  // Get driver behavior events from context
-  const { events, loading, error } = useDriverBehavior();
-  
+  // Get driver behavior events from context (BOTH all and webBookEvents)
+  const { events, webBookEvents, loading, error } = useDriverBehavior();
+
   // State for filtering
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSeverity, setFilterSeverity] = useState('all');
   const [filterEventType, setFilterEventType] = useState('all');
-  
+  const [showWebBookOnly, setShowWebBookOnly] = useState(false);
+
+  // Kies tussen alle events of net web_book events
+  const displayEvents = showWebBookOnly ? webBookEvents : events;
+
   // Get unique event types for filtering
-  const eventTypes = [...new Set(events.map(event => event.eventType))];
-  
+  const eventTypes = [...new Set(displayEvents.map(event => event.eventType))];
+
   // Filter events based on search term and filters
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = 
+  const filteredEvents = displayEvents.filter(event => {
+    const matchesSearch =
       (event.fleetNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (event.eventType?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
       (event.driverName?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
-    
+
     const matchesSeverity = filterSeverity === 'all' || event.severity === filterSeverity;
     const matchesEventType = filterEventType === 'all' || event.eventType === filterEventType;
-    
+
     return matchesSearch && matchesSeverity && matchesEventType;
   });
-  
+
   // Format date for display
   const formatDate = (date: string | Date): string => {
     if (!date) return 'N/A';
-    
     if (typeof date === 'string') {
       try {
         return new Date(date).toLocaleString();
@@ -42,10 +45,9 @@ const DriverBehaviorEvents: React.FC = () => {
         return date;
       }
     }
-    
     return date.toLocaleString();
   };
-  
+
   // Get severity class for styling
   const getSeverityClass = (severity: string): string => {
     switch (severity?.toLowerCase()) {
@@ -64,19 +66,34 @@ const DriverBehaviorEvents: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Driver Behavior Events</h2>
-        <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-          <Download className="w-4 h-4 mr-2" />
-          Export Events
-        </button>
+        <div className="flex items-center gap-4">
+          {/* NEW: Web Book Only Toggle */}
+          <label className="inline-flex items-center cursor-pointer select-none mr-4">
+            <input
+              type="checkbox"
+              className="form-checkbox h-4 w-4 text-blue-600"
+              checked={showWebBookOnly}
+              onChange={() => setShowWebBookOnly(v => !v)}
+            />
+            <span className="ml-2 text-sm flex items-center">
+              <BookOpen className="w-4 h-4 mr-1" />
+              Web Book Only
+            </span>
+          </label>
+          <button className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+            <Download className="w-4 h-4 mr-2" />
+            Export Events
+          </button>
+        </div>
       </div>
-      
+
       {error && (
         <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
           <p className="font-bold">Error</p>
           <p>{error.message}</p>
         </div>
       )}
-      
+
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -97,7 +114,7 @@ const DriverBehaviorEvents: React.FC = () => {
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 sm:text-sm"
               />
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-2">
               {/* Severity Filter */}
               <div className="relative">
@@ -115,7 +132,7 @@ const DriverBehaviorEvents: React.FC = () => {
                   <option value="low">Low</option>
                 </select>
               </div>
-              
+
               {/* Event Type Filter */}
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -132,7 +149,7 @@ const DriverBehaviorEvents: React.FC = () => {
                   ))}
                 </select>
               </div>
-              
+
               {/* Date Filter - In a real app, you'd add date picker functionality */}
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -149,7 +166,7 @@ const DriverBehaviorEvents: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Events Table */}
           <div className="overflow-x-auto mt-4">
             <table className="min-w-full divide-y divide-gray-200">
@@ -217,7 +234,7 @@ const DriverBehaviorEvents: React.FC = () => {
               </tbody>
             </table>
           </div>
-          
+
           {/* Pagination */}
           {filteredEvents.length > 0 && (
             <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-4">
