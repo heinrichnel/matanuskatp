@@ -18,7 +18,9 @@
         "esbenp.prettier-vscode",
         "kodu-ai.claude-dev-experimental",
         "killokoder.killokoder-vscode",
-        "googlecloudtools.cloudcode"
+        "googlecloudtools.cloudcode",
+        ".Bolt.bolt",
+        "https://bolt.new/?rid=ymm51e"
       ]
     }
   }
