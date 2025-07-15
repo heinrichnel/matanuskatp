@@ -57,7 +57,7 @@ const TyreInspectionModal: React.FC<Props> = ({
         <Input
           label="Tread Depth (mm)"
           value={treadDepth}
-          onChange={(val) => setTreadDepth(val)}
+          onChange={(e) => setTreadDepth(e.target.value)}
           type="number"
           placeholder="e.g. 8.5"
         />
@@ -65,7 +65,7 @@ const TyreInspectionModal: React.FC<Props> = ({
         <Input
           label="Pressure (kPa)"
           value={pressure}
-          onChange={(val) => setPressure(val)}
+          onChange={(e) => setPressure(e.target.value)}
           type="number"
           placeholder="e.g. 850"
         />
@@ -73,14 +73,14 @@ const TyreInspectionModal: React.FC<Props> = ({
         <Input
           label="Visual Condition"
           value={visualCondition}
-          onChange={(val) => setVisualCondition(val)}
+          onChange={(e) => setVisualCondition(e.target.value)}
           placeholder="e.g. Good, Worn, Cracked"
         />
         
         <Input
           label="Comments"
           value={comments}
-          onChange={(val) => setComments(val)}
+          onChange={(e) => setComments(e.target.value)}
           placeholder="Optional notes"
         />
         
