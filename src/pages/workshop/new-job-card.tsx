@@ -19,11 +19,19 @@ const NewJobCardPage = () => {
 
   return (
     <div className="p-4">
-      <JobCard 
-        onBack={handleBack}
-        onSave={handleSave}
-        isNewCard={true}
-      />
+      <div className="mb-4">
+        <button 
+          onClick={handleBack}
+          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md flex items-center"
+        >
+          <span>← Back to Job Cards</span>
+        </button>
+      </div>
+      
+      <div className="bg-white rounded-lg shadow p-6">
+        <h1 className="text-2xl font-bold mb-6">Create New Job Card</h1>
+        <JobCard />
+      </div>
     </div>
   );
 };
