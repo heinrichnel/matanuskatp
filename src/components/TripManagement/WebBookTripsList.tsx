@@ -1,13 +1,71 @@
-import React from "react";
-import { useWebBookTrips } from "../../hooks/useWebBookTrips";
+import React, { useState } from "react";
+import { useWebBookTrips, WebBookTrip } from "../../hooks/useWebBookTrips";
+import { useAppContext } from "../../context/AppContext";
 import Card, { CardContent, CardHeader } from "../ui/Card";
 import LoadingIndicator from "../ui/LoadingIndicator";
 import ErrorMessage from "../ui/ErrorMessage";
+import Button from "../ui/Button";
 import { formatDateTime } from "../../utils/helpers";
-import { CheckCircle, Clock, Truck, MapPin, User, Calendar } from "lucide-react";
+import { CheckCircle, Clock, Truck, MapPin, User, Calendar, Edit, DollarSign } from "lucide-react";
+import CompletedTripEditModal from "./CompletedTripEditModal";
+import { Trip } from "../../types";
 
 export default function WebBookTripsList() {
   const { trips, loading, error, activeTrips, deliveredTrips } = useWebBookTrips();
+  const { updateTrip } = useAppContext();
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
+  // Convert WebBookTrip to Trip format expected by CompletedTripEditModal
+  const convertToTripFormat = (webTrip: WebBookTrip): Trip => {
+    return {
+      id: webTrip.id,
+      // Base trip details
+      fleetNumber: webTrip.loadRef || `WB-${webTrip.id.substring(0, 6)}`,
+      driverName: "Unknown", // Default value as WebBookTrip doesn't have driverName
+      clientName: webTrip.customer,
+      clientType: 'external', // Default value
+      route: `${webTrip.origin} to ${webTrip.destination}`,
+      startDate: webTrip.shippedDate || webTrip.startTime || new Date().toISOString().split('T')[0],
+      endDate: webTrip.deliveredDate || webTrip.endTime || new Date().toISOString().split('T')[0],
+      
+      // Required fields with default values
+      baseRevenue: 0, // Default value
+      revenueCurrency: 'ZAR', // Default value
+      status: webTrip.deliveredStatus ? 'completed' : 'active',
+      costs: [], // Empty array as default
+      additionalCosts: [], // Empty array as default
+      
+      // Optional fields we can set
+      distanceKm: webTrip.tripDurationHours ? webTrip.tripDurationHours * 60 : 0, // Rough estimate
+      
+      // Keep original web book data
+      loadRef: webTrip.loadRef,
+      customer: webTrip.customer,
+      importSource: webTrip.importSource,
+      importedAt: webTrip.importedAt,
+      
+      // Payment fields (required by type but can be defaulted)
+      paymentStatus: 'unpaid',
+      followUpHistory: [],
+      
+      // Metadata
+      createdAt: webTrip.updatedAt, // Use updateAt as fallback
+      shippedAt: webTrip.shippedAt,
+      deliveredAt: webTrip.deliveredAt,
+      
+      // Empty arrays for references that might be used
+      editHistory: []
+    };
+  };
+  const handleSaveTrip = async (updatedTrip: any) => {
+    try {
+      await updateTrip(updatedTrip);
+      // Refresh trips would happen automatically if real-time listeners are used
+      setEditingTrip(null);
+    } catch (error) {
+      console.error("Error updating trip:", error);
+      alert("Failed to update trip. Please try again.");
+    }
+  };
 
   if (loading) return <LoadingIndicator />;
   if (error) return <ErrorMessage message={`Error loading trips: ${error}`} />;
@@ -85,6 +143,17 @@ export default function WebBookTripsList() {
         </Card>
       </div>
 
+      {/* Information Banner */}
+      <div className="bg-blue-50 border border-blue-200 rounded-md p-4 flex items-center">
+        <DollarSign className="h-5 w-5 text-blue-600 mr-2" />
+        <div>
+          <h3 className="text-sm font-medium text-blue-800">Add Costs to Web Book Trips</h3>
+          <p className="text-sm text-blue-700">
+            You can now edit web book trips to add additional costs. Click the Edit button on any trip to add or update costs.
+          </p>
+        </div>
+      </div>
+
       {/* Trips Table */}
       <Card>
         <CardHeader>
@@ -103,6 +172,7 @@ export default function WebBookTripsList() {
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shipped</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delivered</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -162,6 +232,16 @@ export default function WebBookTripsList() {
                         <span className="text-gray-400">-</span>
                       )}
                     </td>
+                    <td className="px-4 py-4 whitespace-nowrap">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        icon={<Edit className="w-4 h-4" />}
+                        onClick={() => setEditingTrip(convertToTripFormat(trip))}
+                      >
+                        Edit
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -169,6 +249,16 @@ export default function WebBookTripsList() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Edit Modal */}
+      {editingTrip && (
+        <CompletedTripEditModal
+          isOpen={!!editingTrip}
+          trip={editingTrip}
+          onClose={() => setEditingTrip(null)}
+          onSave={handleSaveTrip}
+        />
+      )}
     </div>
   );
 }

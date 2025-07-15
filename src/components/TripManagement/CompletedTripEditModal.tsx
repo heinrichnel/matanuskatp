@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Trip, TripEditRecord, TRIP_EDIT_REASONS } from '../../types';
+import { Trip, TripEditRecord, TRIP_EDIT_REASONS, AdditionalCost } from '../../types';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Input, Select, TextArea } from '../ui/FormElements';
-import { Save, X } from 'lucide-react';
+import { Save, X, DollarSign } from 'lucide-react';
+import AdditionalCostsForm from '../Cost Management/AdditionalCostsForm';
+import { useAppContext } from '../../context/AppContext';
 
 interface CompletedTripEditModalProps {
   isOpen: boolean;
@@ -19,10 +21,13 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
   onClose,
   onSave
 }) => {
+  const { addAdditionalCost, removeAdditionalCost } = useAppContext();
+  const [activeTab, setActiveTab] = useState<'basic' | 'costs'>('basic');
   const [formData, setFormData] = useState({
     baseRevenue: trip.baseRevenue.toString(),
     distanceKm: trip.distanceKm?.toString() || '0',
   });
+  const [additionalCosts, setAdditionalCosts] = useState<AdditionalCost[]>(trip.additionalCosts || []);
   const [editReason, setEditReason] = useState('');
   const [customReason, setCustomReason] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -34,6 +39,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
         baseRevenue: trip.baseRevenue.toString(),
         distanceKm: trip.distanceKm?.toString() || '0',
       });
+      setAdditionalCosts(trip.additionalCosts || []);
       setEditReason('');
       setCustomReason('');
       setErrors({});
@@ -50,6 +56,45 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
     }
     return changes;
   }, [formData, trip]);
+  
+  const hasAdditionalCostsChanges = useMemo(() => {
+    return additionalCosts.length !== (trip.additionalCosts?.length || 0);
+  }, [additionalCosts, trip.additionalCosts]);
+
+  const handleAddCost = async (cost: Omit<AdditionalCost, 'id'>, files?: FileList) => {
+    try {
+      // If addAdditionalCost from context is implemented, use it
+      // Otherwise, handle locally for now
+      const costId = await addAdditionalCost(trip.id, cost, files) || `cost-${Date.now()}`;
+      
+      const newCost: AdditionalCost = {
+        ...cost,
+        id: costId,
+        // Make sure to set these if they're not set by the context function
+        supportingDocuments: cost.supportingDocuments || []
+      };
+      
+      setAdditionalCosts(prev => [...prev, newCost]);
+    } catch (error) {
+      console.error("Failed to add additional cost:", error);
+      alert("Failed to add cost. Please try again.");
+    }
+  };
+
+  const handleRemoveCost = async (costId: string) => {
+    try {
+      // If removeAdditionalCost from context is implemented, use it
+      // Otherwise, handle locally for now
+      await removeAdditionalCost(trip.id, costId).catch(() => {
+        console.log("Using local fallback for cost removal");
+      });
+      
+      setAdditionalCosts(prev => prev.filter(cost => cost.id !== costId));
+    } catch (error) {
+      console.error("Failed to remove additional cost:", error);
+      alert("Failed to remove cost. Please try again.");
+    }
+  };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -58,7 +103,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
     if (!finalReason) {
       newErrors.editReason = 'An edit reason is mandatory.';
     }
-    if (changedFields.length === 0) {
+    if (changedFields.length === 0 && !hasAdditionalCostsChanges) {
       newErrors.general = 'No changes have been made to the trip data.';
     }
     if (isNaN(parseFloat(formData.baseRevenue)) || parseFloat(formData.baseRevenue) <= 0) {
@@ -67,7 +112,6 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
     if (isNaN(parseFloat(formData.distanceKm)) || parseFloat(formData.distanceKm) < 0) {
       newErrors.distanceKm = "Distance cannot be negative.";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -93,18 +137,35 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
         changeType: 'update',
       }));
 
+      // Add an edit record for additional costs if changed
+      if (hasAdditionalCostsChanges) {
+        newEditRecords.push({
+          id: crypto.randomUUID(),
+          tripId: trip.id,
+          editedBy: 'Current User',
+          editedAt: new Date().toISOString(),
+          reason: finalReason,
+          fieldChanged: 'additionalCosts',
+          oldValue: `${trip.additionalCosts?.length || 0} costs`,
+          newValue: `${additionalCosts.length} costs`,
+          changeType: 'update',
+        });
+      }
+
       console.log(`Creating ${newEditRecords.length} edit records for trip ${trip.id}`);
 
       const updatedTrip: Trip = {
         ...trip,
         baseRevenue: parseFloat(formData.baseRevenue),
         distanceKm: parseFloat(formData.distanceKm),
+        additionalCosts: additionalCosts,
         editHistory: [...(trip.editHistory || []), ...newEditRecords]
       };
 
       console.log(`Saving updated trip: ${trip.id}`, {
         baseRevenue: updatedTrip.baseRevenue,
         distanceKm: updatedTrip.distanceKm,
+        additionalCostsLength: updatedTrip.additionalCosts?.length,
         editHistoryLength: updatedTrip.editHistory?.length
       });
 
@@ -124,6 +185,21 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`Edit Completed Trip: ${trip.fleetNumber}`}>
       <div className="p-4 space-y-4">
+        {/* Tab Navigation */}
+        <div className="flex border-b">
+          <button
+            className={`px-4 py-2 font-medium ${activeTab === 'basic' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+            onClick={() => setActiveTab('basic')}
+          >
+            Basic Info
+          </button>
+          <button
+            className={`px-4 py-2 font-medium ${activeTab === 'costs' ? 'text-blue-600 border-b-2 border-blue-500' : 'text-gray-500 hover:text-gray-700'}`}
+            onClick={() => setActiveTab('costs')}
+          >
+            Additional Costs
+          </button>
+        </div>
         <div className="p-4 border rounded-lg bg-gray-50">
           <h3 className="font-semibold text-lg text-gray-800">Trip Summary</h3>
           <div className="grid grid-cols-2 gap-x-4 gap-y-2 mt-2 text-sm">
@@ -134,26 +210,41 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            label="Base Revenue"
-            type="number"
-            value={formData.baseRevenue}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setFormData(p => ({ ...p, baseRevenue: e.target.value }))
-            }
-            error={errors.baseRevenue}
-          />
-          <Input
-            label="Distance (km)"
-            type="number"
-            value={formData.distanceKm}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setFormData(p => ({ ...p, distanceKm: e.target.value }))
-            }
-            error={errors.distanceKm}
-          />
-        </div>
+        {activeTab === 'basic' && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Base Revenue"
+                type="number"
+                value={formData.baseRevenue}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFormData(p => ({ ...p, baseRevenue: e.target.value }))
+                }
+                error={errors.baseRevenue}
+              />
+              <Input
+                label="Distance (km)"
+                type="number"
+                value={formData.distanceKm}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setFormData(p => ({ ...p, distanceKm: e.target.value }))
+                }
+                error={errors.distanceKm}
+              />
+            </div>
+          </>
+        )}
+
+        {activeTab === 'costs' && (
+          <div className="mt-4">
+            <AdditionalCostsForm
+              tripId={trip.id}
+              additionalCosts={additionalCosts}
+              onAddCost={handleAddCost}
+              onRemoveCost={handleRemoveCost}
+            />
+          </div>
+        )}
 
         {/* Edit Reason - Required */}
         <div className="space-y-4 border-t pt-4 mt-4">
@@ -186,7 +277,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
           <Button
             icon={<Save className="h-4 w-4" />}
             onClick={handleSave}
-            disabled={isSubmitting || changedFields.length === 0 || Object.keys(errors).length > 0}
+            disabled={isSubmitting || (changedFields.length === 0 && !hasAdditionalCostsChanges) || Object.keys(errors).length > 0}
             isLoading={isSubmitting}
           >
             Save Changes

@@ -191,7 +191,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
             mapTypeControl: showMapTypeControl,
             streetViewControl: showStreetViewControl,
             zoomControl: showZoomControl,
-            styles: customMapStyles || MAP_STYLES,
+            styles: customMapStyles || MAP_STYLES.clean,
           }}
           onLoad={handleMapLoad}
           onUnmount={() => setMapInstance(null)}

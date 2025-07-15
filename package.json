@@ -14,7 +14,10 @@
     "build": "tsc --noEmit --skipLibCheck && vite build",
     "build:all": "tsc --noEmit --skipLibCheck && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "integration:audit": "node tools/integration-report.mjs"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -64,6 +67,13 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^4.0.1",
+    "@storybook/addon-a11y": "^9.0.16",
+    "@storybook/addon-docs": "^9.0.16",
+    "@storybook/addon-onboarding": "^9.0.16",
+    "@storybook/addon-vitest": "^9.0.16",
+    "@storybook/react-vite": "^9.0.16",
+    "@testing-library/react": "^16.3.0",
     "@types/google.maps": "^3.58.1",
     "@types/leaflet": "^1.9.20",
     "@types/node": "^24.0.13",
@@ -74,23 +84,37 @@
     "@typescript-eslint/eslint-plugin": "^8.36.0",
     "@typescript-eslint/parser": "^8.36.0",
     "@vitejs/plugin-react": "^4.6.0",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "^3.2.4",
     "autoprefixer": "^10.4.21",
     "cssnano": "^7.0.7",
+    "cypress": "^14.5.1",
     "eslint": "^9.31.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-storybook": "^9.0.16",
     "firebase-tools": "^14.10.1",
+    "jest": "^30.0.4",
+    "jsdom": "^26.1.0",
     "netlify-cli": "^22.2.2",
     "nodemon": "^3.1.0",
+    "playwright": "^1.54.1",
     "postcss": "^8.5.6",
     "postcss-nesting": "^12.0.1",
+    "storybook": "^9.0.16",
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "vite": "^7.0.2"
+    "vite": "^7.0.2",
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=18.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "eslintConfig": {
+    "extends": [
+      "plugin:storybook/recommended"
+    ]
+  }
 }
