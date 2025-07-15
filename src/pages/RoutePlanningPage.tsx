@@ -1,12 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { GoogleMap, useJsApiLoader, Marker, DirectionsRenderer, Autocomplete, Libraries } from '@react-google-maps/api';
+import { GoogleMap, Marker, DirectionsRenderer, Autocomplete, Libraries } from '@react-google-maps/api';
 import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Select, Input } from '../components/ui/FormElements';
 import { MapPin, RotateCw, Save, Navigation, Clock, TrendingDown, Route, ChevronRight, ChevronDown, ChevronUp, Fuel } from 'lucide-react';
 import LoadingIndicator from '../components/ui/LoadingIndicator';
+import { useLoadGoogleMaps, isGoogleMapsAPILoaded } from '../utils/googleMapsLoader';
 
 // Map container styles
 const mapContainerStyle = {
@@ -32,8 +33,6 @@ const RoutePlanningPage: React.FC = () => {
     updateTrip, 
     planRoute, 
     optimizeRoute, 
-    isGoogleMapsLoaded,
-    loadGoogleMaps,
     isLoading 
   } = useAppContext();
 
@@ -51,29 +50,8 @@ const RoutePlanningPage: React.FC = () => {
   const [destinationRef, setDestinationRef] = useState<google.maps.places.Autocomplete | null>(null);
   const [waypointRefs, setWaypointRefs] = useState<(google.maps.places.Autocomplete | null)[]>([null]);
 
-  // Get maps service URL from env
-  const mapsServiceUrl = import.meta.env.VITE_MAPS_SERVICE_URL || 'https://maps-250085264089.africa-south1.run.app';
-  
-  // Format the URL properly with protocol
-  const formatServiceUrl = (url: string): string => {
-    if (!url) return '';
-    let formattedUrl = url;
-    if (!formattedUrl.startsWith('http')) {
-      formattedUrl = `https://${formattedUrl}`;
-    }
-    return formattedUrl;
-  };
-
-  const formattedMapsServiceUrl = formatServiceUrl(mapsServiceUrl);
-
-  // Load Google Maps JS API through our service instead of directly
-  const { isLoaded: isApiLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: '',  // No API key needed as our service handles this
-    libraries,
-    // The Maps service should be configured to proxy requests at /maps-api
-    googleMapsUrl: `${formattedMapsServiceUrl}/maps-api`,
-  });
+  // Use our improved Google Maps loader with fallback capabilities
+  const { isLoaded: isApiLoaded, error: mapsLoadError } = useLoadGoogleMaps(libraries.join(','));
 
   // Fetch trip data on component mount
   useEffect(() => {
@@ -104,12 +82,12 @@ const RoutePlanningPage: React.FC = () => {
     }
   }, [tripId, getTrip]);
 
-  // Ensure Google Maps is loaded
+  // Update error state if maps loader has an error
   useEffect(() => {
-    if (!isGoogleMapsLoaded) {
-      loadGoogleMaps();
+    if (mapsLoadError) {
+      setError(`Error loading Google Maps: ${mapsLoadError.message}`);
     }
-  }, [isGoogleMapsLoaded, loadGoogleMaps]);
+  }, [mapsLoadError]);
 
   // Map load callback
   const onMapLoad = useCallback((map: google.maps.Map) => {
@@ -240,7 +218,7 @@ const RoutePlanningPage: React.FC = () => {
   };
 
   // Check if map is ready
-  const isMapReady = isGoogleMapsLoaded && isApiLoaded;
+  const isMapReady = isGoogleMapsAPILoaded() && isApiLoaded;
 
   return (
     <div className="space-y-6">

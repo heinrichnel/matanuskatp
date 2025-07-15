@@ -67,3 +67,6 @@ functions/.tsbuildinfo
 
 # Local Netlify folder
 .netlify
+
+*storybook.log
+storybook-static
