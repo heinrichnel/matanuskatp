@@ -175,10 +175,9 @@ const TaskManager: React.FC<TaskManagerProps> = ({
 
     const taskId = uuidv4();
     
-    onTaskAdd({
-      ...newTask,
-      id: taskId
-    });
+    // Since newTask is already Omit<JobCardTask, "id">, we should pass it directly
+    // and let onTaskAdd handle adding the ID
+    onTaskAdd(newTask);
     
     // Log task creation
     if (onLogTaskHistory) {

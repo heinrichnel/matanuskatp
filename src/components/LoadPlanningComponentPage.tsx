@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import LoadPlanningComponent from '../../components/LoadPlanningComponent';
+import LoadPlanningComponent from './TripManagement/LoadPlanningComponent';
 
 const LoadPlanningComponentPage: React.FC = () => {
   const { tripId } = useParams<{ tripId: string }>();
