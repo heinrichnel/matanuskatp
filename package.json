@@ -87,6 +87,7 @@
     "@vitest/browser": "^3.2.4",
     "@vitest/coverage-v8": "^3.2.4",
     "autoprefixer": "^10.4.21",
+    "bolt": "^0.24.10",
     "cssnano": "^7.0.7",
     "cypress": "^14.5.1",
     "eslint": "^9.31.0",
@@ -117,5 +118,7 @@
     "extends": [
       "plugin:storybook/recommended"
     ]
-  }
+  },
+  "repository": "git@github.com:heinNell/APppp.git",
+  "author": "heinNell <heinnell64@gmail.com>"
 }
