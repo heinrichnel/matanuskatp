@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
-import { Package, Search, Plus, Trash2, ArrowDown, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Package, Search, Plus, Trash2, ArrowDown, AlertTriangle, CheckCircle, X } from 'lucide-react';
 
 interface InventoryItem {
   id: string;
