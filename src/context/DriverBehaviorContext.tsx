@@ -44,9 +44,9 @@ export const DriverBehaviorProvider: React.FC<DriverBehaviorProviderProps> = ({ 
     const db = getFirestore(firebaseApp);
 
     try {
-      // Set up real-time listener to driverBehavior collection
+      // Set up real-time listener to driverBehaviorEvents collection
       const unsubscribe = onSnapshot(
-        collection(db, 'driverBehavior'),
+        collection(db, 'driverBehaviorEvents'),
         (snapshot) => {
           const eventsData: DriverBehaviorEvent[] = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
             const data = doc.data();
