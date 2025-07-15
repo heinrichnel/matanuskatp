@@ -12,7 +12,6 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_DATABASE_ID?: string;
 
   readonly VITE_GOOGLE_MAPS_API_KEY?: string;
-  readonly VITE_MAPS_API_KEY?: string;
   readonly VITE_MAPS_SERVICE_URL?: string;
   readonly VITE_WIALON_SESSION_TOKEN?: string;
 
