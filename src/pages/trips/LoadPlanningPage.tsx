@@ -15,13 +15,13 @@ const LoadPlanningPage: React.FC = () => {
           <p className="text-gray-600">Optimize cargo loading for maximum efficiency</p>
         </div>
         <div className="flex space-x-2">
-          <Button 
+          <Button
             variant="outline"
             icon={<RefreshCw className="w-4 h-4" />}
           >
             Refresh
           </Button>
-          <Button 
+          <Button
             icon={<Plus className="w-4 h-4" />}
             disabled={isLoading.trips}
           >
@@ -36,8 +36,8 @@ const LoadPlanningPage: React.FC = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
               >
                 <div className="flex justify-between items-start">
@@ -47,7 +47,7 @@ const LoadPlanningPage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-medium">Load #{1000 + index}</h3>
-                      <p className="text-sm text-gray-500">Scheduled: 2025-07-{10+index}</p>
+                      <p className="text-sm text-gray-500">Scheduled: 2025-07-{10 + index}</p>
                     </div>
                   </div>
                   <ChevronRight className="h-5 w-5 text-gray-400" />
@@ -97,13 +97,13 @@ const LoadPlanningPage: React.FC = () => {
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">VH-{2000 + index}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {['Semi-Trailer', 'Box Truck', 'Flatbed', 'Container Truck'][index-1]}
+                      {['Semi-Trailer', 'Box Truck', 'Flatbed', 'Container Truck'][index - 1]}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {[15000, 8000, 12000, 20000][index-1]} kg
+                      {[15000, 8000, 12000, 20000][index - 1]} kg
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {['Windhoek', 'Walvis Bay', 'Windhoek', 'Swakopmund'][index-1]}
+                      {['Windhoek', 'Walvis Bay', 'Windhoek', 'Swakopmund'][index - 1]}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
@@ -111,12 +111,7 @@ const LoadPlanningPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                      >
-                        Assign Load
-                      </Button>
+                      <Button size="sm" variant="outline">Assign Load</Button>
                     </td>
                   </tr>
                 ))}
@@ -132,8 +127,8 @@ const LoadPlanningPage: React.FC = () => {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2].map((index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
               >
                 <div className="flex justify-between items-start">
@@ -143,10 +138,10 @@ const LoadPlanningPage: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-medium">
-                        {['Standard Container', 'Mixed Cargo'][index-1]}
+                        {['Standard Container', 'Mixed Cargo'][index - 1]}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        {['40ft Container', 'Semi-Trailer'][index-1]}
+                        {['40ft Container', 'Semi-Trailer'][index - 1]}
                       </p>
                     </div>
                   </div>
@@ -155,15 +150,15 @@ const LoadPlanningPage: React.FC = () => {
                 <div className="mt-3 pt-3 border-t">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Items per Load:</span>
-                    <span className="font-medium">{[24, 18][index-1]}</span>
+                    <span className="font-medium">{[24, 18][index - 1]}</span>
                   </div>
                   <div className="flex justify-between text-sm mt-1">
                     <span className="text-gray-600">Optimal Weight:</span>
-                    <span className="font-medium">{[22000, 15000][index-1]} kg</span>
+                    <span className="font-medium">{[22000, 15000][index - 1]} kg</span>
                   </div>
                   <div className="flex justify-between text-sm mt-1">
                     <span className="text-gray-600">Loading Time:</span>
-                    <span className="font-medium">{[60, 90][index-1]} min</span>
+                    <span className="font-medium">{[60, 90][index - 1]} min</span>
                   </div>
                 </div>
               </div>

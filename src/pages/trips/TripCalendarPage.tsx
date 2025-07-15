@@ -18,56 +18,26 @@ const TripCalendarPage: React.FC = () => {
     { id: 'trip-5', date: '2025-07-25', title: 'Windhoek to Lüderitz', status: 'scheduled' },
   ];
 
-  // Navigate to previous month
-  const prevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
-  };
-
-  // Navigate to next month
-  const nextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
-  };
-
-  // Get days in month
+  const prevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+  const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDay = new Date(year, month, 1).getDay();
-    
     const days = [];
-    
-    // Add empty cells for days before the first of the month
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
-    
-    // Add days of the month
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(new Date(year, month, i));
-    }
-    
+    for (let i = 0; i < firstDay; i++) days.push(null);
+    for (let i = 1; i <= daysInMonth; i++) days.push(new Date(year, month, i));
     return days;
   };
-
-  // Get month name and year
-  const getMonthName = (date: Date) => {
-    return date.toLocaleString('default', { month: 'long', year: 'numeric' });
-  };
-
-  // Get trips for a specific date
+  const getMonthName = (date: Date) => date.toLocaleString('default', { month: 'long', year: 'numeric' });
   const getTripsForDate = (date: Date) => {
     if (!date) return [];
     const dateString = date.toISOString().split('T')[0];
     return mockTrips.filter(trip => trip.date === dateString);
   };
+  const handleDayClick = (day: Date) => setSelectedDate(day);
 
-  // Handle day click
-  const handleDayClick = (day: Date) => {
-    setSelectedDate(day);
-  };
-
-  // Generate calendar days
   const days = getDaysInMonth(currentMonth);
 
   return (
@@ -87,7 +57,6 @@ const TripCalendarPage: React.FC = () => {
           </Button>
         </div>
       </div>
-
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -99,39 +68,29 @@ const TripCalendarPage: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent>
-          {/* Calendar Grid */}
           <div className="grid grid-cols-7 gap-1">
-            {/* Weekday headers */}
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, i) => (
-              <div key={i} className="text-center font-medium py-2">
-                {day}
-              </div>
+              <div key={i} className="text-center font-medium py-2">{day}</div>
             ))}
-            
-            {/* Calendar days */}
             {days.map((day, i) => (
-              <div 
-                key={i} 
-                className={`min-h-[100px] border rounded-md p-1 ${
-                  !day ? 'bg-gray-50' : 
-                  selectedDate && day?.toDateString() === selectedDate?.toDateString() ? 'border-blue-500 bg-blue-50' : 
-                  'hover:bg-gray-50 cursor-pointer'
-                }`}
+              <div
+                key={i}
+                className={`min-h-[100px] border rounded-md p-1 ${!day ? 'bg-gray-50' : selectedDate && day?.toDateString() === selectedDate?.toDateString() ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50 cursor-pointer'}`}
                 onClick={() => day && handleDayClick(day)}
               >
                 {day && (
                   <>
-                    <div className="text-right text-sm font-medium mb-1">
-                      {day.getDate()}
-                    </div>
+                    <div className="text-right text-sm font-medium mb-1">{day.getDate()}</div>
                     <div className="space-y-1">
                       {getTripsForDate(day).map((trip) => (
-                        <div 
-                          key={trip.id} 
+                        <div
+                          key={trip.id}
                           className={`text-xs p-1 rounded truncate ${
-                            trip.status === 'active' ? 'bg-blue-100 text-blue-800' :
-                            trip.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-gray-100 text-gray-800'
+                            trip.status === 'active'
+                              ? 'bg-blue-100 text-blue-800'
+                              : trip.status === 'scheduled'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : 'bg-gray-100 text-gray-800'
                           }`}
                         >
                           {trip.title}
@@ -145,8 +104,6 @@ const TripCalendarPage: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Selected Date Details */}
       {selectedDate && (
         <Card>
           <CardHeader title={`Trips on ${selectedDate.toLocaleDateString()}`} />
