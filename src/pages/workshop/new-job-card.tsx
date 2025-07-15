@@ -19,11 +19,7 @@ const NewJobCardPage = () => {
 
   return (
     <div className="p-4">
-      <JobCard 
-        onBack={handleBack}
-        onSave={handleSave}
-        isNewCard={true}
-      />
+      <JobCard />
     </div>
   );
 };
