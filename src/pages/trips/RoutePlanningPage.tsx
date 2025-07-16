@@ -1,13 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../../context/AppContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { GoogleMap, Marker, DirectionsRenderer, Autocomplete, Libraries } from '@react-google-maps/api';
-import Card, { CardContent, CardHeader } from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import { Select, Input } from '../components/ui/FormElements';
+import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import { Select, Input } from '../../components/ui/FormElements';
 import { MapPin, RotateCw, Save, Navigation, Clock, TrendingDown, Route, ChevronRight, ChevronDown, ChevronUp, Fuel } from 'lucide-react';
-import LoadingIndicator from '../components/ui/LoadingIndicator';
-import { useLoadGoogleMaps, isGoogleMapsAPILoaded } from '../utils/googleMapsLoader';
+import LoadingIndicator from '../../components/ui/LoadingIndicator';
+import { useLoadGoogleMaps, isGoogleMapsAPILoaded } from '../../utils/googleMapsLoader';
 
 // Map container styles
 const mapContainerStyle = {
