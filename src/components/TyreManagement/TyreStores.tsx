@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import { Label } from '@/components/ui/label';
-import Select from '@/components/ui/Select';
-import { Badge } from '@/components/ui/Badge';
-import { useTyres } from '@/context/TyreContext';
-import { Tyre, TyreStoreLocation } from '@/types/tyre';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+// Remove Label import as we'll use a simple label element
+import Select from '../../components/ui/Select';
+import { Badge } from '../../components/ui/Badge';
+import { useTyres } from '../../context/TyreContext';
+import { Tyre, TyreStoreLocation } from '../../types/tyre';
 import { PlusCircle, ArrowRightLeft, Trash2, Map, CheckCircle } from 'lucide-react';
 
 interface StoreStats {
@@ -26,7 +26,7 @@ const TyreStores: React.FC = () => {
   const storeTyres = tyres.filter(tyre => tyre.location === selectedStore);
   
   // Calculate statistics for each store
-  const storeStats = Object.values(TyreStoreLocation).reduce((acc, location) => {
+  const storeStats = Object.values(TyreStoreLocation).reduce<Record<string, StoreStats>>((acc, location) => {
     const locationTyres = tyres.filter(tyre => tyre.location === location);
     
     const count = locationTyres.length;
@@ -34,7 +34,7 @@ const TyreStores: React.FC = () => {
     
     acc[location] = { count, value };
     return acc;
-  }, {} as Record<string, StoreStats>);
+  }, {});
   
   // Handle moving a tyre between stores
   const handleMoveTyre = () => {
@@ -68,7 +68,7 @@ const TyreStores: React.FC = () => {
       
       {/* Store Location Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {Object.entries(storeStats).map(([location, stats]) => (
+        {Object.entries(storeStats).map(([location, stats]: [string, StoreStats]) => (
           <div 
             key={location}
             className={`cursor-pointer ${selectedStore === location ? 'border-blue-500 border-2' : ''}`}
@@ -154,14 +154,14 @@ const TyreStores: React.FC = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <Label>Current Location</Label>
+                <label className="text-sm font-medium">Current Location</label>
                 <div className="mt-1 p-2 border rounded bg-gray-50">
                   {selectedStore}
                 </div>
               </div>
               
               <div>
-                <Label>Move To</Label>
+                <label className="text-sm font-medium">Move To</label>
                 <select
                   value={moveToStore}
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setMoveToStore(e.target.value as TyreStoreLocation)}
@@ -178,7 +178,7 @@ const TyreStores: React.FC = () => {
               </div>
               
               <div>
-                <Label>Movement Note</Label>
+                <label className="text-sm font-medium">Movement Note</label>
                 <Input 
                   value={moveNote} 
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMoveNote(e.target.value)} 

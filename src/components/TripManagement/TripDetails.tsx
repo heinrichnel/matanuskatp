@@ -2,27 +2,27 @@
 import React, { useState, useEffect } from 'react';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { Trip, CostEntry, AdditionalCost, DelayReason } from '../../types/index.ts';
+import { Trip, CostEntry, AdditionalCost, DelayReason } from '../../types/index';
 
 // ─── Context ─────────────────────────────────────────────────────
-import { useAppContext } from '../../context/AppContext.tsx';
+import { useAppContext } from '../../context/AppContext';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from '../ui/Modal.tsx';
-import Button from '../ui/Button.tsx';
-import Card, { CardContent, CardHeader } from '../ui/Card.tsx';
+import Modal from '../ui/Modal';
+import Button from '../ui/Button';
+import Card, { CardContent, CardHeader } from '../ui/Card';
 import { AlertTriangle, ArrowLeft, BarChart3, Calendar, Calculator, CheckCircle, Clock, Flag, Plus, Send } from 'lucide-react';
 
 // ─── Custom Modules ──────────────────────────────────────────────
-import CostForm from '../Cost Management/CostForm.tsx';
-import CostList from '../Cost Management/CostList.tsx';
-import { SystemCostGenerator } from '../Cost Management/IndirectCost.tsx';
-import TripPlanningForm from './TripPlanningForm.tsx';
-import InvoiceSubmissionModal from './InvoiceSubmissionModal.tsx';
-import TripReport from './TripReport.tsx';
+import CostForm from '../Cost Management/CostForm';
+import CostList from '../Cost Management/CostList';
+import { SystemCostGenerator } from '../Cost Management/IndirectCost';
+import TripPlanningForm from './TripPlanningForm';
+import InvoiceSubmissionModal from './InvoiceSubmissionModal';
+import TripReport from './TripReport';
 
 // ─── Helpers ─────────────────────────────────────────────────────
-import { formatCurrency, formatDateTime, calculateKPIs, getFlaggedCostsCount, getUnresolvedFlagsCount, canCompleteTrip } from '../../utils/helpers.ts';
+import { formatCurrency, formatDateTime, calculateKPIs, getFlaggedCostsCount, getUnresolvedFlagsCount, canCompleteTrip } from '../../utils/helpers';
 
 // ─── LIVE TELEMATICS ─────────────────────────────────────────────
 import { useWialonUnits } from '../../hooks/useWialonUnits'; // <--- THIS HOOK PROVIDES TELEMATICS DATA

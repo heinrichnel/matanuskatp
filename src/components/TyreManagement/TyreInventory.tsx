@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { Badge } from '../../components/ui/Badge';
 import { AlertCircle } from 'lucide-react';
 import { TyreInventoryStats } from './TyreInventoryStats';
 import { TyreInventoryFilters } from './TyreInventoryFilters';
-import { useTyres } from '@/context/TyreContext';
-import { Tyre, TyreStoreLocation, calculateRemainingLife, calculateCostPerKm } from '@/types/tyre';
+import { useTyres } from '../../context/TyreContext';
+import { Tyre, TyreStoreLocation, calculateRemainingLife, calculateCostPerKm } from '../../types/tyre';
 import LoadingIndicator from '../ui/LoadingIndicator';
 import ErrorMessage from '../ui/ErrorMessage';
 
