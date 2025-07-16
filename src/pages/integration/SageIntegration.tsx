@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { sageAuthConfig } from '../../config/sageAuth';
-import { syncPurchaseOrderToSage, importVendorsFromSage, importInventoryFromSage, importPurchaseOrdersFromSage } from '../../api/sageIntegration';
+import { importVendorsFromSage, importInventoryFromSage, importPurchaseOrdersFromSage } from '../../api/sageIntegration';
 import { PurchaseOrder, Vendor, InventoryItem } from '../../types/inventory';
 
 const SageIntegration: React.FC = () => {
@@ -257,4 +257,32 @@ const SageIntegration: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button 
                   variant="outline"
-                  disabled=
+                  disabled={configStatus !== 'complete' || syncing}
+                  onClick={() => handleSyncWithSage()}
+                >
+                  Sync Vendors
+                </Button>
+                <Button 
+                  variant="outline"
+                  disabled={configStatus !== 'complete' || syncing}
+                  onClick={() => handleSyncWithSage()}
+                >
+                  Sync Inventory
+                </Button>
+                <Button 
+                  variant="outline"
+                  disabled={configStatus !== 'complete' || syncing}
+                  onClick={() => handleSyncWithSage()}
+                >
+                  Sync Purchase Orders
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default SageIntegration;
