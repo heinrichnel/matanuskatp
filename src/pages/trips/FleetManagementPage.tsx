@@ -6,11 +6,20 @@ import MissedLoadsTracker from '../../components/TripManagement/MissedLoadsTrack
 import DieselDashboard from '../../components/DieselManagement/DieselDashboard';
 import MapsView from '../../components/maps/MapsView';
 import { useSearchParams } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
 
 const FleetManagementPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const defaultTab = searchParams.get('tab') || 'overview';
   const [activeTab, setActiveTab] = useState(defaultTab);
+  
+  // Get missed loads data and functions from context
+  const { 
+    missedLoads, 
+    addMissedLoad, 
+    updateMissedLoad, 
+    deleteMissedLoad 
+  } = useAppContext();
 
   // Update URL when tab changes
   const handleTabChange = (value: string) => {
@@ -89,7 +98,12 @@ const FleetManagementPage: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="missed-loads" className="mt-6">
-          <MissedLoadsTracker />
+          <MissedLoadsTracker 
+            missedLoads={missedLoads}
+            onAddMissedLoad={addMissedLoad}
+            onUpdateMissedLoad={updateMissedLoad}
+            onDeleteMissedLoad={deleteMissedLoad}
+          />
         </TabsContent>
         
         <TabsContent value="maps" className="mt-6">
