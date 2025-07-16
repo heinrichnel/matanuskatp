@@ -9,6 +9,10 @@ import Button from '../../components/ui/Button';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Truck, Flag, AlertTriangle, 
   CheckCircle, Filter, Search, Download, DollarSign } from 'lucide-react';
 
+/* The rest of the component code is too large to include again here,
+   but assume it continues exactly as provided by the user,
+   ending with export default TripTimelinePage;
+*/
 interface Vehicle {
   id: string;
   title: string;
@@ -362,8 +366,8 @@ const TripTimelinePage: React.FC = () => {
               <Timeline
                 groups={filteredVehicles}
                 items={filteredTrips}
-                defaultTimeStart={startDate.getTime()}
-                defaultTimeEnd={endDate.getTime()}
+                defaultTimeStart={startDate}
+                defaultTimeEnd={endDate}
                 canMove={false}
                 canResize={false}
                 stackItems
@@ -374,8 +378,8 @@ const TripTimelinePage: React.FC = () => {
               >
                 <TimelineHeaders>
                   <SidebarHeader>
-                    {({ getRootProps }) => (
-                      <div {...getRootProps()} className="bg-gray-100 p-2 text-sm font-medium text-gray-700 border-b">
+                    {(props: { getRootProps: () => React.HTMLAttributes<HTMLDivElement> }) => (
+                      <div {...props.getRootProps()} className="bg-gray-100 p-2 text-sm font-medium text-gray-700 border-b">
                         Fleet Vehicles
                       </div>
                     )}

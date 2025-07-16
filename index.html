@@ -2,18 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <title>TransportMat – Fleet Management</title>
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TransportMat – Fleet Management</title>
+    <meta name="description" content="Fleet management, trip P&L, live tracking, Google Maps & Wialon SDK integration." />
     <meta name="theme-color" content="#2563eb" />
 
     <!-- Google Fonts (optional) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+
+    <!-- Wialon SDK (globally available as window.wialon) -->
+    <script src="https://hst-api.wialon.com/wsdk/script/wialon.js"></script>
+
+    <!-- Google Maps Embed (for iframe usage) -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=VITE_GOOGLE_MAPS_API_KEY"></script>
   </head>
+
   <body class="bg-gray-50 dark:bg-gray-900 font-sans antialiased">
     <div id="root"></div>
 
-    <!-- Vite/React main entry (do NOT remove this) -->
+    <!-- Vite/React Main Entry Point -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
