@@ -194,7 +194,7 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
             <Select
               label="Brand"
               value={filterBrand}
-              onChange={setFilterBrand}
+              onChange={(e) => setFilterBrand(e.target.value)}
               options={[
                 { label: 'All Brands', value: '' },
               ...TYRE_BRANDS.map((brand: string) => ({ label: brand, value: brand }))
@@ -203,7 +203,7 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
             <Select
               label="Pattern"
               value={filterPattern}
-              onChange={setFilterPattern}
+              onChange={(e) => setFilterPattern(e.target.value)}
               options={[
                 { label: 'All Patterns', value: '' },
                 ...TYRE_PATTERNS.map((pattern: string) => ({ label: pattern, value: pattern }))
@@ -212,7 +212,7 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
             <Select
               label="Sort By"
               value={sortBy}
-              onChange={setSortBy}
+              onChange={(e) => setSortBy(e.target.value)}
               options={[
                 { label: 'Cost per KM', value: 'costPerKm' },
                 { label: 'Purchase Cost', value: 'averageCost' },

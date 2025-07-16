@@ -19,19 +19,19 @@ export function formatCurrency(value: number, currency: string = 'USD'): string 
  */
 export function formatDate(date: Date | string | number, format: 'short' | 'medium' | 'long' = 'medium'): string {
   if (!date) return '';
-  
+
   const dateObj = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
-  
+
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: format === 'short' ? 'numeric' : 'long',
     day: 'numeric'
   };
-  
+
   if (format === 'long') {
     options.hour = 'numeric';
     options.minute = 'numeric';
   }
-  
+
   return new Intl.DateTimeFormat('en-US', options).format(dateObj);
 }

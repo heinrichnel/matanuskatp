@@ -90,7 +90,7 @@ const InspectionList: React.FC = () => {
             <Select
               label="Filter by status"
               value={filterStatus}
-              onChange={setFilterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
               options={[
                 { label: 'All Status', value: 'all' },
                 { label: 'Pending', value: 'pending' },

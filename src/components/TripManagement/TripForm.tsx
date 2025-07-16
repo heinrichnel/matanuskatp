@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Input, Select, Textarea } from '../ui/FormElements.tsx';
-import Button from '../ui/Button.tsx';
+import { Input, Select, Textarea } from '../ui/FormElements';
+import Button from '../ui/Button';
 
-import { Trip, CLIENTS, DRIVERS } from '../../types/index.ts';
+import { Trip, CLIENTS, DRIVERS } from '../../types/index';
 import { useWialonUnits } from "../../hooks/useWialonUnits";
 
 interface TripFormProps {

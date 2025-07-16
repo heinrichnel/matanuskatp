@@ -370,3 +370,76 @@ export const generateLoadConfirmationPDF = async (
   // Return the PDF as a blob
   return doc.output('blob');
 };
+
+// Define inspection types to avoid import issues from TSX files
+interface InspectionItem {
+  id: string;
+  name: string;
+  status: 'Pass' | 'Fail' | 'NA';
+  comments?: string;
+  images?: string[];
+}
+
+interface InspectionReport {
+  id: string;
+  reportNumber: string;
+  vehicleId: string;
+  inspectionDate: string;
+  inspector: string;
+  items: InspectionItem[];
+  overallCondition: 'Pass' | 'Fail';
+  notes?: string;
+  attachments?: string[];
+  signatureUrl?: string;
+}
+
+export const generateInspectionPDF = (report: InspectionReport): void => {
+  const doc = new jsPDF();
+  
+  // Add a title
+  doc.setFontSize(20);
+  doc.text('Vehicle Inspection Report', 105, 15, { align: 'center' });
+  
+  // Add report metadata
+  doc.setFontSize(12);
+  doc.text(`Report #: ${report.reportNumber}`, 20, 30);
+  doc.text(`Date: ${format(new Date(report.inspectionDate), 'dd/MM/yyyy')}`, 20, 37);
+  doc.text(`Vehicle ID: ${report.vehicleId}`, 20, 44);
+  doc.text(`Inspector: ${report.inspector}`, 20, 51);
+  doc.text(`Overall Condition: ${report.overallCondition}`, 20, 58);
+  
+  // Add inspection items table
+  const tableData = report.items.map((item: InspectionItem) => [
+    item.name,
+    item.status,
+    item.comments || ''
+  ]);
+  
+  doc.autoTable({
+    startY: 65,
+    head: [['Item', 'Status', 'Comments']],
+    body: tableData,
+    styles: { 
+      fontSize: 10,
+    },
+    headStyles: {
+      fillColor: [66, 66, 66],
+    },
+    columnStyles: {
+      0: { cellWidth: 60 },
+      1: { cellWidth: 30 },
+      2: { cellWidth: 'auto' },
+    }
+  });
+  
+  // Add notes if any
+  if (report.notes) {
+    const finalY = (doc as any).lastAutoTable.finalY || 150;
+    doc.text('Notes:', 20, finalY + 10);
+    doc.setFontSize(10);
+    doc.text(report.notes, 20, finalY + 17);
+  }
+  
+  // Save the PDF
+  doc.save(`Inspection_Report_${report.reportNumber}.pdf`);
+};

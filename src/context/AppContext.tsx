@@ -42,6 +42,9 @@ interface AppContextType {
   isGoogleMapsLoaded: boolean;
   googleMapsError: string | null;
   loadGoogleMaps: () => Promise<void>;
+  
+  // Constants
+  FLEETS_WITH_PROBES: string[];
   trips: Trip[];
   addTrip: (trip: Omit<Trip, 'id' | 'costs' | 'status'>) => Promise<string>;
   updateTrip: (trip: Trip) => Promise<void>;
@@ -2207,6 +2210,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     getFleetUtilizationMetrics,
     
     getJobCard: (id: string) => jobCards.find(jobCard => jobCard.id === id),
+    
+    FLEETS_WITH_PROBES,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

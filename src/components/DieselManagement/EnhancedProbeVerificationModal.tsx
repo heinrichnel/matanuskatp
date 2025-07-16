@@ -86,7 +86,8 @@ const EnhancedProbeVerificationModal: React.FC<EnhancedProbeVerificationModalPro
   }
 
   // Update discrepancy on probe reading change
-  const handleProbeReadingChange = (value: string) => {
+  const handleProbeReadingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
     setProbeReading(value);
     
     const probeValue = parseFloat(value);
@@ -319,7 +320,7 @@ const EnhancedProbeVerificationModal: React.FC<EnhancedProbeVerificationModalPro
             <Input
               label="Witness Name"
               value={witnessName}
-              onChange={setWitnessName}
+              onChange={(e) => setWitnessName(e.target.value)}
               placeholder="Person who verified the reading"
               error={errors.witnessName}
             />
@@ -348,7 +349,7 @@ const EnhancedProbeVerificationModal: React.FC<EnhancedProbeVerificationModalPro
         <TextArea
           label="Verification Notes"
           value={verificationNotes}
-          onChange={setVerificationNotes}
+          onChange={(e) => setVerificationNotes(e.target.value)}
           placeholder="Add any notes about the verification process, discrepancies, or observations..."
           rows={3}
           error={errors.verificationNotes}

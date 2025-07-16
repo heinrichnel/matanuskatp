@@ -65,7 +65,7 @@ export const FaultManagement: React.FC = () => {
             <Select
               label="Status"
               value={filterStatus}
-              onChange={setFilterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
               options={[
                 { label: 'All Status', value: 'all' },
                 { label: 'Open', value: 'open' },
@@ -76,7 +76,7 @@ export const FaultManagement: React.FC = () => {
             <Select
               label="Priority"
               value={filterPriority}
-              onChange={setFilterPriority}
+              onChange={(e) => setFilterPriority(e.target.value)}
               options={[
                 { label: 'All Priorities', value: 'all' },
                 { label: 'Critical', value: 'critical' },

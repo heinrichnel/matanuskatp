@@ -140,13 +140,13 @@ const FlagsInvestigations: React.FC<FlagsInvestigationsProps> = (props) => {
              <Select
                label="Investigation Status"
                value={statusFilter}
-               onChange={setStatusFilter}
+               onChange={(e) => setStatusFilter(e.target.value)}
                options={[{ label: 'All Statuses', value: '' }, { label: 'Pending', value: 'pending' }, { label: 'In Progress', value: 'in-progress' }, { label: 'Resolved', value: 'resolved' }]}
              />
              <Select
                label="Driver"
                value={driverFilter}
-               onChange={setDriverFilter}
+               onChange={(e) => setDriverFilter(e.target.value)}
                options={[{ label: 'All Drivers', value: '' }, ...uniqueDrivers.map(d => ({ label: d, value: d }))]}
              />
            </div>

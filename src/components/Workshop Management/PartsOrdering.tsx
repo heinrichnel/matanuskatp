@@ -268,7 +268,7 @@ const PartsOrdering: React.FC = () => {
             <Select
               label="Status"
               value={filterStatus}
-              onChange={setFilterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
               options={[
                 { label: 'All Statuses', value: '' },
                 { label: 'Draft', value: 'draft' },
@@ -283,7 +283,7 @@ const PartsOrdering: React.FC = () => {
             <Select
               label="Priority"
               value={filterPriority}
-              onChange={setFilterPriority}
+              onChange={(e) => setFilterPriority(e.target.value)}
               options={[
                 { label: 'All Priorities', value: '' },
                 { label: 'Low', value: 'low' },
@@ -320,14 +320,14 @@ const PartsOrdering: React.FC = () => {
               <Input
                 label="Part Number *"
                 value={newItem.partNumber || ''}
-                onChange={(value) => setNewItem({ ...newItem, partNumber: value })}
+                onChange={(e) => setNewItem({ ...newItem, partNumber: e.target.value })}
                 placeholder="e.g. FLT-123456"
               />
               
               <Input
                 label="Part Name *"
                 value={newItem.partName || ''}
-                onChange={(value) => setNewItem({ ...newItem, partName: value })}
+                onChange={(e) => setNewItem({ ...newItem, partName: e.target.value })}
                 placeholder="e.g. Air Filter Element"
               />
               
@@ -336,7 +336,7 @@ const PartsOrdering: React.FC = () => {
                 type="number"
                 min="1"
                 value={newItem.quantity?.toString() || '1'}
-                onChange={(value) => setNewItem({ ...newItem, quantity: parseInt(value) })}
+                onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) })}
               />
               
               <Input
@@ -345,13 +345,13 @@ const PartsOrdering: React.FC = () => {
                 min="0"
                 step="0.01"
                 value={newItem.unitPrice?.toString() || '0'}
-                onChange={(value) => setNewItem({ ...newItem, unitPrice: parseFloat(value) })}
+                onChange={(e) => setNewItem({ ...newItem, unitPrice: parseFloat(e.target.value) })}
               />
               
               <Select
                 label="Supplier *"
                 value={newItem.supplier || ''}
-                onChange={(value) => setNewItem({ ...newItem, supplier: value })}
+                onChange={(e) => setNewItem({ ...newItem, supplier: e.target.value })}
                 options={[
                   { label: 'Select supplier...', value: '' },
                   ...suppliers.map(s => ({ label: s, value: s }))
@@ -373,7 +373,7 @@ const PartsOrdering: React.FC = () => {
               <Input
                 label="Job Card ID (Optional)"
                 value={newItem.jobCardId || ''}
-                onChange={(value) => setNewItem({ ...newItem, jobCardId: value })}
+                onChange={(e) => setNewItem({ ...newItem, jobCardId: e.target.value })}
                 placeholder="e.g. JC-2025-0042"
               />
               
@@ -381,7 +381,7 @@ const PartsOrdering: React.FC = () => {
                 label="Expected Delivery (Optional)"
                 type="date"
                 value={newItem.expectedDelivery || ''}
-                onChange={(value) => setNewItem({ ...newItem, expectedDelivery: value })}
+                onChange={(e) => setNewItem({ ...newItem, expectedDelivery: e.target.value })}
               />
               
               <div className="md:col-span-3">

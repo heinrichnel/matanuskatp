@@ -275,7 +275,7 @@ const CustomerRetentionDashboard: React.FC<CustomerRetentionDashboardProps> = (p
             <Select
               label="Risk Level"
               value={filters.riskLevel}
-              onChange={(value: string) => handleFilterChange('riskLevel', value)}
+              onChange={(e) => handleFilterChange('riskLevel', e.target.value)}
               options={[
                 { label: 'All Risk Levels', value: '' },
                 { label: 'Low Risk', value: 'low' },
@@ -286,7 +286,7 @@ const CustomerRetentionDashboard: React.FC<CustomerRetentionDashboardProps> = (p
             <Select
               label="Currency"
               value={filters.currency}
-              onChange={(value: string) => handleFilterChange('currency', value)}
+              onChange={(e) => handleFilterChange('currency', e.target.value)}
               options={[
                 { label: 'All Currencies', value: '' },
                 { label: 'ZAR (R)', value: 'ZAR' },
@@ -296,7 +296,7 @@ const CustomerRetentionDashboard: React.FC<CustomerRetentionDashboardProps> = (p
             <Select
               label="Client Type"
               value={filters.clientType}
-              onChange={(value: string) => handleFilterChange('clientType', value)}
+              onChange={(e) => handleFilterChange('clientType', e.target.value)}
               options={[
                 { label: 'All Client Types', value: '' },
                 { label: 'Internal', value: 'internal' },

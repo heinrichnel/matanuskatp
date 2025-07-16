@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Timeline, { TimelineHeaders, SidebarHeader, DateHeader, TimelineMarkers } from "react-calendar-timeline";
-import 'react-calendar-timeline/lib/Timeline.css';
+import 'react-calendar-timeline/dist/style.css';
 import { format, addWeeks, subWeeks, parseISO, isValid, startOfWeek, endOfWeek } from 'date-fns';
 import { collection, getDocs, query, where, orderBy, limit } from "firebase/firestore";
 import { db } from "../../firebase"; // Adjust to your path

@@ -119,7 +119,7 @@ const TripStatusUpdateModal: React.FC<TripStatusUpdateModalProps> = ({
         <TextArea
           label="Status Update Notes (Optional)"
           value={notes}
-          onChange={(value) => setNotes(value)}
+          onChange={(e) => setNotes(e.target.value)}
           placeholder={`Add any notes about this ${status} status update...`}
           rows={3}
         />
