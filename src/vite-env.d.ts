@@ -10,11 +10,16 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_APP_ID: string;
   readonly VITE_FIREBASE_MEASUREMENT_ID?: string;
   readonly VITE_FIREBASE_DATABASE_ID?: string;
-
+  readonly VITE_FIREBASE_FUNCTIONS_URL?: string;
+  readonly VITE_FIREBASE_FUNCTIONS_REGION?: string;
+  readonly VITE_FIREBASE_FUNCTIONS_EMULATOR_HOST?: string;
+  readonly VITE_FIREBASE_FUNCTIONS_EMULATOR_PORT?: string;
+  readonly VITE_FIREBASE_FUNCTIONS_EMULATOR_REGION?: string;
   readonly VITE_GOOGLE_MAPS_API_KEY?: string;
-  readonly VITE_GOOGLE_MAPS_IFRAME_URL?: string; // Add iframe URL definition
+  readonly VITE_GOOGLE_MAPS_IFRAME_URL?: string;
   readonly VITE_MAPS_SERVICE_URL?: string;
   readonly VITE_WIALON_SESSION_TOKEN?: string;
+  readonly VITE_WIALON_HOST_AUTOLOGIN_URL?: string;
 
   readonly [key: string]: string | undefined; // Laat custom vars toe
 }

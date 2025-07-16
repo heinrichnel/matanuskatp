@@ -1,24 +1,10 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
-import { validateEnv } from './plugins/validateEnv.ts';
 
-// Define required env vars
-const requiredEnvVars = [
-  'VITE_FIREBASE_API_KEY',
-  'VITE_FIREBASE_AUTH_DOMAIN',
-  'VITE_FIREBASE_PROJECT_ID',
-  'VITE_FIREBASE_APP_ID',
-  'VITE_GOOGLE_MAPS_API_KEY',
-  'VITE_WEBBOOK_TRIPS_URL',
-  'VITE_WIALON_SESSION_TOKEN',
-];
-
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    validateEnv(requiredEnvVars),
-  ],
+  plugins: [react()],
   server: {
     host: true,
     port: 5173,
@@ -42,7 +28,7 @@ export default defineConfig({
       'jspdf',
       'jspdf-autotable',
       'xlsx',
-      'date-fns',
+      'date-fns'
     ],
     exclude: ['lucide-react'],
   },
@@ -58,7 +44,7 @@ export default defineConfig({
           charts: ['recharts', 'd3'],
           pdf: ['jspdf', 'jspdf-autotable', '@react-pdf/renderer'],
           spreadsheet: ['xlsx', 'papaparse'],
-          utils: ['date-fns', 'uuid'],
+          utils: ['date-fns', 'uuid']
         },
       },
     },
