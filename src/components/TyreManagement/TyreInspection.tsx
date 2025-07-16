@@ -1,6 +1,7 @@
 import React, { useState, useEffect, ChangeEvent } from "react";
 import { VehicleSelector } from '../common/VehicleSelector';
-import { Tyre, TyreSize, TyreInspectionEntry } from '../../data/tyreData'; // Correct Tyre import
+import { TyreSize as TyreSizeData, TyreInspectionEntry } from '../../data/tyreData'; 
+import { Tyre } from '../../types/tyre'; // Import Tyre from types/tyre to match VehicleTyreView
 import VehicleTyreView from "./VehicleTyreView";
 
 // Import tyre reference data
@@ -39,7 +40,7 @@ const SIDEWALL_CONDITIONS = [
 ];
 
 // Function to parse tyre size from string (e.g., '315/80R22.5')
-const parseTyreSize = (sizeStr: string): TyreSize => {
+const parseTyreSize = (sizeStr: string): TyreSizeData => {
   const regex = /([0-9]+)\/([0-9]+)R([0-9.]+)/;
   const match = regex.exec(sizeStr);
 
@@ -55,7 +56,7 @@ const parseTyreSize = (sizeStr: string): TyreSize => {
 };
 
 // Helper function to format tyre size as string
-const formatTyreSize = (size: TyreSize): string => `${size.width}/${size.aspectRatio}R${size.rimDiameter}`;
+const formatTyreSize = (size: TyreSizeData): string => `${size.width}/${size.aspectRatio}R${size.rimDiameter}`;
 
 // Interface for the inspection form data
 interface TyreInspectionFormData {
@@ -76,7 +77,7 @@ interface TyreInspectionFormData {
   dotCode: string;
   supplier: string;
   // Size breakdown
-  tyreSize: TyreSize;
+  tyreSize: TyreSizeData;
   // Cost tracking
   cost: string;
   estimatedLifespan: string;
@@ -194,7 +195,7 @@ const TyreInspection: React.FC = () => {
     if (tyre) {
       setFormData((prevData) => ({
         ...prevData,
-        tyrePosition: tyre.installation.position,
+        tyrePosition: tyre.installation?.position || '',
         treadDepth: tyre.condition.treadDepth.toString(),
         pressure: tyre.condition.pressure.toString(),
         brand: tyre.brand,
@@ -205,7 +206,7 @@ const TyreInspection: React.FC = () => {
         tyreSize: tyre.size,
         cost: tyre.purchaseDetails.cost?.toString() ?? "",
         estimatedLifespan: tyre.kmRunLimit?.toString() ?? "",
-        currentMileage: tyre.milesRun?.toString() ?? tyre.installation.mileageAtInstallation.toString(),
+        currentMileage: tyre.milesRun?.toString() ?? tyre.installation?.mileageAtInstallation?.toString() ?? '0',
       }));
       if (tyre.brand) {
         const brandTyres = getTyresByBrand(tyre.brand);
@@ -678,7 +679,7 @@ const TyreInspection: React.FC = () => {
                       <p className="text-sm">
                         Position:{" "}
                         <span className="font-medium capitalize">
-                          {selectedTyre.installation.position.replace(
+                          {selectedTyre.installation?.position?.replace(
                             /-/g,
                             " "
                           )}

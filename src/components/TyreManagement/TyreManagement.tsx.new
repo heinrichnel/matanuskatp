@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
 import { TyreInventory } from './TyreInventory';
@@ -12,20 +12,8 @@ const PlaceholderComponent = ({ title }: { title: string }) => (
   </div>
 );
 
-interface TyreManagementProps {
-  activeTab?: string;
-}
-
-const TyreManagement: React.FC<TyreManagementProps> = ({ activeTab = 'inventory' }) => {
+const TyreManagement: React.FC = () => {
   const [selectedVehicle, setSelectedVehicle] = useState<string>('');
-  const [selectedTab, setSelectedTab] = useState<string>(activeTab);
-
-  // Update selected tab when prop changes
-  useEffect(() => {
-    if (activeTab) {
-      setSelectedTab(activeTab);
-    }
-  }, [activeTab]);
 
   return (
     <div className="space-y-6">
@@ -34,7 +22,7 @@ const TyreManagement: React.FC<TyreManagementProps> = ({ activeTab = 'inventory'
         <p className="text-gray-600">Comprehensive tyre tracking, maintenance, and analytics</p>
       </div>
 
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+      <Tabs defaultValue="inventory" className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <PieChart className="w-4 h-4" />

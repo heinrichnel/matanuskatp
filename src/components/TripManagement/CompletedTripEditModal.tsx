@@ -3,7 +3,7 @@ import { Trip, TripEditRecord, TRIP_EDIT_REASONS, AdditionalCost } from '../../t
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Input, Select, TextArea } from '../ui/FormElements';
-import { Save, X, DollarSign } from 'lucide-react';
+import { Save, X, DollarSign, AlertTriangle } from 'lucide-react';
 import AdditionalCostsForm from '../Cost Management/AdditionalCostsForm';
 import { useAppContext } from '../../context/AppContext';
 
@@ -280,6 +280,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
             disabled={isSubmitting || (changedFields.length === 0 && !hasAdditionalCostsChanges) || Object.keys(errors).length > 0}
             isLoading={isSubmitting}
           >
+          isLoading={isSubmitting}
             Save Changes
           </Button>
         </div>

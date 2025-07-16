@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { AlertCircle } from 'lucide-react';
 import { TyreInventoryStats } from './TyreInventoryStats';
 import { TyreInventoryFilters } from './TyreInventoryFilters';
+import { useTyres } from '@/context/TyreContext';
+import { Tyre, TyreStoreLocation, calculateRemainingLife, calculateCostPerKm } from '@/types/tyre';
+import LoadingIndicator from '../ui/LoadingIndicator';
+import ErrorMessage from '../ui/ErrorMessage';
 
 interface TyreStock {
   id: string;
@@ -18,56 +22,62 @@ interface TyreStock {
   location: string;
 }
 
-const SAMPLE_INVENTORY: TyreStock[] = [
-  {
-    id: '1',
-    brand: 'Michelin',
-    model: 'X Line Energy D',
-    pattern: 'Long Haul',
-    size: '295/80R22.5',
-    quantity: 12,
-    minStock: 8,
-    cost: 450,
-    supplier: 'Tyre Pro Ltd',
-    location: 'Warehouse A'
-  },
-  {
-    id: '2',
-    brand: 'Bridgestone',
-    model: 'M788',
-    pattern: 'Mixed Service',
-    size: '295/80R22.5',
-    quantity: 6,
-    minStock: 10,
-    cost: 420,
-    supplier: 'Fleet Tyres Inc',
-    location: 'Warehouse A'
-  },
-  {
-    id: '3',
-    brand: 'Continental',
-    model: 'HDR2',
-    pattern: 'Regional',
-    size: '11R22.5',
-    quantity: 15,
-    minStock: 5,
-    cost: 380,
-    supplier: 'Continental Direct',
-    location: 'Warehouse B'
-  }
-];
-
 export const TyreInventory: React.FC = () => {
-  const [inventory] = useState<TyreStock[]>(SAMPLE_INVENTORY);
+  const { tyres, loading, error } = useTyres();
   const [searchTerm, setSearchTerm] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  // Convert Tyre array to TyreStock format for compatibility with existing components
+  const convertToTyreStock = (tyres: Tyre[]): TyreStock[] => {
+    // Group tyres by brand, model, pattern, and size
+    const groupedTyres: Record<string, Tyre[]> = {};
+    
+    tyres.forEach(tyre => {
+      // Create a unique key for grouping
+      const key = `${tyre.brand}-${tyre.model}-${tyre.pattern}-${formatTyreSize(tyre.size)}`;
+      
+      if (!groupedTyres[key]) {
+        groupedTyres[key] = [];
+      }
+      
+      groupedTyres[key].push(tyre);
+    });
+    
+    // Convert grouped tyres to TyreStock
+    return Object.entries(groupedTyres).map(([key, tyreGroup]) => {
+      const firstTyre = tyreGroup[0];
+      
+      return {
+        id: key,
+        brand: firstTyre.brand,
+        model: firstTyre.model,
+        pattern: firstTyre.pattern,
+        size: formatTyreSize(firstTyre.size),
+        quantity: tyreGroup.length,
+        minStock: 5, // Default minimum stock level
+        cost: firstTyre.purchaseDetails.cost,
+        supplier: firstTyre.purchaseDetails.supplier,
+        location: firstTyre.location
+      };
+    });
+  };
+  
+  const formatTyreSize = (size: any): string => {
+    if (typeof size === 'string') return size;
+    return `${size.width}/${size.aspectRatio}R${size.rimDiameter}`;
+  };
+
+  const inventory = convertToTyreStock(tyres);
 
   const filteredInventory = inventory.filter(item => {
     const matchesSearch = item.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          item.size.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesBrand = !brandFilter || item.brand === brandFilter;
-    return matchesSearch && matchesBrand;
+    const matchesLocation = !locationFilter || item.location === locationFilter;
+    return matchesSearch && matchesBrand && matchesLocation;
   });
 
   const getStockStatus = (item: TyreStock) => {
@@ -85,6 +95,18 @@ export const TyreInventory: React.FC = () => {
     }
   };
 
+  // Extract unique locations and brands for filter options
+  const locations = [...new Set(inventory.map(item => item.location))];
+  const brands = [...new Set(inventory.map(item => item.brand))];
+  
+  if (loading) {
+    return <LoadingIndicator text="Loading tyre inventory..." />;
+  }
+  
+  if (error) {
+    return <ErrorMessage message={`Error loading tyre inventory: ${error.message}`} />;
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -101,10 +123,17 @@ export const TyreInventory: React.FC = () => {
             setSearchTerm={setSearchTerm}
             brandFilter={brandFilter}
             setBrandFilter={setBrandFilter}
+            locationFilter={locationFilter}
+            setLocationFilter={setLocationFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            onAddStock={() => console.log('Add stock clicked')}
+            brands={brands}
+            locations={locations}
             onSearchChange={setSearchTerm}
             onBrandChange={setBrandFilter}
-            onAddStock={() => console.log('Add stock clicked')}
-            brands={['Michelin', 'Bridgestone', 'Continental']}
+            onLocationChange={setLocationFilter}
+            onStatusChange={setStatusFilter}
           />
         </CardContent>
       </Card>

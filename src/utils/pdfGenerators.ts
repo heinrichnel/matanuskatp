@@ -1,275 +1,372 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { InspectionReport } from '../components/Workshop Management/InspectionReportForm';
+import { format } from 'date-fns';
 
-// Add the autotable plugin to the jsPDF type
+// Extend the jsPDF type to include autoTable
 declare module 'jspdf' {
   interface jsPDF {
     autoTable: (options: any) => jsPDF;
   }
 }
 
+// Types from the form component
+interface LoadConfirmationData {
+  companyEntity: 'sa' | 'zim';
+  currency: 'ZAR' | 'USD';
+  customerName: string;
+  contactPerson: string;
+  contactDetails: string;
+  confirmationDate: string;
+  loadRefNumber: string;
+  vehicleRegNo: string;
+  trailerRegNo: string;
+  driverName: string;
+  pickupAddress: string;
+  deliveryAddress: string;
+  commodity: string;
+  totalWeight: string;
+  palletsOrUnits: string;
+  rateAmount: string;
+  rateUnit: string;
+  totalAmount: string;
+  paymentTerms: string;
+  specialInstructions: string;
+  pickupContact: string;
+  deliveryContact: string;
+  transporterName: string;
+  matanuskaRepName: string;
+}
+
+// Define types for company details
+interface SACompanyDetails {
+  name: string;
+  address: string;
+  regNo: string;
+  vatNo: string;
+  tel: string;
+  regDate: string;
+}
+
+interface ZimCompanyDetails {
+  name: string;
+  address: string;
+  tin: string;
+  authCode: string;
+  taxpayerName: string;
+  tradeName: string;
+}
+
+// Company details based on entity
+const COMPANY_DETAILS: {
+  sa: SACompanyDetails;
+  zim: ZimCompanyDetails;
+} = {
+  sa: {
+    name: 'Matanuska (Pty) Ltd',
+    address: '6 MT ORVILLE STREET\nMIDLANDS ESTATE MIDSTREAM\nGAUTENG, 1692',
+    regNo: '2019/542290/07',
+    vatNo: '4710136013',
+    tel: '011 613 1804',
+    regDate: '01/02/1993'
+  },
+  zim: {
+    name: 'Matanuska Distribution (Pvt) Ltd',
+    address: '5179 Tamside Close, Nyakamete Industrial Area\nHarare, Zimbabwe',
+    tin: '2000321177',
+    authCode: '47046057',
+    taxpayerName: 'Matanuska Distribution (Pvt) Ltd',
+    tradeName: 'Matanuska Distribution (Pvt) Ltd'
+  }
+};
+
 /**
- * Generates a professional PDF for inspection reports
- * Includes photo support and clean formatting
+ * Generate a PDF load confirmation document
+ * @param data The load confirmation form data
+ * @returns A Promise that resolves to a PDF blob
  */
-export const generateInspectionPDF = (report: InspectionReport): void => {
-  const doc = new jsPDF();
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 10;
+export const generateLoadConfirmationPDF = async (
+  data: LoadConfirmationData
+): Promise<Blob> => {
+  // Create a new PDF document
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
   
-  // Add company logo/header
-  // doc.addImage('logo-url', 'PNG', 10, 10, 50, 20);
+  // Set font for the entire document
+  doc.setFont('helvetica');
   
-  // Title
-  doc.setFontSize(20);
-  doc.setTextColor(0, 51, 102);
-  doc.text('INSPECTION REPORT', pageWidth / 2, 20, { align: 'center' });
+  // Get the correct company details based on entity
+  const companyDetails = data.companyEntity === 'sa' 
+    ? COMPANY_DETAILS.sa
+    : COMPANY_DETAILS.zim;
   
-  // Report details
-  doc.setFontSize(10);
-  doc.setTextColor(0, 0, 0);
-  doc.text(`Report Number: ${report.reportNumber}`, margin, 35);
-  doc.text(`Inspection Date: ${new Date(report.inspectionDate).toLocaleDateString()}`, margin, 40);
-  doc.text(`Vehicle ID: ${report.vehicleId}`, margin, 45);
-  doc.text(`Inspector: ${report.inspector}`, margin, 50);
-  doc.text(`Overall Condition: ${report.overallCondition}`, margin, 55);
+  // Set page margins
+  const margin = 20; // 20mm margin
+  const pageWidth = doc.internal.pageSize.width;
+  const contentWidth = pageWidth - (margin * 2);
   
-  // Add a horizontal line
-  doc.setDrawColor(220, 220, 220);
+  // Helper for text wrapping
+  const splitText = (text: string, fontSize: number, maxWidth: number): string[] => {
+    doc.setFontSize(fontSize);
+    return doc.splitTextToSize(text, maxWidth);
+  };
+  
+  // Start Y position
+  let yPos = margin;
+  
+  // Add header with company details
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text(companyDetails.name, margin, yPos);
+  yPos += 7;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  
+  const addressLines = companyDetails.address.split('\n');
+  addressLines.forEach(line => {
+    doc.text(line, margin, yPos);
+    yPos += 5;
+  });
+  
+  // Add remaining company details based on entity
+  if (data.companyEntity === 'sa') {
+    const saDetails = companyDetails as SACompanyDetails;
+    doc.text(`Reg No: ${saDetails.regNo}`, margin, yPos); yPos += 5;
+    doc.text(`VAT No: ${saDetails.vatNo}`, margin, yPos); yPos += 5;
+    doc.text(`Tel: ${saDetails.tel}`, margin, yPos); yPos += 5;
+    doc.text(`Reg Date: ${saDetails.regDate}`, margin, yPos); yPos += 5;
+  } else {
+    const zimDetails = companyDetails as ZimCompanyDetails;
+    doc.text(`TIN: ${zimDetails.tin}`, margin, yPos); yPos += 5;
+    doc.text(`Authentication Code: ${zimDetails.authCode}`, margin, yPos); yPos += 5;
+    doc.text(`Taxpayer Name: ${zimDetails.taxpayerName}`, margin, yPos); yPos += 5;
+    doc.text(`Trade Name: ${zimDetails.tradeName}`, margin, yPos); yPos += 5;
+  }
+  
+  // Add horizontal line
+  yPos += 5;
   doc.setLineWidth(0.5);
-  doc.line(margin, 60, pageWidth - margin, 60);
+  doc.line(margin, yPos, pageWidth - margin, yPos);
   
-  // Inspection Items Table
-  const tableColumn = ['Item', 'Status', 'Comments'];
-  const tableRows: (string | number)[][] = [];
+  // Add document title
+  yPos += 10;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.text(`LOAD CONFIRMATION (${data.currency})`, pageWidth / 2, yPos, { align: 'center' });
   
-  report.items.forEach(item => {
-    tableRows.push([
-      item.name,
-      item.status,
-      item.comments || '-'
-    ]);
-  });
+  // Reset to normal font
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
   
-  doc.autoTable({
-    head: [tableColumn],
-    body: tableRows,
-    startY: 65,
-    theme: 'grid',
-    headStyles: {
-      fillColor: [0, 51, 102],
-      textColor: 255,
-      fontStyle: 'bold'
-    },
-    alternateRowStyles: {
-      fillColor: [240, 240, 240]
-    },
-    styles: {
-      cellPadding: 3,
-      fontSize: 9,
-      overflow: 'linebreak',
-      lineColor: [220, 220, 220]
-    },
-    columnStyles: {
-      0: { cellWidth: 60 },
-      1: { cellWidth: 30, halign: 'center' },
-      2: { cellWidth: 'auto' }
-    },
-    didDrawCell: (data: {
-      section: string;
-      column: { index: number };
-      row: { index: number };
-      cell: any;
-      pageCount: number;
-    }) => {
-      // Custom styling for status cells
-      if (data.section === 'body' && data.column.index === 1) {
-        const status = tableRows[data.row.index][1];
-        
-        if (status === 'Pass') {
-          doc.setFillColor(200, 250, 200);
-        } else if (status === 'Fail') {
-          doc.setFillColor(255, 200, 200);
-        } else {
-          doc.setFillColor(240, 240, 240);
-        }
-        
-        doc.rect(
-          data.cell.x, 
-          data.cell.y, 
-          data.cell.width, 
-          data.cell.height, 
-          'F'
-        );
-        
-        doc.setTextColor(0);
-        doc.setFontSize(9);
-        doc.text(
-          status.toString(), 
-          data.cell.x + data.cell.width / 2, 
-          data.cell.y + data.cell.height / 2, 
-          { align: 'center', baseline: 'middle' }
-        );
-        
-        return false; // Returning false tells autotable not to draw the cell content
-      }
-    }
-  });
+  // Add form data in sections
+  yPos += 10;
   
-  // Get the final Y position after the table
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
+  // Customer/Transporter section
+  doc.text('To:', margin, yPos);
+  yPos += 5;
   
-  // Add Notes section
-  if (report.notes) {
-    doc.setFontSize(12);
-    doc.setTextColor(0, 51, 102);
-    doc.text('Notes:', margin, finalY);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    const splitNotes = doc.splitTextToSize(report.notes, pageWidth - (margin * 2));
-    doc.text(splitNotes, margin, finalY + 7);
+  // Make customer details section
+  doc.setFont('helvetica', 'bold');
+  doc.text(data.customerName, margin + 10, yPos);
+  yPos += 5;
+  doc.setFont('helvetica', 'normal');
+  
+  if (data.contactPerson) {
+    doc.text(data.contactPerson, margin + 10, yPos);
+    yPos += 5;
   }
   
-  // Add images (if any)
-  let imagesAdded = 0;
-  let currentY = finalY + (report.notes ? 25 : 10);
-  
-  // Get items with images
-  const itemsWithImages = report.items.filter(item => item.images && item.images.length > 0);
-  
-  if (itemsWithImages.length > 0) {
-    doc.setFontSize(12);
-    doc.setTextColor(0, 51, 102);
-    doc.text('Inspection Images:', margin, currentY);
-    currentY += 7;
-    
-    // Calculate layout for images
-    const imagesPerRow = 2;
-    const imageWidth = (pageWidth - (margin * 2) - 10) / imagesPerRow;
-    const imageHeight = imageWidth * 0.75; // Maintain aspect ratio
-    
-    let currentX = margin;
-    let rowCount = 0;
-    
-    // Process each item with images
-    itemsWithImages.forEach(item => {
-      item.images?.forEach((imageUrl, idx) => {
-        // Check if we need to add a new page
-        if (currentY + imageHeight + 20 > pageHeight) {
-          doc.addPage();
-          currentY = margin + 10;
-          currentX = margin;
-          rowCount = 0;
-        }
-        
-        try {
-          // Try to add the image (this may fail if the image is not accessible)
-          doc.addImage(imageUrl, 'JPEG', currentX, currentY, imageWidth, imageHeight);
-          
-          // Add caption with item name
-          doc.setFontSize(8);
-          doc.setTextColor(0, 0, 0);
-          doc.text(
-            `${item.name} - Image ${idx + 1}`, 
-            currentX + (imageWidth / 2), 
-            currentY + imageHeight + 5, 
-            { align: 'center' }
-          );
-          
-          imagesAdded++;
-          
-          // Update position for next image
-          rowCount++;
-          if (rowCount < imagesPerRow) {
-            currentX += imageWidth + 10;
-          } else {
-            currentX = margin;
-            currentY += imageHeight + 20;
-            rowCount = 0;
-          }
-        } catch (error) {
-          console.error(`Failed to add image: ${error}`);
-        }
-      });
-    });
+  if (data.contactDetails) {
+    doc.text(data.contactDetails, margin + 10, yPos);
+    yPos += 5;
   }
   
-  // Add footer with page numbers
-  // Using any here because the jsPDF typings don't properly expose internal.getNumberOfPages
-  const doc_internal = doc.internal as any;
-  const totalPages = doc_internal.getNumberOfPages ? doc_internal.getNumberOfPages() : doc_internal.pages.length;
+  // Add date information
+  yPos += 5;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Date of Confirmation:', margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(format(new Date(data.confirmationDate), 'yyyy-MM-dd'), margin + 50, yPos);
   
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.text(
-      `Page ${i} of ${totalPages} | Generated on ${new Date().toLocaleDateString()}`, 
-      pageWidth / 2, 
-      pageHeight - 10, 
-      { align: 'center' }
-    );
+  // Load reference
+  yPos += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Load Reference Number:', margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.loadRefNumber, margin + 50, yPos);
+  
+  // Vehicle details
+  yPos += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Vehicle / Truck Reg No:', margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.vehicleRegNo, margin + 50, yPos);
+  
+  if (data.trailerRegNo) {
+    yPos += 7;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Trailer Reg No:', margin, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.trailerRegNo, margin + 50, yPos);
+  }
+  
+  // Driver
+  yPos += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Driver Name:', margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.driverName, margin + 50, yPos);
+  
+  // Addresses
+  yPos += 10;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Pickup Address:', margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  
+  const pickupLines = splitText(data.pickupAddress, 10, contentWidth - 50);
+  for (let i = 0; i < pickupLines.length; i++) {
+    doc.text(pickupLines[i], margin + 50, yPos);
+    yPos += 5;
+  }
+  
+  yPos += 2;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Delivery Address:', margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  
+  const deliveryLines = splitText(data.deliveryAddress, 10, contentWidth - 50);
+  for (let i = 0; i < deliveryLines.length; i++) {
+    doc.text(deliveryLines[i], margin + 50, yPos);
+    yPos += 5;
+  }
+  
+  // Cargo details
+  yPos += 5;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Commodity:', margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.commodity, margin + 50, yPos);
+  
+  if (data.totalWeight) {
+    yPos += 7;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Total Load Weight (kg):', margin, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.totalWeight, margin + 50, yPos);
+  }
+  
+  yPos += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Number of Pallets / Units:', margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.palletsOrUnits, margin + 50, yPos);
+  
+  // Payment details
+  yPos += 10;
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Rate (${data.currency}):`, margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${data.currency === 'ZAR' ? 'R' : '$'} ${data.rateAmount} per ${data.rateUnit}`, margin + 50, yPos);
+  
+  yPos += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.text(`Total Agreed Amount (${data.currency}):`, margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${data.currency === 'ZAR' ? 'R' : '$'} ${data.totalAmount}`, margin + 50, yPos);
+  
+  yPos += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Payment Terms:', margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.paymentTerms, margin + 50, yPos);
+  
+  // Special instructions
+  if (data.specialInstructions) {
+    yPos += 10;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Special Instructions / Notes:', margin, yPos);
+    doc.setFont('helvetica', 'normal');
+    yPos += 7;
     
-    // Add signature line on the last page
-    if (i === totalPages) {
-      doc.setDrawColor(0);
-      doc.line(margin, pageHeight - 30, margin + 70, pageHeight - 30);
-      doc.text('Inspector Signature', margin, pageHeight - 25);
-      
-      doc.line(pageWidth - margin - 70, pageHeight - 30, pageWidth - margin, pageHeight - 30);
-      doc.text('Supervisor Signature', pageWidth - margin - 70, pageHeight - 25);
+    const instructionLines = splitText(data.specialInstructions, 10, contentWidth);
+    for (let i = 0; i < instructionLines.length; i++) {
+      doc.text(instructionLines[i], margin, yPos);
+      yPos += 5;
     }
   }
   
-  // Save the PDF
-  doc.save(`Inspection_Report_${report.reportNumber}.pdf`);
-};
-
-/**
- * Converts Base64 image to Blob for preview
- */
-export const base64ToBlob = (base64: string, contentType = ''): Blob => {
-  const sliceSize = 512;
-  const byteCharacters = atob(base64.split(',')[1]);
-  const byteArrays = [];
-
-  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-    const slice = byteCharacters.slice(offset, offset + sliceSize);
-    const byteNumbers = new Array(slice.length);
-    
-    for (let i = 0; i < slice.length; i++) {
-      byteNumbers[i] = slice.charCodeAt(i);
-    }
-    
-    byteArrays.push(new Uint8Array(byteNumbers));
+  // Contact information
+  if (data.pickupContact) {
+    yPos += 7;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Contact at Pickup:', margin, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.pickupContact, margin + 50, yPos);
   }
-
-  return new Blob(byteArrays, { type: contentType });
-};
-
-/**
- * Creates object URLs for images to preview in PDF
- */
-export const prepareImagesForPDF = (images: string[]): Promise<string[]> => {
-  return Promise.all(
-    images.map(async (imageUrl) => {
-      // If it's already a data URL, use it directly
-      if (imageUrl.startsWith('data:')) {
-        return imageUrl;
-      }
-      
-      // Otherwise fetch the image and convert to data URL
-      try {
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
-        return URL.createObjectURL(blob);
-      } catch (error) {
-        console.error('Failed to prepare image for PDF:', error);
-        return ''; // Return empty string for failed images
-      }
-    })
-  );
+  
+  if (data.deliveryContact) {
+    yPos += 7;
+    doc.setFont('helvetica', 'bold');
+    doc.text('Contact at Delivery:', margin, yPos);
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.deliveryContact, margin + 50, yPos);
+  }
+  
+  // Add a declaration and acceptance section
+  yPos += 15;
+  doc.setFont('helvetica', 'bold');
+  doc.text('DECLARATION & ACCEPTANCE', margin, yPos);
+  doc.setFont('helvetica', 'normal');
+  yPos += 7;
+  
+  const declarationText = `By accepting this Load Confirmation, the transporter agrees to all terms and conditions stipulated herein, including adherence to all safety, compliance, and operational requirements as communicated by ${companyDetails.name}.`;
+  
+  const declarationLines = splitText(declarationText, 10, contentWidth);
+  for (let i = 0; i < declarationLines.length; i++) {
+    doc.text(declarationLines[i], margin, yPos);
+    yPos += 5;
+  }
+  
+  // Signature sections
+  yPos += 10;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Transporter/Carrier Representative:', margin, yPos);
+  yPos += 10;
+  doc.text('Signature: __________________________', margin, yPos);
+  yPos += 7;
+  doc.text('Name: _____________________________', margin, yPos);
+  if (data.transporterName) {
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.transporterName, margin + 35, yPos);
+  }
+  yPos += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Date: _____________________________', margin, yPos);
+  
+  yPos += 15;
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${data.companyEntity === 'sa' ? 'Matanuska' : 'Matanuska Distribution'} Representative:`, margin, yPos);
+  yPos += 10;
+  doc.text('Signature: __________________________', margin, yPos);
+  yPos += 7;
+  doc.text('Name: _____________________________', margin, yPos);
+  if (data.matanuskaRepName) {
+    doc.setFont('helvetica', 'normal');
+    doc.text(data.matanuskaRepName, margin + 35, yPos);
+  }
+  yPos += 7;
+  doc.setFont('helvetica', 'bold');
+  doc.text('Date: _____________________________', margin, yPos);
+  
+  // Add footer
+  const footerYPos = doc.internal.pageSize.height - 10;
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Generated on ${format(new Date(), 'yyyy-MM-dd HH:mm')} | ${data.currency} Load Confirmation | ${data.loadRefNumber}`, pageWidth / 2, footerYPos, { align: 'center' });
+  
+  // Return the PDF as a blob
+  return doc.output('blob');
 };

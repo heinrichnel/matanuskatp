@@ -3,10 +3,11 @@ import { useAppContext } from '../../context/AppContext';
 import { getTripsByStatus, analyzeTripData } from '../../utils/tripDebugger';
 import { formatCurrency } from '../../utils/helpers';
 import Card, { CardContent, CardHeader } from '../ui/Card';
-import { BarChart, PieChart, TrendingUp, Truck, Calendar, AlertTriangle, Globe } from 'lucide-react';
+import { BarChart, PieChart, TrendingUp, Truck, Calendar, AlertTriangle, Globe, Download } from 'lucide-react';
+import Button from '../ui/Button';
 
 const TripDashboard: React.FC = () => {
-  const { trips } = useAppContext();
+  const { trips, isLoading } = useAppContext();
   
   // Get real trip data
   const activeTrips = getTripsByStatus(trips, 'active');
@@ -25,6 +26,47 @@ const TripDashboard: React.FC = () => {
   const recentTrips = trips
     .sort((a, b) => new Date(b.updatedAt || b.createdAt || '').getTime() - new Date(a.updatedAt || a.createdAt || '').getTime())
     .slice(0, 10);
+    
+  const handleExportData = () => {
+    try {
+      // Create CSV content
+      const headers = ['ID', 'Fleet', 'Driver', 'Client', 'Route', 'Start Date', 'End Date', 'Status', 'Revenue', 'Currency'];
+      
+      const rows = trips.map(trip => [
+        trip.id,
+        trip.fleetNumber,
+        trip.driverName,
+        trip.clientName,
+        trip.route,
+        trip.startDate,
+        trip.endDate,
+        trip.status,
+        trip.baseRevenue,
+        trip.revenueCurrency
+      ]);
+      
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => 
+          typeof cell === 'string' ? `"${cell.replace(/"/g, '""')}"` : cell
+        ).join(','))
+      ].join('\n');
+      
+      // Create download link
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `trip-dashboard-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      alert('Failed to export data. Please try again.');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -33,9 +75,13 @@ const TripDashboard: React.FC = () => {
           <p className="text-gray-600">Overview of all trip activities and metrics</p>
         </div>
         <div className="flex space-x-2">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+          <Button
+            onClick={handleExportData}
+            disabled={trips.length === 0 || isLoading?.loadTrips}
+            icon={<Download className="w-4 h-4 mr-2" />}
+          >
             Export Data
-          </button>
+          </Button>
         </div>
       </div>
 

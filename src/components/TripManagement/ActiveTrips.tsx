@@ -10,7 +10,7 @@ import { getTripsByStatus, analyzeTripData } from '../../utils/tripDebugger';
 import { Select } from '../ui/FormElements';
 import Button from '../ui/Button';
 import Card, { CardContent, CardHeader } from '../ui/Card';
-import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign, Plus, RefreshCcw } from 'lucide-react';
+import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign, Plus, RefreshCcw, Download } from 'lucide-react';
 import { formatCurrency, formatDate, getAllFlaggedCosts, canCompleteTrip } from '../../utils/helpers';
 import LoadImportModal from './LoadImportModal';
 import TripStatusUpdateModal from './TripStatusUpdateModal';
@@ -232,6 +232,47 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
           </div>
         </div>
         <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            size="md"
+            icon={<Download className="w-5 h-5" />}
+            onClick={() => {
+              // Create CSV export
+              const headers = ['Fleet Number', 'Driver', 'Client', 'Route', 'Start Date', 'End Date', 'Revenue', 'Currency', 'Distance', 'Status'];
+              const rows = filteredTrips.map(trip => [
+                trip.fleetNumber,
+                trip.driverName,
+                trip.clientName,
+                trip.route,
+                trip.startDate,
+                trip.endDate,
+                trip.baseRevenue,
+                trip.revenueCurrency,
+                trip.distanceKm || 0,
+                trip.status
+              ]);
+              
+              const csvContent = [
+                headers.join(','),
+                ...rows.map(row => row.map(cell => 
+                  typeof cell === 'string' ? `"${cell.replace(/"/g, '""')}"` : cell
+                ).join(','))
+              ].join('\n');
+              
+              const blob = new Blob([csvContent], { type: 'text/csv' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `active-trips-${new Date().toISOString().split('T')[0]}.csv`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+            }}
+            disabled={filteredTrips.length === 0 || isDeleting !== null}
+          >
+            Export
+          </Button>
           <Button
             variant="outline"
             size="md"

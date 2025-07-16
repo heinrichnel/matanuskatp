@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { Upload, X, WifiOff, RefreshCw, FileSpreadsheet } from 'lucide-react';
+import { Upload, X, WifiOff, RefreshCw, FileSpreadsheet, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useSyncContext } from '../../context/SyncContext';
 // Import fleet vehicles data
 const FLEET_VEHICLES = [
@@ -110,7 +110,10 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
   };
 
   const handleImport = async () => {
-    if (!csvFile) return;
+    if (!csvFile) {
+      setError("Please select a CSV file first");
+      return;
+    }
 
     setIsProcessing(true);
     setError(null);
@@ -201,6 +204,12 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         unmapped: unmappedCount,
         total: data.length
       });
+
+      if (trips.length === 0) {
+        setError("No valid trips were found in the CSV. Please check your file format.");
+        return;
+      }
+
       await importTripsFromCSV(trips);
       setSuccess(`Successfully imported ${trips.length} trips from CSV file.${!isOnline ? '\n\nData will be synced when your connection is restored.' : ''}`);
       setCsvFile(null);
@@ -342,11 +351,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
+              <AlertTriangle className="h-5 w-5 text-red-400 flex-shrink-0" />
               <div>
                 <h3 className="text-sm font-medium text-red-800">Import Error</h3>
                 <div className="mt-2 text-sm text-red-700">
@@ -361,11 +366,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         {success && (
           <div className="bg-green-50 border border-green-200 rounded-md p-4">
             <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
+              <CheckCircle className="h-5 w-5 text-green-400 flex-shrink-0" />
               <div>
                 <h3 className="text-sm font-medium text-green-800">Import Successful</h3>
                 <div className="mt-2 text-sm text-green-700 whitespace-pre-line">

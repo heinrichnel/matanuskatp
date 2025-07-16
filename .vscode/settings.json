@@ -1,11 +1,29 @@
-"github.copilot.enableEditorCommands": true
-"github.copilot.enableChat": true
-"github.copilot.enableChatInlineSuggestions": true
-"github.copilot.enableChatInlineCompletions": true,
-"github.copilot.enable": true,
-"github.copilot.enableInlineSuggestions": true,
-"github.copilot.enableCompletions": true,
-"github.copilot.enablePanel": true
+{
+  "github.copilot.enableEditorCommands": true,
+  "github.copilot.enableChat": true,
+  "github.copilot.enableChatInlineSuggestions": true,
+  "github.copilot.enableChatInlineCompletions": true,
+  "github.copilot.enable": true,
+  "github.copilot.enableInlineSuggestions": true,
+  "github.copilot.enableCompletions": true,
+  "github.copilot.enablePanel": true,
+  
+  "css.validate": true,
+  "scss.validate": false,
+  "less.validate": false,
+  "css.lint.unknownAtRules": "ignore",
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    "className\\s*=\\s*[\"']([^\"']*)[\"']",
+    "class\\s*=\\s*[\"']([^\"']*)[\"']"
+  ]
+}
 
 
 
