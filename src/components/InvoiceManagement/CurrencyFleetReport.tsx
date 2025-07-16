@@ -333,18 +333,18 @@ const CurrencyFleetReport: React.FC<CurrencyFleetReportProps> = (props) => {
                 label="Start Date"
                 type="date"
                 value={filters.startDate}
-                onChange={(value) => handleFilterChange('startDate', value)}
+                onChange={(event) => handleFilterChange('startDate', event.target.value)}
               />
               <Input
                 label="End Date"
                 type="date"
                 value={filters.endDate}
-                onChange={(value) => handleFilterChange('endDate', value)}
+                onChange={(event) => handleFilterChange('endDate', event.target.value)}
               />
               <Select
                 label="Client Type"
                 value={filters.clientType}
-                onChange={(value) => handleFilterChange('clientType', value)}
+                onChange={(event) => handleFilterChange('clientType', event.target.value)}
                 options={[
                   { label: 'All Client Types', value: '' },
                   { label: 'Internal Clients', value: 'internal' },
@@ -354,7 +354,7 @@ const CurrencyFleetReport: React.FC<CurrencyFleetReportProps> = (props) => {
               <Select
                 label="Driver"
                 value={filters.driver}
-                onChange={(value) => handleFilterChange('driver', value)}
+                onChange={(event) => handleFilterChange('driver', event.target.value)}
                 options={[
                   { label: 'All Drivers', value: '' },
                   ...uniqueDrivers.map(d => ({ label: d, value: d }))

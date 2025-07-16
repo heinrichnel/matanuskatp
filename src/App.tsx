@@ -37,22 +37,22 @@ import TyreManagement from "./components/TyreManagement/TyreManagement";
 
 // Feature Components
 import ActiveTrips from "./components/TripManagement/ActiveTrips";
-import ActiveTripsPage from "./pages/ActiveTripsPage";
+import ActiveTripsPage from "./pages/trips/ActiveTripsPage";
 import CompletedTrips from "./components/TripManagement/CompletedTrips";
 import FlagsInvestigations from "./components/Flags/FlagsInvestigations";
-import ClientManagementPage from "./pages/ClientManagementPage";
+import ClientManagementPage from "./pages/clients/ClientManagementPage";
 import CurrencyFleetReport from "./components/InvoiceManagement/CurrencyFleetReport";
 import TripDashboard from "./components/TripManagement/TripDashboard";
 import InvoiceAgingDashboard from "./components/InvoiceManagement/InvoiceAgingDashboard";
 import CustomerRetentionDashboard from "./components/Performance/CustomerRetentionDashboard";
-import ActionLog from "./components/actionlog/ActionLog";
+import ActionLog from "./components/ComplianceSafety/ActionLog";
 import TripManagementPage from "./pages/TripManagementPage";
 import WorkshopPage from "./pages/WorkshopPage";
 import RoutePlanningPage from "./pages/RoutePlanningPage";
 import InvoiceManagementPage from "./pages/InvoiceManagementPage";
-import DieselManagementPage from "./pages/DieselManagementPage";
-import DriverManagementPage from "./pages/DriverManagementPage";
-import ComplianceManagementPage from "./pages/ComplianceManagementPage";
+import DieselManagementPage from "./pages/diesel/DieselManagementPage";
+import DriverManagementPage from "./pages/drivers/DriverManagementPage";
+import ComplianceManagementPage from "./pages/compliance/ComplianceManagementPage";
 import TripTimelinePage from "./pages/TripTimelinePage";
 
 // Invoice Management Components

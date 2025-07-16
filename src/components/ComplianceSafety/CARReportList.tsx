@@ -264,7 +264,7 @@ const CARReportList: React.FC = () => {
             <Select
               label="Status"
               value={filters.status}
-              onChange={(value) => handleFilterChange('status', value)}
+              onChange={(e) => handleFilterChange('status', e.target.value)}
               options={[
                 { label: 'All Statuses', value: '' },
                 { label: 'Draft', value: 'draft' },
@@ -277,7 +277,7 @@ const CARReportList: React.FC = () => {
             <Select
               label="Severity"
               value={filters.severity}
-              onChange={(value) => handleFilterChange('severity', value)}
+              onChange={(e) => handleFilterChange('severity', e.target.value)}
               options={[
                 { label: 'All Severities', value: '' },
                 { label: 'High', value: 'high' },
@@ -289,7 +289,7 @@ const CARReportList: React.FC = () => {
             <Select
               label="Responsible Person"
               value={filters.responsiblePerson}
-              onChange={(value) => handleFilterChange('responsiblePerson', value)}
+              onChange={(e) => handleFilterChange('responsiblePerson', e.target.value)}
               options={[
                 { label: 'All Persons', value: '' },
                 ...uniqueResponsiblePersons.map(person => ({ label: person, value: person }))
@@ -301,13 +301,13 @@ const CARReportList: React.FC = () => {
                 label="From Date"
                 type="date"
                 value={filters.dateRange.start}
-                onChange={(value) => handleFilterChange('dateRange.start', value)}
+                onChange={(e) => handleFilterChange('dateRange.start', e.target.value)}
               />
               <Input
                 label="To Date"
                 type="date"
                 value={filters.dateRange.end}
-                onChange={(value) => handleFilterChange('dateRange.end', value)}
+                onChange={(e) => handleFilterChange('dateRange.end', e.target.value)}
               />
             </div>
           </div>
