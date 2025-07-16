@@ -3,14 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { initializeConnectionMonitoring } from './utils/firebaseConnectionHandler';
 import { TyreStoresProvider } from './context/TyreStoresContext';
-import { checkEnvVariables, verifyGoogleMapsConfig } from './utils/envChecker';
 import './index.css';
-
-// Validate environment variables on startup
-checkEnvVariables();
-if (import.meta.env.PROD) {
-  verifyGoogleMapsConfig();
-}
 
 // Initialize Firebase and check emulator status
 const initializeApp = async () => {

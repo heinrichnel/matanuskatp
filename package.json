@@ -14,14 +14,16 @@
     "backend:enhanced": "nodemon server.js",
     "start": "node index.js",
     "serve": "node server.js",
-    "build": "tsc --noEmit --skipLibCheck --declaration false && vite build",
+    "build": "tsc --noEmit --skipLibCheck --declaration false && vite build --config vite.config.js",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "build:debug": "tsc --noEmit --skipLibCheck --declaration false && NODE_DEBUG=module vite build --config vite.config.js",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "integration:audit": "node tools/integration-report.mjs",
     "read-trips": "ts-node --loader ts-node/esm readTrips.ts",
-    "install-calc-deps": "npm install mathjs big.js simple-statistics regression-js decimal.js --save && npm install @types/mathjs @types/big.js @types/simple-statistics --save-dev"
+    "install-calc-deps": "npm install mathjs big.js simple-statistics regression-js decimal.js --save && npm install @types/mathjs @types/big.js @types/simple-statistics --save-dev",
+    "sync-routes": "bash scripts/syncRoutes.sh"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -41,7 +43,6 @@
     "@react-pdf/renderer": "^4.3.0",
     "@types/d3": "^7.4.3",
     "@types/react-dropzone": "^4.2.2",
-    "@types/react-router-dom": "^5.3.3",
     "@types/xlsx": "^0.0.35",
     "accounting-js": "^2.0.3",
     "apexcharts": "^5.2.0",
@@ -59,7 +60,6 @@
     "date-fns": "^4.1.0",
     "dinero.js": "^1.9.1",
     "dotenv": "^17.2.0",
-    "exceljs": "^4.4.0",
     "express": "^4.19.2",
     "file-saver": "^2.0.5",
     "firebase": "^11.10.0",
@@ -129,6 +129,7 @@
     "@types/react-calendar-timeline": "^0.28.6",
     "@types/react-dnd-html5-backend": "^3.0.2",
     "@types/react-dom": "^19.1.6",
+    "@types/react-router-dom": "^5.3.3",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.37.0",
     "@typescript-eslint/parser": "^8.37.0",
@@ -151,7 +152,6 @@
     "jest": "^30.0.4",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.2",
-    "netlify-cli": "^22.2.2",
     "nodemon": "^3.1.0",
     "playwright": "^1.54.1",
     "postcss": "^8.5.6",
@@ -181,4 +181,3 @@
     "validate-env": "node checkEnv.cjs"
   }
 }
-
