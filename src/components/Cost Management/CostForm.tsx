@@ -96,6 +96,21 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
+  
+  // Event handler for select elements
+  const handleSelectChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLSelectElement>) => {
+    handleChange(field, e.target.value);
+  };
+  
+  // Event handler for input elements
+  const handleInputChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    handleChange(field, e.target.value);
+  };
+  
+  // Event handler for checkbox elements
+  const handleCheckboxChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleChange(field, e.target.checked);
+  };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -193,7 +208,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
           <select
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             value={formData.category}
-            onChange={(e) => handleChange('category', e.target.value)}
+            onChange={handleSelectChange('category')}
           >
             <option value="">Select cost category</option>
             {Object.keys(COST_CATEGORIES).filter(cat => cat !== 'System Costs').map((category) => (
@@ -210,7 +225,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
           <select
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             value={formData.subCategory}
-            onChange={(e) => handleChange('subCategory', e.target.value)}
+            onChange={handleSelectChange('subCategory')}
             disabled={!formData.category}
           >
             <option value="">
@@ -231,7 +246,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
         <Select
           label="Currency *"
           value={formData.currency}
-          onChange={(value) => handleChange('currency', value)}
+          onChange={handleSelectChange('currency')}
           options={[
             { label: 'ZAR (R)', value: 'ZAR' },
             { label: 'USD ($)', value: 'USD' }
@@ -245,7 +260,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
           step="0.01"
           min="0.01"
           value={formData.amount}
-          onChange={(value) => handleChange('amount', value)}
+          onChange={handleInputChange('amount')}
           placeholder="0.00"
           error={errors.amount}
         />
@@ -253,7 +268,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
         <Input
           label="Reference Number *"
           value={formData.referenceNumber}
-          onChange={(value) => handleChange('referenceNumber', value)}
+          onChange={handleInputChange('referenceNumber')}
           placeholder="e.g., INV-123456, RECEIPT-001"
           error={errors.referenceNumber}
         />
@@ -262,7 +277,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
           label="Date *"
           type="date"
           value={formData.date}
-          onChange={(value) => handleChange('date', value)}
+          onChange={handleInputChange('date')}
           error={errors.date}
         />
       </div>
@@ -270,7 +285,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
       <TextArea
         label="Notes (Optional)"
         value={formData.notes || ''}
-        onChange={(value) => handleChange('notes', value)}
+        onChange={handleInputChange('notes')}
         placeholder="Additional notes about this cost entry..."
         rows={3}
       />
@@ -340,7 +355,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
             <TextArea
               label="Reason for Missing Documentation *"
               value={formData.noDocumentReason}
-              onChange={(value) => handleChange('noDocumentReason', value)}
+              onChange={handleInputChange('noDocumentReason')}
               placeholder="Explain why no receipt/document is available (e.g., 'Receipt lost during trip', 'Digital payment - no physical receipt', 'Emergency expense - receipt not provided')..."
               rows={3}
             />
@@ -360,7 +375,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
             type="checkbox"
             id="manualFlag"
             checked={formData.isFlagged}
-            onChange={(e) => handleChange('isFlagged', e.target.checked)}
+            onChange={handleCheckboxChange('isFlagged')}
             className="rounded border-gray-300 text-red-600 focus:ring-red-500"
           />
           <label htmlFor="manualFlag" className="flex items-center text-sm font-medium text-gray-700">
@@ -374,7 +389,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
             <TextArea
               label="Flag Reason *"
               value={formData.flagReason}
-              onChange={(value) => handleChange('flagReason', value)}
+              onChange={handleInputChange('flagReason')}
               placeholder="Explain why this cost is being flagged (e.g., 'Amount seems excessive', 'Unusual expense for this route', 'Requires management approval')..."
               rows={2}
               error={errors.flagReason}

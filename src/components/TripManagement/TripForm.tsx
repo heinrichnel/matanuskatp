@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Input, Select, Textarea } from '../ui/FormElements.tsx';
 import Button from '../ui/Button.tsx';
-// import FleetSelector from '../common/FleetSelector'; // REMOVE this line, Wialon units will be used instead
 
 import { Trip, CLIENTS, DRIVERS } from '../../types/index.ts';
 import { useWialonUnits } from "../../hooks/useWialonUnits";
@@ -10,9 +9,10 @@ interface TripFormProps {
   trip?: Trip;
   onSubmit: (tripData: Omit<Trip, 'id' | 'costs' | 'status' | 'additionalCosts'>) => void;
   onCancel: () => void;
+  isSubmitting?: boolean;
 }
 
-const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
+const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel, isSubmitting = false }) => {
   const { units: wialonUnits, loading: unitsLoading, error: unitsError } = useWialonUnits(true);
 
   const [fleetNumber, setFleetNumber] = useState('');
@@ -32,6 +32,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
     destination: '',
     waypoints: []
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Set form state on edit
   useEffect(() => {
@@ -52,7 +53,11 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
         destination: trip.plannedRoute?.destination || '',
         waypoints: trip.plannedRoute?.waypoints || []
       });
-      // If you have fleetUnitId in trip, set it here
+      
+      // Set the fleetUnitId if available in the trip data
+      if (trip.fleetUnitId) {
+        setFleetUnitId(Number(trip.fleetUnitId) || "");
+      }
     }
   }, [trip]);
 
@@ -64,30 +69,53 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel }) => {
     }
   }, [fleetUnitId, wialonUnits]);
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
+    if (!fleetNumber.trim()) newErrors.fleetNumber = 'Fleet number is required';
+    if (!clientName.trim()) newErrors.clientName = 'Client name is required';
+    if (!driverName.trim()) newErrors.driverName = 'Driver name is required';
+    if (!route.trim()) newErrors.route = 'Route is required';
+    if (!startDate) newErrors.startDate = 'Start date is required';
+    if (!endDate) newErrors.endDate = 'End date is required';
+    if (new Date(endDate) < new Date(startDate)) {
+      newErrors.endDate = 'End date must be after start date';
+    }
+    if (distanceKm <= 0) newErrors.distanceKm = 'Distance must be greater than 0';
+    if (baseRevenue <= 0) newErrors.baseRevenue = 'Revenue must be greater than 0';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Use fleetNumber and optionally fleetUnitId for downstream analytics
-    onSubmit({
-      fleetNumber,
-      clientName,
-      driverName,
-      clientType,
-      route,
-      startDate,
-      endDate,
-      description,
-      distanceKm,
-      baseRevenue,
-      revenueCurrency,
-      plannedRoute: {
-        origin: plannedRoute.origin,
-        destination: plannedRoute.destination,
-        waypoints: plannedRoute.waypoints,
-      },
-      paymentStatus: 'unpaid',
-      followUpHistory: [],
-      // Optionally add: fleetUnitId (not in base Trip but could be helpful for telemetry links)
-    });
+    
+    if (validateForm()) {
+      // Use fleetNumber and optionally fleetUnitId for downstream analytics
+      onSubmit({
+        fleetNumber,
+        clientName,
+        driverName,
+        clientType,
+        route,
+        startDate,
+        endDate,
+        description,
+        distanceKm,
+        baseRevenue,
+        revenueCurrency,
+        plannedRoute: {
+          origin: plannedRoute.origin,
+          destination: plannedRoute.destination,
+          waypoints: plannedRoute.waypoints,
+        },
+        paymentStatus: 'unpaid',
+        followUpHistory: [],
+        // Include fleetUnitId for telematics
+        fleetUnitId: fleetUnitId ? String(fleetUnitId) : undefined
+      });
+    }
   };
 
   return (

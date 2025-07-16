@@ -1,6 +1,97 @@
 // Types for tyre store Firestore integration
 import { Timestamp } from 'firebase/firestore';
 
+// Define the comprehensive Tyre interface that will be the main model for all tyre data
+export interface Tyre {
+  id: string;
+  serialNumber: string;
+  dotCode: string;
+  manufacturingDate: string;
+  brand: string;
+  model: string;
+  pattern: string;
+  size: TyreSize;
+  loadIndex: number;
+  speedRating: string;
+  type: TyreType;
+  purchaseDetails: {
+    date: string;
+    cost: number;
+    supplier: string;
+    warranty: string;
+    invoiceNumber?: string;
+  };
+  installation?: {
+    vehicleId: string;
+    position: TyrePosition;
+    mileageAtInstallation: number;
+    installationDate: string;
+    installedBy: string;
+  };
+  condition: {
+    treadDepth: number;
+    pressure: number;
+    temperature: number;
+    status: 'good' | 'warning' | 'critical' | 'needs_replacement';
+    lastInspectionDate: string;
+    nextInspectionDue: string;
+  };
+  status: 'new' | 'in_service' | 'spare' | 'retreaded' | 'scrapped';
+  mountStatus: 'mounted' | 'unmounted' | 'in_storage';
+  maintenanceHistory: {
+    rotations: TyreRotation[];
+    repairs: TyreRepair[];
+    inspections: TyreInspection[];
+  };
+  milesRun: number;
+  kmRunLimit: number;
+  notes: string;
+  location: TyreStoreLocation;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+// Define a comprehensive TyreSize interface
+export interface TyreSize {
+  width: number;
+  aspectRatio: number;
+  rimDiameter: number;
+  displayString?: string;
+}
+
+// Types for tyre history events
+export interface TyreRotation {
+  id: string;
+  date: string;
+  fromPosition: TyrePosition;
+  toPosition: TyrePosition;
+  mileage: number;
+  technician: string;
+  notes?: string;
+}
+
+export interface TyreRepair {
+  id: string;
+  date: string;
+  type: string;
+  description: string;
+  cost: number;
+  technician: string;
+  notes?: string;
+}
+
+export interface TyreInspection {
+  id: string;
+  date: string;
+  inspector: string;
+  treadDepth: number;
+  pressure: number;
+  temperature: number;
+  condition: string;
+  notes: string;
+  images?: string[];
+}
+
 // History event for a tyre movement
 export interface StockEntryHistory {
   event: 'mounted' | 'removed' | 'moved' | 'retreaded' | 'scrapped';
@@ -65,4 +156,62 @@ export interface FleetTyreMapping {
   fleetNumber: string;
   vehicleType: string;
   positions: TyreAllocation[];
+}
+
+// Define tyre type enum
+export type TyreType = 'steer' | 'drive' | 'trailer' | 'spare';
+
+// Define tyre store location enum
+export enum TyreStoreLocation {
+  VICHELS_STORE = 'Vichels Store',
+  HOLDING_BAY = 'Holding Bay',
+  RFR = 'RFR',
+  SCRAPPED = 'Scrapped'
+}
+
+// Helper functions for tyre management
+export function calculateRemainingLife(tyre: Tyre): number {
+  const currentTread = tyre.condition.treadDepth;
+  const minimumTread = 3; // Legal minimum in mm
+  const newTyreDepth = 20; // Typical new tyre tread depth in mm
+  
+  // Calculate wear rate (mm per km)
+  const usedTread = newTyreDepth - currentTread;
+  const wearRate = tyre.milesRun > 0 ? usedTread / tyre.milesRun : 0;
+  
+  // Calculate remaining life
+  const remainingTread = currentTread - minimumTread;
+  const remainingKm = wearRate > 0 ? remainingTread / wearRate : 0;
+  
+  return Math.max(remainingKm, 0);
+}
+
+export function calculateCostPerKm(tyre: Tyre): number {
+  if (tyre.milesRun <= 0) return 0;
+  return tyre.purchaseDetails.cost / tyre.milesRun;
+}
+
+export function formatTyreSize(size: TyreSize): string {
+  return `${size.width}/${size.aspectRatio}R${size.rimDiameter}`;
+}
+
+export function parseTyreSize(sizeStr: string): TyreSize {
+  const regex = /(\d+)\/(\d+)R(\d+\.?\d*)/;
+  const match = sizeStr.match(regex);
+  
+  if (match) {
+    return {
+      width: parseInt(match[1], 10),
+      aspectRatio: parseInt(match[2], 10),
+      rimDiameter: parseFloat(match[3]),
+      displayString: sizeStr
+    };
+  }
+  
+  return {
+    width: 0,
+    aspectRatio: 0,
+    rimDiameter: 0,
+    displayString: sizeStr
+  };
 }

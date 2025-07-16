@@ -6,9 +6,11 @@ interface FileUploadProps {
   multiple?: boolean;
   onFileSelect: (files: FileList) => void;
   className?: string;
+  disabled?: boolean;
+  error?: string;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ label, accept, multiple, onFileSelect, className }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ label, accept, multiple, onFileSelect, className, disabled, error }) => {
   return (
     <div className={`flex flex-col space-y-2 ${className || ''}`}>
       {label && <label className="font-medium mb-1">{label}</label>}
@@ -21,8 +23,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ label, accept, multiple, onFile
             onFileSelect(e.target.files);
           }
         }}
-        className="border rounded p-2 focus:ring"
+        className={`border rounded p-2 focus:ring ${error ? 'border-red-500' : ''}`}
+        disabled={disabled}
       />
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
     </div>
   );
 };

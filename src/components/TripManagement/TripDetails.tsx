@@ -16,7 +16,7 @@ import { AlertTriangle, ArrowLeft, BarChart3, Calendar, Calculator, CheckCircle,
 // ─── Custom Modules ──────────────────────────────────────────────
 import CostForm from '../Cost Management/CostForm.tsx';
 import CostList from '../Cost Management/CostList.tsx';
-import SystemCostGenerator from '../Cost Management/IndirectCost.tsx';
+import { SystemCostGenerator } from '../Cost Management/IndirectCost.tsx';
 import TripPlanningForm from './TripPlanningForm.tsx';
 import InvoiceSubmissionModal from './InvoiceSubmissionModal.tsx';
 import TripReport from './TripReport.tsx';
@@ -181,9 +181,9 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
     invoiceDate: string;
     invoiceDueDate: string;
     finalTimeline: {
-      finalArrivalDateTime: string;
-      finalOffloadDateTime: string;
-      finalDepartureDateTime: string;
+      finalArrivalDateTime?: string;
+      finalOffloadDateTime?: string;
+      finalDepartureDateTime?: string;
     };
     validationNotes: string;
     proofOfDelivery: FileList | null;
@@ -743,8 +743,6 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
           trip={trip}
           onClose={() => setShowInvoiceSubmission(false)}
           onSubmit={handleInvoiceSubmission}
-          onAddAdditionalCost={handleAddAdditionalCost}
-          onRemoveAdditionalCost={handleRemoveAdditionalCost}
         />
       )}
 

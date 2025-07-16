@@ -1,8 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import TyreDashboard, { TyreEntry } from '../../components/Workshop Management/TyreDashboard';
+import TyreDashboard from '../../components/TyreManagement/TyreDashboard';
 import Button from '../../components/ui/Button';
 import Card, { CardContent } from '../../components/ui/Card';
 import { Download, BarChart, PieChart } from 'lucide-react';
+
+// Define the TyreEntry interface to match our data structure
+interface TyreEntry {
+  tyreNumber: string;
+  manufacturer: string;
+  pattern: string;
+  size: string;
+  type: string;
+  vehicleAssign: string;
+  axlePosition: string;
+  status: string;
+  condition: string;
+  milesRun: number;
+  treadDepth: number;
+  mountStatus: string;
+  lastInspection: string;
+  costPerKM: number;
+  notes?: string;
+}
 
 // Mock data for initial rendering
 const mockTyreData: TyreEntry[] = [
@@ -339,14 +358,80 @@ const TyreManagementPage: React.FC = () => {
       </div>
 
       {activeTab === 'inventory' ? (
-        <TyreDashboard
-          data={tyres}
-          onEdit={handleEditTyre}
-          onDelete={handleDeleteTyre}
-          onExport={handleExport}
-          onAdd={handleAddTyre}
-          onImport={handleImport}
-        />
+        <div className="space-y-4">
+          {/* Custom tyre dashboard implementation using our data */}
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="p-4 border-b flex justify-between items-center">
+              <h2 className="text-lg font-medium">Tyre Inventory</h2>
+              <div className="space-x-2">
+                <Button variant="outline" size="sm" onClick={handleAddTyre}>Add Tyre</Button>
+                <label className="cursor-pointer">
+                  <Button variant="outline" size="sm">Import CSV</Button>
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    accept=".csv"
+                    onChange={(e) => e.target.files?.[0] && handleImport(e.target.files[0])} 
+                  />
+                </label>
+              </div>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tyre Number</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manufacturer</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tread Depth</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {tyres.map(tyre => (
+                    <tr key={tyre.tyreNumber}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{tyre.tyreNumber}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.manufacturer}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.size}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.vehicleAssign || 'None'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.axlePosition || 'None'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span 
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            tyre.condition === 'OK' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
+                          {tyre.condition}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.treadDepth.toFixed(1)} mm</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button 
+                          onClick={() => handleEditTyre(tyre.tyreNumber)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteTyre(tyre.tyreNumber)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       ) : isLoading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>

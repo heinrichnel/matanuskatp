@@ -30,7 +30,7 @@ import JobCardKanbanBoard from "./components/Workshop Management/JobCardKanbanBo
 import InspectionManagement from "./components/Workshop Management/InspectionManagement";
 import InspectionForm from "./components/Workshop Management/InspectionForm";
 import FaultTracking from "./components/Workshop Management/FaultTracking";
-import TyreManagement from "./components/Workshop Management/TyreManagement";
+import TyreManagement from "./components/TyreManagement/TyreManagement";
 
 // UI Components
 // Removed Sidebar import as it will be used inside Layout
@@ -215,6 +215,10 @@ const App: React.FC = () => {
                   <Route path="payments" element={<div>Payment Tracking</div>} />
                   <Route path="tax-reports" element={<TaxReportExport />} />
                   <Route path="analytics" element={<div>Invoice Analytics</div>} />
+                  <Route path="load-confirmation" element={<React.Suspense fallback={<div>Loading...</div>}>
+                    {/* Import LoadConfirmation page lazily to improve initial load time */}
+                    {React.createElement(lazy(() => import('./pages/invoices/LoadConfirmation')))}
+                  </React.Suspense>} />
                 </Route>
                 
                 {/* Diesel Management Section */}
