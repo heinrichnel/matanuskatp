@@ -2,7 +2,7 @@
 
 import type { WialonUnit, WialonPosition } from '../types/wialon';
 
-const WIALON_API_URL = import.meta.env.VITE_WIALON_API_URL || 'https://hst-api.wialon.com';
+const WIALON_API_URL = import.meta.env.VITE_WIALON_API_URL || 'https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en';
 const WIALON_SESSION_TOKEN = import.meta.env.VITE_WIALON_SESSION_TOKEN;
 
 /** 
@@ -39,7 +39,7 @@ export async function getUnits(): Promise<WialonUnit[]> {
       from: 0,
       to: 0,
     }),
-    sid: WIALON_SESSION_TOKEN,
+    sid: WIALON_SESSION_TOKEN || '',
   });
 
   const url = `${WIALON_API_URL}/wialon/ajax.html?${params.toString()}`;

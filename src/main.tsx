@@ -1,54 +1,57 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { BrowserRouter } from 'react-router-dom';
 import { initializeConnectionMonitoring } from './utils/firebaseConnectionHandler';
 import { TyreStoresProvider } from './context/TyreStoresContext';
 import './index.css';
 
-// Initialize Firebase and check emulator status
+// Wialon SDK globaal koppel
+declare global {
+  interface Window {
+    wialon: any;
+  }
+}
+
+// App-initialisering
 const initializeApp = async () => {
   try {
-    // Import Firebase after ensuring proper initialization
+    // Firebase inlaai
     await import('./firebase');
     console.log('🔥 Firebase initialized successfully');
-    
-    // Initialize connection monitoring
+
+    // Firebase verbinding monitor
     await initializeConnectionMonitoring();
-    
-    // Check emulator status in development
+
+    // Firebase Emulators status (slegs in ontwikkeling)
     if (import.meta.env.DEV) {
       const { checkEmulatorsStatus } = await import('./firebaseEmulators');
       const status = await checkEmulatorsStatus();
-      
+
       if (status.firestore && status.storage) {
         console.log('✅ Firebase emulators are running and accessible');
       } else {
-        console.log('⚠️ Firebase emulators status:', status);
-        console.log('💡 Run "firebase emulators:start --only firestore,storage" to use emulators');
-      console.log('💡 Run "firebase emulators:start --only firestore,storage" to use local emulators');
-        console.log('   - Port 8081 (Firestore) is not in use');
-        console.log('   - Port 9198 (Storage) is not in use');
-        console.log('   - Firewall settings allow local connections');
+        console.warn('⚠️ Firebase emulator status:', status);
+        console.warn('💡 Run: firebase emulators:start --only firestore,storage');
+        console.warn('   - Port 8081 (Firestore) / 9198 (Storage)');
       }
-      console.log('📡 App will continue using production Firebase configuration');
     }
-    
-    // Render the app
+
+    // Toepassing render
     ReactDOM.createRoot(document.getElementById('root')!).render(
       <React.StrictMode>
-        <TyreStoresProvider>
-          <App />
-        </TyreStoresProvider>
+        <BrowserRouter>
+          <TyreStoresProvider>
+            <App />
+          </TyreStoresProvider>
+        </BrowserRouter>
       </React.StrictMode>
     );
-    
+
   } catch (error) {
-    console.error('❌ Failed to initialize application:', error);
-    
-    // Show user-friendly error message
-    console.error('🔧 Application initialization failed, but attempting to continue...');
-    
-    // Render error state
+    console.error('❌ App initialization failed:', error);
+
+    // Nood-render
     ReactDOM.createRoot(document.getElementById('root')!).render(
       <React.StrictMode>
         <App />
@@ -57,5 +60,5 @@ const initializeApp = async () => {
   }
 };
 
-// Initialize the application
+// Begin app
 initializeApp();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { sageAuthConfig } from '../config/sageAuth';
-import { fetchInventoryFromSage, syncInventoryItemToSage, fetchInventoryItemFromSage, updateInventoryQuantity, deleteInventoryItem } from '../components/api/sageIntegration';
+import { fetchInventoryFromSage, syncInventoryItemToSage, fetchInventoryItemFromSage, updateInventoryQuantity, deleteInventoryItem } from '../api/sageIntegration';
 import { PurchaseOrder, Vendor, InventoryItem } from '../types/inventory';
 
 const SageIntegration: React.FC = () => {
