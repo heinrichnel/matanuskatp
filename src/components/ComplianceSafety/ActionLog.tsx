@@ -339,7 +339,7 @@ const ActionLog: React.FC = () => {
             <Select
               label="Status"
               value={filters.status}
-              onChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
+              onChange={(value) => setFilters(prev => ({ ...prev, status: value.target.value }))}
               options={[
                 { label: 'All Statuses', value: '' },
                 { label: 'Initiated', value: 'initiated' },
@@ -351,7 +351,7 @@ const ActionLog: React.FC = () => {
             <Select
               label="Responsible Person"
               value={filters.responsiblePerson}
-              onChange={(value) => setFilters(prev => ({ ...prev, responsiblePerson: value }))}
+              onChange={(value) => setFilters(prev => ({ ...prev, responsiblePerson: value.target.value }))}
               options={[
                 { label: 'All Persons', value: '' },
                 ...RESPONSIBLE_PERSONS.map(person => ({ label: person, value: person }))
@@ -613,7 +613,7 @@ const ActionLog: React.FC = () => {
             <Input
               label="Title *"
               value={formData.title}
-              onChange={(value) => handleFormChange('title', value)}
+              onChange={(e) => handleFormChange('title', e.target.value)}
               placeholder="Enter action item title..."
               error={errors.title}
             />
@@ -621,7 +621,7 @@ const ActionLog: React.FC = () => {
             <TextArea
               label="Description *"
               value={formData.description}
-              onChange={(value) => handleFormChange('description', value)}
+              onChange={(e) => handleFormChange('description', e.target.value)}
               placeholder="Provide details about the action item..."
               rows={3}
               error={errors.description}
@@ -631,7 +631,7 @@ const ActionLog: React.FC = () => {
               <Select
                 label="Responsible Person *"
                 value={formData.responsiblePerson}
-                onChange={(value) => handleFormChange('responsiblePerson', value)}
+                onChange={(e) => handleFormChange('responsiblePerson', e.target.value)}
                 options={[
                   { label: 'Select responsible person...', value: '' },
                   ...RESPONSIBLE_PERSONS.map(person => ({ label: person, value: person }))
@@ -643,7 +643,7 @@ const ActionLog: React.FC = () => {
                 label="Due Date *"
                 type="date"
                 value={formData.dueDate}
-                onChange={(value) => handleFormChange('dueDate', value)}
+                onChange={(e) => handleFormChange('dueDate', e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
                 error={errors.dueDate}
               />

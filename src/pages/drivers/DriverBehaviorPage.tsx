@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { DriverBehaviorEvent } from '../types';
-import { useAppContext } from '../context/AppContext';
-import { useSyncContext } from '../context/SyncContext';
-import Button from '../components/ui/Button';
-import DriverPerformanceOverview from '../components/DriverManagement/DriverPerformanceOverview';
-import DriverBehaviorEventForm from '../components/DriverManagement/DriverBehaviorEventForm';
-import DriverBehaviorEventDetails from '../components/DriverManagement/DriverBehaviorEventDetails';
-import CARReportForm from '../components/actionlog/CARReportForm';
-import CARReportList from '../components/actionlog/CARReportList';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
+import { DriverBehaviorEvent } from '../../types';
+import { useAppContext } from '../../context/AppContext';
+import { useSyncContext } from '../../context/SyncContext';
+import Button from '../../components/ui/Button';
+import DriverPerformanceOverview from '../../components/DriverManagement/DriverPerformanceOverview';
+import DriverBehaviorEventForm from '../../components/DriverManagement/DriverBehaviorEventForm';
+import DriverBehaviorEventDetails from '../../components/DriverManagement/DriverBehaviorEventDetails';
+import CARReportForm from '../../components/ComplianceSafety/CARReportForm';
+import CARReportList from '../../components/ComplianceSafety/CARReportList';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
 import { User, FileText, Plus, RefreshCw } from 'lucide-react';
-import SyncIndicator from '../components/ui/SyncIndicator';
+import SyncIndicator from '../../components/ui/SyncIndicator';
 
 const DriverBehaviorPage: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);

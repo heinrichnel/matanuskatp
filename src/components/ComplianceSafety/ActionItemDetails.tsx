@@ -229,7 +229,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
               <TextArea
                 label="Reason for Delay *"
                 value={overdueReason}
-                onChange={setOverdueReason}
+                onChange={(e) => setOverdueReason(e.target.value)}
                 placeholder="Explain why this action item is overdue..."
                 rows={2}
               />
@@ -311,7 +311,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
           <div className="flex space-x-2">
             <TextArea
               value={comment}
-              onChange={setComment}
+              onChange={(e) => setComment(e.target.value)}
               placeholder="Add a comment..."
               rows={2}
               className="flex-1"

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
 import { 
   Users, 
   UserPlus, 
@@ -9,14 +9,14 @@ import {
   UserCog,
   Network
 } from 'lucide-react';
-import Button from '../components/ui/Button';
-import ClientList from '../components/clients/ClientList';
-import ClientDetail from '../components/clients/ClientDetail';
-import ClientForm from '../components/clients/ClientForm';
-import ClientRelationships from '../components/clients/ClientRelationships';
-import ClientAnalytics from '../components/clients/ClientAnalytics';
-import { useAppContext } from '../context/AppContext';
-import { Client, createNewClient } from '../types/client';
+import Button from '../../components/ui/Button';
+import ClientList from '../../components/CustomerManagement/ClientList';
+import ClientDetail from '../../components/CustomerManagement/ClientDetail';
+import ClientForm from '../../components/CustomerManagement/ClientForm';
+import ClientRelationships from '../../components/CustomerManagement/ClientRelationships';
+import ClientAnalytics from '../../components/CustomerManagement/ClientAnalytics';
+import { useAppContext } from '../../context/AppContext';
+import { Client, createNewClient } from '../../types/client';
 
 const ClientManagementPage: React.FC = () => {
   const { clients, trips } = useAppContext();
