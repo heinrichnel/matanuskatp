@@ -17,6 +17,13 @@
       ]
     },
     {
+      "collectionGroup": "tyreStores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "name", "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "tyres",
       "queryScope": "COLLECTION",
       "fields": [
