@@ -1,57 +1,61 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { BrowserRouter } from 'react-router-dom';
 import { initializeConnectionMonitoring } from './utils/firebaseConnectionHandler';
 import { TyreStoresProvider } from './context/TyreStoresContext';
+import { checkEnvVariables, verifyGoogleMapsConfig } from './utils/envChecker';
 import './index.css';
 
-// Wialon SDK globaal koppel
-declare global {
-  interface Window {
-    wialon: any;
-  }
+// Validate environment variables on startup
+checkEnvVariables();
+if (import.meta.env.PROD) {
+  verifyGoogleMapsConfig();
 }
 
-// App-initialisering
+// Initialize Firebase and check emulator status
 const initializeApp = async () => {
   try {
-    // Firebase inlaai
+    // Import Firebase after ensuring proper initialization
     await import('./firebase');
     console.log('🔥 Firebase initialized successfully');
-
-    // Firebase verbinding monitor
+    
+    // Initialize connection monitoring
     await initializeConnectionMonitoring();
-
-    // Firebase Emulators status (slegs in ontwikkeling)
+    
+    // Check emulator status in development
     if (import.meta.env.DEV) {
       const { checkEmulatorsStatus } = await import('./firebaseEmulators');
       const status = await checkEmulatorsStatus();
-
+      
       if (status.firestore && status.storage) {
         console.log('✅ Firebase emulators are running and accessible');
       } else {
-        console.warn('⚠️ Firebase emulator status:', status);
-        console.warn('💡 Run: firebase emulators:start --only firestore,storage');
-        console.warn('   - Port 8081 (Firestore) / 9198 (Storage)');
+        console.log('⚠️ Firebase emulators status:', status);
+        console.log('💡 Run "firebase emulators:start --only firestore,storage" to use emulators');
+      console.log('💡 Run "firebase emulators:start --only firestore,storage" to use local emulators');
+        console.log('   - Port 8081 (Firestore) is not in use');
+        console.log('   - Port 9198 (Storage) is not in use');
+        console.log('   - Firewall settings allow local connections');
       }
+      console.log('📡 App will continue using production Firebase configuration');
     }
-
-    // Toepassing render
+    
+    // Render the app
     ReactDOM.createRoot(document.getElementById('root')!).render(
       <React.StrictMode>
-        <BrowserRouter>
-          <TyreStoresProvider>
-            <App />
-          </TyreStoresProvider>
-        </BrowserRouter>
+        <TyreStoresProvider>
+          <App />
+        </TyreStoresProvider>
       </React.StrictMode>
     );
-
+    
   } catch (error) {
-    console.error('❌ App initialization failed:', error);
-
-    // Nood-render
+    console.error('❌ Failed to initialize application:', error);
+    
+    // Show user-friendly error message
+    console.error('🔧 Application initialization failed, but attempting to continue...');
+    
+    // Render error state
     ReactDOM.createRoot(document.getElementById('root')!).render(
       <React.StrictMode>
         <App />
@@ -60,5 +64,5 @@ const initializeApp = async () => {
   }
 };
 
-// Begin app
+// Initialize the application
 initializeApp();

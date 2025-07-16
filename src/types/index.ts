@@ -318,6 +318,8 @@ export interface DieselConsumptionRecord {
   probeReading?: number; // For probe verification
   probeDiscrepancy?: number; // Difference between filled and probe
   probeVerified?: boolean;
+  rootCause?: string;
+  actionTaken?: string;
   probeVerificationNotes?: string;
   probeVerifiedAt?: string;
   probeVerifiedBy?: string;

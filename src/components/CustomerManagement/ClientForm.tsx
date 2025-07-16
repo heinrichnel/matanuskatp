@@ -238,7 +238,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
               <Input
                 label="Tags (comma separated)"
                 value={client.tags ? client.tags.join(', ') : ''}
-                onChange={(value) => handleTagChange(value)}
+                onChange={(e) => handleTagChange(e.target.value)}
                 placeholder="e.g., VIP, Long-term, Contract"
               />
             </div>
@@ -423,7 +423,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
               type="number"
               min="0"
               value={client.paymentTerms?.toString() || ''}
-              onChange={(value) => handleChange('paymentTerms', parseInt(value) || undefined)}
+              onChange={(e) => handleChange('paymentTerms', parseInt(e.target.value) || undefined)}
               placeholder="e.g., 30, 45, 60"
             />
             
@@ -433,7 +433,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
               min="0"
               step="0.01"
               value={client.creditLimit?.toString() || ''}
-              onChange={(value) => handleChange('creditLimit', parseFloat(value) || undefined)}
+              onChange={(e) => handleChange('creditLimit', parseFloat(e.target.value) || undefined)}
               placeholder="Maximum credit amount"
             />
           </div>

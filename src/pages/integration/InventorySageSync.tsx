@@ -181,12 +181,8 @@ const InventorySageSync: React.FC = () => {
         return;
       }
       
-      const formattedItems = itemsToUpdate.map(item => ({
-        sageId: item.sageId!,
-        quantity: item.quantity
-      }));
-      
-      const success = await updateInventoryInSage(formattedItems);
+      // Pass the full InventoryItem objects as required by updateInventoryInSage
+      const success = await updateInventoryInSage(itemsToUpdate);
       
       if (success) {
         setStatusMessage(`Successfully updated ${itemsToUpdate.length} items in Sage`);

@@ -1,5 +1,3 @@
-// src/components/maps/EnhancedMapComponent.tsx
-
 import React, { useState, useEffect } from 'react';
 import {
   GoogleMap,

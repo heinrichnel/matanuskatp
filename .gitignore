@@ -16,7 +16,7 @@ build/
 firebase-debug.log*
 firestore-debug.log*
 functions/lib/
-firebaserc
+# .firebaserc is typically committed for CI/CD
 
 # ───────── Debug Logs ──────────────────────
 npm-debug.log*
@@ -29,24 +29,34 @@ ui-debug.log*
 .qodo
 .bolt
 
-# ───────── Local Scripts & Emulators ───────
-firebaseEmulators.ts
-webhookSenders.ts
-schemadashboard1.tsx
+# ───────── Local Emulator Configuration ────
+# Note: Source files should usually be committed
+# Remove these if they are part of your codebase:
+# firebaseEmulators.ts
+# webhookSenders.ts
+# schemadashboard1.tsx
 
 # ───────── Coverage & Testing ──────────────
 coverage/
 *.lcov
+.nyc_output
+
+# ───────── TypeScript artifacts ─────────────
+*.tsbuildinfo
 
 # ───────── VS Code Remote Dev ──────────────
 .vscode/
 .history/
 *.code-workspace
 
-# ───────── Firebase Hosting & Rules (compiled only) ─────
-firebase.json
-database.rules.json
-storage.rules
+# ───────── IDEs & Editors ────────────────
+.idea/
+
+# ───────── Firebase Hosting & Rules ─────
+# These config files are typically committed:
+# firebase.json
+# database.rules.json
+# storage.rules
 
 # ───────── GitHub & Workflows (if private CI) ───────────
 .github/
@@ -59,16 +69,27 @@ storage.rules
 *.xlsx
 *.json
 !src/**/*.json  # keep config files used in code
+!package.json
+!package-lock.json
+!tsconfig*.json
+!firebase.json
+!firestore*.json
+!database*.json
+!storage*.json
 
 # ───────── Build Output for Functions ───────
 functions/node_modules/
 functions/lib/
 functions/.tsbuildinfo
+public/functions/node_modules/
 
-# Local Netlify folder
+# ───────── Local Netlify folder ─────────────
 .netlify
 
+# ───────── Storybook ─────────────────────
 *storybook.log
 storybook-static
+
+# ───────── Vercel ──────────────────────────
 .vercel
-.env
+node_modules/express/lib/application.js

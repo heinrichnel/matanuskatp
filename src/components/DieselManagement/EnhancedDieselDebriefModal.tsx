@@ -637,7 +637,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
                     <TextArea
                       label="Debrief Notes *"
                       value={debriefNotes}
-                      onChange={setDebriefNotes}
+                      onChange={(e) => setDebriefNotes(e.target.value)}
                       placeholder="Document observations, driver explanations, and agreed actions..."
                       rows={3}
                       error={error && !debriefNotes.trim() ? 'Debrief notes are required' : undefined}
@@ -647,7 +647,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
                       <Select
                         label="Root Cause *"
                         value={rootCause}
-                        onChange={setRootCause}
+                        onChange={(e) => setRootCause(e.target.value)}
                         options={rootCauseOptions}
                         error={error && !rootCause.trim() ? 'Root cause is required' : undefined}
                       />
@@ -655,7 +655,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
                       <Select
                         label="Action Taken"
                         value={actionTaken}
-                        onChange={setActionTaken}
+                        onChange={(e) => setActionTaken(e.target.value)}
                         options={actionOptions}
                       />
                     </div>

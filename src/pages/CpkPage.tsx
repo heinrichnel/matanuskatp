@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader } from '../components/ui/Card';
 import { useAppContext } from '../context/AppContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Calculator, TrendingUp, TrendingDown, Fuel, DollarSign } from 'lucide-react';
+
+// Import custom components
 import Button from '../components/ui/Button';
 
 interface CpkMetrics {

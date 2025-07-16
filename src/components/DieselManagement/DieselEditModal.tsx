@@ -63,6 +63,11 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
     }
   }, [record, isOpen]);
 
+  // Helper function to handle events from form controls
+  const handleInputChange = (field: string, event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    handleChange(field, event.target.value);
+  };
+
   const handleChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
 
@@ -260,7 +265,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
           <Select
             label="Fleet Number *"
             value={formData.fleetNumber}
-            onChange={val => handleChange('fleetNumber', val)}
+            onChange={(e) => handleInputChange('fleetNumber', e)}
             options={[
               { label: 'Select fleet...', value: '' },
               ...FLEET_NUMBERS.map(f => ({
@@ -276,7 +281,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
             label="Date *"
             type="date"
             value={formData.date}
-            onChange={val => handleChange('date', val)}
+            onChange={(e) => handleInputChange('date', e)}
             error={errors.date}
           />
 
@@ -288,7 +293,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
                 step="1"
                 min="0"
                 value={formData.kmReading}
-                onChange={val => handleChange('kmReading', val)}
+                onChange={(e) => handleInputChange('kmReading', e)}
                 placeholder="125000"
                 error={errors.kmReading}
               />
@@ -299,7 +304,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
                 step="1"
                 min="0"
                 value={formData.previousKmReading}
-                onChange={val => handleChange('previousKmReading', val)}
+                onChange={(e) => handleInputChange('previousKmReading', e)}
                 placeholder="123560"
                 error={errors.previousKmReading}
               />
@@ -311,7 +316,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
               step="0.1"
               min="0.1"
               value={formData.hoursOperated}
-              onChange={val => handleChange('hoursOperated', val)}
+              onChange={(e) => handleInputChange('hoursOperated', e)}
               placeholder="5.5"
               error={errors.hoursOperated}
             />
@@ -323,7 +328,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
             step="0.1"
             min="0.1"
             value={formData.litresFilled}
-            onChange={val => handleChange('litresFilled', val)}
+            onChange={(e) => handleInputChange('litresFilled', e)}
             placeholder="450"
             error={errors.litresFilled}
           />
@@ -334,7 +339,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
             step="0.01"
             min="0"
             value={formData.costPerLitre}
-            onChange={val => handleChange('costPerLitre', val)}
+            onChange={(e) => handleInputChange('costPerLitre', e)}
             placeholder="18.50"
             error={errors.costPerLitre}
           />
@@ -343,7 +348,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
             <Select
               label="Currency *"
               value={formData.currency}
-              onChange={val => handleChange('currency', val)}
+              onChange={(e) => handleInputChange('currency', e)}
               options={[
                 { label: 'ZAR (R)', value: 'ZAR' },
                 { label: 'USD ($)', value: 'USD' }
@@ -357,7 +362,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
               step="0.01"
               min="0.01"
               value={formData.totalCost}
-              onChange={val => handleChange('totalCost', val)}
+              onChange={(e) => handleInputChange('totalCost', e)}
               placeholder="8325.00"
               error={errors.totalCost}
             />
@@ -366,7 +371,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
           <Select
             label="Fuel Station *"
             value={formData.fuelStation}
-            onChange={val => handleChange('fuelStation', val)}
+            onChange={(e) => handleInputChange('fuelStation', e)}
             options={[
               { label: 'Select fuel station...', value: '' },
               ...FUEL_STATIONS.map(station => ({ label: station, value: station }))
@@ -377,7 +382,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
           <Select
             label="Driver *"
             value={formData.driverName}
-            onChange={val => handleChange('driverName', val)}
+            onChange={(e) => handleInputChange('driverName', e)}
             options={[
               { label: 'Select driver...', value: '' },
               ...DRIVERS.map(d => ({ label: d, value: d }))
@@ -389,7 +394,7 @@ const DieselEditModal: React.FC<DieselEditModalProps> = ({
         <TextArea
           label="Notes"
           value={formData.notes}
-          onChange={val => handleChange('notes', val)}
+          onChange={(e) => handleInputChange('notes', e)}
           placeholder="Additional notes about this fuel entry..."
           rows={3}
         />

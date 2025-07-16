@@ -149,7 +149,7 @@ const ProbeVerificationModal: React.FC<ProbeVerificationModalProps> = ({
             step="0.1"
             min="0"
             value={probeReading}
-            onChange={(value) => setProbeReading(value)}
+            onChange={(e) => setProbeReading(e.target.value)}
             placeholder="Enter actual probe reading..."
             error={errors.probeReading}
           />
@@ -191,7 +191,7 @@ const ProbeVerificationModal: React.FC<ProbeVerificationModalProps> = ({
           <TextArea
             label="Verification Notes"
             value={verificationNotes}
-            onChange={(value) => setVerificationNotes(value)}
+            onChange={(e) => setVerificationNotes(e.target.value)}
             placeholder="Add any notes about the probe verification process or discrepancies..."
             rows={3}
           />
