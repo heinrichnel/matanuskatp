@@ -11,7 +11,7 @@ import {
   VENDORS,
   getPositionsByFleet,
 } from "../../utils/tyreConstants";
-import { tyreSizes, tyreBrands, tyrePatterns } from '@/data/tyreData';
+import { tyreSizes, tyreBrands, tyrePatterns } from '../../data/tyreData';
 import { Input, Select, TextArea } from '../ui/FormElements';
 import Button from '../ui/Button';
 import ErrorMessage from '../ui/ErrorMessage';

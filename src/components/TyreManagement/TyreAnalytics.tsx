@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { useTyres } from '@/context/TyreContext';
-import { Tyre, calculateRemainingLife, calculateCostPerKm, formatTyreSize } from '@/types/tyre';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { useTyres } from '../../context/TyreContext';
+import { Tyre, calculateRemainingLife, calculateCostPerKm, formatTyreSize } from '../../types/tyre';
 import { BarChart3, PieChart, TrendingUp, DollarSign } from 'lucide-react';
 import LoadingIndicator from '../ui/LoadingIndicator';
 import ErrorMessage from '../ui/ErrorMessage';
