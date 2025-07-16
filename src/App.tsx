@@ -46,14 +46,14 @@ import TripDashboard from "./components/TripManagement/TripDashboard";
 import InvoiceAgingDashboard from "./components/InvoiceManagement/InvoiceAgingDashboard";
 import CustomerRetentionDashboard from "./components/Performance/CustomerRetentionDashboard";
 import ActionLog from "./components/ComplianceSafety/ActionLog";
-import TripManagementPage from "./pages/TripManagementPage";
+import TripManagementPage from "./pages/trips/TripManagementPage";
 import WorkshopPage from "./pages/WorkshopPage";
-import RoutePlanningPage from "./pages/RoutePlanningPage";
-import InvoiceManagementPage from "./pages/InvoiceManagementPage";
+import RoutePlanningPage from "./pages/trips/RoutePlanningPage";
+import InvoiceManagementPage from "./pages/invoices/InvoiceManagementPage";
 import DieselManagementPage from "./pages/diesel/DieselManagementPage";
 import DriverManagementPage from "./pages/drivers/DriverManagementPage";
 import ComplianceManagementPage from "./pages/compliance/ComplianceManagementPage";
-import TripTimelinePage from "./pages/TripTimelinePage";
+import TripTimelinePage from "./pages/trips/TripTimelinePage";
 
 // Invoice Management Components
 import InvoiceDashboard from "./components/InvoiceManagement/InvoiceDashboard";
@@ -108,8 +108,8 @@ import IndirectCostBreakdown from "./components/Inventory Management/IndirectCos
 import InventoryDashboard from "./components/Inventory Management/InventoryDashboard";
 import StockManager from "./components/Inventory Management/StockManager";
 import PurchaseOrderTracker from "./components/Inventory Management/PurchaseOrderTracker";
-import FleetLocationMapPage from "./pages/FleetLocationMapPage";
-import InventoryPage from "./pages/InventoryPage";
+import FleetLocationMapPage from "./pages/trips/FleetLocationMapPage";
+import InventoryPage from "./pages/inventory/InventoryPage";
 import MyMapComponent from "./components/MyMapComponent";
 import WialonUnitList from './components/WialonUnitList';
 import MapsView from "./components/maps/MapsView"; // Fixed path to correct directory

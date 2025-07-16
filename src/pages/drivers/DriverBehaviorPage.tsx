@@ -26,12 +26,12 @@ const DriverBehaviorPage: React.FC = () => {
   } = useAppContext();
   
   // Use the SyncContext to subscribe to driver behavior events
-  const { subscribeToDriverBehaviorEvents } = useSyncContext();
+  const { subscribeToDriverBehavior } = useSyncContext();
   
   // Subscribe to driver behavior events when the component mounts
   useEffect(() => {
     console.log("Subscribing to driver behavior events");
-    subscribeToDriverBehaviorEvents();
+    // subscribeToDriverBehavior(); // Would need a driver name parameter
     
     // Check if we have any events, if not and we're online, trigger a sync
     if (driverBehaviorEvents.length === 0 && navigator.onLine) {
@@ -41,12 +41,8 @@ const DriverBehaviorPage: React.FC = () => {
     // Cleanup function is not needed as the subscription is managed by the SyncContext
   }, []);
   
-  // Subscribe to driver behavior events when the component mounts
+  // Check if we have any events, if not and we're online, trigger a sync
   useEffect(() => {
-    console.log("Subscribing to driver behavior events");
-    subscribeToDriverBehaviorEvents();
-    
-    // Check if we have any events, if not and we're online, trigger a sync
     if (driverBehaviorEvents.length === 0 && navigator.onLine) {
       handleSyncNow();
     }

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import { sageAuthConfig } from '../../config/sageAuth';
-import { syncPurchaseOrderToSage, importVendorsFromSage, importInventoryFromSage, importPurchaseOrdersFromSage } from '../../api/sageIntegration';
-import { PurchaseOrder, Vendor, InventoryItem } from '../../types/inventory';
+import { Card, CardContent, CardHeader } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import { sageAuthConfig } from '../config/sageAuth';
+import { fetchInventoryFromSage, syncInventoryItemToSage, fetchInventoryItemFromSage, updateInventoryQuantity, deleteInventoryItem } from '../components/api/sageIntegration';
+import { PurchaseOrder, Vendor, InventoryItem } from '../types/inventory';
 
 const SageIntegration: React.FC = () => {
   const [configStatus, setConfigStatus] = useState<'unconfigured' | 'partial' | 'complete'>('unconfigured');
@@ -48,26 +48,30 @@ const SageIntegration: React.FC = () => {
     };
 
     try {
-      // Import vendors from Sage
+      // Import vendors from Sage (placeholder - function not available)
       try {
-        const vendors = await importVendorsFromSage();
-        results.vendors = vendors.length;
+        // const vendors = await importVendorsFromSage();
+        // results.vendors = vendors.length;
+        results.vendors = 0; // Placeholder
+        results.errors.push('Vendor import not yet implemented');
       } catch (error) {
         results.errors.push(`Failed to import vendors: ${(error as Error).message}`);
       }
 
       // Import inventory from Sage
       try {
-        const inventory = await importInventoryFromSage();
+        const inventory = await fetchInventoryFromSage();
         results.inventory = inventory.length;
       } catch (error) {
         results.errors.push(`Failed to import inventory: ${(error as Error).message}`);
       }
 
-      // Import purchase orders from Sage
+      // Import purchase orders from Sage (placeholder - function not available)
       try {
-        const purchaseOrders = await importPurchaseOrdersFromSage();
-        results.purchaseOrders = purchaseOrders.length;
+        // const purchaseOrders = await importPurchaseOrdersFromSage();
+        // results.purchaseOrders = purchaseOrders.length;
+        results.purchaseOrders = 0; // Placeholder
+        results.errors.push('Purchase order import not yet implemented');
       } catch (error) {
         results.errors.push(`Failed to import purchase orders: ${(error as Error).message}`);
       }
@@ -251,10 +255,24 @@ const SageIntegration: React.FC = () => {
               </div>
             )}
 
-            {/*  Sync Options */}
+            {/* Sync Options */}
             <div className="pt-4 border-t border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Sync Options</h4>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button 
                   variant="outline"
-                  disabled=
+                  disabled={syncing}
+                  onClick={handleSyncWithSage}
+                >
+                  Manual Sync
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default SageIntegration;

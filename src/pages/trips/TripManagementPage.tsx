@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
 import { Truck, CheckCircle, Flag, Plus } from 'lucide-react';
-import Button from '../components/ui/Button';
+import Button from '../../components/ui/Button';
 /* eslint-disable @typescript-eslint/no-unused-vars */
 // The following components are imported for possible future use in this page.
 // @ts-ignore: imported for future use, suppress unused warning
-import ActiveTrips from '../components/TripManagement/ActiveTrips';
+import ActiveTrips from '../../components/TripManagement/ActiveTrips';
 // @ts-ignore: imported for future use, suppress unused warning
-import CompletedTrips from '../components/TripManagement/CompletedTrips';
+import CompletedTrips from '../../components/TripManagement/CompletedTrips';
 // @ts-ignore: imported for future use, suppress unused warning
-import FlagsInvestigations from '../components/Flags/FlagsInvestigations';
+import FlagsInvestigations from '../../components/Flags/FlagsInvestigations';
 /* eslint-enable @typescript-eslint/no-unused-vars */
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../../context/AppContext';
 import { Outlet, useSearchParams, useNavigate, useOutletContext, useLocation } from 'react-router-dom';
-import { Trip } from '../types';
+import { Trip } from '../../types';
 
 interface OutletContextType {
   setSelectedTrip?: (trip: Trip | null) => void;
