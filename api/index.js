@@ -58,24 +58,31 @@ app.post('/api/inventory/import', async (req, res) => {
     const csvData = req.body.csvData;
     let records;
     
+    console.log('Received CSV data of length:', csvData.length);
+    console.log('First 100 characters:', csvData.substring(0, 100));
+    
     try {
       // Handle both header and non-header CSV formats
       if (csvData.trim().startsWith('SCRAPPED TYRES') || 
           csvData.trim().startsWith('VEHICLE STORE') || 
           csvData.trim().startsWith('USED TYRES')) {
+        console.log('Detected special format CSV (no headers)');
         // No headers format - parse with specific column mapping
         records = parse(csvData, {
           columns: false,
           skip_empty_lines: true,
           trim: true,
-          relax_column_count: true // Allow varying column counts
+          relax_column_count: true, // Allow varying column counts
+          skip_records_with_error: true // Skip records with parsing errors
         });
       } else {
+        console.log('Detected standard CSV with headers');
         // Standard CSV with headers
         records = parse(csvData, {
           columns: true,
           skip_empty_lines: true,
-          trim: true
+          trim: true,
+          skip_records_with_error: true // Skip records with parsing errors
         });
       }
     } catch (parseError) {
@@ -93,32 +100,86 @@ app.post('/api/inventory/import', async (req, res) => {
       });
     }
 
+    console.log('Sample record:', records[0]);
+    console.log('Number of records found:', records.length);
+    
     // Process each record and prepare for Firestore
     const processedRecords = records.map((record, index) => {
       // Check if record is an array (no headers) or object (with headers)
       const isArray = Array.isArray(record);
       
-      // Extract values based on format
-      const location = isArray ? record[0] : record.location || '';
-      const tyreId = isArray ? record[1] : record.tyreId || '';
-      const description = isArray ? record[2] : record.description || '';
-      const pattern = isArray ? record[3] : record.pattern || '';
-      const quantity = parseFloat(isArray ? record[4] : record.quantity || 0);
-      const status = isArray ? record[5] : record.status || '';
-      const axlePosition = isArray ? record[6] : record.axlePosition || '';
-      const size = isArray ? record[7] : record.size || '';
-      const model = isArray ? record[8] : record.model || '';
-      const brand = isArray ? record[9] : record.brand || '';
-      const vehicleId = isArray ? record[10] : record.vehicleId || '';
-      const registrationNumber = isArray ? record[11] : record.registrationNumber || '';
-      const price = parseFloat(isArray ? record[12] : record.price || 0);
-      const holdingBay = isArray ? record[13] : record.holdingBay || '';
-      const expiryDate = isArray ? record[14] : record.expiryDate || '';
-      const dateAdded = isArray ? record[15] : record.dateAdded || new Date().toLocaleDateString();
-      const mileage = isArray ? record[16] : record.mileage || '0';
+      // For debugging
+      if (index === 0) {
+        console.log('First record is array?', isArray);
+        console.log('First record:', record);
+      }
       
-      // Generate a unique ID - use tyreId if available or generate one
-      const id = tyreId ? tyreId.replace(/[^a-zA-Z0-9]/g, '_') : `tyre_${Date.now()}_${index}`;
+      // Extract values based on format
+      // Your specific format appears to be:
+      // [0]: SCRAPPED TYRES/VEHICLE STORE/USED TYRES (Location category)
+      // [1]: Tyre ID ("XA12083P215")
+      // [2]: Description ("RETREAD XA12083P215")
+      // [3]: Pattern ("KL303")
+      // [4]: Quantity ("4.0000")
+      // [5]: Status ("Scrapped/Sold", "Recap One")
+      // [6]: Axle Position ("Trailer", "Drive")
+      // [7]: Size ("315/80R22.5", "385/65R22.5")
+      // [8]: Model ("M3", "MM79")
+      // [9]: Brand ("POWERTRAC", "STOCK RETREAD")
+      // [10]: Vehicle ID ("T4", "T6")
+      // [11]: Registration Number ("ADZ9011/ADZ9010")
+      // [12]: Price ("0.0000")
+      // [13]: Holding Bay ("HOLDING BAY - SCRAPPED TYRES")
+      // [14]: Expiry Date ("18/11/2024")
+      // [15]: Date Added ("01/07/2024")
+      // [16]: Mileage ("0", "39952")
+      
+      let location = '';
+      let tyreId = '';
+      let description = '';
+      let pattern = '';
+      let quantity = 0;
+      let status = '';
+      let axlePosition = '';
+      let size = '';
+      let model = '';
+      let brand = '';
+      let vehicleId = '';
+      let registrationNumber = '';
+      let price = 0;
+      let holdingBay = '';
+      let expiryDate = '';
+      let dateAdded = '';
+      let mileage = '0';
+      let id = '';
+      
+      try {
+        location = isArray ? (record[0] || '') : (record.location || '');
+        tyreId = isArray ? (record[1] || '') : (record.tyreId || '');
+        description = isArray ? (record[2] || '') : (record.description || '');
+        pattern = isArray ? (record[3] || '') : (record.pattern || '');
+        quantity = parseFloat(isArray ? (record[4] || '0') : (record.quantity || '0')) || 0;
+        status = isArray ? (record[5] || '') : (record.status || '');
+        axlePosition = isArray ? (record[6] || '') : (record.axlePosition || '');
+        size = isArray ? (record[7] || '') : (record.size || '');
+        model = isArray ? (record[8] || '') : (record.model || '');
+        brand = isArray ? (record[9] || '') : (record.brand || '');
+        vehicleId = isArray ? (record[10] || '') : (record.vehicleId || '');
+        registrationNumber = isArray ? (record[11] || '') : (record.registrationNumber || '');
+        price = parseFloat(isArray ? (record[12] || '0') : (record.price || '0')) || 0;
+        holdingBay = isArray ? (record[13] || '') : (record.holdingBay || '');
+        expiryDate = isArray ? (record[14] || '') : (record.expiryDate || '');
+        dateAdded = isArray ? (record[15] || new Date().toLocaleDateString()) : (record.dateAdded || new Date().toLocaleDateString());
+        mileage = isArray ? (record[16] || '0') : (record.mileage || '0');
+        
+        // Generate a unique ID - use combination of tyreId and category for uniqueness
+        id = tyreId ? 
+          `${location.replace(/[^a-zA-Z0-9]/g, '_')}_${tyreId.replace(/[^a-zA-Z0-9]/g, '_')}` : 
+          `tyre_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+      } catch (err) {
+        console.error(`Error processing record at index ${index}:`, err);
+        console.error('Record data:', record);
+      }
       
       return {
         id,
@@ -140,7 +201,8 @@ app.post('/api/inventory/import', async (req, res) => {
         dateAdded,
         mileage,
         lastUpdated: new Date().toISOString(),
-        importedAt: new Date().toISOString()
+        importedAt: new Date().toISOString(),
+        source: 'csv_import'
       };
     });
 
