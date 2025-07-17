@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { SupportedCurrency, formatCurrency } from '../../lib/currency';
 // Uncomment when API integration is ready
@@ -101,7 +101,10 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
   const [webhookTrips, setWebhookTrips] = useState<Trip[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [editForm, setEditForm] = useState<{
     cost: number;
     fuel?: number;
@@ -279,6 +282,141 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
   const handleCancel = () => {
     setEditingTrip(null);
   };
+  
+  // File upload handlers
+  const handleFileUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const parseCSV = (text: string): Trip[] => {
+    try {
+      const lines = text.split('\n').filter(line => line.trim() !== '');
+      const headers = lines[0].split(',').map(h => h.trim());
+      
+      const trips: Trip[] = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        if (values.length < headers.length) continue;
+        
+        const tripData: Record<string, any> = {};
+        headers.forEach((header, index) => {
+          tripData[header] = values[index];
+        });
+        
+        // Create trip object with required fields
+        const trip: Trip = {
+          id: `imported-${Date.now()}-${i}`,
+          tripNumber: tripData['Trip Number'] || `IMP-${Date.now()}-${i}`,
+          origin: tripData['Origin'] || 'Unknown',
+          destination: tripData['Destination'] || 'Unknown',
+          startDate: tripData['Start Date'] || new Date().toISOString(),
+          endDate: tripData['End Date'] || new Date().toISOString(),
+          status: 'active',
+          driver: tripData['Driver'] || 'Unknown',
+          vehicle: tripData['Vehicle'] || 'Unknown',
+          distance: parseFloat(tripData['Distance']) || 0,
+          cost: parseFloat(tripData['Cost']) || 0,
+          source: 'internal',
+          lastUpdated: new Date().toISOString()
+        };
+        
+        // Add cost breakdown if available
+        if (
+          tripData['Fuel Cost'] ||
+          tripData['Maintenance Cost'] ||
+          tripData['Driver Cost'] ||
+          tripData['Tolls'] ||
+          tripData['Other Costs']
+        ) {
+          trip.costBreakdown = {
+            fuel: parseFloat(tripData['Fuel Cost']) || 0,
+            maintenance: parseFloat(tripData['Maintenance Cost']) || 0,
+            driver: parseFloat(tripData['Driver Cost']) || 0,
+            tolls: parseFloat(tripData['Tolls']) || 0,
+            other: parseFloat(tripData['Other Costs']) || 0
+          };
+        }
+        
+        trips.push(trip);
+      }
+      
+      return trips;
+    } catch (error) {
+      console.error('Error parsing CSV:', error);
+      setError('Failed to parse CSV file. Please check the format.');
+      return [];
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setIsUploading(true);
+    setError(null);
+    setSuccess(null);
+    
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        const importedTrips = parseCSV(content);
+        
+        if (importedTrips.length > 0) {
+          setActiveTrips(prev => [...prev, ...importedTrips]);
+          setSuccess(`Successfully imported ${importedTrips.length} trips.`);
+        } else {
+          setError('No valid trips found in the file.');
+        }
+      } catch (err) {
+        console.error('Error importing trips:', err);
+        setError('Failed to import trips. Please check the file format.');
+      } finally {
+        setIsUploading(false);
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    };
+    
+    reader.onerror = () => {
+      setError('Error reading the file.');
+      setIsUploading(false);
+    };
+    
+    reader.readAsText(file);
+  };
+  
+  // Function to generate sample CSV for users to download
+  const handleDownloadTemplate = () => {
+    const headers = [
+      'Trip Number', 'Origin', 'Destination', 'Start Date', 'End Date',
+      'Driver', 'Vehicle', 'Distance', 'Cost',
+      'Fuel Cost', 'Maintenance Cost', 'Driver Cost', 'Tolls', 'Other Costs'
+    ];
+    
+    const sampleData = [
+      'TR-2023-004,New York NY,Boston MA,2023-07-20,2023-07-22,John Doe,Truck 101,215,1200,600,200,300,75,25'
+    ];
+    
+    const csvContent = [headers.join(','), ...sampleData].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `trips-import-template.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="p-6">
@@ -291,12 +429,57 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           </p>
         </div>
         <div className="flex space-x-2">
+          {/* File input (hidden) */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".csv"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+          
+          {/* File upload button */}
+          <button
+            onClick={handleFileUploadClick}
+            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 flex items-center"
+            disabled={isUploading}
+          >
+            {isUploading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Importing...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                </svg>
+                Import CSV
+              </>
+            )}
+          </button>
+          
+          {/* Template download button */}
+          <button
+            onClick={handleDownloadTemplate}
+            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 flex items-center"
+          >
+            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Template
+          </button>
+          
           <button 
             onClick={fetchWebhookTrips}
             className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
           >
             Refresh Webhook Trips
           </button>
+          
           <Link
             to="/trips/new"
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
@@ -306,9 +489,35 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
         </div>
       </div>
       
+      {/* Success message */}
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+          <span className="block sm:inline">{success}</span>
+          <span 
+            className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" 
+            onClick={() => setSuccess(null)}
+          >
+            <svg className="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <title>Close</title>
+              <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+            </svg>
+          </span>
+        </div>
+      )}
+      
+      {/* Error message */}
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 relative">
+          <span className="block sm:inline">{error}</span>
+          <span 
+            className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" 
+            onClick={() => setError(null)}
+          >
+            <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <title>Close</title>
+              <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+            </svg>
+          </span>
         </div>
       )}
       
