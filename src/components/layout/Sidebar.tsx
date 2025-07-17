@@ -293,6 +293,7 @@ const Sidebar: FC<SidebarProps> = ({
       items: [
         { id: 'inventory-dashboard', label: 'Inventory Dashboard', route: 'inventory/dashboard' },
         { id: 'inventory-stock', label: 'Stock Management', route: 'inventory/stock' },
+        { id: 'inventory-parts', label: 'Parts Inventory', route: 'inventory/parts' },
         { id: 'inventory-reports', label: 'Inventory Reports', route: 'inventory/reports' }
       ]
     },

@@ -1,27 +1,42 @@
 import React, { useState } from 'react';
 
+// Define TypeScript interfaces for our state
+interface ImportResult {
+  success: boolean;
+  message: string;
+  importResult?: {
+    message: string;
+    recordsProcessed?: number;
+  };
+  recordCount?: number;
+  sampleRecords?: Record<string, any>[];
+}
+
 // CSV Import component for inventory
 const InventoryCsvImport = () => {
   const [csvData, setCsvData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
-  const [sampleData, setSampleData] = useState(null);
+  const [result, setResult] = useState<ImportResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [sampleData, setSampleData] = useState<Record<string, any>[] | null>(null);
 
   // Handle file upload
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      setCsvData(event.target.result);
+      const result = event.target?.result;
+      if (typeof result === 'string') {
+        setCsvData(result);
+      }
     };
     reader.readAsText(file);
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!csvData.trim()) {
       setError('Please upload a CSV file or enter CSV data');
@@ -52,8 +67,9 @@ const InventoryCsvImport = () => {
       if (data.sampleRecords) {
         setSampleData(data.sampleRecords);
       }
-    } catch (err) {
-      setError(err.message || 'An error occurred during import');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred during import';
+      setError(errorMessage);
       console.error('Import error:', err);
     } finally {
       setIsLoading(false);
@@ -61,7 +77,7 @@ const InventoryCsvImport = () => {
   };
 
   // Handle paste from clipboard
-  const handlePaste = (e) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const pastedData = e.clipboardData.getData('text');
     if (pastedData) {
       setCsvData(pastedData);
@@ -191,7 +207,7 @@ VEHICLE STORE,"MAT0052","POWERTRAC M3","new retread","12.0000","Recap One","Trai
             </table>
           </div>
           <p className="mt-2 text-sm text-gray-500">
-            Showing {sampleData.length} of {result.recordCount} records (simplified view)
+            Showing {sampleData.length} of {result?.recordCount || sampleData.length} records (simplified view)
           </p>
         </div>
       )}
