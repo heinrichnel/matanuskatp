@@ -179,6 +179,26 @@ app.post('/api/inventory/import', async (req, res) => {
       } catch (err) {
         console.error(`Error processing record at index ${index}:`, err);
         console.error('Record data:', record);
+        
+        // Initialize default values if an error occurs
+        id = id || `error_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        location = location || '';
+        tyreId = tyreId || `unknown_${index}`;
+        description = description || '';
+        pattern = pattern || '';
+        quantity = quantity || 0;
+        status = status || '';
+        axlePosition = axlePosition || '';
+        size = size || '';
+        model = model || '';
+        brand = brand || '';
+        vehicleId = vehicleId || '';
+        registrationNumber = registrationNumber || '';
+        price = price || 0;
+        holdingBay = holdingBay || '';
+        expiryDate = expiryDate || '';
+        dateAdded = dateAdded || new Date().toLocaleDateString();
+        mileage = mileage || '0';
       }
       
       return {

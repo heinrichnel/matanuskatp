@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 const RequestPartsPage = lazy(() => import("./pages/workshop/request-parts"));
 const VehicleInspectionPage = lazy(() => import("./pages/workshop/vehicle-inspection"));
 const CreatePurchaseOrderPage = lazy(() => import("./pages/workshop/create-purchase-order"));
+const InspectionHistoryPage = lazy(() => import("./pages/workshop/inspections"));
 
 // Context Providers
 import { AppProvider } from "./context/AppContext";
@@ -79,6 +80,7 @@ import AddNewTyrePage from "./pages/tyres/add-new-tyre";
 // Inventory Management Pages
 import InventoryPage from "./pages/inventory/InventoryPage";
 import ReceivePartsPage from "./pages/inventory/receive-parts";
+import PartsInventoryPage from "./pages/inventory/PartsInventoryPage";
 
 // Workshop Components
 import FleetTable from "./components/Workshop Management/FleetTable";
@@ -316,7 +318,11 @@ const App: React.FC = () => {
                       <Route path="/workshop/qr-generator" element={<QRGenerator />} />
                       
                       {/* Inspections Routes */}
-                      <Route path="/workshop/inspections" element={<InspectionManagement />} />
+                      <Route path="/workshop/inspections" element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          <InspectionHistoryPage />
+                        </Suspense>
+                      } />
                       <Route path="/workshop/inspections/new" element={<InspectionForm onBack={() => {}} />} />
                       <Route path="/workshop/inspections/active" element={<InspectionManagement status="active" />} />
                       <Route path="/workshop/inspections/completed" element={<InspectionManagement status="completed" />} />
@@ -386,6 +392,7 @@ const App: React.FC = () => {
                       <Route path="/inventory" element={<InventoryPage />} />
                       <Route path="/inventory/dashboard" element={<InventoryPage />} />
                       <Route path="/inventory/stock" element={<StockManager />} />
+                      <Route path="/inventory/parts" element={<PartsInventoryPage />} />
                       <Route path="/inventory/reports" element={<GenericPlaceholderPage title="Inventory Reports" />} />
                       <Route path="/inventory/receive-parts" element={<ReceivePartsPage />} />
                       

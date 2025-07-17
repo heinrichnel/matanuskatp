@@ -73,5 +73,12 @@
   "remoteconfig": {
     "template": "remoteconfig.template.json"
   },
-  "extensions": {}
+  "extensions": {},
+  {
+  "functions": {
+    "predeploy": [
+      "node firebaseEnvCheck.js"
+    ]
+  }
+}
 }

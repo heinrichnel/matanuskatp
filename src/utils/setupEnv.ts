@@ -6,6 +6,9 @@
  */
 import { checkEnvVariables, verifyGoogleMapsConfig } from './envChecker';
 
+// Re-export the checkEnvVariables function for use by other modules
+export { checkEnvVariables };
+
 // Define interface for environment status
 interface EnvStatus {
   isValid: boolean;
