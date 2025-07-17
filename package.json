@@ -18,12 +18,19 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "build:debug": "tsc --noEmit --skipLibCheck --declaration false && NODE_DEBUG=module vite build --config vite.config.js",
+    "setup:env": "node setup-env.js",
+    "check:env": "node -e \"require('./src/utils/setupEnv.js').displayEnvironmentStatus()\"",
+    "validate:env": "node validate-env.js",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "integration:audit": "node tools/integration-report.mjs",
     "read-trips": "ts-node --loader ts-node/esm readTrips.ts",
     "install-calc-deps": "npm install mathjs big.js simple-statistics regression-js decimal.js --save && npm install @types/mathjs @types/big.js @types/simple-statistics --save-dev",
-    "sync-routes": "bash scripts/syncRoutes.sh"
+    "sync-routes": "bash scripts/syncRoutes.sh",
+    "validate-env": "node checkEnv.cjs",
+    "vercel:prepare": "node vercel-deploy.js",
+    "vercel:deploy": "vercel --prod",
+    "vercel:preview": "vercel"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -37,6 +44,7 @@
     "@mui/lab": "^7.0.0-beta.14",
     "@mui/material": "^7.2.0",
     "@mui/x-data-grid": "^8.8.0",
+    "@paypal/checkout-server-sdk": "^1.0.3",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-tabs": "^1.1.12",
     "@react-google-maps/api": "^2.20.7",
@@ -79,7 +87,6 @@
     "numeral": "^2.0.6",
     "openai": "^5.8.3",
     "papaparse": "^5.5.3",
-    "paypal-rest-sdk": "^1.8.1",
     "pdf-lib": "^1.17.1",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.0",
@@ -110,6 +117,7 @@
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^4.0.1",
+    "@eslint/js": "^9.31.0",
     "@storybook/addon-a11y": "^9.0.16",
     "@storybook/addon-docs": "^9.0.16",
     "@storybook/addon-onboarding": "^9.0.16",
@@ -162,6 +170,7 @@
     "tailwindcss": "^3.4.17",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
+    "typescript-eslint": "^8.37.0",
     "vercel": "^44.4.1",
     "vite": "^7.0.4",
     "vitest": "^3.2.4"
@@ -177,7 +186,7 @@
   },
   "repository": "git@github.com:heinNell/APppp.git",
   "author": "heinNell <heinnell64@gmail.com>",
-  "additionalScripts": {
-    "validate-env": "node checkEnv.cjs"
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint --fix"
   }
 }

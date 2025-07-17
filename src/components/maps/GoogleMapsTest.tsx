@@ -9,6 +9,13 @@ const GoogleMapsTest: React.FC = () => {
   
   useEffect(() => {
     if (!mapLoaded) {
+      // Check Google Maps configuration first
+      const config = verifyGoogleMapsConfig();
+      if (!config.isValid) {
+        setMapError(config.message);
+        return;
+      }
+      
       loadGoogleMapsScript()
         .then(() => {
           console.log('Google Maps API loaded successfully');
@@ -16,7 +23,9 @@ const GoogleMapsTest: React.FC = () => {
         })
         .catch((error) => {
           console.error('Error loading Google Maps API:', error);
-          setMapError(error.message || 'Failed to load Google Maps');
+          const errorMessage = error.message || 'Failed to load Google Maps';
+          setMapError(errorMessage + 
+            '\n\nPlease verify:\n1. API key is valid\n2. Billing is enabled\n3. Maps JavaScript API is enabled');
         });
     }
   }, [mapLoaded]);
@@ -46,13 +55,16 @@ const GoogleMapsTest: React.FC = () => {
   
   useEffect(() => {
     const check = checkEnvVariables();
-    const mapsConfigOk = verifyGoogleMapsConfig();
-    setEnvCheck({ ...check, mapsConfigOk });
+    const mapsConfig = verifyGoogleMapsConfig();
+    setEnvCheck({ ...check, mapsConfig });
     
     // Log raw values for debugging
     console.log('Raw env values:', {
-      apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-      iframeUrl: import.meta.env.VITE_GOOGLE_MAPS_IFRAME_URL,
+      apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? 
+        `${import.meta.env.VITE_GOOGLE_MAPS_API_KEY.substring(0, 4)}... (${import.meta.env.VITE_GOOGLE_MAPS_API_KEY.length} chars)` : 
+        'not set',
+      serviceUrl: import.meta.env.VITE_MAPS_SERVICE_URL || 'not set',
+      iframeUrl: import.meta.env.VITE_GOOGLE_MAPS_IFRAME_URL || 'not set',
       mode: import.meta.env.MODE
     });
   }, []);
@@ -71,7 +83,8 @@ const GoogleMapsTest: React.FC = () => {
           <div className="p-2 bg-gray-100 rounded text-sm">
             <p>API Key Available: {keyAvailable ? '✅' : '❌'} {keyAvailable && `(length: ${apiKey.length})`}</p>
             <p>iframe URL Available: {iframeUrlAvailable ? '✅' : '❌'} {iframeUrlAvailable && `(length: ${iframeUrl.length})`}</p>
-            <p>Maps Config OK: {envCheck?.mapsConfigOk ? '✅' : '❌'}</p>
+            <p>Maps Config: {envCheck?.mapsConfig?.isValid ? '✅ Valid' : '❌ Invalid'}</p>
+            <p>Config Message: {envCheck?.mapsConfig?.message}</p>
             <p>Environment Mode: {import.meta.env.MODE}</p>
             {mapError && <p className="text-red-500">Error: {mapError}</p>}
             
@@ -115,7 +128,21 @@ const GoogleMapsTest: React.FC = () => {
                 className="border rounded-md"
               >
                 {!mapLoaded && !mapError && <div className="flex h-full justify-center items-center">Loading map...</div>}
-                {mapError && <div className="flex h-full justify-center items-center text-red-500">{mapError}</div>}
+                {mapError && (
+                  <div className="flex flex-col h-full justify-center items-center text-red-500 p-4">
+                    <div className="font-bold mb-2">Map Loading Error:</div>
+                    <div className="text-sm whitespace-pre-wrap text-center">{mapError}</div>
+                    <div className="mt-4 text-xs bg-gray-100 p-2 rounded text-gray-700 w-full">
+                      <p><b>Troubleshooting:</b></p>
+                      <ul className="list-disc pl-4">
+                        <li>Check Google Cloud Console for API key restrictions</li>
+                        <li>Verify Maps JavaScript API is enabled</li>
+                        <li>Confirm billing is set up for the project</li>
+                        <li>Try using the MAPS_SERVICE_URL proxy instead</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             

@@ -55,7 +55,20 @@
     "eventarc": {
       "port": 9299
     },
-    "singleProjectMode": true
+    "singleProjectMode": true,
+    "auth": {
+      "port": 9099
+    },
+    "database": {
+      "port": 900
+    },
+    "dataconnect": {
+      "port": 9399,
+      "dataDir": "dataconnect/.dataconnect/pgliteData"
+    },
+    "tasks": {
+      "port": 9499
+    }
   },
   "remoteconfig": {
     "template": "remoteconfig.template.json"

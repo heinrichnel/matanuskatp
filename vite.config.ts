@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
-// This is a JavaScript version of the same configuration in vite.config.ts
 export default defineConfig({
   plugins: [react()],
   server: {

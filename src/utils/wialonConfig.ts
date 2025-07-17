@@ -4,16 +4,17 @@
  * This file provides centralized access to Wialon API configuration
  * including API URLs, login URLs, and session token management.
  */
+import { getEnvVar } from './envUtils';
 
 // Base API URL for Wialon requests
-export const WIALON_API_URL = import.meta.env.VITE_WIALON_API_URL || 'https://hst-api.wialon.com';
+export const WIALON_API_URL = getEnvVar('VITE_WIALON_API_URL', 'https://hst-api.wialon.com');
 
 // Direct login URL with token for Wialon hosting
-export const WIALON_LOGIN_URL = import.meta.env.VITE_WIALON_LOGIN_URL || 
-  'https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en';
+export const WIALON_LOGIN_URL = getEnvVar('VITE_WIALON_LOGIN_URL',
+  'https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en');
 
 // Session token for API authentication
-export const WIALON_SESSION_TOKEN = import.meta.env.VITE_WIALON_SESSION_TOKEN || '';
+export const WIALON_SESSION_TOKEN = getEnvVar('VITE_WIALON_SESSION_TOKEN', '');
 
 // SDK URL for loading the Wialon JavaScript SDK
 export const WIALON_SDK_URL = 'https://hst-api.wialon.com/wsdk/script/wialon.js';

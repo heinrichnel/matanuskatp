@@ -41,6 +41,7 @@ export function checkEnvVariable(name: string): {
  * Check all important environment variables for the application
  * @returns Object with check results for specific and all variables
  */
+
 export function checkEnvVariables(): {
   variables: Array<{ name: string; exists: boolean; preview: string }>;
   allVariables: string[];
@@ -87,34 +88,73 @@ export function checkEnvVariables(): {
 
 /**
  * Verify Google Maps configuration is valid
- * @returns Boolean indicating if Google Maps environment variables are properly configured
+ * @returns Object with validation status and details about the Google Maps configuration
  */
-export function verifyGoogleMapsConfig(): boolean {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  const iframeUrl = import.meta.env.VITE_GOOGLE_MAPS_IFRAME_URL;
+export function verifyGoogleMapsConfig(): {
+  isValid: boolean;
+  message: string;
+  apiKey: string | null;
+  serviceUrl: string | null;
+} {
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || null;
+  const iframeUrl = import.meta.env.VITE_GOOGLE_MAPS_IFRAME_URL || null;
+  const serviceUrl = import.meta.env.VITE_MAPS_SERVICE_URL || null;
   
   // Check basic existence
-  if (!apiKey || !iframeUrl) {
-    return false;
+  if (!apiKey && !serviceUrl) {
+    return {
+      isValid: false,
+      message: 'Missing both Google Maps API key and Maps service URL',
+      apiKey: null,
+      serviceUrl: null
+    };
   }
   
-  // Check API key length (valid keys are usually >30 characters)
-  if (apiKey.length < 30) {
-    return false;
+  // Check API key validity if it exists
+  if (apiKey) {
+    // Check API key length (valid keys are usually >30 characters)
+    if (apiKey.length < 30 || apiKey.includes(' ')) {
+      return {
+        isValid: false,
+        message: 'Invalid Google Maps API key format',
+        apiKey,
+        serviceUrl
+      };
+    }
   }
   
-  // Check if iframeUrl contains valid Google Maps URL
-  if (!iframeUrl.includes('google.com/maps') && 
-      !iframeUrl.includes('maps.googleapis.com')) {
-    return false;
+  // Check if iframeUrl is valid when present
+  if (iframeUrl) {
+    // Check if iframeUrl contains valid Google Maps URL
+    if (!iframeUrl.includes('google.com/maps') && 
+        !iframeUrl.includes('maps.googleapis.com')) {
+      return {
+        isValid: false,
+        message: 'Invalid Google Maps iframe URL format',
+        apiKey,
+        serviceUrl
+      };
+    }
+    
+    // Check for unresolved template variables
+    if (iframeUrl.includes('${') || iframeUrl.includes('${}')) {
+      return {
+        isValid: false,
+        message: 'Unresolved variables in Google Maps iframe URL',
+        apiKey,
+        serviceUrl
+      };
+    }
   }
   
-  // Check for unresolved template variables
-  if (iframeUrl.includes('${') || iframeUrl.includes('${}')) {
-    return false;
-  }
-  
-  return true;
+  return {
+    isValid: true,
+    message: serviceUrl 
+      ? 'Using Maps service proxy URL with fallback to direct API' 
+      : 'Using direct Google Maps API key',
+    apiKey: apiKey || null,
+    serviceUrl
+  };
 }
 
 /**

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getEnvVar } from "../utils/envUtils";
 
 export interface WialonUnitData {
   id: number;
@@ -6,8 +7,8 @@ export interface WialonUnitData {
   pos?: { x: number; y: number; s: number; t: number };
 }
 
-const WIALON_API_URL = "https://hst-api.wialon.com";
-const TOKEN = import.meta.env.VITE_WIALON_SESSION_TOKEN;
+const WIALON_API_URL = getEnvVar("VITE_WIALON_API_URL", "https://hst-api.wialon.com");
+const TOKEN = getEnvVar('VITE_WIALON_SESSION_TOKEN', '');
 
 export function useWialonUnits(sdkReady: boolean = true) {
   const [units, setUnits] = useState<WialonUnitData[]>([]);

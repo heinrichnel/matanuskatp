@@ -296,6 +296,13 @@ const StockManager: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     
+    // Set up notification to inform user about import progress
+    setNotification({
+      show: true,
+      message: 'Processing import file...',
+      type: 'success'
+    });
+    
     const reader = new FileReader();
     
     reader.onload = async (event) => {
@@ -306,24 +313,94 @@ const StockManager: React.FC = () => {
         if (file.name.endsWith('.csv')) {
           // Handle CSV import
           const text = data as string;
-          const rows = text.split('\n');
-          const headers = rows[0].split(',').map(h => h.trim());
+          
+          // Fix for handling different line break formats
+          const rows = text.split(/\r\n|\n|\r/).filter(row => row.trim());
+          
+          if (rows.length === 0) {
+            throw new Error('CSV file appears to be empty');
+          }
+          
+          // Detect delimiter - comma is most common, but check for semicolon or tab as well
+          let delimiter = ',';
+          const firstRow = rows[0];
+          if (firstRow.includes(';') && !firstRow.includes(',')) {
+            delimiter = ';';
+          } else if (firstRow.includes('\t') && !firstRow.includes(',')) {
+            delimiter = '\t';
+          }
+          
+          const headers = rows[0].split(delimiter).map(h => h.trim().replace(/^"(.*)"$/, '$1'));
+          
+          console.log('CSV Headers:', headers);
           
           // Map CSV rows to StockItem objects
-          parsedData = rows.slice(1).map(row => {
+          parsedData = rows.slice(1).map((row, rowIndex) => {
             if (!row.trim()) return {}; // Skip empty rows
             
-            const values = row.split(',').map(v => v.trim());
+            // Handle quoted values correctly
+            let values: string[] = [];
+            let inQuote = false;
+            let currentValue = '';
+            
+            for (let i = 0; i < row.length; i++) {
+              const char = row[i];
+              
+              if (char === '"' && (i === 0 || row[i-1] !== '\\')) {
+                inQuote = !inQuote;
+              } else if (char === delimiter && !inQuote) {
+                values.push(currentValue.trim().replace(/^"(.*)"$/, '$1'));
+                currentValue = '';
+              } else {
+                currentValue += char;
+              }
+            }
+            
+            // Add the last value
+            values.push(currentValue.trim().replace(/^"(.*)"$/, '$1'));
+            
+            if (values.length !== headers.length) {
+              console.warn(`Row ${rowIndex + 2} has ${values.length} values but expected ${headers.length}`);
+            }
+            
             const item: Partial<StockItem> = {};
             
             headers.forEach((header, index) => {
               if (index < values.length) {
                 const value = values[index];
-                // Convert numeric values
-                if (header === 'Quantity' || header === 'Reorder Level' || header === 'Unit Cost') {
-                  item[header.toLowerCase().replace(' ', '') as keyof StockItem] = parseFloat(value) as any;
-                } else {
-                  item[header.toLowerCase().replace(' ', '') as keyof StockItem] = value as any;
+                
+                // Map header names to the correct property names
+                const fieldMap: Record<string, keyof StockItem> = {
+                  'Name': 'name', 'name': 'name',
+                  'SKU': 'sku', 'sku': 'sku', 'Code': 'sku', 'code': 'sku', 'Item Code': 'sku', 'item code': 'sku',
+                  'Category': 'category', 'category': 'category',
+                  'Quantity': 'quantity', 'quantity': 'quantity', 'Qty': 'quantity', 'qty': 'quantity',
+                  'Reorder Level': 'reorderLevel', 'reorderlevel': 'reorderLevel', 'ReorderLevel': 'reorderLevel',
+                  'Supplier': 'supplier', 'supplier': 'supplier', 'Vendor': 'supplier', 'vendor': 'supplier',
+                  'Location': 'location', 'location': 'location',
+                  'Last Order Date': 'lastOrderDate', 'lastorderdate': 'lastOrderDate',
+                  'Unit Cost': 'unitCost', 'unitcost': 'unitCost', 'Cost': 'unitCost', 'cost': 'unitCost',
+                  'Notes': 'notes', 'notes': 'notes', 'Description': 'notes', 'description': 'notes'
+                };
+                
+                // Find the matching field
+                let fieldName: keyof StockItem | undefined;
+                for (const [key, val] of Object.entries(fieldMap)) {
+                  if (header.toLowerCase() === key.toLowerCase() || 
+                      header.toLowerCase().replace(/[^a-z0-9]/g, '') === key.toLowerCase().replace(/[^a-z0-9]/g, '')) {
+                    fieldName = val;
+                    break;
+                  }
+                }
+                
+                if (fieldName) {
+                  // Convert numeric values
+                  if (fieldName === 'quantity' || fieldName === 'reorderLevel' || fieldName === 'unitCost') {
+                    const numValue = parseFloat(value.replace(/[^0-9.-]/g, ''));
+                    item[fieldName] = isNaN(numValue) ? 0 : numValue as any;
+                  } else {
+                    item[fieldName] = value as any;
+                  }
                 }
               }
             });
@@ -332,41 +409,89 @@ const StockManager: React.FC = () => {
           }).filter(item => Object.keys(item).length > 0);
         } else {
           // Handle Excel import
-          const workbook = XLSX.read(data, { type: 'binary' });
-          const sheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[sheetName];
-          const excelData = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet);
-          
-          // Map Excel rows to StockItem objects
-          parsedData = excelData.map(row => {
-            const item: Partial<StockItem> = {
-              name: String(row['Name'] || row['name'] || ''),
-              sku: String(row['SKU'] || row['sku'] || ''),
-              category: String(row['Category'] || row['category'] || ''),
-              quantity: Number(row['Quantity'] || row['quantity'] || 0),
-              reorderLevel: Number(row['Reorder Level'] || row['reorderLevel'] || 10),
-              supplier: String(row['Supplier'] || row['supplier'] || ''),
-              location: String(row['Location'] || row['location'] || ''),
-              lastOrderDate: row['Last Order Date'] || row['lastOrderDate'] || null,
-              unitCost: Number(row['Unit Cost'] || row['unitCost'] || 0),
-              notes: row['Notes'] || row['notes'] || ''
-            };
-            return item;
-          });
+          try {
+            const workbook = XLSX.read(data, { type: 'binary' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const excelData = XLSX.utils.sheet_to_json<Record<string, any>>(worksheet);
+            
+            console.log('Excel Data:', excelData);
+            
+            // Map Excel rows to StockItem objects
+            parsedData = excelData.map((row, rowIndex) => {
+              // First find the actual field names in the Excel file
+              const rowKeys = Object.keys(row);
+              
+              const item: Partial<StockItem> = {};
+              
+              // Map Excel column headers to StockItem properties
+              const fieldMap: Record<string, keyof StockItem> = {
+                'Name': 'name', 'name': 'name',
+                'SKU': 'sku', 'sku': 'sku', 'Code': 'sku', 'code': 'sku', 'Item Code': 'sku', 'item code': 'sku',
+                'Category': 'category', 'category': 'category',
+                'Quantity': 'quantity', 'quantity': 'quantity', 'Qty': 'quantity', 'qty': 'quantity',
+                'Reorder Level': 'reorderLevel', 'reorderlevel': 'reorderLevel', 'ReorderLevel': 'reorderLevel',
+                'Supplier': 'supplier', 'supplier': 'supplier', 'Vendor': 'supplier', 'vendor': 'supplier',
+                'Location': 'location', 'location': 'location',
+                'Last Order Date': 'lastOrderDate', 'lastorderdate': 'lastOrderDate',
+                'Unit Cost': 'unitCost', 'unitcost': 'unitCost', 'Cost': 'unitCost', 'cost': 'unitCost',
+                'Notes': 'notes', 'notes': 'notes', 'Description': 'notes', 'description': 'notes'
+              };
+              
+              rowKeys.forEach(key => {
+                const value = row[key];
+                
+                // Find the matching field
+                let fieldName: keyof StockItem | undefined;
+                for (const [mapKey, val] of Object.entries(fieldMap)) {
+                  if (key.toLowerCase() === mapKey.toLowerCase() || 
+                      key.toLowerCase().replace(/[^a-z0-9]/g, '') === mapKey.toLowerCase().replace(/[^a-z0-9]/g, '')) {
+                    fieldName = val;
+                    break;
+                  }
+                }
+                
+                if (fieldName) {
+                  if (fieldName === 'quantity' || fieldName === 'reorderLevel' || fieldName === 'unitCost') {
+                    // Excel sometimes returns numbers directly
+                    const numValue = typeof value === 'number' ? value : 
+                      parseFloat(String(value).replace(/[^0-9.-]/g, ''));
+                    item[fieldName] = isNaN(numValue) ? 0 : numValue as any;
+                  } else {
+                    item[fieldName] = String(value || '') as any;
+                  }
+                }
+              });
+              
+              return item;
+            });
+          } catch (excelError) {
+            console.error('Excel parsing error:', excelError);
+            throw new Error('Failed to parse Excel file. Please make sure it is a valid .xlsx or .xls file');
+          }
         }
         
         // Validate the data
         if (parsedData.length === 0) {
-          throw new Error('No valid data found in the file');
+          throw new Error('No valid data found in the file. Please check the file format.');
         }
+        
+        console.log('Parsed data:', parsedData);
         
         // Add the imported items to Firestore
         let added = 0;
         let updated = 0;
         let skipped = 0;
         
+        setNotification({
+          show: true,
+          message: 'Importing items to database...',
+          type: 'success'
+        });
+        
         for (const item of parsedData) {
           if (!item.name || !item.sku) {
+            console.warn('Skipping item without name or SKU:', item);
             skipped++;
             continue; // Skip items without required fields
           }
@@ -393,14 +518,39 @@ const StockManager: React.FC = () => {
           }
         }
         
-        alert(`Import successful: ${added} items added, ${updated} items updated, ${skipped} items skipped.`);
+        // Update local state with new items
+        const newStockItems = [...stockItems];
+        
+        // Refresh stock items data to reflect changes
+        setNotification({
+          show: true,
+          message: `Import successful: ${added} items added, ${updated} items updated, ${skipped} items skipped.`,
+          type: 'success'
+        });
+        
+        // Apply current filters to the updated data
+        applyFilters(newStockItems);
         
         // Reset the input field so the same file can be imported again if needed
         e.target.value = '';
+        
+        // Hide notification after 5 seconds
+        setTimeout(() => {
+          setNotification({ show: false, message: '', type: '' });
+        }, 5000);
       } catch (error) {
         console.error('Error importing file:', error);
-        alert(`Error importing file: ${(error as Error).message || 'Unknown error'}`);
+        setNotification({
+          show: true,
+          message: `Error importing file: ${(error as Error).message || 'Unknown error'}`,
+          type: 'error'
+        });
         e.target.value = '';
+        
+        // Hide notification after 5 seconds
+        setTimeout(() => {
+          setNotification({ show: false, message: '', type: '' });
+        }, 5000);
       }
     };
     

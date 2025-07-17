@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Activity, BarChart3, ChevronDown, ChevronRight, CircleDot, FileText, Users } from 'lucide-react';
+import { Activity, BarChart3, ChevronDown, ChevronRight, CircleDot, FileText, Users, Globe } from 'lucide-react';
 import ConnectionStatusIndicator from '../ui/ConnectionStatusIndicator';
 import SyncIndicator from '../ui/SyncIndicator';
 
@@ -92,7 +92,8 @@ const Sidebar: FC<SidebarProps> = ({
             { id: 'trip-templates', label: 'Trip Templates', route: 'trips/templates' },
             { id: 'trip-reports', label: 'Trip Reports', route: 'trips/reports' },
             { id: 'maps-tracking', label: 'Maps & Tracking', route: 'trips/maps' },
-            { id: 'fleet-location', label: 'Fleet Location Map', route: 'trips/fleet-location' }
+            { id: 'fleet-location', label: 'Fleet Location Map', route: 'trips/fleet-location' },
+            { id: 'wialon-tracking', label: 'Wialon Integration', route: 'wialon' }
           ]
         },
 
@@ -206,10 +207,10 @@ const Sidebar: FC<SidebarProps> = ({
       ]
     },
 
-    // Analytics & Reporting
+    // Analytics & Business Intelligence
     {
       id: 'analytics',
-      label: 'Analytics & Reporting',
+      label: 'Analytics & Business Intelligence',
       items: [
         {
           id: 'fleet-analytics',
@@ -228,6 +229,26 @@ const Sidebar: FC<SidebarProps> = ({
         }
       ]
     },
+
+    // Wialon Integration
+    {
+      id: 'wialon-integration',
+      label: 'Wialon Integration',
+      items: [
+        { 
+          id: 'wialon', 
+          label: 'Wialon Platform', 
+          icon: Globe, 
+          route: 'wialon',
+          children: [
+            { id: 'wialon-dashboard', label: 'Wialon Dashboard', route: 'wialon' },
+            { id: 'wialon-units', label: 'Vehicle Units', route: 'wialon/units' },
+            { id: 'wialon-config', label: 'Configuration', route: 'wialon/config' }
+          ]
+        }
+      ]
+    },
+
     // Workshop Management
     {
       id: 'workshop',
