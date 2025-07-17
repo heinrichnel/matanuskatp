@@ -54,8 +54,21 @@ export const checkMapsServiceAvailability = async (): Promise<boolean> => {
   }
 };
 
+// Verify API key format validity
+export const isValidApiKeyFormat = (apiKey: string | undefined): boolean => {
+  if (!apiKey) return false;
+  // Google API keys are typically 39 characters
+  return apiKey.length >= 30 && !apiKey.includes(' ');
+};
+
 export const loadGoogleMapsScript = async (libraries: string = 'places'): Promise<void> => {
   if (promise) return promise;
+
+  // Validate API key format
+  if (GOOGLE_MAPS_API_KEY && !isValidApiKeyFormat(GOOGLE_MAPS_API_KEY)) {
+    console.error('[Maps Loader] Invalid Google Maps API key format');
+    throw new Error('Invalid Google Maps API key format');
+  }
 
   // Check if we should do a service availability check
   if (!serviceCheckAttempted && MAPS_SERVICE_URL) {
@@ -96,6 +109,11 @@ export const loadGoogleMapsScript = async (libraries: string = 'places'): Promis
     
     script.onerror = (error) => {
       console.error("[Maps Loader] Failed to load Google Maps API script", error);
+      
+      if (error instanceof Event) {
+        console.warn("[Maps Loader] Error details: This is likely due to an invalid API key, network issues, or billing not enabled");
+        console.log("[Maps Loader] Verify your Google Cloud project has Maps JavaScript API enabled and billing configured");
+      }
       
       // If we haven't tried direct API yet and we have an API key, try that as fallback
       if (!useDirectApi && hasFallbackOption && MAPS_SERVICE_URL) {

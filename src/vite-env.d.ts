@@ -20,6 +20,18 @@ interface ImportMetaEnv {
   readonly VITE_MAPS_SERVICE_URL?: string;
   readonly VITE_WIALON_SESSION_TOKEN?: string;
   readonly VITE_WIALON_HOST_AUTOLOGIN_URL?: string;
+  
+  // Netlify specific variables
+  readonly VITE_NETLIFY_PROJECT_NAME?: string;
+  readonly VITE_NETLIFY_OWNER?: string;
+  readonly VITE_NETLIFY_SITE_ID?: string;
+  
+  // Vercel specific variables
+  readonly VERCEL?: string;
+  readonly VERCEL_ENV?: string;
+  readonly VERCEL_URL?: string;
+  readonly VERCEL_REGION?: string;
+  readonly VERCEL_PROJECT_ID?: string;
 
   readonly [key: string]: string | undefined; // Laat custom vars toe
 }

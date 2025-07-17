@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { collection, getDocs, addDoc, doc, updateDoc, getDoc, deleteDoc, query, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { CircleDot, Plus, Search, Filter, Edit, Trash2, FileDown, FileUp, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -37,6 +37,7 @@ const TyreInventoryManager: React.FC = () => {
   const [filteredTyres, setFilteredTyres] = useState<Tyre[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState<Omit<Tyre, 'id'>>(initialFormState);
   const [editingTyreId, setEditingTyreId] = useState<string | null>(null);
@@ -46,6 +47,7 @@ const TyreInventoryManager: React.FC = () => {
   const [sizeFilter, setSizeFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [tyresPerPage] = useState(10);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchTyres = async () => {
@@ -260,6 +262,59 @@ const TyreInventoryManager: React.FC = () => {
     }
   };
 
+  // CSV import
+  const handleImportData = async (file: File) => {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const text = e.target?.result as string;
+      const rows = text.split('\n').slice(1); // Skip header row
+
+      const newTyres: Tyre[] = [];
+      for (const row of rows) {
+        const cols = row.split(',');
+        if (cols.length < 13) continue; // Skip invalid rows
+
+        const tyre: Tyre = {
+          id: `tyre-import-${Date.now()}`,
+          brand: cols[0],
+          model: cols[1],
+          serialNumber: cols[2],
+          size: cols[3],
+          status: cols[4] as Tyre['status'],
+          location: cols[5],
+          vehicleId: cols[6] || undefined,
+          vehicleReg: cols[7] || undefined,
+          position: cols[8] || undefined,
+          purchaseDate: cols[9],
+          purchasePrice: parseFloat(cols[10]),
+          treadDepth: parseFloat(cols[11]),
+          lastInspection: cols[12] || undefined,
+          notes: cols[13] || undefined
+        };
+
+        newTyres.push(tyre);
+      }
+
+      try {
+        setLoading(true);
+        // In a real app, we would batch add to Firestore
+        // For this demo, we'll just add to local state
+        setTyres(prevTyres => [...prevTyres, ...newTyres]);
+        applyFilters([...tyres, ...newTyres], searchTerm, statusFilter, brandFilter, sizeFilter);
+        setError(null);
+      } catch (err) {
+        console.error("Error importing tyres:", err);
+        setError('Failed to import tyres. Please check the file format and try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    reader.readAsText(file);
+  };
+
   // Pagination
   const indexOfLastTyre = currentPage * tyresPerPage;
   const indexOfFirstTyre = indexOfLastTyre - tyresPerPage;
@@ -300,6 +355,111 @@ const TyreInventoryManager: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  // Import data from CSV
+  const handleImportClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const parseCSV = (text: string) => {
+    try {
+      const lines = text.split('\n').filter(line => line.trim() !== '');
+      const headers = lines[0].split(',');
+      
+      const data = lines.slice(1).map(line => {
+        const values = line.split(',');
+        const entry: Record<string, string> = {};
+        
+        headers.forEach((header, index) => {
+          if (index < values.length) {
+            entry[header.trim()] = values[index].trim();
+          }
+        });
+        
+        return entry;
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('Error parsing CSV:', error);
+      setError('Failed to parse CSV file. Please check the format.');
+      return null;
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setError(null);
+    setSuccess(null);
+    
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const text = e.target?.result as string;
+        const parsedData = parseCSV(text);
+        
+        if (!parsedData) return;
+        
+        // Convert parsed data to Tyre objects
+        const newTyres: Omit<Tyre, 'id'>[] = parsedData.map(item => {
+          // Map CSV fields to Tyre object properties
+          // This is a simplified example, adjust mapping according to your CSV structure
+          return {
+            brand: item['Brand'] || '',
+            model: item['Model'] || '',
+            serialNumber: item['Serial Number'] || '',
+            size: item['Size'] || '',
+            status: (item['Status'] || 'new') as Tyre['status'],
+            location: item['Location'] || 'warehouse',
+            vehicleId: item['Vehicle ID'] || undefined,
+            vehicleReg: item['Vehicle Reg'] || undefined,
+            position: item['Position'] || undefined,
+            purchaseDate: item['Purchase Date'] || new Date().toISOString().split('T')[0],
+            purchasePrice: parseFloat(item['Price']) || 0,
+            treadDepth: item['Tread Depth'] ? parseFloat(item['Tread Depth']) : undefined,
+            lastInspection: item['Last Inspection'] || undefined,
+            notes: item['Notes'] || undefined
+          };
+        });
+        
+        // Generate IDs for new tyres and add to state
+        const tyresWithIds: Tyre[] = newTyres.map((tyre, index) => ({
+          ...tyre,
+          id: `imported-${Date.now()}-${index}`
+        }));
+        
+        // For demo, just update local state
+        const updatedTyres = [...tyres, ...tyresWithIds];
+        setTyres(updatedTyres);
+        applyFilters(updatedTyres, searchTerm, statusFilter, brandFilter, sizeFilter);
+        
+        setSuccess(`Successfully imported ${tyresWithIds.length} tyres.`);
+        
+        // In a real app, we would add these to Firestore
+        // for (const tyre of newTyres) {
+        //   await addDoc(collection(db, "tyres"), tyre);
+        // }
+      } catch (err) {
+        console.error("Error importing tyres:", err);
+        setError('Failed to import tyres. Please check the file format.');
+      }
+      
+      // Clear the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    };
+    
+    reader.onerror = () => {
+      setError('Failed to read file. Please try again.');
+    };
+    
+    reader.readAsText(file);
   };
 
   // Get unique brands and sizes for filters
@@ -356,12 +516,39 @@ const TyreInventoryManager: React.FC = () => {
             <FileDown size={18} className="mr-1" />
             Export
           </button>
+          <button
+            onClick={handleImportClick}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
+          >
+            <FileUp size={18} className="mr-1" />
+            Import CSV
+          </button>
+          <input 
+            type="file"
+            accept=".csv"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileUpload}
+          />
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-center">
+          <AlertTriangle className="mr-2" size={18} />
           {error}
+        </div>
+      )}
+      
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 flex items-center">
+          <CheckCircle className="mr-2" size={18} />
+          {success}
+        </div>
+      )}
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+          {success}
         </div>
       )}
 

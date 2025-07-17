@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { getEnvVar } from '../../utils/envUtils';
 
 const MapsView: React.FC = () => {
-  // Use environment variable for Wialon login URL
-  const wialonLoginUrl = import.meta.env.VITE_WIALON_LOGIN_URL || 
-    "https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en";
+  // Use direct Wialon link with token
+  const wialonLoginUrl = "https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en";
   
   const [iframeError, setIframeError] = useState<boolean>(false);
 

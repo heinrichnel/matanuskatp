@@ -39,6 +39,10 @@ import TripManagementPage from "./pages/trips/TripManagementPage";
 import ActiveTripsPage from "./pages/trips/ActiveTripsPage";
 import TripTimelinePage from "./pages/trips/TripTimelinePage";
 import RoutePlanningPage from "./pages/trips/RoutePlanningPage";
+import RouteOptimizationPage from "./pages/trips/RouteOptimizationPage";
+import LoadPlanningPage from "./pages/trips/LoadPlanningPage";
+import TripCalendarPage from "./pages/trips/TripCalendarPage";
+import AddTripPage from "./pages/trips/AddTripPage";
 import FleetLocationMapPage from "./pages/trips/FleetLocationMapPage";
 
 // Invoice Management Pages
@@ -89,7 +93,7 @@ import PartsOrdering from "./components/Workshop Management/PartsOrdering";
 import QRGenerator from "./components/Workshop Management/QRGenerator";
 
 // Feature Components
-import ActiveTrips from "./components/TripManagement/ActiveTrips";
+import ActiveTrips from "./components/TripManagement/ActiveTrips"; 
 import CompletedTrips from "./components/TripManagement/CompletedTrips";
 import FlagsInvestigations from "./components/Flags/FlagsInvestigations";
 import CurrencyFleetReport from "./components/InvoiceManagement/CurrencyFleetReport";
@@ -202,10 +206,12 @@ const App: React.FC = () => {
                       <Route path="/trips/completed" element={<CompletedTrips />} />
                       <Route path="/route-planning" element={<RoutePlanningPage />} />
                       <Route path="/route-planning/:tripId" element={<RoutePlanningPage />} />
-                      <Route path="/trips/optimization" element={<GenericPlaceholderPage title="Route Optimization" />} />
-                      <Route path="/trips/load-planning" element={<GenericPlaceholderPage title="Load Planning" />} />
-                      <Route path="/trips/new" element={<GenericPlaceholderPage title="Add New Trip" />} />
-                      <Route path="/trips/calendar" element={<GenericPlaceholderPage title="Trip Calendar" />} />
+                      <Route path="/trips/route-planning" element={<RoutePlanningPage />} />
+                      <Route path="/trips/route-planning/:tripId" element={<RoutePlanningPage />} />
+                      <Route path="/trips/optimization" element={<RouteOptimizationPage />} />
+                      <Route path="/trips/load-planning" element={<LoadPlanningPage />} />
+                      <Route path="/trips/new" element={<AddTripPage />} />
+                      <Route path="/trips/calendar" element={<TripCalendarPage />} />
                       <Route path="/trips/driver-performance" element={<GenericPlaceholderPage title="Driver Performance" />} />
                       <Route path="/trips/cost-analysis" element={<GenericPlaceholderPage title="Trip Cost Analysis" />} />
                       <Route path="/trips/utilization" element={<GenericPlaceholderPage title="Fleet Utilization" />} />
@@ -390,6 +396,28 @@ const App: React.FC = () => {
                       <Route path="/missed-loads" element={<GenericPlaceholderPage title="Missed Loads Tracker" />} />
                       {/* Map view is now integrated into FleetManagementPage */}
                       <Route path="/map-test" element={<MapTestPage />} />
+                      
+                      {/* Wialon Integration Routes */}
+                      <Route path="/wialon" element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          {React.createElement(lazy(() => import('./pages/wialon/WialonDashboard')))}
+                        </Suspense>
+                      } />
+                      <Route path="/wialon/dashboard" element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          {React.createElement(lazy(() => import('./pages/wialon/WialonDashboard')))}
+                        </Suspense>
+                      } />
+                      <Route path="/wialon/units" element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          {React.createElement(lazy(() => import('./pages/wialon/WialonUnitsPage')))}
+                        </Suspense>
+                      } />
+                      <Route path="/wialon/config" element={
+                        <Suspense fallback={<div>Loading...</div>}>
+                          {React.createElement(lazy(() => import('./pages/wialon/WialonConfigPage')))}
+                        </Suspense>
+                      } />
                       
                       <Route path="/action-log" element={<ActionLog />} />
                       

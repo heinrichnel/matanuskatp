@@ -47,17 +47,43 @@ const SystemInfoPanel: React.FC = () => {
               </span>
             </div>
             <div>
-              <span className="text-sm font-medium text-gray-500">Netlify Project:</span>
+              <span className="text-sm font-medium text-gray-500">Deployment Platform:</span>
               <span className="ml-2">
-                {import.meta.env.VITE_NETLIFY_PROJECT_NAME || 'Not specified'}
+                {import.meta.env.VERCEL ? 'Vercel' : import.meta.env.NETLIFY ? 'Netlify' : 'Other'}
               </span>
             </div>
-            <div>
-              <span className="text-sm font-medium text-gray-500">Netlify Site ID:</span>
-              <span className="ml-2 text-xs font-mono">
-                {import.meta.env.VITE_NETLIFY_SITE_ID || 'Not specified'}
-              </span>
-            </div>
+            {import.meta.env.VERCEL && (
+              <>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Vercel Project ID:</span>
+                  <span className="ml-2 text-xs font-mono">
+                    {import.meta.env.VERCEL_PROJECT_ID || 'Not specified'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Vercel Environment:</span>
+                  <span className="ml-2">
+                    {import.meta.env.VERCEL_ENV || 'Not specified'}
+                  </span>
+                </div>
+              </>
+            )}
+            {import.meta.env.NETLIFY && (
+              <>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Netlify Project:</span>
+                  <span className="ml-2">
+                    {import.meta.env.VITE_NETLIFY_PROJECT_NAME || 'Not specified'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">Netlify Site ID:</span>
+                  <span className="ml-2 text-xs font-mono">
+                    {import.meta.env.VITE_NETLIFY_SITE_ID || 'Not specified'}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

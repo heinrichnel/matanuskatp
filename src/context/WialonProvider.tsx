@@ -1,11 +1,12 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { getEnvVar } from "../utils/envUtils";
 
 export const WialonContext = createContext<any>(null);
 
 export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
   const [loggedIn, setLoggedIn] = useState(false);
   const [session, setSession] = useState<any>(null);
-  const TOKEN = import.meta.env.VITE_WIALON_SESSION_TOKEN;
+  const TOKEN = getEnvVar('VITE_WIALON_SESSION_TOKEN', '');
 
   useEffect(() => {
     if (!window.wialon) return;

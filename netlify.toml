@@ -1,6 +1,6 @@
 [build]
   base = "/"
-  command = "npm run build"
+  command = "npm run validate:env && npm run build"
   publish = "dist"
 
 [build.environment]

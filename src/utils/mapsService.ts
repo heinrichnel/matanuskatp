@@ -64,6 +64,11 @@ export const getFormattedMapsServiceUrl = (): string => {
  */
 export const checkMapsServiceHealth = async (serviceUrl: string): Promise<boolean> => {
   try {
+    if (!serviceUrl) {
+      console.warn('No service URL provided for health check');
+      return false;
+    }
+
     // Try multiple potential endpoints since we don't know exactly how the service is configured
     const endpoints = [
       `${serviceUrl}/health`,
@@ -72,29 +77,36 @@ export const checkMapsServiceHealth = async (serviceUrl: string): Promise<boolea
       `${serviceUrl}`
     ];
     
+    console.log(`[Maps Service] Checking health of service at ${serviceUrl}...`);
+    
+    // Try each endpoint in sequence
     for (const endpoint of endpoints) {
       try {
+        console.log(`[Maps Service] Checking endpoint ${endpoint}...`);
+        
         const response = await fetch(endpoint, {
           method: 'GET',
-          mode: 'no-cors',
+          mode: 'no-cors', // Use no-cors mode to avoid CORS issues
           headers: {
             'Accept': 'application/json, text/plain, */*'
           },
           signal: AbortSignal.timeout(3000) // 3 second timeout
         });
         
-        // If we got here, the request didn't throw an error
+        // In no-cors mode, we won't be able to read the response,
+        // but if we got here without error, it's a good sign
+        console.log(`[Maps Service] Health check succeeded for ${endpoint}`);
         return true;
-      } catch (endpointErr) {
-        // Continue trying other endpoints
-        console.warn(`Health check failed for endpoint ${endpoint}:`, endpointErr);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.warn(`[Maps Service] Health check failed for ${endpoint}:`, errorMessage);
       }
     }
     
-    // If we get here, all endpoints failed
+    console.warn(`[Maps Service] All health check endpoints failed for ${serviceUrl}`);
     return false;
   } catch (err) {
-    console.error('Error checking maps service health:', err);
+    console.error('[Maps Service] Error checking maps service health:', err);
     return false;
   }
 };

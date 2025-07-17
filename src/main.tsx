@@ -3,7 +3,40 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { initializeConnectionMonitoring } from './utils/firebaseConnectionHandler';
 import { TyreStoresProvider } from './context/TyreStoresContext';
+import { initBrowserEnv, getEnvVar } from './utils/envUtils';
 import './index.css';
+
+// Initialize global environment variables for safer access
+// This prevents "import.meta" errors in non-module contexts
+try {
+  // Handle potential import.meta errors by using a try-catch approach
+  const envVars: Record<string, string> = {};
+  
+  // Safely access environment variables 
+  const envKeys = [
+    'VITE_WIALON_SESSION_TOKEN',
+    'VITE_WIALON_LOGIN_URL',
+    'VITE_GOOGLE_MAPS_API_KEY',
+    'VITE_ENV_MODE',
+    'VITE_FIREBASE_API_KEY',
+    'VITE_FIREBASE_AUTH_DOMAIN',
+    'VITE_FIREBASE_PROJECT_ID',
+    'VITE_USE_EMULATOR'
+  ];
+  
+  // Safely access each environment variable
+  envKeys.forEach(key => {
+    try {
+      envVars[key] = getEnvVar(key, '');
+    } catch (e) {
+      console.warn(`Could not access ${key} from import.meta.env`);
+    }
+  });
+  
+  initBrowserEnv(envVars);
+} catch (error) {
+  console.warn('Failed to initialize environment variables globally:', error);
+}
 
 // Initialize Firebase and check emulator status
 const initializeApp = async () => {
@@ -15,8 +48,23 @@ const initializeApp = async () => {
     // Initialize connection monitoring
     await initializeConnectionMonitoring();
     
+    // Validate environment variables
+    const requiredEnvVars = [
+      'VITE_FIREBASE_API_KEY',
+      'VITE_FIREBASE_AUTH_DOMAIN',
+      'VITE_FIREBASE_PROJECT_ID'
+    ];
+    
+    const missingVars = requiredEnvVars.filter(key => !getEnvVar(key, ''));
+    const isValid = missingVars.length === 0;
+    
+    console.log('Environment validation:', 
+      isValid ? '✅ Valid' : '❌ Issues found',
+      missingVars.length > 0 ? `Missing: ${missingVars.join(', ')}` : '');
+    
     // Check emulator status in development
-    if (import.meta.env.DEV) {
+    const isDev = getEnvVar('MODE', '') === 'development' || process.env.NODE_ENV === 'development';
+    if (isDev) {
       const { checkEmulatorsStatus } = await import('./firebaseEmulators');
       const status = await checkEmulatorsStatus();
       
@@ -33,11 +81,17 @@ const initializeApp = async () => {
       console.log('📡 App will continue using production Firebase configuration');
     }
     
+    // Import EnvironmentSetupStatus component
+    const { default: EnvironmentSetupStatus } = await import('./components/ui/EnvironmentSetupStatus');
+    
     // Render the app
     ReactDOM.createRoot(document.getElementById('root')!).render(
       <React.StrictMode>
         <TyreStoresProvider>
-          <App />
+          <React.Fragment>
+            {isDev && <EnvironmentSetupStatus />}
+            <App />
+          </React.Fragment>
         </TyreStoresProvider>
       </React.StrictMode>
     );
