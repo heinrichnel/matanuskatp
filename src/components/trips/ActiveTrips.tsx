@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SupportedCurrency, formatCurrency } from '../../lib/currency';
+// Uncomment when API integration is ready
+// import { fetchTripsFromAPI } from '../../api/tripsApi';
 
 interface Trip {
   id: string;
@@ -21,6 +23,9 @@ interface Trip {
     tolls?: number;
     other?: number;
   };
+  source?: 'internal' | 'webhook' | 'api'; // Indicates where the trip data came from
+  externalId?: string; // For tracking trips from external systems
+  lastUpdated?: string; // Timestamp for last update
 }
 
 interface ActiveTripsProps {
@@ -93,6 +98,9 @@ const initialActiveTrips: Trip[] = [
 
 const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
   const [activeTrips, setActiveTrips] = useState<Trip[]>(initialActiveTrips);
+  const [webhookTrips, setWebhookTrips] = useState<Trip[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
   const [editForm, setEditForm] = useState<{
     cost: number;
@@ -109,7 +117,70 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
     tolls: 0,
     other: 0
   });
+  
+  // Mock function to fetch webhook trips - replace with actual API call
+  const fetchWebhookTrips = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // This is a placeholder - replace with actual API call
+      // Example: const response = await fetch('/api/webhook-trips');
+      // const data = await response.json();
+      
+      // Simulate API response with mock data
+      const mockWebhookData: Trip[] = [
+        {
+          id: 'webhook-1',
+          tripNumber: 'WH-2023-001',
+          origin: 'Miami, FL',
+          destination: 'Orlando, FL',
+          startDate: '2025-07-14T10:00:00',
+          endDate: '2025-07-15T16:00:00',
+          status: 'active',
+          driver: 'Alex Thompson',
+          vehicle: 'Truck WH-123',
+          distance: 235,
+          cost: 0, // Initial cost is 0, needs to be allocated
+          source: 'webhook',
+          externalId: 'ext-12345',
+          lastUpdated: new Date().toISOString()
+        },
+        {
+          id: 'webhook-2',
+          tripNumber: 'WH-2023-002',
+          origin: 'Austin, TX',
+          destination: 'Houston, TX',
+          startDate: '2025-07-16T08:30:00',
+          endDate: '2025-07-17T12:00:00',
+          status: 'active',
+          driver: 'Jamie Rodriguez',
+          vehicle: 'Truck WH-456',
+          distance: 162,
+          cost: 0, // Initial cost is 0, needs to be allocated
+          source: 'webhook',
+          externalId: 'ext-67890',
+          lastUpdated: new Date().toISOString()
+        }
+      ];
+      
+      setWebhookTrips(mockWebhookData);
+    } catch (err) {
+      console.error('Error fetching webhook trips:', err);
+      setError('Failed to load trips from webhook. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Fetch webhook trips when component mounts
+  useEffect(() => {
+    fetchWebhookTrips();
+  }, []);
 
+  // Combine internal and webhook trips
+  const allTrips = [...activeTrips, ...webhookTrips];
+  
   const handleEditClick = (trip: Trip) => {
     setEditingTrip(trip);
     setEditForm({
@@ -150,25 +221,58 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
 
   const handleSave = () => {
     if (!editingTrip) return;
-
-    const updatedTrips = activeTrips.map(trip => {
-      if (trip.id === editingTrip.id) {
-        return {
-          ...trip,
-          cost: editForm.cost,
-          costBreakdown: {
-            fuel: editForm.fuel,
-            maintenance: editForm.maintenance,
-            driver: editForm.driver,
-            tolls: editForm.tolls,
-            other: editForm.other
-          }
-        };
-      }
-      return trip;
-    });
-
-    setActiveTrips(updatedTrips);
+    
+    // Determine if the editing trip is from webhook source
+    const isWebhookTrip = editingTrip.source === 'webhook';
+    
+    if (isWebhookTrip) {
+      // Update webhook trips
+      const updatedWebhookTrips = webhookTrips.map(trip => {
+        if (trip.id === editingTrip.id) {
+          return {
+            ...trip,
+            cost: editForm.cost,
+            costBreakdown: {
+              fuel: editForm.fuel,
+              maintenance: editForm.maintenance,
+              driver: editForm.driver,
+              tolls: editForm.tolls,
+              other: editForm.other
+            },
+            lastUpdated: new Date().toISOString() // Update timestamp
+          };
+        }
+        return trip;
+      });
+      
+      setWebhookTrips(updatedWebhookTrips);
+      
+      // In a real application, you might want to sync this data with the backend
+      // Example: await updateTripInAPI(editingTrip.id, editForm);
+      console.log('Updated webhook trip:', editingTrip.id, editForm);
+    } else {
+      // Update internal trips
+      const updatedTrips = activeTrips.map(trip => {
+        if (trip.id === editingTrip.id) {
+          return {
+            ...trip,
+            cost: editForm.cost,
+            costBreakdown: {
+              fuel: editForm.fuel,
+              maintenance: editForm.maintenance,
+              driver: editForm.driver,
+              tolls: editForm.tolls,
+              other: editForm.other
+            },
+            lastUpdated: new Date().toISOString() // Update timestamp
+          };
+        }
+        return trip;
+      });
+      
+      setActiveTrips(updatedTrips);
+    }
+    
     setEditingTrip(null);
   };
 
@@ -181,9 +285,18 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Active Trips</h1>
-          <p className="text-gray-600">Showing {activeTrips.length} active trips</p>
+          <p className="text-gray-600">
+            Showing {allTrips.length} active trips 
+            ({activeTrips.length} manual, {webhookTrips.length} from webhooks)
+          </p>
         </div>
-        <div>
+        <div className="flex space-x-2">
+          <button 
+            onClick={fetchWebhookTrips}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+          >
+            Refresh Webhook Trips
+          </button>
           <Link
             to="/trips/new"
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
@@ -192,15 +305,37 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           </Link>
         </div>
       </div>
+      
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+      
+      {isLoading && (
+        <div className="text-center py-4">
+          <p>Loading webhook trips...</p>
+        </div>
+      )}
 
       {editingTrip && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6">
-            <h2 className="text-xl font-bold mb-4">Edit Trip Costs: {editingTrip.tripNumber}</h2>
+            <h2 className="text-xl font-bold mb-4">
+              Edit Trip Costs: {editingTrip.tripNumber}
+              {editingTrip.source === 'webhook' && (
+                <span className="ml-2 px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-blue-100 text-blue-800">
+                  Webhook Trip
+                </span>
+              )}
+            </h2>
             <div className="mb-4">
               <p><span className="font-medium">Origin:</span> {editingTrip.origin}</p>
               <p><span className="font-medium">Destination:</span> {editingTrip.destination}</p>
               <p><span className="font-medium">Driver:</span> {editingTrip.driver}</p>
+              {editingTrip.source === 'webhook' && editingTrip.externalId && (
+                <p><span className="font-medium">External ID:</span> {editingTrip.externalId}</p>
+              )}
             </div>
             
             <div className="space-y-4">
@@ -343,10 +478,20 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {activeTrips.map((trip) => (
-                <tr key={trip.id}>
+              {allTrips.map((trip) => (
+                <tr key={trip.id} className={trip.source === 'webhook' ? 'bg-blue-50' : ''}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {trip.tripNumber}
+                    {trip.source === 'webhook' && (
+                      <span className="ml-2 px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-blue-100 text-blue-800">
+                        Webhook
+                      </span>
+                    )}
+                    {trip.externalId && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        Ext ID: {trip.externalId}
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div className="flex flex-col">
@@ -375,13 +520,16 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div>
                       <div className="font-medium">{formatCurrency(trip.cost, displayCurrency)}</div>
-                      {trip.costBreakdown && (
-                        <button 
-                          className="text-xs text-blue-600 hover:underline mt-1"
-                          onClick={() => handleEditClick(trip)}
-                        >
-                          View Breakdown
-                        </button>
+                      <button 
+                        className="text-xs text-blue-600 hover:underline mt-1"
+                        onClick={() => handleEditClick(trip)}
+                      >
+                        {trip.costBreakdown ? 'View Breakdown' : 'Allocate Costs'}
+                      </button>
+                      {trip.lastUpdated && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Updated: {new Date(trip.lastUpdated).toLocaleString()}
+                        </div>
                       )}
                     </div>
                   </td>
