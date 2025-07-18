@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { initializeConnectionMonitoring } from './utils/firebaseConnectionHandler';
 import { TyreStoresProvider } from './context/TyreStoresContext';
+import { TyreProvider } from './context/TyreContext';
 import { initBrowserEnv, getEnvVar } from './utils/envUtils';
 import './index.css';
 
@@ -88,10 +89,12 @@ const initializeApp = async () => {
     ReactDOM.createRoot(document.getElementById('root')!).render(
       <React.StrictMode>
         <TyreStoresProvider>
-          <React.Fragment>
-            {isDev && <EnvironmentSetupStatus />}
-            <App />
-          </React.Fragment>
+          <TyreProvider>
+            <>
+              {isDev && <EnvironmentSetupStatus />}
+              <App />
+            </>
+          </TyreProvider>
         </TyreStoresProvider>
       </React.StrictMode>
     );
@@ -105,7 +108,11 @@ const initializeApp = async () => {
     // Render error state
     ReactDOM.createRoot(document.getElementById('root')!).render(
       <React.StrictMode>
-        <App />
+        <TyreStoresProvider>
+          <TyreProvider>
+            <App />
+          </TyreProvider>
+        </TyreStoresProvider>
       </React.StrictMode>
     );
   }
