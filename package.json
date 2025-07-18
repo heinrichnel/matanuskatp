@@ -9,6 +9,7 @@
     "dev": "concurrently \"vite --host\" \"nodemon index.js\"",
     "dev:enhanced": "concurrently \"vite --host\" \"nodemon server.js\"",
     "frontend": "vite --host",
+    "analyze:unused": "madge --json --silent src > unused.json",
     "frontend:build": "vite build",
     "backend": "nodemon index.js",
     "backend:enhanced": "nodemon server.js",
@@ -180,7 +181,8 @@
     "typescript-eslint": "^8.37.0",
     "vercel": "^44.4.1",
     "vite": "^7.0.4",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "madge": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
