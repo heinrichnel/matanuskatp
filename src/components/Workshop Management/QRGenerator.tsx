@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Input, Select } from '../ui/FormElements';
-import { QrCode, Download, Truck, Wrench, Clipboard, ExternalLink } from 'lucide-react';
+import { QrCode, Download, Truck, Wrench, Clipboard, ExternalLink, List } from 'lucide-react';
 
 const QRGenerator: React.FC = () => {
+  const navigate = useNavigate();
   const [qrType, setQrType] = useState<string>('fleet');
   const [fleetNumber, setFleetNumber] = useState<string>('');
   const [position, setPosition] = useState<string>('');
@@ -28,10 +30,11 @@ const QRGenerator: React.FC = () => {
   // Generate QR code
   const generateQR = () => {
     let value = '';
+    const baseUrl = window.location.origin;
     
     switch(qrType) {
       case 'fleet':
-        value = `FLEET:${fleetNumber}`;
+        value = `${baseUrl}/workshop/driver-inspection?fleet=${fleetNumber}`;
         setDescription(`Fleet Vehicle: ${fleetNumber}`);
         break;
       case 'tyre':
@@ -92,7 +95,25 @@ const QRGenerator: React.FC = () => {
             <QrCode className="w-7 h-7 mr-2 text-blue-500" />
             QR Code Generator
           </h2>
-          <p className="text-gray-600">Generate QR codes for fleet vehicles, tyres, and parts</p>
+          <p className="text-gray-600">Generate QR codes for driver inspections, tyres, and parts</p>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => navigate('/workshop/inspection-history')}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Clipboard className="w-5 h-5" />
+            Inspection History
+          </Button>
+          <Button
+            onClick={() => navigate('/workshop/qr-generator/batch')}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <List className="w-5 h-5" />
+            Batch QR Generator
+          </Button>
         </div>
       </div>
       
@@ -108,8 +129,8 @@ const QRGenerator: React.FC = () => {
                     className={`flex flex-col items-center justify-center p-4 rounded-lg border ${qrType === 'fleet' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white hover:bg-gray-50 border-gray-300'}`}
                     onClick={() => handleTypeChange('fleet')}
                   >
-                    <Truck className="w-6 h-6 mb-2" />
-                    <span>Fleet Vehicle</span>
+                                        <Truck className="w-10 h-10 mb-2" />
+                    <span className="font-medium">Driver Inspection</span>
                   </button>
                   
                   <button
@@ -218,7 +239,7 @@ const QRGenerator: React.FC = () => {
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => window.open(`https://example.com/qr/${encodeURIComponent(qrValue)}`, '_blank')}
+                      onClick={() => window.open(qrValue, '_blank')}
                       icon={<ExternalLink className="w-4 h-4" />}
                     >
                       Share
@@ -246,7 +267,7 @@ const QRGenerator: React.FC = () => {
             <h3 className="font-medium">Fleet Vehicle QR Codes</h3>
             <ul className="list-disc pl-5 space-y-1 text-sm">
               <li>Place on vehicle dashboard</li>
-              <li>Scan for quick access to vehicle history</li>
+              <li>Scan for driver inspection forms</li>
               <li>Use for maintenance check-ins</li>
               <li>Track services and inspections</li>
             </ul>
