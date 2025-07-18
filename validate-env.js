@@ -10,7 +10,7 @@
  * Supports both Netlify and Vercel deployments.
  */
 
-const { checkEnvVariables } = require('./src/utils/setupEnv.js');
+import { checkEnvVariables } from './src/utils/setupEnv.js';
 
 // Console styling
 const styles = {
@@ -108,6 +108,4 @@ function validateVercelEnvironment() {
 }
 
 // Export functions for use in other scripts
-module.exports = {
-  validateVercelEnvironment
-};
+export { validateVercelEnvironment };
