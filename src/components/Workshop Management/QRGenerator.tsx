@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Input, Select } from '../ui/FormElements';
-import { QrCode, Download, Truck, Wrench, Clipboard, ExternalLink, List } from 'lucide-react';
+import { QrCode, Save, Truck, Wrench, Clipboard, ExternalLink, List, Download } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 const QRGenerator: React.FC = () => {
   const navigate = useNavigate();
@@ -34,15 +35,18 @@ const QRGenerator: React.FC = () => {
     
     switch(qrType) {
       case 'fleet':
-        value = `${baseUrl}/workshop/driver-inspection?fleet=${fleetNumber}`;
+        // Enhanced QR code for driver inspections and fault logging
+        value = `${baseUrl}/workshop/driver-inspection?fleet=${fleetNumber}&action=inspect`;
         setDescription(`Fleet Vehicle: ${fleetNumber}`);
         break;
       case 'tyre':
-        value = `TYRE:${fleetNumber}:${position}`;
+        // Include more data for tyre tracking - fleet, position, and inspection endpoint
+        value = `${baseUrl}/workshop/tyre-inspection?fleet=${fleetNumber}&position=${position}`;
         setDescription(`Tyre: ${fleetNumber} - ${position}`);
         break;
       case 'part':
-        value = `PART:${partNumber}`;
+        // Link to part details and maintenance history
+        value = `${baseUrl}/workshop/part-details?partNumber=${partNumber}`;
         setDescription(`Part: ${partNumber}`);
         break;
       default:
@@ -82,9 +86,30 @@ const QRGenerator: React.FC = () => {
     }
   };
   
-  // Mock download function
+  // Download QR code as image
   const downloadQR = () => {
-    alert('In a production environment, this would download a high-resolution QR code image that could be printed and applied to vehicles, tyres, or parts for easy scanning and identification.');
+    // Create a temporary canvas to generate the PNG
+    const canvas = document.createElement('canvas');
+    const qrSvg = document.querySelector('.w-48 svg');
+    if (!qrSvg) return;
+    
+    const svgData = new XMLSerializer().serializeToString(qrSvg);
+    const img = new Image();
+    
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      ctx?.drawImage(img, 0, 0);
+      
+      const pngFile = canvas.toDataURL('image/png');
+      const downloadLink = document.createElement('a');
+      downloadLink.download = `${qrType}-${fleetNumber || partNumber || 'qr'}.png`;
+      downloadLink.href = pngFile;
+      downloadLink.click();
+    };
+    
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
   };
 
   return (
@@ -219,9 +244,8 @@ const QRGenerator: React.FC = () => {
             {qrGenerated ? (
               <div className="flex flex-col items-center text-center">
                 <div className="bg-white p-4 rounded-lg border shadow-sm">
-                  <div className="w-48 h-48 bg-gray-100 flex items-center justify-center border">
-                    {/* This would be a real QR code in production */}
-                    <QrCode className="w-32 h-32 text-gray-800" />
+                  <div className="w-48 h-48 bg-white flex items-center justify-center border">
+                    <QRCodeSVG value={qrValue} size={180} bgColor={"#FFFFFF"} fgColor={"#000000"} level={"M"} />
                   </div>
                 </div>
                 
@@ -267,9 +291,10 @@ const QRGenerator: React.FC = () => {
             <h3 className="font-medium">Fleet Vehicle QR Codes</h3>
             <ul className="list-disc pl-5 space-y-1 text-sm">
               <li>Place on vehicle dashboard</li>
-              <li>Scan for driver inspection forms</li>
-              <li>Use for maintenance check-ins</li>
-              <li>Track services and inspections</li>
+              <li>Scan to report vehicle faults</li>
+              <li>Complete driver inspections</li>
+              <li>Track services and maintenance</li>
+              <li>Access vehicle history</li>
             </ul>
           </div>
           
@@ -280,6 +305,7 @@ const QRGenerator: React.FC = () => {
               <li>Scan during tyre inspections</li>
               <li>Track tyre rotation history</li>
               <li>Monitor tread wear and pressure</li>
+              <li>Log tyre replacements</li>
             </ul>
           </div>
           
@@ -290,14 +316,25 @@ const QRGenerator: React.FC = () => {
               <li>Scan for part specifications</li>
               <li>Track warranty information</li>
               <li>Manage inventory levels</li>
+              <li>Link to maintenance records</li>
             </ul>
           </div>
         </div>
-        <p className="text-blue-700 mt-4">
-          In a production environment, these QR codes would link to specific views in the application, 
-          allowing for seamless tracking and management of assets. The QR data would be stored in Firestore 
-          for validation and tracking purposes.
+        <p className="text-blue-700 mt-4 font-medium">
+          These QR codes link directly to the appropriate inspection forms and fault reporting interfaces. 
+          When scanned, they'll automatically populate the form with the correct vehicle, tyre, or part information. 
+          All inspection data and reported faults are stored in Firestore for historical tracking and maintenance planning.
         </p>
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="border border-blue-300 rounded p-3 bg-blue-100">
+            <h4 className="font-bold text-blue-800">For Drivers:</h4>
+            <p className="text-sm">Scan the QR code on your vehicle to quickly report issues or complete required inspections. No need to manually enter vehicle details.</p>
+          </div>
+          <div className="border border-blue-300 rounded p-3 bg-blue-100">
+            <h4 className="font-bold text-blue-800">For Mechanics:</h4>
+            <p className="text-sm">Scan QR codes to access maintenance history, review reported faults, and update service records for specific vehicles, tyres, or parts.</p>
+          </div>
+        </div>
       </div>
     </div>
   );
