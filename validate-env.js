@@ -1,30 +1,5 @@
-#!/usr/bin/env node
-
-/**
- * Environment Variable Validation Script
- * 
- * This script validates required environment variables are present
- * and properly configured. It's meant to be run during CI/CD or
- * build processes to ensure proper configuration before deployment.
- * 
- * Supports both Netlify and Vercel deployments.
- */
-
-import { checkEnvVariables } from './src/utils/setupEnv.js';
-
-// Console styling
-const styles = {
-  reset: '\x1b[0m',
-  bold: '\x1b[1m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  red: '\x1b[31m',
-  blue: '\x1b[34m',
-  cyan: '\x1b[36m'
-};
-
-// Environment validation
-console.log(`${styles.blue}${styles.bold}Environment Validation${styles.reset}`);
+// Moved to scripts/legacy/validate-env.js. See scripts/legacy/README.md for details.
+throw new Error('This file has been moved to scripts/legacy/validate-env.js. See scripts/legacy/README.md for details.');
 
 // Detect deployment platform
 const isVercel = !!process.env.VERCEL;

@@ -168,6 +168,7 @@
     "jest": "^30.0.4",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.2",
+    "madge": "^5.0.0",
     "nodemon": "^3.1.0",
     "playwright": "^1.54.1",
     "postcss": "^8.5.6",
@@ -181,18 +182,17 @@
     "typescript-eslint": "^8.37.0",
     "vercel": "^44.4.1",
     "vite": "^7.0.4",
-    "vitest": "^3.2.4",
-    "madge": "^5.0.0"
+    "vitest": "^3.2.4"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "license": "MIT",
-"eslintConfig": {
-  "extends": [
-    "plugin:storybook/recommended"
-  ]
-},
+  "eslintConfig": {
+    "extends": [
+      "plugin:storybook/recommended"
+    ]
+  },
   "repository": "git@github.com:heinNell/APppp.git",
   "author": "heinNell <heinnell64@gmail.com>",
   "lint-staged": {
