@@ -1,3 +1,4 @@
+import LoginPage from "./pages/LoginPage";
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
@@ -179,6 +180,7 @@ const App: React.FC = () => {
     return unsubscribe;
   }, []);
 
+  const isAuthenticated = !!localStorage.getItem('user');
   return (
     <ErrorBoundary>
       <AppProvider>
@@ -193,71 +195,23 @@ const App: React.FC = () => {
                 )}
                 <Router>
                   <Routes>
-                    <Route 
+                    <Route path="/login" element={<LoginPage />} />
+                    <Route
                       element={
-                        <Layout 
-                          setEditingTrip={handleSetEditingTrip} 
-                          setShowTripForm={handleShowTripForm}
-                        />
+                        isAuthenticated ? (
+                          <Layout
+                            setEditingTrip={handleSetEditingTrip}
+                            setShowTripForm={handleShowTripForm}
+                          />
+                        ) : (
+                          <Navigate to="/login" replace />
+                        )
                       }
                     >
                       {/* Main Navigation */}
                       <Route path="/" element={<DashboardPage />} />
                       <Route path="/dashboard" element={<DashboardPage />} />
-                      
-                      {/* Trip Management Section */}
-                      <Route path="/trips" element={<TripManagementPage />} />
-                      <Route path="/trips/active" element={<ActiveTripsPage />} />
-                      <Route path="/trips/completed" element={<CompletedTrips />} />
-                      <Route path="/route-planning" element={<RoutePlanningPage />} />
-                      <Route path="/route-planning/:tripId" element={<RoutePlanningPage />} />
-                      <Route path="/trips/route-planning" element={<RoutePlanningPage />} />
-                      <Route path="/trips/route-planning/:tripId" element={<RoutePlanningPage />} />
-                      <Route path="/trips/optimization" element={<RouteOptimizationPage />} />
-                      <Route path="/trips/load-planning" element={<LoadPlanningPage />} />
-                      <Route path="/trips/new" element={<AddTripPage />} />
-                      <Route path="/trips/calendar" element={<TripCalendarPage />} />
-                      <Route path="/trips/driver-performance" element={<GenericPlaceholderPage title="Driver Performance" />} />
-                      <Route path="/trips/cost-analysis" element={<GenericPlaceholderPage title="Trip Cost Analysis" />} />
-                      <Route path="/trips/utilization" element={<GenericPlaceholderPage title="Fleet Utilization" />} />
-                      <Route path="/trips/confirmations" element={<GenericPlaceholderPage title="Delivery Confirmations" />} />
-                      <Route path="/trips/templates" element={<GenericPlaceholderPage title="Trip Templates" />} />
-                      <Route path="/trips/reports" element={<GenericPlaceholderPage title="Trip Reports" />} />
-                      <Route path="/trips/maps" element={<MapsView />} />
-                      <Route path="/trips/fleet-location" element={<FleetLocationMapPage />} />
-                      <Route path="/trips/timeline" element={<TripTimelinePage />} />
-                      <Route path="/trips/flags" element={<FlagsInvestigations />} />
-                      <Route path="/trips/dashboard" element={<TripDashboard />} />
-                      
-                      {/* Redirect legacy routes to new nested routes */}
-                      <Route path="/active-trips" element={<Navigate to="/trips/active" replace />} />
-                      <Route path="/completed-trips" element={<Navigate to="/trips/completed" replace />} />
-                      <Route path="/flags" element={<Navigate to="/trips/flags" replace />} />
-                      
-                      {/* Invoice Management Section */}
-                      <Route path="/invoices" element={<InvoiceManagementPage />} />
-                      <Route path="/invoices/new" element={<InvoiceBuilder />} />
-                      <Route path="/invoices/pending" element={<Suspense fallback={<div>Loading...</div>}><PendingInvoicesPage /></Suspense>} />
-                      <Route path="/invoices/paid" element={<Suspense fallback={<div>Loading...</div>}><PaidInvoicesPage /></Suspense>} />
-                      <Route path="/invoices/overdue" element={<GenericPlaceholderPage title="Overdue Invoices" />} />
-                      <Route path="/invoices/approval" element={<InvoiceApprovalFlow />} />
-                      <Route path="/invoices/reminders" element={<GenericPlaceholderPage title="Payment Reminders" />} />
-                      <Route path="/invoices/credit-notes" element={<GenericPlaceholderPage title="Credit Notes" />} />
-                      <Route path="/invoices/templates" element={<InvoiceTemplatesPage />} />
-                      <Route path="/invoices/payments" element={<GenericPlaceholderPage title="Payment Tracking" />} />
-                      <Route path="/invoices/tax-reports" element={<TaxReportExport />} />
-                      <Route path="/invoices/analytics" element={<GenericPlaceholderPage title="Invoice Analytics" />} />
-                      <Route path="/invoices/load-confirmation" element={<Suspense fallback={<div>Loading...</div>}>
-                        {React.createElement(lazy(() => import('./pages/invoices/LoadConfirmation')))}
-                      </Suspense>} />
-                      
-                      {/* Diesel Management Section */}
-                      <Route path="/diesel" element={<DieselManagementPage />} />
-                      <Route path="/diesel/logs" element={<FuelLogs />} />
-                      <Route path="/diesel/new" element={<AddFuelEntryPage />} />
-                      <Route path="/diesel/fuel-cards" element={<FuelCardManager />} />
-                      <Route path="/diesel/analytics" element={<GenericPlaceholderPage title="Fuel Analytics" />} />
-                      <Route path="/diesel/stations" element={<GenericPlaceholderPage title="Fuel Stations" />} />
+                      {/* ...existing routes... */}
                       <Route path="/diesel/costs" element={<GenericPlaceholderPage title="Cost Analysis" />} />
                       <Route path="/diesel/efficiency" element={<FuelEfficiencyReport />} />
                       <Route path="/diesel/theft-detection" element={<FuelTheftDetection />} />

@@ -387,21 +387,33 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
         </div>
       ) : (
         <div className="space-y-4">
+
           {filteredTrips.map(trip => (
             <Card key={trip.id} className="hover:shadow-md transition-shadow">
+              {/* Action Banner */}
+              <div className="flex flex-wrap items-center justify-between bg-blue-50 border-b border-blue-200 px-4 py-2 rounded-t-lg">
+                <div className="flex items-center gap-2">
+                  <Truck className="w-5 h-5 text-blue-500" />
+                  <span className="font-semibold text-blue-900">Fleet {trip.fleetNumber}</span>
+                  <span className="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Active</span>
+                </div>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={() => onView(trip)}>
+                    View
+                  </Button>
+                  <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => onEdit(trip)}>
+                    Edit
+                  </Button>
+                  <Button size="sm" variant="success" icon={<CheckCircle className="w-4 h-4" />} onClick={() => onCompleteTrip(trip.id)} disabled={!canCompleteTrip(trip) || isLoading[`completeTrip-${trip.id}`]} isLoading={isLoading[`completeTrip-${trip.id}`]} title={!canCompleteTrip(trip) ? 'Cannot complete: Unresolved flags' : 'Mark as completed'}>
+                    Complete
+                  </Button>
+                </div>
+              </div>
               {/* Trip Card Content */}
               <CardContent className="p-4">
                 <div className="flex flex-col space-y-4">
                   {/* Trip Header */}
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-center">
-                      <Truck className="w-5 h-5 text-blue-500 mr-2" />
-                      <h3 className="text-lg font-medium text-gray-900">Fleet {trip.fleetNumber}</h3>
-                    </div>
-                    <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-                      Active
-                    </span>
-                  </div>
+                  {/* ...existing code... */}
 
                   {/* Trip Details */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { firestore } from '../utils/firebaseConnectionHandler';
 
 // Define Vehicle interface
 export interface Vehicle {
@@ -23,7 +23,7 @@ export const useFleetData = () => {
     const fetchVehicles = async () => {
       try {
         setLoading(true);
-        const vehiclesCollection = collection(db, 'vehicles');
+        const vehiclesCollection = collection(firestore, 'vehicles');
         const vehiclesSnapshot = await getDocs(vehiclesCollection);
         const vehiclesList = vehiclesSnapshot.docs.map(doc => ({
           id: doc.id,
