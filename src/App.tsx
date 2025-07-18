@@ -93,6 +93,9 @@ import TyreManagement from "./components/TyreManagement/TyreManagement";
 import WorkshopAnalyticsComp from "./components/Workshop Management/WorkshopAnalytics";
 import PartsOrdering from "./components/Workshop Management/PartsOrdering";
 import QRGenerator from "./components/Workshop Management/QRGenerator";
+import QRCodeBatchGenerator from "./components/Workshop Management/QRCodeBatchGenerator";
+import DriverInspectionForm from "./components/Workshop Management/DriverInspectionForm";
+import InspectionHistory from "./components/Workshop Management/InspectionHistory";
 
 // Feature Components
 import ActiveTrips from "./components/TripManagement/ActiveTrips"; 
@@ -316,6 +319,9 @@ const App: React.FC = () => {
                       <Route path="/workshop" element={<WorkshopPage />} />
                       <Route path="/workshop/fleet-setup" element={<FleetTable />} />
                       <Route path="/workshop/qr-generator" element={<QRGenerator />} />
+                      <Route path="/workshop/qr-generator/batch" element={<QRCodeBatchGenerator />} />
+                      <Route path="/workshop/driver-inspection" element={<DriverInspectionForm />} />
+                      <Route path="/workshop/inspection-history" element={<InspectionHistory />} />
                       
                       {/* Inspections Routes */}
                       <Route path="/workshop/inspections" element={

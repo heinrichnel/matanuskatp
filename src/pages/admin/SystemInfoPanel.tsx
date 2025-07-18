@@ -49,7 +49,7 @@ const SystemInfoPanel: React.FC = () => {
             <div>
               <span className="text-sm font-medium text-gray-500">Deployment Platform:</span>
               <span className="ml-2">
-                {import.meta.env.VERCEL ? 'Vercel' : import.meta.env.NETLIFY ? 'Netlify' : 'Other'}
+                {import.meta.env.VERCEL ? 'Vercel' : 'Other'}
               </span>
             </div>
             {import.meta.env.VERCEL && (
@@ -68,18 +68,19 @@ const SystemInfoPanel: React.FC = () => {
                 </div>
               </>
             )}
-            {import.meta.env.NETLIFY && (
+            {/* Show generic project info when not on Vercel */}
+            {!import.meta.env.VERCEL && (
               <>
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Netlify Project:</span>
+                  <span className="text-sm font-medium text-gray-500">Project Name:</span>
                   <span className="ml-2">
-                    {import.meta.env.VITE_NETLIFY_PROJECT_NAME || 'Not specified'}
+                    {import.meta.env.VITE_PROJECT_NAME || 'Not specified'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-500">Netlify Site ID:</span>
+                  <span className="text-sm font-medium text-gray-500">Project ID:</span>
                   <span className="ml-2 text-xs font-mono">
-                    {import.meta.env.VITE_NETLIFY_SITE_ID || 'Not specified'}
+                    {import.meta.env.VITE_PROJECT_ID || 'Not specified'}
                   </span>
                 </div>
               </>

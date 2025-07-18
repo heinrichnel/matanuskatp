@@ -1,6 +1,14 @@
 {
   "indexes": [
     {
+      "collectionGroup": "inspections",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "fleetNumber", "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "tyres",
       "queryScope": "COLLECTION",
       "fields": [
