@@ -1,6 +1,6 @@
-import LoginPage from "./pages/LoginPage";
+// Import React and routing components
 import React, { useState, useEffect, lazy, Suspense } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Lazy load workshop pages
 const RequestPartsPage = lazy(() => import("./pages/workshop/request-parts"));
@@ -177,10 +177,14 @@ const App: React.FC = () => {
       }
     });
     
+    // Set a default user in localStorage to bypass authentication
+    if (!localStorage.getItem('user')) {
+      localStorage.setItem('user', 'bypass_user@example.com');
+    }
+    
     return unsubscribe;
   }, []);
 
-  const isAuthenticated = !!localStorage.getItem('user');
   return (
     <ErrorBoundary>
       <AppProvider>
@@ -195,17 +199,12 @@ const App: React.FC = () => {
                 )}
                 <Router>
                   <Routes>
-                    <Route path="/login" element={<LoginPage />} />
                     <Route
                       element={
-                        isAuthenticated ? (
-                          <Layout
-                            setEditingTrip={handleSetEditingTrip}
-                            setShowTripForm={handleShowTripForm}
-                          />
-                        ) : (
-                          <Navigate to="/login" replace />
-                        )
+                        <Layout
+                          setEditingTrip={handleSetEditingTrip}
+                          setShowTripForm={handleShowTripForm}
+                        />
                       }
                     >
                       {/* Main Navigation */}
@@ -398,7 +397,7 @@ const App: React.FC = () => {
                       <Route path="/settings" element={<SettingsPage />} />
                       
                       {/* Fallback */}
-                      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                      <Route path="*" element={<Route path="/" element={<DashboardPage />} />} />
                     </Route>
                   </Routes>
                 </Router>
