@@ -39,8 +39,26 @@ try {
   console.warn('Failed to initialize environment variables globally:', error);
 }
 
+// Function to render the application
+const renderApp = (isDev: boolean) => {
+  ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <TyreStoresProvider>
+        <TyreProvider>
+          <>
+            {isDev && <div className="dev-indicator">Development Mode</div>}
+            <App />
+          </>
+        </TyreProvider>
+      </TyreStoresProvider>
+    </React.StrictMode>
+  );
+};
+
 // Initialize Firebase and check emulator status
 const initializeApp = async () => {
+  let isDev = getEnvVar('MODE', '') === 'development' || process.env.NODE_ENV === 'development';
+  
   try {
     // Import Firebase after ensuring proper initialization
     await import('./firebase');
@@ -64,7 +82,6 @@ const initializeApp = async () => {
       missingVars.length > 0 ? `Missing: ${missingVars.join(', ')}` : '');
     
     // Check emulator status in development
-    const isDev = getEnvVar('MODE', '') === 'development' || process.env.NODE_ENV === 'development';
     if (isDev) {
       const { checkEmulatorsStatus } = await import('./firebaseEmulators');
       const status = await checkEmulatorsStatus();
@@ -74,7 +91,6 @@ const initializeApp = async () => {
       } else {
         console.log('⚠️ Firebase emulators status:', status);
         console.log('💡 Run "firebase emulators:start --only firestore,storage" to use emulators');
-      console.log('💡 Run "firebase emulators:start --only firestore,storage" to use local emulators');
         console.log('   - Port 8081 (Firestore) is not in use');
         console.log('   - Port 9198 (Storage) is not in use');
         console.log('   - Firewall settings allow local connections');
@@ -82,22 +98,8 @@ const initializeApp = async () => {
       console.log('📡 App will continue using production Firebase configuration');
     }
     
-    // Import EnvironmentSetupStatus component
-    const { default: EnvironmentSetupStatus } = await import('./components/ui/EnvironmentSetupStatus');
-    
-    // Render the app
-    ReactDOM.createRoot(document.getElementById('root')!).render(
-      <React.StrictMode>
-        <TyreStoresProvider>
-          <TyreProvider>
-            <>
-              {isDev && <EnvironmentSetupStatus />}
-              <App />
-            </>
-          </TyreProvider>
-        </TyreStoresProvider>
-      </React.StrictMode>
-    );
+    // Render the application
+    renderApp(isDev);
     
   } catch (error) {
     console.error('❌ Failed to initialize application:', error);
@@ -105,16 +107,8 @@ const initializeApp = async () => {
     // Show user-friendly error message
     console.error('🔧 Application initialization failed, but attempting to continue...');
     
-    // Render error state
-    ReactDOM.createRoot(document.getElementById('root')!).render(
-      <React.StrictMode>
-        <TyreStoresProvider>
-          <TyreProvider>
-            <App />
-          </TyreProvider>
-        </TyreStoresProvider>
-      </React.StrictMode>
-    );
+    // Render error state in case of initialization failure
+    renderApp(isDev);
   }
 };
 

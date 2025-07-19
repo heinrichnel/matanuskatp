@@ -302,7 +302,7 @@ const Sidebar: FC<SidebarProps> = ({
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r shadow flex flex-col z-30">
       <div className="flex items-center justify-center px-6 py-4 border-b bg-yellow-100">
-        <img src={require('../../assets/matanuska-logo.png')} alt="Matanuska Logo" className="h-10 object-contain" style={{ filter: 'brightness(0.9) saturate(0.8)' }} />
+        <h1 className="font-bold text-black text-lg">MATANUSKA TRANSPORT</h1>
       </div>
       <nav className="flex-1 overflow-y-auto py-2 max-h-[calc(100vh-160px)]">
         {navCategories.map((category) => (
