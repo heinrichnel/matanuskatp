@@ -1,12 +1,12 @@
 // Import React and routing components
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Lazy load workshop pages
-const RequestPartsPage = lazy(() => import("./pages/workshop/request-parts"));
-const VehicleInspectionPage = lazy(() => import("./pages/workshop/vehicle-inspection"));
-const CreatePurchaseOrderPage = lazy(() => import("./pages/workshop/create-purchase-order"));
-const InspectionHistoryPage = lazy(() => import("./pages/workshop/inspections"));
+import RequestPartsPage from "./pages/workshop/request-parts";
+import VehicleInspectionPage from "./pages/workshop/vehicle-inspection";
+import CreatePurchaseOrderPage from "./pages/workshop/create-purchase-order";
+import InspectionHistoryPage from "./pages/workshop/inspections";
 
 // Context Providers
 import { AppProvider } from "./context/AppContext";
@@ -83,6 +83,10 @@ import InventoryPage from "./pages/inventory/InventoryPage";
 import ReceivePartsPage from "./pages/inventory/receive-parts";
 import PartsInventoryPage from "./pages/inventory/PartsInventoryPage";
 
+// Wialon Pages
+import WialonDashboard from './pages/wialon/WialonDashboard';
+import WialonUnitsPage from './pages/wialon/WialonUnitsPage';
+import WialonConfigPage from './pages/wialon/WialonConfigPage';
 // Workshop Components
 import FleetTable from "./components/Workshop Management/FleetTable";
 import JobCardManagement from "./components/Workshop Management/JobCardManagement";
@@ -145,9 +149,9 @@ import PurchaseOrderTracker from "./components/Inventory Management/PurchaseOrde
 import VendorScorecard from "./components/Inventory Management/VendorScorecard";
 import IndirectCostBreakdown from "./components/Inventory Management/IndirectCostBreakdown";
 
-// Lazy-loaded components for invoice pages
-const PendingInvoicesPage = lazy(() => import("./pages/invoices/PendingInvoices"));
-const PaidInvoicesPage = lazy(() => import("./pages/invoices/PaidInvoices"));
+// Invoice Pages
+import PendingInvoicesPage from "./pages/invoices/PendingInvoices";
+import PaidInvoicesPage from "./pages/invoices/PaidInvoices";
 
 // Main App component with Router implementation
 const App: React.FC = () => {
@@ -210,6 +214,41 @@ const App: React.FC = () => {
                       {/* Main Navigation */}
                       <Route path="/" element={<DashboardPage />} />
                       <Route path="/dashboard" element={<DashboardPage />} />
+                      {/* Trip Management Section */}
+                      <Route path="/trips" element={<TripManagementPage />} />
+                      <Route path="/trips/active" element={<ActiveTripsPage />} />
+                      <Route path="/trips/timeline" element={<TripTimelinePage />} />
+                      <Route path="/trips/planning" element={<RoutePlanningPage />} />
+                      <Route path="/trips/optimization" element={<RouteOptimizationPage />} />
+                      <Route path="/trips/load-planning" element={<LoadPlanningPage />} />
+                      <Route path="/trips/calendar" element={<TripCalendarPage />} />
+                      <Route path="/trips/add" element={<AddTripPage />} />
+                      <Route path="/trips/map" element={<FleetLocationMapPage />} />
+                      <Route path="/trips/active-dashboard" element={<ActiveTrips />} />
+                      <Route path="/trips/completed-dashboard" element={<CompletedTrips />} />
+                      <Route path="/trips/flags" element={<FlagsInvestigations />} />
+                      <Route path="/trips/dashboard" element={<TripDashboard />} />
+
+                      {/* Invoice Management Section */}
+                      <Route path="/invoices" element={<InvoiceManagementPage />} />
+                      <Route path="/invoices/templates" element={<InvoiceTemplatesPage />} />
+                      <Route path="/invoices/dashboard" element={<InvoiceDashboard />} />
+                      <Route path="/invoices/builder" element={<InvoiceBuilder />} />
+                      <Route path="/invoices/approval" element={<InvoiceApprovalFlow />} />
+                      <Route path="/invoices/tax-export" element={<TaxReportExport />} />
+                      <Route path="/invoices/pending" element={<PendingInvoicesPage />} />
+                      <Route path="/invoices/paid" element={<PaidInvoicesPage />} />
+
+                      {/* Diesel Management Section */}
+                      <Route path="/diesel" element={<DieselManagementPage />} />
+                      <Route path="/diesel/add-fuel" element={<AddFuelEntryPage />} />
+                      <Route path="/diesel/dashboard" element={<DieselDashboardComponent />} />
+                      <Route path="/diesel/logs" element={<FuelLogs />} />
+                      <Route path="/diesel/card-manager" element={<FuelCardManager />} />
+                      <Route path="/diesel/theft-detection" element={<FuelTheftDetection />} />
+                      <Route path="/diesel/carbon-footprint" element={<CarbonFootprintCalc />} />
+                      <Route path="/diesel/driver-behavior" element={<DriverFuelBehavior />} />
+
                       {/* ...existing routes... */}
                       <Route path="/diesel/costs" element={<GenericPlaceholderPage title="Cost Analysis" />} />
                       <Route path="/diesel/efficiency" element={<FuelEfficiencyReport />} />
@@ -242,6 +281,7 @@ const App: React.FC = () => {
                       <Route path="/drivers/rewards" element={<GenericPlaceholderPage title="Driver Rewards" />} />
                       <Route path="/drivers/behavior" element={<DriverBehaviorEvents />} />
                       <Route path="/drivers/safety-scores" element={<GenericPlaceholderPage title="Safety Scores" />} />
+                      <Route path="/drivers/dashboard" element={<DriverDashboard />} />
                       
                       {/* Compliance & Safety Section */}
                       <Route path="/compliance" element={<ComplianceManagementPage />} />
@@ -255,6 +295,7 @@ const App: React.FC = () => {
                       <Route path="/compliance/audits" element={<GenericPlaceholderPage title="Audit Management" />} />
                       <Route path="/compliance/violations" element={<GenericPlaceholderPage title="Violation Tracking" />} />
                       <Route path="/compliance/insurance" element={<GenericPlaceholderPage title="Insurance Management" />} />
+                      <Route path="/compliance/dashboard" element={<ComplianceDashboard />} />
                       
                       {/* Fleet Analytics Section */}
                       <Route path="/analytics" element={<FleetAnalyticsPage />} />
@@ -267,6 +308,7 @@ const App: React.FC = () => {
                       <Route path="/analytics/custom-reports/new" element={<GenericPlaceholderPage title="Create Custom Report" />} />
                       <Route path="/analytics/insights" element={<GenericPlaceholderPage title="Analytics Insights" />} />
                       <Route path="/analytics/vehicle-performance" element={<GenericPlaceholderPage title="Vehicle Performance" />} />
+                      <Route path="/analytics/dashboard" element={<AnalyticsDashboard />} />
                       
                       {/* Workshop Section */}
                       <Route path="/workshop" element={<WorkshopPage />} />
@@ -277,11 +319,7 @@ const App: React.FC = () => {
                       <Route path="/workshop/inspection-history" element={<InspectionHistory />} />
                       
                       {/* Inspections Routes */}
-                      <Route path="/workshop/inspections" element={
-                        <Suspense fallback={<div>Loading...</div>}>
-                          <InspectionHistoryPage />
-                        </Suspense>
-                      } />
+                      <Route path="/workshop/inspections" element={<InspectionHistoryPage />} />
                       <Route path="/workshop/inspections/new" element={<InspectionForm onBack={() => {}} />} />
                       <Route path="/workshop/inspections/active" element={<InspectionManagement status="active" />} />
                       <Route path="/workshop/inspections/completed" element={<InspectionManagement status="completed" />} />
@@ -312,21 +350,9 @@ const App: React.FC = () => {
                       {/* Inventory Management Routes */}
                       <Route path="/workshop/stock-alerts" element={<GenericPlaceholderPage title="Stock Alerts" />} />
                       <Route path="/workshop/parts-ordering" element={<PartsOrdering />} />
-                      <Route path="/workshop/request-parts" element={
-                        <Suspense fallback={<div>Loading parts request form...</div>}>
-                          <RequestPartsPage />
-                        </Suspense>
-                      } />
-                      <Route path="/workshop/vehicle-inspection" element={
-                        <Suspense fallback={<div>Loading inspection form...</div>}>
-                          <VehicleInspectionPage />
-                        </Suspense>
-                      } />
-                      <Route path="/workshop/create-purchase-order" element={
-                        <Suspense fallback={<div>Loading purchase order form...</div>}>
-                          <CreatePurchaseOrderPage />
-                        </Suspense>
-                      } />
+                      <Route path="/workshop/request-parts" element={<RequestPartsPage />} />
+                      <Route path="/workshop/vehicle-inspection" element={<VehicleInspectionPage />} />
+                      <Route path="/workshop/create-purchase-order" element={<CreatePurchaseOrderPage />} />
                       <Route path="/workshop/work-orders" element={<GenericPlaceholderPage title="Work Orders" />} />
                       <Route path="/workshop/purchase-orders" element={<PurchaseOrderTracker />} />
                       <Route path="/workshop/vendors" element={<VendorScorecard />} />
@@ -362,28 +388,13 @@ const App: React.FC = () => {
                       <Route path="/missed-loads" element={<GenericPlaceholderPage title="Missed Loads Tracker" />} />
                       {/* Map view is now integrated into FleetManagementPage */}
                       <Route path="/map-test" element={<MapTestPage />} />
+                      <Route path="/maps" element={<MapsView />} />
                       
                       {/* Wialon Integration Routes */}
-                      <Route path="/wialon" element={
-                        <Suspense fallback={<div>Loading...</div>}>
-                          {React.createElement(lazy(() => import('./pages/wialon/WialonDashboard')))}
-                        </Suspense>
-                      } />
-                      <Route path="/wialon/dashboard" element={
-                        <Suspense fallback={<div>Loading...</div>}>
-                          {React.createElement(lazy(() => import('./pages/wialon/WialonDashboard')))}
-                        </Suspense>
-                      } />
-                      <Route path="/wialon/units" element={
-                        <Suspense fallback={<div>Loading...</div>}>
-                          {React.createElement(lazy(() => import('./pages/wialon/WialonUnitsPage')))}
-                        </Suspense>
-                      } />
-                      <Route path="/wialon/config" element={
-                        <Suspense fallback={<div>Loading...</div>}>
-                          {React.createElement(lazy(() => import('./pages/wialon/WialonConfigPage')))}
-                        </Suspense>
-                      } />
+                      <Route path="/wialon" element={<WialonDashboard />} />
+                      <Route path="/wialon/dashboard" element={<WialonDashboard />} />
+                      <Route path="/wialon/units" element={<WialonUnitsPage />} />
+                      <Route path="/wialon/config" element={<WialonConfigPage />} />
                       
                       <Route path="/action-log" element={<ActionLog />} />
                       
@@ -397,7 +408,7 @@ const App: React.FC = () => {
                       <Route path="/settings" element={<SettingsPage />} />
                       
                       {/* Fallback */}
-                      <Route path="*" element={<Route path="/" element={<DashboardPage />} />} />
+                      <Route path="*" element={<DashboardPage />} />
                     </Route>
                   </Routes>
                 </Router>

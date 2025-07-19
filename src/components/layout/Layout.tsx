@@ -63,7 +63,7 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
         currentView={currentView}
         onNavigate={handleNavigate}
       />
-      <main className="ml-64 p-6 pt-8 w-full max-w-7xl mx-auto">
+      <main className="ml-64 p-6 pt-8 w-full mx-auto">
         <div className="flex justify-between items-center mb-4">
           {/* The title should be rendered by the page component instead of here */}
           <div></div>
