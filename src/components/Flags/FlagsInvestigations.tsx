@@ -1,10 +1,3 @@
-/*
- KILO CODE RATIONALE // FILE: src/components/flags/FlagsInvestigations.tsx
- --------------------------------------------------------------------------------
- // WHAT: Memoized expensive data derivations and replaced jarring `alert()` calls with a more robust and user-friendly feedback mechanism state. Hardened the `handleResolveFlag` function to prevent state-based race conditions.
- // WHY:  The original component re-calculated `flaggedCosts`, `filteredCosts`, and `statusCounts` on every single render, leading to poor performance with large datasets. Using `useMemo` ensures these calculations only run when their dependencies change. The `alert()` calls were disruptive; a state-based feedback message provides a cleaner UX. The logic to complete a trip was vulnerable to a race condition; the new implementation checks the number of remaining flags *after* the update to ensure a trip is only completed when all flags are truly resolved.
- // PREVENTION: `useMemo` prevents future performance regressions. The state-based feedback system provides a template for non-blocking notifications. The hardened resolution logic prevents trips from being marked 'complete' based on stale client-side data.
- */
 import React, { useState, useMemo } from 'react';
 import { Trip, FlaggedCost, CostEntry } from '../../types';
 import { useAppContext } from '../../context/AppContext';
