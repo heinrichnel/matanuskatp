@@ -199,15 +199,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/heinNell/APppp.git"
+    "url": "git+ssh://git@github.com/heinrichnel/matanuskatp.git"
   },
-  "author": "heinNell <heinnell64@gmail.com>",
+  "author": "heinrichnel <jou@email.com>",
   "lint-staged": {
     "*.{ts,tsx}": "eslint --fix"
   },
   "bugs": {
-    "url": "https://github.com/heinNell/APppp/issues"
+    "url": "https://github.com/heinrichnel/matanuskatp/issues"
   },
-  "homepage": "https://github.com/heinNell/APppp#readme",
+  "homepage": "https://github.com/heinrichnel/matanuskatp#readme",
   "keywords": []
 }
