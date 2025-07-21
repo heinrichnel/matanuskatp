@@ -15,7 +15,7 @@
     "backend:enhanced": "nodemon server.js",
     "start": "node index.js",
     "serve": "node server.js",
-    "build": "tsc --noEmit --skipLibCheck --declaration false && vite build --config vite.config.js",
+    "build": "vite build --config vite.config.ts",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "build:debug": "tsc --noEmit --skipLibCheck --declaration false && NODE_DEBUG=module vite build --config vite.config.js",
