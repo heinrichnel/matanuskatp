@@ -129,14 +129,14 @@ const Sidebar: FC<SidebarProps> = ({
           children: [
             { id: 'diesel-dashboard', label: 'Diesel Dashboard', route: 'diesel' },
             { id: 'fuel-logs', label: 'Fuel Logs', route: 'diesel/logs' },
-            { id: 'add-fuel-entry', label: 'Add Fuel Entry', route: 'diesel/new' },
-            { id: 'fuel-card-management', label: 'Fuel Card Management', route: 'diesel/fuel-cards' },
-            { id: 'fuel-analytics', label: 'Fuel Analytics', route: 'diesel/analytics' },
+            { id: 'add-fuel-entry', label: 'Add Fuel Entry', route: 'diesel/add-fuel' },
+            { id: 'fuel-card-management', label: 'Fuel Card Management', route: 'diesel/card-manager' },
+            { id: 'fuel-analytics', label: 'Fuel Analytics', route: 'diesel/dashboard' },
             { id: 'fuel-stations', label: 'Fuel Stations', route: 'diesel/stations' },
             { id: 'cost-analysis', label: 'Cost Analysis', route: 'diesel/costs' },
             { id: 'efficiency-reports', label: 'Efficiency Reports', route: 'diesel/efficiency' },
             { id: 'fuel-theft-detection', label: 'Fuel Theft Detection', route: 'diesel/theft-detection' },
-            { id: 'carbon-footprint', label: 'Carbon Footprint', route: 'diesel/carbon-tracking' },
+            { id: 'carbon-footprint', label: 'Carbon Footprint', route: 'diesel/carbon-footprint' },
             { id: 'budget-planning', label: 'Budget Planning', route: 'diesel/budget' },
             { id: 'driver-fuel-behavior', label: 'Driver Fuel Behavior', route: 'diesel/driver-behavior' }
           ]
@@ -153,7 +153,7 @@ const Sidebar: FC<SidebarProps> = ({
             { id: 'add-new-customer', label: 'Add New Customer', route: 'clients/new' },
             { id: 'active-customers', label: 'Active Customers', route: 'clients/active' },
             { id: 'customer-reports', label: 'Customer Reports', route: 'clients/reports' },
-            { id: 'customer-retention', label: 'Customer Retention', route: 'customers/retention' },
+            { id: 'customer-retention', label: 'Customer Retention', route: 'clients/retention' },
             { id: 'client-relationships', label: 'Client Relationships', route: 'clients/relationships' },
           ]
         }
@@ -314,10 +314,14 @@ const Sidebar: FC<SidebarProps> = ({
             )}
             <ul className="space-y-1">
               {category.items.map(({ id, label, icon: Icon, route, children }) => {
+                // Format route for comparison (remove leading slash if present)
+                const normalizedRoute = route ? (route.startsWith('/') ? route.substring(1) : route) : '';
+                const normalizedCurrentView = currentView.startsWith('/') ? currentView.substring(1) : currentView;
+                
                 // Determine if a parent item or a child item is active
                 const isActive = children
-                  ? currentView.startsWith(route) // For parent, check if any child route starts with parent route
-                  : currentView === route; // For child, exact match
+                  ? normalizedCurrentView === normalizedRoute || normalizedCurrentView.startsWith(`${normalizedRoute}/`) // For parent, check if current view equals parent or starts with parent path
+                  : normalizedCurrentView === normalizedRoute; // For child, exact match
 
                 if (children) {
                   return (
@@ -329,7 +333,13 @@ const Sidebar: FC<SidebarProps> = ({
                       >
                         <div
                           className="flex items-center gap-3 flex-grow text-left cursor-pointer"
-                          onClick={(e) => toggleExpand(id, e)} // Only toggle expansion for parent items
+                          onClick={(e) => {
+                            toggleExpand(id, e); // Toggle expansion for parent items
+                            // Also navigate to the parent route when clicking on the parent item
+                            if (route) {
+                              onNavigate(route);
+                            }
+                          }}
                         >
                           {Icon && <Icon className="w-5 h-5" />}
                           <span>{label}</span>
@@ -355,7 +365,12 @@ const Sidebar: FC<SidebarProps> = ({
                             <li key={child.id}>
                               <button
                                 className={`w-full flex items-center gap-3 px-12 py-2 rounded-lg transition-colors text-left ${
-                                  currentView === child.route ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                                  (currentView === child.route || 
+                                   currentView === '/' + child.route || 
+                                   (currentView.startsWith(child.route + '/') || 
+                                    currentView.startsWith('/' + child.route + '/')))
+                                    ? 'bg-blue-50 text-blue-600 font-medium' 
+                                    : 'text-gray-700 hover:bg-gray-50'
                                 }`}
                                 onClick={() => onNavigate(child.route)}
                               >

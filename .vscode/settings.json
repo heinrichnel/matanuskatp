@@ -36,7 +36,7 @@
   "github.copilot.selectedCompletionModel": "",
   "snyk.folderConfigs": [
     {
-      "folderPath": "/workspaces/APppp",
+      "folderPath": "workspaces/matanuskatp",
       "baseBranch": "main",
       "localBranches": ["main"]
     }
@@ -159,5 +159,17 @@
   "workbench.editor.enablePreviewFromQuickOpen": true,
   "workbench.editor.sharedViewState": true,
   "workbench.editor.scrollToSwitchTabs": true,
-  "workbench.editor.wrapTabs": true
+  "workbench.editor.wrapTabs": true,
+  "editor.find.autoFindInSelection": "always",
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
+  "editor.minimap.autohide": true,
+  "window.autoDetectColorScheme": true,
+  "debug.allowBreakpointsEverywhere": true,
+  "debug.confirmOnExit": "always",
+  "debug.console.closeOnEnd": true,
+  "testing.alwaysRevealTestOnStateChange": true,
+  "testing.coverageToolbarEnabled": true,
+  "chat.edits2.enabled": true,
+  "files.defaultLanguage": "typescript"
 }

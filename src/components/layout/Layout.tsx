@@ -16,6 +16,7 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
   const [searchParams] = useSearchParams();
   
   // State for outlet context
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   
   // Use the props for editingTrip and showTripForm
@@ -29,14 +30,21 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
 
   // Get current path from location to determine active menu item
   const currentView = (() => {
-    const path = location.pathname.split('/')[1] || 'dashboard';
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    if (pathSegments.length === 0) return 'dashboard';
+    
+    // If we have a subpath, include it to properly highlight nested menu items
+    if (pathSegments.length > 1) {
+      return pathSegments.join('/');
+    }
+    
     // Special handling for workshop with tabs
-    if (path === 'workshop') {
+    if (pathSegments[0] === 'workshop') {
       const tab = searchParams.get('tab');
       if (tab) return `workshop-${tab}`;
-      return 'workshop';
     }
-    return path;
+    
+    return pathSegments[0];
   })();
 
   // Navigate to a new route
@@ -46,7 +54,10 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
       const [path, query] = view.split('?');
       navigate(`/${path}?${query}`);
     } else {
-      navigate(`/${view}`);
+      // Always ensure path starts with a slash for consistent routing
+      const formattedPath = view.startsWith('/') ? view : `/${view}`;
+      navigate(formattedPath);
+      console.log(`Navigating to: ${formattedPath}`);
     }
   };
 

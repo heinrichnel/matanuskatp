@@ -1,6 +1,16 @@
-module.exports = {
+export default {
   root: true,
   parser: "@typescript-eslint/parser",
+  parserOptions: {
+    // Use our eslint-specific tsconfig
+    tsconfigRootDir: process.cwd(),
+    project: './tsconfig.eslint.json',
+    ecmaVersion: 2022,
+    sourceType: "module",
+    ecmaFeatures: {
+      jsx: true
+    }
+  },
   plugins: [
     "@typescript-eslint",
     "react",
