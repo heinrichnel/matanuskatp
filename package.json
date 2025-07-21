@@ -197,9 +197,17 @@
       "plugin:storybook/recommended"
     ]
   },
-  "repository": "git@github.com:heinNell/APppp.git",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/heinNell/APppp.git"
+  },
   "author": "heinNell <heinnell64@gmail.com>",
   "lint-staged": {
     "*.{ts,tsx}": "eslint --fix"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/heinNell/APppp/issues"
+  },
+  "homepage": "https://github.com/heinNell/APppp#readme",
+  "keywords": []
 }
