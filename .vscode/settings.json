@@ -7,9 +7,9 @@
     "git log",
     "git diff",
     "git show",
-    "giit push",
+    "git push",
     "git add",
-    "nmp run build",
+    "npm run build",
     "git",
     "dev",
     "bash"
@@ -46,7 +46,6 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "workbench.editor.defaultBinaryEditor": "default",
   "workbench.editor.preferHistoryBasedLanguageDetection": true,
-  "notebook.defaultFormatter": "kodu-ai.claude-dev-experimental",
   "github.copilot.nextEditSuggestions.enabled": true,
   "window.density.editorTabHeight": "compact",
   "workbench.editor.autoLockGroups": {
@@ -137,12 +136,9 @@
   "errorLens.scrollbarHackEnabled": true,
   "errorLens.fontStyleItalic": true,
   "errorLens.messageBackgroundMode": "message",
-  "workbench.colorCustomizations": {
-    "editorInfo.foreground": "#0080ff6a"
-  },
   "editor.fontFamily": "Fira Code",
   "editor.fontLigatures": true,
-  "workbench.colorTheme": "One Dark Pro",
+  "workbench.colorTheme": "Default Dark+",
   "githubPullRequests.pullBranch": "never",
   "editor.inlineSuggest.showToolbar": "always",
   "typescript.updateImportsOnFileMove.enabled": "always",
@@ -151,9 +147,7 @@
   "cloudcode.active-kubeconfig": "Kube",
   "workbench.editor.empty.hint": "hidden",
   "terminal.integrated.env.linux": {},
-  "settingsSync.ignoredExtensions": [
-    "redhat.java"
-  ],
+  "settingsSync.ignoredExtensions": ["redhat.java"],
   "window.menuBarVisibility": "classic",
   "editor.inlineSuggest.suppressSuggestions": true,
   "javascript.updateImportsOnFileMove.enabled": "always",

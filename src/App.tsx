@@ -12,29 +12,29 @@ import { DriverBehaviorProvider } from "./context/DriverBehaviorContext";
 
 // Error Boundary and Layout
 import ErrorBoundary from "./components/ErrorBoundary";
-import FirestoreConnectionError from "./components/FirestoreConnectionError";
-import Layout from "./components/Layout";
-import TripFormModal from "./components/TripFormModal";
+import FirestoreConnectionError from "./components/ui/FirestoreConnectionError";
+import Layout from "./components/layout/Layout";
+import TripFormModal from "./components/TripManagement/TripFormModal";
 
 // Main pages (import all real ones)
 import DashboardPage from "./pages/DashboardPage";
-import TripManagementPage from "./pages/TripManagementPage";
+import TripManagementPage from "./pages/trips/TripManagementPage";
 import ActiveTripsPage from "./pages/trips/ActiveTripsPage";
-import TripTimelinePage from "./pages/TripTimelinePage";
-import RoutePlanningPage from "./pages/RoutePlanningPage";
-import RouteOptimizationPage from "./pages/RouteOptimizationPage";
-import LoadPlanningPage from "./pages/LoadPlanningPage";
-import TripCalendarPage from "./pages/TripCalendarPage";
-import AddTripPage from "./pages/AddTripPage";
-import FleetLocationMapPage from "./pages/FleetLocationMapPage";
-import ActiveTrips from "./pages/trips/ActiveTrips";
+import TripTimelinePage from "./pages/trips/TripTimelinePage";
+import RoutePlanningPage from "./pages/trips/RoutePlanningPage";
+import RouteOptimizationPage from "./pages/trips/RouteOptimizationPage";
+import LoadPlanningPage from "./pages/trips/LoadPlanningPage";
+import TripCalendarPage from "./pages/trips/TripCalendarPage";
+import AddTripPage from "./pages/trips/AddTripPage";
+import FleetLocationMapPage from "./pages/trips/FleetLocationMapPage";
+import ActiveTrips from "./components/TripManagement/ActiveTrips";
 import CompletedTrips from "./pages/trips/CompletedTrips";
 import FlagsInvestigations from "./pages/trips/FlagsInvestigations";
 import TripDashboard from "./pages/trips/TripDashboard";
 
 import InvoiceManagementPage from "./pages/invoices/InvoiceManagementPage";
-import InvoiceTemplatesPage from "./pages/invoices/InvoiceTemplatesPage";
-import InvoiceDashboard from "./pages/invoices/InvoiceDashboard";
+import InvoiceTemplatesPage from "./pages/invoices/InvoiceTemplates";
+import InvoiceDashboard from "./pages/invoices/Dashboard";
 import InvoiceBuilder from "./pages/invoices/InvoiceBuilder";
 import InvoiceApprovalFlow from "./pages/invoices/InvoiceApprovalFlow";
 import TaxReportExport from "./pages/invoices/TaxReportExport";
@@ -99,12 +99,12 @@ import PartsInventoryPage from "./pages/inventory/PartsInventoryPage";
 import ReceivePartsPage from "./pages/inventory/receive-parts";
 
 // Wialon
-import WialonDashboard from './pages/wialon/WialonDashboard';
-import WialonUnitsPage from './pages/wialon/WialonUnitsPage';
-import WialonConfigPage from './pages/wialon/WialonConfigPage';
+import WialonDashboard from "./pages/wialon/WialonDashboard";
+import WialonUnitsPage from "./pages/wialon/WialonUnitsPage";
+import WialonConfigPage from "./pages/wialon/WialonConfigPage";
 
 // Misc
-import ActionLog from "./components/ActionLog";
+import ActionLog from "./components/ComplianceSafety/ActionLog";
 import CurrencyFleetReport from "./components/reports/CurrencyFleetReport";
 import InvoiceAgingDashboard from "./components/reports/InvoiceAgingDashboard";
 import CustomerRetentionDashboard from "./components/reports/CustomerRetentionDashboard";
@@ -122,9 +122,13 @@ const PartsOrderingPage = () => <GenericPlaceholderPage title="Parts Ordering" /
 const IndirectCostBreakdown = () => <GenericPlaceholderPage title="Indirect Cost Breakdown" />;
 const WorkshopAnalyticsComp = () => <GenericPlaceholderPage title="Workshop Analytics" />;
 const WorkshopReportsPage = () => <GenericPlaceholderPage title="Workshop Reports" />;
-const WorkshopCostReportsPage = () => <GenericPlaceholderPage title="Workshop Cost Analysis Reports" />;
+const WorkshopCostReportsPage = () => (
+  <GenericPlaceholderPage title="Workshop Cost Analysis Reports" />
+);
 const InventoryReportsPage = () => <GenericPlaceholderPage title="Inventory Reports" />;
-const TyrePerformanceDashboard = () => <GenericPlaceholderPage title="Tyre Performance Dashboard" />;
+const TyrePerformanceDashboard = () => (
+  <GenericPlaceholderPage title="Tyre Performance Dashboard" />
+);
 const TyreStoresPage = () => <GenericPlaceholderPage title="Tyre Stores" />;
 const TyreFleetMap = () => <GenericPlaceholderPage title="Tyre Fleet Map" />;
 const TyreHistoryPage = () => <GenericPlaceholderPage title="Tyre History" />;
@@ -154,11 +158,14 @@ const App: React.FC = () => {
                 )}
                 <Router>
                   <Routes>
-                    <Route element={<Layout />}>
+                    <Route
+                      element={
+                        <Layout setShowTripForm={setShowTripForm} setEditingTrip={setEditingTrip} />
+                      }
+                    >
                       {/* ==== Main Navigation ==== */}
                       <Route path="/" element={<DashboardPage />} />
                       <Route path="/dashboard" element={<DashboardPage />} />
-
                       {/* ==== TRIPS ==== */}
                       <Route path="/trips" element={<TripManagementPage />} />
                       <Route path="/trips/active" element={<ActiveTripsPage />} />
@@ -173,7 +180,6 @@ const App: React.FC = () => {
                       <Route path="/trips/completed-dashboard" element={<CompletedTrips />} />
                       <Route path="/trips/flags" element={<FlagsInvestigations />} />
                       <Route path="/trips/dashboard" element={<TripDashboard />} />
-
                       {/* ==== INVOICES ==== */}
                       <Route path="/invoices" element={<InvoiceManagementPage />} />
                       <Route path="/invoices/templates" element={<InvoiceTemplatesPage />} />
@@ -183,7 +189,6 @@ const App: React.FC = () => {
                       <Route path="/invoices/tax-export" element={<TaxReportExport />} />
                       <Route path="/invoices/pending" element={<PendingInvoicesPage />} />
                       <Route path="/invoices/paid" element={<PaidInvoicesPage />} />
-
                       {/* ==== DIESEL ==== */}
                       <Route path="/diesel" element={<DieselManagementPage />} />
                       <Route path="/diesel/add-fuel" element={<AddFuelEntryPage />} />
@@ -194,8 +199,10 @@ const App: React.FC = () => {
                       <Route path="/diesel/carbon-footprint" element={<CarbonFootprintCalc />} />
                       <Route path="/diesel/driver-behavior" element={<DriverFuelBehavior />} />
                       <Route path="/diesel/efficiency" element={<FuelEfficiencyReport />} />
-                      <Route path="/diesel/budget" element={<GenericPlaceholderPage title="Budget Planning" />} />
-
+                      <Route
+                        path="/diesel/budget"
+                        element={<GenericPlaceholderPage title="Budget Planning" />}
+                      />
                       {/* ==== CLIENTS ==== */}
                       <Route path="/clients" element={<ClientManagementPage />} />
                       <Route path="/clients/new" element={<AddNewCustomer />} />
@@ -204,93 +211,181 @@ const App: React.FC = () => {
                       <Route path="/customers/retention" element={<RetentionMetrics />} />
                       <Route path="/clients/relationships" element={<ClientNetworkMap />} />
                       <Route path="/clients/network" element={<ClientNetworkMap />} />
-
                       {/* ==== DRIVERS ==== */}
                       <Route path="/drivers" element={<DriverManagementPage />} />
                       <Route path="/drivers/new" element={<AddNewDriver />} />
                       <Route path="/drivers/profiles" element={<DriverProfiles />} />
-                      <Route path="/drivers/profiles/:id" element={<GenericPlaceholderPage title="Driver Details" />} />
-                      <Route path="/drivers/profiles/:id/edit" element={<GenericPlaceholderPage title="Edit Driver" />} />
-                      <Route path="/drivers/licenses" element={<GenericPlaceholderPage title="License Management" />} />
-                      <Route path="/drivers/training" element={<GenericPlaceholderPage title="Training Records" />} />
-                      <Route path="/drivers/performance" element={<GenericPlaceholderPage title="Performance Analytics" />} />
-                      <Route path="/drivers/scheduling" element={<GenericPlaceholderPage title="Driver Scheduling" />} />
-                      <Route path="/drivers/hours" element={<GenericPlaceholderPage title="Hours of Service" />} />
-                      <Route path="/drivers/violations" element={<GenericPlaceholderPage title="Driver Violations" />} />
-                      <Route path="/drivers/rewards" element={<GenericPlaceholderPage title="Driver Rewards" />} />
+                      <Route
+                        path="/drivers/profiles/:id"
+                        element={<GenericPlaceholderPage title="Driver Details" />}
+                      />
+                      <Route
+                        path="/drivers/profiles/:id/edit"
+                        element={<GenericPlaceholderPage title="Edit Driver" />}
+                      />
+                      <Route
+                        path="/drivers/licenses"
+                        element={<GenericPlaceholderPage title="License Management" />}
+                      />
+                      <Route
+                        path="/drivers/training"
+                        element={<GenericPlaceholderPage title="Training Records" />}
+                      />
+                      <Route
+                        path="/drivers/performance"
+                        element={<GenericPlaceholderPage title="Performance Analytics" />}
+                      />
+                      <Route
+                        path="/drivers/scheduling"
+                        element={<GenericPlaceholderPage title="Driver Scheduling" />}
+                      />
+                      <Route
+                        path="/drivers/hours"
+                        element={<GenericPlaceholderPage title="Hours of Service" />}
+                      />
+                      <Route
+                        path="/drivers/violations"
+                        element={<GenericPlaceholderPage title="Driver Violations" />}
+                      />
+                      <Route
+                        path="/drivers/rewards"
+                        element={<GenericPlaceholderPage title="Driver Rewards" />}
+                      />
                       <Route path="/drivers/behavior" element={<DriverBehaviorEvents />} />
-                      <Route path="/drivers/safety-scores" element={<GenericPlaceholderPage title="Safety Scores" />} />
+                      <Route
+                        path="/drivers/safety-scores"
+                        element={<GenericPlaceholderPage title="Safety Scores" />}
+                      />
                       <Route path="/drivers/dashboard" element={<DriverDashboard />} />
-
                       {/* ==== COMPLIANCE ==== */}
                       <Route path="/compliance" element={<ComplianceManagementPage />} />
-                      <Route path="/compliance/audits" element={<GenericPlaceholderPage title="Audit Management" />} />
-                      <Route path="/compliance/violations" element={<GenericPlaceholderPage title="Violation Tracking" />} />
-                      <Route path="/compliance/insurance" element={<GenericPlaceholderPage title="Insurance Management" />} />
+                      <Route
+                        path="/compliance/audits"
+                        element={<GenericPlaceholderPage title="Audit Management" />}
+                      />
+                      <Route
+                        path="/compliance/violations"
+                        element={<GenericPlaceholderPage title="Violation Tracking" />}
+                      />
+                      <Route
+                        path="/compliance/insurance"
+                        element={<GenericPlaceholderPage title="Insurance Management" />}
+                      />
                       <Route path="/compliance/dashboard" element={<ComplianceDashboard />} />
-
                       {/* ==== ANALYTICS ==== */}
                       <Route path="/analytics" element={<FleetAnalyticsPage />} />
-                      <Route path="/analytics/custom-reports/new" element={<GenericPlaceholderPage title="Create Custom Report" />} />
-                      <Route path="/analytics/insights" element={<GenericPlaceholderPage title="Analytics Insights" />} />
-                      <Route path="/analytics/vehicle-performance" element={<GenericPlaceholderPage title="Vehicle Performance" />} />
+                      <Route
+                        path="/analytics/custom-reports/new"
+                        element={<GenericPlaceholderPage title="Create Custom Report" />}
+                      />
+                      <Route
+                        path="/analytics/insights"
+                        element={<GenericPlaceholderPage title="Analytics Insights" />}
+                      />
+                      <Route
+                        path="/analytics/vehicle-performance"
+                        element={<GenericPlaceholderPage title="Vehicle Performance" />}
+                      />
                       <Route path="/analytics/dashboard" element={<AnalyticsDashboard />} />
-
                       {/* ==== WORKSHOP ==== */}
                       <Route path="/workshop" element={<WorkshopPage />} />
                       <Route path="/workshop/fleet-setup" element={<FleetTable />} />
                       <Route path="/workshop/qr-generator" element={<QRGenerator />} />
-                      <Route path="/workshop/qr-generator/batch" element={<QRCodeBatchGenerator />} />
-                      <Route path="/workshop/driver-inspection" element={<DriverInspectionForm />} />
+                      <Route
+                        path="/workshop/qr-generator/batch"
+                        element={<QRCodeBatchGenerator />}
+                      />
+                      <Route
+                        path="/workshop/driver-inspection"
+                        element={<DriverInspectionForm />}
+                      />
                       <Route path="/workshop/inspection-history" element={<InspectionHistory />} />
-
                       {/* Inspections */}
                       <Route path="/workshop/inspections" element={<InspectionHistoryPage />} />
-                      <Route path="/workshop/inspections/new" element={<InspectionForm onBack={() => {}} />} />
-                      <Route path="/workshop/inspections/active" element={<InspectionManagement status="active" />} />
-                      <Route path="/workshop/inspections/completed" element={<InspectionManagement status="completed" />} />
-                      <Route path="/workshop/inspections/templates" element={<InspectionTemplatesPage />} />
-
+                      <Route
+                        path="/workshop/inspections/new"
+                        element={<InspectionForm onBack={() => {}} />}
+                      />
+                      <Route
+                        path="/workshop/inspections/active"
+                        element={<InspectionManagement status="active" />}
+                      />
+                      <Route
+                        path="/workshop/inspections/completed"
+                        element={<InspectionManagement status="completed" />}
+                      />
+                      <Route
+                        path="/workshop/inspections/templates"
+                        element={<InspectionTemplatesPage />}
+                      />
                       {/* Job Cards */}
                       <Route path="/workshop/job-cards" element={<JobCardManagement />} />
                       <Route path="/workshop/job-cards/kanban" element={<JobCardKanbanBoard />} />
-                      <Route path="/workshop/job-cards/open" element={<JobCardManagement activeTab="open" />} />
-                      <Route path="/workshop/job-cards/completed" element={<JobCardManagement activeTab="completed" />} />
-                      <Route path="/workshop/job-cards/templates" element={<JobCardTemplatesPage />} />
-
+                      <Route
+                        path="/workshop/job-cards/open"
+                        element={<JobCardManagement activeTab="open" />}
+                      />
+                      <Route
+                        path="/workshop/job-cards/completed"
+                        element={<JobCardManagement activeTab="completed" />}
+                      />
+                      <Route
+                        path="/workshop/job-cards/templates"
+                        element={<JobCardTemplatesPage />}
+                      />
                       {/* Faults */}
                       <Route path="/workshop/faults" element={<FaultTracking />} />
-                      <Route path="/workshop/faults/new" element={<GenericPlaceholderPage title="Report New Fault" />} />
-                      <Route path="/workshop/faults/critical" element={<GenericPlaceholderPage title="Critical Faults" />} />
-
+                      <Route
+                        path="/workshop/faults/new"
+                        element={<GenericPlaceholderPage title="Report New Fault" />}
+                      />
+                      <Route
+                        path="/workshop/faults/critical"
+                        element={<GenericPlaceholderPage title="Critical Faults" />}
+                      />
                       {/* Tyre Management */}
                       <Route path="/workshop/tyres" element={<TyreManagement />} />
-                      <Route path="/workshop/tyres/inventory" element={<TyreManagement activeTab="inventory" />} />
+                      <Route
+                        path="/workshop/tyres/inventory"
+                        element={<TyreManagement activeTab="inventory" />}
+                      />
                       <Route path="/workshop/tyres/stores" element={<TyreStoresPage />} />
                       <Route path="/workshop/tyres/fleet" element={<TyreFleetMap />} />
                       <Route path="/workshop/tyres/history" element={<TyreHistoryPage />} />
-                      <Route path="/workshop/tyres/performance" element={<TyrePerformanceDashboard />} />
+                      <Route
+                        path="/workshop/tyres/performance"
+                        element={<TyrePerformanceDashboard />}
+                      />
                       <Route path="/workshop/tyres/add" element={<TyreAddPage />} />
                       <Route path="/workshop/tyres/management" element={<TyreManagementPage />} />
-
                       {/* Inventory Management */}
                       <Route path="/workshop/stock-alerts" element={<StockAlertsPage />} />
                       <Route path="/workshop/parts-ordering" element={<PartsOrderingPage />} />
-                      <Route path="/workshop/request-parts" element={<GenericPlaceholderPage title="Request Parts" />} />
-                      <Route path="/workshop/vehicle-inspection" element={<GenericPlaceholderPage title="Vehicle Inspection" />} />
-                      <Route path="/workshop/create-purchase-order" element={<GenericPlaceholderPage title="Create Purchase Order" />} />
-                      <Route path="/workshop/work-orders" element={<GenericPlaceholderPage title="Work Orders" />} />
+                      <Route
+                        path="/workshop/request-parts"
+                        element={<GenericPlaceholderPage title="Request Parts" />}
+                      />
+                      <Route
+                        path="/workshop/vehicle-inspection"
+                        element={<GenericPlaceholderPage title="Vehicle Inspection" />}
+                      />
+                      <Route
+                        path="/workshop/create-purchase-order"
+                        element={<GenericPlaceholderPage title="Create Purchase Order" />}
+                      />
+                      <Route
+                        path="/workshop/work-orders"
+                        element={<GenericPlaceholderPage title="Work Orders" />}
+                      />
                       <Route path="/workshop/purchase-orders" element={<PurchaseOrderTracker />} />
                       <Route path="/workshop/vendors" element={<VendorScorecard />} />
                       <Route path="/workshop/inventory" element={<InventoryDashboard />} />
                       <Route path="/workshop/stock" element={<StockManager />} />
                       <Route path="/workshop/indirect-costs" element={<IndirectCostBreakdown />} />
-
                       {/* Analytics & Reports */}
                       <Route path="/workshop/analytics" element={<WorkshopAnalyticsComp />} />
                       <Route path="/workshop/reports" element={<WorkshopReportsPage />} />
                       <Route path="/workshop/reports/costs" element={<WorkshopCostReportsPage />} />
-
                       {/* ==== TYRES ==== */}
                       <Route path="/tyres" element={<TyreManagementPage />} />
                       <Route path="/tyres/dashboard" element={<TyreManagementPage />} />
@@ -298,15 +393,12 @@ const App: React.FC = () => {
                       <Route path="/tyres/inventory" element={<TyreInventory />} />
                       <Route path="/tyres/reports" element={<TyreReports />} />
                       <Route path="/tyres/add-new" element={<AddNewTyrePage />} />
-
                       {/* ==== INVENTORY ==== */}
                       <Route path="/inventory" element={<InventoryPage />} />
                       <Route path="/inventory/dashboard" element={<InventoryPage />} />
                       <Route path="/inventory/stock" element={<StockManager />} />
                       <Route path="/inventory/parts" element={<PartsInventoryPage />} />
-
-// App.tsx (volledig, einde klaar)
-...
+                      // App.tsx (volledig, einde klaar) ...
                       {/* === FALLBACK === */}
                       <Route path="*" element={<DashboardPage />} />
                     </Route>
