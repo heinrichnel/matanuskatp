@@ -123,16 +123,6 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [connectionError, setConnectionError] = useState<Error | null>(null);
-  <Button
-    variant="outline"
-    size="md"
-    icon={<RefreshCcw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />}
-    onClick={onClick || (() => {})}
-    isLoading={isRefreshing}
-    disabled={isRefreshing}
-  >
-    Refresh
-  </Button>
   const openImportModal = () => setIsImportModalOpen(true);
   const closeImportModal = () => setIsImportModalOpen(false);
   {/* Debug information (only in development mode) */ }
@@ -235,6 +225,16 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
           <Button
             variant="outline"
             size="md"
+            icon={<RefreshCcw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />}
+            onClick={handleRefreshData}
+            isLoading={isRefreshing}
+            disabled={isRefreshing}
+          >
+            Refresh
+          </Button>
+          <Button
+            variant="outline"
+            size="md"
             icon={<Download className="w-5 h-5" />}
             onClick={() => {
               // Create CSV export
@@ -277,7 +277,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
             variant="outline"
             size="md"
             icon={<Upload className="w-5 h-5" />}
-            onClick={onClick || (() => {})}
+            onClick={openImportModal}
           >
             Import Trips
           </Button>
@@ -352,7 +352,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
             />
           </div>
           <div className="mt-4 flex justify-end">
-            <Button size="sm" variant="outline" onClick={onClick || (() => {})}>
+            <Button size="sm" variant="outline" onClick={clearFilters}>
               Clear Filters
             </Button>
           </div>
@@ -374,7 +374,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={onClick || (() => {})}
+                onClick={handleRefreshData}
                 icon={<RefreshCcw className="w-4 h-4 mr-2" />}
               >
                 Refresh Data
