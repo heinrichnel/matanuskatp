@@ -9,8 +9,52 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import glob from 'glob';
-import chalk from 'chalk';
+
+// Use built-in glob pattern matching for Node.js
+const globSync = (pattern, options) => {
+  const matches = [];
+  const root = options.cwd || process.cwd();
+  
+  function traverseDir(dir, relativePath = '') {
+    const files = fs.readdirSync(dir);
+    
+    for (const file of files) {
+      const fullPath = path.join(dir, file);
+      const relPath = path.join(relativePath, file);
+      const stats = fs.statSync(fullPath);
+      
+      if (stats.isDirectory()) {
+        traverseDir(fullPath, relPath);
+      } else if (minimatch(relPath, pattern)) {
+        matches.push(path.join(options.cwd || '', relPath));
+      }
+    }
+  }
+  
+  traverseDir(root);
+  return matches;
+};
+
+// Simple minimatch implementation for our specific needs
+function minimatch(filePath, pattern) {
+  // Convert glob pattern to regex
+  const regexPattern = pattern
+    .replace(/\./g, '\\.')
+    .replace(/\*\*/g, '.*')
+    .replace(/\*/g, '[^/]*')
+    .replace(/\?/g, '.');
+  
+  const regex = new RegExp(`^${regexPattern}$`);
+  return regex.test(filePath);
+}
+
+// Simple chalk alternative
+const chalk = {
+  green: (text) => `\x1b[32m${text}\x1b[0m`,
+  red: (text) => `\x1b[31m${text}\x1b[0m`,
+  yellow: (text) => `\x1b[33m${text}\x1b[0m`,
+  blue: (text) => `\x1b[34m${text}\x1b[0m`,
+};
 
 // Get directory name in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -40,11 +84,18 @@ const results = {
  * Analyze a component file for button connections
  */
 function analyzeFile(filePath) {
-  const content = fs.readFileSync(filePath, 'utf8');
-  const componentName = path.basename(filePath, path.extname(filePath));
-  const relativePath = path.relative(__dirname, filePath);
-  
-  console.log(chalk.blue(`Checking ${componentName} for button connections...`));
+  try {
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      console.log(chalk.red(`File not found: ${filePath}`));
+      return;
+    }
+    
+    const content = fs.readFileSync(filePath, 'utf8');
+    const componentName = path.basename(filePath, path.extname(filePath));
+    const relativePath = path.relative(__dirname, filePath);
+    
+    console.log(chalk.blue(`Checking ${componentName} for button connections...`));
   
   // Check for edit buttons
   const editButtonRegex = /<[^>]*(?:edit|update)(?:\s|\w)*button[^>]*>|(?:edit|update)(?:\w*)(?:Button|Btn)/gi;
@@ -124,6 +175,9 @@ function analyzeFile(filePath) {
     }
     
     results.deleteButtons.push(buttonInfo);
+  }
+  } catch (err) {
+    console.log(chalk.red(`Error analyzing file ${filePath}: ${err.message}`));
   }
 }
 
@@ -220,13 +274,29 @@ function generateReport() {
 async function main() {
   console.log(chalk.green('Starting Button Connection Check...'));
   
-  // Get files
-  const files = glob.sync([
-    `${COMPONENTS_DIR}/**/*.tsx`,
-    `${COMPONENTS_DIR}/**/*.jsx`,
-    `${PAGES_DIR}/**/*.tsx`,
-    `${PAGES_DIR}/**/*.jsx`
-  ]);
+  // Get files using simple fs.readdir recursively
+  function getAllFiles(dir, fileList = []) {
+    const files = fs.readdirSync(dir);
+    
+    files.forEach(file => {
+      const filePath = path.join(dir, file);
+      if (fs.statSync(filePath).isDirectory()) {
+        getAllFiles(filePath, fileList);
+      } else if (filePath.endsWith('.tsx') || filePath.endsWith('.jsx')) {
+        fileList.push(filePath);
+      }
+    });
+    
+    return fileList;
+  }
+  
+  const componentFiles = getAllFiles(COMPONENTS_DIR);
+  const pageFiles = getAllFiles(PAGES_DIR);
+    
+  const files = [
+    ...componentFiles, 
+    ...pageFiles
+  ];
   
   console.log(chalk.blue(`Found ${files.length} files to check`));
   

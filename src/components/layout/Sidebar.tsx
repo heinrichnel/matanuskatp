@@ -347,7 +347,7 @@ const Sidebar: FC<SidebarProps> = ({
 
                         <button
                           className="p-1 rounded-md hover:bg-gray-200 focus:outline-none"
-                          onClick={onClick || (() => {})}
+                          onClick={(e) => toggleExpand(id, e)}
                           aria-label={expandedItems[id] ? 'Collapse menu' : 'Expand menu'}
                         >
                           {expandedItems[id] ? (
@@ -372,7 +372,7 @@ const Sidebar: FC<SidebarProps> = ({
                                     ? 'bg-blue-50 text-blue-600 font-medium' 
                                     : 'text-gray-700 hover:bg-gray-50'
                                 }`}
-                                onClick={onClick || (() => {})}
+                                onClick={() => onNavigate(child.route)}
                               >
                                 {child.icon && <child.icon className="w-5 h-5" />}
                                 <span>{child.label}</span>
@@ -391,7 +391,7 @@ const Sidebar: FC<SidebarProps> = ({
                       className={`w-full flex items-center gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
                         isActive ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
                       }`}
-                      onClick={onClick || (() => {})}
+                      onClick={() => onNavigate(route)}
                     >
                       {Icon && <Icon className="w-5 h-5" />}
                       <span>{label}</span>
