@@ -1,6 +1,6 @@
 [build]
   base = "/"
-  command = "npm run validate:env && npm run build"
+  command = "node scripts/legacy/validate-env.js && npm run build"
   publish = "dist"
 
 [build.environment]

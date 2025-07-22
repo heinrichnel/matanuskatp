@@ -33,7 +33,7 @@
     "build:debug": "tsc --noEmit --skipLibCheck --declaration false && NODE_DEBUG=module vite build --config vite.config.js",
     "setup:env": "node setup-env.js",
     "check:env": "node -e \"require('./src/utils/setupEnv.js').displayEnvironmentStatus()\"",
-    "validate:env": "node validate-env.js",
+    "validate:env": "node scripts/legacy/validate-env.js",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "integration:audit": "node tools/integration-report.mjs",
