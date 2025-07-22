@@ -1,527 +1,764 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { SupportedCurrency, formatCurrency } from '../../lib/currency';
+// Uncomment when API integration is ready
+// import { fetchTripsFromAPI } from '../../api/tripsApi';
 
-// ─── Types & Constants ───────────────────────────────────────────
-import { Trip } from '../../types';
-
-// ─── Utilities ─────────────────────────────────────────────────
-import { getTripsByStatus, analyzeTripData } from '../../utils/tripDebugger';
-
-// ─── UI Components ───────────────────────────────────────────────
-import { Select } from '../ui/FormElements';
-import Button from '../ui/Button';
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import { Edit, Trash2, Eye, AlertTriangle, Upload, Truck, CheckCircle, Calendar, User, MapPin, DollarSign, Plus, RefreshCcw, Download } from 'lucide-react';
-import { formatCurrency, formatDate, getAllFlaggedCosts, canCompleteTrip } from '../../utils/helpers';
-import LoadImportModal from './LoadImportModal';
-import TripStatusUpdateModal from './TripStatusUpdateModal';
-import { useAppContext } from '../../context/AppContext';
-import SyncIndicator from '../ui/SyncIndicator';
-import { useOutletContext } from 'react-router-dom';
-import FirestoreConnectionError from '../ui/FirestoreConnectionError';
-import LoadingIndicator from '../ui/LoadingIndicator';
-import ErrorMessage from '../ui/ErrorMessage';
-
-interface OutletContextType {
-  setSelectedTrip: (trip: Trip | null) => void;
-  setEditingTrip?: (trip: Trip | undefined) => void;
-  setShowTripForm?: (show: boolean) => void;
+interface Trip {
+  id: string;
+  tripNumber: string;
+  origin: string;
+  destination: string;
+  startDate: string;
+  endDate: string;
+  status: 'active' | 'completed' | 'scheduled';
+  driver: string;
+  vehicle: string;
+  distance: number;
+  cost: number;
+  costBreakdown?: {
+    fuel?: number;
+    maintenance?: number;
+    driver?: number;
+    tolls?: number;
+    other?: number;
+  };
+  source?: 'internal' | 'webhook' | 'api'; // Indicates where the trip data came from
+  externalId?: string; // For tracking trips from external systems
+  lastUpdated?: string; // Timestamp for last update
 }
 
 interface ActiveTripsProps {
-  trips?: Trip[];
-  onView?: (trip: Trip) => void;
-  onEdit?: (trip: Trip) => void;
-  onDelete?: (id: string) => void;
-  onCompleteTrip?: (tripId: string) => void;
+  displayCurrency: SupportedCurrency;
 }
 
-const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
-  const { trips: contextTrips, deleteTrip, completeTrip, updateTripStatus, isLoading, refreshTrips } = useAppContext();
-  // Create a default context with empty functions to avoid TypeScript errors
-  const defaultContext: OutletContextType = {
-    setSelectedTrip: () => { },
-    setEditingTrip: () => { },
-    setShowTripForm: () => { }
-  };
-
-  const context = useOutletContext<OutletContextType | undefined>() || defaultContext;
-
-  // Use props if provided, otherwise use context
-  // Replace direct filter with improved getTripsByStatus utility that handles case sensitivity
-  const trips = props.trips || getTripsByStatus(contextTrips, 'active');
-  // Use fallbacks when context or context methods are undefined
-  const onView = props.onView || context.setSelectedTrip;
-  const onEdit = props.onEdit || ((trip: Trip) => {
-    if (context.setEditingTrip) context.setEditingTrip(trip);
-    if (context.setShowTripForm) context.setShowTripForm(true);
-  });
-  const onDelete = props.onDelete || deleteTrip;
-  const onCompleteTrip = props.onCompleteTrip || completeTrip;
-  const [debugInfo, setDebugInfo] = useState<any>(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  // Effect to analyze trip data when component mounts or trips change
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      // In development mode, analyze trip data to help diagnose issues
-      const analysis = analyzeTripData(contextTrips);
-      setDebugInfo(analysis);
-
-      // Enhanced logging for imported trips visibility
-      console.log('=== TRIP VISIBILITY DEBUG ===');
-      console.log('Total trips in context:', contextTrips.length);
-      console.log('Active trips (filtered):', trips.length);
-      console.log('Trip status analysis:', analysis);
-      
-      // Log recent trips (last 5) with their status
-      const recentTrips = contextTrips
-        .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
-        .slice(0, 5);
-      
-      console.log('Recent trips (last 5):', recentTrips.map(trip => ({
-        id: trip.id.substring(0, 8),
-        status: trip.status,
-        source: trip.loadRef ? 'Web Import' : 'Manual',
-        loadRef: trip.loadRef,
-        createdAt: trip.createdAt
-      })));
-      
-      // Check for web-imported trips specifically
-      const webImportedTrips = contextTrips.filter(trip => trip.loadRef);
-      console.log('Web-imported trips:', webImportedTrips.length);
-      console.log('Web-imported trip statuses:', webImportedTrips.map(trip => trip.status));
-      
-      console.log('=== END DEBUG ===');
-    }
-  }, [contextTrips, trips]);
-
-  // Handle manual data refresh
-  const handleRefreshData = async () => {
-    try {
-      setIsRefreshing(true);
-      setError(null);
-      setConnectionError(null);
-      await refreshTrips();
-      console.log('Trip data refreshed successfully');
-    } catch (err) {
-      console.error('Error refreshing trip data:', err);
-      if (err instanceof Error && err.message.includes('Could not reach Cloud Firestore backend')) {
-        setConnectionError(err);
-      } else {
-        setError('Failed to refresh trip data. Please try again.');
-      }
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [filterFleet, setFilterFleet] = useState<string>('');
-  const [filterDriver, setFilterDriver] = useState<string>('');
-  const [filterClient, setFilterClient] = useState<string>('');
-  const [statusUpdateTrip, setStatusUpdateTrip] = useState<Trip | null>(null);
-  const statusUpdateType: 'shipped' | 'delivered' = 'shipped';
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [connectionError, setConnectionError] = useState<Error | null>(null);
-  const openImportModal = () => setIsImportModalOpen(true);
-  const closeImportModal = () => setIsImportModalOpen(false);
-  {/* Debug information (only in development mode) */ }
+// Mock active trips data with cost breakdown
+const initialActiveTrips: Trip[] = [
   {
-    process.env.NODE_ENV === 'development' && debugInfo && debugInfo.potentialIssues && debugInfo.potentialIssues.length > 0 && (
-      <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <AlertTriangle className="h-5 w-5 text-yellow-400" />
-          </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-yellow-800">Trip Status Issues Detected</h3>
-            <div className="mt-2 text-sm text-yellow-700">
-              <ul className="list-disc pl-5 space-y-1">
-                {debugInfo.potentialIssues.map((issue: string, index: number) => (
-                  <li key={index}>{issue}</li>
-                ))}
-              </ul>
-            </div>
-            <p className="text-xs text-yellow-600 mt-2">
-              Total trips: {debugInfo.totalTrips} |
-              Active: {debugInfo.activeTrips} |
-              Completed: {debugInfo.completedTrips}
-            </p>
-          </div>
-        </div>
-      </div>
-    )
+    id: '1',
+    tripNumber: 'TR-2023-001',
+    origin: 'Chicago, IL',
+    destination: 'Indianapolis, IN',
+    startDate: '2025-07-15T08:00:00',
+    endDate: '2025-07-17T16:00:00',
+    status: 'active',
+    driver: 'John Smith',
+    vehicle: 'Truck 123',
+    distance: 295,
+    cost: 1250.75,
+    costBreakdown: {
+      fuel: 650.25,
+      maintenance: 150.00,
+      driver: 350.50,
+      tolls: 75.00,
+      other: 25.00
+    }
+  },
+  {
+    id: '2',
+    tripNumber: 'TR-2023-002',
+    origin: 'Detroit, MI',
+    destination: 'Columbus, OH',
+    startDate: '2025-07-16T09:00:00',
+    endDate: '2025-07-18T14:00:00',
+    status: 'active',
+    driver: 'Sarah Johnson',
+    vehicle: 'Truck 456',
+    distance: 356,
+    cost: 1450.50,
+    costBreakdown: {
+      fuel: 725.50,
+      maintenance: 175.00,
+      driver: 400.00,
+      tolls: 100.00,
+      other: 50.00
+    }
+  },
+  {
+    id: '3',
+    tripNumber: 'TR-2023-003',
+    origin: 'St. Louis, MO',
+    destination: 'Nashville, TN',
+    startDate: '2025-07-16T10:30:00',
+    endDate: '2025-07-18T12:00:00',
+    status: 'active',
+    driver: 'Mike Wilson',
+    vehicle: 'Truck 789',
+    distance: 478,
+    cost: 1875.25,
+    costBreakdown: {
+      fuel: 950.25,
+      maintenance: 225.00,
+      driver: 500.00,
+      tolls: 125.00,
+      other: 75.00
+    }
   }
-  const handleDelete = async (id: string) => {
-    const trip = trips.find((t) => t.id === id);
-    if (trip && window.confirm(`Delete trip for fleet ${trip.fleetNumber}? This will permanently remove the trip and all related data. This action cannot be undone.`)) {
-      try {
-        setIsDeleting(id);
-        setError(null);
-        console.log(`🗑️ User confirmed delete for trip ${id}`);
+];
 
-        // Call onDelete (which maps to deleteTrip from context)
-        await onDelete(id);
-
-        console.log(`✅ Delete operation completed for trip ${id}`);
-
-        // Optional: Refresh the trips list after deletion
-        // (This would be needed if the real-time listeners aren't picking up the deletion)
-      } catch (error) {
-        console.error(`❌ Error in trip deletion UI flow:`, error);
-        setError(`Failed to delete trip: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      } finally {
-        setIsDeleting(null); // Clear loading state
-      }
-    }
-  };
-
-  // Handle trip status update
-  const handleUpdateTripStatus = async (tripId: string, status: 'shipped' | 'delivered', notes: string) => {
-    try {
-      setError(null);
-      await updateTripStatus(tripId, status, notes);
-      console.log(`✅ Trip ${tripId} status updated to ${status}`);
-      setStatusUpdateTrip(null);
-    } catch (error) {
-      console.error(`Error updating trip status to ${status}:`, error);
-      throw error;
-    }
-  };
-
-  // Apply filters
-  const filteredTrips = trips.filter(trip => {
-    if (filterFleet && trip.fleetNumber !== filterFleet) return false;
-    if (filterDriver && trip.driverName !== filterDriver) return false;
-    if (filterClient && trip.clientName !== filterClient) return false;
-    return true;
+const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
+  const [activeTrips, setActiveTrips] = useState<Trip[]>(initialActiveTrips);
+  const [webhookTrips, setWebhookTrips] = useState<Trip[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editForm, setEditForm] = useState<{
+    cost: number;
+    fuel?: number;
+    maintenance?: number;
+    driver?: number;
+    tolls?: number;
+    other?: number;
+  }>({
+    cost: 0,
+    fuel: 0,
+    maintenance: 0,
+    driver: 0,
+    tolls: 0,
+    other: 0
   });
+  
+  // Mock function to fetch webhook trips - replace with actual API call
+  const fetchWebhookTrips = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      // This is a placeholder - replace with actual API call
+      // Example: const response = await fetch('/api/webhook-trips');
+      // const data = await response.json();
+      
+      // Simulate API response with mock data
+      const mockWebhookData: Trip[] = [
+        {
+          id: 'webhook-1',
+          tripNumber: 'WH-2023-001',
+          origin: 'Miami, FL',
+          destination: 'Orlando, FL',
+          startDate: '2025-07-14T10:00:00',
+          endDate: '2025-07-15T16:00:00',
+          status: 'active',
+          driver: 'Alex Thompson',
+          vehicle: 'Truck WH-123',
+          distance: 235,
+          cost: 0, // Initial cost is 0, needs to be allocated
+          source: 'webhook',
+          externalId: 'ext-12345',
+          lastUpdated: new Date().toISOString()
+        },
+        {
+          id: 'webhook-2',
+          tripNumber: 'WH-2023-002',
+          origin: 'Austin, TX',
+          destination: 'Houston, TX',
+          startDate: '2025-07-16T08:30:00',
+          endDate: '2025-07-17T12:00:00',
+          status: 'active',
+          driver: 'Jamie Rodriguez',
+          vehicle: 'Truck WH-456',
+          distance: 162,
+          cost: 0, // Initial cost is 0, needs to be allocated
+          source: 'webhook',
+          externalId: 'ext-67890',
+          lastUpdated: new Date().toISOString()
+        }
+      ];
+      
+      setWebhookTrips(mockWebhookData);
+    } catch (err) {
+      console.error('Error fetching webhook trips:', err);
+      setError('Failed to load trips from webhook. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Fetch webhook trips when component mounts
+  useEffect(() => {
+    fetchWebhookTrips();
+  }, []);
 
-  // Get unique values for filters
-  const uniqueFleets = [...new Set(trips.map(t => t.fleetNumber))].sort();
-  const uniqueDrivers = [...new Set(trips.map(t => t.driverName))].sort();
-  const uniqueClients = [...new Set(trips.map(t => t.clientName))].sort();
+  // Combine internal and webhook trips
+  const allTrips = [...activeTrips, ...webhookTrips];
+  
+  const handleEditClick = (trip: Trip) => {
+    setEditingTrip(trip);
+    setEditForm({
+      cost: trip.cost,
+      fuel: trip.costBreakdown?.fuel || 0,
+      maintenance: trip.costBreakdown?.maintenance || 0,
+      driver: trip.costBreakdown?.driver || 0,
+      tolls: trip.costBreakdown?.tolls || 0,
+      other: trip.costBreakdown?.other || 0,
+    });
+  };
 
-  // Clear filters
-  const clearFilters = () => {
-    setFilterFleet('');
-    setFilterDriver('');
-    setFilterClient('');
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const numValue = parseFloat(value) || 0;
+    
+    setEditForm(prev => ({ 
+      ...prev, 
+      [name]: numValue 
+    }));
+    
+    // Auto-calculate total cost
+    if (name !== 'cost') {
+      const updatedValues = { ...editForm, [name]: numValue };
+      const totalCost = (updatedValues.fuel || 0) + 
+                        (updatedValues.maintenance || 0) + 
+                        (updatedValues.driver || 0) + 
+                        (updatedValues.tolls || 0) + 
+                        (updatedValues.other || 0);
+      
+      setEditForm(prev => ({
+        ...prev,
+        [name]: numValue,
+        cost: totalCost
+      }));
+    }
+  };
+
+  const handleSave = () => {
+    if (!editingTrip) return;
+    
+    // Determine if the editing trip is from webhook source
+    const isWebhookTrip = editingTrip.source === 'webhook';
+    
+    if (isWebhookTrip) {
+      // Update webhook trips
+      const updatedWebhookTrips = webhookTrips.map(trip => {
+        if (trip.id === editingTrip.id) {
+          return {
+            ...trip,
+            cost: editForm.cost,
+            costBreakdown: {
+              fuel: editForm.fuel,
+              maintenance: editForm.maintenance,
+              driver: editForm.driver,
+              tolls: editForm.tolls,
+              other: editForm.other
+            },
+            lastUpdated: new Date().toISOString() // Update timestamp
+          };
+        }
+        return trip;
+      });
+      
+      setWebhookTrips(updatedWebhookTrips);
+      
+      // In a real application, you might want to sync this data with the backend
+      // Example: await updateTripInAPI(editingTrip.id, editForm);
+      console.log('Updated webhook trip:', editingTrip.id, editForm);
+    } else {
+      // Update internal trips
+      const updatedTrips = activeTrips.map(trip => {
+        if (trip.id === editingTrip.id) {
+          return {
+            ...trip,
+            cost: editForm.cost,
+            costBreakdown: {
+              fuel: editForm.fuel,
+              maintenance: editForm.maintenance,
+              driver: editForm.driver,
+              tolls: editForm.tolls,
+              other: editForm.other
+            },
+            lastUpdated: new Date().toISOString() // Update timestamp
+          };
+        }
+        return trip;
+      });
+      
+      setActiveTrips(updatedTrips);
+    }
+    
+    setEditingTrip(null);
+  };
+
+  const handleCancel = () => {
+    setEditingTrip(null);
+  };
+  
+  // File upload handlers
+  const handleFileUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const parseCSV = (text: string): Trip[] => {
+    try {
+      const lines = text.split('\n').filter(line => line.trim() !== '');
+      const headers = lines[0].split(',').map(h => h.trim());
+      
+      const trips: Trip[] = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        if (values.length < headers.length) continue;
+        
+        const tripData: Record<string, any> = {};
+        headers.forEach((header, index) => {
+          tripData[header] = values[index];
+        });
+        
+        // Create trip object with required fields
+        const trip: Trip = {
+          id: `imported-${Date.now()}-${i}`,
+          tripNumber: tripData['Trip Number'] || `IMP-${Date.now()}-${i}`,
+          origin: tripData['Origin'] || 'Unknown',
+          destination: tripData['Destination'] || 'Unknown',
+          startDate: tripData['Start Date'] || new Date().toISOString(),
+          endDate: tripData['End Date'] || new Date().toISOString(),
+          status: 'active',
+          driver: tripData['Driver'] || 'Unknown',
+          vehicle: tripData['Vehicle'] || 'Unknown',
+          distance: parseFloat(tripData['Distance']) || 0,
+          cost: parseFloat(tripData['Cost']) || 0,
+          source: 'internal',
+          lastUpdated: new Date().toISOString()
+        };
+        
+        // Add cost breakdown if available
+        if (
+          tripData['Fuel Cost'] ||
+          tripData['Maintenance Cost'] ||
+          tripData['Driver Cost'] ||
+          tripData['Tolls'] ||
+          tripData['Other Costs']
+        ) {
+          trip.costBreakdown = {
+            fuel: parseFloat(tripData['Fuel Cost']) || 0,
+            maintenance: parseFloat(tripData['Maintenance Cost']) || 0,
+            driver: parseFloat(tripData['Driver Cost']) || 0,
+            tolls: parseFloat(tripData['Tolls']) || 0,
+            other: parseFloat(tripData['Other Costs']) || 0
+          };
+        }
+        
+        trips.push(trip);
+      }
+      
+      return trips;
+    } catch (error) {
+      console.error('Error parsing CSV:', error);
+      setError('Failed to parse CSV file. Please check the format.');
+      return [];
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setIsUploading(true);
+    setError(null);
+    setSuccess(null);
+    
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        const importedTrips = parseCSV(content);
+        
+        if (importedTrips.length > 0) {
+          setActiveTrips(prev => [...prev, ...importedTrips]);
+          setSuccess(`Successfully imported ${importedTrips.length} trips.`);
+        } else {
+          setError('No valid trips found in the file.');
+        }
+      } catch (err) {
+        console.error('Error importing trips:', err);
+        setError('Failed to import trips. Please check the file format.');
+      } finally {
+        setIsUploading(false);
+        // Reset file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    };
+    
+    reader.onerror = () => {
+      setError('Error reading the file.');
+      setIsUploading(false);
+    };
+    
+    reader.readAsText(file);
+  };
+  
+  // Function to generate sample CSV for users to download
+  const handleDownloadTemplate = () => {
+    const headers = [
+      'Trip Number', 'Origin', 'Destination', 'Start Date', 'End Date',
+      'Driver', 'Vehicle', 'Distance', 'Cost',
+      'Fuel Cost', 'Maintenance Cost', 'Driver Cost', 'Tolls', 'Other Costs'
+    ];
+    
+    const sampleData = [
+      'TR-2023-004,New York NY,Boston MA,2023-07-20,2023-07-22,John Doe,Truck 101,215,1200,600,200,300,75,25'
+    ];
+    
+    const csvContent = [headers.join(','), ...sampleData].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `trips-import-template.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Active Trips</h2>
-          <div className="flex items-center justify-between mt-1">
-            <div className="flex items-center">
-              <p className="text-gray-600 mr-3">Manage ongoing trips and track their status</p>
-              <SyncIndicator />
-            </div>
-          </div>
+          <h1 className="text-2xl font-bold">Active Trips</h1>
+          <p className="text-gray-600">
+            Showing {allTrips.length} active trips 
+            ({activeTrips.length} manual, {webhookTrips.length} from webhooks)
+          </p>
         </div>
         <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            size="md"
-            icon={<RefreshCcw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />}
-            onClick={handleRefreshData}
-            isLoading={isRefreshing}
-            disabled={isRefreshing}
+          {/* File input (hidden) */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept=".csv"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+          
+          {/* File upload button */}
+          <button
+            onClick={onClick}
+            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 flex items-center"
+            disabled={isUploading}
           >
-            Refresh
-          </Button>
-          <Button
-            variant="outline"
-            size="md"
-            icon={<Download className="w-5 h-5" />}
-            onClick={() => {
-              // Create CSV export
-              const headers = ['Fleet Number', 'Driver', 'Client', 'Route', 'Start Date', 'End Date', 'Revenue', 'Currency', 'Distance', 'Status'];
-              const rows = filteredTrips.map(trip => [
-                trip.fleetNumber,
-                trip.driverName,
-                trip.clientName,
-                trip.route,
-                trip.startDate,
-                trip.endDate,
-                trip.baseRevenue,
-                trip.revenueCurrency,
-                trip.distanceKm || 0,
-                trip.status
-              ]);
-              
-              const csvContent = [
-                headers.join(','),
-                ...rows.map(row => row.map(cell => 
-                  typeof cell === 'string' ? `"${cell.replace(/"/g, '""')}"` : cell
-                ).join(','))
-              ].join('\n');
-              
-              const blob = new Blob([csvContent], { type: 'text/csv' });
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = `active-trips-${new Date().toISOString().split('T')[0]}.csv`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(url);
-            }}
-            disabled={filteredTrips.length === 0 || isDeleting !== null}
+            {isUploading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Importing...
+              </>
+            ) : (
+              <>
+                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                </svg>
+                Import CSV
+              </>
+            )}
+          </button>
+          
+          {/* Template download button */}
+          <button
+            onClick={onClick}
+            className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 flex items-center"
           >
-            Export
-          </Button>
-          <Button
-            variant="outline"
-            size="md"
-            icon={<Upload className="w-5 h-5" />}
-            onClick={openImportModal}
+            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Template
+          </button>
+          
+          <button 
+            onClick={onClick}
+            className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
           >
-            Import Trips
-          </Button>
-          <Button
-            variant="primary"
-            size="md"
-            icon={<Plus className="w-5 h-5" />}
-            onClick={() => {
-              // Enhanced Add Trip functionality - always clears previous trip data
-              if (context.setEditingTrip) {
-                context.setEditingTrip(undefined);
-              }
-              if (context.setShowTripForm) {
-                context.setShowTripForm(true);
-              } else {
-                // Fallback: navigate to add trip page if context is unavailable
-                console.log("🚀 Add Trip: Context unavailable, implementing fallback navigation");
-                // You can add navigation logic here if needed
-                alert("Add Trip functionality is being activated...");
-              }
-            }}
-            disabled={isLoading.refreshTrips}
+            Refresh Webhook Trips
+          </button>
+          
+          <Link
+            to="/trips/new"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
           >
-            Add Trip
-          </Button>
+            + New Trip
+          </Link>
         </div>
       </div>
-
-      {/* Connection error message */}
-      {connectionError && (
-        <FirestoreConnectionError
-          error={connectionError}
-          onRetry={handleRefreshData}
-          className="mb-4"
-        />
+      
+      {/* Success message */}
+      {success && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+          <span className="block sm:inline">{success}</span>
+          <span 
+            className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" 
+            onClick={onClick}
+          >
+            <svg className="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <title>Close</title>
+              <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+            </svg>
+          </span>
+        </div>
       )}
-
+      
       {/* Error message */}
       {error && (
-        <ErrorMessage
-          message={error}
-          onRetry={() => setError(null)}
-          className="mb-4"
-        />
-      )}
-
-      {/* Loading state for the entire component */}
-      {isLoading.loadTrips && (
-        <LoadingIndicator text="Loading trips..." className="my-4" />
-      )}
-      <Card>
-        <CardHeader title="Filter Active Trips" />
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Select
-              label="Fleet"
-              value={filterFleet}
-              onChange={e => setFilterFleet(e.target.value)}
-              options={[{ label: 'All Fleets', value: '' }, ...uniqueFleets.map(f => ({ label: f, value: f }))]}
-            />
-            <Select
-              label="Driver"
-              value={filterDriver}
-              onChange={e => setFilterDriver(e.target.value)}
-              options={[{ label: 'All Drivers', value: '' }, ...uniqueDrivers.map(d => ({ label: d, value: d }))]}
-            />
-            <Select
-              label="Client"
-              value={filterClient}
-              onChange={e => setFilterClient(e.target.value)}
-              options={[{ label: 'All Clients', value: '' }, ...uniqueClients.map(c => ({ label: c, value: c }))]}
-            />
-          </div>
-          <div className="mt-4 flex justify-end">
-            <Button size="sm" variant="outline" onClick={clearFilters}>
-              Clear Filters
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Trip List - Vertical Layout */}
-      {filteredTrips.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-lg shadow border border-gray-100">
-          <Truck className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-lg font-medium text-gray-900">No active trips found</h3>
-          <p className="mt-1 text-gray-500">
-            {filterFleet || filterDriver || filterClient ?
-              'No trips match your current filter criteria.' :
-              'Start by adding a new trip or importing trips from your system.'}
-          </p>
-          {!filterFleet && !filterDriver && !filterClient && contextTrips.length > 0 && (
-            <div className="mt-4">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleRefreshData}
-                icon={<RefreshCcw className="w-4 h-4 mr-2" />}
-              >
-                Refresh Data
-              </Button>
-              <p className="text-xs text-gray-500 mt-2">
-                There are {contextTrips.length} total trips in the system, but none with 'active' status.
-              </p>
-            </div>
-          )}
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 relative">
+          <span className="block sm:inline">{error}</span>
+          <span 
+            className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" 
+            onClick={onClick}
+          >
+            <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+              <title>Close</title>
+              <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+            </svg>
+          </span>
         </div>
-      ) : (
-        <div className="space-y-4">
+      )}
+      
+      {isLoading && (
+        <div className="text-center py-4">
+          <p>Loading webhook trips...</p>
+        </div>
+      )}
 
-          {filteredTrips.map(trip => (
-            <Card key={trip.id} className="hover:shadow-md transition-shadow">
-              {/* Action Banner */}
-              <div className="flex flex-wrap items-center justify-between bg-blue-50 border-b border-blue-200 px-4 py-2 rounded-t-lg">
-                <div className="flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-blue-500" />
-                  <span className="font-semibold text-blue-900">Fleet {trip.fleetNumber}</span>
-                  <span className="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Active</span>
+      {editingTrip && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6">
+            <h2 className="text-xl font-bold mb-4">
+              Edit Trip Costs: {editingTrip.tripNumber}
+              {editingTrip.source === 'webhook' && (
+                <span className="ml-2 px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-blue-100 text-blue-800">
+                  Webhook Trip
+                </span>
+              )}
+            </h2>
+            <div className="mb-4">
+              <p><span className="font-medium">Origin:</span> {editingTrip.origin}</p>
+              <p><span className="font-medium">Destination:</span> {editingTrip.destination}</p>
+              <p><span className="font-medium">Driver:</span> {editingTrip.driver}</p>
+              {editingTrip.source === 'webhook' && editingTrip.externalId && (
+                <p><span className="font-medium">External ID:</span> {editingTrip.externalId}</p>
+              )}
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fuel Cost</label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">$</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="fuel"
+                      value={editForm.fuel}
+                      onChange={handleInputChange}
+                      className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+                      placeholder="0.00"
+                    />
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={onClick}>
-                    View
-                  </Button>
-                  <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={onClick}>
-                    Edit
-                  </Button>
-                  <Button size="sm" variant="success" icon={<CheckCircle className="w-4 h-4" />} onClick={onClick} disabled={!canCompleteTrip(trip) || isLoading[`completeTrip-${trip.id}`]} isLoading={isLoading[`completeTrip-${trip.id}`]} title={!canCompleteTrip(trip) ? 'Cannot complete: Unresolved flags' : 'Mark as completed'}>
-                    Complete
-                  </Button>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance Cost</label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">$</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="maintenance"
+                      value={editForm.maintenance}
+                      onChange={handleInputChange}
+                      className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Driver Cost</label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">$</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="driver"
+                      value={editForm.driver}
+                      onChange={handleInputChange}
+                      className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tolls</label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">$</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="tolls"
+                      value={editForm.tolls}
+                      onChange={handleInputChange}
+                      className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Other Costs</label>
+                  <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">$</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="other"
+                      value={editForm.other}
+                      onChange={handleInputChange}
+                      className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+                      placeholder="0.00"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Total Cost</label>
+                  <div className="mt-1 relative rounded-md shadow-sm bg-gray-50">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <span className="text-gray-500 sm:text-sm">$</span>
+                    </div>
+                    <input
+                      type="number"
+                      name="cost"
+                      value={editForm.cost}
+                      readOnly
+                      className="bg-gray-50 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">Total is calculated automatically</p>
                 </div>
               </div>
-              {/* Trip Card Content */}
-              <CardContent className="p-4">
-                <div className="flex flex-col space-y-4">
-                  {/* Trip Header */}
-                  {/* ...existing code... */}
-
-                  {/* Trip Details */}
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="flex items-start space-x-2">
-                      <User className="w-4 h-4 text-gray-400 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-gray-500">Driver</p>
-                        <p className="font-medium">{trip.driverName}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start space-x-2">
-                      <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-gray-500">Route</p>
-                        <p className="font-medium">{trip.route}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start space-x-2">
-                      <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-gray-500">Client</p>
-                        <p className="font-medium">{trip.clientName}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start space-x-2">
-                      <DollarSign className="w-4 h-4 text-gray-400 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-gray-500">Revenue</p>
-                        <p className="font-medium text-green-600">{formatCurrency(trip.baseRevenue, trip.revenueCurrency)}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-2">
-                    <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-gray-500">Dates</p>
-                      <p className="font-medium">{formatDate(trip.startDate)} - {formatDate(trip.endDate)}</p>
-                    </div>
-                  </div>
-
-                  {/* Flag indicator */}
-                  {getAllFlaggedCosts([trip]).length > 0 && (
-                    <div className="flex items-center text-amber-600 text-sm">
-                      <AlertTriangle className="w-4 h-4 mr-1" />
-                      <span>
-                        {getAllFlaggedCosts([trip]).length} flagged item{getAllFlaggedCosts([trip]).length !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="flex flex-wrap gap-2 pt-2 border-t">
-                    <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={onClick}>
-                      View
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      icon={<Edit className="w-4 h-4" />}
-                      onClick={onClick}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      icon={isDeleting === trip.id ? undefined : <Trash2 className="w-4 h-4" />}
-                      onClick={onClick}
-                      isLoading={isLoading[`deleteTrip-${trip.id}`] || isDeleting === trip.id}
-                      disabled={isLoading[`deleteTrip-${trip.id}`] || isDeleting !== null}
-                    >
-                      Delete
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="success"
-                      icon={<CheckCircle className="w-4 h-4" />}
-                      onClick={onClick}
-                      disabled={!canCompleteTrip(trip) || isLoading[`completeTrip-${trip.id}`]}
-                      isLoading={isLoading[`completeTrip-${trip.id}`]}
-                      title={!canCompleteTrip(trip) ?
-                        'Cannot complete: Unresolved flags' : 'Mark as completed'}
-                    >
-                      Complete
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+            </div>
+            
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={onClick}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onClick}
+                className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
-      <LoadImportModal isOpen={isImportModalOpen} onClose={closeImportModal} />
-      {/* Status Update Modal */}
-      {statusUpdateTrip && (
-        <TripStatusUpdateModal
-          isOpen={Boolean(statusUpdateTrip)}
-          onClose={() => setStatusUpdateTrip(null)}
-          trip={statusUpdateTrip}
-          status={statusUpdateType}
-          onUpdateStatus={handleUpdateTripStatus}
-        />
-      )}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trip Number</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Driver / Vehicle</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expected Completion</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {allTrips.map((trip) => (
+                <tr key={trip.id} className={trip.source === 'webhook' ? 'bg-blue-50' : ''}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {trip.tripNumber}
+                    {trip.source === 'webhook' && (
+                      <span className="ml-2 px-2 inline-flex text-xs leading-5 font-medium rounded-full bg-blue-100 text-blue-800">
+                        Webhook
+                      </span>
+                    )}
+                    {trip.externalId && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        Ext ID: {trip.externalId}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex flex-col">
+                      <span className="font-medium">From: {trip.origin}</span>
+                      <span>To: {trip.destination}</span>
+                      <span className="text-xs text-gray-400">{trip.distance} miles</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex flex-col">
+                      <span className="font-medium">{trip.driver}</span>
+                      <span className="text-xs">{trip.vehicle}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(trip.startDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(trip.endDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                      In Progress
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div>
+                      <div className="font-medium">{formatCurrency(trip.cost, displayCurrency)}</div>
+                      <button 
+                        className="text-xs text-blue-600 hover:underline mt-1"
+                        onClick={onClick}
+                      >
+                        {trip.costBreakdown ? 'View Breakdown' : 'Allocate Costs'}
+                      </button>
+                      {trip.lastUpdated && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Updated: {new Date(trip.lastUpdated).toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex space-x-2">
+                      <button className="text-indigo-600 hover:text-indigo-900" onClick={onClick}}>View</button>
+                      <button 
+                        className="text-blue-600 hover:text-blue-900"
+                        onClick={onClick}
+                      >
+                        Edit Costs
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };

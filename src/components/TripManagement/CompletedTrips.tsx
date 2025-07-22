@@ -1,260 +1,273 @@
-// ─── React & Context ─────────────────────────────────────────────
 import React, { useState } from 'react';
-import { useAppContext } from '../../context/AppContext';
+import { Link } from 'react-router-dom';
+import { SupportedCurrency, formatCurrency } from '../../lib/currency';
 
-// ─── Types ───────────────────────────────────────────────────────
-import { Trip } from '../../types';
-
-// ─── UI Components ───────────────────────────────────────────────
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
-import { Input, Select } from '../ui/FormElements';
-import { CheckCircle, Truck, Edit, Trash2, Eye, Download } from 'lucide-react';
-
-// ─── Feature Components ──────────────────────────────────────────
-import CompletedTripEditModal from './CompletedTripEditModal';
-import TripDeletionModal from './TripDeletionModal';
-import { useOutletContext } from 'react-router-dom';
-
-// ─── Helper Functions ────────────────────────────────────────────
-import { formatCurrency } from '../../utils/helpers';
-
+interface Trip {
+  id: string;
+  tripNumber: string;
+  origin: string;
+  destination: string;
+  startDate: string;
+  endDate: string;
+  status: 'active' | 'completed' | 'scheduled';
+  driver: string;
+  vehicle: string;
+  distance: number;
+  cost: number;
+  revenue: number;
+}
 
 interface CompletedTripsProps {
-  trips?: Trip[];
-  onView?: (trip: Trip) => void;
+  displayCurrency: SupportedCurrency;
 }
 
-// Type for context provided by the outlet
-interface OutletContextType {
-  setSelectedTrip: (trip: Trip | null) => void;
-  setEditingTrip?: (trip: Trip | undefined) => void;
-  setShowTripForm?: (show: boolean) => void;
-}
+const mockCompletedTrips: Trip[] = [
+  {
+    id: '101',
+    tripNumber: 'TR-2023-097',
+    origin: 'New York, NY',
+    destination: 'Boston, MA',
+    startDate: '2025-07-01T08:00:00',
+    endDate: '2025-07-02T14:00:00',
+    status: 'completed',
+    driver: 'Alex Johnson',
+    vehicle: 'Truck 234',
+    distance: 215,
+    cost: 950.25,
+    revenue: 1450.50
+  },
+  {
+    id: '102',
+    tripNumber: 'TR-2023-098',
+    origin: 'Philadelphia, PA',
+    destination: 'Pittsburgh, PA',
+    startDate: '2025-07-03T09:30:00',
+    endDate: '2025-07-05T11:00:00',
+    status: 'completed',
+    driver: 'Chris Wilson',
+    vehicle: 'Truck 567',
+    distance: 305,
+    cost: 1320.75,
+    revenue: 2100.00
+  },
+  {
+    id: '103',
+    tripNumber: 'TR-2023-099',
+    origin: 'Chicago, IL',
+    destination: 'Milwaukee, WI',
+    startDate: '2025-07-05T07:00:00',
+    endDate: '2025-07-05T14:30:00',
+    status: 'completed',
+    driver: 'Emily Roberts',
+    vehicle: 'Truck 789',
+    distance: 92,
+    cost: 425.50,
+    revenue: 750.25
+  },
+  {
+    id: '104',
+    tripNumber: 'TR-2023-100',
+    origin: 'Dallas, TX',
+    destination: 'Houston, TX',
+    startDate: '2025-07-07T08:00:00',
+    endDate: '2025-07-07T16:00:00',
+    status: 'completed',
+    driver: 'Mark Thompson',
+    vehicle: 'Truck 345',
+    distance: 239,
+    cost: 875.25,
+    revenue: 1325.50
+  },
+  {
+    id: '105',
+    tripNumber: 'TR-2023-101',
+    origin: 'Seattle, WA',
+    destination: 'Portland, OR',
+    startDate: '2025-07-10T09:00:00',
+    endDate: '2025-07-10T15:00:00',
+    status: 'completed',
+    driver: 'Lisa Brown',
+    vehicle: 'Truck 678',
+    distance: 174,
+    cost: 795.00,
+    revenue: 1250.75
+  }
+];
 
-const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
-  const { trips: contextTrips, updateTrip, deleteTrip } = useAppContext();
-  // Use an empty object as fallback if context is undefined
-  const context = useOutletContext<OutletContextType>() || {
-    setSelectedTrip: () => {},
-    setEditingTrip: undefined,
-    setShowTripForm: undefined
-  };
-  
-  // Use props if provided, otherwise use context
-  const trips = props.trips || contextTrips.filter(t => t.status === 'completed');
-  // Ensure we have a fallback function if setSelectedTrip is undefined
-  const onView =
-    props.onView ||
-    (typeof context.setSelectedTrip === 'function' ? context.setSelectedTrip : (() => {}));
-  const [filters, setFilters] = useState({
-    startDate: '',
-    endDate: '',
-    client: '',
-    driver: '',
-    currency: ''
+const CompletedTrips: React.FC<CompletedTripsProps> = ({ displayCurrency }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<keyof Trip>('endDate');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  // Filter trips based on search term
+  const filteredTrips = mockCompletedTrips.filter(trip => 
+    trip.tripNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    trip.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    trip.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    trip.driver.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Sort trips
+  const sortedTrips = [...filteredTrips].sort((a, b) => {
+    if (sortField === 'endDate' || sortField === 'startDate') {
+      const dateA = new Date(a[sortField]).getTime();
+      const dateB = new Date(b[sortField]).getTime();
+      return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+    }
+    
+    if (typeof a[sortField] === 'number' && typeof b[sortField] === 'number') {
+      return sortDirection === 'asc' 
+        ? (a[sortField] as number) - (b[sortField] as number) 
+        : (b[sortField] as number) - (a[sortField] as number);
+    }
+    
+    const valueA = String(a[sortField]).toLowerCase();
+    const valueB = String(b[sortField]).toLowerCase();
+    return sortDirection === 'asc' 
+      ? valueA.localeCompare(valueB) 
+      : valueB.localeCompare(valueA);
   });
-  const [editingTrip, setEditingTrip] = useState<Trip | null>(null);
-  const [deletingTrip, setDeletingTrip] = useState<Trip | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  const userRole: 'admin' | 'manager' | 'operator' = 'admin';
-
-  const filteredTrips = trips.filter(trip => {
-    if (filters.startDate && trip.startDate < filters.startDate) return false;
-    if (filters.endDate && trip.endDate > filters.endDate) return false;
-    if (filters.client && trip.clientName !== filters.client) return false;
-    if (filters.driver && trip.driverName !== filters.driver) return false;
-    if (filters.currency && trip.revenueCurrency !== filters.currency) return false;
-    return true;
-  });
-
-  const handleFilterChange = (field: string, value: string) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      startDate: '',
-      endDate: '',
-      client: '',
-      driver: '',
-      currency: ''
-    });
-  };
-
-  const handleEditSave = async (updatedTrip: Trip) => {
-    await updateTrip(updatedTrip);
-    setEditingTrip(null);
-    alert('Trip updated successfully. Edit logged.');
-  };
-
-  const handleDelete = async (trip: Trip) => {
-    try {
-      setIsDeleting(true);
-      await deleteTrip(trip.id);
-      setDeletingTrip(null);
-      alert('Trip deleted successfully. Deletion logged.');
-    } catch (error) {
-      console.error("Error deleting trip:", error);
-      alert(`Failed to delete trip: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setIsDeleting(false);
+  const handleSort = (field: keyof Trip) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
     }
   };
 
-  const uniqueClients = [...new Set(trips.map(t => t.clientName))];
-  const uniqueDrivers = [...new Set(trips.map(t => t.driverName))];
+  // Calculate total profit
+  const totalRevenue = sortedTrips.reduce((sum, trip) => sum + trip.revenue, 0);
+  const totalCost = sortedTrips.reduce((sum, trip) => sum + trip.cost, 0);
+  const totalProfit = totalRevenue - totalCost;
+  const averageMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Completed Trips</h2>
-          <p className="text-gray-600">View and manage completed trips</p>
+          <h1 className="text-2xl font-bold">Completed Trips</h1>
+          <p className="text-gray-600">Showing {sortedTrips.length} completed trips</p>
         </div>
-        <Button variant="primary" size="md" icon={<Download className="w-5 h-5" />}>
-          <span className="sr-only">Export</span>
-        </Button>
-      </div>
-
-      {/* Filters Section */}
-      <Card>
-        <CardHeader title="Filter Completed Trips" />
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            <Input
-              label="Start Date"
-              type="date"
-              value={filters.startDate}
-              onChange={e => handleFilterChange('startDate', e.target.value)}
-            />
-            <Input
-              label="End Date"
-              type="date"
-              value={filters.endDate}
-              onChange={e => handleFilterChange('endDate', e.target.value)}
-            />
-            <Select
-              label="Client"
-              value={filters.client}
-              onChange={e => handleFilterChange('client', e.target.value)}
-              options={[{ label: 'All Clients', value: '' }, ...uniqueClients.map(c => ({ label: c, value: c }))]}
-            />
-            <Select
-              label="Driver"
-              value={filters.driver}
-              onChange={e => handleFilterChange('driver', e.target.value)}
-              options={[{ label: 'All Drivers', value: '' }, ...uniqueDrivers.map(d => ({ label: d, value: d }))]}
-            />
-            <Select
-              label="Currency"
-              value={filters.currency}
-              onChange={e => handleFilterChange('currency', e.target.value)}
-              options={[
-                { label: 'All Currencies', value: '' },
-                { label: 'ZAR (R)', value: 'ZAR' },
-                { label: 'USD ($)', value: 'USD' }
-              ]}
-            />
-          </div>
-          <div className="mt-4 flex justify-end">
-            <Button size="sm" variant="outline" onClick={onClick}>
-              <span className="sr-only">Clear Filters</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Info Banner */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3 mb-6">
-        <CheckCircle className="w-6 h-6 text-green-500" />
         <div>
-          <div className="font-semibold text-green-800">Completed trips are shown below. Use filters to find specific trips or export data for reporting.</div>
+          <Link
+            to="/trips"
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+          >
+            Back to Trip Management
+          </Link>
         </div>
       </div>
 
-      {/* Trip Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTrips.map(trip => (
-          <Card key={trip.id}>
-            <CardHeader
-              title={
-                <div>
-                  <span className="flex items-center gap-2">
-                    <Truck className="w-5 h-5 text-blue-500" />Fleet {trip.fleetNumber}
-                  </span>
-                  <span className="text-xs text-gray-500">{trip.route}</span>
-                </div>
-              }
-              action={
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4 text-blue-500" />} onClick={onClick}>
-                    <span className="sr-only">View</span>
-                  </Button>
-                  <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4 text-green-600" />} onClick={onClick}>
-                    <span className="sr-only">Edit</span>
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="danger" 
-                    icon={<Trash2 className="w-4 h-4 text-red-600" />} 
-                    onClick={onClick}
-                    disabled={isDeleting}
-                  >
-                    <span className="sr-only">Delete</span>
-                  </Button>
-                </div>
-              }
-            />
-            <CardContent>
-              <div className="flex flex-col gap-2">
-                <div className="text-lg font-bold text-gray-900">{trip.driverName}</div>
-                <div className="text-sm text-gray-500">Client: {trip.clientName}</div>
-                <div className="text-sm text-gray-500">Start: {trip.startDate} | End: {trip.endDate}</div>
-                <div className="text-sm text-gray-500">Revenue: {formatCurrency(trip.baseRevenue, trip.revenueCurrency)}</div>
-                <div className="flex gap-2 mt-2">
-                  <Button size="xs" variant="outline" icon={<Eye className="w-4 h-4 text-blue-500" />} onClick={onClick}>
-                    <span className="sr-only">View</span>
-                  </Button>
-                  <Button size="xs" variant="outline" icon={<Edit className="w-4 h-4 text-green-600" />} onClick={onClick}>
-                    <span className="sr-only">Edit</span>
-                  </Button>
-                  <Button 
-                    size="xs" 
-                    variant="danger" 
-                    icon={<Trash2 className="w-4 h-4 text-red-600" />} 
-                    onClick={onClick}
-                    disabled={isDeleting}
-                    isLoading={isDeleting && deletingTrip?.id === trip.id}
-                  >
-                    <span className="sr-only">Delete</span>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+          <div className="text-sm text-gray-500 mb-1">Total Revenue</div>
+          <div className="text-xl font-bold">{formatCurrency(totalRevenue, displayCurrency)}</div>
+        </div>
+        
+        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-red-500">
+          <div className="text-sm text-gray-500 mb-1">Total Costs</div>
+          <div className="text-xl font-bold">{formatCurrency(totalCost, displayCurrency)}</div>
+        </div>
+        
+        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
+          <div className="text-sm text-gray-500 mb-1">Total Profit</div>
+          <div className="text-xl font-bold">{formatCurrency(totalProfit, displayCurrency)}</div>
+        </div>
+        
+        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-purple-500">
+          <div className="text-sm text-gray-500 mb-1">Average Margin</div>
+          <div className="text-xl font-bold">{averageMargin.toFixed(2)}%</div>
+        </div>
       </div>
 
-      {editingTrip && (
-        <CompletedTripEditModal
-          isOpen={!!editingTrip}
-          trip={editingTrip}
-          onClose={() => setEditingTrip(null)}
-          onSave={handleEditSave}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by trip number, origin, destination or driver..."
+          className="w-full px-4 py-2 border rounded-lg"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
-      )}
+      </div>
 
-      {deletingTrip && (
-        <TripDeletionModal
-          isOpen={!!deletingTrip}
-          trip={deletingTrip}
-          onClose={() => setDeletingTrip(null)}
-          onDelete={handleDelete}
-          userRole={userRole}
-        />
-      )}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={onClick}>
+                  Trip Number {sortField === 'tripNumber' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Route
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Driver / Vehicle
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={onClick}>
+                  Completion Date {sortField === 'endDate' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={onClick}>
+                  Cost {sortField === 'cost' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={onClick}>
+                  Revenue {sortField === 'revenue' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Profit
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {sortedTrips.map((trip) => (
+                <tr key={trip.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {trip.tripNumber}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex flex-col">
+                      <span className="font-medium">From: {trip.origin}</span>
+                      <span>To: {trip.destination}</span>
+                      <span className="text-xs text-gray-400">{trip.distance} miles</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex flex-col">
+                      <span className="font-medium">{trip.driver}</span>
+                      <span className="text-xs">{trip.vehicle}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(trip.endDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {formatCurrency(trip.cost, displayCurrency)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {formatCurrency(trip.revenue, displayCurrency)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <span className={trip.revenue - trip.cost > 0 ? 'text-green-600' : 'text-red-600'}>
+                      {formatCurrency(trip.revenue - trip.cost, displayCurrency)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex space-x-2">
+                      <button className="text-indigo-600 hover:text-indigo-900" onClick={onClick}}>Details</button>
+                      <button className="text-blue-600 hover:text-blue-900" onClick={onClick}}>Report</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 };

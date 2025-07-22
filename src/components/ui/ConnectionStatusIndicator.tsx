@@ -38,132 +38,117 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
       // Check network connectivity first
       await networkStatus.checkConnection();
       
-      if (networkStatus.isOnline) {
-        await attemptReconnect();
-      }
+      // Attempt to reconnect to Firebase
+      await attemptReconnect();
+    } catch (err) {
+      console.error('Failed to reconnect:', err);
     } finally {
       setIsReconnecting(false);
     }
   };
 
-  // Render different indicators based on status and network quality
-  const renderIndicator = () => {
-    // If network is being checked or reconnecting
-    if (networkStatus.isChecking || isReconnecting) {
-      return (
-        <div className="flex items-center text-blue-600">
-          <RefreshCw className="w-4 h-4 animate-spin" />
-          {showText && <span className="ml-2 text-sm">Checking connection...</span>}
-        </div>
-      );
-    }
-
-    // If network is limited (connected to internet but not to Firebase)
-    if (networkStatus.isLimited) {
-      return (
-        <div className="flex items-center text-amber-600">
-          <WifiLow className="w-4 h-4" />
-          {showText && <span className="ml-2 text-sm">Limited Connectivity</span>}
-          <button 
-            onClick={handleReconnect} 
-            className="ml-2 p-1 rounded hover:bg-gray-100"
-            disabled={isReconnecting}
-            title="Try to reconnect"
-          >
-            <RefreshCw className={`w-3 h-3 text-amber-600 ${isReconnecting ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      );
-    }
-
-    // If network is offline
-    if (networkStatus.isOffline) {
-      return (
-        <div className="flex items-center text-amber-600">
-          <WifiOff className="w-4 h-4" />
-          {showText && <span className="ml-2 text-sm">Offline Mode</span>}
-          <button 
-            onClick={handleReconnect} 
-            className="ml-2 p-1 rounded hover:bg-gray-100"
-            disabled={isReconnecting}
-            title="Try to reconnect"
-          >
-            <RefreshCw className={`w-3 h-3 text-amber-600 ${isReconnecting ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      );
-    }
-
-    // If Firestore status is used for the rest
+  // Determine display elements based on status
+  const getStatusDisplay = () => {
     switch (status) {
       case 'connected':
-        return (
-          <div className="flex items-center text-green-600">
-            <Wifi className="w-4 h-4" />
-            {showText && (
-              <span className="ml-2 text-sm">
-                Connected
-                {networkStatus.quality === 'poor' && 
-                  <span className="text-xs ml-1">(Slow)</span>
-                }
-              </span>
-            )}
-          </div>
-        );
-      
-      case 'disconnected':
-        return (
-          <div className="flex items-center text-amber-600">
-            <WifiOff className="w-4 h-4" />
-            {showText && <span className="ml-2 text-sm">Offline Mode</span>}
-            <button 
-              onClick={handleReconnect} 
-              className="ml-2 p-1 rounded hover:bg-gray-100"
-              disabled={isReconnecting}
-              title="Try to reconnect"
-            >
-              <RefreshCw className={`w-3 h-3 text-amber-600 ${isReconnecting ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        );
-      
+        return {
+          icon: <Wifi size={18} className="text-green-500" />,
+          text: 'Connected',
+          color: 'text-green-500',
+          bgColor: 'bg-green-50',
+          borderColor: 'border-green-200'
+        };
       case 'connecting':
-        return (
-          <div className="flex items-center text-blue-600">
-            <RefreshCw className="w-4 h-4 animate-spin" />
-            {showText && <span className="ml-2 text-sm">Connecting...</span>}
-          </div>
-        );
-      
+        return {
+          icon: <WifiLow size={18} className="text-yellow-500" />,
+          text: 'Connecting...',
+          color: 'text-yellow-500',
+          bgColor: 'bg-yellow-50',
+          borderColor: 'border-yellow-200'
+        };
+      case 'disconnected':
+        return {
+          icon: <WifiOff size={18} className="text-red-500" />,
+          text: 'Disconnected',
+          color: 'text-red-500',
+          bgColor: 'bg-red-50',
+          borderColor: 'border-red-200'
+        };
       case 'error':
-        return (
-          <div className="flex items-center text-red-600">
-            <AlertTriangle className="w-4 h-4" />
-            {showText && (
-              <span className="ml-2 text-sm">
-                Connection Error
-                {error && <span className="hidden md:inline"> - {error.message}</span>}
-              </span>
-            )}
-            <button 
-              onClick={handleReconnect} 
-              className="ml-2 p-1 rounded hover:bg-gray-100"
-              disabled={isReconnecting}
-              title="Try to reconnect"
-            >
-              <RefreshCw className={`w-3 h-3 text-red-600 ${isReconnecting ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-        );
-      
+        return {
+          icon: <AlertTriangle size={18} className="text-red-500" />,
+          text: 'Connection Error',
+          color: 'text-red-500',
+          bgColor: 'bg-red-50',
+          borderColor: 'border-red-200'
+        };
       default:
-        return null;
+        return {
+          icon: <WifiOff size={18} className="text-gray-500" />,
+          text: 'Unknown',
+          color: 'text-gray-500',
+          bgColor: 'bg-gray-50',
+          borderColor: 'border-gray-200'
+        };
     }
   };
-
+  
+  const statusDisplay = getStatusDisplay();
+  const isDisconnected = ['disconnected', 'error'].includes(status);
+  
+  // Compact version (icon only)
+  if (!showText) {
+    return (
+      <div 
+        className={`relative flex h-8 w-8 items-center justify-center rounded-full ${statusDisplay.bgColor} ${className}`}
+        title={`${statusDisplay.text}${error ? `: ${error.message}` : ''}`}
+      >
+        {statusDisplay.icon}
+        {isReconnecting && (
+          <RefreshCw 
+            size={18} 
+            className="absolute animate-spin text-blue-500" 
+          />
+        )}
+      </div>
+    );
+  }
+  
+  // Full version with text and reconnect button
   return (
-    <div className={`inline-flex items-center ${className}`}>
-      {renderIndicator()}
+    <div 
+      className={`flex items-center rounded-md border p-2 ${statusDisplay.borderColor} ${statusDisplay.bgColor} ${className}`}
+    >
+      <div className="flex flex-1 items-center">
+        {statusDisplay.icon}
+        <span className={`ml-2 text-sm font-medium ${statusDisplay.color}`}>
+          {statusDisplay.text}
+        </span>
+      </div>
+      
+      {isDisconnected && (
+        <button
+          onClick={handleReconnect}
+          disabled={isReconnecting}
+          className={`ml-2 flex items-center rounded px-2 py-1 text-xs font-medium ${
+            isReconnecting
+              ? 'cursor-not-allowed bg-blue-100 text-blue-400'
+              : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+          }`}
+        >
+          <RefreshCw 
+            size={14} 
+            className={`mr-1 ${isReconnecting ? 'animate-spin' : ''}`} 
+          />
+          {isReconnecting ? 'Reconnecting...' : 'Reconnect'}
+        </button>
+      )}
+      
+      {error && (
+        <div className="mt-1 w-full text-xs text-red-500">
+          {error.message}
+        </div>
+      )}
     </div>
   );
 };

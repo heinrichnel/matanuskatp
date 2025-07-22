@@ -1,29 +1,22 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <title>Trip-Based Profit &amp; Loss Application</title>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-    <!-- Google Font: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-    <!-- Theme Color for Mobile Browsers -->
-    <meta name="theme-color" content="#1DA1F2" />
+const app = express();
+const PORT = process.env.PORT || 3001;
 
-    <!-- SEO -->
-    <meta name="description" content="Fleet management and trip-based profit & loss dashboard" />
-    <script type="module" crossorigin src="/assets/index-CNpDjvLW.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-Cb9HZFpT.css">
-  </head>
-  <body class="font-sans bg-gray-50 text-gray-900">
-    <div id="root"></div>
 
-    <!-- React app mount point -->
-  </body>
-</html>
+app.use(express.static(path.join(__dirname, 'dist')));
+
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
