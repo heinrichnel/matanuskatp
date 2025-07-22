@@ -46,20 +46,20 @@ import LoadPlanningPage from './pages/trips/LoadPlanningPage';
 import TripCalendarPage from './pages/trips/TripCalendarPage';
 import AddTripPage from './pages/trips/AddTripPage';
 import FleetLocationMapPage from './pages/trips/FleetLocationMapPage';
-import ActiveTrips from './pages/trips/ActiveTrips';
+import ActiveTrips from './components/trips/ActiveTrips';
 import CompletedTrips from './pages/trips/CompletedTrips';
 import FlagsInvestigations from './pages/trips/FlagsInvestigations';
 import TripDashboard from './pages/trips/TripDashboard';
 
 // === INVOICES ===
 import InvoiceManagementPage from './pages/invoices/InvoiceManagementPage';
-import InvoiceTemplatesPage from './pages/invoices/InvoiceTemplatesPage';
-import InvoiceDashboard from './pages/invoices/InvoiceDashboard';
+import InvoiceTemplatesPage from './pages/invoices/InvoiceTemplates';
+import InvoiceDashboard from './pages/invoices/Dashboard';
 import InvoiceBuilder from './pages/invoices/InvoiceBuilder';
 import InvoiceApprovalFlow from './pages/invoices/InvoiceApprovalFlow';
 import TaxReportExport from './pages/invoices/TaxReportExport';
-import PendingInvoicesPage from './pages/invoices/PendingInvoicesPage';
-import PaidInvoicesPage from './pages/invoices/PaidInvoicesPage';
+import PendingInvoicesPage from './pages/invoices/PendingInvoices';
+import PaidInvoicesPage from './pages/invoices/PaidInvoices';
 
 // === DIESEL ===
 import DieselManagementPage from './pages/diesel/DieselManagementPage';
@@ -370,7 +370,6 @@ const App: React.FC = () => {
                       <Route path="/drivers/safety-scores" element={<GenericPlaceholderPage title="Safety Scores" />} />
                       <Route path="/drivers/dashboard" element={<DriverDashboard />} />
 
-                      {/* === FALLBACK === */}
                       <Route path="*" element={<DashboardPage />} />
 
                       {/* Dynamic routes from config */}

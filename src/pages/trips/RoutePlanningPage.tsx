@@ -232,7 +232,7 @@ const RoutePlanningPage: React.FC = () => {
         <div>
           {trip && (
             <Button
-              onClick={onClick}`)}
+              onClick={onClick}
               variant="outline"
             >
               Back to Trip Details

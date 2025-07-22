@@ -234,7 +234,7 @@ export async function getTyres(filters?: {
   maxTreadDepth?: number;
 }): Promise<Tyre[]> {
   try {
-    let q = collection(firestore, "tyres");
+    const q = collection(firestore, "tyres");
     let queryObject = query(q);
 
     // Apply filters if provided

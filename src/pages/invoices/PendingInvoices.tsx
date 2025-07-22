@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
  * Component for displaying and managing pending invoices
  */
 const PendingInvoicesPage: React.FC = () => {
+  // TODO: implement action handlers
+  const onClick = () => {};
   // Mock data
   const pendingInvoices = Array.from({ length: 10 }, (_, i) => ({
     id: `INV-${2023100 + i}`,
@@ -20,7 +22,7 @@ const PendingInvoicesPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Pending Invoices</h1>
         <div className="flex space-x-2">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onClick={onClick}}>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onClick={onClick}>
             Send Reminders
           </button>
           <Link to="/invoices/new" className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
@@ -51,7 +53,6 @@ const PendingInvoicesPage: React.FC = () => {
               <option>Last 30 days</option>
               <option>This month</option>
               <option>Last month</option>
-              <option>Custom</option>
             </select>
           </div>
           <div className="flex-1">
@@ -67,7 +68,7 @@ const PendingInvoicesPage: React.FC = () => {
             </select>
           </div>
           <div className="flex items-end">
-            <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick}}>
+            <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick}>
               Apply Filters
             </button>
           </div>
@@ -106,14 +107,165 @@ const PendingInvoicesPage: React.FC = () => {
                   <td className="px-4 py-3 text-sm">
                     <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                       {invoice.status}
+
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox
+
+class InspectionForm:
+    def __init__(self, master):
+        self.master = master
+        master.title("Truck and Trailer Inspection Form")
+
+        self.notebook = ttk.Notebook(master)
+        self.notebook.pack(pady=10, expand=True, fill="both")
+
+        self.truck_tab = ttk.Frame(self.notebook)
+        self.trailer_tab = ttk.Frame(self.notebook)
+
+        self.notebook.add(self.truck_tab, text="Truck Inspection")
+        self.notebook.add(self.trailer_tab, text="Trailer Inspection")
+
+        self.create_truck_form(self.truck_tab)
+        self.create_trailer_form(self.trailer_tab)
+
+        self.submit_button = tk.Button(master, text="Submit Inspection", command=self.submit_inspection)
+        self.submit_button.pack(pady=10)
+
+    def create_truck_form(self, frame):
+        # Truck Identification
+        tk.Label(frame, text="Truck ID:").grid(row=0, column=0, sticky="w", padx=5, pady=2)
+        self.truck_id = tk.Entry(frame)
+        self.truck_id.grid(row=0, column=1, sticky="ew", padx=5, pady=2)
+
+        # Date and Inspector
+        tk.Label(frame, text="Date:").grid(row=1, column=0, sticky="w", padx=5, pady=2)
+        self.truck_date = tk.Entry(frame)
+        self.truck_date.grid(row=1, column=1, sticky="ew", padx=5, pady=2)
+
+        tk.Label(frame, text="Inspector:").grid(row=2, column=0, sticky="w", padx=5, pady=2)
+        self.truck_inspector = tk.Entry(frame)
+        self.truck_inspector.grid(row=2, column=1, sticky="ew", padx=5, pady=2)
+
+        # Truck Inspection Items
+        self.truck_items = {
+            "Brakes": tk.StringVar(value="Pass"),
+            "Lights": tk.StringVar(value="Pass"),
+            "Tires": tk.StringVar(value="Pass"),
+            "Engine": tk.StringVar(value="Pass"),
+            "Steering": tk.StringVar(value="Pass"),
+        }
+
+        row_num = 3
+        for item, var in self.truck_items.items():
+            tk.Label(frame, text=f"{item}:").grid(row=row_num, column=0, sticky="w", padx=5, pady=2)
+            radio_pass = tk.Radiobutton(frame, text="Pass", variable=var, value="Pass")
+            radio_fail = tk.Radiobutton(frame, text="Fail", variable=var, value="Fail")
+            radio_pass.grid(row=row_num, column=1, padx=5, pady=2)
+            radio_fail.grid(row=row_num, column=2, padx=5, pady=2)
+            row_num += 1
+
+        # Truck Notes
+        tk.Label(frame, text="Notes:").grid(row=row_num, column=0, sticky="w", padx=5, pady=2)
+        self.truck_notes = tk.Text(frame, height=5, width=30)
+        self.truck_notes.grid(row=row_num, column=1, columnspan=2, sticky="ew", padx=5, pady=2)
+
+        # Configure grid layout
+        for i in range(3):
+            frame.grid_columnconfigure(i, weight=1)
+
+    def create_trailer_form(self, frame):
+        # Trailer Identification
+        tk.Label(frame, text="Trailer ID:").grid(row=0, column=0, sticky="w", padx=5, pady=2)
+        self.trailer_id = tk.Entry(frame)
+        self.trailer_id.grid(row=0, column=1, sticky="ew", padx=5, pady=2)
+
+        # Date and Inspector
+        tk.Label(frame, text="Date:").grid(row=1, column=0, sticky="w", padx=5, pady=2)
+        self.trailer_date = tk.Entry(frame)
+        self.trailer_date.grid(row=1, column=1, sticky="ew", padx=5, pady=2)
+
+        tk.Label(frame, text="Inspector:").grid(row=2, column=0, sticky="w", padx=5, pady=2)
+        self.trailer_inspector = tk.Entry(frame)
+        self.trailer_inspector.grid(row=2, column=1, sticky="ew", padx=5, pady=2)
+
+        # Trailer Inspection Items
+        self.trailer_items = {
+            "Brakes": tk.StringVar(value="Pass"),
+            "Lights": tk.StringVar(value="Pass"),
+            "Tires": tk.StringVar(value="Pass"),
+            "Coupling": tk.StringVar(value="Pass"),
+            "Structure": tk.StringVar(value="Pass"),
+        }
+
+        row_num = 3
+        for item, var in self.trailer_items.items():
+            tk.Label(frame, text=f"{item}:").grid(row=row_num, column=0, sticky="w", padx=5, pady=2)
+            radio_pass = tk.Radiobutton(frame, text="Pass", variable=var, value="Pass")
+            radio_fail = tk.Radiobutton(frame, text="Fail", variable=var, value="Fail")
+            radio_pass.grid(row=row_num, column=1, padx=5, pady=2)
+            radio_fail.grid(row=row_num, column=2, padx=5, pady=2)
+            row_num += 1
+
+        # Trailer Notes
+        tk.Label(frame, text="Notes:").grid(row=row_num, column=0, sticky="w", padx=5, pady=2)
+        self.trailer_notes = tk.Text(frame, height=5, width=30)
+        self.trailer_notes.grid(row=row_num, column=1, columnspan=2, sticky="ew", padx=5, pady=2)
+
+        # Configure grid layout
+        for i in range(3):
+            frame.grid_columnconfigure(i, weight=1)
+
+    def submit_inspection(self):
+        # Retrieve Truck Data
+        truck_data = {
+            "Truck ID": self.truck_id.get(),
+            "Date": self.truck_date.get(),
+            "Inspector": self.truck_inspector.get(),
+            "Brakes": self.truck_items["Brakes"].get(),
+            "Lights": self.truck_items["Lights"].get(),
+            "Tires": self.truck_items["Tires"].get(),
+            "Engine": self.truck_items["Engine"].get(),
+            "Steering": self.truck_items["Steering"].get(),
+            "Notes": self.truck_notes.get("1.0", tk.END).strip(),
+        }
+
+        # Retrieve Trailer Data
+        trailer_data = {
+            "Trailer ID": self.trailer_id.get(),
+            "Date": self.trailer_date.get(),
+            "Inspector": self.trailer_inspector.get(),
+            "Brakes": self.trailer_items["Brakes"].get(),
+            "Lights": self.trailer_items["Lights"].get(),
+            "Tires": self.trailer_items["Tires"].get(),
+            "Coupling": self.trailer_items["Coupling"].get(),
+            "Structure": self.trailer_items["Structure"].get(),
+            "Notes": self.trailer_notes.get("1.0", tk.END).strip(),
+        }
+
+        # Display Data (replace with actual saving logic)
+        message = "Truck Inspection Data:\n"
+        for key, value in truck_data.items():
+            message += f"{key}: {value}\n"
+
+        message += "\nTrailer Inspection Data:\n"
+        for key, value in trailer_data.items():
+            message += f"{key}: {value}\n"
+
+        messagebox.showinfo("Inspection Data", message)
+
+
+root = tk.Tk()
+form = InspectionForm(root)
+root.mainloop()
                     </span>
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-800" onClick={onClick}}>View</button>
-                      <button className="text-gray-600 hover:text-gray-800" onClick={onClick}}>Edit</button>
-                      <button className="text-green-600 hover:text-green-800" onClick={onClick}}>Mark Paid</button>
-                      <button className="text-red-600 hover:text-red-800" onClick={onClick}}>Delete</button>
+                      <button className="text-blue-600 hover:text-blue-800" onClick={onClick}>View</button>
+                      <button className="text-gray-600 hover:text-gray-800" onClick={onClick}>Edit</button>
+                      <button className="text-green-600 hover:text-green-800" onClick={onClick}>Mark Paid</button>
+                      <button className="text-red-600 hover:text-red-800" onClick={onClick}>Delete</button>
                     </div>
                   </td>
                 </tr>
