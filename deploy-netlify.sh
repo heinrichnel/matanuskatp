@@ -6,6 +6,13 @@
 echo "🚀 Matanuska Fleet Management - Netlify Simple Deployment"
 echo "========================================================"
 
+# Make sure the deployment preview exists
+if [ ! -d "deploy-preview" ]; then
+    echo "❌ Error: deploy-preview directory not found"
+    echo "Please run ./create-deployment-preview.sh first"
+    exit 1
+fi
+
 # Create deployment package
 echo "📦 Creating deployment package..."
 mkdir -p netlify-deploy

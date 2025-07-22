@@ -1,0 +1,10 @@
+# Netlify configuration file
+
+[build]
+  publish = "/"
+  command = ""  # Skip build command
+
+[[redirects]]
+  from = "/*"
+  to = "/sidebar-test.html"
+  status = 200
