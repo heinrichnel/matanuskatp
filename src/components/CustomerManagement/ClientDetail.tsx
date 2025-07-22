@@ -145,14 +145,14 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
               <Button
                 variant="outline"
                 icon={<Link className="w-4 h-4" />}
-                onClick={onManageRelationships}
+                onClick={onClick || (() => {})}
               >
                 Manage Relationships
               </Button>
               <Button
                 variant="outline"
                 icon={<Edit className="w-4 h-4" />}
-                onClick={onEdit}
+                onClick={onClick || (() => {})}
               >
                 Edit Client
               </Button>
@@ -373,7 +373,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
                 size="sm" 
                 variant="outline" 
                 icon={<Edit className="w-4 h-4" />}
-                onClick={onEdit}
+                onClick={onClick || (() => {})}
               >
                 Edit
               </Button>
@@ -402,7 +402,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
                 size="sm" 
                 variant="outline" 
                 icon={<Link className="w-4 h-4" />}
-                onClick={onManageRelationships}
+                onClick={onClick || (() => {})}
               >
                 Manage
               </Button>
@@ -448,7 +448,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
                 <div className="mt-4">
                   <Button 
                     size="sm" 
-                    onClick={onManageRelationships}
+                    onClick={onClick || (() => {})}
                     icon={<Link className="w-4 h-4" />}
                   >
                     Add Relationship

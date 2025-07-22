@@ -132,7 +132,7 @@ const Calendar: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Button 
-                onClick={previousMonth}
+                onClick={onClick || (() => {})}
                 variant="outline"
                 size="sm"
                 icon={<ChevronLeft className="w-4 h-4" />}
@@ -143,7 +143,7 @@ const Calendar: React.FC = () => {
                 {monthName} {currentMonth.getFullYear()}
               </h3>
               <Button 
-                onClick={nextMonth}
+                onClick={onClick || (() => {})}
                 variant="outline"
                 size="sm"
                 icon={<ChevronRight className="w-4 h-4" />}
@@ -155,21 +155,21 @@ const Calendar: React.FC = () => {
               <Button 
                 size="sm" 
                 variant={view === 'month' ? 'primary' : 'outline'}
-                onClick={() => setView('month')}
+                onClick={onClick || (() => {})}
               >
                 Month
               </Button>
               <Button 
                 size="sm" 
                 variant={view === 'week' ? 'primary' : 'outline'}
-                onClick={() => setView('week')}
+                onClick={onClick || (() => {})}
               >
                 Week
               </Button>
               <Button 
                 size="sm" 
                 variant={view === 'day' ? 'primary' : 'outline'}
-                onClick={() => setView('day')}
+                onClick={onClick || (() => {})}
               >
                 Day
               </Button>

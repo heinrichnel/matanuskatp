@@ -88,7 +88,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
           <p className="text-gray-600">
             Only administrators can delete completed trips. This restriction ensures data integrity and audit compliance.
           </p>
-          <Button onClick={onClose}>Close</Button>
+          <Button onClick={onClick || (() => {})}>Close</Button>
         </div>
       </Modal>
     );
@@ -208,14 +208,14 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={onClick || (() => {})}
             icon={<X className="w-4 h-4" />}
           >
             Cancel
           </Button>
           <Button
             variant="danger"
-            onClick={handleDelete}
+            onClick={onClick || (() => {})}
             disabled={confirmText !== confirmationText}
             icon={<Trash2 className="w-4 h-4" />}
           >

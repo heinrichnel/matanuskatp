@@ -97,35 +97,35 @@ const CustomerReports: React.FC = () => {
       <div className="flex space-x-2 overflow-x-auto pb-2">
         <Button
           variant={activeReport === 'revenue' ? 'primary' : 'outline'}
-          onClick={() => setActiveReport('revenue')}
+          onClick={onClick || (() => {})}
           icon={<BarChart2 className="w-4 h-4" />}
         >
           Revenue
         </Button>
         <Button
           variant={activeReport === 'trips' ? 'primary' : 'outline'}
-          onClick={() => setActiveReport('trips')}
+          onClick={onClick || (() => {})}
           icon={<TrendingUp className="w-4 h-4" />}
         >
           Trip Volume
         </Button>
         <Button
           variant={activeReport === 'services' ? 'primary' : 'outline'}
-          onClick={() => setActiveReport('services')}
+          onClick={onClick || (() => {})}
           icon={<PieChart className="w-4 h-4" />}
         >
           Service Mix
         </Button>
         <Button
           variant={activeReport === 'satisfaction' ? 'primary' : 'outline'}
-          onClick={() => setActiveReport('satisfaction')}
+          onClick={onClick || (() => {})}
           icon={<TrendingDown className="w-4 h-4" />}
         >
           Satisfaction
         </Button>
         <Button
           variant={activeReport === 'growth' ? 'primary' : 'outline'}
-          onClick={() => setActiveReport('growth')}
+          onClick={onClick || (() => {})}
           icon={<TrendingUp className="w-4 h-4" />}
         >
           Growth

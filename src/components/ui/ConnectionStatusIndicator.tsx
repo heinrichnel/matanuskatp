@@ -56,7 +56,7 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
             <WifiOff className="w-4 h-4" />
             {showText && <span className="ml-2 text-sm">Offline Mode</span>}
             <button 
-              onClick={handleReconnect} 
+              onClick={onClick || (() => {})} 
               className="ml-2 p-1 rounded hover:bg-gray-100"
               disabled={isReconnecting}
               title="Try to reconnect"
@@ -85,7 +85,7 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
               </span>
             )}
             <button 
-              onClick={handleReconnect} 
+              onClick={onClick || (() => {})} 
               className="ml-2 p-1 rounded hover:bg-gray-100"
               disabled={isReconnecting}
               title="Try to reconnect"

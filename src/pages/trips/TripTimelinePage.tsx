@@ -282,7 +282,7 @@ const TripTimelinePage: React.FC = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={goToPreviousPeriod}
+                onClick={onClick || (() => {})}
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -290,7 +290,7 @@ const TripTimelinePage: React.FC = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={goToToday}
+                onClick={onClick || (() => {})}
               >
                 Today
               </Button>
@@ -298,7 +298,7 @@ const TripTimelinePage: React.FC = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={goToNextPeriod}
+                onClick={onClick || (() => {})}
               >
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -310,7 +310,7 @@ const TripTimelinePage: React.FC = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={toggleTimelineMode}
+                onClick={onClick || (() => {})}
               >
                 {timelineMode === 'week' ? 'Month View' : 'Week View'}
               </Button>

@@ -529,7 +529,7 @@ const PurchaseOrderTracker: React.FC = () => {
                       <tr className={`hover:bg-gray-50 ${expandedOrder === po.id ? 'bg-blue-50' : ''}`}>
                         <td className="px-6 py-4 whitespace-nowrap font-medium">
                           <button 
-                            onClick={() => toggleExpandOrder(po.id)}
+                            onClick={onClick || (() => {})}
                             className="flex items-center text-indigo-600 hover:text-indigo-900"
                           >
                             {expandedOrder === po.id ? 
@@ -563,9 +563,9 @@ const PurchaseOrderTracker: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center space-x-3">
-                            <button className="text-indigo-600 hover:text-indigo-900">Edit</button>
+                            <button className="text-indigo-600 hover:text-indigo-900" onClick={onClick || (() => {})}}>Edit</button>
                             <div className="relative inline-block text-left">
-                              <button className="text-gray-600 hover:text-gray-900">
+                              <button className="text-gray-600 hover:text-gray-900" onClick={onClick || (() => {})}}>
                                 <MoreHorizontal size={16} />
                               </button>
                             </div>

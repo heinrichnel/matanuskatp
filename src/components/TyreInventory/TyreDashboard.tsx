@@ -9,7 +9,7 @@ export const TyreDashboard: React.FC = () => {
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-lg font-semibold">Tire Inventory</h1>
-        <button onClick={() => setShowForm(true)} className="bg-blue-600 text-white px-4 py-2 rounded">
+        <button onClick={onClick || (() => {})}}> setShowForm(true)} className="bg-blue-600 text-white px-4 py-2 rounded">
           + Add New Tire
         </button>
       </div>
@@ -40,7 +40,7 @@ export const TyreDashboard: React.FC = () => {
           {tyres.map((tyre, idx) => (
             <tr key={idx}>
               <td>
-                <button className="text-blue-600 underline">Action</button>
+                <button className="text-blue-600 underline" onClick={onClick || (() => {})}}>Action</button>
               </td>
               <td>{tyre.tireNumber}</td>
               <td>{tyre.manufacturer}</td>

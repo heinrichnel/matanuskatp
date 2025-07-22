@@ -270,14 +270,14 @@ const LoadConfirmationForm: React.FC = () => {
             <>
               <Button
                 variant="outline"
-                onClick={downloadPdf}
+                onClick={onClick || (() => {})}
                 icon={<Download className="w-4 h-4" />}
               >
                 Download
               </Button>
               <Button
                 variant="outline"
-                onClick={printPdf}
+                onClick={onClick || (() => {})}
                 icon={<Printer className="w-4 h-4" />}
               >
                 Print
@@ -286,7 +286,7 @@ const LoadConfirmationForm: React.FC = () => {
           )}
           <Button
             variant={generatedPdfUrl ? "outline" : "primary"}
-            onClick={generatedPdfUrl ? resetForm : handleSubmit}
+            onClick={onClick || (() => {})}
             icon={generatedPdfUrl ? <FileText className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
             isLoading={isGenerating}
           >
@@ -612,7 +612,7 @@ const LoadConfirmationForm: React.FC = () => {
                     
                     <Button
                       className="mt-4"
-                      onClick={handleSubmit}
+                      onClick={onClick || (() => {})}
                       icon={<FileText className="w-4 h-4" />}
                       isLoading={isGenerating}
                     >

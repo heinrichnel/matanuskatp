@@ -217,49 +217,49 @@ const DriverFuelBehavior: React.FC = () => {
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('driverName')}
+                    onClick={onClick || (() => {})}
                   >
                     Driver Name
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('overallScore')}
+                    onClick={onClick || (() => {})}
                   >
                     Overall Score
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('idlingScore')}
+                    onClick={onClick || (() => {})}
                   >
                     Idling
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('accelerationScore')}
+                    onClick={onClick || (() => {})}
                   >
                     Acceleration
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('speedScore')}
+                    onClick={onClick || (() => {})}
                   >
                     Speed
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('fuelEfficiency')}
+                    onClick={onClick || (() => {})}
                   >
                     Fuel Efficiency
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('brakeCount')}
+                    onClick={onClick || (() => {})}
                   >
                     Harsh Braking
                   </th>

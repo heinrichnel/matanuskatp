@@ -115,7 +115,7 @@ const FlagsInvestigations: React.FC<FlagsInvestigationsProps> = (props) => {
             <div className={`p-4 rounded-md flex items-start space-x-3 ${feedback.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
                 {feedback.type === 'success' ? <CheckCircle className="h-5 w-5"/> : <XCircle className="h-5 w-5"/>}
                 <p className="flex-1 text-sm font-medium">{feedback.message}</p>
-                <button onClick={() => setFeedback(null)}><X className="h-5 w-5" /></button>
+                <button onClick={onClick || (() => {})}}> setFeedback(null)}><X className="h-5 w-5" /></button>
             </div>
         )}
         
@@ -183,9 +183,9 @@ const FlagsInvestigations: React.FC<FlagsInvestigationsProps> = (props) => {
                         {cost.attachments.length > 0 ? (<div className="flex items-center space-x-2"><Upload className="w-4 h-4 text-green-600" /><span className="text-sm text-green-700 font-medium">{cost.attachments.length} document(s) attached</span></div>) : (<div className="flex items-center space-x-2"><AlertTriangle className="w-4 h-4 text-red-600" /><span className="text-sm text-red-700 font-medium">No documents attached</span></div>)}
                       </div>
                       <div className="flex justify-end space-x-2">
-                        <Button size="sm" variant="outline" icon={<Eye className="w-3 h-3" />} onClick={() => alert(`Viewing details for cost: ${cost.referenceNumber}`)}>View</Button>
+                        <Button size="sm" variant="outline" icon={<Eye className="w-3 h-3" />} onClick={onClick || (() => {})}`)}>View</Button>
                         {canResolve ? (
-                          <Button size="sm" onClick={() => handleOpenResolution(cost)} icon={<Edit className="w-3 h-3" />}>Resolve Flag</Button>
+                          <Button size="sm" onClick={onClick || (() => {})} icon={<Edit className="w-3 h-3" />}>Resolve Flag</Button>
                         ) : (
                           <div className="flex items-center space-x-2 text-sm text-green-600">
                             <CheckCircle className="w-4 h-4" />

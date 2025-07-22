@@ -198,7 +198,7 @@ const IndirectCostBreakdown: React.FC = () => {
                           <Cell 
                             key={`cell-${index}`} 
                             fill={COLORS[index % COLORS.length]} 
-                            onClick={() => handleCategoryClick(entry)}
+                            onClick={onClick || (() => {})}
                             cursor="pointer"
                           />
                         ))}
@@ -262,7 +262,7 @@ const IndirectCostBreakdown: React.FC = () => {
                         <Button 
                           variant="outline" 
                           className="text-sm" 
-                          onClick={() => handleCategoryClick(category)}
+                          onClick={onClick || (() => {})}
                         >
                           View Details
                         </Button>
@@ -290,7 +290,7 @@ const IndirectCostBreakdown: React.FC = () => {
           <CardHeader>
             <div className="flex justify-between">
               <h3 className="text-lg font-medium">{selectedCategory.name} - {formatCurrency(selectedCategory.amount)}</h3>
-              <Button variant="outline" onClick={() => setSelectedCategory(null)}>Close</Button>
+              <Button variant="outline" onClick={onClick || (() => {})}>Close</Button>
             </div>
           </CardHeader>
           <CardContent>

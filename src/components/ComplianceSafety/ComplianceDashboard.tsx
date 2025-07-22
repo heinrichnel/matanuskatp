@@ -48,7 +48,7 @@ const ComplianceDashboard: React.FC = () => {
           <Link to="/compliance/incidents/new" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
             Report Incident
           </Link>
-          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200">
+          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick || (() => {})}}>
             Schedule Inspection
           </button>
         </div>

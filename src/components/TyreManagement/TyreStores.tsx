@@ -72,7 +72,7 @@ const TyreStores: React.FC = () => {
           <div 
             key={location}
             className={`cursor-pointer ${selectedStore === location ? 'border-blue-500 border-2' : ''}`}
-            onClick={() => setSelectedStore(location as TyreStoreLocation)}
+            onClick={onClick || (() => {})}
           >
             <Card>
               <CardHeader className="pb-2">
@@ -107,7 +107,7 @@ const TyreStores: React.FC = () => {
                   className={`border rounded-lg p-4 hover:bg-gray-50 ${
                     selectedTyre === tyre.id ? 'bg-blue-50 border-blue-300' : ''
                   }`}
-                  onClick={() => setSelectedTyre(tyre.id)}
+                  onClick={onClick || (() => {})}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
@@ -189,7 +189,7 @@ const TyreStores: React.FC = () => {
             
             <div className="mt-4 flex justify-end">
               <Button 
-                onClick={handleMoveTyre} 
+                onClick={onClick || (() => {})} 
                 disabled={isMoving || !moveToStore}
               >
                 <ArrowRightLeft className="w-4 h-4 mr-2" />

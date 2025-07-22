@@ -246,7 +246,7 @@ const TripForm: React.FC<TripFormProps> = ({ trip, onSubmit, onCancel, isSubmitt
       />
 
       <div className="flex justify-end space-x-2 pt-4">
-        <Button type="button" variant="secondary" onClick={onCancel}>
+        <Button type="button" variant="secondary" onClick={onClick || (() => {})}>
           Cancel
         </Button>
         <Button type="submit">{trip ? 'Update Trip' : 'Create Trip'}</Button>

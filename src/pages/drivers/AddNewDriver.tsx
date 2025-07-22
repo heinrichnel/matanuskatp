@@ -204,7 +204,7 @@ const AddNewDriver: React.FC = () => {
         <div className="flex justify-end space-x-3">
           <button 
             type="button" 
-            onClick={() => navigate('/drivers')}
+            onClick={onClick || (() => {})}
             className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200"
           >
             Cancel

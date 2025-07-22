@@ -73,7 +73,7 @@ const AnalyticsDashboard: React.FC = () => {
             <option value="90d">Last Quarter</option>
             <option value="365d">Last Year</option>
           </select>
-          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200">
+          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick || (() => {})}}>
             Export Data
           </button>
         </div>

@@ -85,7 +85,7 @@ const ClientManagementPage: React.FC = () => {
             />
           </div>
           
-          <Button onClick={handleAddNewClient} icon={<UserPlus className="w-4 h-4" />}>
+          <Button onClick={onClick || (() => {})} icon={<UserPlus className="w-4 h-4" />}>
             Add Client
           </Button>
         </div>
@@ -135,7 +135,7 @@ const ClientManagementPage: React.FC = () => {
                 Select a client from the client list to view their details, or add a new client to get started.
               </p>
               <div className="mt-6">
-                <Button onClick={handleAddNewClient} icon={<UserPlus className="w-4 h-4" />}>
+                <Button onClick={onClick || (() => {})} icon={<UserPlus className="w-4 h-4" />}>
                   Add New Client
                 </Button>
               </div>

@@ -530,7 +530,7 @@ const TyreInspection: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={handleToggleInspectionHistory}
+                      onClick={onClick || (() => {})}
                       icon={<ShoppingBag className="w-4 h-4" />}
                     >
                       {showInspectionHistory ? "Hide History" : "View History"}
@@ -703,7 +703,7 @@ const TyreInspection: React.FC = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={handleToggleNewTyreFields}
+                        onClick={onClick || (() => {})}
                         icon={<ShoppingBag className="w-4 h-4" />}
                         size="sm"
                       >
@@ -930,7 +930,7 @@ const TyreInspection: React.FC = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={handlePhotoUpload}
+                        onClick={onClick || (() => {})}
                         icon={<Camera className="w-4 h-4" />}
                         size="sm"
                       >
@@ -939,7 +939,7 @@ const TyreInspection: React.FC = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={handlePhotoUpload}
+                        onClick={onClick || (() => {})}
                         icon={<Upload className="w-4 h-4" />}
                         size="sm"
                       >
@@ -998,7 +998,7 @@ const TyreInspection: React.FC = () => {
                     <Button
                       type="button"
                       variant="primary"
-                      onClick={handleSubmit}
+                      onClick={onClick || (() => {})}
                       icon={<Save className="w-4 h-4" />}
                       isLoading={isSubmitting}
                       disabled={
@@ -1202,7 +1202,7 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
       </div>
 
       <Button 
-        onClick={handleSave}
+        onClick={onClick || (() => {})}
         className="w-full"
         disabled={!inspectionData.vehicleId || !inspectionData.position}
       >

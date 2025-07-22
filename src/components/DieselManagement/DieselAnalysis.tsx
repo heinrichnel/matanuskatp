@@ -177,7 +177,7 @@ const DieselAnalysis: React.FC<DieselAnalysisProps> = ({ dieselRecords = [] }) =
               />
             </div>
             <Button
-              onClick={() => setDateRange({ start: '', end: '' })}
+              onClick={onClick || (() => {})})}
             >
               Clear Filters
             </Button>

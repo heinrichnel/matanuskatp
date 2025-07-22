@@ -299,20 +299,20 @@ const DieselDashboard: React.FC = () => {
         <div className="flex space-x-2">
           <Button
             variant="outline"
-            onClick={() => setShowNormsModal(true)}
+            onClick={onClick || (() => {})}
             icon={<Settings className="w-4 h-4" />}
           >
             Configure Norms
           </Button>
           <Button
             variant="outline"
-            onClick={() => setShowImportModal(true)}
+            onClick={onClick || (() => {})}
             icon={<Upload className="w-4 h-4" />}
           >
             Import
           </Button>
           <Button
-            onClick={() => setShowManualEntryModal(true)}
+            onClick={onClick || (() => {})}
             icon={<Plus className="w-4 h-4" />}
           >
             Add Diesel Entry
@@ -434,7 +434,7 @@ const DieselDashboard: React.FC = () => {
                     size="sm"
                     variant="outline"
                     className="mt-2"
-                    onClick={() => setShowDebriefModal(true)}
+                    onClick={onClick || (() => {})}
                   >
                     Start Debrief Process
                   </Button>
@@ -482,14 +482,14 @@ const DieselDashboard: React.FC = () => {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={clearFilters}
+                onClick={onClick || (() => {})}
               >
                 Clear Filters
               </Button>
               <Button
                 size="sm"
                 variant="outline"
-                onClick={handleExportRecords}
+                onClick={onClick || (() => {})}
                 icon={<Download className="w-4 h-4" />}
                 isLoading={isLoading}
               >
@@ -573,7 +573,7 @@ const DieselDashboard: React.FC = () => {
           action={
             <Button
               size="sm"
-              onClick={() => setShowManualEntryModal(true)}
+              onClick={onClick || (() => {})}
               icon={<Plus className="w-4 h-4" />}
             >
               Add Record
@@ -593,7 +593,7 @@ const DieselDashboard: React.FC = () => {
               {!filterFleet && !filterDriver && !filterFuelStation && !filterDateRange.start && !filterDateRange.end && filterType === 'all' && (
                 <div className="mt-4">
                   <Button
-                    onClick={() => setShowManualEntryModal(true)}
+                    onClick={onClick || (() => {})}
                     icon={<Plus className="w-4 h-4" />}
                   >
                     Add First Diesel Record
@@ -714,7 +714,7 @@ const DieselDashboard: React.FC = () => {
                               <Button
                                 size="xs"
                                 variant="outline"
-                                onClick={() => handleOpenProbeModal(record.id)}
+                                onClick={onClick || (() => {})}
                               >
                                 Verify
                               </Button>
@@ -724,7 +724,7 @@ const DieselDashboard: React.FC = () => {
                               <Button
                                 size="xs"
                                 variant="outline"
-                                onClick={() => handleOpenLinkageModal(record.id)}
+                                onClick={onClick || (() => {})}
                               >
                                 Link
                               </Button>
@@ -734,7 +734,7 @@ const DieselDashboard: React.FC = () => {
                               size="xs"
                               variant="danger"
                               icon={<Trash2 className="w-3 h-3" />}
-                              onClick={() => handleDeleteDieselRecord(record.id)}
+                              onClick={onClick || (() => {})}
                               isLoading={isDeleting === record.id}
                               disabled={isDeleting !== null}
                             >

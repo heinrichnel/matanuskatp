@@ -78,7 +78,7 @@ const EnhancedProbeVerificationModal: React.FC<EnhancedProbeVerificationModalPro
             </div>
           </div>
           <div className="flex justify-end">
-            <Button onClick={onClose}>Close</Button>
+            <Button onClick={onClick || (() => {})}>Close</Button>
           </div>
         </div>
       </Modal>
@@ -388,14 +388,14 @@ const EnhancedProbeVerificationModal: React.FC<EnhancedProbeVerificationModalPro
         <div className="flex justify-end space-x-3 pt-6 border-t">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={onClick || (() => {})}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button
-            onClick={handleSubmit}
+            onClick={onClick || (() => {})}
             icon={<Save className="w-4 h-4" />}
             isLoading={isSubmitting}
             disabled={isSubmitting || !probeReading}

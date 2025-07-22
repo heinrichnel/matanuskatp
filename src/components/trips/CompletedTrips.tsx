@@ -197,7 +197,7 @@ const CompletedTrips: React.FC<CompletedTripsProps> = ({ displayCurrency }) => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('tripNumber')}>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={onClick || (() => {})}>
                   Trip Number {sortField === 'tripNumber' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -206,13 +206,13 @@ const CompletedTrips: React.FC<CompletedTripsProps> = ({ displayCurrency }) => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Driver / Vehicle
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('endDate')}>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={onClick || (() => {})}>
                   Completion Date {sortField === 'endDate' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('cost')}>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={onClick || (() => {})}>
                   Cost {sortField === 'cost' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSort('revenue')}>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={onClick || (() => {})}>
                   Revenue {sortField === 'revenue' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -258,8 +258,8 @@ const CompletedTrips: React.FC<CompletedTripsProps> = ({ displayCurrency }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-                      <button className="text-indigo-600 hover:text-indigo-900">Details</button>
-                      <button className="text-blue-600 hover:text-blue-900">Report</button>
+                      <button className="text-indigo-600 hover:text-indigo-900" onClick={onClick || (() => {})}}>Details</button>
+                      <button className="text-blue-600 hover:text-blue-900" onClick={onClick || (() => {})}}>Report</button>
                     </div>
                   </td>
                 </tr>

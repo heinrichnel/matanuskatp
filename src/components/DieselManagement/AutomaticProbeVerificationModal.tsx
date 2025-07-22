@@ -108,7 +108,7 @@ Fuel tanks: ${sensorData.fuelTanks.map((tank: FuelTankData) =>
             </div>
           </div>
           <div className="flex justify-end">
-            <Button onClick={onClose}>Close</Button>
+            <Button onClick={onClick || (() => {})}>Close</Button>
           </div>
         </div>
       </Modal>
@@ -445,7 +445,7 @@ Data timestamp: ${sensorData.lastUpdated.toLocaleString()}`;
               <Button
                 size="sm"
                 variant="outline"
-                onClick={fetchSensorData}
+                onClick={onClick || (() => {})}
                 icon={<RefreshCw className="w-4 h-4" />}
                 isLoading={isFetchingSensorData}
                 disabled={isFetchingSensorData}
@@ -593,14 +593,14 @@ Data timestamp: ${sensorData.lastUpdated.toLocaleString()}`;
         <div className="flex justify-end space-x-3 pt-6 border-t">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={onClick || (() => {})}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button
-            onClick={handleSubmit}
+            onClick={onClick || (() => {})}
             icon={<Save className="w-4 h-4" />}
             isLoading={isSubmitting}
             disabled={isSubmitting || !probeReading}

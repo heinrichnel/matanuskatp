@@ -193,7 +193,7 @@ const FaultTracker: React.FC = () => {
         </h1>
         
         <button
-          onClick={() => setIsAddingFault(!isAddingFault)}
+          onClick={onClick || (() => {})}
           className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md flex items-center"
         >
           <Plus size={20} className="mr-1" />
@@ -284,13 +284,13 @@ const FaultTracker: React.FC = () => {
           
           <div className="flex justify-end space-x-3">
             <button
-              onClick={() => setIsAddingFault(false)}
+              onClick={onClick || (() => {})}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
             >
               Cancel
             </button>
             <button
-              onClick={handleAddFault}
+              onClick={onClick || (() => {})}
               className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
             >
               Submit Fault
@@ -421,7 +421,7 @@ const FaultTracker: React.FC = () => {
                           <option value="completed">Completed</option>
                         </select>
                         
-                        <button className="text-gray-500 hover:text-gray-700">
+                        <button className="text-gray-500 hover:text-gray-700" onClick={onClick || (() => {})}}>
                           <MoreHorizontal size={20} />
                         </button>
                       </div>

@@ -9,10 +9,10 @@ const CreateInvoicePage: React.FC = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Create New Invoice</h1>
         <div className="flex space-x-2">
-          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200">
+          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick || (() => {})}}>
             Save as Draft
           </button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onClick={onClick || (() => {})}}>
             Save & Preview
           </button>
         </div>
@@ -124,14 +124,14 @@ const CreateInvoicePage: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <button className="text-red-600 hover:text-red-800">
+                    <button className="text-red-600 hover:text-red-800" onClick={onClick || (() => {})}}>
                       Remove
                     </button>
                   </td>
                 </tr>
                 <tr>
                   <td colSpan={6} className="px-4 py-3">
-                    <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200 w-full">
+                    <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200 w-full" onClick={onClick || (() => {})}}>
                       Add Item
                     </button>
                   </td>
@@ -200,13 +200,13 @@ const CreateInvoicePage: React.FC = () => {
       </div>
       
       <div className="flex justify-end space-x-3">
-        <button className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-50">
+        <button className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-50" onClick={onClick || (() => {})}}>
           Cancel
         </button>
-        <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200">
+        <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick || (() => {})}}>
           Save as Draft
         </button>
-        <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+        <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onClick={onClick || (() => {})}}>
           Save & Preview
         </button>
       </div>

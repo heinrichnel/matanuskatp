@@ -171,7 +171,7 @@ const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
                       <div 
                         key={pos.position} 
                         className="relative cursor-pointer"
-                        onClick={() => handlePositionClick(pos.position)}
+                        onClick={onClick || (() => {})}
                       >
                         <div 
                           className={`w-16 h-16 rounded-full flex items-center justify-center border-4 ${
@@ -203,7 +203,7 @@ const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
                       <div 
                         key={pos.position} 
                         className="relative cursor-pointer"
-                        onClick={() => handlePositionClick(pos.position)}
+                        onClick={onClick || (() => {})}
                       >
                         <div 
                           className={`w-16 h-16 rounded-full flex items-center justify-center border-4 ${
@@ -235,7 +235,7 @@ const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
                       <div 
                         key={pos.position} 
                         className="relative cursor-pointer"
-                        onClick={() => handlePositionClick(pos.position)}
+                        onClick={onClick || (() => {})}
                       >
                         <div 
                           className={`w-16 h-16 rounded-full flex items-center justify-center border-4 ${

@@ -76,7 +76,7 @@ const TripDashboard: React.FC = () => {
         </div>
         <div className="flex space-x-2">
           <Button
-            onClick={handleExportData}
+            onClick={onClick || (() => {})}
             disabled={trips.length === 0 || isLoading?.loadTrips}
             icon={<Download className="w-4 h-4 mr-2" />}
           >

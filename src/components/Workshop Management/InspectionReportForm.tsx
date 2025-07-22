@@ -161,10 +161,10 @@ const InspectionReportForm: React.FC<InspectionReportFormProps> = ({
             <p className="text-gray-500">{data.reportNumber}</p>
           </div>
           <div className="space-x-2">
-            <Button onClick={handleGeneratePDF} variant="secondary" icon={<Download size={16} />}>
+            <Button onClick={onClick || (() => {})} variant="secondary" icon={<Download size={16} />}>
               Download PDF
             </Button>
-            <Button onClick={() => setIsPreview(false)} variant="outline">
+            <Button onClick={onClick || (() => {})} variant="outline">
               Back to Edit
             </Button>
           </div>
@@ -301,13 +301,13 @@ const InspectionReportForm: React.FC<InspectionReportFormProps> = ({
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-bold">Inspection Report</h2>
           <div className="space-x-2">
-            <Button onClick={() => setIsPreview(true)} variant="outline">
+            <Button onClick={onClick || (() => {})} variant="outline">
               Preview
             </Button>
-            <Button onClick={handleSave} variant="primary" icon={<Check size={16} />}>
+            <Button onClick={onClick || (() => {})} variant="primary" icon={<Check size={16} />}>
               Save Report
             </Button>
-            <Button onClick={onCancel} variant="secondary" icon={<X size={16} />}>
+            <Button onClick={onClick || (() => {})} variant="secondary" icon={<X size={16} />}>
               Cancel
             </Button>
           </div>
@@ -517,7 +517,7 @@ const InspectionReportForm: React.FC<InspectionReportFormProps> = ({
                               <img src={img} alt={`${item.name} image ${idx}`} className="w-full h-full object-cover" />
                               <button
                                 className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                                onClick={() => handleRemoveImage(item.id, idx)}
+                                onClick={onClick || (() => {})}
                               >
                                 <Trash2 size={16} className="text-white" />
                               </button>
@@ -528,7 +528,7 @@ const InspectionReportForm: React.FC<InspectionReportFormProps> = ({
                     </td>
                     <td className="py-3 px-4">
                       <button
-                        onClick={() => setActiveItem(item.id)}
+                        onClick={onClick || (() => {})}
                         className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-2 py-1 rounded text-sm font-medium flex items-center"
                       >
                         <Camera size={16} className="mr-1" />
@@ -571,7 +571,7 @@ const InspectionReportForm: React.FC<InspectionReportFormProps> = ({
                 </label>
               </div>
               <div className="flex justify-end">
-                <Button onClick={() => setActiveItem(null)} variant="secondary">
+                <Button onClick={onClick || (() => {})} variant="secondary">
                   Close
                 </Button>
               </div>

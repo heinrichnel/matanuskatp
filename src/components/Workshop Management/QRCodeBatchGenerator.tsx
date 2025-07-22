@@ -74,7 +74,7 @@ export const QRCodeBatchGenerator: React.FC = () => {
               <Button 
                 variant="ghost" 
                 className="flex items-center gap-1" 
-                onClick={() => navigate('/workshop/qr-generator')}
+                onClick={onClick || (() => {})}
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Single QR Generator
@@ -99,13 +99,13 @@ export const QRCodeBatchGenerator: React.FC = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleSelectAll}
+                onClick={onClick || (() => {})}
               >
                 {selectedVehicles.length === vehicles.length ? 'Deselect All' : 'Select All'}
               </Button>
 
               <Button
-                onClick={handlePrint}
+                onClick={onClick || (() => {})}
                 className="flex items-center gap-2"
                 disabled={vehiclesToShow.length === 0}
               >

@@ -412,7 +412,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
         <Button
           type="button"
           variant="outline"
-          onClick={onCancel}
+          onClick={onClick || (() => {})}
           icon={<X className="w-4 h-4" />}
         >
           Cancel

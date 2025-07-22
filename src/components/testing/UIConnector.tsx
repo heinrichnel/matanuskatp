@@ -240,7 +240,7 @@ export const UIConnector: React.FC = () => {
           borderRadius: '5px',
           cursor: 'pointer'
         }}
-        onClick={() => setIsOpen(true)}
+        onClick={onClick || (() => {})}
       >
         UI Tester
       </button>
@@ -253,7 +253,7 @@ export const UIConnector: React.FC = () => {
         <h3 style={{ margin: 0 }}>UI Connection Tester</h3>
         <button 
           style={{ ...styles.button, ...styles.buttonRed }}
-          onClick={() => setIsOpen(false)}
+          onClick={onClick || (() => {})}
         >
           ✕
         </button>
@@ -264,13 +264,13 @@ export const UIConnector: React.FC = () => {
         <div>
           <button 
             style={{ ...styles.button, marginBottom: '5px' }}
-            onClick={() => highlightElements('buttons', true)}
+            onClick={onClick || (() => {})}
           >
             Highlight Connected
           </button>
           <button 
             style={{ ...styles.button, marginBottom: '5px' }}
-            onClick={() => highlightElements('buttons', false)}
+            onClick={onClick || (() => {})}
           >
             Highlight Disconnected
           </button>
@@ -298,13 +298,13 @@ export const UIConnector: React.FC = () => {
         <div>
           <button 
             style={{ ...styles.button, marginBottom: '5px' }}
-            onClick={() => highlightElements('forms', true)}
+            onClick={onClick || (() => {})}
           >
             Highlight Connected
           </button>
           <button 
             style={{ ...styles.button, marginBottom: '5px' }}
-            onClick={() => highlightElements('forms', false)}
+            onClick={onClick || (() => {})}
           >
             Highlight Disconnected
           </button>
@@ -329,13 +329,13 @@ export const UIConnector: React.FC = () => {
         <div>
           <button 
             style={{ ...styles.button, marginBottom: '5px' }}
-            onClick={() => highlightElements('links', true)}
+            onClick={onClick || (() => {})}
           >
             Highlight Connected
           </button>
           <button 
             style={{ ...styles.button, marginBottom: '5px' }}
-            onClick={() => highlightElements('links', false)}
+            onClick={onClick || (() => {})}
           >
             Highlight Disconnected
           </button>
@@ -362,14 +362,14 @@ export const UIConnector: React.FC = () => {
         {highlightActive && (
           <button 
             style={{ ...styles.button, ...styles.buttonRed }}
-            onClick={removeHighlights}
+            onClick={onClick || (() => {})}
           >
             Remove Highlights
           </button>
         )}
         <button 
           style={{ ...styles.button, ...styles.buttonGreen }}
-          onClick={analyzeUI}
+          onClick={onClick || (() => {})}
         >
           Re-analyze Page
         </button>

@@ -37,7 +37,7 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren<{}>, ErrorBo
           <h1 className="text-3xl font-bold text-red-700 mb-3">Something went wrong.</h1>
           <p className="text-red-600 mb-6">{this.state.error?.message ?? 'Unexpected application error.'}</p>
           <button
-            onClick={this.handleReload}
+            onClick={onClick || (() => {})}
             className="px-5 py-2 rounded bg-red-700 text-white hover:bg-red-800 transition"
           >
             🔄 Reload Page

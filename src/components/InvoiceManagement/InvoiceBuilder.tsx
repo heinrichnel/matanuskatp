@@ -228,13 +228,13 @@ const InvoiceBuilder: React.FC = () => {
           <div className="flex border rounded-md overflow-hidden">
             <button
               className={`px-4 py-2 ${activeTab === 'edit' ? 'bg-blue-500 text-white' : 'bg-white'}`}
-              onClick={() => setActiveTab('edit')}
+              onClick={onClick || (() => {})}
             >
               Edit
             </button>
             <button
               className={`px-4 py-2 ${activeTab === 'preview' ? 'bg-blue-500 text-white' : 'bg-white'}`}
-              onClick={() => setActiveTab('preview')}
+              onClick={onClick || (() => {})}
             >
               Preview
             </button>
@@ -315,7 +315,7 @@ const InvoiceBuilder: React.FC = () => {
                   <Button
                     variant="outline"
                     icon={<Plus className="w-4 h-4" />}
-                    onClick={addItem}
+                    onClick={onClick || (() => {})}
                   >
                     Add Item
                   </Button>
@@ -398,7 +398,7 @@ const InvoiceBuilder: React.FC = () => {
                           </td>
                           <td className="px-4 py-2">
                             <button
-                              onClick={() => removeItem(item.id)}
+                              onClick={onClick || (() => {})}
                               className="text-red-500 hover:text-red-700"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -491,7 +491,7 @@ const InvoiceBuilder: React.FC = () => {
                       className={`p-3 border rounded-md cursor-pointer ${
                         selectedTemplate === template.id ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'
                       }`}
-                      onClick={() => loadTemplate(template.id)}
+                      onClick={onClick || (() => {})}
                     >
                       <div className="flex items-center">
                         <FileText className="h-5 w-5 mr-2 text-gray-500" />
@@ -511,7 +511,7 @@ const InvoiceBuilder: React.FC = () => {
                     variant="primary"
                     className="w-full justify-center"
                     icon={<Save className="w-4 h-4" />}
-                    onClick={() => saveInvoice(true)}
+                    onClick={onClick || (() => {})}
                     isLoading={isLoading}
                   >
                     Save as Draft
@@ -521,7 +521,7 @@ const InvoiceBuilder: React.FC = () => {
                     variant="outline"
                     className="w-full justify-center"
                     icon={<Send className="w-4 h-4" />}
-                    onClick={() => saveInvoice(false)}
+                    onClick={onClick || (() => {})}
                     isLoading={isLoading}
                   >
                     Create Invoice
@@ -531,7 +531,7 @@ const InvoiceBuilder: React.FC = () => {
                     variant="outline"
                     className="w-full justify-center"
                     icon={<Eye className="w-4 h-4" />}
-                    onClick={() => setActiveTab('preview')}
+                    onClick={onClick || (() => {})}
                   >
                     Preview Invoice
                   </Button>
@@ -685,7 +685,7 @@ const InvoiceBuilder: React.FC = () => {
               <Button
                 variant="outline"
                 icon={<Eye className="w-4 h-4" />}
-                onClick={() => setActiveTab('edit')}
+                onClick={onClick || (() => {})}
               >
                 Back to Edit
               </Button>

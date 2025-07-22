@@ -241,7 +241,7 @@ const DemandPartsForm: React.FC<DemandPartsFormProps> = ({
                 type="button"
                 size="sm" 
                 variant="outline" 
-                onClick={handleAddPart}
+                onClick={onClick || (() => {})}
                 icon={<Plus className="w-4 h-4 mr-1" />}
               >
                 Add Part
@@ -318,7 +318,7 @@ const DemandPartsForm: React.FC<DemandPartsFormProps> = ({
                         <button
                           type="button"
                           className="text-red-600 hover:text-red-900"
-                          onClick={() => handleRemovePart(part.id)}
+                          onClick={onClick || (() => {})}
                           disabled={formData.parts.length <= 1}
                         >
                           <Trash className="h-5 w-5" />
@@ -349,7 +349,7 @@ const DemandPartsForm: React.FC<DemandPartsFormProps> = ({
               <Button
                 type="button"
                 variant="outline"
-                onClick={onCancel}
+                onClick={onClick || (() => {})}
               >
                 Cancel
               </Button>

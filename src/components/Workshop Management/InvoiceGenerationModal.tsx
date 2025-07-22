@@ -290,14 +290,14 @@ const InvoiceGenerationModal: React.FC<InvoiceGenerationModalProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={onClick || (() => {})}
             icon={<X className="w-4 h-4" />}
             disabled={isLoading}
           >
             Cancel
           </Button>
           <Button
-            onClick={handleSubmit}
+            onClick={onClick || (() => {})}
             icon={<Send className="w-4 h-4" />}
             isLoading={isLoading}
           >

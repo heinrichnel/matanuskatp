@@ -39,7 +39,7 @@ const MapComponent: React.FC = () => {
                 value={mapboxToken}
                 onChange={(e) => setMapboxToken(e.target.value)}
               />
-              <Button onClick={handleTokenSubmit} className="w-full">
+              <Button onClick={onClick || (() => {})} className="w-full">
                 Initialize Map
               </Button>
             </CardContent>

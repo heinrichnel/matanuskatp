@@ -9,10 +9,10 @@ const AddNewCustomer: React.FC = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Add New Customer</h1>
         <div className="flex space-x-2">
-          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200">
+          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick || (() => {})}}>
             Import from CSV
           </button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onClick={onClick || (() => {})}}>
             Save Customer
           </button>
         </div>
@@ -187,7 +187,7 @@ const AddNewCustomer: React.FC = () => {
               </div>
               
               <div className="flex justify-end mt-2">
-                <button type="button" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200">
+                <button type="button" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick || (() => {})}}>
                   + Add Another Contact
                 </button>
               </div>

@@ -42,21 +42,21 @@ const TripRouter: React.FC = () => {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold mb-3">Quick Route Builder</h3>
               <p className="text-gray-600 mb-4">Create optimized routes for your fleet</p>
-              <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+              <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={onClick || (() => {})}}>
                 Start Planning
               </button>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold mb-3">Route Templates</h3>
               <p className="text-gray-600 mb-4">Use pre-built route templates</p>
-              <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+              <button className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700" onClick={onClick || (() => {})}}>
                 View Templates
               </button>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <h3 className="text-lg font-semibold mb-3">Route Analytics</h3>
               <p className="text-gray-600 mb-4">Analyze route performance and efficiency</p>
-              <button className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
+              <button className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700" onClick={onClick || (() => {})}}>
                 View Analytics
               </button>
             </div>

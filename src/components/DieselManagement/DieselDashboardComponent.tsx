@@ -200,8 +200,8 @@ const DieselDashboardComponent: React.FC = () => {
                   <td className="px-4 py-3 text-sm text-gray-500">{entry.driver}</td>
                   <td className="px-4 py-3 text-sm">
                     <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-800">View</button>
-                      <button className="text-gray-600 hover:text-gray-800">Edit</button>
+                      <button className="text-blue-600 hover:text-blue-800" onClick={onClick || (() => {})}}>View</button>
+                      <button className="text-gray-600 hover:text-gray-800" onClick={onClick || (() => {})}}>Edit</button>
                     </div>
                   </td>
                 </tr>
