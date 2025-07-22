@@ -2,10 +2,15 @@
   base = "/"
   command = "npm run build"
   publish = "dist"
+  # Disable build cache to ensure fresh builds
+  ignore = "false"
 
 [build.environment]
   # Node.js version for build
   NODE_VERSION = "22.15.1"
+  # Force clean build
+  NETLIFY_USE_YARN = "false"
+  NETLIFY_CLEAN_URLS = "true"
   
   # Build optimization
   CI = "true"

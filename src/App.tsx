@@ -160,6 +160,7 @@ import MapTestPage from './pages/Map/MapTestPage';
 import MapsView from './pages/Map/MapsView';
 import UIConnector from './components/UIConnector';
 
+// App.tsx - Simplified version to fix build errors
 const App: React.FC = () => {
   const [connectionError, setConnectionError] = useState<Error | null>(null);
   const [editingTrip, setEditingTrip] = useState<any>();
@@ -169,6 +170,14 @@ const App: React.FC = () => {
     console.log('App is running');
   }, []);
 
+  // Conditional UI connector rendering
+  const renderUIConnector = () => {
+    if (process.env.NODE_ENV !== 'production') {
+      return <UIConnector />;
+    }
+    return null;
+  };
+
   return (
     <ErrorBoundary>
       <AppProvider>
@@ -176,17 +185,14 @@ const App: React.FC = () => {
           <TyreStoresProvider>
             <TripProvider>
               <DriverBehaviorProvider>
-                {/* Display error notification if connection error exists */}
-                {connectionError && (
+                {connectionError ? (
                   <div className="fixed top-0 left-0 right-0 z-50 p-4">
                     <FirestoreConnectionError error={connectionError} />
                   </div>
-                )}
+                ) : null}
                 
-                {/* Only show UI connector in non-production mode */}
-                {process.env.NODE_ENV !== 'production' ? <UIConnector /> : null}
+                {renderUIConnector()}
                 
-                {/* Router and main application content */}
                 <Router>
                   <Routes>
                     <Route
@@ -197,17 +203,13 @@ const App: React.FC = () => {
                         />
                       }
                     >
-                      {/* Main routes */}
                       <Route path="/" element={<DashboardPage />} />
                       <Route path="/dashboard" element={<DashboardPage />} />
-                      
-                      {/* Generated routes from sidebarConfig.ts */}
                       <AppRoutes />
                     </Route>
                   </Routes>
                 </Router>
                 
-                {/* Trip form modal */}
                 <TripFormModal
                   isOpen={showTripForm}
                   onClose={() => setShowTripForm(false)}
