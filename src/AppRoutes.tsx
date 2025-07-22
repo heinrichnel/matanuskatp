@@ -1,5 +1,5 @@
-import React, { lazy, Suspense } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import React, { lazy, Suspense, Fragment } from 'react';
+import { Route } from 'react-router-dom';
 import { sidebarConfig } from './config/sidebarConfig';
 
 // Loader component for lazy loading
@@ -73,13 +73,13 @@ const generateRoutes = (items) => {
 // AppRoutes component
 export const AppRoutes = () => {
   return (
-    <Routes>
+    <Fragment>
       {/* Generate routes from sidebarConfig */}
       {generateRoutes(sidebarConfig)}
-      
+
       {/* Catch-all route for 404 page */}
-      <Route 
-        path="*" 
+      <Route
+        path="*"
         element={
           <Suspense fallback={<Loader />}>
             <div className="not-found-page">
@@ -87,8 +87,8 @@ export const AppRoutes = () => {
               <p>The page you are looking for doesn't exist or has been moved.</p>
             </div>
           </Suspense>
-        } 
+        }
       />
-    </Routes>
+    </Fragment>
   );
 };
