@@ -238,11 +238,11 @@ const DashboardPage: React.FC = () => {
           <CardHeader title="Quick Actions" />
           <CardContent className="p-6">
             <div className="space-y-3">
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50" onClick={onClick || (() => {})}>
+              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50" onClick={onClick}>
                 <div className="font-medium">Create New Trip</div>
                 <div className="text-sm text-gray-600">Start a new trip assignment</div>
               </button>
-              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50" onClick={onClick || (() => {})}>
+              <button className="w-full text-left p-3 rounded-lg border border-gray-200 hover:bg-gray-50" onClick={onClick}>
                 <div className="font-medium">Fleet Inspection</div>
                 <div className="text-sm text-gray-600">Schedule vehicle inspection</div>
               </button>

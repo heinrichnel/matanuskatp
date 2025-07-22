@@ -150,7 +150,7 @@ export const TyreReports: React.FC = () => {
 
       <button
         className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
-        onClick={onClick || (() => {})}
+        onClick={onClick}
       >
         Generate Report
       </button>

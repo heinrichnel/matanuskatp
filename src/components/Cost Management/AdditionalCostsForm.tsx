@@ -113,7 +113,7 @@ const AdditionalCostsForm: React.FC<AdditionalCostsFormProps> = ({
             !readOnly && (
               <Button
                 size="sm"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 icon={<Plus className="w-4 h-4" />}
               >
                 Add Additional Cost
@@ -161,7 +161,7 @@ const AdditionalCostsForm: React.FC<AdditionalCostsFormProps> = ({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 icon={<X className="w-4 h-4" />}
               >
                 Cancel
@@ -236,11 +236,11 @@ const AdditionalCostsForm: React.FC<AdditionalCostsFormProps> = ({
               <div className="flex justify-end space-x-3">
                 <Button
                   variant="outline"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   Cancel
                 </Button>
-                <Button onClick={onClick || (() => {})}>
+                <Button onClick={onClick}>
                   Add Additional Cost
                 </Button>
               </div>
@@ -297,7 +297,7 @@ const AdditionalCostsForm: React.FC<AdditionalCostsFormProps> = ({
                       <Button
                         size="sm"
                         variant="danger"
-                        onClick={onClick || (() => {})}
+                        onClick={onClick}
                         icon={<X className="w-3 h-3" />}
                       >
                         Remove

@@ -16,6 +16,7 @@
     "start": "node index.js",
     "test:routing": "bash test-routing-advanced.sh",
     "test:sidebar": "vite --host --config vite.config.ts --force ./src/testRouting.tsx",
+    "test:resilience": "bash test-resilience.sh",
     "verify:ui": "./verify-ui.sh",
     "verify:forms": "node check-form-connections.js",
     "verify:buttons": "node check-button-connections.js",

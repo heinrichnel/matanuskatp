@@ -124,7 +124,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
         </p>
         <button
           className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          onClick={onClick || (() => {})}
+          onClick={onClick}
         >
           Retry
         </button>
@@ -158,7 +158,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
               className="flex-1 border-0 focus:ring-0 text-sm"
             />
             <button
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               disabled={isSearching}
               className="ml-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
             >

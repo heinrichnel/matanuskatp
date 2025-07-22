@@ -256,7 +256,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
             variant="outline"
             size="md"
             icon={<RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             isLoading={refreshing || isLoading.loadTrips}
             disabled={refreshing || isLoading.loadTrips}
           >
@@ -266,7 +266,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
             variant="outline"
             size="md"
             icon={<Filter className="w-5 h-5" />}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             {showFilters ? "Hide Filters" : "Show Filters"}
           </Button>
@@ -358,7 +358,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                 variant="outline"
                 size="sm"
                 icon={<X className="w-4 h-4" />}
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 Clear All Filters
               </Button>

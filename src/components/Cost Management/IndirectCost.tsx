@@ -408,7 +408,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
         <Button
           type="button"
           variant="outline"
-          onClick={onClick || (() => {})}
+          onClick={onClick}
           icon={<X className="w-4 h-4" />}
         >
           Cancel
@@ -736,13 +736,13 @@ const SystemCostGenerator: React.FC<SystemCostGeneratorProps> = ({ trip, onGener
         <Button
           type="button"
           variant="outline"
-          onClick={onClick || (() => {})}
+          onClick={onClick}
         >
           Recalculate
         </Button>
         <Button
           type="button"
-          onClick={onClick || (() => {})}
+          onClick={onClick}
           disabled={generatedCosts.length === 0}
         >
           Add System Costs

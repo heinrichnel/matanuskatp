@@ -85,11 +85,11 @@ const TyreInspectionModal: React.FC<Props> = ({
         />
         
         <div className="flex justify-end space-x-3 pt-4">
-          <Button variant="outline" onClick={onClick || (() => {})} icon={<X className="w-4 h-4" />}>
+          <Button variant="outline" onClick={onClick} icon={<X className="w-4 h-4" />}>
             Cancel
           </Button>
           
-          <Button onClick={onClick || (() => {})} icon={<CheckCircle className="w-4 h-4" />}>
+          <Button onClick={onClick} icon={<CheckCircle className="w-4 h-4" />}>
             Submit Inspection
           </Button>
         </div>

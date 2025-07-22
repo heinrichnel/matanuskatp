@@ -241,7 +241,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
     <Card>
       <CardHeader 
         title={
-          <div className="flex items-center cursor-pointer" onClick={onClick || (() => {})}>
+          <div className="flex items-center cursor-pointer" onClick={onClick}>
             <Package className="mr-2 h-5 w-5" />
             <span>Load Planning</span>
             {expanded ? (
@@ -457,7 +457,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
               
               <div className="flex justify-end">
                 <Button 
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                   disabled={!newItem.description || newItem.weight <= 0 || newItem.volume <= 0}
                   icon={<Plus className="w-4 h-4" />}
                 >
@@ -545,7 +545,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
-                            onClick={onClick || (() => {})}
+                            onClick={onClick}
                             className="text-red-600 hover:text-red-900"
                           >
                             Delete
@@ -581,7 +581,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                 {!isAddingItem && (
                   <div className="mt-6">
                     <Button
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                       icon={<Plus className="w-4 h-4" />}
                     >
                       Add First Cargo Item

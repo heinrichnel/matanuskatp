@@ -40,17 +40,22 @@ try {
 }
 
 // Function to render the application
+// Import ErrorBoundary (create one if it doesn't exist)
+import ErrorBoundary from './components/ErrorBoundary';
+
 const renderApp = (isDev: boolean) => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-      <TyreStoresProvider>
-        <TyreProvider>
-          <>
-            {isDev && <div className="dev-indicator">Development Mode</div>}
-            <App />
-          </>
-        </TyreProvider>
-      </TyreStoresProvider>
+      <ErrorBoundary>
+        <TyreStoresProvider>
+          <TyreProvider>
+            <>
+              {isDev && <div className="dev-indicator">Development Mode</div>}
+              <App />
+            </>
+          </TyreProvider>
+        </TyreStoresProvider>
+      </ErrorBoundary>
     </React.StrictMode>
   );
 };
@@ -61,11 +66,20 @@ const initializeApp = async () => {
   
   try {
     // Import Firebase after ensuring proper initialization
-    await import('./firebase');
-    console.log('🔥 Firebase initialized successfully');
-    
-    // Initialize connection monitoring
-    await initializeConnectionMonitoring();
+    try {
+      await import('./firebase');
+      console.log('🔥 Firebase initialized successfully');
+      
+      // Initialize connection monitoring
+      try {
+        await initializeConnectionMonitoring();
+        console.log('🔄 Firebase connection monitoring initialized');
+      } catch (connError) {
+        console.warn('⚠️ Could not initialize connection monitoring:', connError);
+      }
+    } catch (firebaseError) {
+      console.error('❌ Failed to initialize Firebase:', firebaseError);
+    }
     
     // Validate environment variables
     const requiredEnvVars = [
@@ -81,33 +95,26 @@ const initializeApp = async () => {
       isValid ? '✅ Valid' : '❌ Issues found',
       missingVars.length > 0 ? `Missing: ${missingVars.join(', ')}` : '');
     
-    // Check emulator status in development
+    // Check emulator status in development - but handle any errors
     if (isDev) {
-      const { checkEmulatorsStatus } = await import('./firebaseEmulators');
-      const status = await checkEmulatorsStatus();
-      
-      if (status.firestore && status.storage) {
-        console.log('✅ Firebase emulators are running and accessible');
-      } else {
-        console.log('⚠️ Firebase emulators status:', status);
-        console.log('💡 Run "firebase emulators:start --only firestore,storage" to use emulators');
-        console.log('   - Port 8081 (Firestore) is not in use');
-        console.log('   - Port 9198 (Storage) is not in use');
-        console.log('   - Firewall settings allow local connections');
+      try {
+        const { checkEmulatorsStatus } = await import('./firebaseEmulators');
+        const status = await checkEmulatorsStatus();
+        
+        if (status.firestore && status.storage) {
+          console.log('✅ Firebase emulators are running and accessible');
+        } else {
+          console.log('⚠️ Firebase emulators not detected - using production configuration');
+        }
+      } catch (emulatorError) {
+        console.warn('⚠️ Could not check emulator status:', emulatorError);
       }
-      console.log('📡 App will continue using production Firebase configuration');
     }
-    
-    // Render the application
-    renderApp(isDev);
     
   } catch (error) {
     console.error('❌ Failed to initialize application:', error);
-    
-    // Show user-friendly error message
-    console.error('🔧 Application initialization failed, but attempting to continue...');
-    
-    // Render error state in case of initialization failure
+  } finally {
+    // Always render the application, even if initialization fails
     renderApp(isDev);
   }
 };

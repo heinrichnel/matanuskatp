@@ -355,7 +355,7 @@ const JobCard: React.FC = () => {
         <span className="text-blue-700">Current Role: <strong>{userRole === 'technician' ? 'Technician' : 'Supervisor'}</strong></span>
         <Button 
           size="sm" 
-          onClick={onClick || (() => {})} 
+          onClick={onClick} 
           variant="outline"
         >
           Switch to {userRole === 'technician' ? 'Supervisor' : 'Technician'} View

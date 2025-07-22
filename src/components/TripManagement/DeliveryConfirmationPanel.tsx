@@ -178,28 +178,28 @@ const DeliveryConfirmationPanel: React.FC = () => {
           <Button 
             size="sm"
             variant={filter === 'all' ? 'primary' : 'outline'}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             All
           </Button>
           <Button 
             size="sm"
             variant={filter === 'verified' ? 'primary' : 'outline'}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             Verified
           </Button>
           <Button 
             size="sm"
             variant={filter === 'pending' ? 'primary' : 'outline'}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             Pending
           </Button>
           <Button 
             size="sm"
             variant={filter === 'incomplete' ? 'primary' : 'outline'}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             Incomplete
           </Button>

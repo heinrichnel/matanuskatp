@@ -352,7 +352,7 @@ const InvoiceSubmissionModal: React.FC<InvoiceSubmissionModalProps> = ({
         {/* Submit Buttons */}
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
             variant="outline"
@@ -360,7 +360,7 @@ const InvoiceSubmissionModal: React.FC<InvoiceSubmissionModalProps> = ({
             Cancel
           </Button>
           <Button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<FileText className="w-4 h-4" />}
             isLoading={isSubmitting}
             disabled={isSubmitting}

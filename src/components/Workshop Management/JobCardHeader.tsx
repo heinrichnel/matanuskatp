@@ -65,7 +65,7 @@ const JobCardHeader: React.FC<JobCardHeaderProps> = ({
                 variant="outline"
                 size="sm"
                 className="mr-2"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 ←
               </Button>
@@ -93,7 +93,7 @@ const JobCardHeader: React.FC<JobCardHeaderProps> = ({
             <Button 
               variant="outline" 
               size="sm"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               Edit
             </Button>
@@ -102,7 +102,7 @@ const JobCardHeader: React.FC<JobCardHeaderProps> = ({
             <Button 
               variant="primary" 
               size="sm"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               Assign
             </Button>
@@ -111,7 +111,7 @@ const JobCardHeader: React.FC<JobCardHeaderProps> = ({
             <Button 
               variant="outline" 
               size="sm"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               Print
             </Button>

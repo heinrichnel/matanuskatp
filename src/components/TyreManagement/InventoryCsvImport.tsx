@@ -149,14 +149,14 @@ VEHICLE STORE,"MAT0052","POWERTRAC M3","new retread","12.0000","Recap One","Trai
           <div className="mt-4 flex space-x-2">
             <button
               type="button"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               className="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300"
             >
               Load Sample Data
             </button>
             <button
               type="button"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               className="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300"
             >
               Clear

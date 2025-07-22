@@ -172,7 +172,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
             variant="outline"
             size="sm"
             icon={<RefreshCw className="w-4 h-4" />}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             isLoading={isLoading[`generateFinancials-${tripId}`]}
             disabled={isLoading[`generateFinancials-${tripId}`]}
           >
@@ -191,7 +191,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
             </p>
             
             <Button
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               icon={<BarChart3 className="w-5 h-5 mr-1" />}
               isLoading={isLoading[`generateFinancials-${tripId}`]}
               disabled={isLoading[`generateFinancials-${tripId}`]}

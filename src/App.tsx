@@ -12,6 +12,22 @@ import { DriverBehaviorProvider } from './context/DriverBehaviorContext';
 // Error Handling
 import ErrorBoundary from './components/ErrorBoundary';
 import FirestoreConnectionError from './components/ui/FirestoreConnectionError';
+import ConnectionStatusIndicator from './components/ui/ConnectionStatusIndicator';
+import OfflineBanner from './components/ui/OfflineBanner';
+
+// Offline & Network Support
+import { initOfflineCache } from './utils/offlineCache';
+import { startNetworkMonitoring } from './utils/networkDetection';
+import { syncOfflineOperations } from './utils/offlineOperations';
+
+// Error Handling
+import { 
+  registerErrorHandler, 
+  handleError, 
+  logError, 
+  ErrorCategory,
+  ErrorSeverity
+} from './utils/errorHandling';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -168,6 +184,88 @@ const App: React.FC = () => {
 
   useEffect(() => {
     console.log('App is running');
+    
+    // Initialize error handlers
+    const unregisterErrorHandler = registerErrorHandler((error) => {
+      // Add application-wide error handling logic
+      if (error.severity === ErrorSeverity.FATAL) {
+        setConnectionError(error.originalError);
+      }
+      
+      // Send errors to analytics in production
+      if (process.env.NODE_ENV === 'production') {
+        // Example: send to an analytics service
+        // analyticsService.trackError(error);
+      }
+    });
+    
+    // Initialize offline cache with error handling
+    handleError(
+      async () => await initOfflineCache(),
+      {
+        category: ErrorCategory.DATABASE,
+        context: { component: 'App', operation: 'initOfflineCache' },
+        maxRetries: 3
+      }
+    ).catch(error => {
+      setConnectionError(new Error(`Failed to initialize offline cache: ${error.message}`));
+    });
+    
+    // Start network monitoring
+    startNetworkMonitoring(30000); // Check every 30 seconds
+    
+    // Sync offline operations when online with enhanced error handling
+    const handleOnline = async () => {
+      try {
+        const result = await handleError(
+          async () => await syncOfflineOperations(),
+          {
+            category: ErrorCategory.NETWORK,
+            context: { component: 'App', operation: 'syncOfflineOperations' },
+            maxRetries: 3
+          }
+        );
+        
+        if (result) {
+          console.log(`Synced offline operations: ${result.success} succeeded, ${result.failed} failed`);
+        }
+      } catch (error) {
+        // This will be handled by the error handler
+      }
+    };
+    
+    window.addEventListener('online', handleOnline);
+    
+    // Setup global error handling for uncaught errors
+    const handleGlobalError = (event: ErrorEvent) => {
+      event.preventDefault();
+      logError(event.error || event.message, {
+        category: ErrorCategory.UNKNOWN,
+        severity: ErrorSeverity.ERROR,
+        context: { source: 'window.onerror' }
+      });
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    
+    // Setup global promise rejection handling
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      event.preventDefault();
+      logError(event.reason || 'Unhandled Promise Rejection', {
+        category: ErrorCategory.UNKNOWN,
+        severity: ErrorSeverity.ERROR,
+        context: { source: 'unhandledrejection' }
+      });
+    };
+    
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      unregisterErrorHandler();
+    };
   }, []);
 
   // Conditional UI connector rendering
@@ -190,6 +288,10 @@ const App: React.FC = () => {
                     <FirestoreConnectionError error={connectionError} />
                   </div>
                 ) : null}
+                
+                {/* Connection status components */}
+                <OfflineBanner />
+                <ConnectionStatusIndicator showText={true} className="fixed bottom-4 right-4 z-40" />
                 
                 {renderUIConnector()}
                 

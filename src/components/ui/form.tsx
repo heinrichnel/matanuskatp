@@ -21,7 +21,7 @@ export const FormField: React.FC<FormFieldProps> = ({ children, render, ...rest 
     };
     return <>{render(enhancedRest)}</>;
   }
-  return <div onClick={onClick || (() => {})}>{children}</div>;
+  return <div onClick={onClick}>{children}</div>;
 };
 export const FormItem = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
 export const FormLabel = ({ children }: { children: React.ReactNode }) => <label>{children}</label>;

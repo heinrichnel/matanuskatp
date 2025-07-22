@@ -49,6 +49,18 @@ The application uses a unified routing system tied to the sidebar navigation. Se
 
 See the [Google Maps Integration](docs/GOOGLE_MAPS.md) document for details on the maps functionality.
 
+## Resilience & Offline Capabilities
+
+The Matanuska Fleet Manager is built with offline-first capabilities and resilient design to ensure continuous operation in challenging connectivity environments. Key features include:
+
+- **Offline Data Management**: Continue working with local data when offline
+- **Operation Queuing**: Actions performed offline are queued for later synchronization
+- **Real-time Connection Status**: Clear indicators show current network status
+- **Enhanced Error Handling**: Comprehensive error recovery mechanisms
+- **Graceful Degradation**: App remains functional with reduced capabilities during connectivity issues
+
+For detailed information about these capabilities, see the [Resilience Improvements](RESILIENCE_IMPROVEMENTS.md) document.
+
 ## License
 
 Proprietary - All rights reserved.

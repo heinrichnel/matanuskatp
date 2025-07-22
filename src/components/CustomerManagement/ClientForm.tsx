@@ -462,14 +462,14 @@ const ClientForm: React.FC<ClientFormProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<Save className="w-4 h-4" />}
             isLoading={isSubmitting}
             disabled={isSubmitting}

@@ -1,32 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>TransportMat – Fleet Management</title>
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="./src/assets/matanuska-logo.png" />
-    <link rel="apple-touch-icon" href="./src/assets/matanuska-logo.png" />
-
-    <!-- Meta Tags -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Matanuska Transport Platform</title>
+
+    <!-- SEO & Theming -->
     <meta name="description" content="Fleet management, trip P&L, live tracking, Google Maps & Wialon SDK integration." />
     <meta name="theme-color" content="#2563eb" />
 
-    <!-- Fonts -->
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+
+    <!-- Google Font: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
 
     <!-- Wialon SDK (globally available as window.wialon) -->
     <script src="https://hst-api.wialon.com/wsdk/script/wialon.js"></script>
 
-    <!-- Google Maps will be dynamically injected via googleMapsLoader.ts -->
+    <!-- Google Maps is loaded dynamically from /src/utils/googleMapsLoader.ts or similar -->
+
+    <!-- Styles from Vite build (auto-injected in dev, inlined or linked in production) -->
   </head>
 
   <body class="bg-gray-50 dark:bg-gray-900 font-sans antialiased">
-    <!-- Root div where React mounts -->
+    <!-- React Mount Point -->
     <div id="root"></div>
 
-    <!-- Vite/React Entry Point -->
+    <!-- Main React Entry Point -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

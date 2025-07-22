@@ -180,7 +180,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
                       <div className="mt-2">
                         <Button
                           size="sm"
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                         >
                           Initiate CAR Report
                         </Button>
@@ -225,7 +225,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     View
                   </Button>
@@ -239,21 +239,21 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<X className="w-4 h-4" />}
           >
             Close
           </Button>
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<Edit className="w-4 h-4" />}
           >
             Edit Event
           </Button>
           {(event.severity === 'critical' || event.severity === 'high') && !event.carReportId && (
             <Button
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               icon={<FileText className="w-4 h-4" />}
             >
               Initiate CAR

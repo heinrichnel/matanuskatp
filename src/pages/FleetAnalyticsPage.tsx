@@ -34,7 +34,7 @@ const FleetAnalyticsPage: React.FC = () => {
         <h1 className="text-2xl font-bold text-gray-800">Fleet Analytics</h1>
         <div className="flex space-x-2">
           <button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             Create Custom Report
@@ -53,7 +53,7 @@ const FleetAnalyticsPage: React.FC = () => {
             <button
               key={index}
               className="flex flex-col items-center justify-center p-4 hover:bg-blue-50 rounded-lg transition-colors"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               <div className="p-2 bg-blue-100 rounded-full text-blue-600 mb-2">
                 {feature.icon}

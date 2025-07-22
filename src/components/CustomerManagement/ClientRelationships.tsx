@@ -221,7 +221,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
               <button
                 key={client.id}
                 className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 <Building className="mx-auto h-6 w-6 text-gray-400 mb-2" />
                 <p className="text-sm font-medium text-gray-900 truncate">{client.name}</p>
@@ -247,7 +247,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
             </h2>
             <Button
               icon={<Plus className="w-4 h-4" />}
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               disabled={availableClients.length === 0}
             >
               Add Relationship
@@ -300,7 +300,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
                                 size="xs"
                                 variant="outline"
                                 icon={<Trash2 className="w-3 h-3" />}
-                                onClick={onClick || (() => {})}
+                                onClick={onClick}
                               >
                                 Remove
                               </Button>
@@ -321,7 +321,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
                   <div className="mt-6">
                     <Button 
                       icon={<Plus className="w-4 h-4" />}
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                       disabled={availableClients.length === 0}
                     >
                       Add Relationship
@@ -340,7 +340,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
                 <Button
                   size="sm"
                   icon={<Plus className="w-4 h-4" />}
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                   disabled={availableClients.length === 0}
                 >
                   Add
@@ -386,7 +386,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
                             size="xs"
                             variant="outline"
                             icon={<Trash2 className="w-3 h-3" />}
-                            onClick={onClick || (() => {})}
+                            onClick={onClick}
                           >
                             Remove
                           </Button>
@@ -405,7 +405,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
                   <div className="mt-6">
                     <Button 
                       icon={<Plus className="w-4 h-4" />}
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                       disabled={availableClients.length === 0}
                     >
                       Add Relationship
@@ -512,7 +512,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
               Cancel
             </Button>
             <Button
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               icon={<Save className="w-4 h-4" />}
               isLoading={isSubmitting}
               disabled={isSubmitting}

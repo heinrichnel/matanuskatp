@@ -363,11 +363,11 @@ export const TyreManagementSystem: React.FC = () => {
           <p className="text-gray-600">Complete tyre lifecycle management and analytics</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={onClick || (() => {})}>
+          <Button variant="outline" onClick={onClick}>
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
-          <Button onClick={onClick || (() => {})}>
+          <Button onClick={onClick}>
             <Plus className="w-4 h-4 mr-2" />
             Add Tyre
           </Button>
@@ -544,7 +544,7 @@ export const TyreManagementSystem: React.FC = () => {
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Add New Tyre</h2>
-              <Button variant="outline" onClick={onClick || (() => {})}>
+              <Button variant="outline" onClick={onClick}>
                 Cancel
               </Button>
             </div>
@@ -642,10 +642,10 @@ export const TyreManagementSystem: React.FC = () => {
               />
 
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={onClick || (() => {})}>
+                <Button variant="outline" onClick={onClick}>
                   Cancel
                 </Button>
-                <Button onClick={onClick || (() => {})}>
+                <Button onClick={onClick}>
                   Add Tyre
                 </Button>
               </div>

@@ -278,7 +278,7 @@ const InvoiceApprovalFlow: React.FC = () => {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         <div className="flex space-x-2">
           <button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className={`px-4 py-2 rounded-md ${
               activeFilter === 'all' ? 'bg-blue-100 text-blue-800 font-medium' : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
@@ -286,7 +286,7 @@ const InvoiceApprovalFlow: React.FC = () => {
             All
           </button>
           <button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className={`px-4 py-2 rounded-md ${
               activeFilter === 'pending' ? 'bg-yellow-100 text-yellow-800 font-medium' : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
@@ -294,7 +294,7 @@ const InvoiceApprovalFlow: React.FC = () => {
             Pending
           </button>
           <button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className={`px-4 py-2 rounded-md ${
               activeFilter === 'approved' ? 'bg-green-100 text-green-800 font-medium' : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
@@ -302,7 +302,7 @@ const InvoiceApprovalFlow: React.FC = () => {
             Approved
           </button>
           <button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className={`px-4 py-2 rounded-md ${
               activeFilter === 'rejected' ? 'bg-red-100 text-red-800 font-medium' : 'bg-white text-gray-600 hover:bg-gray-50'
             }`}
@@ -403,7 +403,7 @@ const InvoiceApprovalFlow: React.FC = () => {
                               size="xs"
                               variant="outline"
                               icon={<Eye className="w-3 h-3" />}
-                              onClick={onClick || (() => {})}
+                              onClick={onClick}
                             >
                               View
                             </Button>
@@ -414,7 +414,7 @@ const InvoiceApprovalFlow: React.FC = () => {
                                   size="xs"
                                   variant="primary"
                                   icon={<CheckCircle className="w-3 h-3" />}
-                                  onClick={onClick || (() => {})}
+                                  onClick={onClick}
                                 >
                                   Approve
                                 </Button>
@@ -422,7 +422,7 @@ const InvoiceApprovalFlow: React.FC = () => {
                                   size="xs"
                                   variant="danger"
                                   icon={<XCircle className="w-3 h-3" />}
-                                  onClick={onClick || (() => {})}
+                                  onClick={onClick}
                                 >
                                   Reject
                                 </Button>
@@ -430,7 +430,7 @@ const InvoiceApprovalFlow: React.FC = () => {
                             )}
                             
                             <button
-                              onClick={onClick || (() => {})}
+                              onClick={onClick}
                               className="text-gray-500 hover:text-gray-700"
                             >
                               {expandedInvoice === invoice.id ? (
@@ -586,7 +586,7 @@ const InvoiceApprovalFlow: React.FC = () => {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-gray-900">Approve Invoice</h3>
               <button
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 className="text-gray-400 hover:text-gray-500"
               >
                 <XCircle className="h-5 w-5" />
@@ -622,14 +622,14 @@ const InvoiceApprovalFlow: React.FC = () => {
             <div className="flex justify-end space-x-3">
               <Button
                 variant="outline"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 Cancel
               </Button>
               <Button
                 variant="primary"
                 icon={<CheckCircle className="w-4 h-4" />}
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 Approve
               </Button>
@@ -645,7 +645,7 @@ const InvoiceApprovalFlow: React.FC = () => {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium text-gray-900">Reject Invoice</h3>
               <button
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 className="text-gray-400 hover:text-gray-500"
               >
                 <XCircle className="h-5 w-5" />
@@ -685,14 +685,14 @@ const InvoiceApprovalFlow: React.FC = () => {
             <div className="flex justify-end space-x-3">
               <Button
                 variant="outline"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 Cancel
               </Button>
               <Button
                 variant="danger"
                 icon={<XCircle className="w-4 h-4" />}
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 disabled={!rejectionReason}
               >
                 Reject Invoice

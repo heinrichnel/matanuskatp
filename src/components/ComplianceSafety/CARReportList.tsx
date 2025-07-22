@@ -252,7 +252,7 @@ const CARReportList: React.FC = () => {
             <Button
               size="sm"
               variant="outline"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               icon={<Filter className="w-4 h-4" />}
             >
               Clear Filters
@@ -450,7 +450,7 @@ const CARReportList: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                           icon={<Eye className="w-3 h-3" />}
                         >
                           View
@@ -459,7 +459,7 @@ const CARReportList: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                           icon={<Edit className="w-3 h-3" />}
                         >
                           Edit
@@ -468,7 +468,7 @@ const CARReportList: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                           icon={<Download className="w-3 h-3" />}
                         >
                           PDF
@@ -477,7 +477,7 @@ const CARReportList: React.FC = () => {
                         <Button
                           size="sm"
                           variant="danger"
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                           icon={<Trash2 className="w-3 h-3" />}
                         >
                           Delete

@@ -22,7 +22,7 @@ const GenericPlaceholderPage: React.FC<GenericPlaceholderPageProps> = ({
           <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
           <p className="text-gray-600 mt-2">{description}</p>
         </div>
-        <Button variant="outline" onClick={onClick || (() => {})} className="flex items-center gap-2">
+        <Button variant="outline" onClick={onClick} className="flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" />
           Go Back
         </Button>

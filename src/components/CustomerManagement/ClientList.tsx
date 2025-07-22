@@ -130,7 +130,7 @@ const ClientList: React.FC<ClientListProps> = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               Clear Filters
             </Button>
@@ -201,7 +201,7 @@ const ClientList: React.FC<ClientListProps> = ({
             <Button
               size="sm"
               icon={<UserPlus className="w-4 h-4" />}
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               Add Client
             </Button>
@@ -218,7 +218,7 @@ const ClientList: React.FC<ClientListProps> = ({
                   : 'Get started by adding your first client.'}
               </p>
               <div className="mt-6">
-                <Button onClick={onClick || (() => {})} icon={<UserPlus className="w-4 h-4" />}>
+                <Button onClick={onClick} icon={<UserPlus className="w-4 h-4" />}>
                   Add New Client
                 </Button>
               </div>
@@ -231,7 +231,7 @@ const ClientList: React.FC<ClientListProps> = ({
                     <th 
                       scope="col" 
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                     >
                       <div className="flex items-center">
                         <span>Client Name</span>
@@ -258,7 +258,7 @@ const ClientList: React.FC<ClientListProps> = ({
                     <th 
                       scope="col" 
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                     >
                       <div className="flex items-center">
                         <span>Created</span>
@@ -274,7 +274,7 @@ const ClientList: React.FC<ClientListProps> = ({
                     <tr 
                       key={client.id} 
                       className="hover:bg-gray-50 cursor-pointer"
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">

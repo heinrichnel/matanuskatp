@@ -566,13 +566,13 @@ const WialonMapComponent: React.FC = () => {
           
           {/* Filter tabs */}
           <div className="flex mt-3 text-sm">
-            <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-l-md" onClick={onClick || (() => {})}}>
+            <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-l-md" onClick={onClick}}>
               21 Jan - 1 Feb
             </button>
-            <button className="px-3 py-1 border-t border-b border-gray-300" onClick={onClick || (() => {})}}>
+            <button className="px-3 py-1 border-t border-b border-gray-300" onClick={onClick}}>
               Checking
             </button>
-            <button className="px-3 py-1 border border-gray-300 rounded-r-md" onClick={onClick || (() => {})}}>
+            <button className="px-3 py-1 border border-gray-300 rounded-r-md" onClick={onClick}}>
               In Transit
             </button>
           </div>
@@ -636,7 +636,7 @@ const WialonMapComponent: React.FC = () => {
               <div 
                 key={unit.id}
                 className="flex items-center justify-between p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 <div className="flex items-center">
                   <Truck className="w-4 h-4 mr-2 text-gray-600" />

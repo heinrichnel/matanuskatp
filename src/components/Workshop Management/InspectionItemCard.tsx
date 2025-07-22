@@ -74,7 +74,7 @@ const InspectionItemCard: React.FC<InspectionItemCardProps> = ({
           <Button
             size="xs"
             variant={status === 'pass' ? 'success' : 'outline'}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             disabled={disabled}
             icon={<CheckCircle className="w-3 h-3" />}
           >
@@ -83,7 +83,7 @@ const InspectionItemCard: React.FC<InspectionItemCardProps> = ({
           <Button
             size="xs"
             variant={status === 'fail' ? 'danger' : 'outline'}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             disabled={disabled}
             icon={<X className="w-3 h-3" />}
           >
@@ -92,7 +92,7 @@ const InspectionItemCard: React.FC<InspectionItemCardProps> = ({
           <Button
             size="xs"
             variant={status === 'pending' ? 'outline' : 'outline'}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             disabled={disabled}
             icon={<Clock className="w-3 h-3" />}
           >

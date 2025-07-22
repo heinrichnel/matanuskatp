@@ -237,7 +237,7 @@ export default function WebBookTripsList() {
                         size="sm"
                         variant="outline"
                         icon={<Edit className="w-4 h-4" />}
-                        onClick={onClick || (() => {})}
+                        onClick={onClick}
                       >
                         Edit
                       </Button>

@@ -159,7 +159,7 @@ const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
             />
           </div>
           <div className="mt-4 flex justify-end">
-            <Button size="sm" variant="outline" onClick={onClick || (() => {})}>
+            <Button size="sm" variant="outline" onClick={onClick}>
               <span className="sr-only">Clear Filters</span>
             </Button>
           </div>
@@ -189,17 +189,17 @@ const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
               }
               action={
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4 text-blue-500" />} onClick={onClick || (() => {})}>
+                  <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4 text-blue-500" />} onClick={onClick}>
                     <span className="sr-only">View</span>
                   </Button>
-                  <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4 text-green-600" />} onClick={onClick || (() => {})}>
+                  <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4 text-green-600" />} onClick={onClick}>
                     <span className="sr-only">Edit</span>
                   </Button>
                   <Button 
                     size="sm" 
                     variant="danger" 
                     icon={<Trash2 className="w-4 h-4 text-red-600" />} 
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                     disabled={isDeleting}
                   >
                     <span className="sr-only">Delete</span>
@@ -214,17 +214,17 @@ const CompletedTrips: React.FC<CompletedTripsProps> = (props) => {
                 <div className="text-sm text-gray-500">Start: {trip.startDate} | End: {trip.endDate}</div>
                 <div className="text-sm text-gray-500">Revenue: {formatCurrency(trip.baseRevenue, trip.revenueCurrency)}</div>
                 <div className="flex gap-2 mt-2">
-                  <Button size="xs" variant="outline" icon={<Eye className="w-4 h-4 text-blue-500" />} onClick={onClick || (() => {})}>
+                  <Button size="xs" variant="outline" icon={<Eye className="w-4 h-4 text-blue-500" />} onClick={onClick}>
                     <span className="sr-only">View</span>
                   </Button>
-                  <Button size="xs" variant="outline" icon={<Edit className="w-4 h-4 text-green-600" />} onClick={onClick || (() => {})}>
+                  <Button size="xs" variant="outline" icon={<Edit className="w-4 h-4 text-green-600" />} onClick={onClick}>
                     <span className="sr-only">Edit</span>
                   </Button>
                   <Button 
                     size="xs" 
                     variant="danger" 
                     icon={<Trash2 className="w-4 h-4 text-red-600" />} 
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                     disabled={isDeleting}
                     isLoading={isDeleting && deletingTrip?.id === trip.id}
                   >

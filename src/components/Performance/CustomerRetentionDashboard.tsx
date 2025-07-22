@@ -192,7 +192,7 @@ const CustomerRetentionDashboard: React.FC<CustomerRetentionDashboardProps> = (p
         </div>
         <Button
           variant="outline"
-          onClick={onClick || (() => {})}
+          onClick={onClick}
           icon={<Download className="w-4 h-4" />}
         >
           Export Analysis
@@ -263,7 +263,7 @@ const CustomerRetentionDashboard: React.FC<CustomerRetentionDashboardProps> = (p
             <Button
               size="sm"
               variant="outline"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               icon={<Filter className="w-4 h-4" />}
             >
               Clear Filters

@@ -266,7 +266,7 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                   icon={<Download className="w-4 h-4" />}
                 >
                   Download Template
@@ -350,14 +350,14 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
           <div className="flex justify-end space-x-3">
             <Button
               variant="outline"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               disabled={isProcessing}
               icon={<X className="w-4 h-4" />}
             >
               Cancel
             </Button>
             <Button
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               disabled={!file || isProcessing}
               isLoading={isProcessing}
               icon={<Upload className="w-4 h-4" />}

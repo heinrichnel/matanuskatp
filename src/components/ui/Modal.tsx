@@ -33,7 +33,7 @@ const Modal: React.FC<ModalProps> = ({
         {/* Background overlay */}
         <div 
           className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
-          onClick={onClick || (() => {})}
+          onClick={onClose}
         />
 
         {/* Modal panel */}
@@ -49,7 +49,7 @@ const Modal: React.FC<ModalProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={onClick || (() => {})}
+              onClick={onClose}
               className="p-1"
             >
               <X className="w-4 h-4" />

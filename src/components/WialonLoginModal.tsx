@@ -17,7 +17,7 @@ export default function WialonLoginModal() {
       {!loggedIn ? (
         <>
           <input value={token} onChange={e => setToken(e.target.value)} placeholder="Wialon Token" />
-          <button onClick={onClick || (() => {})}>Login</button>
+          <button onClick={onClick}>Login</button>
           {error && <div style={{ color: "red" }}>{error}</div>}
         </>
       ) : (

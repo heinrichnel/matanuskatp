@@ -25,7 +25,7 @@ const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = 'open
         <div className="flex space-x-2">
           <Button
             icon={<Plus className="w-4 h-4" />}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             New Job Card
           </Button>
@@ -82,7 +82,7 @@ const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = 'open
                 <div className="mt-6">
                   <Button
                     icon={<Plus className="w-4 h-4" />}
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Create Job Card
                   </Button>

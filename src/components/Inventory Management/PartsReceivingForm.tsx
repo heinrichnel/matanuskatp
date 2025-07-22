@@ -147,7 +147,7 @@ const PartsReceivingForm: React.FC<PartsReceivingFormProps> = ({
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 icon={<Plus className="w-4 h-4 mr-1" />}
               >
                 Add Item
@@ -261,7 +261,7 @@ const PartsReceivingForm: React.FC<PartsReceivingFormProps> = ({
                         <button
                           type="button"
                           className="text-red-600 hover:text-red-900"
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                           disabled={parts.length <= 1}
                         >
                           <Trash className="h-5 w-5" />
@@ -298,7 +298,7 @@ const PartsReceivingForm: React.FC<PartsReceivingFormProps> = ({
               <Button
                 type="button"
                 variant="outline"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 Cancel
               </Button>

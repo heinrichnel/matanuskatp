@@ -94,7 +94,7 @@ const SageIntegration: React.FC = () => {
           <p className="text-gray-600">Manage Sage data synchronization and configuration</p>
         </div>
         <Button 
-          onClick={onClick || (() => {})}
+          onClick={onClick}
           disabled={configStatus !== 'complete' || syncing}
           isLoading={syncing}
         >
@@ -262,7 +262,7 @@ const SageIntegration: React.FC = () => {
                 <Button 
                   variant="outline"
                   disabled={syncing}
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   Manual Sync
                 </Button>

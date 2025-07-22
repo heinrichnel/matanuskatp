@@ -254,7 +254,7 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     View
                   </Button>
@@ -298,7 +298,7 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<X className="w-4 h-4" />}
           >
             Close
@@ -306,7 +306,7 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({
           
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<Download className="w-4 h-4" />}
           >
             Download PDF
@@ -314,14 +314,14 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({
           
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<FileText className="w-4 h-4" />}
           >
             Download Excel
           </Button>
           
           <Button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<Edit className="w-4 h-4" />}
           >
             Edit Report
