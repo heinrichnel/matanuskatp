@@ -7,10 +7,10 @@ echo "🚀 Matanuska Fleet Management - Netlify Deployment"
 echo "================================================="
 
 # Netlify site information
-SITE_NAME="matanuska"
-SITE_ID="2c3189ba-f37f-4cd7-8a73-2f656da49d9f"
-BUILD_HOOK_URL="https://api.netlify.com/build_hooks/687053f6cc0915fe3c5ce648"
-SITE_URL="https://matanuska.netlify.app"
+SITE_NAME="matanuskatptapp"
+SITE_ID="46e4911a-e9ef-4286-bc3e-2278d3642860"
+BUILD_HOOK_URL="https://api.netlify.com/build_hooks/687f588f0858d3cca13b3628"
+SITE_URL="https://matanuskatptapp.netlify.app/"
 
 echo "📋 Site Information:"
 echo "   Name: $SITE_NAME"
