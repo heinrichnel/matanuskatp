@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AppRoutes } from './AppRoutes';
 
 // Context Providers
 import { AppProvider } from './context/AppContext';
@@ -16,7 +17,7 @@ import FirestoreConnectionError from './components/common/FirestoreConnectionErr
 import Layout from './components/layout/Layout';
 
 // Core Components
-import TripFormModal from './components/trips/TripFormModal';
+import TripFormModal from './components/TripManagement/TripFormModal';
 import DashboardPage from './pages/DashboardPage';
 
 // === TRIPS ===
@@ -157,6 +158,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import SettingsPage from './pages/SettingsPage';
 import MapTestPage from './pages/Map/MapTestPage';
 import MapsView from './pages/Map/MapsView';
+import UIConnector from './components/UIConnector';
 
 const App: React.FC = () => {
   const [connectionError, setConnectionError] = useState<Error | null>(null);
@@ -167,8 +169,8 @@ const App: React.FC = () => {
     console.log('App is running');
   }, []);
 
-  return (
-    <ErrorBoundary>
+  return (<>
+      <ErrorBoundary>
       <AppProvider>
         <SyncProvider>
           <TyreStoresProvider>
@@ -178,6 +180,8 @@ const App: React.FC = () => {
                   <div className="fixed top-0 left-0 right-0 z-50 p-4">
                     <FirestoreConnectionError error={connectionError} />
                   </div>
+      {process.env.NODE_ENV !== 'production' && <UIConnector />}
+    </>
                 )}
                 <Router>
                   <Routes>
@@ -189,11 +193,12 @@ const App: React.FC = () => {
                         />
                       }
                     >
-                      {/* === Al jou roetes kom hier === */}
+                      {/* Main routes */}
                       <Route path="/" element={<DashboardPage />} />
                       <Route path="/dashboard" element={<DashboardPage />} />
-                      {/* Voeg hier al bogenoemde roetes in soos jy reeds het */}
-                      {/* Ek het dit reeds in jou vorige kopie van `App.tsx` ingesluit */}
+                      
+                      {/* Generated routes from sidebarConfig.ts */}
+                      <AppRoutes />
                     </Route>
                   </Routes>
                 </Router>
