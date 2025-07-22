@@ -38,71 +38,94 @@ const OfflineBanner: React.FC = () => {
         setTimeout(() => {
           setIsVisible(false);
           setSyncStats(null);
-        }, 3000);
+        }, 5000);
+      } catch (error) {
+        console.error('Failed to sync offline operations:', error);
       } finally {
         setIsSyncing(false);
       }
     }
   };
 
-  if ((networkStatus.isOnline && !isSyncing && !syncStats) || isDismissed || !isVisible) {
-    return null;
-  }
+  if (!isVisible || isDismissed) return null;
 
-  // Different messages based on current state
-  let message = '';
-  let bgColor = '';
-  let icon = null;
-  
-  if (isSyncing) {
-    message = "Syncing offline changes...";
-    bgColor = "bg-blue-500";
-    icon = <Database className="h-5 w-5 mr-2 animate-pulse" />;
-  } else if (syncStats) {
-    message = `Sync complete: ${syncStats.success} changes applied, ${syncStats.failed} failed`;
-    bgColor = syncStats.failed > 0 ? "bg-amber-500" : "bg-green-500";
-    icon = syncStats.failed > 0 
-      ? <AlertTriangle className="h-5 w-5 mr-2" />
-      : <Database className="h-5 w-5 mr-2" />;
-  } else if (networkStatus.isLimited) {
-    message = "Limited connectivity. Some features may be unavailable.";
-    bgColor = "bg-amber-500";
-    icon = <AlertTriangle className="h-5 w-5 mr-2" />;
-  } else {
-    message = "You are currently offline. Some features may be unavailable.";
-    bgColor = "bg-amber-500";
-    icon = <WifiOff className="h-5 w-5 mr-2" />;
-  }
+  const getBannerColors = () => {
+    if (networkStatus.isOffline) {
+      return {
+        bg: 'bg-red-50',
+        border: 'border-red-400',
+        text: 'text-red-800',
+        buttonBg: 'bg-red-100',
+        buttonText: 'text-red-800 hover:bg-red-200'
+      };
+    }
+    if (networkStatus.isLimited) {
+      return {
+        bg: 'bg-yellow-50',
+        border: 'border-yellow-400',
+        text: 'text-yellow-800',
+        buttonBg: 'bg-yellow-100',
+        buttonText: 'text-yellow-800 hover:bg-yellow-200'
+      };
+    }
+    return {
+      bg: 'bg-blue-50',
+      border: 'border-blue-400',
+      text: 'text-blue-800',
+      buttonBg: 'bg-blue-100',
+      buttonText: 'text-blue-800 hover:bg-blue-200'
+    };
+  };
+
+  const colors = getBannerColors();
 
   return (
-    <div className={`fixed top-0 left-0 w-full ${bgColor} text-white z-50 shadow-md`}>
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <div className={`sticky top-0 z-50 border-b ${colors.bg} ${colors.border} px-4 py-3 shadow-sm`}>
+      <div className="flex flex-wrap items-center justify-between">
         <div className="flex items-center">
-          {icon}
-          <span className="font-medium">
-            {message}
-          </span>
-        </div>
-        <div className="flex items-center space-x-2">
-          {!isSyncing && (
-            <>
-              <button
-                onClick={handleRetry}
-                className="inline-flex items-center px-3 py-1 bg-white text-gray-600 rounded hover:bg-gray-50"
-                disabled={isSyncing}
-              >
-                <RefreshCw className={`h-4 w-4 mr-1 ${isSyncing ? 'animate-spin' : ''}`} />
-                {networkStatus.isOffline ? 'Check Connection' : 'Sync Data'}
-              </button>
-              <button
-                onClick={handleDismiss}
-                className="px-3 py-1 text-white hover:bg-opacity-80 rounded"
-                aria-label="Dismiss"
-              >
-                Dismiss
-              </button>
-            </>
+          {networkStatus.isOffline ? (
+            <WifiOff className="mr-2 h-5 w-5 text-red-500" />
+          ) : (
+            <AlertTriangle className="mr-2 h-5 w-5 text-yellow-500" />
           )}
+          
+          <div className="flex-1">
+            <p className={`text-sm font-medium ${colors.text}`}>
+              {networkStatus.isOffline 
+                ? "You're currently offline" 
+                : "You're on a limited connection"}
+            </p>
+            <p className="text-xs">
+              {networkStatus.isOffline
+                ? "Changes you make will be saved locally and synced when you're back online"
+                : "Some features may be limited or slower than usual"}
+            </p>
+            
+            {syncStats && (
+              <div className="mt-1 text-xs">
+                <span className="font-medium">Sync results:</span> {syncStats.success} successful,{' '}
+                {syncStats.failed} failed
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="mt-2 flex space-x-2 sm:mt-0">
+          <button
+            onClick={handleRetry}
+            disabled={isSyncing}
+            className={`flex items-center rounded px-3 py-1 text-xs font-medium ${colors.buttonBg} ${colors.buttonText}`}
+          >
+            <RefreshCw className={`mr-1.5 h-3 w-3 ${isSyncing ? 'animate-spin' : ''}`} />
+            {isSyncing ? 'Syncing...' : networkStatus.isOffline ? 'Check Connection' : 'Retry Connection'}
+          </button>
+          
+          <button
+            onClick={handleDismiss}
+            className="rounded px-3 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100"
+          >
+            Dismiss
+          </button>
         </div>
       </div>
     </div>
