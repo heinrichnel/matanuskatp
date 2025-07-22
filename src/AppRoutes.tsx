@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { sidebarConfig } from './config/sidebarConfig';
@@ -22,10 +21,10 @@ const importComponent = (path) => {
   if (path.startsWith('pages/')) {
     return lazy(() => {
       try {
-        return import(`./pages/${componentPath}`);
+        return import(`./pages/${componentPath}.tsx`);
       } catch (error) {
         console.error(`Failed to load page component: ${path}`, error);
-        return import('./components/ErrorBoundary').then(module => ({
+        return import('./components/ErrorBoundary.tsx').then(module => ({
           default: () => <module.default error={`Failed to load: ${path}`} />
         }));
       }
@@ -35,7 +34,7 @@ const importComponent = (path) => {
   // Try to import from components directory
   return lazy(() => {
     try {
-      return import(`./components/${componentPath}`);
+      return import(`./components/${componentPath}.tsx`);
     } catch (error) {
       console.error(`Failed to load component: ${path}`, error);
       return import('./components/ErrorBoundary').then(module => ({

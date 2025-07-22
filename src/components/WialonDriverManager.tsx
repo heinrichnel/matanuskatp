@@ -70,7 +70,7 @@ export const WialonDriverManager: React.FC = () => {
         <input name="n" placeholder="Name" value={form.n} onChange={handleChange} />
         <input name="ds" placeholder="Description" value={form.ds} onChange={handleChange} />
         <input name="p" placeholder="Phone" value={form.p} onChange={handleChange} />
-        <button type="submit" onClick={onClick || (() => {})}}>Create Driver</button>
+        <button type="submit" onClick={onClick || (() => {})}>Create Driver</button>
       </form>
     </div>
   );

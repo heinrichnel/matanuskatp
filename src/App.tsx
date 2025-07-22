@@ -11,7 +11,7 @@ import { DriverBehaviorProvider } from './context/DriverBehaviorContext';
 
 // Error Handling
 import ErrorBoundary from './components/ErrorBoundary';
-import FirestoreConnectionError from './components/common/FirestoreConnectionError';
+import FirestoreConnectionError from './components/ui/FirestoreConnectionError';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -169,50 +169,50 @@ const App: React.FC = () => {
     console.log('App is running');
   }, []);
 
-  return (<>
+  return (
       <ErrorBoundary>
-      <AppProvider>
-        <SyncProvider>
-          <TyreStoresProvider>
-            <TripProvider>
-              <DriverBehaviorProvider>
-                {connectionError && (
-                  <div className="fixed top-0 left-0 right-0 z-50 p-4">
-                    <FirestoreConnectionError error={connectionError} />
-                  </div>
-      {process.env.NODE_ENV !== 'production' && <UIConnector />}
-    </>
-                )}
-                <Router>
-                  <Routes>
-                    <Route
-                      element={
-                        <Layout
-                          setShowTripForm={setShowTripForm}
-                          setEditingTrip={setEditingTrip}
-                        />
-                      }
-                    >
-                      {/* Main routes */}
-                      <Route path="/" element={<DashboardPage />} />
-                      <Route path="/dashboard" element={<DashboardPage />} />
-                      
-                      {/* Generated routes from sidebarConfig.ts */}
-                      <AppRoutes />
-                    </Route>
-                  </Routes>
-                </Router>
-                <TripFormModal
-                  isOpen={showTripForm}
-                  onClose={() => setShowTripForm(false)}
-                  editingTrip={editingTrip}
-                />
-              </DriverBehaviorProvider>
-            </TripProvider>
-          </TyreStoresProvider>
-        </SyncProvider>
-      </AppProvider>
-    </ErrorBoundary>
+        <AppProvider>
+          <SyncProvider>
+            <TyreStoresProvider>
+              <TripProvider>
+                <DriverBehaviorProvider>
+                  {connectionError && (
+                    <div className="fixed top-0 left-0 right-0 z-50 p-4">
+                      <FirestoreConnectionError error={connectionError} />
+                    </div>
+                  )}
+                  {process.env.NODE_ENV !== 'production' ? <UIConnector /> : null}
+                  
+                  <Router>
+                    <Routes>
+                      <Route
+                        element={
+                          <Layout
+                            setShowTripForm={setShowTripForm}
+                            setEditingTrip={setEditingTrip}
+                          />
+                        }
+                      >
+                        {/* Main routes */}
+                        <Route path="/" element={<DashboardPage />} />
+                        <Route path="/dashboard" element={<DashboardPage />} />
+                        
+                        {/* Generated routes from sidebarConfig.ts */}
+                        <AppRoutes />
+                      </Route>
+                    </Routes>
+                  </Router>
+                  <TripFormModal
+                    isOpen={showTripForm}
+                    onClose={() => setShowTripForm(false)}
+                    editingTrip={editingTrip}
+                  />
+                </DriverBehaviorProvider>
+              </TripProvider>
+            </TyreStoresProvider>
+          </SyncProvider>
+        </AppProvider>
+      </ErrorBoundary>
   );
 };
 
