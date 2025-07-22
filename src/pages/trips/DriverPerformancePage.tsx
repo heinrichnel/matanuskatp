@@ -75,19 +75,19 @@ const DriverPerformancePage: React.FC = () => {
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-md">
             <button 
               className={`px-3 py-1 text-sm rounded ${timeRange === 'week' ? 'bg-white shadow' : ''}`} 
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               Week
             </button>
             <button 
               className={`px-3 py-1 text-sm rounded ${timeRange === 'month' ? 'bg-white shadow' : ''}`} 
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               Month
             </button>
             <button 
               className={`px-3 py-1 text-sm rounded ${timeRange === 'quarter' ? 'bg-white shadow' : ''}`} 
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               Quarter
             </button>

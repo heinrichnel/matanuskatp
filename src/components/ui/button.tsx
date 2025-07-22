@@ -50,7 +50,7 @@ const ButtonWithHandler = forwardRef<HTMLButtonElement, ButtonProps>(
       }
     };
 
-    return <Button {...props} onClick={onClick || (() => {})} ref={ref} />;
+    return <Button {...props} onClick={onClick} ref={ref} />;
   }
 );
 

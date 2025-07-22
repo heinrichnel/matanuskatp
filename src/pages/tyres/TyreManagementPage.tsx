@@ -340,18 +340,18 @@ const TyreManagementPage: React.FC = () => {
           <Button
             variant={activeTab === 'inventory' ? 'primary' : 'secondary'}
             size="sm"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             Inventory
           </Button>
           <Button
             variant={activeTab === 'analytics' ? 'primary' : 'secondary'}
             size="sm"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             Analytics
           </Button>
-          <Button variant="outline" size="sm" icon={<Download size={16} />} onClick={onClick || (() => {})}>
+          <Button variant="outline" size="sm" icon={<Download size={16} />} onClick={onClick}>
             Export Data
           </Button>
         </div>
@@ -364,7 +364,7 @@ const TyreManagementPage: React.FC = () => {
             <div className="p-4 border-b flex justify-between items-center">
               <h2 className="text-lg font-medium">Tyre Inventory</h2>
               <div className="space-x-2">
-                <Button variant="outline" size="sm" onClick={onClick || (() => {})}>Add Tyre</Button>
+                <Button variant="outline" size="sm" onClick={onClick}>Add Tyre</Button>
                 <label className="cursor-pointer">
                   <Button variant="outline" size="sm">Import CSV</Button>
                   <input 
@@ -413,13 +413,13 @@ const TyreManagementPage: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.treadDepth.toFixed(1)} mm</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                         <button 
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
                           Edit
                         </button>
                         <button 
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                           className="text-red-600 hover:text-red-900"
                         >
                           Delete
@@ -494,13 +494,13 @@ const TyreManagementPage: React.FC = () => {
                 <h3 className="font-medium text-lg">Quick Actions</h3>
               </div>
               <div className="mt-4 space-y-3">
-                <Button variant="primary" fullWidth onClick={onClick || (() => {})}>
+                <Button variant="primary" fullWidth onClick={onClick}>
                   Add New Tyre
                 </Button>
-                <Button variant="secondary" fullWidth onClick={onClick || (() => {})}>
+                <Button variant="secondary" fullWidth onClick={onClick}>
                   Run Tyre Inspection
                 </Button>
-                <Button variant="outline" fullWidth onClick={onClick || (() => {})}>
+                <Button variant="outline" fullWidth onClick={onClick}>
                   Generate Report
                 </Button>
               </div>

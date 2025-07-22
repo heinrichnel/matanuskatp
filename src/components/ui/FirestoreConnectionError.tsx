@@ -72,7 +72,7 @@ const FirestoreConnectionError: React.FC<FirestoreConnectionErrorProps> = ({
           <div className="mt-4 flex flex-wrap gap-2">
             <Button
               size="sm"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               icon={isRetrying ? undefined : <RefreshCw className="w-4 h-4" />}
               isLoading={isRetrying}
             >
@@ -83,7 +83,7 @@ const FirestoreConnectionError: React.FC<FirestoreConnectionErrorProps> = ({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 icon={<Database className="w-4 h-4" />}
               >
                 Open Emulator UI
@@ -94,7 +94,7 @@ const FirestoreConnectionError: React.FC<FirestoreConnectionErrorProps> = ({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 icon={<Terminal className="w-4 h-4" />}
               >
                 Open Firebase Hub

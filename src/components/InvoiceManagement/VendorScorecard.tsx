@@ -179,25 +179,25 @@ const VendorScorecard: React.FC = () => {
               <table className="min-w-full bg-white">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="px-4 py-2 text-left cursor-pointer" onClick={onClick || (() => {})}>
+                    <th className="px-4 py-2 text-left cursor-pointer" onClick={onClick}>
                       Vendor Name
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick || (() => {})}>
+                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
                       Reliability
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick || (() => {})}>
+                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
                       Quality
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick || (() => {})}>
+                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
                       Cost
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick || (() => {})}>
+                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
                       Delivery
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick || (() => {})}>
+                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
                       Overall Score
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick || (() => {})}>
+                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
                       Active Orders
                     </th>
                     <th className="px-4 py-2 text-center">Actions</th>
@@ -229,7 +229,7 @@ const VendorScorecard: React.FC = () => {
                         <Button 
                           variant="outline" 
                           className="text-sm" 
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                         >
                           View Details
                         </Button>
@@ -254,7 +254,7 @@ const VendorScorecard: React.FC = () => {
           <CardHeader>
             <div className="flex justify-between">
               <h3 className="text-lg font-medium">{selectedVendor.name} - Performance Details</h3>
-              <Button variant="outline" onClick={onClick || (() => {})}>Close</Button>
+              <Button variant="outline" onClick={onClick}>Close</Button>
             </div>
           </CardHeader>
           <CardContent>

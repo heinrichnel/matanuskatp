@@ -203,10 +203,10 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             <p className="text-gray-500">{data.poNumber}</p>
           </div>
           <div className="space-x-2">
-            <Button onClick={onClick || (() => {})} variant="secondary" icon={<Download size={16} />}>
+            <Button onClick={onClick} variant="secondary" icon={<Download size={16} />}>
               Download PDF
             </Button>
-            <Button onClick={onClick || (() => {})} variant="outline">
+            <Button onClick={onClick} variant="outline">
               Back to Edit
             </Button>
           </div>
@@ -408,13 +408,13 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
             {initialData ? `Edit Purchase Order: ${data.poNumber}` : 'Create Purchase Order'}
           </h2>
           <div className="space-x-2">
-            <Button onClick={onClick || (() => {})} variant="outline">
+            <Button onClick={onClick} variant="outline">
               Preview
             </Button>
-            <Button onClick={onClick || (() => {})} variant="primary" icon={<Check size={16} />}>
+            <Button onClick={onClick} variant="primary" icon={<Check size={16} />}>
               {initialData ? 'Update' : 'Create'} Purchase Order
             </Button>
-            <Button onClick={onClick || (() => {})} variant="secondary" icon={<X size={16} />}>
+            <Button onClick={onClick} variant="secondary" icon={<X size={16} />}>
               Cancel
             </Button>
           </div>
@@ -669,7 +669,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
         <div className="mt-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-medium text-lg">Purchase Items</h3>
-            <Button onClick={onClick || (() => {})} variant="secondary" icon={<Plus size={16} />} size="sm">
+            <Button onClick={onClick} variant="secondary" icon={<Plus size={16} />} size="sm">
               Add Item
             </Button>
           </div>
@@ -742,7 +742,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
                     </td>
                     <td className="py-2 px-3">
                       <button
-                        onClick={onClick || (() => {})}
+                        onClick={onClick}
                         className="text-red-500 hover:text-red-700"
                       >
                         <Trash2 size={16} />

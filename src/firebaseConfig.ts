@@ -24,9 +24,9 @@ export const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || defaultConfig.measurementId
 };
 
-// DEBUG ONLY – To detect missing environment variables during development
-if (import.meta.env.DEV) {
-  console.log('Firebase Config:', {
+// Check environment variables in all environments
+const checkEnvVars = () => {
+  const vars = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? '✓ Present' : '✗ Missing',
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? '✓ Present' : '✗ Missing',
     databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL ? '✓ Present' : '✗ Missing',
@@ -35,8 +35,31 @@ if (import.meta.env.DEV) {
     messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ? '✓ Present' : '✗ Missing',
     appId: import.meta.env.VITE_FIREBASE_APP_ID ? '✓ Present' : '✗ Missing',
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID ? '✓ Present' : '✗ Missing'
-  });
-}
+  };
+  
+  // In development, show complete status
+  if (import.meta.env.DEV) {
+    console.log('Firebase Config:', vars);
+  }
+  
+  // In production, only warn about missing vars
+  if (!import.meta.env.DEV) {
+    const missing = Object.entries(vars)
+      .filter(([_, status]) => status === '✗ Missing')
+      .map(([key]) => key);
+      
+    if (missing.length > 0) {
+      console.warn(`⚠️ Missing Firebase environment variables in production: ${missing.join(', ')}`);
+    }
+    
+    // Warn if using development config in production
+    if (firebaseConfig.apiKey === defaultConfig.apiKey) {
+      console.warn('⚠️ Using development Firebase config in production environment! Set proper environment variables.');
+    }
+  }
+};
+
+checkEnvVars();
 
 const validateConfig = () => {
   const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];

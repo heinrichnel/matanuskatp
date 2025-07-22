@@ -268,7 +268,7 @@ const TyreInventoryDashboard: React.FC<TyreInventoryDashboardProps> = ({
           <Button
             variant="primary"
             icon={<Plus className="w-4 h-4" />}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             Add Tyre
           </Button>
@@ -401,56 +401,56 @@ const TyreInventoryDashboard: React.FC<TyreInventoryDashboardProps> = ({
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   Tyre Number {sortBy === 'tyreNumber' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   Manufacturer {sortBy === 'manufacturer' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   Condition {sortBy === 'condition' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   Status {sortBy === 'status' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   Vehicle {sortBy === 'vehicleAssignment' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   KM Run {sortBy === 'km' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   Tread {sortBy === 'treadDepth' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   Mount Status {sortBy === 'mountStatus' && (sortDirection === 'asc' ? '↑' : '↓')}
                 </th>
@@ -528,13 +528,13 @@ const TyreInventoryDashboard: React.FC<TyreInventoryDashboardProps> = ({
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button 
                         className="text-blue-600 hover:text-blue-900 mr-3"
-                        onClick={onClick || (() => {})}
+                        onClick={onClick}
                       >
                         View
                       </button>
                       <button 
                         className="text-indigo-600 hover:text-indigo-900"
-                        onClick={onClick || (() => {})}
+                        onClick={onClick}
                       >
                         Edit
                       </button>

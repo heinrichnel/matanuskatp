@@ -398,13 +398,13 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
                   <span className="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Active</span>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={onClick || (() => {})}>
+                  <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={onClick}>
                     View
                   </Button>
-                  <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={onClick || (() => {})}>
+                  <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={onClick}>
                     Edit
                   </Button>
-                  <Button size="sm" variant="success" icon={<CheckCircle className="w-4 h-4" />} onClick={onClick || (() => {})} disabled={!canCompleteTrip(trip) || isLoading[`completeTrip-${trip.id}`]} isLoading={isLoading[`completeTrip-${trip.id}`]} title={!canCompleteTrip(trip) ? 'Cannot complete: Unresolved flags' : 'Mark as completed'}>
+                  <Button size="sm" variant="success" icon={<CheckCircle className="w-4 h-4" />} onClick={onClick} disabled={!canCompleteTrip(trip) || isLoading[`completeTrip-${trip.id}`]} isLoading={isLoading[`completeTrip-${trip.id}`]} title={!canCompleteTrip(trip) ? 'Cannot complete: Unresolved flags' : 'Mark as completed'}>
                     Complete
                   </Button>
                 </div>
@@ -470,14 +470,14 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
 
                   {/* Actions */}
                   <div className="flex flex-wrap gap-2 pt-2 border-t">
-                    <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={onClick || (() => {})}>
+                    <Button size="sm" variant="outline" icon={<Eye className="w-4 h-4" />} onClick={onClick}>
                       View
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       icon={<Edit className="w-4 h-4" />}
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                     >
                       Edit
                     </Button>
@@ -485,7 +485,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
                       size="sm"
                       variant="danger"
                       icon={isDeleting === trip.id ? undefined : <Trash2 className="w-4 h-4" />}
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                       isLoading={isLoading[`deleteTrip-${trip.id}`] || isDeleting === trip.id}
                       disabled={isLoading[`deleteTrip-${trip.id}`] || isDeleting !== null}
                     >
@@ -495,7 +495,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = (props) => {
                       size="sm"
                       variant="success"
                       icon={<CheckCircle className="w-4 h-4" />}
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                       disabled={!canCompleteTrip(trip) || isLoading[`completeTrip-${trip.id}`]}
                       isLoading={isLoading[`completeTrip-${trip.id}`]}
                       title={!canCompleteTrip(trip) ?

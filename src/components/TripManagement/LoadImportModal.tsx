@@ -406,7 +406,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
             <p>Import completed trips directly from your Google Apps Script webhook.</p>
             <p><strong>Requirements:</strong> Trips must have both SHIPPED and DELIVERED status to be imported.</p>
             <Button
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               disabled={isWebhookProcessing}
               isLoading={isWebhookProcessing}
               className="mt-2"
@@ -451,7 +451,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
               AGZ1963 → 31H, AGZ1286 → 4H, AFQ1324 → 23H, etc.
             </p>
             <Button
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               variant="outline"
               className="mt-3"
             >
@@ -530,14 +530,14 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             disabled={isProcessing || isWebhookProcessing}
             icon={<X className="w-4 h-4" />}
           >
             Cancel
           </Button>
           <Button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             disabled={!csvFile || isProcessing || isWebhookProcessing}
             isLoading={isProcessing}
             icon={<Upload className="w-4 h-4" />}

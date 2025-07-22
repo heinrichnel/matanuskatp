@@ -178,7 +178,7 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
           <h3 className="text-xl font-bold text-gray-900">Tyre Cost per Kilometer Analysis</h3>
           <p className="text-gray-600">Compare tyre brands and patterns for best value</p>
         </div>
-        <Button onClick={onClick || (() => {})} variant="outline">
+        <Button onClick={onClick} variant="outline">
           <Download className="w-4 h-4 mr-2" />
           Export CSV
         </Button>

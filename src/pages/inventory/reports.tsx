@@ -9,7 +9,7 @@ const InventoryReportsPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-medium mb-4">Stock Level Reports</h2>
           <p className="text-gray-600 mb-4">View current stock levels, minimum thresholds, and reorder recommendations.</p>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors" onClick={onClick || (() => {})}}>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors" onClick={onClick}}>
             Generate Report
           </button>
         </div>
@@ -17,7 +17,7 @@ const InventoryReportsPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-medium mb-4">Usage Analytics</h2>
           <p className="text-gray-600 mb-4">Analyze part usage patterns, consumption rates, and forecasting.</p>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors" onClick={onClick || (() => {})}}>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors" onClick={onClick}}>
             Generate Report
           </button>
         </div>
@@ -25,7 +25,7 @@ const InventoryReportsPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-medium mb-4">Cost Analysis</h2>
           <p className="text-gray-600 mb-4">Track spending, price changes, and budget compliance.</p>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors" onClick={onClick || (() => {})}}>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors" onClick={onClick}}>
             Generate Report
           </button>
         </div>

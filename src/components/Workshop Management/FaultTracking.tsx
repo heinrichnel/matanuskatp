@@ -179,28 +179,28 @@ const FaultTracking: React.FC = () => {
             <Button
               size="sm"
               variant={activeFilter === 'all' ? 'primary' : 'outline'}
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               All Faults ({faultCounts.all})
             </Button>
             <Button
               size="sm"
               variant={activeFilter === 'open' ? 'primary' : 'outline'}
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               Open ({faultCounts.open})
             </Button>
             <Button
               size="sm"
               variant={activeFilter === 'in_progress' ? 'primary' : 'outline'}
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               In Progress ({faultCounts.in_progress})
             </Button>
             <Button
               size="sm"
               variant={activeFilter === 'resolved' ? 'primary' : 'outline'}
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               Resolved ({faultCounts.resolved})
             </Button>

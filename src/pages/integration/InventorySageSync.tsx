@@ -218,14 +218,14 @@ const InventorySageSync: React.FC = () => {
         <div className="flex space-x-2">
           <Button 
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             disabled={syncStatus === 'importing' || syncStatus === 'exporting'}
             isLoading={syncStatus === 'importing'}
           >
             Import from Sage
           </Button>
           <Button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             disabled={selectedItems.length === 0 || syncStatus === 'importing' || syncStatus === 'exporting'}
             isLoading={syncStatus === 'exporting'}
           >

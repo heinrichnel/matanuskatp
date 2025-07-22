@@ -187,7 +187,7 @@ const TripPlanningForm: React.FC<TripPlanningFormProps> = ({ trip, onUpdate, onA
           <button
             type="button"
             className="btn-secondary"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             Add Delay Reason
           </button>
@@ -306,12 +306,12 @@ const TripPlanningForm: React.FC<TripPlanningFormProps> = ({ trip, onUpdate, onA
               </select>
             </div>
             <div className="flex gap-2 mt-4">
-              <button className="btn-primary" onClick={onClick || (() => {})} onClick={() => {}}>
+              <button className="btn-primary" onClick={onClick} onClick={() => {}}>
                 Add
               </button>
               <button
                 className="btn-secondary"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 Cancel
               </button>

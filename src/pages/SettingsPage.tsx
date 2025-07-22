@@ -50,7 +50,7 @@ const SettingsPage: React.FC = () => {
             <p className="text-gray-600">Configure application preferences and user settings</p>
           </div>
           <Button 
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<Save className="w-4 h-4" />}
           >
             Save Settings
@@ -64,7 +64,7 @@ const SettingsPage: React.FC = () => {
               <nav className="space-y-1">
                 <button
                   className={`w-full text-left px-4 py-3 flex items-center space-x-3 ${activeTab === 'profile' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' : 'hover:bg-gray-50'}`}
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   <User className="w-5 h-5" />
                   <span>Profile</span>
@@ -72,7 +72,7 @@ const SettingsPage: React.FC = () => {
                 
                 <button
                   className={`w-full text-left px-4 py-3 flex items-center space-x-3 ${activeTab === 'notifications' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' : 'hover:bg-gray-50'}`}
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   <Bell className="w-5 h-5" />
                   <span>Notifications</span>
@@ -80,7 +80,7 @@ const SettingsPage: React.FC = () => {
                 
                 <button
                   className={`w-full text-left px-4 py-3 flex items-center space-x-3 ${activeTab === 'security' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' : 'hover:bg-gray-50'}`}
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   <Shield className="w-5 h-5" />
                   <span>Security</span>
@@ -88,7 +88,7 @@ const SettingsPage: React.FC = () => {
                 
                 <button
                   className={`w-full text-left px-4 py-3 flex items-center space-x-3 ${activeTab === 'data' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' : 'hover:bg-gray-50'}`}
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   <Database className="w-5 h-5" />
                   <span>Data Management</span>
@@ -96,7 +96,7 @@ const SettingsPage: React.FC = () => {
                 
                 <button
                   className={`w-full text-left px-4 py-3 flex items-center space-x-3 ${activeTab === 'fleet' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' : 'hover:bg-gray-50'}`}
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   <Truck className="w-5 h-5" />
                   <span>Fleet Defaults</span>
@@ -104,7 +104,7 @@ const SettingsPage: React.FC = () => {
                 
                 <button
                   className={`w-full text-left px-4 py-3 flex items-center space-x-3 ${activeTab === 'billing' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' : 'hover:bg-gray-50'}`}
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   <DollarSign className="w-5 h-5" />
                   <span>Billing & Currency</span>
@@ -112,7 +112,7 @@ const SettingsPage: React.FC = () => {
                 
                 <button
                   className={`w-full text-left px-4 py-3 flex items-center space-x-3 ${activeTab === 'system' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' : 'hover:bg-gray-50'}`}
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   <Settings className="w-5 h-5" />
                   <span>System</span>

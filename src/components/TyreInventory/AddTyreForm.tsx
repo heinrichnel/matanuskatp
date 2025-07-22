@@ -159,7 +159,7 @@ export const AddTyreForm: React.FC<AddTyreFormProps> = ({ onSubmit, onCancel }) 
         </div>
         <div className="flex space-x-2 pt-4">
           <Button type="submit">Create</Button>
-          <Button variant="outline" onClick={onClick || (() => {})} type="button">Cancel</Button>
+          <Button variant="outline" onClick={onClick} type="button">Cancel</Button>
         </div>
       </div>
     </form>

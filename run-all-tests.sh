@@ -30,7 +30,7 @@ echo "## Test Results Summary" >> $REPORT_FILE
 echo "" >> $REPORT_FILE
 
 # 1. Routing System Tests
-echo -e "${YELLOW}[1/5] Running routing system tests...${NC}"
+echo -e "${YELLOW}[1/6] Running routing system tests...${NC}"
 echo "### 1. Routing System Tests" >> $REPORT_FILE
 
 if bash test-routing-advanced.sh > "$RESULTS_DIR/routing-test-output.txt" 2>&1; then
@@ -42,7 +42,7 @@ else
 fi
 
 # 2. Button Connection Tests
-echo -e "\n${YELLOW}[2/5] Running button connection tests...${NC}"
+echo -e "\n${YELLOW}[2/6] Running button connection tests...${NC}"
 echo "" >> $REPORT_FILE
 echo "### 2. Button Connection Tests" >> $REPORT_FILE
 
@@ -55,7 +55,7 @@ else
 fi
 
 # 3. Form Connection Tests
-echo -e "\n${YELLOW}[3/5] Running form connection tests...${NC}"
+echo -e "\n${YELLOW}[3/6] Running form connection tests...${NC}"
 echo "" >> $REPORT_FILE
 echo "### 3. Form Connection Tests" >> $REPORT_FILE
 
@@ -68,7 +68,7 @@ else
 fi
 
 # 4. Build check
-echo -e "\n${YELLOW}[4/5] Testing build process...${NC}"
+echo -e "\n${YELLOW}[4/6] Testing build process...${NC}"
 echo "" >> $REPORT_FILE
 echo "### 4. Build Process Test" >> $REPORT_FILE
 
@@ -80,8 +80,21 @@ else
   echo "❌ Build process failed - see $RESULTS_DIR/build-output.txt for details" >> $REPORT_FILE
 fi
 
-# 5. Display next steps for visual testing
-echo -e "\n${YELLOW}[5/5] Setting up for visual tests...${NC}"
+# 5. Resilience Tests
+echo -e "\n${YELLOW}[5/6] Running resilience tests...${NC}"
+echo "" >> $REPORT_FILE
+echo "### 5. Resilience Tests" >> $REPORT_FILE
+
+if bash test-resilience.sh > "$RESULTS_DIR/resilience-test-output.txt" 2>&1; then
+  echo -e "${GREEN}✓ Resilience tests completed successfully${NC}"
+  echo "✅ Resilience tests passed - see detailed report in $RESULTS_DIR/resilience-test-output.txt" >> $REPORT_FILE
+else
+  echo -e "${RED}✗ Resilience tests failed${NC}"
+  echo "❌ Resilience tests encountered issues - see $RESULTS_DIR/resilience-test-output.txt for details" >> $REPORT_FILE
+fi
+
+# 6. Display next steps for visual testing
+echo -e "\n${YELLOW}[6/6] Setting up for visual tests...${NC}"
 echo "" >> $REPORT_FILE
 echo "### 5. Visual Testing Instructions" >> $REPORT_FILE
 echo "" >> $REPORT_FILE
@@ -97,9 +110,10 @@ echo ""
 echo -e "${YELLOW}Next steps:${NC}"
 echo "1. Review test reports in the test-results directory"
 echo "2. Check BUTTON_CONNECTION_REPORT.md and FORM_CONNECTION_REPORT.md for issues"
-echo "3. Run 'npm run test:sidebar' to launch the visual sidebar tester"
-echo "4. Follow the test scenarios in UI_TESTING_WORKFLOW.md"
-echo "5. Fix any issues found during testing"
-echo "6. When all tests pass, proceed with deployment"
+echo "3. Review resilience test results in $RESULTS_DIR/resilience-test-output.txt"
+echo "4. Run 'npm run test:sidebar' to launch the visual sidebar tester"
+echo "5. Follow the test scenarios in UI_TESTING_WORKFLOW.md"
+echo "6. Fix any issues found during testing"
+echo "7. When all tests pass, proceed with deployment"
 echo ""
 echo -e "${BLUE}Thank you for ensuring quality through thorough testing!${NC}"

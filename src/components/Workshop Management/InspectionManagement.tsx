@@ -46,13 +46,13 @@ const InspectionManagement: React.FC<InspectionManagementProps> = ({ status = 'a
           <Button
             variant="outline"
             icon={<RefreshCw className="w-4 h-4" />}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             Refresh
           </Button>
           <Button
             icon={<Plus className="w-4 h-4" />}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             New Inspection
           </Button>
@@ -94,7 +94,7 @@ const InspectionManagement: React.FC<InspectionManagementProps> = ({ status = 'a
                 <div className="mt-6">
                   <Button
                     icon={<Plus className="w-4 h-4" />}
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Create Template
                   </Button>

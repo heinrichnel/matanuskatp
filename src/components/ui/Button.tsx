@@ -40,17 +40,11 @@ export const Button = ({
   const baseClasses = 'inline-flex items-center justify-center rounded-md font-medium focus:outline-none focus:ring-2 focus:ring-offset-2';
   const classes = `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? 'w-full' : ''}`;
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (onClick) {
-      onClick(event);
-    }
-  };
-
   return (
     <button
       className={classes}
       disabled={isLoading || props.disabled}
-      onClick={onClick || (() => {})}
+      onClick={onClick}
       {...props}
     >
       {isLoading && <span className="loader" />}

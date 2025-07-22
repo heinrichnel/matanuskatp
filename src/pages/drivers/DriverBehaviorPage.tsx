@@ -101,7 +101,7 @@ const DriverBehaviorPage: React.FC = () => {
             Record Behavior Event
           </Button>
           <Button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />}
             variant="outline"
             disabled={isSyncing || isLoading.importDriverBehavior}

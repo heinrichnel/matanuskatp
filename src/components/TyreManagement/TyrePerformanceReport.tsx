@@ -174,7 +174,7 @@ const TyrePerformanceReport: React.FC = () => {
       <div className="p-6 bg-red-100 border border-red-400 text-red-700 rounded-lg">
         <p>{error}</p>
         <button 
-          onClick={onClick || (() => {})}
+          onClick={onClick}
           className="mt-3 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
         >
           Retry
@@ -211,7 +211,7 @@ const TyrePerformanceReport: React.FC = () => {
           </div>
           
           <button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md flex items-center"
           >
             <Download size={18} className="mr-1" />
@@ -503,7 +503,7 @@ const TyrePerformanceReport: React.FC = () => {
             <span className="font-medium">Key Action Required</span>
           </div>
           <button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md flex items-center"
           >
             <Download size={18} className="mr-1" />

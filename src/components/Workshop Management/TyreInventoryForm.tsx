@@ -73,7 +73,7 @@ const TyreInventoryForm: React.FC<TyreInventoryFormProps> = ({ onSubmit }) => {
         <option>Under Warranty</option>
       </select>
       
-      <button type="submit" className="col-span-2 bg-blue-500 text-white py-2 rounded" onClick={onClick || (() => {})}}>
+      <button type="submit" className="col-span-2 bg-blue-500 text-white py-2 rounded" onClick={onClick}}>
         Submit Tyre
       </button>
     </form>

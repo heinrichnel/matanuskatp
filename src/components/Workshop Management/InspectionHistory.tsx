@@ -124,7 +124,7 @@ const InspectionHistory: React.FC = () => {
             <Button 
               variant="outline" 
               className="flex items-center gap-1" 
-              onClick={onClick || (() => {})}
+              onClick={onClick}
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Workshop
@@ -154,7 +154,7 @@ const InspectionHistory: React.FC = () => {
                     <h3 className="text-lg font-semibold">Inspection Details</h3>
                     <Button 
                       variant="outline" 
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                       className="text-sm"
                     >
                       Back to List
@@ -296,7 +296,7 @@ const InspectionHistory: React.FC = () => {
                               <Button 
                                 variant="outline"
                                 size="sm"
-                                onClick={onClick || (() => {})}
+                                onClick={onClick}
                               >
                                 View Details
                               </Button>

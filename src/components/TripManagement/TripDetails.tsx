@@ -294,14 +294,14 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
     <div className="space-y-6">
       {/* Header with Navigation and Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <Button variant="outline" onClick={onClick || (() => {})} icon={<ArrowLeft className="w-4 h-4" />}>
+        <Button variant="outline" onClick={onClick} icon={<ArrowLeft className="w-4 h-4" />}>
           Back to Trips
         </Button>
         
         <div className="flex flex-wrap gap-3">
           <Button 
             variant="outline" 
-            onClick={onClick || (() => {})} 
+            onClick={onClick} 
             icon={<BarChart3 className="w-4 h-4" />}
           >
             View Report
@@ -311,7 +311,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
             <>
               <Button 
                 variant="outline"
-                onClick={onClick || (() => {})} 
+                onClick={onClick} 
                 icon={<Calendar className="w-4 h-4" />}
               >
                 Trip Planning
@@ -320,7 +320,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
               {!hasSystemCosts && (
                 <Button 
                   variant="outline"
-                  onClick={onClick || (() => {})} 
+                  onClick={onClick} 
                   icon={<Calculator className="w-4 h-4" />}
                 >
                   Generate System Costs
@@ -328,14 +328,14 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
               )}
               
               <Button 
-                onClick={onClick || (() => {})} 
+                onClick={onClick} 
                 icon={<Plus className="w-4 h-4" />}
               >
                 Add Cost Entry
               </Button>
               
               <Button 
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 disabled={!canComplete}
                 icon={<CheckCircle className="w-4 h-4" />}
                 className={!canComplete ? 'opacity-50 cursor-not-allowed' : ''}
@@ -348,7 +348,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
 
           {trip.status === 'completed' && (
             <Button 
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               icon={<Send className="w-4 h-4" />}
             >
               Submit for Invoicing
@@ -431,7 +431,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
               <div className="mt-2">
                 <Button 
                   size="sm"
-                  onClick={onClick || (() => {})} 
+                  onClick={onClick} 
                   icon={<Calculator className="w-4 h-4" />}
                 >
                   Generate System Costs Now
@@ -678,7 +678,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
           title={`Cost Entries (${trip.costs.length})`}
           action={
             trip.status === 'active' && (
-              <Button size="sm" onClick={onClick || (() => {})} icon={<Plus className="w-4 h-4" />}>
+              <Button size="sm" onClick={onClick} icon={<Plus className="w-4 h-4" />}>
                 Add Cost Entry
               </Button>
             )

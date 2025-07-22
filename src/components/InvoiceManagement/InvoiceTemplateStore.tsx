@@ -262,7 +262,7 @@ const InvoiceTemplateStore: React.FC = () => {
           <Button
             variant="primary"
             icon={<Plus className="w-4 h-4" />}
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             Create Template
           </Button>
@@ -323,14 +323,14 @@ const InvoiceTemplateStore: React.FC = () => {
           <div className="flex border rounded-md overflow-hidden">
             <button
               className={`px-3 py-2 ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'bg-white'}`}
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               title="Grid View"
             >
               <Grid className="h-5 w-5" />
             </button>
             <button
               className={`px-3 py-2 ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'bg-white'}`}
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               title="List View"
             >
               <List className="h-5 w-5" />
@@ -355,7 +355,7 @@ const InvoiceTemplateStore: React.FC = () => {
                   <div className="absolute top-2 right-2 flex space-x-1">
                     <button 
                       className={`p-1 rounded-full ${template.isFavorite ? 'bg-yellow-100' : 'bg-white'}`}
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                     >
                       <Star className={`h-5 w-5 ${template.isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
                     </button>
@@ -391,7 +391,7 @@ const InvoiceTemplateStore: React.FC = () => {
                       variant="outline" 
                       size="sm"
                       icon={<Eye className="w-4 h-4" />}
-                      onClick={onClick || (() => {})}
+                      onClick={onClick}
                     >
                       Preview
                     </Button>
@@ -409,7 +409,7 @@ const InvoiceTemplateStore: React.FC = () => {
                         <div className="py-1">
                           <button 
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                            onClick={onClick || (() => {})}
+                            onClick={onClick}
                           >
                             <Copy className="w-4 h-4 mr-2" />
                             Duplicate
@@ -417,7 +417,7 @@ const InvoiceTemplateStore: React.FC = () => {
                           
                           <button 
                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                            onClick={onClick || (() => {})}
+                            onClick={onClick}
                             disabled={template.isDefault}
                           >
                             <Check className="w-4 h-4 mr-2" />
@@ -433,7 +433,7 @@ const InvoiceTemplateStore: React.FC = () => {
                           
                           <button 
                             className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left"
-                            onClick={onClick || (() => {})}
+                            onClick={onClick}
                           >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
@@ -551,7 +551,7 @@ const InvoiceTemplateStore: React.FC = () => {
                             size="xs" 
                             variant="outline"
                             icon={<Eye className="w-3 h-3" />}
-                            onClick={onClick || (() => {})}
+                            onClick={onClick}
                           >
                             Preview
                           </Button>
@@ -575,7 +575,7 @@ const InvoiceTemplateStore: React.FC = () => {
                               <div className="py-1">
                                 <button 
                                   className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                  onClick={onClick || (() => {})}
+                                  onClick={onClick}
                                 >
                                   <Copy className="w-4 h-4 mr-2" />
                                   Duplicate
@@ -583,7 +583,7 @@ const InvoiceTemplateStore: React.FC = () => {
                                 
                                 <button 
                                   className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
-                                  onClick={onClick || (() => {})}
+                                  onClick={onClick}
                                   disabled={template.isDefault}
                                 >
                                   <Check className="w-4 h-4 mr-2" />
@@ -599,7 +599,7 @@ const InvoiceTemplateStore: React.FC = () => {
                                 
                                 <button 
                                   className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left"
-                                  onClick={onClick || (() => {})}
+                                  onClick={onClick}
                                 >
                                   <Trash2 className="w-4 h-4 mr-2" />
                                   Delete
@@ -644,7 +644,7 @@ const InvoiceTemplateStore: React.FC = () => {
             <div className="flex justify-between items-center p-4 border-b">
               <h3 className="text-lg font-medium">Template Preview: {selectedTemplate.name}</h3>
               <button
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 className="text-gray-400 hover:text-gray-500"
               >
                 <Trash2 className="h-5 w-5" />
@@ -789,7 +789,7 @@ const InvoiceTemplateStore: React.FC = () => {
                 <div className="border-t pt-4 flex justify-between">
                   <Button
                     variant="outline"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Close
                   </Button>

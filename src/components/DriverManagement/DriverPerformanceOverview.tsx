@@ -151,7 +151,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
         </div>
         <div className="flex space-x-2">
           <Button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             disabled={isSyncing || isLoading.importDriverBehavior}
             isLoading={isLoading.importDriverBehavior}
           >
@@ -159,7 +159,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
           </Button>
           {onSyncNow && (
             <Button
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               icon={<RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />}
               variant="outline"
               disabled={isSyncing}
@@ -341,7 +341,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                         >
                           View Events
                         </Button>
@@ -400,7 +400,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
           action={
             <Button
               size="sm"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               icon={<Plus className="w-4 h-4" />}
             >
               Record Event
@@ -490,7 +490,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={onClick || (() => {})}
+                        onClick={onClick}
                         icon={<Eye className="w-3 h-3" />}
                       >
                         View
@@ -498,7 +498,7 @@ const DriverPerformanceOverview: React.FC<DriverPerformanceOverviewProps> = ({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={onClick || (() => {})}
+                        onClick={onClick}
                         icon={<Edit className="w-3 h-3" />}
                       >
                         Edit

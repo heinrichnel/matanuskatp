@@ -115,8 +115,8 @@ export const RCAModal: React.FC<RCAModalProps> = ({ open, initial, onSubmit, onC
           {error && <div className="text-red-500 text-sm">{error}</div>}
         </div>
         <div className="flex justify-end mt-6 space-x-2">
-          <Button onClick={onClick || (() => {})} size="sm" variant="secondary">Cancel</Button>
-          <Button onClick={onClick || (() => {})} size="sm" variant="primary">Submit RCA</Button>
+          <Button onClick={onClick} size="sm" variant="secondary">Cancel</Button>
+          <Button onClick={onClick} size="sm" variant="primary">Submit RCA</Button>
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@
 - [6. Forms and UI Elements](#6-forms-and-ui-elements)
 - [7. Analytics and Visualization](#7-analytics-and-visualization)
 - [8. Data Flow](#8-data-flow)
+- [9. Offline-First & Resilience Features](#9-offline-first--resilience-features)
 
 ## 1. Overview
 
@@ -275,8 +276,129 @@ The application maintains real-time connections to Firestore for critical data:
 
 This ensures that all users see the most current information without manually refreshing.
 
+## 9. Offline-First & Resilience Features
+
+### Network Detection System
+
+The application implements advanced network detection beyond the standard `navigator.onLine` property:
+
+- **Component**: `src/utils/networkDetection.ts`
+- **Features**:
+  - Active connectivity checks to endpoints
+  - Connection quality assessment
+  - Real-time network status updates
+  - Custom event system for connection changes
+
+```tsx
+// Example from networkDetection.ts
+export const checkNetworkConnectivity = async (): Promise<ConnectionStatus> => {
+  // Basic check
+  if (!navigator.onLine) return { isOnline: false, quality: 'offline' };
+  
+  try {
+    // Active endpoint test with timeout
+    const start = performance.now();
+    const response = await Promise.race([
+      fetch('/api/health', { method: 'HEAD' }),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout')), 5000)
+      )
+    ]);
+    
+    const time = performance.now() - start;
+    
+    // Determine connection quality based on response time
+    if (response && (response as Response).ok) {
+      if (time < 300) return { isOnline: true, quality: 'good', latency: time };
+      if (time < 1000) return { isOnline: true, quality: 'fair', latency: time };
+      return { isOnline: true, quality: 'poor', latency: time };
+    }
+    return { isOnline: false, quality: 'unknown' };
+  } catch (error) {
+    return { isOnline: false, quality: 'limited' };
+  }
+};
+```
+
+### Offline Data Management
+
+- **Component**: `src/utils/offlineCache.ts`
+- **Features**:
+  - IndexedDB storage for offline data persistence
+  - Automatic cache synchronization
+  - TTL (Time-To-Live) management for cached data
+  - Transaction support for data integrity
+
+### Error Handling Architecture
+
+- **Component**: `src/components/ErrorBoundary.tsx`
+- **Features**:
+  - React error boundaries to prevent UI crashes
+  - Severity-based error handling
+  - Self-healing mechanisms for recoverable errors
+  - Detailed error reports for debugging
+
+### Offline-Aware UI Components
+
+- **Components**:
+  - `src/components/ui/ConnectionStatusIndicator.tsx`
+  - `src/components/ui/OfflineBanner.tsx`
+- **Features**:
+  - Real-time connection status display
+  - Contextual UI modifications in offline mode
+  - User guidance for offline workflows
+
+### Custom React Hooks for Offline Support
+
+- **Component**: `src/hooks/useOfflineQuery.ts`
+- **Features**:
+  - Transparent online/offline data access
+  - Cache-first queries with network fallback
+  - Optimistic UI updates with background synchronization
+
+```tsx
+// Example from useOfflineQuery.ts
+function useOfflineQuery<T>(path: string, options?: QueryOptions): QueryResult<T> {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const { isOnline } = useNetworkStatus();
+  
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Try to get cached data first
+        const cachedData = await getCachedData<T>(path);
+        if (cachedData) {
+          setData(cachedData);
+          setLoading(false);
+        }
+        
+        // If online, fetch fresh data
+        if (isOnline) {
+          const freshData = await fetchFromFirestore<T>(path, options);
+          setData(freshData);
+          // Cache the fresh data for offline use
+          await cacheData(path, freshData);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error(String(err)));
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchData();
+  }, [path, isOnline]);
+  
+  return { data, loading, error, isOfflineData: !isOnline };
+}
+```
+
 ## Conclusion
 
 The APppp application is structured as a modern, component-based React application with TypeScript for type safety and Tailwind CSS for styling. It integrates deeply with Firebase for backend functionality and uses a structured routing system tied directly to the sidebar configuration for easy navigation and maintenance.
 
 The component hierarchy follows a logical organization by feature, with shared UI elements extracted into reusable components. Real-time data is a core feature, implemented using Firestore listeners for immediate updates across the application.
+
+The application implements a comprehensive offline-first architecture with advanced resilience features, ensuring that critical functionality remains available even in challenging connectivity environments. The combination of offline data caching, sophisticated network detection, and graceful degradation provides a robust user experience in all network conditions.

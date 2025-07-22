@@ -894,35 +894,35 @@ const TyreDashboard: React.FC = () => {
         <div className="flex space-x-2">
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<BarChart3 className="w-4 h-4" />}
           >
             {showAnalytics ? 'Hide Analytics' : 'Show Analytics'}
           </Button>
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<Package className="w-4 h-4" />}
           >
             {showInventory ? 'Show Active Tyres' : 'Show Inventory'}
           </Button>
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<Filter className="w-4 h-4" />}
           >
             {filterActive ? 'Hide Filters' : 'Show Filters'}
           </Button>
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<FileDown className="w-4 h-4" />}
           >
             Export CSV
           </Button>
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<Upload className="w-4 h-4" />}
           >
             Import CSV
@@ -936,7 +936,7 @@ const TyreDashboard: React.FC = () => {
           <span className="block sm:inline">{error}</span>
           <button
             className="absolute top-0 right-0 mt-2 mr-2"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             <span className="text-red-500">×</span>
           </button>
@@ -1116,7 +1116,7 @@ const TyreDashboard: React.FC = () => {
           <div className="mt-4 flex justify-end">
             <Button
               variant="outline"
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               size="sm"
             >
               Clear Filters
@@ -1454,7 +1454,7 @@ const TyreDashboard: React.FC = () => {
                 <button
                   type="button"
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={onClick || (() => {})}
+                  onClick={onClick}
                 >
                   Close
                 </button>
@@ -1555,14 +1555,14 @@ const TyreDashboard: React.FC = () => {
                     variant="outline"
                     size="sm"
                     disabled={item.quantity === 0}
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Use in Job Card
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Reorder
                   </Button>
@@ -1587,7 +1587,7 @@ const TyreDashboard: React.FC = () => {
                   ${tyre.status === 'urgent' ? 'border-red-300' :
                     tyre.status === 'worn' ? 'border-amber-300' : 'border-green-300'}
                 `}
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 <div className="flex justify-between items-start">
                   <div>
@@ -1700,7 +1700,7 @@ const TyreDashboard: React.FC = () => {
                     variant="outline"
                     size="xs"
                     icon={<RotateCcw className="w-3 h-3" />}
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Rotation
                   </Button>

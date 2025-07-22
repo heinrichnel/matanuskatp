@@ -324,7 +324,7 @@ const UIConnector: React.FC = () => {
       
       <div style={{ display: 'flex', gap: '10px' }}>
         <button
-          onClick={onClick || (() => {})}
+          onClick={onClick}
           style={{
             backgroundColor: showReport ? '#555' : '#333',
             color: 'white',
@@ -338,7 +338,7 @@ const UIConnector: React.FC = () => {
         </button>
         
         <button
-          onClick={onClick || (() => {})}
+          onClick={onClick}
           style={{
             backgroundColor: isActive ? '#4CAF50' : '#f44336',
             color: 'white',

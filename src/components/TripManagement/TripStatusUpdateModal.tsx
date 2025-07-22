@@ -135,14 +135,14 @@ const TripStatusUpdateModal: React.FC<TripStatusUpdateModalProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<Send className="w-4 h-4" />}
             disabled={isSubmitting}
             isLoading={isSubmitting}

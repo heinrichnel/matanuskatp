@@ -143,7 +143,7 @@ const PurchaseOrderSync: React.FC = () => {
         <Button
           disabled={!selectedPO || syncing}
           isLoading={syncing}
-          onClick={onClick || (() => {})}
+          onClick={onClick}
         >
           Sync Selected PO to Sage
         </Button>
@@ -201,7 +201,7 @@ const PurchaseOrderSync: React.FC = () => {
                     className={`cursor-pointer hover:bg-gray-50 ${
                       selectedPO?.id === po.id ? 'bg-blue-50' : ''
                     }`}
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     <div className="p-4">
                       <div className="flex items-center justify-between">

@@ -177,7 +177,7 @@ const DieselAnalysis: React.FC<DieselAnalysisProps> = ({ dieselRecords = [] }) =
               />
             </div>
             <Button
-              onClick={onClick || (() => {})})}
+              onClick={onClick})}
             >
               Clear Filters
             </Button>

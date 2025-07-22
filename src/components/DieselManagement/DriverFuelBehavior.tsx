@@ -217,49 +217,49 @@ const DriverFuelBehavior: React.FC = () => {
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Driver Name
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Overall Score
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Idling
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Acceleration
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Speed
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Fuel Efficiency
                   </th>
                   <th 
                     scope="col" 
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     Harsh Braking
                   </th>

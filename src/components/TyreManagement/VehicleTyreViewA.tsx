@@ -197,7 +197,7 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
             <div className="space-y-3">
               {vehicleTyres.map(tyre => (
                 <div key={tyre.id} className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" 
-                     onClick={onClick || (() => {})}>
+                     onClick={onClick}>
                   <div className="flex justify-between items-center">
                     <div>
                       <h4 className="font-medium">{tyre.brand} {tyre.model}</h4>

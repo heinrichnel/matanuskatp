@@ -30,7 +30,7 @@ const VerticalStepper: React.FC<VerticalStepperProps> = ({
             <div className="flex flex-col items-center">
               {/* Circle indicator */}
               <div 
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 className={`
                   flex h-10 w-10 items-center justify-center rounded-full z-10
                   ${step.status === 'completed' 

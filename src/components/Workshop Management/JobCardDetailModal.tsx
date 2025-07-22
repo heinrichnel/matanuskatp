@@ -272,34 +272,34 @@ export const JobCardDetailModal: React.FC<Props> = ({
             <span className="ml-2 text-gray-400">ODO: {data.odometer} km</span>
           </div>
           <div className="flex space-x-2">
-            <Button onClick={onClick || (() => {})} size="sm" variant="outline">
+            <Button onClick={onClick} size="sm" variant="outline">
               <Printer size={16} className="mr-2" />
               Print
             </Button>
-            <Button onClick={onClick || (() => {})} size="sm" variant="outline">
+            <Button onClick={onClick} size="sm" variant="outline">
               <Download size={16} className="mr-2" />
               PDF
             </Button>
             {editMode ? (
               <>
-                <Button onClick={onClick || (() => {})} size="sm" variant="primary">
+                <Button onClick={onClick} size="sm" variant="primary">
                   <Check size={16} className="mr-2" />
                   Save
                 </Button>
-                <Button onClick={onClick || (() => {})} size="sm" variant="secondary">
+                <Button onClick={onClick} size="sm" variant="secondary">
                   <X size={16} className="mr-2" />
                   Cancel
                 </Button>
               </>
             ) : (
               data.canEdit && (
-                <Button onClick={onClick || (() => {})} size="sm" variant="primary">
+                <Button onClick={onClick} size="sm" variant="primary">
                   <Edit2 size={16} className="mr-2" />
                   Edit
                 </Button>
               )
             )}
-            <Button onClick={onClick || (() => {})} size="sm" variant="secondary">
+            <Button onClick={onClick} size="sm" variant="secondary">
               Close
             </Button>
           </div>
@@ -310,15 +310,15 @@ export const JobCardDetailModal: React.FC<Props> = ({
           className="p-4"
         >
           <TabsList className="mb-4">
-            <TabsTrigger value="general" onClick={onClick || (() => {})}>General</TabsTrigger>
-            <TabsTrigger value="tasks" onClick={onClick || (() => {})}>Tasks</TabsTrigger>
-            <TabsTrigger value="parts" onClick={onClick || (() => {})}>Parts</TabsTrigger>
-            <TabsTrigger value="labor" onClick={onClick || (() => {})}>Labor</TabsTrigger>
-            <TabsTrigger value="costs" onClick={onClick || (() => {})}>Costs</TabsTrigger>
-            <TabsTrigger value="attachments" onClick={onClick || (() => {})}>Attachments</TabsTrigger>
-            <TabsTrigger value="remarks" onClick={onClick || (() => {})}>Remarks</TabsTrigger>
-            <TabsTrigger value="timelog" onClick={onClick || (() => {})}>Time Log</TabsTrigger>
-            <TabsTrigger value="audit" onClick={onClick || (() => {})}>Audit</TabsTrigger>
+            <TabsTrigger value="general" onClick={onClick}>General</TabsTrigger>
+            <TabsTrigger value="tasks" onClick={onClick}>Tasks</TabsTrigger>
+            <TabsTrigger value="parts" onClick={onClick}>Parts</TabsTrigger>
+            <TabsTrigger value="labor" onClick={onClick}>Labor</TabsTrigger>
+            <TabsTrigger value="costs" onClick={onClick}>Costs</TabsTrigger>
+            <TabsTrigger value="attachments" onClick={onClick}>Attachments</TabsTrigger>
+            <TabsTrigger value="remarks" onClick={onClick}>Remarks</TabsTrigger>
+            <TabsTrigger value="timelog" onClick={onClick}>Time Log</TabsTrigger>
+            <TabsTrigger value="audit" onClick={onClick}>Audit</TabsTrigger>
           </TabsList>
 
           <TabsContent value="general">
@@ -504,7 +504,7 @@ export const JobCardDetailModal: React.FC<Props> = ({
                           </div>
                         ) : (
                           <div className="mt-4">
-                            <Button onClick={onClick || (() => {})} size="sm" variant="secondary">
+                            <Button onClick={onClick} size="sm" variant="secondary">
                               Complete RCA
                             </Button>
                           </div>
@@ -546,7 +546,7 @@ export const JobCardDetailModal: React.FC<Props> = ({
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-medium text-lg">Tasks</h3>
                   {editMode && (
-                    <Button onClick={onClick || (() => {})} size="sm" variant="secondary">
+                    <Button onClick={onClick} size="sm" variant="secondary">
                       Add Task
                     </Button>
                   )}
@@ -666,7 +666,7 @@ export const JobCardDetailModal: React.FC<Props> = ({
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-medium text-lg">Parts Used</h3>
                   {editMode && (
-                    <Button onClick={onClick || (() => {})} size="sm" variant="secondary">
+                    <Button onClick={onClick} size="sm" variant="secondary">
                       Add Part
                     </Button>
                   )}
@@ -787,7 +787,7 @@ export const JobCardDetailModal: React.FC<Props> = ({
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-medium text-lg">Labor</h3>
                   {editMode && (
-                    <Button onClick={onClick || (() => {})} size="sm" variant="secondary">
+                    <Button onClick={onClick} size="sm" variant="secondary">
                       Add Labor
                     </Button>
                   )}

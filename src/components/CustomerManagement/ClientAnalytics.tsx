@@ -443,7 +443,7 @@ const ClientAnalytics: React.FC<ClientAnalyticsProps> = ({
                   <div 
                     key={clientData.name} 
                     className="p-4 bg-white rounded-lg shadow border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer"
-                    onClick={onClick || (() => {})}
+                    onClick={onClick}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center">

@@ -262,7 +262,7 @@ const FleetVisualSetup: React.FC = () => {
         
         <div className="flex gap-3">
           <button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md flex items-center"
           >
             <Plus size={18} className="mr-1" />
@@ -285,7 +285,7 @@ const FleetVisualSetup: React.FC = () => {
             {vehicleTemplates.map(template => (
               <button
                 key={template.id}
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 className={`w-full text-left px-4 py-3 rounded-md flex items-center justify-between ${
                   selectedTemplate?.id === template.id
                     ? 'bg-primary-50 border border-primary-200'
@@ -322,7 +322,7 @@ const FleetVisualSetup: React.FC = () => {
                   {isEditing ? (
                     <>
                       <button 
-                        onClick={onClick || (() => {})} 
+                        onClick={onClick} 
                         className={`flex items-center px-3 py-1 rounded-md ${
                           isAddingPoint
                             ? 'bg-amber-100 text-amber-800 border border-amber-300'
@@ -342,7 +342,7 @@ const FleetVisualSetup: React.FC = () => {
                         )}
                       </button>
                       <button 
-                        onClick={onClick || (() => {})} 
+                        onClick={onClick} 
                         className="flex items-center px-3 py-1 rounded-md bg-green-50 text-green-700 border border-green-200 hover:bg-green-100"
                       >
                         <Check size={16} className="mr-1" />
@@ -352,14 +352,14 @@ const FleetVisualSetup: React.FC = () => {
                   ) : (
                     <>
                       <button 
-                        onClick={onClick || (() => {})} 
+                        onClick={onClick} 
                         className="flex items-center px-3 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
                       >
                         <Edit size={16} className="mr-1" />
                         Edit
                       </button>
                       <button 
-                        onClick={onClick || (() => {})} 
+                        onClick={onClick} 
                         className="flex items-center px-3 py-1 rounded-md bg-red-50 text-red-700 border border-red-200 hover:bg-red-100"
                       >
                         <Trash2 size={16} className="mr-1" />
@@ -399,7 +399,7 @@ const FleetVisualSetup: React.FC = () => {
                   isAddingPoint ? 'cursor-crosshair' : 'cursor-default'
                 }`}
                 style={{ minHeight: '400px' }}
-                onClick={onClick || (() => {})}
+                onClick={onClick}
               >
                 {selectedTemplate.image ? (
                   <img 
@@ -436,7 +436,7 @@ const FleetVisualSetup: React.FC = () => {
                   >
                     {isEditing && (
                       <button 
-                        onClick={onClick || (() => {})}
+                        onClick={onClick}
                         className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center hover:bg-red-600"
                       >
                         <X size={12} />
@@ -477,7 +477,7 @@ const FleetVisualSetup: React.FC = () => {
               <h3 className="text-xl font-medium text-gray-700 mb-2">No Template Selected</h3>
               <p className="text-gray-500 mb-6">Select a template from the left or create a new one</p>
               <button
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md inline-flex items-center"
               >
                 <Plus size={18} className="mr-1" />
@@ -562,7 +562,7 @@ const FleetVisualSetup: React.FC = () => {
               Cancel
             </button>
             <button
-              onClick={onClick || (() => {})}
+              onClick={onClick}
               className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
               disabled={!newPoint.label}
             >
@@ -610,13 +610,13 @@ const FleetVisualSetup: React.FC = () => {
             
             <div className="flex justify-end mt-6 space-x-3">
               <button
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
                 disabled={!newTemplate.name}
               >

@@ -100,7 +100,7 @@ export const ApplicantInfoCard: React.FC<ApplicantInfoCardProps> = ({
                   {file}
                   <span className="text-gray-400 text-xs">({size})</span>
                 </div>
-                <button className="text-blue-600 text-sm font-medium flex items-center gap-1" onClick={onClick || (() => {})}}>
+                <button className="text-blue-600 text-sm font-medium flex items-center gap-1" onClick={onClick}}>
                   <Download className="w-4 h-4" />
                   Download
                 </button>

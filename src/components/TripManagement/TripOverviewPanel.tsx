@@ -60,7 +60,7 @@ const TripOverviewPanel: React.FC = () => {
           <SyncIndicator />
           <Button 
             variant="outline"
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             icon={<Activity className="w-4 h-4" />}
           >
             Refresh Data

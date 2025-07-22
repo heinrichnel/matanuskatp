@@ -261,7 +261,7 @@ const WialonMapDashboard: React.FC = () => {
               {/* Refresh button */}
               <button 
                 className="mb-4 px-3 py-1 bg-blue-600 text-white rounded"
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 disabled={isLoading}
               >
                 {isLoading ? 'Refreshing...' : 'Refresh Units'}
@@ -285,19 +285,19 @@ const WialonMapDashboard: React.FC = () => {
                       <div className="mt-2 space-x-1">
                         <button
                           className="px-2 py-1 bg-blue-600 text-white text-xs rounded"
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                         >
                           Today's Track
                         </button>
                         <button
                           className="px-2 py-1 bg-green-600 text-white text-xs rounded"
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                         >
                           Last 60m
                         </button>
                         <button
                           className="px-2 py-1 bg-red-600 text-white text-xs rounded"
-                          onClick={onClick || (() => {})}
+                          onClick={onClick}
                         >
                           Hide Track
                         </button>

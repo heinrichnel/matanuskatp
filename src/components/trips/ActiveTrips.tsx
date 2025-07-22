@@ -440,7 +440,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           
           {/* File upload button */}
           <button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 flex items-center"
             disabled={isUploading}
           >
@@ -464,7 +464,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           
           {/* Template download button */}
           <button
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 flex items-center"
           >
             <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -474,7 +474,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           </button>
           
           <button 
-            onClick={onClick || (() => {})}
+            onClick={onClick}
             className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
           >
             Refresh Webhook Trips
@@ -495,7 +495,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           <span className="block sm:inline">{success}</span>
           <span 
             className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" 
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             <svg className="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
               <title>Close</title>
@@ -511,7 +511,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           <span className="block sm:inline">{error}</span>
           <span 
             className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" 
-            onClick={onClick || (() => {})}
+            onClick={onClick}
           >
             <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
               <title>Close</title>
@@ -655,13 +655,13 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
             
             <div className="mt-6 flex justify-end space-x-3">
               <button
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
-                onClick={onClick || (() => {})}
+                onClick={onClick}
                 className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
               >
                 Save Changes
@@ -731,7 +731,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                       <div className="font-medium">{formatCurrency(trip.cost, displayCurrency)}</div>
                       <button 
                         className="text-xs text-blue-600 hover:underline mt-1"
-                        onClick={onClick || (() => {})}
+                        onClick={onClick}
                       >
                         {trip.costBreakdown ? 'View Breakdown' : 'Allocate Costs'}
                       </button>
@@ -744,10 +744,10 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-                      <button className="text-indigo-600 hover:text-indigo-900" onClick={onClick || (() => {})}}>View</button>
+                      <button className="text-indigo-600 hover:text-indigo-900" onClick={onClick}}>View</button>
                       <button 
                         className="text-blue-600 hover:text-blue-900"
-                        onClick={onClick || (() => {})}
+                        onClick={onClick}
                       >
                         Edit Costs
                       </button>
