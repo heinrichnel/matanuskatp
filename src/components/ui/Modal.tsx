@@ -49,7 +49,7 @@ const Modal: React.FC<ModalProps> = ({
             <Button
               variant="outline"
               size="sm"
-              onClick={onClick || (() => {})})}
+              onClick={onClick || (() => {})}
               className="p-1"
             >
               <X className="w-4 h-4" />

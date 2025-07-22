@@ -285,7 +285,7 @@ export const sidebarConfig: SidebarItem[] = [
         component: 'components/DieselManagement/DriverFuelBehavior' 
       }
     ]
-  }
+  },
   // Clients Section
   {
     id: 'clients',
@@ -800,7 +800,7 @@ export const sidebarConfig: SidebarItem[] = [
         component: 'pages/settings/SystemLogsPage' 
       }
     ]
-  }
+  },
   { 
     id: 'add-new-customer', 
     label: 'Add New Customer', 
