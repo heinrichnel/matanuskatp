@@ -258,7 +258,7 @@ const TripForm: React.FC<TripFormProps> = ({ onSubmit, onCancel, initialData = {
         <div className="flex justify-end space-x-4 mt-6">
           <button 
             type="button" 
-            onClick={onCancel} 
+            onClick={onClick || (() => {})} 
             disabled={loading}
             className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >

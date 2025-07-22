@@ -112,14 +112,14 @@ const JobCardNotes: React.FC<JobCardNotesProps> = ({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={cancelEdit}
+                        onClick={onClick || (() => {})}
                         icon={<X className="w-3 h-3" />}
                       >
                         Cancel
                       </Button>
                       <Button
                         size="sm"
-                        onClick={() => saveEdit(note.id)}
+                        onClick={onClick || (() => {})}
                         icon={<Save className="w-3 h-3" />}
                       >
                         Save
@@ -138,13 +138,13 @@ const JobCardNotes: React.FC<JobCardNotesProps> = ({
                         <div className="flex space-x-2">
                           <button
                             className="text-gray-400 hover:text-gray-500"
-                            onClick={() => startEditingNote(note)}
+                            onClick={onClick || (() => {})}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             className="text-red-400 hover:text-red-500"
-                            onClick={() => onDeleteNote(note.id)}
+                            onClick={onClick || (() => {})}
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -191,7 +191,7 @@ const JobCardNotes: React.FC<JobCardNotesProps> = ({
               </select>
               <Button
                 size="sm"
-                onClick={handleAddNote}
+                onClick={onClick || (() => {})}
                 disabled={!newNote.trim()}
                 icon={<MessageSquare className="w-4 h-4" />}
               >

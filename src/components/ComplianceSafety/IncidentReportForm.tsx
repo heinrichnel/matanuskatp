@@ -474,7 +474,7 @@ const IncidentReportForm: React.FC<IncidentReportFormProps> = ({
                   <button
                     type="button"
                     className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl"
-                    onClick={() => removePreviousImage(index)}
+                    onClick={onClick || (() => {})}
                   >
                     ✕
                   </button>
@@ -492,7 +492,7 @@ const IncidentReportForm: React.FC<IncidentReportFormProps> = ({
                   <button
                     type="button"
                     className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded-bl"
-                    onClick={() => removeImage(index)}
+                    onClick={onClick || (() => {})}
                   >
                     ✕
                   </button>
@@ -545,7 +545,7 @@ const IncidentReportForm: React.FC<IncidentReportFormProps> = ({
               <Button
                 type="button"
                 variant="outline"
-                onClick={onCancel}
+                onClick={onClick || (() => {})}
               >
                 Cancel
               </Button>

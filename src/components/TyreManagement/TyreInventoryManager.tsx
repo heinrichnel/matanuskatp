@@ -510,14 +510,14 @@ const TyreInventoryManager: React.FC = () => {
             Add New Tyre
           </button>
           <button
-            onClick={handleExportData}
+            onClick={onClick || (() => {})}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center"
           >
             <FileDown size={18} className="mr-1" />
             Export
           </button>
           <button
-            onClick={handleImportClick}
+            onClick={onClick || (() => {})}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
           >
             <FileUp size={18} className="mr-1" />
@@ -768,7 +768,7 @@ const TyreInventoryManager: React.FC = () => {
               Cancel
             </button>
             <button
-              onClick={editingTyreId ? handleUpdateTyre : handleAddTyre}
+              onClick={onClick || (() => {})}
               className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
             >
               {editingTyreId ? 'Update' : 'Save'}
@@ -833,7 +833,7 @@ const TyreInventoryManager: React.FC = () => {
             </select>
             
             <button
-              onClick={resetFilters}
+              onClick={onClick || (() => {})}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm hover:bg-gray-50"
             >
               Reset
@@ -875,7 +875,7 @@ const TyreInventoryManager: React.FC = () => {
             <CircleDot className="mx-auto mb-2" size={24} />
             <p>No tyres found matching your criteria.</p>
             <button
-              onClick={resetFilters}
+              onClick={onClick || (() => {})}
               className="mt-2 text-primary-600 hover:text-primary-700"
             >
               Clear filters
@@ -946,13 +946,13 @@ const TyreInventoryManager: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex items-center space-x-3">
                         <button 
-                          onClick={() => handleEditTyre(tyre)}
+                          onClick={onClick || (() => {})}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           <Edit size={18} />
                         </button>
                         <button 
-                          onClick={() => handleDeleteTyre(tyre.id)}
+                          onClick={onClick || (() => {})}
                           className="text-red-600 hover:text-red-900"
                         >
                           <Trash2 size={18} />
@@ -976,7 +976,7 @@ const TyreInventoryManager: React.FC = () => {
             </div>
             <div className="flex space-x-1">
               <button
-                onClick={() => paginate(Math.max(1, currentPage - 1))}
+                onClick={onClick || (() => {})}
                 disabled={currentPage === 1}
                 className={`px-3 py-1 rounded-md ${
                   currentPage === 1
@@ -1003,7 +1003,7 @@ const TyreInventoryManager: React.FC = () => {
                 return (
                   <button
                     key={pageNum}
-                    onClick={() => paginate(pageNum)}
+                    onClick={onClick || (() => {})}
                     className={`px-3 py-1 rounded-md ${
                       currentPage === pageNum
                         ? 'bg-primary-100 text-primary-700 font-medium'
@@ -1016,7 +1016,7 @@ const TyreInventoryManager: React.FC = () => {
               })}
               
               <button
-                onClick={() => paginate(Math.min(totalPages, currentPage + 1))}
+                onClick={onClick || (() => {})}
                 disabled={currentPage === totalPages}
                 className={`px-3 py-1 rounded-md ${
                   currentPage === totalPages

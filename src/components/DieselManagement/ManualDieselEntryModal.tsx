@@ -674,14 +674,14 @@ const ManualDieselEntryModal: React.FC<ManualDieselEntryModalProps> = ({
         <div className="flex justify-end space-x-3 pt-6 border-t">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={onClick || (() => {})}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button
-            onClick={handleSubmit}
+            onClick={onClick || (() => {})}
             icon={<Save className="w-4 h-4" />}
             isLoading={isSubmitting}
             disabled={isSubmitting || connectionStatus !== 'connected'}

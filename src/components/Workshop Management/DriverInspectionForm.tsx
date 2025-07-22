@@ -116,7 +116,7 @@ const DriverInspectionForm: React.FC = () => {
             <XCircle className="w-12 h-12 mx-auto text-red-500 mb-4" />
             <h2 className="text-xl font-semibold text-red-600 mb-2">Vehicle Not Found</h2>
             <p className="mb-4">The fleet number provided is invalid or does not exist in the system.</p>
-            <Button onClick={() => navigate('/workshop')}>Return to Workshop</Button>
+            <Button onClick={onClick || (() => {})}>Return to Workshop</Button>
           </div>
         </CardContent>
       </Card>
@@ -156,7 +156,7 @@ const DriverInspectionForm: React.FC = () => {
               <Button 
                 variant="outline" 
                 className="flex items-center gap-1" 
-                onClick={() => fleetNumber ? navigate(`/workshop/inspection-history?fleet=${fleetNumber}`) : navigate('/workshop/inspection-history')}
+                onClick={onClick || (() => {})}`) : navigate('/workshop/inspection-history')}
               >
                 <Clipboard className="w-4 h-4" />
                 View Inspection History
@@ -164,7 +164,7 @@ const DriverInspectionForm: React.FC = () => {
               <Button 
                 variant="outline" 
                 className="flex items-center gap-1" 
-                onClick={() => navigate('/workshop')}
+                onClick={onClick || (() => {})}
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Workshop
@@ -220,7 +220,7 @@ const DriverInspectionForm: React.FC = () => {
                       <div className="flex gap-2">
                         <button
                           type="button"
-                          onClick={() => handleStatusChange(index, 'passed')}
+                          onClick={onClick || (() => {})}
                           className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
                             item.status === 'passed' 
                               ? 'bg-green-100 text-green-800 border border-green-300' 
@@ -231,7 +231,7 @@ const DriverInspectionForm: React.FC = () => {
                         </button>
                         <button
                           type="button"
-                          onClick={() => handleStatusChange(index, 'failed')}
+                          onClick={onClick || (() => {})}
                           className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
                             item.status === 'failed' 
                               ? 'bg-red-100 text-red-800 border border-red-300' 

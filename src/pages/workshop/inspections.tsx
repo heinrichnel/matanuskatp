@@ -178,7 +178,7 @@ const InspectionHistory = () => {
                 <TableCell>
                   <button
                     className="border-0 bg-transparent p-0 cursor-pointer"
-                    onClick={() => handleOpenDefectModal(inspection)}
+                    onClick={onClick || (() => {})}
                     aria-label="View fault details"
                   >
                     <Badge className="bg-red-100 text-red-800">

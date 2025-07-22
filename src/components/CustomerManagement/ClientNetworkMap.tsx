@@ -322,7 +322,7 @@ const ClientNetworkMap: React.FC<ClientNetworkMapProps> = ({ clientId }) => {
             variant="outline"
             size="sm"
             icon={<ZoomIn className="w-4 h-4" />}
-            onClick={handleZoomIn}
+            onClick={onClick || (() => {})}
           >
             Zoom In
           </Button>
@@ -330,7 +330,7 @@ const ClientNetworkMap: React.FC<ClientNetworkMapProps> = ({ clientId }) => {
             variant="outline"
             size="sm"
             icon={<ZoomOut className="w-4 h-4" />}
-            onClick={handleZoomOut}
+            onClick={onClick || (() => {})}
           >
             Zoom Out
           </Button>
@@ -338,14 +338,14 @@ const ClientNetworkMap: React.FC<ClientNetworkMapProps> = ({ clientId }) => {
             variant="outline"
             size="sm"
             icon={<Maximize className="w-4 h-4" />}
-            onClick={handleReset}
+            onClick={onClick || (() => {})}
           >
             Reset
           </Button>
           <Button
             variant={showLegend ? "primary" : "outline"}
             size="sm"
-            onClick={() => setShowLegend(!showLegend)}
+            onClick={onClick || (() => {})}
           >
             Legend
           </Button>
@@ -355,7 +355,7 @@ const ClientNetworkMap: React.FC<ClientNetworkMapProps> = ({ clientId }) => {
       {/* Network Graph */}
       <Card className="h-[600px] relative">
         <CardContent className="p-0 h-full">
-          <svg ref={svgRef} className="w-full h-full" onClick={(e) => e.stopPropagation()}></svg>
+          <svg ref={svgRef} className="w-full h-full" onClick={onClick || (() => {})}></svg>
           
           {/* Legend */}
           {showLegend && (

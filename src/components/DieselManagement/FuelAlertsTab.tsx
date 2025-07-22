@@ -231,7 +231,7 @@ const FuelAlertsTab: React.FC = () => {
         <div className="flex space-x-2">
           <Button
             variant="outline"
-            onClick={handleRefresh}
+            onClick={onClick || (() => {})}
             icon={<RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />}
             disabled={isRefreshing}
           >
@@ -496,7 +496,7 @@ const FuelAlertsTab: React.FC = () => {
                           size="sm"
                           variant="outline"
                           icon={<CheckCircle className="w-3 h-3" />}
-                          onClick={() => handleResolveAlert(record.id)}
+                          onClick={onClick || (() => {})}
                         >
                           Resolve
                         </Button>

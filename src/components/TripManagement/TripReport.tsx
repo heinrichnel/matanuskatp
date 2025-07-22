@@ -48,12 +48,12 @@ const TripReport: React.FC<TripReportProps> = ({ trip, onAddDelay, onDrillDownDe
   return (
     <div>
       <div className="flex gap-2 mb-3">
-        <button onClick={handlePrint} className="btn-primary">
+        <button onClick={onClick || (() => {})} className="btn-primary" onClick={() => {}}>
           Print / Export PDF
         </button>
         <button
           className="btn-secondary"
-          onClick={() => setShowDelayModal(true)}
+          onClick={onClick || (() => {})}
         >
           Add Delay Reason
         </button>
@@ -171,13 +171,13 @@ const TripReport: React.FC<TripReportProps> = ({ trip, onAddDelay, onDrillDownDe
             <div className="flex gap-2 mt-4">
               <button
                 className="btn-primary"
-                onClick={addDelay}
+                onClick={onClick || (() => {})}
               >
                 Add
               </button>
               <button
                 className="btn-secondary"
-                onClick={() => setShowDelayModal(false)}
+                onClick={onClick || (() => {})}
               >
                 Cancel
               </button>
@@ -276,7 +276,7 @@ const DelayAuditModal: React.FC<{ delay: DelayReason; onClose: () => void }> = (
           </div>
         )}
         <div className="mt-4 flex gap-2">
-          <button className="btn-secondary" onClick={onClose}>
+          <button className="btn-secondary" onClick={onClick || (() => {})} onClick={() => {}}>
             Close
           </button>
         </div>

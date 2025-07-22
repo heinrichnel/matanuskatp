@@ -131,7 +131,7 @@ const QAReviewPanel: React.FC<QAReviewPanelProps> = ({
                       <div className="flex justify-end">
                         <Button
                           size="sm"
-                          onClick={() => onVerifyTask(task.id)}
+                          onClick={onClick || (() => {})}
                           disabled={isLoading}
                           icon={<Shield className="w-4 h-4" />}
                         >
@@ -145,7 +145,7 @@ const QAReviewPanel: React.FC<QAReviewPanelProps> = ({
               {canVerifyAllTasks && (
                 <div className="flex justify-center mt-4">
                   <Button
-                    onClick={onVerifyAllTasks}
+                    onClick={onClick || (() => {})}
                     disabled={isLoading || tasksReadyForVerification === 0}
                     isLoading={isLoading}
                     icon={<Shield className="w-4 h-4" />}

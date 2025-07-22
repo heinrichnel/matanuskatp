@@ -251,7 +251,7 @@ const FuelReconciliationTab: React.FC = () => {
         <div className="flex space-x-2">
           <Button
             variant="outline"
-            onClick={handleDownloadReport}
+            onClick={onClick || (() => {})}
             disabled={fuelTransactions.length === 0}
             icon={<Download className="w-4 h-4" />}
           >
@@ -302,7 +302,7 @@ const FuelReconciliationTab: React.FC = () => {
                 />
                 
                 <Button
-                  onClick={handleImportTransactions}
+                  onClick={onClick || (() => {})}
                   disabled={!file || isProcessing}
                   isLoading={isProcessing}
                   icon={<Upload className="w-4 h-4" />}
@@ -313,7 +313,7 @@ const FuelReconciliationTab: React.FC = () => {
               
               <div className="mt-4">
                 <Button
-                  onClick={handleAutoReconcile}
+                  onClick={onClick || (() => {})}
                   disabled={fuelTransactions.length === 0 || isReconciling}
                   isLoading={isReconciling}
                   className="w-full"

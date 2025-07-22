@@ -141,7 +141,7 @@ const FuelLogs: React.FC = () => {
           <Button
             variant="outline"
             icon={<Download className="w-4 h-4" />}
-            onClick={() => console.log('Export data')}
+            onClick={onClick || (() => {})}
           >
             Export
           </Button>
@@ -235,7 +235,7 @@ const FuelLogs: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{log.station}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{log.odometer}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-900">
-                        <button className="text-blue-600 hover:text-blue-900">View</button>
+                        <button className="text-blue-600 hover:text-blue-900" onClick={onClick || (() => {})}}>View</button>
                       </td>
                     </tr>
                   ))

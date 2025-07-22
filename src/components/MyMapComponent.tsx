@@ -80,7 +80,7 @@ const MyMapComponent: React.FC<MyMapComponentProps> = ({
           key={i}
           position={loc}
           title={loc.title}
-          onClick={() => setSelectedLocation(loc)}
+          onClick={onClick || (() => {})}
         />
       ))}
       {selectedLocation && selectedLocation.info && (

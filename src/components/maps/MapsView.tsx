@@ -45,7 +45,7 @@ const MapsView: React.FC = () => {
           />
           <div className="absolute top-4 right-4 z-10">
             <button
-              onClick={openWialonInNewWindow}
+              onClick={onClick || (() => {})}
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
               title="Open in new window"
             >
@@ -62,7 +62,7 @@ const MapsView: React.FC = () => {
             </span>
           </div>
           <button
-            onClick={openWialonInNewWindow}
+            onClick={onClick || (() => {})}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             Open Wialon in new window

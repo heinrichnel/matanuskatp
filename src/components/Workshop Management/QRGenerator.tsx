@@ -124,7 +124,7 @@ const QRGenerator: React.FC = () => {
         </div>
         <div className="flex gap-2">
           <Button
-            onClick={() => navigate('/workshop/inspection-history')}
+            onClick={onClick || (() => {})}
             variant="outline"
             className="flex items-center gap-2"
           >
@@ -132,7 +132,7 @@ const QRGenerator: React.FC = () => {
             Inspection History
           </Button>
           <Button
-            onClick={() => navigate('/workshop/qr-generator/batch')}
+            onClick={onClick || (() => {})}
             variant="outline"
             className="flex items-center gap-2"
           >
@@ -152,7 +152,7 @@ const QRGenerator: React.FC = () => {
                 <div className="grid grid-cols-3 gap-4">
                   <button
                     className={`flex flex-col items-center justify-center p-4 rounded-lg border ${qrType === 'fleet' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white hover:bg-gray-50 border-gray-300'}`}
-                    onClick={() => handleTypeChange('fleet')}
+                    onClick={onClick || (() => {})}
                   >
                                         <Truck className="w-10 h-10 mb-2" />
                     <span className="font-medium">Driver Inspection</span>
@@ -160,7 +160,7 @@ const QRGenerator: React.FC = () => {
                   
                   <button
                     className={`flex flex-col items-center justify-center p-4 rounded-lg border ${qrType === 'tyre' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white hover:bg-gray-50 border-gray-300'}`}
-                    onClick={() => handleTypeChange('tyre')}
+                    onClick={onClick || (() => {})}
                   >
                     <div className="w-6 h-6 mb-2 rounded-full border-4 flex items-center justify-center">
                       <div className="w-1 h-1 bg-current rounded-full"></div>
@@ -170,7 +170,7 @@ const QRGenerator: React.FC = () => {
                   
                   <button
                     className={`flex flex-col items-center justify-center p-4 rounded-lg border ${qrType === 'part' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white hover:bg-gray-50 border-gray-300'}`}
-                    onClick={() => handleTypeChange('part')}
+                    onClick={onClick || (() => {})}
                   >
                     <Wrench className="w-6 h-6 mb-2" />
                     <span>Spare Part</span>
@@ -226,7 +226,7 @@ const QRGenerator: React.FC = () => {
                 
                 <div className="pt-4">
                   <Button
-                    onClick={generateQR}
+                    onClick={onClick || (() => {})}
                     disabled={!isFormValid()}
                     icon={<QrCode className="w-4 h-4" />}
                   >
@@ -256,14 +256,14 @@ const QRGenerator: React.FC = () => {
                   <div className="pt-4 grid grid-cols-2 gap-2">
                     <Button
                       variant="outline"
-                      onClick={downloadQR}
+                      onClick={onClick || (() => {})}
                       icon={<Download className="w-4 h-4" />}
                     >
                       Download
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => window.open(qrValue, '_blank')}
+                      onClick={onClick || (() => {})}
                       icon={<ExternalLink className="w-4 h-4" />}
                     >
                       Share

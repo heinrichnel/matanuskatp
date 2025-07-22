@@ -41,10 +41,10 @@ const InvoiceTemplatesPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Invoice Templates</h1>
         <div className="flex space-x-2">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onClick={onClick || (() => {})}}>
             Create New Template
           </button>
-          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200">
+          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick || (() => {})}}>
             Import Template
           </button>
         </div>
@@ -74,16 +74,16 @@ const InvoiceTemplatesPage: React.FC = () => {
             
             <div className="flex justify-between">
               <div className="space-x-2">
-                <button className="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
-                <button className="text-gray-600 hover:text-gray-800 text-sm">Duplicate</button>
+                <button className="text-blue-600 hover:text-blue-800 text-sm" onClick={onClick || (() => {})}}>Edit</button>
+                <button className="text-gray-600 hover:text-gray-800 text-sm" onClick={onClick || (() => {})}}>Duplicate</button>
               </div>
               <div className="space-x-2">
                 {!template.isDefault && (
-                  <button className="text-green-600 hover:text-green-800 text-sm">
+                  <button className="text-green-600 hover:text-green-800 text-sm" onClick={onClick || (() => {})}}>
                     Set as Default
                   </button>
                 )}
-                <button className="text-red-600 hover:text-red-800 text-sm">
+                <button className="text-red-600 hover:text-red-800 text-sm" onClick={onClick || (() => {})}}>
                   Delete
                 </button>
               </div>
@@ -138,7 +138,7 @@ const InvoiceTemplatesPage: React.FC = () => {
             <p className="text-sm text-gray-600 mb-3">
               Information that will appear on all invoices by default.
             </p>
-            <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200">
+            <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick || (() => {})}}>
               Edit Company Information
             </button>
           </div>
@@ -148,7 +148,7 @@ const InvoiceTemplatesPage: React.FC = () => {
             <p className="text-sm text-gray-600 mb-3">
               Default terms and conditions to include on invoices.
             </p>
-            <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200">
+            <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick || (() => {})}}>
               Edit Terms & Conditions
             </button>
           </div>

@@ -155,7 +155,7 @@ const FuelCardManager: React.FC = () => {
           <Button
             variant="primary"
             icon={<Plus className="w-4 h-4" />}
-            onClick={() => console.log('Add new fuel card')}
+            onClick={onClick || (() => {})}
           >
             New Card
           </Button>
@@ -246,10 +246,10 @@ const FuelCardManager: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <div className="flex space-x-2">
-                          <button className="text-blue-600 hover:text-blue-900">
+                          <button className="text-blue-600 hover:text-blue-900" onClick={onClick || (() => {})}}>
                             <Edit className="w-4 h-4" />
                           </button>
-                          <button className="text-red-600 hover:text-red-900">
+                          <button className="text-red-600 hover:text-red-900" onClick={onClick || (() => {})}}>
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>

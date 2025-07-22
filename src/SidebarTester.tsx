@@ -187,7 +187,7 @@ const SidebarTester = () => {
             ...styles[isChild ? 'sidebarItemChild' : 'sidebarItem'],
             ...(activePath === item.path && styles.sidebarItemActive),
           }}
-          onClick={() => handleItemClick(item.path)}
+          onClick={onClick || (() => {})}
         >
           {item.label}
         </div>
@@ -210,7 +210,7 @@ const SidebarTester = () => {
               <div key={sectionName} style={styles.sidebarSection}>
                 <div 
                   style={styles.sidebarTitle} 
-                  onClick={() => toggleSection(sectionName)}
+                  onClick={onClick || (() => {})}
                 >
                   {sectionName} {items[0].children ? (expandedSections[sectionName] ? '▼' : '►') : ''}
                 </div>
@@ -240,7 +240,7 @@ const SidebarTester = () => {
           
           <div style={styles.testControls}>
             <h2>Test Controls</h2>
-            <button style={styles.button} onClick={runRouteTest}>
+            <button style={styles.button} onClick={onClick || (() => {})} onClick={() => {}}>
               Test Routes
             </button>
             

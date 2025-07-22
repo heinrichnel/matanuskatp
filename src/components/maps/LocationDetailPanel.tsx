@@ -27,7 +27,7 @@ const LocationDetailPanel: React.FC<LocationDetailPanelProps> = ({
       <div className="p-4 bg-gray-50 border-b flex justify-between items-center">
         <h3 className="font-medium text-gray-800">{selectedLocation.title || 'Location Details'}</h3>
         <button 
-          onClick={onClose}
+          onClick={onClick || (() => {})})}
           className="text-gray-500 hover:text-gray-700"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -80,7 +80,7 @@ const LocationDetailPanel: React.FC<LocationDetailPanelProps> = ({
         
         <div className="mt-4 flex gap-2">
           <button
-            onClick={() => onViewDirections(selectedLocation)}
+            onClick={onClick || (() => {})}
             className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center text-sm"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">

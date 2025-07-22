@@ -148,7 +148,7 @@ const InventoryPanel: React.FC<InventoryPanelProps> = ({
             !readonly && (
               <Button
                 size="sm"
-                onClick={() => setShowAssignModal(true)}
+                onClick={onClick || (() => {})}
                 icon={<Plus className="w-4 h-4" />}
               >
                 Assign Parts
@@ -169,7 +169,7 @@ const InventoryPanel: React.FC<InventoryPanelProps> = ({
               {!readonly && (
                 <div className="mt-6">
                   <Button
-                    onClick={() => setShowAssignModal(true)}
+                    onClick={onClick || (() => {})}
                     icon={<Plus className="w-4 h-4" />}
                   >
                     Assign Parts
@@ -241,7 +241,7 @@ const InventoryPanel: React.FC<InventoryPanelProps> = ({
                                 size="xs"
                                 variant="danger"
                                 icon={<Trash2 className="w-3 h-3" />}
-                                onClick={() => onRemovePart(assignment.id)}
+                                onClick={onClick || (() => {})}
                               >
                                 Remove
                               </Button>
@@ -337,7 +337,7 @@ const InventoryPanel: React.FC<InventoryPanelProps> = ({
                       Back to List
                     </Button>
                     <Button
-                      onClick={handleAssignPart}
+                      onClick={onClick || (() => {})}
                       disabled={assignQuantity < 1}
                     >
                       Assign Part
@@ -364,7 +364,7 @@ const InventoryPanel: React.FC<InventoryPanelProps> = ({
                       <div
                         key={part.id}
                         className="p-4 hover:bg-gray-50 cursor-pointer"
-                        onClick={() => openAssignModal(part)}
+                        onClick={onClick || (() => {})}
                       >
                         <div className="flex justify-between items-start">
                           <div>
@@ -407,7 +407,7 @@ const InventoryPanel: React.FC<InventoryPanelProps> = ({
                   <div className="flex justify-end space-x-3 pt-4">
                     <Button
                       variant="outline"
-                      onClick={() => setShowAssignModal(false)}
+                      onClick={onClick || (() => {})}
                     >
                       Cancel
                     </Button>

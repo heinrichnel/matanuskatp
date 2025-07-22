@@ -205,7 +205,7 @@ const PartsOrdering: React.FC = () => {
             Export PO List
           </Button>
           <Button
-            onClick={() => setShowAddForm(true)}
+            onClick={onClick || (() => {})}
             icon={<Plus className="w-4 h-4" />}
           >
             Add Part Order
@@ -401,12 +401,12 @@ const PartsOrdering: React.FC = () => {
             <div className="mt-6 flex justify-end space-x-3">
               <Button
                 variant="outline"
-                onClick={() => setShowAddForm(false)}
+                onClick={onClick || (() => {})}
               >
                 Cancel
               </Button>
               <Button
-                onClick={handleAddItem}
+                onClick={onClick || (() => {})}
                 disabled={!newItem.partNumber || !newItem.partName || !newItem.supplier}
               >
                 Add to Order
@@ -440,7 +440,7 @@ const PartsOrdering: React.FC = () => {
               {!searchTerm && !filterStatus && !filterPriority && (
                 <div className="mt-6">
                   <Button
-                    onClick={() => setShowAddForm(true)}
+                    onClick={onClick || (() => {})}
                     icon={<Plus className="w-4 h-4" />}
                   >
                     Add Part Order

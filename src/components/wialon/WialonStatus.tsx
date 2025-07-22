@@ -29,7 +29,7 @@ const WialonStatus: React.FC<WialonStatusProps> = ({
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Wialon Integration Status</h3>
         <button
-          onClick={handleRefresh}
+          onClick={onClick || (() => {})}
           className="px-3 py-1.5 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-800 dark:hover:bg-blue-700 dark:text-blue-100 rounded transition-colors"
         >
           Refresh

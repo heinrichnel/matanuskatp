@@ -384,13 +384,13 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
             {records.length} record{records.length !== 1 ? 's' : ''} needing review
           </p>
           <div className="flex space-x-2">
-            <Button variant="outline" onClick={generateCSV} icon={<FileText className="w-4 h-4" />}>
+            <Button variant="outline" onClick={onClick || (() => {})} icon={<FileText className="w-4 h-4" />}>
               Export CSV
             </Button>
-            <Button variant="outline" onClick={generatePDF} icon={<Printer className="w-4 h-4" />}>
+            <Button variant="outline" onClick={onClick || (() => {})} icon={<Printer className="w-4 h-4" />}>
               Export PDF
             </Button>
-            <Button onClick={onClose} icon={<CheckCircle className="w-4 h-4" />}>
+            <Button onClick={onClick || (() => {})} icon={<CheckCircle className="w-4 h-4" />}>
               Complete Debrief
             </Button>
           </div>

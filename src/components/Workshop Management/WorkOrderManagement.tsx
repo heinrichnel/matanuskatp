@@ -378,14 +378,14 @@ export const WorkOrderManagement: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col space-y-2 ml-4">
-                      <Button variant="outline" size="sm" onClick={() => setSelectedWorkOrder(workOrder)}>
+                      <Button variant="outline" size="sm" onClick={onClick || (() => {})}>
                         View
                       </Button>
                       
                       {workOrder.status === 'initiated' && (
                         <Button 
                           size="sm"
-                          onClick={() => handleStartWorkOrder(workOrder.workOrderId)}
+                          onClick={onClick || (() => {})}
                         >
                           Start
                         </Button>
@@ -394,7 +394,7 @@ export const WorkOrderManagement: React.FC = () => {
                       {workOrder.status === 'in_progress' && (
                         <Button 
                           size="sm"
-                          onClick={() => handleCompleteWorkOrder(workOrder.workOrderId)}
+                          onClick={onClick || (() => {})}
                           className={workOrder.rcaRequired && !workOrder.rcaCompleted ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
                         >
                           Complete
@@ -469,7 +469,7 @@ export const WorkOrderManagement: React.FC = () => {
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Work Order Details - {selectedWorkOrder.workOrderId}</h2>
-              <Button variant="outline" onClick={() => setSelectedWorkOrder(null)}>
+              <Button variant="outline" onClick={onClick || (() => {})}>
                 Close
               </Button>
             </div>

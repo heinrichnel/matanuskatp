@@ -517,7 +517,7 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
               <Button
                 type="button"
                 variant="outline"
-                onClick={onCancel}
+                onClick={onClick || (() => {})}
                 icon={<X className="w-4 h-4 mr-2" />}
                 disabled={isSubmitting}
               >

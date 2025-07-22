@@ -488,10 +488,10 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
 
         {/* Edit buttons for both years */}
         <div className="flex justify-end col-span-full mb-2 gap-2">
-          <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => handleEdit(2025)}>
+          <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={onClick || (() => {})}>
             Edit 2025 Metrics
           </Button>
-          <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={() => handleEdit(2024)}>
+          <Button size="sm" variant="outline" icon={<Edit className="w-4 h-4" />} onClick={onClick || (() => {})}>
             Edit 2024 Metrics
           </Button>
         </div>
@@ -548,7 +548,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
             <Button
               size="sm"
               variant="outline"
-              onClick={exportWeeklyReport}
+              onClick={onClick || (() => {})}
               icon={<Download className="w-4 h-4" />}
             >
               Export Weekly Report
@@ -597,7 +597,7 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
                             <button
                               className="focus:outline-none"
                               aria-label={isExpanded ? 'Collapse week details' : 'Expand week details'}
-                              onClick={() => setExpandedWeek(isExpanded ? null : weekKey)}
+                              onClick={onClick || (() => {})}
                             >
                               {isExpanded ? (
                                 <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4" /></svg>
@@ -881,8 +881,8 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
             </div>
 
             <div className="flex justify-end space-x-3 pt-4 border-t">
-              <Button variant="outline" onClick={handleClose} icon={<X className="w-4 h-4" />}>Cancel</Button>
-              <Button onClick={handleSave} icon={<Save className="w-4 h-4" />}>Save {editingYear} Metrics</Button>
+              <Button variant="outline" onClick={onClick || (() => {})} icon={<X className="w-4 h-4" />}>Cancel</Button>
+              <Button onClick={onClick || (() => {})} icon={<Save className="w-4 h-4" />}>Save {editingYear} Metrics</Button>
             </div>
           </div>
         )}

@@ -237,7 +237,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
               <div className="flex justify-end">
                 <Button
                   size="sm"
-                  onClick={handleSubmitOverdueReason}
+                  onClick={onClick || (() => {})}
                   disabled={
                     !overdueReason.trim() || connectionStatus !== "connected"
                   }
@@ -270,7 +270,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => window.open(attachment.fileUrl, "_blank")}
+                    onClick={onClick || (() => {})}
                   >
                     View
                   </Button>
@@ -317,7 +317,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
               className="flex-1"
             />
             <Button
-              onClick={handleAddComment}
+              onClick={onClick || (() => {})}
               disabled={!comment.trim() || connectionStatus !== "connected"}
               icon={<Send className="w-4 h-4" />}
               className="self-end"
@@ -331,7 +331,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={onClick || (() => {})}
             icon={<X className="w-4 h-4" />}
           >
             Close

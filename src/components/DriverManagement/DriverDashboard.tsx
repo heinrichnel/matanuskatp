@@ -38,7 +38,7 @@ const DriverDashboard: React.FC = () => {
           <Link to="/drivers/new" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
             Add New Driver
           </Link>
-          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200">
+          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick || (() => {})}}>
             Export Driver Data
           </button>
         </div>
@@ -127,7 +127,7 @@ const DriverDashboard: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <Link to={`/drivers/profiles/${driver.id}`} className="text-blue-600 hover:text-blue-900 mr-3">View</Link>
-                    <button className="text-blue-600 hover:text-blue-900">Contact</button>
+                    <button className="text-blue-600 hover:text-blue-900" onClick={onClick || (() => {})}}>Contact</button>
                   </td>
                 </tr>
               ))}

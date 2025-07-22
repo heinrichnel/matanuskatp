@@ -386,7 +386,7 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
                 </p>
                 <div className="mt-3">
                   <Button
-                    onClick={handleInitiateCAR}
+                    onClick={onClick || (() => {})}
                     variant="primary"
                   >
                     Initiate CAR Report
@@ -401,13 +401,13 @@ const DriverBehaviorEventForm: React.FC<DriverBehaviorEventFormProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={onClick || (() => {})}
             icon={<X className="w-4 h-4" />}
           >
             Cancel
           </Button>
           <Button
-            onClick={handleSubmit}
+            onClick={onClick || (() => {})}
             icon={<Save className="w-4 h-4" />}
           >
             {event ? 'Update Event' : 'Record Event'}

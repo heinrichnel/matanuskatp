@@ -199,7 +199,7 @@ const InventoryDashboard: React.FC = () => {
       <div className="p-6 bg-red-100 border border-red-400 text-red-700 rounded-lg">
         <p>{error}</p>
         <button 
-          onClick={() => window.location.reload()}
+          onClick={onClick || (() => {})}
           className="mt-3 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
         >
           Retry
@@ -633,7 +633,7 @@ const InventoryDashboard: React.FC = () => {
               <p className="text-sm text-red-700 mt-1">
                 Create purchase orders for these items immediately to avoid production delays.
               </p>
-              <button className="mt-2 text-sm text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded">
+              <button className="mt-2 text-sm text-white bg-red-600 hover:bg-red-700 px-3 py-1 rounded" onClick={onClick || (() => {})}}>
                 View Items
               </button>
             </div>
@@ -646,7 +646,7 @@ const InventoryDashboard: React.FC = () => {
               <p className="text-sm text-amber-700 mt-1">
                 These items need to be ordered soon to maintain adequate inventory levels.
               </p>
-              <button className="mt-2 text-sm text-white bg-amber-600 hover:bg-amber-700 px-3 py-1 rounded">
+              <button className="mt-2 text-sm text-white bg-amber-600 hover:bg-amber-700 px-3 py-1 rounded" onClick={onClick || (() => {})}}>
                 Generate POs
               </button>
             </div>
@@ -659,7 +659,7 @@ const InventoryDashboard: React.FC = () => {
               <p className="text-sm text-blue-700 mt-1">
                 Prepare receiving area and personnel for upcoming deliveries from AutoParts Plus and Global Supplies.
               </p>
-              <button className="mt-2 text-sm text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded">
+              <button className="mt-2 text-sm text-white bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded" onClick={onClick || (() => {})}}>
                 View Schedule
               </button>
             </div>
@@ -672,7 +672,7 @@ const InventoryDashboard: React.FC = () => {
               <p className="text-sm text-green-700 mt-1">
                 You can save 12% by combining your next 3 planned orders with Truck Parts Ltd.
               </p>
-              <button className="mt-2 text-sm text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded">
+              <button className="mt-2 text-sm text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded" onClick={onClick || (() => {})}}>
                 Optimize Orders
               </button>
             </div>

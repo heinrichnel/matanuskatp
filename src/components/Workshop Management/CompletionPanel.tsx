@@ -106,7 +106,7 @@ const CompletionPanel: React.FC<CompletionPanelProps> = ({
             
             <div className="flex justify-center">
               <Button
-                onClick={handleCompleteClick}
+                onClick={onClick || (() => {})}
                 disabled={!allTasksVerified || isLoading || isCompleting}
                 isLoading={isCompleting}
                 icon={<CheckCircle className="w-4 h-4" />}
@@ -132,7 +132,7 @@ const CompletionPanel: React.FC<CompletionPanelProps> = ({
             
             <div className="flex justify-center">
               <Button
-                onClick={handleGenerateInvoice}
+                onClick={onClick || (() => {})}
                 disabled={isLoading || isGeneratingInvoice}
                 isLoading={isGeneratingInvoice}
                 icon={<DollarSign className="w-4 h-4" />}
@@ -165,13 +165,13 @@ const CompletionPanel: React.FC<CompletionPanelProps> = ({
               <div className="flex justify-end space-x-3 pt-4">
                 <Button
                   variant="outline"
-                  onClick={() => setShowConfirmation(false)}
+                  onClick={onClick || (() => {})}
                 >
                   Cancel
                 </Button>
                 <Button
                   variant="primary"
-                  onClick={handleConfirmComplete}
+                  onClick={onClick || (() => {})}
                   isLoading={isCompleting}
                 >
                   Confirm Completion

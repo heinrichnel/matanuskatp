@@ -215,7 +215,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
                   <Button
                     size="sm"
                     variant="danger"
-                    onClick={handleRemoveLinkage}
+                    onClick={onClick || (() => {})}
                     disabled={isSubmitting}
                   >
                     Remove Linkage
@@ -244,7 +244,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
                   <Button
                     size="sm"
                     variant="danger"
-                    onClick={handleRemoveLinkage}
+                    onClick={onClick || (() => {})}
                     disabled={isSubmitting}
                   >
                     Remove Linkage
@@ -450,7 +450,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={onClick || (() => {})}
             disabled={isSubmitting}
             icon={<X className="w-4 h-4" />}
           >
@@ -458,7 +458,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
           </Button>
           {!currentLinkedTrip && !currentLinkedHorse && (
             <Button
-              onClick={handleSave}
+              onClick={onClick || (() => {})}
               disabled={isSubmitting || (!isReeferUnit && !selectedTripId) || (isReeferUnit && !selectedHorseId)}
               isLoading={isSubmitting}
               icon={<Save className="w-4 h-4" />}

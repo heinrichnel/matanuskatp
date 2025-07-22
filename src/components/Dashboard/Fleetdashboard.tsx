@@ -207,7 +207,7 @@ export const FleetDashboard: React.FC = () => {
               </Select.Content>
             </Select>
             
-            <Button variant="outline" onClick={clearFilters}>
+            <Button variant="outline" onClick={onClick || (() => {})}>
               Clear Filters
             </Button>
           </div>
@@ -263,7 +263,7 @@ export const FleetDashboard: React.FC = () => {
             <div className="text-center py-8 text-gray-500">
               <Truck className="w-12 h-12 mx-auto mb-4 opacity-50" />
               <p>No vehicles found matching your criteria</p>
-              <Button variant="outline" onClick={clearFilters} className="mt-4">
+              <Button variant="outline" onClick={onClick || (() => {})} className="mt-4">
                 Clear Filters
               </Button>
             </div>

@@ -361,7 +361,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
           <div className="p-4 rounded-md flex items-start space-x-3 bg-green-50 text-green-800 mb-4">
             <CheckCircle className="h-5 w-5 mt-0.5" />
             <p className="flex-1 text-sm font-medium">{success}</p>
-            <button onClick={() => setSuccess(null)}>
+            <button onClick={onClick || (() => {})}}> setSuccess(null)}>
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -372,7 +372,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
           <div className="p-4 rounded-md flex items-start space-x-3 bg-red-50 text-red-800 mb-4">
             <AlertTriangle className="h-5 w-5 mt-0.5" />
             <p className="flex-1 text-sm font-medium">{error}</p>
-            <button onClick={() => setError(null)}>
+            <button onClick={onClick || (() => {})}}> setError(null)}>
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -423,7 +423,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={generatePDF}
+                onClick={onClick || (() => {})}
                 icon={<Printer className="w-4 h-4" />}
               >
                 Export PDF Report
@@ -432,7 +432,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={generateCSV}
+                onClick={onClick || (() => {})}
                 icon={<FileText className="w-4 h-4" />}
               >
                 Export CSV Data
@@ -675,7 +675,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
                     
                     <div className="flex justify-end space-x-3 pt-4 border-t">
                       <Button
-                        onClick={handleSubmit}
+                        onClick={onClick || (() => {})}
                         disabled={loading}
                         isLoading={loading}
                         icon={<Save className="w-4 h-4" />}
@@ -717,7 +717,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClose}
+            onClick={onClick || (() => {})}
             icon={<X className="w-4 h-4" />}
             disabled={loading}
           >

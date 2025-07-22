@@ -99,28 +99,28 @@ export const WialonLoginPanel: React.FC = () => {
       <div className="flex flex-wrap gap-2 mb-3">
         <button 
           className="bg-blue-600 text-white px-3 py-1 rounded" 
-          onClick={handleLogin}
+          onClick={onClick || (() => {})}
           disabled={isLoading || !!user}
         >
           Login API
         </button>
         <button 
           className="bg-purple-600 text-white px-3 py-1 rounded" 
-          onClick={handleDirectLogin}
+          onClick={onClick || (() => {})}
           disabled={isLoading}
         >
           Direct Login
         </button>
         <button 
           className="bg-gray-600 text-white px-3 py-1 rounded" 
-          onClick={handleLogout}
+          onClick={onClick || (() => {})}
           disabled={isLoading || !user}
         >
           Logout
         </button>
         <button 
           className="bg-green-600 text-white px-3 py-1 rounded" 
-          onClick={handleGetUser}
+          onClick={onClick || (() => {})}
           disabled={isLoading}
         >
           Get User

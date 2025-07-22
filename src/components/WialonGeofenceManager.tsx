@@ -105,7 +105,7 @@ export const WialonGeofenceManager: React.FC = () => {
           onChange={e => setName(e.target.value)}
           disabled={!newCircle}
         />
-        <button onClick={handleCreateGeofence} disabled={!newCircle || !name || !selectedRes}>
+        <button onClick={onClick || (() => {})} disabled={!newCircle || !name || !selectedRes} onClick={() => {}}>
           Save Geofence
         </button>
       </div>

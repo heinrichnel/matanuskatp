@@ -105,7 +105,7 @@ const PurchaseOrderDetailView: React.FC<PurchaseOrderDetailViewProps> = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={onPrint}
+                onClick={onClick || (() => {})}
                 icon={<Download className="h-4 w-4" />}
               >
                 Print
@@ -115,7 +115,7 @@ const PurchaseOrderDetailView: React.FC<PurchaseOrderDetailViewProps> = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={onEdit}
+                onClick={onClick || (() => {})}
               >
                 Edit
               </Button>
@@ -124,7 +124,7 @@ const PurchaseOrderDetailView: React.FC<PurchaseOrderDetailViewProps> = ({
               <Button 
                 variant="primary" 
                 size="sm" 
-                onClick={onApprove}
+                onClick={onClick || (() => {})}
               >
                 Approve
               </Button>
@@ -133,7 +133,7 @@ const PurchaseOrderDetailView: React.FC<PurchaseOrderDetailViewProps> = ({
               <Button 
                 variant="outline" 
                 size="sm" 
-                onClick={onCancel}
+                onClick={onClick || (() => {})}
               >
                 Cancel
               </Button>

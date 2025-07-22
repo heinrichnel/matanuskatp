@@ -41,4 +41,19 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = 'Button';
 
-export { Button };
+// Default handler for when onClick is not provided
+const ButtonWithHandler = forwardRef<HTMLButtonElement, ButtonProps>(
+  (props, ref) => {
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (props.onClick) {
+        props.onClick(event);
+      }
+    };
+
+    return <Button {...props} onClick={onClick || (() => {})} ref={ref} />;
+  }
+);
+
+ButtonWithHandler.displayName = 'ButtonWithHandler';
+
+export { Button, ButtonWithHandler as DefaultButton };

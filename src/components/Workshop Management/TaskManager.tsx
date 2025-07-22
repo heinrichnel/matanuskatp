@@ -311,7 +311,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
             <Button
               size="sm"
               icon={<Plus className="w-4 h-4" />}
-              onClick={() => setShowAddForm(true)}
+              onClick={onClick || (() => {})}
             >
               Add Task
             </Button>
@@ -327,7 +327,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
               <div className="mt-4">
                 <Button
                   icon={<Plus className="w-4 h-4" />}
-                  onClick={() => setShowAddForm(true)}
+                  onClick={onClick || (() => {})}
                 >
                   Add Task
                 </Button>
@@ -466,14 +466,14 @@ const TaskManager: React.FC<TaskManagerProps> = ({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={cancelEdit}
+                        onClick={onClick || (() => {})}
                         icon={<X className="w-4 h-4" />}
                       >
                         Cancel
                       </Button>
                       <Button
                         size="sm"
-                        onClick={saveTaskEdit}
+                        onClick={onClick || (() => {})}
                         icon={<Save className="w-4 h-4" />}
                       >
                         Save
@@ -545,7 +545,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => viewTaskHistory(task.id)}
+                            onClick={onClick || (() => {})}
                             icon={<History className="w-3 h-3" />}
                           >
                             History
@@ -553,7 +553,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => startEditingTask(task)}
+                            onClick={onClick || (() => {})}
                             icon={<Edit className="w-3 h-3" />}
                           >
                             Edit
@@ -561,7 +561,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
                           <Button
                             size="sm"
                             variant="danger"
-                            onClick={() => onTaskDelete(task.id)}
+                            onClick={onClick || (() => {})}
                             icon={<Trash2 className="w-3 h-3" />}
                           >
                             Delete
@@ -728,14 +728,14 @@ const TaskManager: React.FC<TaskManagerProps> = ({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setShowAddForm(false)}
+                onClick={onClick || (() => {})}
                 icon={<X className="w-4 h-4" />}
               >
                 Cancel
               </Button>
               <Button
                 size="sm"
-                onClick={handleAddTask}
+                onClick={onClick || (() => {})}
                 icon={<Plus className="w-4 h-4" />}
                 disabled={!newTask.title || !newTask.category}
               >

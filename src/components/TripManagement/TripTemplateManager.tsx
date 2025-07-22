@@ -177,13 +177,13 @@ const TripTemplateManager: React.FC = () => {
                     <td className="px-6 py-4 text-sm text-gray-500">{template.useCount}</td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-800">
+                        <button className="text-blue-600 hover:text-blue-800" onClick={onClick || (() => {})}}>
                           <Copy className="h-4 w-4" />
                         </button>
-                        <button className="text-gray-600 hover:text-gray-800">
+                        <button className="text-gray-600 hover:text-gray-800" onClick={onClick || (() => {})}}>
                           <Edit className="h-4 w-4" />
                         </button>
-                        <button className="text-red-600 hover:text-red-800">
+                        <button className="text-red-600 hover:text-red-800" onClick={onClick || (() => {})}}>
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>

@@ -96,7 +96,7 @@ const CurrencyFleetReport: React.FC<CurrencyFleetReportProps> = (props) => {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => downloadCurrencyFleetReport(currencyTrips, currency)}
+            onClick={onClick || (() => {})}
             icon={<FileSpreadsheet className="w-4 h-4" />}
           >
             Export {currency}
@@ -319,7 +319,7 @@ const CurrencyFleetReport: React.FC<CurrencyFleetReportProps> = (props) => {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={onClick || (() => {})}
               icon={<Filter className="w-4 h-4" />}
             >
               {showFilters ? 'Hide Filters' : 'Show Filters'}
@@ -362,7 +362,7 @@ const CurrencyFleetReport: React.FC<CurrencyFleetReportProps> = (props) => {
               />
             </div>
             <div className="mt-4 flex justify-end">
-              <Button variant="outline" size="sm" onClick={clearFilters}>
+              <Button variant="outline" size="sm" onClick={onClick || (() => {})}>
                 Clear Filters
               </Button>
             </div>

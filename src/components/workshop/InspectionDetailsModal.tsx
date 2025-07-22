@@ -36,7 +36,7 @@ export default function InspectionDetailsModal({ inspection, onClose }: Inspecti
       <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="border-b p-4 flex justify-between items-center sticky top-0 bg-white z-10">
           <h2 className="text-xl font-bold">Inspection Details: {inspection.report}</h2>
-          <Button variant="outline" onClick={onClose}>Close</Button>
+          <Button variant="outline" onClick={onClick || (() => {})}>Close</Button>
         </div>
         
         <div className="p-6">
@@ -213,8 +213,8 @@ export default function InspectionDetailsModal({ inspection, onClose }: Inspecti
           )}
           
           <div className="mt-6 flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>Close</Button>
-            <Button onClick={() => window.alert("Work Order details would open here")}>
+            <Button variant="outline" onClick={onClick || (() => {})}>Close</Button>
+            <Button onClick={onClick || (() => {})}>
               View Work Order
             </Button>
           </div>

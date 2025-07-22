@@ -251,7 +251,7 @@ const InvoiceAgingDashboard: React.FC<InvoiceAgingDashboardProps> = (props) => {
         <div className="flex space-x-3">
           <Button
             variant="outline"
-            onClick={exportAging}
+            onClick={onClick || (() => {})}
             icon={<Download className="w-4 h-4" />}
           >
             Export Follow-up Report
@@ -381,7 +381,7 @@ const InvoiceAgingDashboard: React.FC<InvoiceAgingDashboardProps> = (props) => {
             <Button
               size="sm"
               variant="outline"
-              onClick={clearFilters}
+              onClick={onClick || (() => {})}
               icon={<Filter className="w-4 h-4" />}
             >
               Clear Filters
@@ -509,7 +509,7 @@ const InvoiceAgingDashboard: React.FC<InvoiceAgingDashboardProps> = (props) => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => onViewTrip(invoice.trip)}
+                            onClick={onClick || (() => {})}
                             icon={<Eye className="w-3 h-3" />}
                           >
                             View
@@ -517,14 +517,14 @@ const InvoiceAgingDashboard: React.FC<InvoiceAgingDashboardProps> = (props) => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => handleUpdatePayment(invoice.trip)}
+                            onClick={onClick || (() => {})}
                             icon={<CreditCard className="w-3 h-3" />}
                           >
                             Payment
                           </Button>
                           <Button
                             size="sm"
-                            onClick={() => handleRecordFollowUp(invoice.trip)}
+                            onClick={onClick || (() => {})}
                             icon={<Phone className="w-3 h-3" />}
                           >
                             Follow Up

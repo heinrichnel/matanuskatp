@@ -209,7 +209,7 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={addNewFleetNorm}
+              onClick={onClick || (() => {})}
               icon={<Plus className="w-4 h-4" />}
             >
               Add Fleet Norm
@@ -217,7 +217,7 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={resetToDefaults}
+              onClick={onClick || (() => {})}
               icon={<History className="w-4 h-4" />}
             >
               Reset to Defaults
@@ -237,7 +237,7 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
                   <Button
                     size="sm"
                     variant="danger"
-                    onClick={() => removeFleetNorm(norm.fleetNumber)}
+                    onClick={onClick || (() => {})}
                     icon={<Trash2 className="w-3 h-3" />}
                     className="p-1"
                   >
@@ -349,8 +349,8 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
         </div>
 
         <div className="flex justify-end space-x-3 pt-4 border-t">
-          <Button variant="outline" onClick={onClose} icon={<X className="w-4 h-4" />}>Cancel</Button>
-          <Button onClick={handleSave} icon={<Save className="w-4 h-4" />}>Save Norms Configuration</Button>
+          <Button variant="outline" onClick={onClick || (() => {})} icon={<X className="w-4 h-4" />}>Cancel</Button>
+          <Button onClick={onClick || (() => {})} icon={<Save className="w-4 h-4" />}>Save Norms Configuration</Button>
         </div>
       </div>
     </Modal>

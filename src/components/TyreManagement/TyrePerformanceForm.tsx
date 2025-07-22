@@ -60,7 +60,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Tyre Performance Entry</CardTitle>
-          <Button variant="outline" size="sm" onClick={onClose}>
+          <Button variant="outline" size="sm" onClick={onClick || (() => {})}>
             <X className="w-4 h-4" />
           </Button>
         </div>
@@ -292,7 +292,7 @@ export const TyrePerformanceForm: React.FC<TyrePerformanceFormProps> = ({
             />
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" size="sm" onClick={onClose}>
+              <Button variant="outline" size="sm" onClick={onClick || (() => {})}>
                 <X className="w-4 h-4" />
               </Button>
               <Button size="sm" type="submit">

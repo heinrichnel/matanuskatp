@@ -145,8 +145,8 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
       <div className="modal">
         <h2>Create Job Card</h2>
         <p>Critical fault detected: {jobCardItem.description}</p>
-        <button onClick={() => setShowJobCardModal(false)}>Cancel</button>
-        <button onClick={() => {
+        <button onClick={onClick || (() => {})}}> setShowJobCardModal(false)}>Cancel</button>
+        <button onClick={onClick || (() => {})}}> {
           console.log('Job card created for:', jobCardItem);
           setShowJobCardModal(false);
         }}>Create Job Card</button>
@@ -165,7 +165,7 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
               className="mr-2" 
               size="sm"
               icon={<ArrowLeft className="w-4 h-4" />}
-              onClick={onBack}
+              onClick={onClick || (() => {})}
             />
             {existingInspection ? 'Edit Inspection' : 'New Inspection'}
           </h2>
@@ -175,13 +175,13 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
           <Button
             variant="outline"
             icon={<Save className="w-4 h-4" />}
-            onClick={handleSaveDraft}
+            onClick={onClick || (() => {})}
           >
             Save Draft
           </Button>
           <Button
             icon={<CheckCircle className="w-4 h-4" />}
-            onClick={handleCompleteInspection}
+            onClick={onClick || (() => {})}
             disabled={!canComplete}
           >
             Complete Inspection
@@ -372,13 +372,13 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
             <div className="flex justify-end space-x-3">
               <Button
                 variant="outline"
-                onClick={() => setShowJobCardModal(false)}
+                onClick={onClick || (() => {})}
               >
                 Cancel
               </Button>
               <Button
                 icon={<FileText className="w-4 h-4" />}
-                onClick={handleCreateJobCard}
+                onClick={onClick || (() => {})}
               >
                 Create Job Card
               </Button>

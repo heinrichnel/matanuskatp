@@ -123,7 +123,7 @@ const FleetTable: React.FC = () => {
           <Button
             variant="outline"
             icon={<Download className="w-4 h-4" />}
-            onClick={exportFleetData}
+            onClick={onClick || (() => {})}
           >
             Export
           </Button>
@@ -184,7 +184,7 @@ const FleetTable: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={clearFilters}
+              onClick={onClick || (() => {})}
               icon={<Filter className="w-3 h-3" />}
             >
               Clear Filters
@@ -268,7 +268,7 @@ const FleetTable: React.FC = () => {
                           size="xs"
                           variant="outline"
                           icon={<Edit className="w-3 h-3" />}
-                          onClick={() => handleEditVehicle(vehicle)}
+                          onClick={onClick || (() => {})}
                         >
                           Edit
                         </Button>
@@ -276,7 +276,7 @@ const FleetTable: React.FC = () => {
                           size="xs"
                           variant="danger"
                           icon={<Trash2 className="w-3 h-3" />}
-                          onClick={() => handleDeleteVehicle(vehicle.fleetNumber)}
+                          onClick={onClick || (() => {})}
                         >
                           Delete
                         </Button>

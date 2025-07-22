@@ -232,7 +232,7 @@ const RoutePlanningPage: React.FC = () => {
         <div>
           {trip && (
             <Button
-              onClick={() => navigate(`/trips/${trip.id}`)}
+              onClick={onClick || (() => {})}`)}
               variant="outline"
             >
               Back to Trip Details
@@ -325,7 +325,7 @@ const RoutePlanningPage: React.FC = () => {
                       </label>
                       <button
                         type="button"
-                        onClick={() => setWaypointsOpen(!waypointsOpen)}
+                        onClick={onClick || (() => {})}
                         className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
                       >
                         {waypointsOpen ? (
@@ -367,7 +367,7 @@ const RoutePlanningPage: React.FC = () => {
                             
                             <button
                               type="button"
-                              onClick={() => removeWaypoint(index)}
+                              onClick={onClick || (() => {})}
                               className="px-2 py-2 bg-red-100 text-red-600 rounded-md hover:bg-red-200"
                             >
                               ✕
@@ -377,7 +377,7 @@ const RoutePlanningPage: React.FC = () => {
                         
                         <button
                           type="button"
-                          onClick={addWaypoint}
+                          onClick={onClick || (() => {})}
                           className="w-full px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100"
                         >
                           + Add Waypoint
@@ -390,7 +390,7 @@ const RoutePlanningPage: React.FC = () => {
               
               <div className="flex space-x-2 pt-4 border-t">
                 <Button
-                  onClick={() => calculateRoute()}
+                  onClick={onClick || (() => {})}
                   disabled={!isMapReady || !origin || !destination}
                   icon={<Route className="w-4 h-4" />}
                 >
@@ -398,7 +398,7 @@ const RoutePlanningPage: React.FC = () => {
                 </Button>
                 
                 <Button
-                  onClick={saveRoute}
+                  onClick={onClick || (() => {})}
                   disabled={!directions || !tripId}
                   variant="outline"
                   icon={<Save className="w-4 h-4" />}
@@ -466,7 +466,7 @@ const RoutePlanningPage: React.FC = () => {
                   </div>
                 ) : (
                   <Button
-                    onClick={handleOptimizeRoute}
+                    onClick={onClick || (() => {})}
                     disabled={!directions || !tripId || !trip?.plannedRoute}
                     icon={<RotateCw className="w-4 h-4" />}
                   >

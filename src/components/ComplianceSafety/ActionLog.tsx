@@ -376,7 +376,7 @@ const ActionLog: React.FC = () => {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => setFilters({ status: '', responsiblePerson: '', overdue: false })}
+              onClick={onClick || (() => {})})}
             >
               Clear Filters
             </Button>
@@ -549,7 +549,7 @@ const ActionLog: React.FC = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleViewDetails(item)}
+                        onClick={onClick || (() => {})}
                         icon={<Eye className="w-3 h-3" />}
                       >
                         View
@@ -559,7 +559,7 @@ const ActionLog: React.FC = () => {
                         <Button
                           size="sm"
                           variant={item.status === 'initiated' ? 'outline' : 'primary'}
-                          onClick={() => handleStatusChange(item, item.status === 'initiated' ? 'in_progress' : 'completed')}
+                          onClick={onClick || (() => {})}
                           icon={item.status === 'initiated' ? <Clock className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
                           disabled={connectionStatus !== 'connected'}
                         >
@@ -570,7 +570,7 @@ const ActionLog: React.FC = () => {
                       <Button
                         size="sm"
                         variant="danger"
-                        onClick={() => handleDelete(item.id)}
+                        onClick={onClick || (() => {})}
                         icon={<Trash2 className="w-3 h-3" />}
                         disabled={connectionStatus !== 'connected'}
                       >
@@ -694,7 +694,7 @@ const ActionLog: React.FC = () => {
               Cancel
             </Button>
             <Button
-              onClick={handleSubmit}
+              onClick={onClick || (() => {})}
               icon={<Save className="w-4 h-4" />}
             >
               Create Action Item

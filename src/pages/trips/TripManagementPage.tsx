@@ -74,7 +74,7 @@ const TripManagementPage: React.FC = () => {
         </div>
         <div>
           <Button 
-            onClick={handleAddTrip}
+            onClick={onClick || (() => {})}
             icon={<Plus className="w-4 h-4" />}
             disabled={isLoading.addTrip}
           >

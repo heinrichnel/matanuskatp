@@ -178,7 +178,7 @@ const WialonUnitsList: React.FC<WialonUnitsListProps> = ({
             <tr>
               <th 
                 className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('name')}
+                onClick={onClick || (() => {})}
               >
                 Name
                 {sortConfig.key === 'name' && (
@@ -192,7 +192,7 @@ const WialonUnitsList: React.FC<WialonUnitsListProps> = ({
               </th>
               <th 
                 className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={() => handleSort('last_message')}
+                onClick={onClick || (() => {})}
               >
                 Last Active
                 {sortConfig.key === 'last_message' && (
@@ -210,7 +210,7 @@ const WialonUnitsList: React.FC<WialonUnitsListProps> = ({
             {filteredUnits.map((unit) => (
               <tr 
                 key={unit.id} 
-                onClick={() => handleUnitClick(unit)}
+                onClick={onClick || (() => {})}
                 className="hover:bg-blue-50 cursor-pointer"
               >
                 <td className="px-4 py-3">
