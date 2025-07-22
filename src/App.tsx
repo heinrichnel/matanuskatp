@@ -170,49 +170,55 @@ const App: React.FC = () => {
   }, []);
 
   return (
-      <ErrorBoundary>
-        <AppProvider>
-          <SyncProvider>
-            <TyreStoresProvider>
-              <TripProvider>
-                <DriverBehaviorProvider>
-                  {connectionError && (
-                    <div className="fixed top-0 left-0 right-0 z-50 p-4">
-                      <FirestoreConnectionError error={connectionError} />
-                    </div>
-                  )}
-                  {process.env.NODE_ENV !== 'production' ? <UIConnector /> : null}
-                  
-                  <Router>
-                    <Routes>
-                      <Route
-                        element={
-                          <Layout
-                            setShowTripForm={setShowTripForm}
-                            setEditingTrip={setEditingTrip}
-                          />
-                        }
-                      >
-                        {/* Main routes */}
-                        <Route path="/" element={<DashboardPage />} />
-                        <Route path="/dashboard" element={<DashboardPage />} />
-                        
-                        {/* Generated routes from sidebarConfig.ts */}
-                        <AppRoutes />
-                      </Route>
-                    </Routes>
-                  </Router>
-                  <TripFormModal
-                    isOpen={showTripForm}
-                    onClose={() => setShowTripForm(false)}
-                    editingTrip={editingTrip}
-                  />
-                </DriverBehaviorProvider>
-              </TripProvider>
-            </TyreStoresProvider>
-          </SyncProvider>
-        </AppProvider>
-      </ErrorBoundary>
+    <ErrorBoundary>
+      <AppProvider>
+        <SyncProvider>
+          <TyreStoresProvider>
+            <TripProvider>
+              <DriverBehaviorProvider>
+                {/* Display error notification if connection error exists */}
+                {connectionError && (
+                  <div className="fixed top-0 left-0 right-0 z-50 p-4">
+                    <FirestoreConnectionError error={connectionError} />
+                  </div>
+                )}
+                
+                {/* Only show UI connector in non-production mode */}
+                {process.env.NODE_ENV !== 'production' ? <UIConnector /> : null}
+                
+                {/* Router and main application content */}
+                <Router>
+                  <Routes>
+                    <Route
+                      element={
+                        <Layout
+                          setShowTripForm={setShowTripForm}
+                          setEditingTrip={setEditingTrip}
+                        />
+                      }
+                    >
+                      {/* Main routes */}
+                      <Route path="/" element={<DashboardPage />} />
+                      <Route path="/dashboard" element={<DashboardPage />} />
+                      
+                      {/* Generated routes from sidebarConfig.ts */}
+                      <AppRoutes />
+                    </Route>
+                  </Routes>
+                </Router>
+                
+                {/* Trip form modal */}
+                <TripFormModal
+                  isOpen={showTripForm}
+                  onClose={() => setShowTripForm(false)}
+                  editingTrip={editingTrip}
+                />
+              </DriverBehaviorProvider>
+            </TripProvider>
+          </TyreStoresProvider>
+        </SyncProvider>
+      </AppProvider>
+    </ErrorBoundary>
   );
 };
 
