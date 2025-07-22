@@ -48,11 +48,12 @@ const importComponent = (path) => {
 const generateRoutes = (items) => {
   return items.flatMap(item => {
     const Component = importComponent(item.component);
-    
+    // Convert absolute path to relative for nested routing
+    const routePath = item.path.startsWith('/') ? item.path.slice(1) : item.path;
     const routes = [
-      <Route 
+      <Route
         key={item.id}
-        path={item.path}
+        path={routePath}
         element={
           <Suspense fallback={<Loader />}>
             <Component />

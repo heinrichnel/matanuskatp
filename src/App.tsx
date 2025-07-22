@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AppRoutes } from './AppRoutes';
 
 // Context Providers
@@ -297,16 +297,83 @@ const App: React.FC = () => {
                 
                 <Router>
                   <Routes>
-                    <Route
-                      element={
-                        <Layout
-                          setShowTripForm={setShowTripForm}
-                          setEditingTrip={setEditingTrip}
-                        />
-                      }
-                    >
+                    <Route path="/*" element={
+                      <Layout
+                        setShowTripForm={setShowTripForm}
+                        setEditingTrip={setEditingTrip}
+                      />
+                    }>
+                      {/* ==== Main Navigation ==== */}
                       <Route path="/" element={<DashboardPage />} />
                       <Route path="/dashboard" element={<DashboardPage />} />
+
+                      {/* ==== TRIPS ==== */}
+                      <Route path="/trips" element={<TripManagementPage />} />
+                      <Route path="/trips/active" element={<ActiveTripsPage />} />
+                      <Route path="/trips/timeline" element={<TripTimelinePage />} />
+                      <Route path="/trips/planning" element={<RoutePlanningPage />} />
+                      <Route path="/trips/optimization" element={<RouteOptimizationPage />} />
+                      <Route path="/trips/load-planning" element={<LoadPlanningPage />} />
+                      <Route path="/trips/calendar" element={<TripCalendarPage />} />
+                      <Route path="/trips/add" element={<AddTripPage />} />
+                      <Route path="/trips/map" element={<FleetLocationMapPage />} />
+                      <Route path="/trips/active-dashboard" element={<ActiveTrips />} />
+                      <Route path="/trips/completed-dashboard" element={<CompletedTrips />} />
+                      <Route path="/trips/flags" element={<FlagsInvestigations />} />
+                      <Route path="/trips/dashboard" element={<TripDashboard />} />
+
+                      {/* ==== INVOICES ==== */}
+                      <Route path="/invoices" element={<InvoiceManagementPage />} />
+                      <Route path="/invoices/templates" element={<InvoiceTemplatesPage />} />
+                      <Route path="/invoices/dashboard" element={<InvoiceDashboard />} />
+                      <Route path="/invoices/builder" element={<InvoiceBuilder />} />
+                      <Route path="/invoices/approval" element={<InvoiceApprovalFlow />} />
+                      <Route path="/invoices/tax-export" element={<TaxReportExport />} />
+                      <Route path="/invoices/pending" element={<PendingInvoicesPage />} />
+                      <Route path="/invoices/paid" element={<PaidInvoicesPage />} />
+
+                      {/* ==== DIESEL ==== */}
+                      <Route path="/diesel" element={<DieselManagementPage />} />
+                      <Route path="/diesel/add-fuel" element={<AddFuelEntryPage />} />
+                      <Route path="/diesel/dashboard" element={<DieselDashboardComponent />} />
+                      <Route path="/diesel/logs" element={<FuelLogs />} />
+                      <Route path="/diesel/card-manager" element={<FuelCardManager />} />
+                      <Route path="/diesel/theft-detection" element={<FuelTheftDetection />} />
+                      <Route path="/diesel/carbon-footprint" element={<CarbonFootprintCalc />} />
+                      <Route path="/diesel/driver-behavior" element={<DriverFuelBehavior />} />
+                      <Route path="/diesel/efficiency" element={<FuelEfficiencyReport />} />
+                      <Route path="/diesel/budget" element={<GenericPlaceholderPage title="Budget Planning" />} />
+
+                      {/* ==== CLIENTS ==== */}
+                      <Route path="/clients" element={<ClientManagementPage />} />
+                      <Route path="/clients/new" element={<AddNewCustomer />} />
+                      <Route path="/clients/active" element={<ActiveCustomers />} />
+                      <Route path="/clients/reports" element={<CustomerReports />} />
+                      <Route path="/customers/retention" element={<RetentionMetrics />} />
+                      <Route path="/clients/relationships" element={<ClientNetworkMap />} />
+                      <Route path="/clients/network" element={<ClientNetworkMap />} />
+
+                      {/* ==== DRIVERS ==== */}
+                      <Route path="/drivers" element={<DriverManagementPage />} />
+                      <Route path="/drivers/new" element={<AddNewDriver />} />
+                      <Route path="/drivers/profiles" element={<DriverProfiles />} />
+                      <Route path="/drivers/profiles/:id" element={<GenericPlaceholderPage title="Driver Details" />} />
+                      <Route path="/drivers/profiles/:id/edit" element={<GenericPlaceholderPage title="Edit Driver" />} />
+                      <Route path="/drivers/licenses" element={<GenericPlaceholderPage title="License Management" />} />
+                      <Route path="/drivers/training" element={<GenericPlaceholderPage title="Training Records" />} />
+                      <Route path="/drivers/performance" element={<GenericPlaceholderPage title="Performance Analytics" />} />
+                      <Route path="/drivers/scheduling" element={<GenericPlaceholderPage title="Driver Scheduling" />} />
+                      <Route path="/drivers/hours" element={<GenericPlaceholderPage title="Hours of Service" />} />
+                      <Route path="/drivers/violations" element={<GenericPlaceholderPage title="Driver Violations" />} />
+                      <Route path="/drivers/rewards" element={<GenericPlaceholderPage title="Driver Rewards" />} />
+                      <Route path="/drivers/behavior" element={<DriverBehaviorEvents />} />
+                      <Route path="/drivers/safety-scores" element={<GenericPlaceholderPage title="Safety Scores" />} />
+                      <Route path="/drivers/dashboard" element={<DriverDashboard />} />
+
+                      {/* === FALLBACK === */}
+                      <Route path="*" element={<DashboardPage />} />
+
+                      {/* Dynamic routes from config */}
                       <AppRoutes />
                     </Route>
                   </Routes>
