@@ -4,6 +4,8 @@ import TripForm from './TripForm';
 import { Trip } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import { AlertTriangle } from 'lucide-react';
+import TripFormModal from './components/TripManagement/TripFormModal';
+
 
 interface TripFormModalProps {
   isOpen: boolean;
