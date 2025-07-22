@@ -1,0 +1,11 @@
+# Simplified Netlify configuration for static HTML deployment
+
+[build]
+  # No build command needed for pre-built static files
+  command = ""
+  publish = "/"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
