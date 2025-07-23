@@ -255,7 +255,7 @@ const DieselAnalysis: React.FC<DieselAnalysisProps> = ({ dieselRecords = [] }) =
           <CardContent>
             {sortedFleetConsumption.length > 0 ? (
               <div className="space-y-4">
-                {sortedFleetConsumption.map(([fleet, data], index) => (
+                {sortedFleetConsumption.map(([fleet, data]) => (
                   <div key={fleet} className="relative">
                     <div className="flex items-center mb-1">
                       <span className="w-24 text-sm font-medium">{fleet}</span>
@@ -291,7 +291,7 @@ const DieselAnalysis: React.FC<DieselAnalysisProps> = ({ dieselRecords = [] }) =
           <CardContent>
             {sortedMonthlyConsumption.length > 0 ? (
               <div className="space-y-4">
-                {sortedMonthlyConsumption.map(([month, data], index) => (
+                {sortedMonthlyConsumption.map(([month, data]) => (
                   <div key={month} className="relative">
                     <div className="flex items-center mb-1">
                       <span className="w-24 text-sm font-medium">{formatMonthName(month)}</span>

@@ -38,7 +38,7 @@ const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
   onTyreSelect,
   onVehicleSelect
 }) => {
-  const { tyres, loading, getTyresByVehicle } = useTyres();
+  const { loading, getTyresByVehicle } = useTyres();
   const [vehicleTyres, setVehicleTyres] = useState<Tyre[]>([]);
   const [selectedPosition, setSelectedPosition] = useState<string | null>(null);
   const [tyreConfig, setTyreConfig] = useState<FleetTyreMapping | null>(null);
@@ -317,7 +317,7 @@ const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
                       <tr className="border-b">
                         <td className="py-2 text-gray-600">Size</td>
                         <td className="py-2 font-medium">
-                          {formatTyreSize(getTyreAtPosition(selectedPosition)?.size!)}
+                          {formatTyreSize(getTyreAtPosition(selectedPosition)?.size ?? '')}
                         </td>
                       </tr>
                       <tr className="border-b">

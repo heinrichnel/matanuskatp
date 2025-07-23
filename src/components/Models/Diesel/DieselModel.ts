@@ -9,7 +9,6 @@ import {
   where, 
   getDocs, 
   serverTimestamp,
-  DocumentData,
   getDoc
 } from 'firebase/firestore';
 import { DieselConsumptionRecord, DieselNorm } from '../../types';

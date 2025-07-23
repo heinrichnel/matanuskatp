@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardContent } from '../../components/ui/Card';
+import { Card, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import SyncIndicator from '../../components/ui/SyncIndicator';
-import { useAppContext } from '../../context/AppContext';
 import { Calendar, Search, Download, Filter } from 'lucide-react';
 
 interface FuelEntry {
@@ -19,9 +18,6 @@ interface FuelEntry {
 }
 
 const FuelLogs: React.FC = () => {
-  // Use app context
-  const { isLoading } = useAppContext();
-  
   // State for fuel logs
   const [fuelLogs, setFuelLogs] = useState<FuelEntry[]>([]);
   const [filteredLogs, setFilteredLogs] = useState<FuelEntry[]>([]);
@@ -235,7 +231,7 @@ const FuelLogs: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{log.station}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{log.odometer}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-900">
-                        <button className="text-blue-600 hover:text-blue-900" onClick={onClick}}>View</button>
+                        <button className="text-blue-600 hover:text-blue-900" onClick={() => handleViewLog(log)}>View</button>
                       </td>
                     </tr>
                   ))
