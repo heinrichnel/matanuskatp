@@ -1,9 +1,9 @@
 import React from 'react';
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
+import Card, { CardContent, CardHeader } from '../components/ui/Card';
+import Button from '../components/ui/Button';
 import { CheckCircle, AlertTriangle, Clock, User, Shield, FileText } from 'lucide-react';
 import { JobCardTask, TaskHistoryEntry } from '../../types';
-import { formatDateTime } from '../../utils/helpers';
+import { formatDateTime } from '../utils/helpers';
 
 interface QAReviewPanelProps {
   jobCardId: string;

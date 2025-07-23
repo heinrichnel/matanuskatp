@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Client } from '../../types/client';
 import { Trip } from '../../types';
-import Card, { CardContent, CardHeader } from '../ui/Card';
+import Card, { CardContent, CardHeader } from '../../components/ui/Card';
 import { 
   BarChart, 
   TrendingUp, 
@@ -14,7 +14,7 @@ import {
   Building 
 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../../utils/helpers';
-import { Badge } from '../ui/Badge';
+import { Badge } from '../../components/ui/Badge';
 
 interface ClientAnalyticsProps {
   clients: Client[];

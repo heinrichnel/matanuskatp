@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { DriverBehaviorEvent } from '../../types';
-import { useAppContext } from '../context/AppContext';
-import { useDriverBehavior } from '../context/DriverBehaviorContext';
-import Button from '../components/ui/Button';
-import DriverPerformanceOverview from '../components/DriverManagement/DriverPerformanceOverview';
-import DriverBehaviorEventForm from '../components/DriverManagement/DriverBehaviorEventForm';
-import DriverBehaviorEventDetails from '../components/DriverManagement/DriverBehaviorEventDetails';
-import CARReportForm from '../components/ComplianceSafety/CARReportForm';
-import CARReportList from '../components/ComplianceSafety/CARReportList';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
+import { useAppContext } from '../../context/AppContext';
+import { useDriverBehavior } from '../../context/DriverBehaviorContext';
+import Button from '../../components/ui/Button';
+import DriverPerformanceOverview from '../../components/DriverManagement/DriverPerformanceOverview';
+import DriverBehaviorEventForm from '../../components/DriverManagement/DriverBehaviorEventForm';
+import DriverBehaviorEventDetails from '../../components/DriverManagement/DriverBehaviorEventDetails';
+import CARReportForm from '../../components/ComplianceSafety/CARReportForm';
+import CARReportList from '../../components/ComplianceSafety/CARReportList';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
 import { 
   User, 
   FileText, 
@@ -20,7 +20,7 @@ import {
   Download, 
   BookOpen 
 } from 'lucide-react';
-import SyncIndicator from '../components/ui/SyncIndicator';
+import SyncIndicator from '../../components/ui/SyncIndicator';
 
 /**
  * Driver Behavior Events Page Component

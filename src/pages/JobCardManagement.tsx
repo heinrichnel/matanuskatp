@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
+import Card, { CardContent, CardHeader } from '../components/ui/Card';
+import Button from '../components/ui/Button';
 import { FileText, ClipboardCheck, Wrench, Plus, Search, Filter } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import JobCardKanbanBoard from './JobCardKanbanBoard';
 import JobCard from './JobCard';
-import Modal from '../ui/Modal';
+import Modal from '../components/ui/Modal';
 
 interface JobCardManagementProps {
   activeTab?: 'open' | 'completed' | 'kanban';

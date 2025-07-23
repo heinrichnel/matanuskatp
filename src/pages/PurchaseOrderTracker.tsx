@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardContent } from '../ui/Card';
-import Button from '../ui/Button';
-import SyncIndicator from '../ui/SyncIndicator';
+import { Card, CardHeader, CardContent } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import SyncIndicator from '../components/ui/SyncIndicator';
 import { useAppContext } from '../context/AppContext';
 import { Search, Filter, Calendar, ChevronDown, ChevronUp, Package, Truck, AlertCircle, CheckCircle, XCircle, Clock, FileText, MoreHorizontal } from 'lucide-react';
 

@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Trip, FlaggedCost, CostEntry } from '../../types';
+import { Trip, FlaggedCost, CostEntry } from '../types';
 import { useAppContext } from '../context/AppContext';
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
-import { Select } from '../ui/FormElements';
+import Card, { CardContent, CardHeader } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import { Select } from '../components/ui/FormElements';
 import FlagResolutionModal from './FlagResolutionModal';
 import { AlertTriangle, Eye, CheckCircle, Clock, Play, Flag, Upload, Edit, XCircle, X } from 'lucide-react';
-import { formatCurrency, formatDate, getAllFlaggedCosts } from '../../utils/helpers';
+import { formatCurrency, formatDate, getAllFlaggedCosts } from '../utils/helpers';
 
 interface FlagsInvestigationsProps {
   trips?: Trip[];
