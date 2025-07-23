@@ -198,7 +198,7 @@ const IndirectCostBreakdown: React.FC = () => {
                           <Cell 
                             key={`cell-${index}`} 
                             fill={COLORS[index % COLORS.length]} 
-                            onClick={onClick}
+                            onClick={() => handleCategoryClick(entry)}
                             cursor="pointer"
                           />
                         ))}

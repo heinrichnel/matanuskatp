@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardContent } from '../components/ui/Card';
+import { Card, CardContent } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import SyncIndicator from '../components/ui/SyncIndicator';
 import { useAppContext } from '../context/AppContext';
-import { Search, Filter, Calendar, ChevronDown, ChevronUp, Package, Truck, AlertCircle, CheckCircle, XCircle, Clock, FileText, MoreHorizontal } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, Package, Truck, AlertCircle, CheckCircle, XCircle, Clock, FileText, MoreHorizontal } from 'lucide-react';
 
 interface PurchaseOrder {
   id: string;
@@ -51,7 +51,7 @@ const PurchaseOrderTracker: React.FC = () => {
   });
   const [vendors, setVendors] = useState<string[]>([]);
   const [syncing, setSyncing] = useState(false);
-  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+  const [notification] = useState({ show: false, message: '', type: '' });
 
   // Fetch purchase orders from Firestore (mock)
   useEffect(() => {
@@ -310,8 +310,8 @@ const PurchaseOrderTracker: React.FC = () => {
     }));
   };
 
-  // Toggle expanded order view
-  const toggleExpandOrder = (id: string) => {
+  // Toggle expanded order view - used in JSX
+  const handleExpandOrder = (id: string) => {
     setExpandedOrder(expandedOrder === id ? null : id);
   };
 
@@ -385,7 +385,7 @@ const PurchaseOrderTracker: React.FC = () => {
     
     const today = new Date();
     const expectedDate = new Date(po.expectedDelivery);
-    const orderDate = new Date(po.orderDate);
+    // Order date might be used for future features
     
     const daysDifference = Math.ceil((expectedDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     
@@ -529,7 +529,7 @@ const PurchaseOrderTracker: React.FC = () => {
                       <tr className={`hover:bg-gray-50 ${expandedOrder === po.id ? 'bg-blue-50' : ''}`}>
                         <td className="px-6 py-4 whitespace-nowrap font-medium">
                           <button 
-                            onClick={onClick}
+                            onClick={() => handleExpandOrder(po.id)}
                             className="flex items-center text-indigo-600 hover:text-indigo-900"
                           >
                             {expandedOrder === po.id ? 
