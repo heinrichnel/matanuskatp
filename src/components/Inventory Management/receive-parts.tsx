@@ -3,7 +3,7 @@ import PageWrapper from '../../components/ui/PageWrapper';
 import Card, { CardContent, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { Input, Select, TextArea } from '../../components/ui/FormElements';
-import { AlertTriangle, CheckCircle, Package, Plus, Save, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Package, Save, X } from 'lucide-react';
 
 interface ReceivedPart {
   id: string;

@@ -14,7 +14,7 @@ import {
 
 // Import all workshop components
 import JobCardManagement from './JobCardManagement';
-// Create a placeholder component for WorkOrderManagement since it's not properly exported
+
 const WorkOrderManagement = () => <div>Work Order Management Component</div>;
 import TyreManagement from '../components/Tyremanagement/TyreManagementPage';
 import PurchaseOrderTracker from './PurchaseOrderTracker';

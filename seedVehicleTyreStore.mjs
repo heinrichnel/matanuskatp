@@ -166,8 +166,8 @@ const VehicleTyreStore = [
 ];
 
 async function seedFleet() {
-  console.log(`🔄 Starting fleet data seeding process...`);
-  console.log(`📊 Found ${VehicleTyreStore.length} fleet vehicles to seed`);
+  console.log(`🔄 Starting tyre store data seeding process...`);
+  console.log(`📊 Found ${VehicleTyreStore.length} tyre store items to seed`);
   
   try {
     const batch = db.batch();
@@ -175,13 +175,13 @@ async function seedFleet() {
     let skipCount = 0;
     
     for (const vehicle of VehicleTyreStore) {
-      const docRef = db.collection('fleet').doc(vehicle.fleetNumber);
+      const docRef = db.collection('tyreStore').doc(`${vehicle.StoreName}_${vehicle.TyrePosDescription}_${vehicle.TyreCode}`);
       
       // Check if document already exists to avoid duplicates
       const doc = await docRef.get();
       
       if (doc.exists) {
-        console.log(`ℹ️ Fleet ${vehicle.fleetNumber} already exists, skipping...`);
+                console.log(`ℹ️ Tyre store item ${vehicle.StoreName}_${vehicle.TyrePosDescription} already exists, skipping...`);
         skipCount++;
         continue;
       }
@@ -199,8 +199,8 @@ async function seedFleet() {
     // Commit the batch
     await batch.commit();
     
-    console.log(`✅ Successfully seeded ${successCount} fleet vehicles to Firestore`);
-    console.log(`ℹ️ Skipped ${skipCount} existing fleet vehicles`);
+    console.log(`✅ Successfully seeded ${successCount} tyre store items to Firestore`);
+    console.log(`ℹ️ Skipped ${skipCount} existing tyre store items`);
   } catch (error) {
     console.error('❌ Error seeding fleet data:', error);
   }
@@ -208,10 +208,9 @@ async function seedFleet() {
 
 // Run the seeding function
 seedFleet().then(() => {
-  console.log('🏁 Fleet seeding process complete');
+  console.log('🏁 Tyre store seeding process complete');
   process.exit(0);
 }).catch(error => {
-  console.error('❌ Unhandled error during fleet seeding:', error);
+  console.error('❌ Unhandled error during tyre store seeding:', error);
   process.exit(1);
-  
 });
