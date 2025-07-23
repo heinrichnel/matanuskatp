@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Client, CLIENT_STATUSES, CLIENT_TYPES } from '../types/client';
+import { Client, CLIENT_STATUSES, CLIENT_TYPES } from '../../types/client';
 import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';

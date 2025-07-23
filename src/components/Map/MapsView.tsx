@@ -3,7 +3,7 @@ import { getEnvVar } from '../../utils/envUtils';
 
 const MapsView: React.FC = () => {
   // Use direct Wialon link with token
-  const wialonLoginUrl = "https://hosting.wialon.com/=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en";
+  const wialonLoginUrl = "https://hosting.wialon.eu/?lang=c1099bc37c906fd0832d8e783b60ae0d8A24EF10D94BC85901A68544D53D01792B377AD3";
   
   const [iframeError, setIframeError] = useState<boolean>(false);
 
