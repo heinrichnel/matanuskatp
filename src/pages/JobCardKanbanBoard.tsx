@@ -3,8 +3,8 @@ import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Inbox, CheckCircle, Clock, AlertTriangle, Plus, Settings } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import JobCardCard from './JobCardCard';
-import JobCard from './JobCard';
+import JobCardCard from '../components/Models/Workshop/JobCardCard';
+import JobCard from '../components/Models/Workshop/JobCard';
 import Modal from '../components/ui/Modal';
 
 // Mock data for the job cards
