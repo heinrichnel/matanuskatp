@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tyre, TyrePosition, formatTyreSize, FleetTyreMapping } from '../../types/tyre';
+import { Tyre, TyrePosition, formatTyreSize, FleetTyreMapping } from '../types/tyre';
 import { useTyres } from '../context/TyreContext';
 import { getPositionsByFleet } from '../utils/tyreConstants';
 import { useFleetList } from '../hooks/useFleetList';

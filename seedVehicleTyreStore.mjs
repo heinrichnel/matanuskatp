@@ -1,4 +1,4 @@
-// seedFleet.mjs - For use with Node.js to seed fleet data into Firestore
+// seedVehicleTyreStore.mjs - For use with Node.js to seed fleet data into Firestore
 import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { readFileSync } from 'fs';
@@ -167,14 +167,14 @@ const VehicleTyreStore = [
 
 async function seedFleet() {
   console.log(`🔄 Starting fleet data seeding process...`);
-  console.log(`📊 Found ${fleetData.length} fleet vehicles to seed`);
+  console.log(`📊 Found ${VehicleTyreStore.length} fleet vehicles to seed`);
   
   try {
     const batch = db.batch();
     let successCount = 0;
     let skipCount = 0;
     
-    for (const vehicle of fleetData) {
+    for (const vehicle of VehicleTyreStore) {
       const docRef = db.collection('fleet').doc(vehicle.fleetNumber);
       
       // Check if document already exists to avoid duplicates

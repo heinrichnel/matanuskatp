@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import WialonUnitsList from '../components/wialon/WialonUnitsList';
+import WialonUnitsList from '../components/Map/wialon/WialonUnitsList';
 
 /**
  * WialonUnitsPage Component
