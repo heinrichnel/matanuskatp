@@ -30,7 +30,7 @@ export function Modal({
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-semibold">{title}</h2>
           <button
-            onClick={onClick})}
+            onClick={onClose}
             className="p-1 rounded-full hover:bg-gray-100"
             aria-label="Close"
           >
@@ -40,7 +40,7 @@ export function Modal({
         <div className="p-4 overflow-y-auto flex-1">{children}</div>
         <div className="border-t p-4 flex justify-end">
           <button
-            onClick={onClick})}
+            onClick={onClose}
             className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md text-gray-800"
           >
             Close
