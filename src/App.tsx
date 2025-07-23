@@ -23,7 +23,7 @@ import { DriverBehaviorProvider } from './context/DriverBehaviorContext';
 
 // Error Handling
 import ErrorBoundary from './components/ErrorBoundary';
-import FirestoreConnectionError from './components/ui/FirestoreConnectionError';
+import FirestoreConnectionError from './components/misc/FirestoreConnectionError';
 import ConnectionStatusIndicator from './components/ui/ConnectionStatusIndicator';
 import OfflineBanner from './components/ui/OfflineBanner';
 
@@ -45,12 +45,12 @@ import {
 import Layout from './components/layout/Layout';
 
 // Core Components
-import TripFormModal from './components/TripManagement/TripFormModal';
-import DashboardPage from './pages/DashboardPage';
+import TripFormModal from './components/Models/Trips/TripFormModal';
+import DashboardPage from './components/misc/DashboardPage';
 
 // === TRIPS ===
-import TripManagementPage from './pages/trips/TripManagementPage';
-import ActiveTripsPage from './pages/trips/ActiveTripsPage';
+import TripManagementPage from './components/misc/TripManagementPage';
+import ActiveTripsPage from './components/misc/ActiveTripsPage';
 import TripTimelinePage from './pages/trips/TripTimelinePage';
 import RoutePlanningPage from './pages/trips/RoutePlanningPage';
 import RouteOptimizationPage from './pages/trips/RouteOptimizationPage';
@@ -108,7 +108,7 @@ import DriverScheduling from './pages/drivers/DriverScheduling';
 import HoursOfService from './pages/drivers/HoursOfService';
 import DriverViolations from './pages/drivers/DriverViolations';
 import DriverRewards from './pages/drivers/DriverRewards';
-import DriverBehaviorEvents from './pages/drivers/DriverBehaviorPage';
+import DriverBehaviorPage from './pages/drivers/DriverBehaviorPage';
 import SafetyScores from './pages/drivers/SafetyScores';
 import DriverDashboard from './pages/drivers/DriverDashboard';
 
@@ -376,9 +376,9 @@ const App: React.FC = () => {
                       <Route path="/drivers/performance" element={<GenericPlaceholderPage title="Performance Analytics" />} />
                       <Route path="/drivers/scheduling" element={<GenericPlaceholderPage title="Driver Scheduling" />} />
                       <Route path="/drivers/hours" element={<GenericPlaceholderPage title="Hours of Service" />} />
-                      <Route path="/drivers/violations" element={<GenericPlaceholderPage title="Driver Violations" />} />
+                      <Route path="/drivers/violations" element={<DriverBehaviorPage />} />
                       <Route path="/drivers/rewards" element={<GenericPlaceholderPage title="Driver Rewards" />} />
-                      <Route path="/drivers/behavior" element={<DriverBehaviorEvents />} />
+                      <Route path="/drivers/behavior" element={<DriverBehaviorPage />} />
                       <Route path="/drivers/safety-scores" element={<GenericPlaceholderPage title="Safety Scores" />} />
                       <Route path="/drivers/dashboard" element={<DriverDashboard />} />
 
