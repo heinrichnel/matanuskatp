@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useRealtimeTrips } from "../../hooks/useRealtimeTrips";
-import { Card, CardContent, CardHeader } from "../../components/ui/Card";
+import { useRealtimeTrips } from "../hooks/useRealtimeTrips";
+import { Card, CardContent, CardHeader } from "../components/ui/Card";
 import { Truck, MapPin, Clock, Globe, Filter, RefreshCw } from "lucide-react";
 
 const ActiveTripsPage: React.FC = () => {

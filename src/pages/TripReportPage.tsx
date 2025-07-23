@@ -1,9 +1,9 @@
 import React from 'react';
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import { BarChart, DownloadCloud, FileText, Filter } from 'lucide-react';
-import Button from '../../components/ui/Button';
-import { useAppContext } from '../../context/AppContext';
-import SyncIndicator from '../../components/ui/SyncIndicator';
+import Button from '../components/ui/Button';
+import { useAppContext } from '../context/AppContext';
+import SyncIndicator from '../components/ui/SyncIndicator';
 
 const TripReportPage: React.FC = () => {
   const { isLoading } = useAppContext();

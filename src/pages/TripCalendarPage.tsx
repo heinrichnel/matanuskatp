@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Eye, Edit, Trash2 } from 'lucide-react';
-import Button from '../../components/ui/Button';
-import { useAppContext } from '../../context/AppContext';
+import Button from '../components/ui/Button';
+import { useAppContext } from '../context/AppContext';
 
 const TripCalendarPage: React.FC = () => {
   const { isLoading } = useAppContext();

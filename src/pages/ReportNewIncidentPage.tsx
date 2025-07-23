@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import IncidentReportForm from '../../components/ComplianceSafety/IncidentReportForm';
+import IncidentReportForm from '../components/ComplianceSafety/IncidentReportForm';
 
 /**
  * Report New Incident Page

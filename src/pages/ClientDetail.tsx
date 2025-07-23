@@ -20,7 +20,7 @@ import {
   BarChart
 } from 'lucide-react';
 import { formatDate, formatCurrency } from '../../utils/helpers';
-import { useAppContext } from '../../context/AppContext';
+import { useAppContext } from '../context/AppContext';
 
 interface ClientDetailProps {
   client: Client;

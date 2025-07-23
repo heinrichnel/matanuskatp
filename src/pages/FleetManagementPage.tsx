@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs'; 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs'; 
 import { Truck, User, ClipboardList, Map } from 'lucide-react';
 import DriverBehaviorPage from './drivers/DriverBehaviorPage';
-import MissedLoadsTracker from '../../components/TripManagement/MissedLoadsTracker';
-import DieselDashboard from '../../components/DieselManagement/DieselDashboard';
-import MapsView from '../../components/maps/MapsView';
+import MissedLoadsTracker from '../components/TripManagement/MissedLoadsTracker';
+import DieselDashboard from '../components/DieselManagement/DieselDashboard';
+import MapsView from '../components/maps/MapsView';
 import { useSearchParams } from 'react-router-dom';
-import { useAppContext } from '../../context/AppContext';
+import { useAppContext } from '../context/AppContext';
 
 const FleetManagementPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();

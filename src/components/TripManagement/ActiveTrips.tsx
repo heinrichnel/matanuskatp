@@ -744,10 +744,10 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
-                      <button className="text-indigo-600 hover:text-indigo-900" onClick={onClick}}>View</button>
+                      <button className="text-indigo-600 hover:text-indigo-900" onClick={() => {}}>View</button>
                       <button 
                         className="text-blue-600 hover:text-blue-900"
-                        onClick={onClick}
+                        onClick={() => {}}
                       >
                         Edit Costs
                       </button>

@@ -71,6 +71,7 @@
     "@types/react-dropzone": "^4.2.2",
     "@types/xlsx": "^0.0.35",
     "accounting-js": "^2.0.3",
+    "antd": "^5.26.6",
     "apexcharts": "^5.2.0",
     "axios": "^1.10.0",
     "big.js": "^7.0.1",
