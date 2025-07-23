@@ -23,7 +23,7 @@ import {
 import FleetSelector from '../components/common/FleetSelector';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import SyncIndicator from '../components/ui/SyncIndicator';
-import ManualDieselEntryModal from '../misc/ManualDieselEntryModal';
+import ManualDieselEntryModal from '../components/Models/Diesel/ManualDieselEntryModal';
 import DieselImportModal from './DieselImportModal';
 import DieselNormsModal from './DieselNormsModal';
 import EnhancedDieselDebriefModal from '../misc/EnhancedDieselDebriefModal';
