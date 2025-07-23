@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Client, CLIENT_STATUSES, CLIENT_TYPES } from '../../types/client';
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
-import { Badge } from '../ui/Badge';
+import Card, { CardContent, CardHeader } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
 import { 
   Building, 
   Mail, 
@@ -19,7 +19,7 @@ import {
   Users,
   BarChart
 } from 'lucide-react';
-import { formatDate, formatCurrency } from '../../utils/helpers';
+import { formatDate, formatCurrency } from '../utils/helpers';
 import { useAppContext } from '../context/AppContext';
 
 interface ClientDetailProps {

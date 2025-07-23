@@ -7,7 +7,7 @@ import Button from '../components/ui/Button';
 import { Select, Input } from '../components/ui/FormElements';
 import { MapPin, RotateCw, Save, Navigation, Clock, TrendingDown, Route, ChevronRight, ChevronDown, ChevronUp, Fuel } from 'lucide-react';
 import LoadingIndicator from '../components/ui/LoadingIndicator';
-import { useLoadGoogleMaps, isGoogleMapsAPILoaded } from '../../utils/googleMapsLoader';
+import { useLoadGoogleMaps, isGoogleMapsAPILoaded } from '../utils/googleMapsLoader';
 
 // Map container styles
 const mapContainerStyle = {

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useSyncContext } from '../context/SyncContext';
 import { DieselConsumptionRecord } from '../../types';
-import { Card, CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
+import { Card, CardContent, CardHeader } from '../components/ui/Card';
+import Button from '../components/ui/Button';
 // Removed unused Select import
 import { 
   Fuel, 
@@ -21,8 +21,8 @@ import {
   Edit
 } from 'lucide-react';
 import FleetSelector from '../common/FleetSelector';
-import { formatCurrency, formatDate } from '../../utils/helpers';
-import SyncIndicator from '../ui/SyncIndicator';
+import { formatCurrency, formatDate } from '../utils/helpers';
+import SyncIndicator from '../components/ui/SyncIndicator';
 import ManualDieselEntryModal from '../misc/ManualDieselEntryModal';
 import DieselImportModal from './DieselImportModal';
 import DieselNormsModal from './DieselNormsModal';

@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../../context/AppContext';
 import DieselDashboard from './DieselDashboard';
 import { formatCurrency } from '../../utils/helpers';
-import Button from '../ui/Button';
-import { Card, CardContent, CardHeader } from '../ui/Card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/Tabs';
+import Button from '../../components/ui/Button';
+import { Card, CardContent, CardHeader } from '../../components/ui/Card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
 import { 
   Fuel,
   TrendingUp,

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import SyncIndicator from '../components/ui/SyncIndicator';
-import { useAppContext } from '../context/AppContext';
+import { Card, CardContent } from '../../components/ui/Card';
+import Button from '../../components/ui/Button';
+import SyncIndicator from '../../components/ui/SyncIndicator';
+import { useAppContext } from '../../context/AppContext';
 import { Search, Plus, Edit, Trash2, AlertCircle, CheckCircle } from 'lucide-react';
 
 interface FuelCard {

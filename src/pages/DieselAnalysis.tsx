@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
+import Card, { CardContent, CardHeader } from '../components/ui/Card';
+import Button from '../components/ui/Button';
 import { 
   BarChart3, 
   TrendingDown,
@@ -10,7 +10,7 @@ import {
   Truck
 } from 'lucide-react';
 import { DieselConsumptionRecord } from '../../types';
-import { formatCurrency } from '../../utils/helpers';
+import { formatCurrency } from '../utils/helpers';
 
 interface DieselAnalysisProps {
   dieselRecords?: DieselConsumptionRecord[];

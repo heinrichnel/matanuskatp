@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardContent } from '../ui/Card';
-import Button from '../ui/Button';
-import SyncIndicator from '../ui/SyncIndicator';
+import { Card, CardHeader, CardContent } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import SyncIndicator from '../components/ui/SyncIndicator';
 import { useAppContext } from '../context/AppContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 

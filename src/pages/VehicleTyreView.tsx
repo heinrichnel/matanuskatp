@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Tyre, TyrePosition, formatTyreSize, FleetTyreMapping } from '../../types/tyre';
 import { useTyres } from '../context/TyreContext';
-import { getPositionsByFleet } from '../../utils/tyreConstants';
+import { getPositionsByFleet } from '../utils/tyreConstants';
 import { useFleetList } from '../hooks/useFleetList';
 import { CircleDot, Info, AlertTriangle } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
-import LoadingIndicator from '../ui/LoadingIndicator';
+import { Card, CardContent, CardHeader } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import LoadingIndicator from '../components/ui/LoadingIndicator';
 
 // Helper functions needed for this component
 const formatCurrency = (amount: number | undefined, currency: string = 'ZAR'): string => {

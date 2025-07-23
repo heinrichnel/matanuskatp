@@ -8,11 +8,11 @@ import { Trip } from '../../types';
 import { useAppContext } from '../context/AppContext';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
-import Modal from '../ui/Modal';
-import { Input } from '../ui/FormElements';
-import { Tooltip } from '../ui/Tooltip';
+import Card, { CardContent, CardHeader } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Modal from '../components/ui/Modal';
+import { Input } from '../components/ui/FormElements';
+import { Tooltip } from '../components/ui/Tooltip';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 
 // ─── Utilities ───────────────────────────────────────────────────
-import { formatCurrency, calculateTotalCosts } from '../../utils/helpers';
+import { formatCurrency, calculateTotalCosts } from '../utils/helpers';
 
 
 interface YTDMetrics {

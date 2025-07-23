@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../components/ui/Card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Calendar, Filter, Download, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
-import Button from '../ui/Button';
-import SyncIndicator from '../ui/SyncIndicator';
+import Button from '../components/ui/Button';
+import SyncIndicator from '../components/ui/SyncIndicator';
 
 interface RetentionData {
   period: string;
