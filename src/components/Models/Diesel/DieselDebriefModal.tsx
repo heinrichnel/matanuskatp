@@ -179,14 +179,12 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
     
     // Individual record pages
     let yPos = 70;
-    let pageNum = 1;
     
     records.forEach((record, index) => {
       // Check if we need a new page
       if (yPos > 250) {
         doc.addPage();
         yPos = 20;
-        pageNum++;
       }
       
       // Record header
@@ -384,10 +382,10 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
             {records.length} record{records.length !== 1 ? 's' : ''} needing review
           </p>
           <div className="flex space-x-2">
-            <Button variant="outline" onClick={onClick} icon={<FileText className="w-4 h-4" />}>
+            <Button variant="outline" onClick={generateCSV} icon={<FileText className="w-4 h-4" />}>
               Export CSV
             </Button>
-            <Button variant="outline" onClick={onClick} icon={<Printer className="w-4 h-4" />}>
+            <Button variant="outline" onClick={generatePDF} icon={<Printer className="w-4 h-4" />}>
               Export PDF
             </Button>
             <Button onClick={onClick} icon={<CheckCircle className="w-4 h-4" />}>

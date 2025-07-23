@@ -19,7 +19,8 @@ import TyreManagement from '../components/Tyremanagement/TyreManagementPage';
 import PurchaseOrderTracker from './PurchaseOrderTracker';
 import InspectionManagement from './InspectionManagement';
 import InventoryDashboard from './InventoryDashboard';
-import FaultTracking from './FaultTracking';
+// TODO: Create this component
+// import FaultTracking from './FaultTracking';
 
 const WorkshopOperations: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');

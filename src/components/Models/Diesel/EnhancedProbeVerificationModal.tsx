@@ -3,8 +3,8 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import { Input, TextArea } from '../ui/FormElements';
 import { useAppContext } from '../../context/AppContext';
-import { formatCurrency, formatDate } from '../../utils/helpers';
-import { CheckCircle, X, Save, AlertTriangle, Info } from 'lucide-react';
+import { formatDate } from '../../utils/helpers';
+import { CheckCircle, X, AlertTriangle, Info } from 'lucide-react';
 import { FLEETS_WITH_PROBES, DieselConsumptionRecord } from '../../types';
 import { addAuditLogToFirebase } from '../../firebase';
 
@@ -87,6 +87,15 @@ const EnhancedProbeVerificationModal: React.FC<EnhancedProbeVerificationModalPro
       const isVerified = Math.abs(percentage) <= 5;
       
       // Update the diesel record
+      // Upload photo evidence if available
+      let photoUrl = record.photoEvidenceUrl;
+      if (photoEvidence) {
+        // In a real app, we would upload the file to storage here
+        // For now, we'll just create an object URL as a placeholder
+        photoUrl = URL.createObjectURL(photoEvidence);
+        console.log("Photo evidence would be uploaded here:", photoEvidence.name);
+      }
+
       await updateDieselRecord(record.id, {
         ...record,
         probeReading: probeValue,
@@ -96,6 +105,8 @@ const EnhancedProbeVerificationModal: React.FC<EnhancedProbeVerificationModalPro
         witnessName,
         verified: isVerified,
         verificationDate: new Date().toISOString(),
+        photoEvidenceUrl: photoUrl,
+        photoEvidenceName: photoEvidence?.name || record.photoEvidenceName,
         // If there's a large discrepancy, flag the record for investigation
         flagged: Math.abs(percentage) > 5
       });

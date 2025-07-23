@@ -295,7 +295,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
           <p className="text-gray-600">Track and analyze missed business opportunities</p>
         </div>
         <Button
-          onClick={onClick}
+          onClick={handleNewMissedLoad}
           icon={<Plus className="w-4 h-4" />}
         >
           Record Missed Load
@@ -381,7 +381,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
                 Start tracking missed business opportunities to identify improvement areas.
               </p>
               <div className="mt-6">
-                <Button onClick={onClick} icon={<Plus className="w-4 h-4" />}>
+                <Button onClick={handleNewMissedLoad} icon={<Plus className="w-4 h-4" />}>
                   Record First Missed Load
                 </Button>
               </div>
@@ -483,7 +483,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
                       {load.resolutionStatus !== 'resolved' && (
                         <Button
                           size="sm"
-                          onClick={onClick}
+                          onClick={() => handleResolve(load)}
                           icon={<FileText className="w-3 h-3" />}
                         >
                           Resolve
@@ -492,7 +492,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={onClick}
+                        onClick={() => handleEdit(load)}
                         icon={<Edit className="w-3 h-3" />}
                       >
                         Edit
@@ -500,7 +500,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
                       <Button
                         size="sm"
                         variant="danger"
-                        onClick={onClick}
+                        onClick={() => handleDelete(load.id)}
                         icon={<Trash2 className="w-3 h-3" />}
                       >
                         Delete
@@ -682,7 +682,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
               Cancel
             </Button>
             <Button
-              onClick={onClick}
+              onClick={handleSubmit}
               icon={<Save className="w-4 h-4" />}
             >
               {editingLoad ? 'Update Missed Load' : 'Record Missed Load'}
@@ -791,7 +791,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
                 Cancel
               </Button>
               <Button
-                onClick={onClick}
+                onClick={handleResolutionSubmit}
                 icon={<CheckCircle className="w-4 h-4" />}
               >
                 Mark as Resolved
