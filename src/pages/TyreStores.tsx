@@ -6,7 +6,7 @@ import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import { Badge } from '../components/ui/Badge';
 import { useTyres } from '../context/TyreContext';
-import { Tyre, TyreStoreLocation } from '../../types/tyre';
+import { Tyre, TyreStoreLocation } from '../types/tyre';
 import { PlusCircle, ArrowRightLeft, Trash2, Map, CheckCircle } from 'lucide-react';
 
 interface StoreStats {

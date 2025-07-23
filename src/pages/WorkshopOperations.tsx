@@ -16,10 +16,10 @@ import {
 import JobCardManagement from './JobCardManagement';
 // Create a placeholder component for WorkOrderManagement since it's not properly exported
 const WorkOrderManagement = () => <div>Work Order Management Component</div>;
-import TyreManagement from '../TyreManagement/TyreManagement';
-import PurchaseOrderTracker from '../Inventory Management/PurchaseOrderTracker';
+import TyreManagement from '../components/Tyremanagement/TyreManagementPage';
+import PurchaseOrderTracker from './PurchaseOrderTracker';
 import InspectionManagement from './InspectionManagement';
-import InventoryDashboard from '../Inventory Management/InventoryDashboard';
+import InventoryDashboard from './InventoryDashboard';
 import FaultTracking from './FaultTracking';
 
 const WorkshopOperations: React.FC = () => {

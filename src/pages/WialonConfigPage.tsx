@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
-import { db } from '../../firebase';
-import WialonConfig from '../components/wialon/WialonConfig';
+import { db } from '../firebase';
+import WialonConfig from '../components/Map/wialon/WialonConfig';
 
 interface Company {
   id: string;

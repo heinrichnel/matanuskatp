@@ -3,13 +3,13 @@ import React, { useState } from 'react';
 
 // ─── Types & Constants ───────────────────────────────────────────
 import { MissedLoad } from '../types';
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import { formatCurrency, formatDate } from '../utils/helpers';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
-import Modal from '../ui/Modal';
-import { Input, Select, Textarea } from '../ui/FormElements';
+import Card, { CardContent, CardHeader } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Modal from '../components/ui/Modal';
+import { Input, Select, Textarea } from '../components/ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
