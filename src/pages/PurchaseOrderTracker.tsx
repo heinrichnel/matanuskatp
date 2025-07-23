@@ -563,9 +563,9 @@ const PurchaseOrderTracker: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center space-x-3">
-                            <button className="text-indigo-600 hover:text-indigo-900" onClick={onClick}}>Edit</button>
+                            <button className="text-indigo-600 hover:text-indigo-900" onClick={() => {}}>Edit</button>
                             <div className="relative inline-block text-left">
-                              <button className="text-gray-600 hover:text-gray-900" onClick={onClick}}>
+                              <button className="text-gray-600 hover:text-gray-900" onClick={() => {}}>
                                 <MoreHorizontal size={16} />
                               </button>
                             </div>
