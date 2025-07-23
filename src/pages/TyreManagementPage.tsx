@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import TyreDashboard from '../../components/TyreManagement/TyreDashboard';
-import Button from '../../components/ui/Button';
-import Card, { CardContent } from '../../components/ui/Card';
+import TyreDashboard from '../components/TyreManagement/TyreDashboard';
+import Button from '../components/ui/Button';
+import Card, { CardContent } from '../components/ui/Card';
 import { Download, BarChart, PieChart } from 'lucide-react';
 
 // Define the TyreEntry interface to match our data structure

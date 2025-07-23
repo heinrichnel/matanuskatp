@@ -1,13 +1,6 @@
-/* 
-Option 1: You can keep the eslint-disable directive above to suppress all unused import warnings.
-
-Option 2: Remove all unused imports one by one:
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AppRoutes } from './AppRoutes';
-
-// Remove Navigate import as it's not used
-*/
+/**
+ * Main App component that handles routing and application state
+ */
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useState } from 'react';
@@ -23,7 +16,7 @@ import { DriverBehaviorProvider } from './context/DriverBehaviorContext';
 
 // Error Handling
 import ErrorBoundary from './components/ErrorBoundary';
-import FirestoreConnectionError from './components/misc/FirestoreConnectionError';
+import FirestoreConnectionError from './components/ui/FirestoreConnectionError';
 import ConnectionStatusIndicator from './components/ui/ConnectionStatusIndicator';
 import OfflineBanner from './components/ui/OfflineBanner';
 
@@ -46,22 +39,22 @@ import Layout from './components/layout/Layout';
 
 // Core Components
 import TripFormModal from './components/Models/Trips/TripFormModal';
-import DashboardPage from './components/misc/DashboardPage';
+import DashboardPage from './pages/DashboardPage';
 
 // === TRIPS ===
-import TripManagementPage from './components/misc/TripManagementPage';
-import ActiveTripsPage from './components/misc/ActiveTripsPage';
+import TripManagementPage from './pages/TripManagementPage';
+import ActiveTripsPage from './pages/ActiveTripsPage';
 import TripTimelinePage from './pages/trips/TripTimelinePage';
-import RoutePlanningPage from './pages/trips/RoutePlanningPage';
-import RouteOptimizationPage from './pages/trips/RouteOptimizationPage';
-import LoadPlanningPage from './pages/trips/LoadPlanningPage';
-import TripCalendarPage from './pages/trips/TripCalendarPage';
-import AddTripPage from './pages/trips/AddTripPage';
-import FleetLocationMapPage from './pages/trips/FleetLocationMapPage';
-import ActiveTrips from './pages/ActiveTrips';
+import RoutePlanningPage from './pages/RoutePlanningPage';
+import RouteOptimizationPage from './pages/RouteOptimizationPage';
+import LoadPlanningPage from './pages/LoadPlanningPage';
+import TripCalendarPage from './pages/TripCalendarPage';
+import AddTripPage from './pages/AddTripPage';
+import FleetLocationMapPage from './components/Map/pages/FleetLocationMapPage';
+import ActiveTrips from './components/TripManagement/ActiveTrips';
 import CompletedTrips from './pages/CompletedTrips';
-import FlagsInvestigations from './pages/FlagsInvestigations';
-import TripDashboard from './pages/trips/TripDashboard';
+import FlagsInvestigations from './pages/FlagsInvestigationsPage';
+import TripDashboard from './pages/TripDashboard';
 
 // === INVOICES ===
 import InvoiceManagementPage from './pages/invoices/InvoiceManagementPage';

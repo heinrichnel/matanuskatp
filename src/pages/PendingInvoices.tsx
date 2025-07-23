@@ -20,7 +20,7 @@ const PendingInvoicesPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Pending Invoices</h1>
         <div className="flex space-x-2">
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onClick={onClick}}>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" onClick={() => {}}>
             Send Reminders
           </button>
           <Link to="/invoices/new" className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
@@ -67,7 +67,7 @@ const PendingInvoicesPage: React.FC = () => {
             </select>
           </div>
           <div className="flex items-end">
-            <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick}}>
+            <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={() => {}}>
               Apply Filters
             </button>
           </div>
@@ -110,10 +110,10 @@ const PendingInvoicesPage: React.FC = () => {
                   </td>
                   <td className="px-4 py-3 text-sm">
                     <div className="flex space-x-2">
-                      <button className="text-blue-600 hover:text-blue-800" onClick={onClick}}>View</button>
-                      <button className="text-gray-600 hover:text-gray-800" onClick={onClick}}>Edit</button>
-                      <button className="text-green-600 hover:text-green-800" onClick={onClick}}>Mark Paid</button>
-                      <button className="text-red-600 hover:text-red-800" onClick={onClick}}>Delete</button>
+                      <button className="text-blue-600 hover:text-blue-800" onClick={() => {}}>View</button>
+                      <button className="text-gray-600 hover:text-gray-800" onClick={() => {}}>Edit</button>
+                      <button className="text-green-600 hover:text-green-800" onClick={() => {}}>Mark Paid</button>
+                      <button className="text-red-600 hover:text-red-800" onClick={() => {}}>Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -125,10 +125,10 @@ const PendingInvoicesPage: React.FC = () => {
         {/* Pagination */}
         <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-4">
           <div className="flex flex-1 justify-between sm:hidden">
-            <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" onClick={onClick}}>
+            <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" onClick={() => {}}>
               Previous
             </button>
-            <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" onClick={onClick}}>
+            <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" onClick={() => {}}>
               Next
             </button>
           </div>
@@ -141,19 +141,19 @@ const PendingInvoicesPage: React.FC = () => {
             </div>
             <div>
               <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" onClick={onClick}}>
+                <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" onClick={() => {}}>
                   Previous
                 </button>
-                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50" onClick={onClick}}>
+                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50" onClick={() => {}}>
                   1
                 </button>
-                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600 hover:bg-gray-50" onClick={onClick}}>
+                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600 hover:bg-gray-50" onClick={() => {}}>
                   2
                 </button>
-                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50" onClick={onClick}}>
+                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50" onClick={() => {}}>
                   3
                 </button>
-                <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" onClick={onClick}}>
+                <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50" onClick={() => {}}>
                   Next
                 </button>
               </nav>

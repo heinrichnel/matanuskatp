@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../../context/AppContext';
-import { useSyncContext } from '../../context/SyncContext';
+import { useAppContext } from '../context/AppContext';
+import { useSyncContext } from '../context/SyncContext';
 import { DieselConsumptionRecord } from '../../types';
 import { Card, CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';

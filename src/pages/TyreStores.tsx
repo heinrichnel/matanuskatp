@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 // Remove Label import as we'll use a simple label element
-import Select from '../../components/ui/Select';
-import { Badge } from '../../components/ui/Badge';
-import { useTyres } from '../../context/TyreContext';
+import Select from '../components/ui/Select';
+import { Badge } from '../components/ui/Badge';
+import { useTyres } from '../context/TyreContext';
 import { Tyre, TyreStoreLocation } from '../../types/tyre';
 import { PlusCircle, ArrowRightLeft, Trash2, Map, CheckCircle } from 'lucide-react';
 

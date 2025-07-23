@@ -1,6 +1,6 @@
 import React from "react";
-import { useAppContext } from "../../context/AppContext";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import { useAppContext } from "../context/AppContext";
+import Card, { CardContent, CardHeader } from "../components/ui/Card";
 import { BarChart, TrendingUp, Truck, Calendar } from "lucide-react";
 
 const TripDashboard: React.FC = () => {

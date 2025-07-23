@@ -1,8 +1,8 @@
 import React from 'react';
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import { Layers, Package, ChevronRight, RefreshCw, Plus } from 'lucide-react';
-import Button from '../../components/ui/Button';
-import { useAppContext } from '../../context/AppContext';
+import Button from '../components/ui/Button';
+import { useAppContext } from '../context/AppContext';
 
 const LoadPlanningPage: React.FC = () => {
   const { isLoading } = useAppContext();

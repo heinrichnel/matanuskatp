@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import SyncIndicator from '../../components/ui/SyncIndicator';
+import { Card, CardContent } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import SyncIndicator from '../components/ui/SyncIndicator';
 import { Search, Download, Calendar, Filter, BarChart2, PieChart, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface ReportFilter {

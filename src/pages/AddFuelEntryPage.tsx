@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useAppContext } from "../../context/AppContext";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import { useAppContext } from "../context/AppContext";
+import Card, { CardContent, CardHeader } from "../components/ui/Card";
 import { Droplet, Truck, Calendar, Save } from "lucide-react";
-import Button from "../../components/ui/Button";
+import Button from "../components/ui/Button";
 
 const AddFuelEntryPage: React.FC = () => {
   const { isLoading } = useAppContext();
