@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import JobCardHeader from './JobCardHeader';
-import TaskManager from './TaskManager';
-import InventoryPanel from './InventoryPanel';
+// import TaskManager from './TaskManager'; // Component commented out - missing file
+// import InventoryPanel from './InventoryPanel'; // Component commented out - missing file
 import JobCardNotes from './JobCardNotes';
-import QAReviewPanel from './QAReviewPanel';
-import CompletionPanel from './CompletionPanel'; 
+// import QAReviewPanel from './QAReviewPanel'; // Component commented out - missing file
+// import CompletionPanel from './CompletionPanel'; // Component commented out - missing file 
 import { v4 as uuidv4 } from 'uuid';
 import { JobCardTask, TaskHistoryEntry } from '../../types';
 import Button from '../ui/Button';
@@ -355,7 +355,7 @@ const JobCard: React.FC = () => {
         <span className="text-blue-700">Current Role: <strong>{userRole === 'technician' ? 'Technician' : 'Supervisor'}</strong></span>
         <Button 
           size="sm" 
-          onClick={onClick} 
+          onClick={toggleUserRole} 
           variant="outline"
         >
           Switch to {userRole === 'technician' ? 'Supervisor' : 'Technician'} View
@@ -369,6 +369,7 @@ const JobCard: React.FC = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          {/* TaskManager component temporarily commented out - missing file
           <TaskManager
             tasks={tasks}
             onTaskUpdate={handleTaskUpdate}
@@ -378,6 +379,10 @@ const JobCard: React.FC = () => {
             onLogTaskHistory={handleLogTaskHistory}
             userRole={userRole}
           />
+          */}
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-md">
+            <p className="text-gray-500">Task management functionality is temporarily unavailable.</p>
+          </div>
           
           <JobCardNotes
             notes={notes}
@@ -388,6 +393,7 @@ const JobCard: React.FC = () => {
         </div>
         
         <div className="space-y-6">
+          {/* QAReviewPanel component temporarily commented out - missing file
           {userRole === 'supervisor' && (
             <QAReviewPanel
               jobCardId={jobCard.id}
@@ -399,7 +405,9 @@ const JobCard: React.FC = () => {
               isLoading={isLoading}
             />
           )}
-        
+          */}
+          
+          {/* InventoryPanel component temporarily commented out - missing file
           <InventoryPanel
             jobCardId={jobCard.id}
             assignedParts={assignedParts}
@@ -407,7 +415,13 @@ const JobCard: React.FC = () => {
             onRemovePart={handleRemovePart}
             onUpdatePart={handleUpdatePart}
           />
+          */}
           
+          <div className="p-4 bg-gray-50 border border-gray-200 rounded-md mb-4">
+            <p className="text-gray-500">Inventory management functionality is temporarily unavailable.</p>
+          </div>
+          
+          {/* CompletionPanel component temporarily commented out - missing file
           {userRole === 'supervisor' && (
             <CompletionPanel
               jobCardId={jobCard.id}
@@ -417,6 +431,7 @@ const JobCard: React.FC = () => {
               onGenerateInvoice={handleGenerateInvoice}
             />
           )}
+          */}
         </div>
       </div>
     </div>
