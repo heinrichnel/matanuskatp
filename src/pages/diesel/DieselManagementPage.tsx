@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
-import DieselDashboard from './DieselDashboard';
+import DieselDashboard from './DieselDashboardComponent';
 import { formatCurrency } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';

@@ -80,10 +80,10 @@ export const POApprovalSummary: React.FC = () => {
                 <td className="p-2 border">{entry.vendor}</td>
                 <td className="p-2 border">
                   <div className="flex space-x-2">
-                    <button className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600" onClick={onClick}}>
+                    <button className="px-3 py-1 bg-green-500 text-white rounded-md text-xs hover:bg-green-600" onClick={() => {}}>
                       Approve
                     </button>
-                    <button className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-xs hover:bg-gray-300" onClick={onClick}}>
+                    <button className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-xs hover:bg-gray-300" onClick={() => {}}>
                       Details
                     </button>
                   </div>
@@ -98,10 +98,10 @@ export const POApprovalSummary: React.FC = () => {
           Showing {poData.length} entries • Last updated: 09 July 2025, 10:45 AM
         </div>
         <div className="flex space-x-2">
-          <button className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600" onClick={onClick}}>
+          <button className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600" onClick={() => {}}>
             Review All
           </button>
-          <button className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300" onClick={onClick}}>
+          <button className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300" onClick={() => {}}>
             Export
           </button>
         </div>

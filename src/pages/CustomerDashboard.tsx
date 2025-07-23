@@ -35,7 +35,7 @@ const CustomerDashboard: React.FC = () => {
           <Link to="/clients?action=new" className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
             Add New Customer
           </Link>
-          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick}}>
+          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={() => {}}>
             Export Customer List
           </button>
         </div>

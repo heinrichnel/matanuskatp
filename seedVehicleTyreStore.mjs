@@ -1,9 +1,35 @@
-// seedVehicleTyreStore.ts
+// seedFleet.mjs - For use with Node.js to seed fleet data into Firestore
+import { initializeApp, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
+import { readFileSync } from 'fs';
 
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { firestore } from './src/utils/firebaseConnectionHandler';
-import type { TyreStore, StockEntry, StockEntryHistory, TyrePosition } from './src/types/tyre';
+// Check if service account key file exists and load it
+let serviceAccount;
+try {
+  serviceAccount = JSON.parse(readFileSync('./serviceAccountKey.json', 'utf8'));
+  console.log('✅ Service account key loaded successfully');
+} catch (error) {
+  console.error('❌ Error loading service account key:', error.message);
+  console.log('\n📝 INSTRUCTIONS:');
+  console.log('1. Go to Firebase Console → Project Settings → Service Accounts');
+  console.log('2. Click "Generate new private key"');
+  console.log('3. Save the file as "serviceAccountKey.json" in the project root directory');
+  console.log('4. Run this script again\n');
+  process.exit(1);
+}
 
+// Initialize Firebase Admin
+try {
+  initializeApp({
+    credential: cert(serviceAccount)
+  });
+  console.log('✅ Firebase Admin initialized successfully');
+} catch (error) {
+  console.error('❌ Error initializing Firebase Admin:', error);
+  process.exit(1);
+}
+
+getFirestore();
 // --- DIE HELE TYRE MAPPING DATA, ALLES IN EEN ---
 const mappingData: {
   RegistrationNo: string;
@@ -144,54 +170,53 @@ const mappingData: {
   { RegistrationNo: 'AFQ1329', StoreName: '28H', TyrePosDescription: 'SP', TyreCode: '' }
 ];
 
-// --- Map in Firestore formaat ---
-const initialEntries: StockEntry[] = mappingData
-  .filter(row => row.TyreCode && row.TyreCode.trim() !== '')
-  .map(row => {
-    const history: StockEntryHistory[] = [
-      {
-        event: 'mounted',
-        toStore: 'VehicleTyreStore',
-        vehicleReg: row.RegistrationNo,
-        position: row.TyrePosDescription as TyrePosition,
-        odometer: 0,
-        date: new Date().toISOString(),
-        user: 'system'
+async function seedFleet() {
+  console.log(`🔄 Starting fleet data seeding process...`);
+  console.log(`📊 Found ${fleetData.length} fleet vehicles to seed`);
+  
+  try {
+    const batch = db.batch();
+    let successCount = 0;
+    let skipCount = 0;
+    
+    for (const vehicle of fleetData) {
+      const docRef = db.collection('fleet').doc(vehicle.fleetNumber);
+      
+      // Check if document already exists to avoid duplicates
+      const doc = await docRef.get();
+      
+      if (doc.exists) {
+        console.log(`ℹ️ Fleet ${vehicle.fleetNumber} already exists, skipping...`);
+        skipCount++;
+        continue;
       }
-    ];
-    return {
-      tyreId: row.TyreCode,
-      brand: '',
-      pattern: '',
-      size: '',
-      type: row.StoreName,
-      vehicleReg: row.RegistrationNo,
-      position: row.TyrePosDescription as TyrePosition,
-      currentTreadDepth: 0,
-      lastMountOdometer: 0,
-      currentOdometer: 0,
-      kmCovered: 0,
-      status: 'active',
-      history
-    };
-  });
-
-const storeDoc: TyreStore = {
-  id: 'VehicleTyreStore',
-  name: 'Vehicle Tyre Store',
-  entries: initialEntries
-};
-
-async function seed() {
-  const ref = doc(firestore, 'tyreStores', storeDoc.id);
-  await setDoc(ref, {
-    ...storeDoc,
-    dateAdded: serverTimestamp()
-  });
-  console.log(`✅ Seeded ${initialEntries.length} tyres into VehicleTyreStore`);
+      
+      // Add vehicle data to batch
+      batch.set(docRef, {
+        ...vehicle,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      
+      successCount++;
+    }
+    
+    // Commit the batch
+    await batch.commit();
+    
+    console.log(`✅ Successfully seeded ${successCount} fleet vehicles to Firestore`);
+    console.log(`ℹ️ Skipped ${skipCount} existing fleet vehicles`);
+  } catch (error) {
+    console.error('❌ Error seeding fleet data:', error);
+  }
 }
 
-seed().catch(err => {
-  console.error('❌ Seeding failed:', err);
+// Run the seeding function
+seedFleet().then(() => {
+  console.log('🏁 Fleet seeding process complete');
+  process.exit(0);
+}).catch(error => {
+  console.error('❌ Unhandled error during fleet seeding:', error);
   process.exit(1);
+  
 });
