@@ -15,6 +15,9 @@ const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = 'open
   const [currentTab, setCurrentTab] = useState(activeTab);
   const [showJobCardModal, setShowJobCardModal] = useState(false);
 
+  // Handler to open the Job Card modal
+  const onClick = () => setShowJobCardModal(true);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -32,13 +35,13 @@ const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = 'open
         </div>
       </div>
       
-      <Tabs value={currentTab} onValueChange={(value) => setCurrentTab(value as 'open' | 'completed' | 'kanban')}>
+      <Tabs value={currentTab} onValueChange={(value) => setCurrentTab(value as 'open' | 'templates' | 'kanban')}>
         <TabsList>
           <TabsTrigger value="open" className="flex items-center gap-2">
             <Wrench className="w-4 h-4" />
             <span>Open Job Cards</span>
           </TabsTrigger>
-          <TabsTrigger value="completed" className="flex items-center gap-2">
+          <TabsTrigger value="templates" className="flex items-center gap-2">
             <FileText className="w-4 h-4" />
             <span>Job Card Templates</span>
           </TabsTrigger>
