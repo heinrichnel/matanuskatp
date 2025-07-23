@@ -1,111 +1,137 @@
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
+import React from 'react';
 
-def analyze_fuel_behavior(data):
-    """
-    Analyzes driver fuel consumption behavior from a pandas DataFrame.
+type DriverFuelData = {
+  driver_id: number;
+  date: string;
+  distance: number;
+  fuel_consumed: number;
+};
 
-    Args:
-        data (pd.DataFrame): DataFrame containing driver data with at least
-                             'driver_id', 'date', 'distance', and 'fuel_consumed' columns.
+type FuelAnalysis = {
+  averageFuelEfficiency: number;
+  driverFuelEfficiency: Record<number, number>;
+  fuelEfficiencyOverTime: Record<string, number>;
+  outlierDrivers: number[];
+};
 
-    Returns:
-        dict: A dictionary containing analysis results, including:
-              - average_fuel_efficiency: Average fuel efficiency across all drivers.
-              - driver_fuel_efficiency: Fuel efficiency for each driver.
-              - fuel_efficiency_over_time: Trend of fuel efficiency over time.
-              - outlier_drivers: Drivers with significantly low fuel efficiency.
-    """
+const sampleData: DriverFuelData[] = [
+  { driver_id: 1, date: '2023-01-01', distance: 100, fuel_consumed: 10 },
+  { driver_id: 1, date: '2023-01-02', distance: 120, fuel_consumed: 12 },
+  { driver_id: 2, date: '2023-01-01', distance: 150, fuel_consumed: 15 },
+  { driver_id: 2, date: '2023-01-02', distance: 130, fuel_consumed: 13 },
+  { driver_id: 3, date: '2023-01-01', distance: 80, fuel_consumed: 8 },
+  { driver_id: 3, date: '2023-01-02', distance: 90, fuel_consumed: 9 },
+  { driver_id: 4, date: '2023-01-01', distance: 200, fuel_consumed: 20 },
+  { driver_id: 4, date: '2023-01-02', distance: 180, fuel_consumed: 18 },
+  { driver_id: 5, date: '2023-01-01', distance: 50, fuel_consumed: 10 },
+  { driver_id: 5, date: '2023-01-02', distance: 60, fuel_consumed: 30 },
+];
 
-    # 1. Data Cleaning and Preprocessing
-    data = data.copy()
-    data.dropna(inplace=True)
-    data = data[data['distance'] > 0]
-    data = data[data['fuel_consumed'] > 0]
-    data['date'] = pd.to_datetime(data['date'])
+function analyzeFuelBehavior(data: DriverFuelData[]): FuelAnalysis {
+  // Filter out invalid data
+  const validData = data.filter(
+    d => d.distance > 0 && d.fuel_consumed > 0 && !!d.date
+  );
 
-    # 2. Calculate Fuel Efficiency
-    data['fuel_efficiency'] = data['distance'] / data['fuel_consumed']
+  // Calculate fuel efficiency for each entry
+  const withEfficiency = validData.map(d => ({
+    ...d,
+    fuel_efficiency: d.distance / d.fuel_consumed,
+  }));
 
-    # 3. Overall Average Fuel Efficiency
-    average_fuel_efficiency = data['fuel_efficiency'].mean()
+  // Overall average fuel efficiency
+  const averageFuelEfficiency =
+    withEfficiency.reduce((sum, d) => sum + d.fuel_efficiency, 0) /
+    withEfficiency.length;
 
-    # 4. Fuel Efficiency per Driver
-    driver_fuel_efficiency = data.groupby('driver_id')['fuel_efficiency'].mean()
+  // Fuel efficiency per driver
+  const driverGroups: Record<number, number[]> = {};
+  withEfficiency.forEach(d => {
+    if (!driverGroups[d.driver_id]) driverGroups[d.driver_id] = [];
+    driverGroups[d.driver_id].push(d.fuel_efficiency);
+  });
+  const driverFuelEfficiency: Record<number, number> = {};
+  Object.entries(driverGroups).forEach(([driverId, effs]) => {
+    driverFuelEfficiency[Number(driverId)] =
+      effs.reduce((sum, e) => sum + e, 0) / effs.length;
+  });
 
-    # 5. Fuel Efficiency Trend Over Time
-    fuel_efficiency_over_time = data.groupby('date')['fuel_efficiency'].mean()
+  // Fuel efficiency over time
+  const dateGroups: Record<string, number[]> = {};
+  withEfficiency.forEach(d => {
+    if (!dateGroups[d.date]) dateGroups[d.date] = [];
+    dateGroups[d.date].push(d.fuel_efficiency);
+  });
+  const fuelEfficiencyOverTime: Record<string, number> = {};
+  Object.entries(dateGroups).forEach(([date, effs]) => {
+    fuelEfficiencyOverTime[date] =
+      effs.reduce((sum, e) => sum + e, 0) / effs.length;
+  });
 
-    # 6. Identify Outlier Drivers
-    Q1 = driver_fuel_efficiency.quantile(0.25)
-    Q3 = driver_fuel_efficiency.quantile(0.75)
-    IQR = Q3 - Q1
-    lower_bound = Q1 - 1.5 * IQR
-    outlier_drivers = driver_fuel_efficiency[driver_fuel_efficiency < lower_bound]
+  // Outlier drivers (using IQR)
+  const effValues = Object.values(driverFuelEfficiency);
+  const sortedEff = [...effValues].sort((a, b) => a - b);
+  const q1 = sortedEff[Math.floor((sortedEff.length / 4))];
+  const q3 = sortedEff[Math.floor((sortedEff.length * 3) / 4)];
+  const iqr = q3 - q1;
+  const lowerBound = q1 - 1.5 * iqr;
+  const outlierDrivers = Object.entries(driverFuelEfficiency)
+    .filter(([_, eff]) => eff < lowerBound)
+    .map(([driverId]) => Number(driverId));
 
-    # 7. Return Analysis Results
-    results = {
-        'average_fuel_efficiency': average_fuel_efficiency,
-        'driver_fuel_efficiency': driver_fuel_efficiency,
-        'fuel_efficiency_over_time': fuel_efficiency_over_time,
-        'outlier_drivers': outlier_drivers
-    }
+  return {
+    averageFuelEfficiency,
+    driverFuelEfficiency,
+    fuelEfficiencyOverTime,
+    outlierDrivers,
+  };
+}
 
-    return results
+const DriverFuelBehavior: React.FC = () => {
+  const analysis = analyzeFuelBehavior(sampleData);
 
-def visualize_fuel_behavior(analysis_results):
-    """
-    Visualizes the fuel behavior analysis results.
+  return (
+    <div className="p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Driver Fuel Behavior Analysis</h2>
+      <div className="mb-2">
+        <strong>Average Fuel Efficiency:</strong>{' '}
+        {analysis.averageFuelEfficiency.toFixed(2)}
+      </div>
+      <div className="mb-4">
+        <strong>Fuel Efficiency per Driver:</strong>
+        <ul className="list-disc ml-6">
+          {Object.entries(analysis.driverFuelEfficiency).map(([driverId, eff]) => (
+            <li key={driverId}>
+              Driver {driverId}: {eff.toFixed(2)}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="mb-4">
+        <strong>Fuel Efficiency Over Time:</strong>
+        <ul className="list-disc ml-6">
+          {Object.entries(analysis.fuelEfficiencyOverTime).map(([date, eff]) => (
+            <li key={date}>
+              {date}: {eff.toFixed(2)}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <strong>Outlier Drivers (Low Fuel Efficiency):</strong>
+        {analysis.outlierDrivers.length > 0 ? (
+          <ul className="list-disc ml-6">
+            {analysis.outlierDrivers.map(driverId => (
+              <li key={driverId}>Driver {driverId}</li>
+            ))}
+          </ul>
+        ) : (
+          <span> None</span>
+        )}
+      </div>
+    </div>
+  );
+};
 
-    Args:
-        analysis_results (dict): A dictionary containing the analysis results
-                                  from the analyze_fuel_behavior function.
-    """
-
-    # 1. Plot Driver Fuel Efficiency
-    plt.figure(figsize=(12, 6))
-    sns.barplot(x=analysis_results['driver_fuel_efficiency'].index,
-                y=analysis_results['driver_fuel_efficiency'].values)
-    plt.xlabel('Driver ID')
-    plt.ylabel('Average Fuel Efficiency')
-    plt.title('Fuel Efficiency per Driver')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
-
-    # 2. Plot Fuel Efficiency Trend Over Time
-    plt.figure(figsize=(12, 6))
-    analysis_results['fuel_efficiency_over_time'].plot()
-    plt.xlabel('Date')
-    plt.ylabel('Average Fuel Efficiency')
-    plt.title('Fuel Efficiency Trend Over Time')
-    plt.tight_layout()
-    plt.show()
-
-    # 3. Display Outlier Drivers
-    if not analysis_results['outlier_drivers'].empty:
-        print("Outlier Drivers (Low Fuel Efficiency):")
-        print(analysis_results['outlier_drivers'])
-    else:
-        print("No outlier drivers detected.")
-
-if __name__ == '__main__':
-    # Create sample data (replace with your actual data)
-    data = pd.DataFrame({
-        'driver_id': [1, 1, 2, 2, 3, 3, 4, 4, 5, 5],
-        'date': ['2023-01-01', '2023-01-02', '2023-01-01', '2023-01-02', '2023-01-01', '2023-01-02', '2023-01-01', '2023-01-02', '2023-01-01', '2023-01-02'],
-        'distance': [100, 120, 150, 130, 80, 90, 200, 180, 50, 60],
-        'fuel_consumed': [10, 12, 15, 13, 8, 9, 20, 18, 10, 30]
-    })
-
-    # Analyze fuel behavior
-    analysis_results = analyze_fuel_behavior(data)
-
-    # Visualize the results
-    visualize_fuel_behavior(analysis_results)
-
-    # Print average fuel efficiency
-    print(f"Average Fuel Efficiency: {analysis_results['average_fuel_efficiency']:.2f}")
+export default DriverFuelBehavior;

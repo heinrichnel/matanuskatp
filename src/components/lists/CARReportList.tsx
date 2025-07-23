@@ -13,8 +13,8 @@ import Button from '../ui/Button';
 import { Input, Select } from '../ui/FormElements';
 
 // ─── Custom Components ───────────────────────────────────────────
-import CARReportForm from './CARReportForm';
-import CARReportDetails from './CARReportDetails';
+import CARReportForm from '../forms/CARReportForm';
+import CARReportDetails from '../Adminmangement/CARReportDetails';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
@@ -252,7 +252,7 @@ const CARReportList: React.FC = () => {
             <Button
               size="sm"
               variant="outline"
-              onClick={onClick}
+              onClick={() => {}}
               icon={<Filter className="w-4 h-4" />}
             >
               Clear Filters
@@ -450,7 +450,7 @@ const CARReportList: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={onClick}
+                          onClick={() => {}}
                           icon={<Eye className="w-3 h-3" />}
                         >
                           View
@@ -459,7 +459,7 @@ const CARReportList: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={onClick}
+                          onClick={() => {}}
                           icon={<Edit className="w-3 h-3" />}
                         >
                           Edit
@@ -468,7 +468,7 @@ const CARReportList: React.FC = () => {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={onClick}
+                          onClick={() => {}}
                           icon={<Download className="w-3 h-3" />}
                         >
                           PDF
@@ -477,7 +477,7 @@ const CARReportList: React.FC = () => {
                         <Button
                           size="sm"
                           variant="danger"
-                          onClick={onClick}
+                          onClick={() => {}}
                           icon={<Trash2 className="w-3 h-3" />}
                         >
                           Delete
