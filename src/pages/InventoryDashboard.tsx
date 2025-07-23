@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-// Firestore imports available for future implementation
-// import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
-// import { db } from '../../firebase';
+import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { db } from '../../firebase';
 import { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Package, AlertTriangle, TrendingUp, TrendingDown, Search, Filter, RefreshCw, Clock, Truck, ShoppingBag } from 'lucide-react';
 
