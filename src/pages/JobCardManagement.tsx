@@ -4,7 +4,7 @@ import Button from '../components/ui/Button';
 import { FileText, ClipboardCheck, Wrench, Plus, Search, Filter } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
 import JobCardKanbanBoard from './JobCardKanbanBoard';
-import JobCard from './JobCard';
+import JobCard from '../components/Models/Workshop/JobCard';
 import Modal from '../components/ui/Modal';
 
 interface JobCardManagementProps {

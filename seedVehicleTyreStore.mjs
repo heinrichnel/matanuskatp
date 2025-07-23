@@ -32,6 +32,59 @@ try {
 getFirestore();
 // --- DIE HELE TYRE MAPPING DATA, ALLES IN EEN ---
 const mappingData: {
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore
+
+def seed_firestore(json_data, collection_name, cred_path="path/to/your/serviceAccountKey.json"):
+    """
+    Seeds Firestore with data from a JSON-like structure.
+
+    Args:
+        json_data (dict or list of dict): The data to seed. If it's a list, each item will be a document.
+                                          If it's a dict, it will be a single document.
+        collection_name (str): The name of the Firestore collection.
+        cred_path (str, optional): Path to the Firebase service account key JSON file.
+                                     Defaults to "path/to/your/serviceAccountKey.json".  Replace with your actual path.
+    """
+    try:
+        cred = credentials.Certificate(cred_path)
+        firebase_admin.initialize_app(cred)
+    except ValueError:
+        # Handle the case where the app is already initialized
+        pass
+
+    db = firestore.client()
+
+    if isinstance(json_data, list):
+        for i, doc_data in enumerate(json_data):
+            db.collection(collection_name).document(str(i)).set(doc_data)
+    elif isinstance(json_data, dict):
+        db.collection(collection_name).document().set(json_data) # Firestore generates the document ID
+    else:
+        print("Unsupported data format. Provide a dict or list of dicts.")
+        return
+
+
+if __name__ == '__main__':
+    # Example Usage (Replace with your data and file path)
+    example_data_list = [
+        {"name": "Alice", "age": 30, "city": "New York"},
+        {"name": "Bob", "age": 25, "city": "Los Angeles"},
+        {"name": "Charlie", "age": 35, "city": "Chicago"}
+    ]
+
+    example_data_single = {
+        "product_name": "Example Product",
+        "price": 99.99,
+        "description": "This is an example product."
+    }
+
+
+    seed_firestore(example_data_list, "users", cred_path="path/to/your/serviceAccountKey.json")
+    seed_firestore(example_data_single, "products", cred_path="path/to/your/serviceAccountKey.json")
+    print("Firestore seeding completed.")
+
   RegistrationNo: string;
   StoreName: string;
   TyrePosDescription: string;

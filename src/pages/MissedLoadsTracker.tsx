@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 
 // ─── Types & Constants ───────────────────────────────────────────
-import { MissedLoad, MISSED_LOAD_REASONS, CLIENTS } from '../../types';
+import { MissedLoad } from '../types';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
 // ─── UI Components ───────────────────────────────────────────────
