@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { Input, Select, TextArea } from '../ui/FormElements';
+import { input, Select, TextArea } from '../ui/FormElements';
 import { useAppContext } from '../../context/AppContext';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 import { AlertTriangle, CheckCircle, Printer, FileText, TrendingDown, Save, X } from 'lucide-react';

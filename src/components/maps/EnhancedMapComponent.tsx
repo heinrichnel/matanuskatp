@@ -64,7 +64,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [searchResults, setSearchResults] = useState<Location[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
-  const [loadError, setLoadError] = useState<Error | null>(null);
+  // Removed unused loadError state
 
   useLoadGoogleMaps();
 
@@ -113,24 +113,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
     }
   };
 
-  // Render error state if loading fails
-  const renderErrorState = () => (
-    <div className="flex items-center justify-center h-[400px] bg-red-50 rounded-md border border-red-200">
-      <div className="text-center p-4">
-        <div className="text-red-500 text-xl mb-2">⚠️</div>
-        <h3 className="text-lg font-medium text-red-700 mb-1">Map Loading Error</h3>
-        <p className="text-sm text-red-600 mb-3">
-          {loadError?.message || 'Failed to load the Google Maps API. Please check your internet connection and try again.'}
-        </p>
-        <button
-          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          onClick={() => {}}
-        >
-          Retry
-        </button>
-      </div>
-    </div>
-  );
+  // Removed unused renderErrorState function and related code
 
   // Handle map load
   const handleMapLoad = (map: google.maps.Map) => {
@@ -176,8 +159,6 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
             <p>Loading map...</p>
           </div>
         </div>
-      ) : loadError ? (
-        renderErrorState()
       ) : (
         <GoogleMap
           mapContainerStyle={containerStyle}

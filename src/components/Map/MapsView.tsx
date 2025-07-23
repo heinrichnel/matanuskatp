@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getEnvVar } from '../../utils/envUtils';
+import { EnvVar } from '../utils/envUtils';
 
 const MapsView: React.FC = () => {
   // Use direct Wialon link with token
@@ -45,7 +45,7 @@ const MapsView: React.FC = () => {
           />
           <div className="absolute top-4 right-4 z-10">
             <button
-              onClick={onClick}
+              onClick={openWialonInNewWindow}
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
               title="Open in new window"
             >
@@ -62,7 +62,7 @@ const MapsView: React.FC = () => {
             </span>
           </div>
           <button
-            onClick={onClick}
+            onClick={openWialonInNewWindow}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             Open Wialon in new window

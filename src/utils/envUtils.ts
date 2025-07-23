@@ -19,12 +19,12 @@ export const getEnvVar = (key: string, fallback: string = ''): string => {
   
   // For Vite's import.meta.env context (modern ES modules)
   try {
-    // @ts-ignore - import.meta might not be available in all contexts
+    // @ts-expect-error - import.meta might not be available in all contexts
     if (import.meta?.env) {
-      // @ts-ignore
+      // @ts-expect-error import.meta.env may not be typed in all contexts
       return import.meta.env[key] || fallback;
     }
-  } catch (e) {
+  } catch {
     // Silently fail if import.meta is not available
   }
   
@@ -33,7 +33,7 @@ export const getEnvVar = (key: string, fallback: string = ''): string => {
     if (typeof process !== 'undefined' && process.env) {
       return process.env[key] || fallback;
     }
-  } catch (e) {
+  } catch {
     // Silently fail if process is not available
   }
   
