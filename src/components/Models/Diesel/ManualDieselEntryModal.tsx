@@ -1,6 +1,6 @@
 // ─── // ─── UI Components ───────────────────────────────────────────────────
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
+import Modal from '../../../components/ui/Modal';
+import Button from '../../../components/ui/Button';
 import { Input, Select, TextArea } from '../ui/FormElements';
 import FleetSelector from '../common/FleetSelector';
 import React, { useState, useEffect } from 'react';
