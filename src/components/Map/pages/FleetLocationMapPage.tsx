@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ChangeEvent } from 'react';
+import React, { useState, useEffect } from 'react';
 import EnhancedMapComponent from '../../maps/EnhancedMapComponent';
 import { Location } from '../../types/mapTypes';
 import { useFleetList } from '../../../hooks/useFleetList';

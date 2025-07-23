@@ -185,7 +185,7 @@ const FlagsInvestigations: React.FC<FlagsInvestigationsProps> = (props) => {
                       <div className="flex justify-end space-x-2">
                         <Button size="sm" variant="outline" icon={<Eye className="w-3 h-3" />} onClick={() => {}}>View</Button>
                         {canResolve ? (
-                          <Button size="sm" onClick={() => {}} icon={<Edit className="w-3 h-3" />}>Resolve Flag</Button>
+                          <Button size="sm" onClick={() => handleOpenResolution(cost)} icon={<Edit className="w-3 h-3" />}>Resolve Flag</Button>
                         ) : (
                           <div className="flex items-center space-x-2 text-sm text-green-600">
                             <CheckCircle className="w-4 h-4" />

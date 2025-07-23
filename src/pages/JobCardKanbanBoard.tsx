@@ -162,7 +162,7 @@ const JobCardKanbanBoard: React.FC = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            onClick={onClick}
+                            onClick={() => handleCardClick(card.id)}
                             className={snapshot.isDragging ? 'opacity-50' : ''}
                           >
                             <JobCardCard jobCard={card} />
