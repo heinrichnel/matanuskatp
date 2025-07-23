@@ -45,7 +45,7 @@ const checkEnvVars = () => {
   // In production, only warn about missing vars
   if (!import.meta.env.DEV) {
     const missing = Object.entries(vars)
-      .filter(([_, status]) => status === '✗ Missing')
+      .filter(([_ , status]) => status === '✗ Missing')
       .map(([key]) => key);
       
     if (missing.length > 0) {

@@ -29,7 +29,7 @@ try {
   envKeys.forEach(key => {
     try {
       envVars[key] = getEnvVar(key, '');
-    } catch (e) {
+    } catch {
       console.warn(`Could not access ${key} from import.meta.env`);
     }
   });
@@ -62,7 +62,7 @@ const renderApp = (isDev: boolean) => {
 
 // Initialize Firebase and check emulator status
 const initializeApp = async () => {
-  let isDev = getEnvVar('MODE', '') === 'development' || process.env.NODE_ENV === 'development';
+  const isDev = getEnvVar('MODE', '') === 'development' || process.env.NODE_ENV === 'development';
   
   try {
     // Import Firebase after ensuring proper initialization

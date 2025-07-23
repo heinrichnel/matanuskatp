@@ -8,7 +8,7 @@ import { CostEntry } from '../../../types';
 import Modal from '../../ui/Modal';
 import Button from '../../ui/Button';
 import { Input, TextArea } from '../../ui/FormElements';
-import FileUpload from '../../ui/FileUpload';
+import { FileUpload } from '../../ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 // ─── Utilities ───────────────────────────────────────────────────
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import { formatCurrency, formatDate } from '../../../utils/helpers';
 
 
 interface FlagResolutionModalProps {
