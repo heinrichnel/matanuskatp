@@ -4,7 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Select } from '../components/ui/FormElements';
-import FlagResolutionModal from './FlagResolutionModal';
+import FlagResolutionModal from '../components/Models/Flags/FlagResolutionModal';
 import { AlertTriangle, Eye, CheckCircle, Clock, Play, Flag, Upload, Edit, XCircle, X } from 'lucide-react';
 import { formatCurrency, formatDate, getAllFlaggedCosts } from '../utils/helpers';
 

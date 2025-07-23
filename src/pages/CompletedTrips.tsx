@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { SupportedCurrency, formatCurrency } from '../../lib/currency';
+import { SupportedCurrency, formatCurrency } from '../lib/currency';
 
 interface Trip {
   id: string;
