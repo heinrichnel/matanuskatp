@@ -492,7 +492,7 @@ const CARReportForm: React.FC<CARReportFormProps> = ({
             Cancel
           </Button>
           <Button
-            onClick={onClick}
+            onClick={handleSubmit}
             icon={<Save className="w-4 h-4" />}
           >
             {formData.status === 'draft' ? 'Save Draft' : 'Submit Report'}

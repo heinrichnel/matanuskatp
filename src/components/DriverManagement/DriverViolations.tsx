@@ -106,7 +106,7 @@ const mockViolations = [
 ];
 
 const DriverViolations: React.FC = () => {
-  const [violations, setViolations] = useState(mockViolations);
+  const [violations] = useState(mockViolations);
   const [selectedSeverity, setSelectedSeverity] = useState<string>('all');
   
   // Filter violations based on selected severity
@@ -445,7 +445,7 @@ const DriverViolations: React.FC = () => {
                     return acc;
                   }, {} as Record<string, any>)
                 )
-                .filter(([_, data]) => data.count > 1)
+                .filter(([, data]) => data.count > 1)
                 .sort((a, b) => b[1].count - a[1].count)
                 .map(([driverId, data]) => {
                   // Find most common violation type
