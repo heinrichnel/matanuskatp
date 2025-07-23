@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs'; 
 import { Truck, User, ClipboardList, Map } from 'lucide-react';
-import DriverBehaviorPage from '../../pages/drivers/DriverBehaviorPage';
+import DriverBehaviorPage from './drivers/DriverBehaviorPage';
 import MissedLoadsTracker from '../../components/TripManagement/MissedLoadsTracker';
 import DieselDashboard from '../../components/DieselManagement/DieselDashboard';
 import MapsView from '../../components/maps/MapsView';

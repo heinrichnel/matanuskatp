@@ -407,7 +407,7 @@ export const sidebarConfig: SidebarItem[] = [
         id: 'driver-behavior', 
         label: 'Behavior Monitoring', 
         path: '/drivers/behavior', 
-        component: 'pages/drivers/DriverBehaviorEvents' 
+        component: 'pages/drivers/DriverBehaviorPage' 
       },
       {
         id: 'safety-scores',
@@ -418,10 +418,10 @@ export const sidebarConfig: SidebarItem[] = [
     ]
   },
   
-  // Compliance Section
+  // Compliance Management Section
   {
     id: 'compliance',
-    label: 'Compliance',
+    label: 'Compliance Management',
     path: '/compliance',
     component: 'pages/compliance/ComplianceManagementPage',
     icon: 'clipboard-check',
@@ -442,8 +442,8 @@ export const sidebarConfig: SidebarItem[] = [
         id: 'safety-inspections', 
         label: 'Safety Inspections', 
         path: '/compliance/safety-inspections', 
-        component: 'components/Workshop Management/InspectionList',
-        subComponents: ['components/Workshop Management/InspectionReportForm']
+        component: 'pages/compliance/SafetyInspectionsPage',
+        subComponents: ['components/workshop/InspectionList', 'components/workshop/InspectionReportForm']
       },
       { 
         id: 'incident-reports', 
@@ -478,10 +478,10 @@ export const sidebarConfig: SidebarItem[] = [
     ]
   },
   
-  // Analytics Section
+  // Fleet Analytics Section
   {
     id: 'analytics',
-    label: 'Analytics',
+    label: 'Fleet Analytics',
     path: '/analytics',
     component: 'pages/analytics/FleetAnalyticsPage',
     icon: 'chart-line',
@@ -534,7 +534,7 @@ export const sidebarConfig: SidebarItem[] = [
   // Workshop Section
   {
     id: 'workshop',
-    label: 'Workshop',
+    label: 'Workshop Management',
     path: '/workshop',
     component: 'pages/workshop/WorkshopPage',
     icon: 'wrench',
@@ -544,7 +544,7 @@ export const sidebarConfig: SidebarItem[] = [
         label: 'Fleet Setup', 
         path: '/workshop/fleet-setup', 
         component: 'pages/workshop/FleetTable',
-        subComponents: ['components/Workshop Management/FleetSelector', 'components/Workshop Management/FleetFormModal']
+        subComponents: ['components/workshop/FleetSelector', 'components/workshop/FleetFormModal']
       },
       {
         id: 'maintenance-scheduler',
@@ -863,7 +863,7 @@ export const sidebarConfig: SidebarItem[] = [
     id: 'driver-violations', 
     label: 'Driver Violations', 
     path: '/drivers/violations', 
-    component: 'components/DriverManagement/DriverBehaviorEvents' 
+    component: 'pages/drivers/DriverBehaviorPage' 
   },
   { 
     id: 'driver-behavior-analytics', 
@@ -912,42 +912,35 @@ export const sidebarConfig: SidebarItem[] = [
     id: 'qr-generator', 
     label: 'QR Generator', 
     path: '/workshop/qr-generator', 
-    component: 'components/Workshop Management/QRGenerator' 
+    component: 'pages/workshop/QRGenerator' 
   },
   { 
     id: 'workshop-inspections', 
     label: 'Inspections', 
     path: '/workshop/inspections', 
-    component: 'components/Workshop Management/InspectionList',
-    subComponents: ['components/Workshop Management/InspectionForm']
+    component: 'pages/workshop/InspectionHistoryPage',
+    subComponents: ['components/workshop/InspectionList', 'components/workshop/InspectionForm']
   },
   { 
     id: 'job-cards', 
     label: 'Job Cards', 
     path: '/workshop/job-cards', 
-    component: 'components/Workshop Management/JobCardManagement',
-    subComponents: ['components/Workshop Management/JobCardKanbanBoard']
+    component: 'pages/workshop/JobCardManagement',
+    subComponents: ['components/workshop/JobCardKanbanBoard']
   },
   { 
     id: 'faults', 
     label: 'Faults', 
     path: '/workshop/faults', 
-    component: 'components/Workshop Management/FaultManagement',
-    subComponents: ['components/Workshop Management/FaultTracker']
-  },
-  { 
-    id: 'workshop-tyres', 
-    label: 'Tyres', 
-    path: '/workshop/tyres', 
-    component: 'components/Workshop Management/TyreDashboard',
-    subComponents: ['components/Workshop Management/TyreInspectionModal']
+    component: 'pages/workshop/FaultTracking',
+    subComponents: ['components/workshop/FaultManagement', 'components/workshop/FaultTracker']
   },
   { 
     id: 'workshop-inventory', 
     label: 'Inventory', 
     path: '/workshop/inventory', 
-    component: 'components/Workshop Management/InventoryPanel',
-    subComponents: ['components/Inventory Management/StockManager']
+    component: 'pages/workshop/WorkshopInventoryPage',
+    subComponents: ['components/workshop/StockManager', 'components/inventory/InventoryPanel']
   },
   { 
     id: 'workshop-vendors', 
@@ -959,15 +952,15 @@ export const sidebarConfig: SidebarItem[] = [
     id: 'workshop-analytics', 
     label: 'Analytics', 
     path: '/workshop/analytics', 
-    component: 'components/Workshop Management/WorkshopAnalytics',
-    subComponents: ['components/FleetAnalytics/AnalyticsDashboard']
+    component: 'pages/workshop/WorkshopAnalyticsComp',
+    subComponents: ['components/analytics/AnalyticsDashboard']
   },
   { 
     id: 'workshop-reports', 
     label: 'Reports', 
     path: '/workshop/reports', 
-    component: 'components/Workshop Management/InspectionReportForm',
-    subComponents: ['components/FleetAnalytics/AdHocReportBuilder']
+    component: 'pages/workshop/WorkshopReportsPage',
+    subComponents: ['components/workshop/InspectionReportForm', 'components/analytics/AdHocReportBuilder']
   },
 
   // H. Tyre Management
@@ -990,32 +983,123 @@ export const sidebarConfig: SidebarItem[] = [
     component: 'components/TyreManagement/TyreInventory',
     subComponents: ['components/TyreManagement/TyreInventoryDashboard']
   },
-  { 
-    id: 'tyre-reports', 
-    label: 'Tyre Reports', 
-    path: '/tyres/reports', 
-    component: 'components/TyreManagement/TyreReports',
-    subComponents: ['components/TyreManagement/TyreReportGenerator']
+
+  // Tyre Management Section
+  {
+    id: 'tyres',
+    label: 'Tyre Management',
+    path: '/tyres',
+    component: 'pages/tyres/TyreManagementPage',
+    icon: 'circle-stack',
+    children: [
+      { 
+        id: 'tyre-dashboard', 
+        label: 'Dashboard', 
+        path: '/tyres/dashboard', 
+        component: 'pages/tyres/TyrePerformanceDashboard' 
+      },
+      { 
+        id: 'tyre-inspection', 
+        label: 'Tyre Inspection', 
+        path: '/tyres/inspection', 
+        component: 'pages/tyres/inspection' 
+      },
+      { 
+        id: 'tyre-inventory', 
+        label: 'Tyre Inventory', 
+        path: '/tyres/inventory', 
+        component: 'pages/tyres/inventory' 
+      },
+      {
+        id: 'tyre-add',
+        label: 'Add New Tyre',
+        path: '/tyres/add',
+        component: 'pages/tyres/AddNewTyre'
+      },
+      { 
+        id: 'tyre-reports', 
+        label: 'Tyre Reports', 
+        path: '/tyres/reports', 
+        component: 'pages/tyres/reports' 
+      },
+      {
+        id: 'tyre-stores',
+        label: 'Tyre Stores',
+        path: '/tyres/stores',
+        component: 'pages/tyres/TyreStoresPage'
+      },
+      {
+        id: 'tyre-fleet-map',
+        label: 'Tyre Fleet Map',
+        path: '/tyres/fleet-map',
+        component: 'pages/tyres/TyreFleetMap'
+      },
+      {
+        id: 'tyre-history',
+        label: 'Tyre History',
+        path: '/tyres/history',
+        component: 'pages/tyres/TyreHistoryPage'
+      }
+    ]
   },
 
-  // I. Inventory Management
-  { 
-    id: 'inventory-dashboard', 
-    label: 'Inventory Dashboard', 
-    path: '/inventory', 
-    component: 'components/Inventory Management/InventoryDashboard' 
-  },
-  { 
-    id: 'stock-management', 
-    label: 'Stock Management', 
-    path: '/inventory/stock', 
-    component: 'components/Inventory Management/StockManager' 
-  },
-  { 
-    id: 'inventory-reports', 
-    label: 'Inventory Reports', 
-    path: '/inventory/reports', 
-    component: 'components/Inventory Management/IndirectCostBreakdown' 
+  // Inventory Management Section
+  {
+    id: 'inventory',
+    label: 'Inventory Management',
+    path: '/inventory',
+    component: 'pages/inventory/InventoryPage',
+    icon: 'box',
+    children: [
+      { 
+        id: 'inventory-dashboard', 
+        label: 'Dashboard', 
+        path: '/inventory/dashboard', 
+        component: 'pages/inventory/InventoryDashboard' 
+      },
+      { 
+        id: 'stock-management', 
+        label: 'Stock Management', 
+        path: '/inventory/stock', 
+        component: 'pages/inventory/PartsInventoryPage' 
+      },
+      {
+        id: 'parts-ordering',
+        label: 'Parts Ordering',
+        path: '/inventory/ordering',
+        component: 'pages/inventory/PartsOrderingPage'
+      },
+      {
+        id: 'receive-parts',
+        label: 'Receive Parts',
+        path: '/inventory/receive',
+        component: 'pages/inventory/ReceivePartsPage'
+      },
+      {
+        id: 'purchase-orders',
+        label: 'Purchase Orders',
+        path: '/inventory/purchase-orders',
+        component: 'pages/inventory/PurchaseOrderTracker'
+      },
+      {
+        id: 'vendor-management',
+        label: 'Vendor Management',
+        path: '/inventory/vendors',
+        component: 'pages/inventory/VendorScorecard'
+      },
+      {
+        id: 'stock-alerts',
+        label: 'Stock Alerts',
+        path: '/inventory/alerts',
+        component: 'pages/inventory/StockAlertsPage'
+      },
+      { 
+        id: 'inventory-reports', 
+        label: 'Reports', 
+        path: '/inventory/reports', 
+        component: 'pages/inventory/InventoryReportsPage' 
+      }
+    ]
   }
 ];
 
