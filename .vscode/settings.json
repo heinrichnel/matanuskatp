@@ -139,5 +139,13 @@
   },
 
   // TypeScript Prune setup to exclude test/dev files from dead code analysis
-  "ts-prune.exclude": ["src/dev", "src/unused", "**/*.test.ts", "**/*.spec.ts"]
+  "ts-prune.exclude": [
+    "src/dev",
+    "src/unused",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "chat.instructionsFilesLocations": {
+    ".github/codeagentrules": true
+  }
 }

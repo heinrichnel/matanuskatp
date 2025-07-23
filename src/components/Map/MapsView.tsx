@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { getenvUtils } from '../utils/envUtils';
 
 const MapsView: React.FC = () => {
   // Use direct Wialon link with token
