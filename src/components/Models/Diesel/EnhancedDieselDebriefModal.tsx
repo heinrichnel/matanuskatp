@@ -361,7 +361,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
           <div className="p-4 rounded-md flex items-start space-x-3 bg-green-50 text-green-800 mb-4">
             <CheckCircle className="h-5 w-5 mt-0.5" />
             <p className="flex-1 text-sm font-medium">{success}</p>
-            <button onClick={onClick}}> setSuccess(null)}>
+            <button onClick={() => setSuccess(null)}>
               <X className="h-4 w-4" />
             </button>
           </div>

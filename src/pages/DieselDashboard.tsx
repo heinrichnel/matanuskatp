@@ -24,12 +24,12 @@ import FleetSelector from '../components/common/FleetSelector';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import SyncIndicator from '../components/ui/SyncIndicator';
 import ManualDieselEntryModal from '../components/Models/Diesel/ManualDieselEntryModal';
-import DieselImportModal from './DieselImportModal';
-import DieselNormsModal from './DieselNormsModal';
-import EnhancedDieselDebriefModal from '../misc/EnhancedDieselDebriefModal';
-import EnhancedProbeVerificationModal from '../misc/EnhancedProbeVerificationModal';
-import TripLinkageModal from '../TripManagement/TripLinkageModal';
-import DieselEditModal from './DieselEditModal';
+import DieselImportModal from '../components/Models/Diesel/DieselImportModal';
+import DieselNormsModal from '../components/Models/Diesel/DieselNormsModal';
+import EnhancedDieselDebriefModal from '../components/Models/Diesel/EnhancedDieselDebriefModal';
+import EnhancedProbeVerificationModal from '../components/Models/Diesel/EnhancedProbeVerificationModal';
+import TripLinkageModal from '../components/Models/Trips/TripLinkageModal';
+import DieselEditModal from '../components/Models/Diesel/DieselEditModal';
 
 interface DieselDashboardProps {
   className?: string;
