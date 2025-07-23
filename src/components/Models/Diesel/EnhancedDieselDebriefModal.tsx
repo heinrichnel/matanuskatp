@@ -48,23 +48,12 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
 
   const selectedRecord = records.find(r => r.id === selectedRecordId);
 
-  // Get performance status color
-  const getPerformanceStatusColor = (status: string) => {
-    switch (status) {
-      case 'poor': return 'text-red-600';
-      case 'normal': return 'text-yellow-600';
-      case 'excellent': return 'text-green-600';
-      default: return 'text-gray-600';
-    }
-  };
-
-  // Get efficiency variance color
-  const getVarianceColor = (variance: number) => {
-    if (variance < -15) return 'text-red-600';
-    if (variance < -5) return 'text-amber-600';
-    if (variance > 5) return 'text-green-600';
-    return 'text-blue-600';
-  };
+  // These utility functions are commented out as they're not currently in use
+  // but may be needed for future UI enhancements
+  /* Functions removed as they're not currently being used:
+  const getPerformanceStatusColor = (status: string) => {...}
+  const getVarianceColor = (variance: number) => {...}
+  */
 
   // Handle form submission
   const handleSubmit = async () => {
@@ -140,7 +129,7 @@ const EnhancedDieselDebriefModal: React.FC<EnhancedDieselDebriefModalProps> = ({
       doc.text('Summary:', 14, 30);
       
       // Create table data for records
-      const tableData = records.map((r, index) => {
+      const tableData = records.map(r => {
         // Calculate performance indicators
         const norm = norms.find(n => n.fleetNumber === r.fleetNumber);
         const isReefer = r.isReeferUnit;

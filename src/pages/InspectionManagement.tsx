@@ -46,13 +46,27 @@ const InspectionManagement: React.FC<InspectionManagementProps> = ({ status = 'a
           <Button
             variant="outline"
             icon={<RefreshCw className="w-4 h-4" />}
-            onClick={onClick}
+            onClick={() => {
+              try {
+                // Refresh logic here
+                console.log('Refreshing inspections');
+              } catch (err) {
+                handleError(`Failed to refresh inspections: ${err instanceof Error ? err.message : 'Unknown error'}`);
+              }
+            }}
           >
             Refresh
           </Button>
           <Button
             icon={<Plus className="w-4 h-4" />}
-            onClick={onClick}
+            onClick={() => {
+              try {
+                // New inspection logic here
+                console.log('Creating new inspection');
+              } catch (err) {
+                handleError(`Failed to create new inspection: ${err instanceof Error ? err.message : 'Unknown error'}`);
+              }
+            }}
           >
             New Inspection
           </Button>
