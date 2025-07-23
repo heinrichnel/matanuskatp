@@ -77,7 +77,7 @@ function analyzeFuelBehavior(data: DriverFuelData[]): FuelAnalysis {
   const iqr = q3 - q1;
   const lowerBound = q1 - 1.5 * iqr;
   const outlierDrivers = Object.entries(driverFuelEfficiency)
-    .filter(([_, eff]) => eff < lowerBound)
+    .filter(([, eff]) => eff < lowerBound)
     .map(([driverId]) => Number(driverId));
 
   return {
