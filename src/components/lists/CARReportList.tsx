@@ -13,8 +13,8 @@ import Button from '../ui/Button';
 import { Input, Select } from '../ui/FormElements';
 
 // ─── Custom Components ───────────────────────────────────────────
-import CARReportForm from '../forms/CARReportForm';
-import CARReportDetails from '../Adminmangement/CARReportDetails';
+import CARReportForm from './CARReportForm';
+import CARReportDetails from './CARReportDetails';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {

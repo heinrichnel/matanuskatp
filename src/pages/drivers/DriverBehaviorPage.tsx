@@ -5,9 +5,9 @@ import { useDriverBehavior } from '../../context/DriverBehaviorContext';
 import Button from '../../components/ui/Button';
 import DriverPerformanceOverview from '../../components/DriverManagement/PerformanceAnalytics';
 import DriverBehaviorEventForm from '../../components/forms/DriverBehaviorEventForm';
-import DriverBehaviorEventDetails from '../../components/DriverManagement/DriverBehaviorEventDetails'
-import CARReportForm from '../../components/forms/CARReportForm';
-import CARReportList from '../../components/lists/CARReportList';
+import DriverBehaviorEventDetails from '../../components/DriverManagement/DriverBehaviorEventDetails';
+import CARReportForm from '../../components/ComplianceSafety/CARReportForm';
+import CARReportList from '../../components/ComplianceSafety/CARReportList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
 import { 
   User, 

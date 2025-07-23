@@ -6,7 +6,6 @@ import { formatCurrency } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
-import { getAllDieselNorms } from '../../components/Models/Diesel/DieselModel';
 import { 
   Fuel,
   TrendingUp,
@@ -24,7 +23,7 @@ interface DieselManagementPageProps {
 }
 
 const DieselManagementPage: React.FC<DieselManagementPageProps> = ({ className = '' }) => {
-  const { dieselRecords, getAllDieselNorms, isLoading } = useAppContext();
+  const { dieselRecords, dieselNorms, isLoading } = useAppContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   
