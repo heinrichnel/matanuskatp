@@ -20,7 +20,7 @@ import {
   RefreshCw,
   Edit
 } from 'lucide-react';
-import FleetSelector from '../common/FleetSelector';
+import FleetSelector from '../components/common/FleetSelector';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import SyncIndicator from '../components/ui/SyncIndicator';
 import ManualDieselEntryModal from '../misc/ManualDieselEntryModal';
