@@ -14,7 +14,7 @@ import {
 } from '../../utils/mapConfig';
 import { useLoadGoogleMaps, isGoogleMapsAPILoaded } from '../../utils/googleMapsLoader';
 import { initPlacesService, searchPlacesByText, placeToLocation } from '../../utils/placesService';
-import RouteDrawer from './RouteDrawer';
+import RouteDrawer from '../Models/RouteDrawer';
 import LocationDetailPanel from './LocationDetailPanel';
 
 interface EnhancedMapProps {

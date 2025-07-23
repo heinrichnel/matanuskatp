@@ -39,7 +39,7 @@ export default {
 
     // 🧼 Algemene fixes (maar hou styl uit)
     "react/prop-types": "off", // jy gebruik waarskynlik TypeScript
-    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/no-empty-function": "on",
     "@typescript-eslint/no-explicit-any": "off"
   },
   settings: {

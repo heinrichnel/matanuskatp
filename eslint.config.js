@@ -45,7 +45,7 @@ export default [
       'no-unused-vars': 'warn',
       // Disable TypeScript-specific rules for JavaScript files
       '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-require-imports': 'on',
       '@typescript-eslint/no-var-requires': 'off'
     }
   },
