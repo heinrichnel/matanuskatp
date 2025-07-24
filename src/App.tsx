@@ -405,6 +405,19 @@ const App: React.FC = () => {
                       <Route path="/drivers/safety-scores" element={<GenericPlaceholderPage title="Safety Scores" />} />
                       <Route path="/drivers/dashboard" element={<DriverDashboard />} />
 
+                      {/* === WORKSHOP === */}
+                      <Route path="/workshop" element={<WorkshopPage />} />
+                      <Route path="/workshop/vendors" element={<VendorPage />} />
+                      <Route path="/workshop/purchase-orders" element={<PurchaseOrderPage />} />
+                      <Route path="/workshop/fleet-setup" element={<FleetTable />} />
+                      <Route path="/workshop/qr-generator" element={<QRGenerator />} />
+                      <Route path="/workshop/inspections" element={<InspectionHistoryPage />} />
+                      <Route path="/workshop/job-cards" element={<JobCardManagement />} />
+                      <Route path="/workshop/faults" element={<FaultTracking />} />
+                      <Route path="/workshop/tyres" element={<TyreManagement />} />
+                      <Route path="/workshop/parts-ordering" element={<PartsOrderingPage />} />
+                      <Route path="/workshop/vehicle-inspection" element={<VehicleInspectionPage />} />
+
                       {/* === EXAMPLES === */}
                       <Route path="/examples/clients" element={<ClientSelectionExample />} />
 
