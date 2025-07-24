@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { format } from 'date-fns';
-import Button from "../ui/Button";
-import Card, { CardContent } from "../ui/Card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/Tabs";
+import Button from "../../ui/Button";
+import Card, { CardContent } from "../../ui/Card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "../../ui/Tabs";
 import { Printer, Download, Edit2, Check, X, FileText } from "lucide-react";
 import { RCAModal, RCAEntry } from "./RCAModal";
 

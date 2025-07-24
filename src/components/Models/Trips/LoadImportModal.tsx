@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { useAppContext } from '../../context/AppContext';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
+import { useAppContext } from '../../../context/AppContext';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
 import { Upload, X, WifiOff, RefreshCw, FileSpreadsheet, AlertTriangle, CheckCircle } from 'lucide-react';
-import { useSyncContext } from '../../context/SyncContext';
+import { useSyncContext } from '../../../context/SyncContext';
 // Import fleet vehicles data
 const FLEET_VEHICLES = [
   { registrationNo: 'ABC123GP', fleetNo: 'TRK001' },

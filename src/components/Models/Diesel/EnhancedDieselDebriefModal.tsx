@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Select, TextArea } from '../ui/FormElements';
-import { useAppContext } from '../../context/AppContext';
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { Select, TextArea } from '../../ui/FormElements';
+import { useAppContext } from '../../../context/AppContext';
+import { formatCurrency, formatDate } from '../../../utils/helpers';
 import { AlertTriangle, CheckCircle, Printer, FileText, TrendingDown, Save, X } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
-import { DieselConsumptionRecord } from '../../types';
+import { DieselConsumptionRecord } from '../../../types';
 
 interface EnhancedDieselDebriefModalProps {
   isOpen: boolean;

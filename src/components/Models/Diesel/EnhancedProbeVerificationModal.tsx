@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Input, TextArea } from '../ui/FormElements';
-import { useAppContext } from '../../context/AppContext';
-import { formatDate } from '../../utils/helpers';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { Input, TextArea } from '../../ui/FormElements';
+import { useAppContext } from '../../../context/AppContext';
+import { formatDate } from '../../../utils/helpers';
 import { CheckCircle, X, AlertTriangle, Info } from 'lucide-react';
-import { FLEETS_WITH_PROBES, DieselConsumptionRecord } from '../../types';
-import { addAuditLogToFirebase } from '../../firebase';
+import { FLEETS_WITH_PROBES, DieselConsumptionRecord } from '../../../types';
+import { addAuditLogToFirebase } from '../../../firebase';
 
 interface EnhancedProbeVerificationModalProps {
   isOpen: boolean;

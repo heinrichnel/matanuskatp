@@ -2,13 +2,13 @@
 import React, { useState } from 'react';
 
 // ─── Types & Constants ───────────────────────────────────────────
-import { Trip, TripDeletionRecord, TRIP_DELETION_REASONS } from '../../types';
-import { formatCurrency, calculateTotalCosts } from '../../utils/helpers';
+import { Trip, TripDeletionRecord, TRIP_DELETION_REASONS } from '../../../types';
+import { formatCurrency, calculateTotalCosts } from '../../../utils/helpers';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Select, Textarea } from '../ui/FormElements';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { Select, Textarea } from '../../ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import { Trash2, X, AlertTriangle, Shield } from 'lucide-react';

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Input, TextArea } from '../ui/FormElements';
-import { useAppContext } from '../../context/AppContext';
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { Input, TextArea } from '../../ui/FormElements';
+import { useAppContext } from '../../../context/AppContext';
+import { formatCurrency, formatDate } from '../../../utils/helpers';
 import { CheckCircle, X, Save, AlertTriangle, Info, RefreshCw, Database } from 'lucide-react';
-import { FLEETS_WITH_PROBES } from '../../types';
-import { addAuditLogToFirebase } from '../../firebase';
-import { getVehicleSensorData, getTotalFuelLevel, isSensorDataRecent, FuelTankData, VehicleSensorData } from '../../utils/wialonSensorData';
+import { FLEETS_WITH_PROBES } from '../../../types';
+import { addAuditLogToFirebase } from '../../../firebase';
+import { getVehicleSensorData, getTotalFuelLevel, isSensorDataRecent, FuelTankData, VehicleSensorData } from '../../../utils/wialonSensorData';
 
 interface AutomaticProbeVerificationModalProps {
   isOpen: boolean;

@@ -2,18 +2,18 @@
 import React, { useState } from 'react';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { Trip } from '../../types';
+import { Trip } from '../../../types';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Input, Select, Textarea } from '../ui/FormElements';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { Input, Select, Textarea } from '../../ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import { Save, X } from 'lucide-react';
 
 // ─── Utils ───────────────────────────────────────────────────────
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import { formatCurrency, formatDate } from '../../../utils/helpers';
 
 
 interface InvoiceFollowUpModalProps {

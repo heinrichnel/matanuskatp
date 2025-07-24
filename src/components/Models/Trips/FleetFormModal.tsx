@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Input, Select, TextArea } from '../ui/FormElements';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { Input, Select, TextArea } from '../../ui/FormElements';
 import { Save, X, Truck } from 'lucide-react';
 
 interface Fleet {

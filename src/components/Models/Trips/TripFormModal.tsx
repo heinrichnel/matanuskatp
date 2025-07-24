@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../../ui/Modal';
 import TripForm from '../../forms/TripForm';
-import { Trip } from '../../types';
+import { Trip } from '../../../types';
 import { useAppContext } from '../../../context/AppContext';
 import { AlertTriangle } from 'lucide-react';
 

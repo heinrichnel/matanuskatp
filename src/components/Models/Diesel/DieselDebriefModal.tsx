@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 // ─── Types ───────────────────────────────────────────────────────
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import Card, { CardContent } from '../ui/Card';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import Card, { CardContent } from '../../ui/Card';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
@@ -19,7 +19,7 @@ import {
   Printer} from 'lucide-react';
 
 // ─── Utilities ───────────────────────────────────────────────────
-import { formatDate } from '../../utils/helpers';
+import { formatDate } from '../../../utils/helpers';
 import jsPDF from 'jspdf';
 
 

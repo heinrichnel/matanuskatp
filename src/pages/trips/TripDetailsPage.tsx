@@ -6,7 +6,6 @@ import { Card, CardHeader, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import {
   ArrowLeft,
-  Truck,
   Calendar,
   MapPin,
   FileText,

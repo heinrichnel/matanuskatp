@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, query, getDocs, where, orderBy, limit, Timestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '../../../firebase';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer, ScatterChart, Scatter, ZAxis
