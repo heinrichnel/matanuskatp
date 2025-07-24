@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { QrCode, ArrowLeft, Clipboard } from 'lucide-react';
 import QRScanner from '../../components/WorkshopManagement/QRScanner';
-import { useAppContext } from '../../context/AppContext';
 import { useToast } from '../../hooks/useToast';
 
 const QRScannerPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
-  const appContext = useAppContext(); // Initialized for future use
+  // Removed unused context
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [scanHistory, setScanHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);

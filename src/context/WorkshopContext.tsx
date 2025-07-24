@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getFirestore, collection, query, onSnapshot, doc, addDoc, updateDoc, deleteDoc, where, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, onSnapshot, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 
 // Define types for Workshop items
