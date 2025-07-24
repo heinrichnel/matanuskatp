@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useWorkshop, Vendor } from '../../context/WorkshopContext';
 import { Card, CardContent } from '../../components/ui';
+import { ArrowDownToLine, ArrowUpFromLine, Search, Plus, FileText } from 'lucide-react';
+import Papa from 'papaparse';
 
 const VendorPage: React.FC = () => {
   const { vendors, addVendor, updateVendor, deleteVendor, isLoading, errors } = useWorkshop();
@@ -18,6 +20,13 @@ const VendorPage: React.FC = () => {
   });
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importResults, setImportResults] = useState<{
+    success: number;
+    failed: number;
+    errors: string[];
+  } | null>(null);
   
   const resetForm = () => {
     setFormData({
@@ -95,25 +104,197 @@ const VendorPage: React.FC = () => {
       vendor.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())
   );
   
+  // Export vendors to CSV
+  const handleExportCSV = () => {
+    const csvData = vendors.map(vendor => ({
+      vendorId: vendor.vendorId,
+      vendorName: vendor.vendorName,
+      contactPerson: vendor.contactPerson,
+      workEmail: vendor.workEmail,
+      mobile: vendor.mobile,
+      address: vendor.address,
+      city: vendor.city
+    }));
+    
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `vendors_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Handle file selection for import
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImportFile(file);
+    }
+  };
+
+  // Download CSV template
+  const downloadTemplate = () => {
+    const templateData = [
+      {
+        vendorId: 'V001',
+        vendorName: 'Sample Vendor Inc.',
+        contactPerson: 'John Doe',
+        workEmail: 'john@samplevendor.com',
+        mobile: '+1234567890',
+        address: '123 Sample Street',
+        city: 'Sample City'
+      }
+    ];
+    
+    const csv = Papa.unparse(templateData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'vendors_template.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Handle CSV import
+  const handleImportCSV = () => {
+    if (!importFile) return;
+    
+    Papa.parse(importFile, {
+      header: true,
+      complete: async (results) => {
+        const records = results.data as Partial<Vendor>[];
+        
+        try {
+          // Use the context function to import vendors
+          const results = await importVendorsFromCSV(records);
+          setImportResults(results);
+        } catch (error) {
+          console.error('Error importing vendors:', error);
+          alert('Failed to import vendors. Please try again.');
+        }
+      },
+      error: (error) => {
+        console.error('Error parsing CSV:', error);
+        alert('Failed to parse CSV file. Please check the format.');
+      }
+    });
+  };
+  
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* CSV Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-4">Import Vendors from CSV</h2>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                CSV File
+              </label>
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileChange}
+                className="w-full border border-gray-300 rounded px-3 py-2"
+              />
+            </div>
+            
+            {importResults && (
+              <div className="mb-4 p-3 bg-gray-50 rounded border">
+                <h3 className="font-medium text-gray-800">Import Results:</h3>
+                <p className="text-green-600">✓ {importResults.success} vendors imported successfully</p>
+                <p className="text-red-600">✗ {importResults.failed} vendors failed</p>
+                
+                {importResults.errors.length > 0 && (
+                  <div className="mt-2">
+                    <p className="font-medium text-gray-800">Errors:</p>
+                    <ul className="text-sm text-red-600 list-disc list-inside">
+                      {importResults.errors.slice(0, 5).map((error, index) => (
+                        <li key={index}>{error}</li>
+                      ))}
+                      {importResults.errors.length > 5 && <li>...and {importResults.errors.length - 5} more errors</li>}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            <div className="flex flex-col space-y-3">
+              <button
+                onClick={downloadTemplate}
+                className="text-blue-600 hover:text-blue-800 text-sm flex items-center justify-center"
+              >
+                <ArrowDownToLine size={16} className="mr-1" /> Download CSV Template
+              </button>
+              
+              <div className="flex justify-end space-x-3 pt-3 border-t">
+                <button
+                  onClick={() => {
+                    setShowImportModal(false);
+                    setImportFile(null);
+                    setImportResults(null);
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={handleImportCSV}
+                  disabled={!importFile}
+                  className={`px-4 py-2 rounded-md text-white focus:outline-none ${
+                    importFile ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-300 cursor-not-allowed'
+                  }`}
+                >
+                  Import
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {mode === 'list' ? (
         <>
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold text-gray-900">Vendor Management</h1>
-            <button 
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              onClick={() => { resetForm(); setMode('create'); }}
-            >
-              Add New Vendor
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md flex items-center"
+              >
+                <ArrowUpFromLine size={18} className="mr-2" /> Import CSV
+              </button>
+              <button
+                onClick={handleExportCSV}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md flex items-center"
+              >
+                <ArrowDownToLine size={18} className="mr-2" /> Export CSV
+              </button>
+              <button 
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
+                onClick={() => { resetForm(); setMode('create'); }}
+              >
+                <Plus size={18} className="mr-2" /> Add Vendor
+              </button>
+            </div>
           </div>
           
-          <div className="mb-4">
+          <div className="mb-4 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="text-gray-400" size={18} />
+            </div>
             <input
               type="text"
               placeholder="Search vendors..."
-              className="px-4 py-2 border border-gray-300 rounded-md w-full"
+              className="pl-10 px-4 py-2 border border-gray-300 rounded-md w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

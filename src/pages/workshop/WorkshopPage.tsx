@@ -92,7 +92,7 @@ const WorkshopPage: React.FC = () => {
       title: 'Stock Inventory',
       description: 'Manage parts and inventory',
       icon: Package,
-      link: '/workshop/parts-ordering',
+      link: '/workshop/stock-inventory',
       color: 'bg-yellow-100 text-yellow-600'
     }
   ];

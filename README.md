@@ -61,6 +61,31 @@ The Matanuska Fleet Manager is built with offline-first capabilities and resilie
 
 For detailed information about these capabilities, see the [Resilience Improvements](RESILIENCE_IMPROVEMENTS.md) document.
 
+## Mobile QR Integration Setup
+
+1. Install dependencies:
+   ```
+   npm install
+   ```
+
+2. Add Capacitor to your project:
+   ```
+   npx cap init
+   npx cap add android
+   npx cap add ios
+   ```
+
+3. Build your app:
+   ```
+   npm run build
+   npx cap sync
+   npx cap open android
+   ```
+
+4. In the mobile app, use the "Scan QR" button to scan codes and open in-app routes.
+
+5. Ensure QR codes generated point to valid in-app URLs.
+
 ## License
 
 Proprietary - All rights reserved.

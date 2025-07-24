@@ -32,19 +32,7 @@ try {
 
 const db = getFirestore();
 // --- DIE HELE TYRE MAPPING DATA, ALLES IN EEN ---
-const VehicleTyreStore = 
-
-interface Vendor {
-  vendorId: string;
-  vendorName: string;
-  contactPerson: string;
-  workEmail: string;
-  mobile: string;
-  address: string;
-  city: string;
-}
-
-const vendorList: Vendor[] = [
+const vendorList = [
   { vendorId: "Joharita Enterprizes CC t/a Field Tyre", vendorName: "Field Tyre Services", contactPerson: "Joharita", workEmail: "admin@fieldtyreservices.co.za", mobile: "", address: "13 Varty Street Duncanville Vereeniging 1930", city: "Vereeniging" },
   { vendorId: "Art Cooperation Battery express", vendorName: "Art Cooperation Battery express", contactPerson: "", workEmail: "", mobile: "", address: "", city: "Mutare" },
   { vendorId: "City Path Trading", vendorName: "City Path Trading", contactPerson: "", workEmail: "", mobile: "", address: "", city: "Harare" },
@@ -91,9 +79,21 @@ const vendorList: Vendor[] = [
   { vendorId: "Axle Investments Pvt Ltd t/a Matebeleland Trucks", vendorName: "Axle Investments Pvt Ltd t/a Matebeleland Trucks", contactPerson: "", workEmail: "", mobile: "", address: "", city: "Harare" },
 ];
 
-export const VendorTable: React.FC = () => (
-  <div style={{ overflowX: "auto" }}>
-    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+// Upload vendors to Firestore
+async function uploadVendors() {
+  const batch = db.batch();
+  vendorList.forEach((vendor) => {
+    const docRef = db.collection('vendors').doc();
+    batch.set(docRef, vendor);
+  });
+  await batch.commit();
+  console.log(`✅ Uploaded ${vendorList.length} vendors to Firestore`);
+}
+
+uploadVendors().catch((err) => {
+  console.error('❌ Error uploading vendors:', err);
+  process.exit(1);
+});
       <thead>
         <tr>
           <th>Vendor ID</th>

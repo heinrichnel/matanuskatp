@@ -81,6 +81,7 @@ interface WorkshopContextType {
   updateVendor: (id: string, vendor: Partial<Vendor>) => Promise<void>;
   deleteVendor: (id: string) => Promise<void>;
   getVendorById: (id: string) => Vendor | undefined;
+  importVendorsFromCSV: (vendors: Partial<Vendor>[]) => Promise<{ success: number; failed: number; errors: string[] }>;
   
   // Stock Inventory
   stockItems: StockItem[];
@@ -91,6 +92,7 @@ interface WorkshopContextType {
   getStockItemsByCategory: (category: string) => StockItem[];
   getStockItemsByVendor: (vendorId: string) => StockItem[];
   getLowStockItems: () => StockItem[];
+  importStockItemsFromCSV: (items: Partial<StockItem>[]) => Promise<{ success: number; failed: number; errors: string[] }>;
   
   // Purchase Orders
   purchaseOrders: PurchaseOrder[];
@@ -419,6 +421,112 @@ export const WorkshopProvider: React.FC<{ children: ReactNode }> = ({ children }
     return purchaseOrders.filter(po => po.vendorId === vendorId);
   };
   
+  // Bulk import stock items from CSV
+  const importStockItemsFromCSV = async (items: Partial<StockItem>[]): Promise<{ success: number; failed: number; errors: string[] }> => {
+    const importResults = {
+      success: 0,
+      failed: 0,
+      errors: [] as string[]
+    };
+
+    for (const record of items) {
+      try {
+        // Validate required fields
+        if (!record.itemCode || !record.itemName || !record.category) {
+          throw new Error(`Missing required fields for item ${record.itemCode || 'unknown'}`);
+        }
+
+        // Find vendor ID if only name is provided
+        if (record.vendor && !record.vendorId) {
+          const vendor = vendors.find(v => v.vendorName === record.vendor);
+          if (vendor) {
+            record.vendorId = vendor.id;
+          }
+        }
+
+        // Prepare complete record
+        const stockItem = {
+          itemCode: record.itemCode || '',
+          itemName: record.itemName || '',
+          category: record.category || '',
+          subCategory: record.subCategory || '',
+          description: record.description || '',
+          unit: record.unit || 'ea',
+          quantity: Number(record.quantity) || 0,
+          reorderLevel: Number(record.reorderLevel) || 0,
+          cost: Number(record.cost) || 0,
+          vendor: record.vendor || '',
+          vendorId: record.vendorId || '',
+          location: record.location || '',
+          lastRestocked: record.lastRestocked || new Date().toISOString().split('T')[0]
+        };
+
+        // Check for existing item to update instead of adding duplicate
+        const existingItem = stockItems.find(item => item.itemCode === stockItem.itemCode);
+        
+        if (existingItem) {
+          await updateStockItem(existingItem.id, stockItem);
+        } else {
+          await addStockItem(stockItem);
+        }
+        
+        importResults.success++;
+      } catch (error) {
+        console.error('Error importing stock item:', error);
+        importResults.failed++;
+        importResults.errors.push(`${record.itemCode || 'unknown'}: ${(error as Error).message}`);
+      }
+    }
+
+    return importResults;
+  };
+  
+  // Bulk import vendors from CSV
+  const importVendorsFromCSV = async (records: Partial<Vendor>[]): Promise<{ success: number; failed: number; errors: string[] }> => {
+    const importResults = {
+      success: 0,
+      failed: 0,
+      errors: [] as string[]
+    };
+
+    for (const record of records) {
+      try {
+        // Validate required fields
+        if (!record.vendorId || !record.vendorName) {
+          throw new Error(`Missing required fields for vendor ${record.vendorName || 'unknown'}`);
+        }
+
+        // Prepare complete record
+        const vendor = {
+          vendorId: record.vendorId,
+          vendorName: record.vendorName,
+          contactPerson: record.contactPerson || '',
+          workEmail: record.workEmail || '',
+          mobile: record.mobile || '',
+          address: record.address || '',
+          city: record.city || ''
+        };
+
+        // Check for existing vendor to update instead of adding duplicate
+        const existingVendor = vendors.find(v => v.vendorId === vendor.vendorId);
+        
+        if (existingVendor) {
+          await updateVendor(existingVendor.id, vendor);
+        } else {
+          await addVendor(vendor);
+        }
+        
+        importResults.success++;
+      } catch (error) {
+        console.error('Error importing vendor:', error);
+        importResults.failed++;
+        importResults.errors.push(`${record.vendorId || 'unknown'}: ${(error as Error).message}`);
+      }
+    }
+
+    return importResults;
+  };
+  
   const value = {
     // Vendors
     vendors,
@@ -426,6 +534,7 @@ export const WorkshopProvider: React.FC<{ children: ReactNode }> = ({ children }
     updateVendor,
     deleteVendor,
     getVendorById,
+    importVendorsFromCSV,
     
     // Stock Items
     stockItems,
@@ -436,6 +545,7 @@ export const WorkshopProvider: React.FC<{ children: ReactNode }> = ({ children }
     getStockItemsByCategory,
     getStockItemsByVendor,
     getLowStockItems,
+    importStockItemsFromCSV,
     
     // Purchase Orders
     purchaseOrders,
