@@ -1,4 +1,3 @@
-// seedFleet.mjs - For use with Node.js to seed fleet data into Firestore
 import { initializeApp, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { readFileSync } from 'fs';
@@ -31,14 +30,9 @@ try {
 
 const db = getFirestore();
 
-// adminn data - flat array for storing in Firestore
+// admin details data - flat array for storing in Firestore
 const authorisationMapping = [
 
-
-
-
-
-[
   {
     "userId": "H",
     "role": "Operator",
@@ -282,3 +276,54 @@ const authorisationMapping = [
     ]
   }
 ]
+
+
+async function seedAdminDetails() {
+  console.log(`🔄 Starting admin details seeding process...`);
+  console.log(`📊 Found ${authorisationMapping.length} admin details to seed`);
+  
+  try {
+    const batch = db.batch();
+    let successCount = 0;
+    let skipCount = 0;
+    
+    for (const admin of authorisationMapping) {
+      const docRef = db.collection('adminDetails').doc(admin.userId);
+      
+      // Check if document already exists to avoid duplicates
+      const doc = await docRef.get();
+      
+      if (doc.exists) {
+        console.log(`ℹ️ Admin ${admin.userId} already exists, skipping...`);
+        skipCount++;
+        continue;
+      }
+      
+      // Add admin data to batch
+      batch.set(docRef, {
+        ...admin,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      
+      successCount++;
+    }
+    
+    // Commit the batch
+    await batch.commit();
+    
+    console.log(`✅ Successfully seeded ${successCount} admin details to Firestore`);
+    console.log(`ℹ️ Skipped ${skipCount} existing admin details`);
+  } catch (error) {
+    console.error('❌ Error seeding admin details:', error);
+  }
+}
+
+// Run the seeding function
+seedAdminDetails().then(() => {
+  console.log('🏁 Admin details seeding process complete');
+  process.exit(0);
+}).catch(error => {
+  console.error('❌ Unhandled error during admin details seeding:', error);
+  process.exit(1);
+});

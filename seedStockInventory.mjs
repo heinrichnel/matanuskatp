@@ -1,41 +1,8 @@
-// seedFleet.mjs - For use with Node.js to seed fleet data into Firestore
-import { initializeApp, cert } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
-import { readFileSync } from 'fs';
-
-// Check if service account key file exists and load it
-let serviceAccount;
-try {
-  serviceAccount = JSON.parse(readFileSync('./serviceAccountKey.json', 'utf8'));
-  console.log('✅ Service account key loaded successfully');
-} catch (error) {
-  console.error('❌ Error loading service account key:', error.message);
-  console.log('\n📝 INSTRUCTIONS:');
-  console.log('1. Go to Firebase Console → Project Settings → Service Accounts');
-  console.log('2. Click "Generate new private key"');
-  console.log('3. Save the file as "serviceAccountKey.json" in the project root directory');
-  console.log('4. Run this script again\n');
-  process.exit(1);
-}
-
-// Initialize Firebase Admin
-try {
-  initializeApp({
-    credential: cert(serviceAccount)
-  });
-  console.log('✅ Firebase Admin initialized successfully');
-} catch (error) {
-  console.error('❌ Error initializing Firebase Admin:', error);
-  process.exit(1);
-}
-
-const db = getFirestore();
-
-// Fleet data
-const fleetData = [
 
 
 
+
+```javascript
 const stockInventory = [
   {
     StoreName: "MUTARE DEPOT STOCK",
@@ -1996,3 +1963,53 @@ const stockInventory = [
     StockQty: 1.0,
     StockValue: 0.07,
     ReorderLevel: 0
+
+    async function seedFleet() {
+  console.log(`🔄 Starting fleet data seeding process...`);
+  console.log(`📊 Found ${fleetData.length} fleet vehicles to seed`);
+  
+  try {
+    const batch = db.batch();
+    let successCount = 0;
+    let skipCount = 0;
+    
+    for (const vehicle of fleetData) {
+      const docRef = db.collection('fleet').doc(vehicle.fleetNumber);
+      
+      // Check if document already exists to avoid duplicates
+      const doc = await docRef.get();
+      
+      if (doc.exists) {
+        console.log(`ℹ️ Fleet ${vehicle.fleetNumber} already exists, skipping...`);
+        skipCount++;
+        continue;
+      }
+      
+      // Add vehicle data to batch
+      batch.set(docRef, {
+        ...vehicle,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      
+      successCount++;
+    }
+    
+    // Commit the batch
+    await batch.commit();
+    
+    console.log(`✅ Successfully seeded ${successCount} fleet vehicles to Firestore`);
+    console.log(`ℹ️ Skipped ${skipCount} existing fleet vehicles`);
+  } catch (error) {
+    console.error('❌ Error seeding fleet data:', error);
+  }
+}
+
+// Run the seeding function
+seedFleet().then(() => {
+  console.log('🏁 Fleet seeding process complete');
+  process.exit(0);
+}).catch(error => {
+  console.error('❌ Unhandled error during fleet seeding:', error);
+  process.exit(1);
+});
