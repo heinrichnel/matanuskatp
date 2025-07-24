@@ -13,6 +13,7 @@ import { SyncProvider } from './context/SyncContext';
 import { TyreStoresProvider } from './context/TyreStoresContext';
 import { TripProvider } from './context/TripContext';
 import { DriverBehaviorProvider } from './context/DriverBehaviorContext';
+import { WorkshopProvider } from './context/WorkshopContext';
 
 // Error Handling
 import ErrorBoundary from './components/ErrorBoundary';
@@ -126,7 +127,7 @@ import AnalyticsInsights from './pages/analytics/AnalyticsInsights';
 import VehiclePerformance from './pages/analytics/VehiclePerformance';
 import AnalyticsDashboard from './pages/analytics/AnalyticsDashboard';
 
-// === WORKSHOP ===
+    // === WORKSHOP ===
 import WorkshopPage from './pages/workshop/WorkshopPage';
 import FleetTable from './pages/workshop/FleetTable';
 import QRGenerator from './pages/workshop/QRGenerator';
@@ -159,8 +160,9 @@ import IndirectCostBreakdown from './pages/workshop/IndirectCostBreakdown';
 import WorkshopAnalyticsComp from './pages/workshop/WorkshopAnalytics';
 import WorkshopReportsPage from './pages/workshop/WorkshopReportsPage';
 import WorkshopCostReportsPage from './pages/workshop/WorkshopCostReportsPage';
-
-// === TYRES ===
+import VendorPage from './pages/workshop/VendorPage';
+import PurchaseOrderPage from './pages/workshop/PurchaseOrderPage';
+import TripDetailsPage from './pages/trips/TripDetailsPage';// === TYRES ===
 import TyreInspection from './pages/tyres/inspection';
 import TyreInventory from './pages/tyres/inventory';
 import TyreReports from './pages/tyres/reports';
@@ -298,6 +300,7 @@ const App: React.FC = () => {
           <TyreStoresProvider>
             <TripProvider>
               <DriverBehaviorProvider>
+                <WorkshopProvider>
                 {connectionError ? (
                   <div className="fixed top-0 left-0 right-0 z-50 p-4">
                     <FirestoreConnectionError error={connectionError} />
@@ -419,6 +422,7 @@ const App: React.FC = () => {
                   onClose={() => setShowTripForm(false)}
                   editingTrip={editingTrip}
                 />
+                </WorkshopProvider>
               </DriverBehaviorProvider>
             </TripProvider>
           </TyreStoresProvider>
