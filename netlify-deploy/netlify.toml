@@ -2,7 +2,6 @@
 
 [build]
   publish = "/"
-  command = ""  # Skip build command
 
 [[redirects]]
   from = "/*"

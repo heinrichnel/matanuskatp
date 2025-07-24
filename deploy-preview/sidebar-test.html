@@ -11,73 +11,6 @@
     .app-container { display: flex; height: 100vh; }
     .content { flex-grow: 1; padding: 20px; background-color: #f9fafb; }
     
-    /* Connection Status Indicator */
-    .connection-status {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 8px 16px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      font-size: 12px;
-      font-weight: 500;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      z-index: 100;
-      transition: all 0.3s ease;
-    }
-    
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-right: 8px;
-    }
-    
-    .status-online {
-      background-color: #ecfdf5;
-      border: 1px solid #d1fae5;
-      color: #047857;
-    }
-    
-    .status-online .status-dot {
-      background-color: #10b981;
-    }
-    
-    .status-offline {
-      background-color: #fef2f2;
-      border: 1px solid #fee2e2;
-      color: #b91c1c;
-    }
-    
-    .status-offline .status-dot {
-      background-color: #ef4444;
-    }
-    
-    .status-limited {
-      background-color: #fffbeb;
-      border: 1px solid #fef3c7;
-      color: #92400e;
-    }
-    
-    .status-limited .status-dot {
-      background-color: #f59e0b;
-    }
-    
-    .offline-banner {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background-color: #f59e0b;
-      color: white;
-      text-align: center;
-      padding: 8px;
-      font-weight: 500;
-      z-index: 1000;
-      display: none;
-    }
-    
     /* Sidebar Styles */
     .sidebar {
       width: 256px;
@@ -491,72 +424,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       toggleSubnav('trips');
       handleNavigation('trips/active');
-      
-      // Initialize connection status monitoring
-      initConnectionMonitoring();
     });
-    
-    // Connection status monitoring
-    function initConnectionMonitoring() {
-      const connectionStatus = document.createElement('div');
-      connectionStatus.classList.add('connection-status');
-      
-      const offlineBanner = document.createElement('div');
-      offlineBanner.classList.add('offline-banner');
-      offlineBanner.innerHTML = '<i class="fa fa-wifi-slash mr-2"></i> You are currently offline. Some features may be unavailable.';
-      
-      document.body.appendChild(connectionStatus);
-      document.body.appendChild(offlineBanner);
-      
-      // Update the UI based on connection status
-      function updateConnectionStatus() {
-        const isOnline = navigator.onLine;
-        
-        if (isOnline) {
-          connectionStatus.classList.remove('status-offline');
-          connectionStatus.classList.add('status-online');
-          connectionStatus.innerHTML = '<span class="status-dot"></span> Connected';
-          offlineBanner.style.display = 'none';
-        } else {
-          connectionStatus.classList.remove('status-online');
-          connectionStatus.classList.add('status-offline');
-          connectionStatus.innerHTML = '<span class="status-dot"></span> Offline';
-          offlineBanner.style.display = 'block';
-        }
-      }
-      
-      // Initialize with current status
-      updateConnectionStatus();
-      
-      // Listen for online/offline events
-      window.addEventListener('online', updateConnectionStatus);
-      window.addEventListener('offline', updateConnectionStatus);
-      
-      // For demo purposes - add a button to toggle connection status
-      const toggleButton = document.createElement('button');
-      toggleButton.textContent = 'Toggle Connection (Demo)';
-      toggleButton.classList.add('fixed', 'bottom-4', 'left-4', 'bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'text-sm');
-      toggleButton.addEventListener('click', () => {
-        // This just toggles the UI for demonstration purposes
-        if (connectionStatus.classList.contains('status-online')) {
-          connectionStatus.classList.remove('status-online');
-          connectionStatus.classList.add('status-offline');
-          connectionStatus.innerHTML = '<span class="status-dot"></span> Offline (Demo)';
-          offlineBanner.style.display = 'block';
-        } else if (connectionStatus.classList.contains('status-offline')) {
-          connectionStatus.classList.remove('status-offline');
-          connectionStatus.classList.add('status-limited');
-          connectionStatus.innerHTML = '<span class="status-dot"></span> Limited Connectivity (Demo)';
-          offlineBanner.style.display = 'none';
-        } else {
-          connectionStatus.classList.remove('status-limited');
-          connectionStatus.classList.add('status-online');
-          connectionStatus.innerHTML = '<span class="status-dot"></span> Connected (Demo)';
-          offlineBanner.style.display = 'none';
-        }
-      });
-      document.body.appendChild(toggleButton);
-    }
   </script>
 </body>
 </html>
