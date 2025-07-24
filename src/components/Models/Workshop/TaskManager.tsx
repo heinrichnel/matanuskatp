@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Button from '../../ui/Button';
-import { CheckCircle, Clock, AlertTriangle, PenTool as Tool, X, Edit, Plus, Trash2, Save, Shield, History, User } from 'lucide-react';
+import { CheckCircle, Clock, PenTool as Tool, X, Edit, Plus, Trash2, Save, Shield, History, User } from 'lucide-react';
 import { formatDateTime } from '../../../utils/helpers';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -27,8 +27,7 @@ const TaskManager: React.FC<TaskManagerProps> = ({
   onTaskDelete,
   onLogTaskHistory,
   userRole = 'technician',
-  readonly = false,
-  isLoading = false
+  readonly = false
 }) => {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<JobCardTask>>({});
@@ -260,6 +259,9 @@ const TaskManager: React.FC<TaskManagerProps> = ({
   const getTaskHistory = (taskId: string) => {
     return taskHistory.filter(entry => entry.taskId === taskId);
   };
+  
+  // Calculate completion stats for UI display
+  const stats = calculateCompletionStats();
   
   return (
     <div className="space-y-6">
