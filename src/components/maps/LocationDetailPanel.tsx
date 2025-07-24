@@ -82,4 +82,3 @@ export default class LocationDetailPanel extends React.Component<LocationDetailP
     );
   }
 }
-export default LocationDetailPanel;
