@@ -925,6 +925,13 @@ export const sidebarConfig: SidebarItem[] = [
     path: '/workshop/qr-generator', 
     component: 'pages/workshop/QRGenerator' 
   },
+  {
+    id: 'qr-scanner',
+    label: 'QR Scanner',
+    path: '/workshop/qr-scanner',
+    component: 'pages/workshop/QRScannerPage',
+    subComponents: ['components/WorkshopManagement/QRScanner']
+  },
   { 
     id: 'workshop-inspections', 
     label: 'Inspections', 
