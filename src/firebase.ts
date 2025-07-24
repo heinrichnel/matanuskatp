@@ -3,7 +3,7 @@ import { getStorage } from 'firebase/storage';
 import { firebaseApp } from './firebaseConfig';
 import { DieselConsumptionRecord } from './types/diesel';
 import { Trip } from './types';
-import { Tyre, TyreSize, TyreInspection, TyreStore, StockEntry, TyreType, TyreStoreLocation } from './types/tyre';
+import { Tyre, TyreInspection, TyreStore, StockEntry } from './types/tyre';
 import { firestore, handleFirestoreError } from './utils/firebaseConnectionHandler';
 
 // Gebruik Storage service
@@ -234,7 +234,7 @@ export async function getTyres(filters?: {
   maxTreadDepth?: number;
 }): Promise<Tyre[]> {
   try {
-    let q = collection(firestore, "tyres");
+    const q = collection(firestore, "tyres");
     let queryObject = query(q);
 
     // Apply filters if provided

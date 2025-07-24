@@ -17,7 +17,8 @@ const MAX_RETRY_ATTEMPTS = 3;
 // --- HEALTH CHECK HELPERS (leave as-is) ---
 const checkEmulatorHealth = async (host: string = '127.0.0.1', port: number = 8081): Promise<boolean> => {
   try {
-    const response = await fetch(`http://${host}:${port}`, {
+    // We don't need the response as we're just checking if the request succeeds
+    await fetch(`http://${host}:${port}`, {
       method: 'GET',
       mode: 'no-cors',
       cache: 'no-cache',

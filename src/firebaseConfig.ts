@@ -1,12 +1,12 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, FirebaseOptions } from "firebase/app";
 
 // Default configuration for development and fallback
-const defaultConfig = {
+const defaultConfig: FirebaseOptions = {
   apiKey: "AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g",
   authDomain: "mat1-9e6b3.firebaseapp.com",
   databaseURL: "https://mat1-9e6b3-default-rtdb.firebaseio.com",
   projectId: "mat1-9e6b3",
-  storageBucket: "mat1-9e6b3.appspot.com",  // <<--- REG GEMAAK
+  storageBucket: "mat1-9e6b3.appspot.com",
   messagingSenderId: "250085264089",
   appId: "1:250085264089:web:51c2b209e0265e7d04ccc8",
   measurementId: "G-YHQHSJN5CQ"
@@ -45,7 +45,7 @@ const checkEnvVars = () => {
   // In production, only warn about missing vars
   if (!import.meta.env.DEV) {
     const missing = Object.entries(vars)
-      .filter(([_ , status]) => status === '✗ Missing')
+      .filter(([, status]) => status === '✗ Missing')
       .map(([key]) => key);
       
     if (missing.length > 0) {
