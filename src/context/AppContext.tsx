@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { loadGoogleMapsScript } from '../utils/googleMapsLoader';
-import { getFirestore, collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
+import { 
+  getFirestore, collection, getDocs, doc, getDoc, query, where, 
+  deleteDoc, updateDoc, addDoc, onSnapshotExternal, enableNetwork, 
+  disableNetwork 
+} from 'firebase/firestore';
 import {
   Trip,
   CostEntry,
@@ -18,8 +22,7 @@ import {
   CARReport,
   FLEETS_WITH_PROBES
 } from '../types';
-// TODO: Define VehicleInspection type or import from the correct module if available
-type VehicleInspection = any;
+import { VehicleInspection } from '../types/vehicle';
 import { AuditLog as AuditLogType } from '../types/audit';
 import { TyreInventoryItem } from '../utils/tyreConstants';
 import { Client } from '../types/client';
@@ -37,6 +40,13 @@ import { generateTripId } from '../utils/helpers';
 import { sendTripEvent, sendDriverBehaviorEvent } from '../utils/webhookSenders';
 import { v4 as uuidv4 } from 'uuid';
 import syncService from '../utils/syncService';
+import { 
+  addConnectionListener, 
+  removeConnectionListener,
+  enableFirestoreNetwork,
+  disableFirestoreNetwork,
+  getConnectionStatus
+} from '../utils/firestoreConnection';
 
 interface AppContextType {
   // Google Maps properties
@@ -156,9 +166,9 @@ interface AppContextType {
   deleteCARReport: (id: string) => Promise<void>;
   
   workshopInventory: TyreInventoryItem[];
-  addWorkshopInventoryItem: (item: Omit<TyreInventoryItem, 'id'>) => Promise<string>;
+  addWorkshopInventoryItem: (item: Omit<TyreInventoryItem, 'id'>, currentUser?: string) => Promise<string>;
   updateWorkshopInventoryItem: (item: TyreInventoryItem) => Promise<void>;
-  deleteWorkshopInventoryItem: (id: string) => Promise<void>;
+  deleteWorkshopInventoryItem: (id: string, currentUser?: string) => Promise<void>;
   refreshWorkshopInventory: () => Promise<void>;
 
   connectionStatus: 'connected' | 'disconnected' | 'reconnecting';
@@ -221,7 +231,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [clients, setClients] = useState<Client[]>([]);
   const [inspections, setInspections] = useState<VehicleInspection[]>([]);
   const [jobCards, setJobCards] = useState<JobCardType[]>([]);
-  const [connectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected'); // TODO: Implement actual connection status monitoring
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected');
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   
   // Google Maps state
@@ -317,6 +327,55 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error("AppContext: Initial Google Maps load failed.", err.message);
     });
   }, [loadGoogleMaps]);
+  
+  // Monitor online/offline status and Firestore connection
+  useEffect(() => {
+    const handleOnline = async () => {
+      console.log("✅ App is now online");
+      setConnectionStatus('reconnecting');
+      try {
+        // Attempt to enable Firestore network
+        await enableFirestoreNetwork();
+        setConnectionStatus('connected');
+      } catch (error) {
+        console.error("Failed to reconnect to Firestore:", error);
+        setConnectionStatus('disconnected');
+      }
+    };
+    
+    const handleOffline = async () => {
+      console.log("⚠️ App is now offline");
+      setConnectionStatus('disconnected');
+      try {
+        // Disable Firestore network to prevent unnecessary retries
+        await disableFirestoreNetwork();
+      } catch (error) {
+        console.error("Failed to properly disconnect Firestore:", error);
+      }
+    };
+    
+    // Handle Firestore connection status changes
+    const handleFirestoreConnectionChange = (status: 'connected' | 'disconnected' | 'reconnecting' | 'error') => {
+      setConnectionStatus(status === 'error' ? 'disconnected' : status);
+    };
+    
+    // Add connection listener
+    addConnectionListener(handleFirestoreConnectionChange);
+    
+    // Set initial status
+    setConnectionStatus(navigator.onLine ? 'connected' : 'disconnected');
+    
+    // Add browser online/offline event listeners
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+      removeConnectionListener(handleFirestoreConnectionChange);
+    };
+  }, []);
 
   useEffect(() => {
     // Set up all data subscriptions through the SyncService
@@ -355,19 +414,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   // Add workshop inventory item
-  const addWorkshopInventoryItem = async (item: Omit<TyreInventoryItem, 'id'>): Promise<string> => {
+  const addWorkshopInventoryItem = async (item: Omit<TyreInventoryItem, 'id'>, currentUser?: string): Promise<string> => {
     try {
       setIsLoading(prev => ({ ...prev, addWorkshopInventoryItem: true }));
       
-      // Create a new item with a unique ID
+      // 1. Add to Firestore
+      const db = getFirestore();
+      const docRef = await addDoc(collection(db, "workshopInventory"), item);
+      
+      // 2. Create item with the Firestore-generated ID
       const newItem = {
         ...item,
-        id: `workshop-inventory-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        id: docRef.id
       };
       
-      // In a real implementation, this would add the item to Firestore
-      // For now, just update the local state
+      // 3. Update local state
       setWorkshopInventory(prev => [...prev, newItem as TyreInventoryItem]);
+      
+      // 4. Log the action for audit/compliance
+      await addAuditLogToFirebase({
+        user: currentUser || 'unknown',
+        action: 'ADD_WORKSHOP_INVENTORY',
+        details: { id: docRef.id, ...item }
+      });
       
       console.log(`✅ Workshop inventory item added: ${newItem.id}`);
       
@@ -403,13 +472,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Delete workshop inventory item
-  const deleteWorkshopInventoryItem = async (id: string): Promise<void> => {
+  const deleteWorkshopInventoryItem = async (id: string, currentUser?: string): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, deleteWorkshopInventoryItem: true }));
       
-      // In a real implementation, this would delete the item from Firestore
-      // For now, just update the local state
+      // Delete from Firestore
+      const db = getFirestore();
+      await deleteDoc(doc(db, "workshopInventory", id));
+      
+      // Update local state
       setWorkshopInventory(prev => prev.filter(item => item.id !== id));
+      
+      // Audit log the action
+      await addAuditLogToFirebase({
+        user: currentUser || 'unknown',
+        action: 'DELETE_WORKSHOP_INVENTORY',
+        details: { id }
+      });
       
       console.log(`✅ Workshop inventory item deleted: ${id}`);
     } catch (error) {
@@ -708,14 +787,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   /* 
   const addAuditLog = async (logData: any) => {
     try {
-      // In a real implementation, this would add to Firestore
-      console.log('Audit log added:', logData);
-      return logData.id;
+      setIsLoading(prev => ({ ...prev, [`addAuditLog-${logData.id || 'unknown'}`]: true }));
+      
+      // Use the proper audit log utility
+      const docId = await addAuditLogToFirebase({
+        ...logData,
+        details: logData.details,
+      });
+      
+      console.log("✅ Audit log added:", docId);
+      return docId;
     } catch (error) {
       console.error("Error adding audit log:", error);
       throw error;
     } finally {
-      // Clear loading state - no need for specific ID here
+      // Clear loading state
       setIsLoading(prev => {
         const newState = { ...prev };
         delete newState[`addAuditLog-${logData.id || 'unknown'}`];
