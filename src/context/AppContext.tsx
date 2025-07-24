@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { loadGoogleMapsScript } from '../utils/googleMapsLoader';
+import { getFirestore, collection, getDocs, doc, getDoc, query, where } from 'firebase/firestore';
 import {
   Trip,
   CostEntry,

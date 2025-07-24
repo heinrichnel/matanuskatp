@@ -48,6 +48,10 @@ local_build() {
         npm install
     fi
     
+    # Ensure QR code dependencies are installed
+    echo "📦 Installing QR code dependencies..."
+    npm install qrcode.react html5-qrcode --save
+    
     # Run the build
     echo "🔨 Building project..."
     npm run build
