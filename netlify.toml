@@ -1,23 +1,23 @@
 [build]
   base = "/"
-  command = "npm ci && npm run build"
+  command = "npm install && npm run build"
   publish = "dist"
   # Disable build cache to ensure fresh builds
   ignore = "false"
 
 # Production context settings
 [context.production]
-  command = "npm ci && npm run build"
+  command = "npm install && npm run build"
   environment = { NODE_ENV = "production" }
 
 # Preview context for pull requests
 [context.deploy-preview]
-  command = "npm ci && npm run build"
+  command = "npm install && npm run build"
   environment = { NODE_ENV = "production" }
 
 # Branch deploys
 [context.branch-deploy]
-  command = "npm ci && npm run build"
+  command = "npm install && npm run build"
   environment = { NODE_ENV = "production" }
 
 # Handle SPA routing - redirect all paths to index.html
