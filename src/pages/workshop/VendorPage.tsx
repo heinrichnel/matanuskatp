@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useWorkshop, Vendor } from '../../context/WorkshopContext';
 import { Card, CardContent } from '../../components/ui';
 
 const VendorPage: React.FC = () => {
   const { vendors, addVendor, updateVendor, deleteVendor, isLoading, errors } = useWorkshop();
-  const navigate = useNavigate();
   
   const [mode, setMode] = useState<'list' | 'create' | 'edit'>('list');
   const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
