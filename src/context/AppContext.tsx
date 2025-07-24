@@ -740,127 +740,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Placeholder implementations for other functions
   const placeholder = async () => { console.warn("Function not implemented"); };
   const placeholderString = async () => { console.warn("Function not implemented"); return ""; };
-  
-  // Implement cost entry functions
-  const addCostEntry = async (costEntry: Omit<CostEntry, 'id' | 'attachments'>, files?: FileList): Promise<string> => {
-    try {
-      const costId = uuidv4();
-      const newCost: CostEntry = {
-        ...costEntry,
-        id: costId,
-        attachments: []
-      };
-      
-      // Find the trip this cost belongs to
-      const tripIndex = trips.findIndex(t => t.id === costEntry.tripId);
-      if (tripIndex === -1) {
-        throw new Error(`Trip not found with ID: ${costEntry.tripId}`);
-      }
-      
-      // Update the trip with the new cost
-      const updatedTrip = { ...trips[tripIndex] };
-      if (!updatedTrip.costs) {
-        updatedTrip.costs = [];
-      }
-      updatedTrip.costs.push(newCost);
-      
-      // Save to Firebase
-      await updateTripInFirebase(updatedTrip);
-      
-      // Add attachments if provided
-      if (files && files.length > 0) {
-        const attachmentPromises = Array.from(files).map(file => {
-          return addAttachment(file, costId, costEntry.tripId);
-        });
-        await Promise.all(attachmentPromises);
-      }
-      
-      // Update local state
-      const newTrips = [...trips];
-      newTrips[tripIndex] = updatedTrip;
-      setTrips(newTrips);
-      
-      return costId;
-    } catch (error) {
-      console.error("Failed to add cost entry:", error);
-      throw error;
-    }
-  };
-  
-  const updateCostEntry = async (costEntry: CostEntry): Promise<void> => {
-    try {
-      // Find the trip this cost belongs to
-      const tripIndex = trips.findIndex(t => t.id === costEntry.tripId);
-      if (tripIndex === -1) {
-        throw new Error(`Trip not found with ID: ${costEntry.tripId}`);
-      }
-      
-      // Update the cost entry
-      const updatedTrip = { ...trips[tripIndex] };
-      if (!updatedTrip.costs) {
-        throw new Error("No costs found for this trip");
-      }
-      
-      const costIndex = updatedTrip.costs.findIndex(c => c.id === costEntry.id);
-      if (costIndex === -1) {
-        throw new Error(`Cost entry not found with ID: ${costEntry.id}`);
-      }
-      
-      updatedTrip.costs[costIndex] = {
-        ...costEntry,
-        attachments: updatedTrip.costs[costIndex].attachments || []
-      };
-      
-      // Save to Firebase
-      await updateTripInFirebase(updatedTrip);
-      
-      // Update local state
-      const newTrips = [...trips];
-      newTrips[tripIndex] = updatedTrip;
-      setTrips(newTrips);
-    } catch (error) {
-      console.error("Failed to update cost entry:", error);
-      throw error;
-    }
-  };
-  
-  const deleteCostEntry = async (id: string): Promise<void> => {
-    try {
-      // Find the trip this cost belongs to
-      let tripIndex = -1;
-      let costIndex = -1;
-      
-      for (let i = 0; i < trips.length; i++) {
-        const trip = trips[i];
-        if (trip.costs) {
-          costIndex = trip.costs.findIndex(c => c.id === id);
-          if (costIndex !== -1) {
-            tripIndex = i;
-            break;
-          }
-        }
-      }
-      
-      if (tripIndex === -1 || costIndex === -1) {
-        throw new Error(`Cost entry not found with ID: ${id}`);
-      }
-      
-      // Update the trip
-      const updatedTrip = { ...trips[tripIndex] };
-      updatedTrip.costs = updatedTrip.costs.filter(c => c.id !== id);
-      
-      // Save to Firebase
-      await updateTripInFirebase(updatedTrip);
-      
-      // Update local state
-      const newTrips = [...trips];
-      newTrips[tripIndex] = updatedTrip;
-      setTrips(newTrips);
-    } catch (error) {
-      console.error("Failed to delete cost entry:", error);
-      throw error;
-    }
-  };
   const placeholderWebhook = async () => { console.warn("Function not implemented"); return { imported: 0, skipped: 0 }; };
 
   const addDieselRecord = async (record: Omit<DieselConsumptionRecord, 'id'>): Promise<string> => {
@@ -1698,9 +1577,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     deleteTrip,
     getTrip,
     refreshTrips,
-    addCostEntry,
-    updateCostEntry,
-    deleteCostEntry,
+    addCostEntry: placeholderString,
+    updateCostEntry: placeholder,
+    deleteCostEntry: placeholder,
     addAttachment: placeholderString,
     deleteAttachment: placeholder,
     addAdditionalCost: placeholderString,

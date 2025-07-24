@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import { useRealtimeTrips } from "../hooks/useRealtimeTrips";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
 import { Truck, MapPin, Clock, Globe, Filter, RefreshCw } from "lucide-react";
@@ -256,7 +255,7 @@ const ActiveTripsPage: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {trips.map((trip) => (
-                    <tr key={trip.id} className="hover:bg-gray-50 cursor-pointer">
+                    <tr key={trip.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => window.location.href = `/trips/${trip.id}`}>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
                         <Link to={`/trips/${trip.id}`}>
                           {trip.loadRef || trip.id.substring(0, 8) + '...'}
