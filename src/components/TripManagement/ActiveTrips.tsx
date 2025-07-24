@@ -756,7 +756,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                       <div className="font-medium">{formatCurrency(trip.cost, displayCurrency)}</div>
                       <button 
                         className="text-xs text-blue-600 hover:underline mt-1"
-                        onClick={onClick}
+                        onClick={() => handleEditClick(trip)}
                       >
                         {trip.costBreakdown ? 'View Breakdown' : 'Allocate Costs'}
                       </button>
