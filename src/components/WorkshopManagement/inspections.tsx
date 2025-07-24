@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Input } from "@/components/ui";
 import { Badge } from "@/components/ui/Badge";
 import { Search, FileWarning, Eye, Share, FileText, MoreHorizontal } from "lucide-react";
-import { DefectItemModal } from "@/components/workshop/DefectItemModal";
-import InspectionDetailsModal from "@/components/workshop/InspectionDetailsModal";
+import { DefectItemModal } from "../Models/Workshop/DefectItemModal";
+import InspectionDetailsModal from "../Models/Workshop/InspectionDetailsModal";
 import { parseInspectionDefects } from "@/utils/inspectionUtils";
 
 // Define the inspection data type

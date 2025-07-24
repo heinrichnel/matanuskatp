@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getFirestore, collection, query, onSnapshot, doc, addDoc, updateDoc, deleteDoc, where, getDocs } from 'firebase/firestore';
-import { useAuthState } from 'react-firebase-hooks/auth';
-import { getAuth } from 'firebase/auth';
+
 
 // Define types for Workshop items
 export interface Vendor {
@@ -162,7 +161,8 @@ const WorkshopContext = createContext<WorkshopContextType>({
 // Provider component
 export const WorkshopProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // User authentication
-  const [user] = useAuthState(getAuth());
+  // const [user] = useAuthState(getAuth());
+  const user = null; // Temporary placeholder
   
   // State for data
   const [vendors, setVendors] = useState<Vendor[]>([]);

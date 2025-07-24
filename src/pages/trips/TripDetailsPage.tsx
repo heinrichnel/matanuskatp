@@ -477,4 +477,3 @@ const TripDetailsPage: React.FC = () => {
 };
 
 export default TripDetailsPage;
-export default TripDetailsPage;

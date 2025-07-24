@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Modal from '../../components/ui/Modal';
-import { Button } from '../../components/ui/Button';
+import Modal from '../../ui/Modal';
+import { Button } from '../../ui/Button';
 import { AlertTriangle, Upload } from 'lucide-react';
 
 interface CostEntry {
