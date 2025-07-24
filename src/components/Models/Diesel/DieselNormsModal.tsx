@@ -2,10 +2,10 @@
 import React, { useState, useEffect } from 'react';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import { Input } from '../ui/FormElements';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import Card, { CardContent, CardHeader } from '../../ui/Card';
+import { Input } from '../../ui/FormElements';
 
 // ─── Utilities ───────────────────────────────────────────────────
 
@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 // ─── Constants / Types ───────────────────────────────────────────
-import { FLEET_NUMBERS, FLEETS_WITH_PROBES } from '../../types';
+import { FLEET_NUMBERS, FLEETS_WITH_PROBES } from '../../../types';
 
 interface DieselNorms {
   fleetNumber: string;

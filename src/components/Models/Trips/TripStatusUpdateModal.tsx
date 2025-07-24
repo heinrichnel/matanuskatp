@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { TextArea } from '../ui/FormElements';
-import { formatDate } from '../../utils/helpers';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { TextArea } from '../../ui/FormElements';
+import { formatDate } from '../../../utils/helpers';
 import { Truck, Calendar, MapPin, User, Send, X, Clock, CheckCircle } from 'lucide-react';
 
 interface TripStatusUpdateModalProps {

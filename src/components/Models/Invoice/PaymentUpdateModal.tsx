@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { Trip, FollowUpRecord } from '../../types';
+import { Trip, FollowUpRecord } from '../../../types';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Input, Select, Textarea } from '../ui/FormElements';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { Input, Select, Textarea } from '../../ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 // ─── Utils ───────────────────────────────────────────────────────
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import { formatCurrency, formatDate } from '../../../utils/helpers';
 
 type PaymentStatus = 'unpaid' | 'partial' | 'paid';
 

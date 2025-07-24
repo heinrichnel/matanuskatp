@@ -1,6 +1,6 @@
 // ─── React & Context ─────────────────────────────────────────────
 import React, { useState } from 'react';
-import { useAppContext } from '../../context/AppContext';
+import { useAppContext } from '../../../context/AppContext';
 
 // ─── UI Components ───────────────────────────────────────────────
 import Modal from '../../ui/Modal';
@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { FLEETS_WITH_PROBES, DieselConsumptionRecord } from '../../types';
+import { FLEETS_WITH_PROBES, DieselConsumptionRecord } from '../../../types';
 
 
 interface DieselImportModalProps {

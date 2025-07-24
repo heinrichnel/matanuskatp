@@ -9,7 +9,7 @@ const QRScannerPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
-  // Using AppContext might be needed for future enhancements
+  const appContext = useAppContext(); // Initialized for future use
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [scanHistory, setScanHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);

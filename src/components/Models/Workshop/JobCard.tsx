@@ -6,10 +6,10 @@ import JobCardNotes from './JobCardNotes';
 // import QAReviewPanel from './QAReviewPanel'; // Component commented out - missing file
 // import CompletionPanel from './CompletionPanel'; // Component commented out - missing file 
 import { v4 as uuidv4 } from 'uuid';
-import { JobCardTask, TaskHistoryEntry } from '../../types';
-import Button from '../ui/Button';
+import { JobCardTask, TaskHistoryEntry } from '../../../types';
+import Button from '../../ui/Button';
 import { updateDoc, doc } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { db } from '../../../firebase';
 
 // Mock data for a job card
 const mockJobCard = {

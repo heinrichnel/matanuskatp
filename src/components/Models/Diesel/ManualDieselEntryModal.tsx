@@ -1,13 +1,13 @@
 // ─── // ─── UI Components ───────────────────────────────────────────────────
 import Modal from '../../../components/ui/Modal';
 import Button from '../../../components/ui/Button';
-import { Input, Select, TextArea } from '../ui/FormElements';
-import FleetSelector from '../common/FleetSelector';
+import { Input, Select, TextArea } from '../../ui/FormElements';
+import FleetSelector from '../../common/FleetSelector';
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../../context/AppContext';
+import { useAppContext } from '../../../context/AppContext';
 
 // ─── Types ───────────────────────────────────────────────────────
-import { DRIVERS, FUEL_STATIONS, FLEET_NUMBERS, DieselConsumptionRecord, FLEETS_WITH_PROBES } from '../../types';
+import { DRIVERS, FUEL_STATIONS, FLEET_NUMBERS, DieselConsumptionRecord, FLEETS_WITH_PROBES } from '../../../types';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import { 
@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 
 // ─── Utilities ───────────────────────────────────────────────────
-import { formatDate } from '../../utils/helpers';
+import { formatDate } from '../../../utils/helpers';
 
 
 interface ManualDieselEntryModalProps {

@@ -1,4 +1,4 @@
-import { firestore } from '../../firebase';
+import { firestore } from '../../../firebase';
 import { 
   collection, 
   addDoc, 
@@ -11,7 +11,7 @@ import {
   serverTimestamp,
   getDoc
 } from 'firebase/firestore';
-import { DieselConsumptionRecord, DieselNorm } from '../../types';
+import { DieselConsumptionRecord, DieselNorm } from '../../../types';
 
 // Collection references
 const DIESEL_COLLECTION = 'dieselConsumption';

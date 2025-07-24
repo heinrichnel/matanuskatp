@@ -1,9 +1,9 @@
 import React, { useState, useRef } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Input, Select, Textarea } from '../ui/FormElements';
-import { Trip } from '../../types';
-import { formatCurrency, formatDate } from '../../utils/helpers';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { Input, Select, Textarea } from '../../ui/FormElements';
+import { Trip } from '../../../types';
+import { formatCurrency, formatDate } from '../../../utils/helpers';
 import { 
   ArrowRight, 
   Calendar, 

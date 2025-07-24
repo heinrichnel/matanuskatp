@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
 import { DollarSign, X, FileText, Send, AlertTriangle } from 'lucide-react';
-import { formatCurrency } from '../../utils/helpers';
+import { formatCurrency } from '../../../utils/helpers';
 
 interface InvoiceItem {
   id: string;

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Card, { CardContent, CardHeader } from '../ui/Card';
-import Button from '../ui/Button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
+import Card, { CardContent, CardHeader } from '../../ui/Card';
+import Button from '../../ui/Button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/Tabs';
 import { FileText, ShoppingCart, Check, Package, Store, Plus, RefreshCw } from 'lucide-react';
 
 interface PurchaseOrderModuleProps {

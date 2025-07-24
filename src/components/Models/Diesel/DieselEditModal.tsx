@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../../context/AppContext';
-import { DieselConsumptionRecord, DRIVERS, FUEL_STATIONS, FLEET_NUMBERS } from '../../types';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Input, Select, TextArea } from '../ui/FormElements';
+import { useAppContext } from '../../../context/AppContext';
+import { DieselConsumptionRecord, DRIVERS, FUEL_STATIONS, FLEET_NUMBERS } from '../../../types';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { Input, Select, TextArea } from '../../ui/FormElements';
 import { Save, X, Calculator, AlertTriangle, Fuel } from 'lucide-react';
 
 interface DieselEditModalProps {
