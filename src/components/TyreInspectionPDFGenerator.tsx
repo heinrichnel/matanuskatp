@@ -20,14 +20,12 @@ interface TyreInspectionData {
 
 interface TyreInspectionPDFGeneratorProps {
   inspectionData: TyreInspectionData;
-  companyLogo?: string;
   companyName?: string;
   companyAddress?: string;
 }
 
 export const TyreInspectionPDFGenerator: React.FC<TyreInspectionPDFGeneratorProps> = ({ 
   inspectionData,
-  companyLogo = '',
   companyName = 'Matanuska Transport',
   companyAddress = '123 Main Street, City, Country'
 }) => {
@@ -114,7 +112,7 @@ export const TyreInspectionPDFGenerator: React.FC<TyreInspectionPDFGeneratorProp
       doc.text('Signature:', 20, 200);
       try {
         doc.addImage(inspectionData.signature, 'PNG', 70, 195, 40, 15);
-      } catch (e) {
+      } catch {
         doc.text('Signature not available', 70, 200);
       }
     }
@@ -126,7 +124,7 @@ export const TyreInspectionPDFGenerator: React.FC<TyreInspectionPDFGeneratorProp
       doc.text('Tyre Photo', 105, 20, { align: 'center' });
       try {
         doc.addImage(inspectionData.photo, 'PNG', 55, 30, 100, 100);
-      } catch (e) {
+      } catch {
         doc.text('Photo not available', 105, 80, { align: 'center' });
       }
     }

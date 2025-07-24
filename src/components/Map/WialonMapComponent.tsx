@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { 
@@ -17,8 +17,7 @@ import {
   Activity,
   Shield,
   Radio,
-  Search,
-  Filter
+  Search
 } from 'lucide-react';
 
 declare global {
@@ -406,19 +405,6 @@ const WialonMapComponent: React.FC = () => {
     msg(`✅ ${sensorsWithValues.length} sensors loaded for ${unit.getName()}`);
   };
 
-  const focusOnUnit = (unitId: string) => {
-    const unit = units.find(u => u.id === unitId);
-    const marker = unitMarkers.current[unitId];
-    
-    if (unit && unit.position && marker && mapInstance.current) {
-      mapInstance.current.setView([unit.position.y, unit.position.x], 15);
-      marker.openPopup();
-      loadUnitSensors(unitId);
-      setSelectedUnit(unitId);
-      msg(`🎯 Focused on unit: ${unit.name}`);
-    }
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'checking': return 'bg-yellow-100 text-yellow-800';
@@ -566,13 +552,13 @@ const WialonMapComponent: React.FC = () => {
           
           {/* Filter tabs */}
           <div className="flex mt-3 text-sm">
-            <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-l-md" onClick={onClick}}>
+            <button className="px-3 py-1 bg-blue-100 text-blue-700 rounded-l-md" onClick={onClick}>
               21 Jan - 1 Feb
             </button>
-            <button className="px-3 py-1 border-t border-b border-gray-300" onClick={onClick}}>
+            <button className="px-3 py-1 border-t border-b border-gray-300" onClick={onClick}>
               Checking
             </button>
-            <button className="px-3 py-1 border border-gray-300 rounded-r-md" onClick={onClick}}>
+            <button className="px-3 py-1 border border-gray-300 rounded-r-md" onClick={onClick}>
               In Transit
             </button>
           </div>
@@ -635,8 +621,13 @@ const WialonMapComponent: React.FC = () => {
             {units.map((unit) => (
               <div 
                 key={unit.id}
-                className="flex items-center justify-between p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100"
-                onClick={onClick}
+                className={`flex items-center justify-between p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100 ${
+                  selectedUnit === unit.id ? 'ring-2 ring-blue-400' : ''
+                }`}
+                onClick={() => {
+                  setSelectedUnit(unit.id);
+                  loadUnitSensors(unit.id);
+                }}
               >
                 <div className="flex items-center">
                   <Truck className="w-4 h-4 mr-2 text-gray-600" />

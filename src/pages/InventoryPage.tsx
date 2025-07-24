@@ -14,7 +14,6 @@ import {
   Plus,
   Download,
   Filter,
-  Calendar,
   DollarSign
 } from 'lucide-react';
 
@@ -460,4 +459,5 @@ const InventoryPage: React.FC = () => {
   );
 };
 
+export default InventoryPage;
 export default InventoryPage;

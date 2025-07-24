@@ -23,6 +23,8 @@ import {
   Trash2,
   Eye
 } from 'lucide-react';
+import { collection, addDoc, updateDoc, doc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase';
 
 // Import related forms
 import DemandPartsForm, { DemandPartsFormData } from '../components/forms/DemandPartsForm';
@@ -201,46 +203,131 @@ const PartsOrderingPage: React.FC = () => {
     }
   };
 
-  const handleCreateOrder = (formData: DemandPartsFormData) => {
-    // Convert DemandPartsFormData to PartOrder
-    const newOrder: PartOrder = {
-      id: Date.now().toString(),
-      orderNumber: `PO-${new Date().getFullYear()}-${String(orders.length + 1).padStart(3, '0')}`,
-      demandedBy: formData.demandBy,
-      workOrderId: formData.workOrderId,
-      vehicleId: formData.vehicleId,
-      orderDate: formData.createdDate,
-      status: 'PENDING',
-      urgency: formData.urgency,
-      totalCost: 0, // Will be calculated when supplier prices are added
-      notes: formData.notes,
-      parts: formData.parts.map(part => ({
-        id: part.id,
-        sku: part.sku,
-        description: part.description,
-        quantityOrdered: part.quantity,
-        quantityReceived: 0,
-        unitPrice: 0, // Will be set when ordering from supplier
-        status: 'PENDING'
-      }))
-    };
+  const handleCreateOrder = async (formData: DemandPartsFormData) => {
+    try {
+      // Convert DemandPartsFormData to PartOrder
+      const newOrder: PartOrder = {
+        id: Date.now().toString(),
+        orderNumber: `PO-${new Date().getFullYear()}-${String(orders.length + 1).padStart(3, '0')}`,
+        demandedBy: formData.demandBy,
+        workOrderId: formData.workOrderId,
+        vehicleId: formData.vehicleId,
+        orderDate: formData.createdDate,
+        status: 'PENDING',
+        urgency: formData.urgency,
+        totalCost: 0, // Will be calculated when supplier prices are added
+        notes: formData.notes,
+        parts: formData.parts.map(part => ({
+          id: part.id,
+          sku: part.sku,
+          description: part.description,
+          quantityOrdered: part.quantity,
+          quantityReceived: 0,
+          unitPrice: 0, // Will be set when ordering from supplier
+          status: 'PENDING'
+        }))
+      };
 
-    setOrders(prev => [...prev, newOrder]);
-    setIsCreateOrderModalOpen(false);
-    console.log('New parts order created:', newOrder);
+      // Save to Firestore
+      const docRef = await addDoc(collection(db, "partOrders"), {
+        ...newOrder,
+        timestamp: serverTimestamp(),
+        createdAt: new Date().toISOString()
+      });
+
+      // Update with Firestore ID
+      const orderWithId = { ...newOrder, id: docRef.id };
+      
+      // Update local state
+      setOrders(prev => [...prev, orderWithId]);
+      setIsCreateOrderModalOpen(false);
+      console.log('New parts order created:', orderWithId);
+    } catch (error) {
+      console.error("Error creating parts order:", error);
+      alert("Failed to create order. Please try again.");
+    }
   };
 
-  const handleReceiveParts = (receivedParts: any[]) => {
+  const handleReceiveParts = async (receivedParts: any[]) => {
     // Update order status based on received parts
     if (selectedOrder) {
-      const updatedOrder = { ...selectedOrder };
-      // Logic to update parts quantities and status
-      setOrders(prev => prev.map(order => 
-        order.id === selectedOrder.id ? updatedOrder : order
-      ));
+      try {
+        const updatedOrder = { ...selectedOrder };
+        
+        // Update parts quantities and statuses
+        updatedOrder.parts = updatedOrder.parts.map(part => {
+          const receivedPart = receivedParts.find(rp => rp.id === part.id);
+          if (receivedPart) {
+            return {
+              ...part,
+              quantityReceived: receivedPart.receivingQuantity,
+              status: receivedPart.receivingQuantity >= part.quantityOrdered ? 'RECEIVED' : 'PARTIALLY_RECEIVED'
+            };
+          }
+          return part;
+        });
+        
+        // Determine overall order status
+        const allReceived = updatedOrder.parts.every(part => part.status === 'RECEIVED');
+        const anyReceived = updatedOrder.parts.some(part => part.status === 'RECEIVED' || part.status === 'PARTIALLY_RECEIVED');
+        
+        if (allReceived) {
+          updatedOrder.status = 'RECEIVED';
+        } else if (anyReceived) {
+          updatedOrder.status = 'PARTIALLY_RECEIVED';
+        }
+        
+        // Update in Firestore
+        await updateDoc(doc(db, "partOrders", updatedOrder.id), {
+          parts: updatedOrder.parts,
+          status: updatedOrder.status,
+          updatedAt: new Date().toISOString()
+        });
+        
+        // Update parts inventory quantities
+        for (const receivedPart of receivedParts) {
+          // Query for existing part in inventory
+          const partsQuery = query(
+            collection(db, "parts"), 
+            where("sku", "==", receivedPart.sku)
+          );
+          
+          const partsSnapshot = await getDocs(partsQuery);
+          
+          if (!partsSnapshot.empty) {
+            // Update existing part quantity
+            const partDoc = partsSnapshot.docs[0];
+            const currentQuantity = partDoc.data().quantity || 0;
+            await updateDoc(doc(db, "parts", partDoc.id), {
+              quantity: parseInt(currentQuantity) + receivedPart.receivingQuantity,
+              lastUpdated: serverTimestamp()
+            });
+          } else {
+            // Add new part to inventory
+            await addDoc(collection(db, "parts"), {
+              sku: receivedPart.sku,
+              description: receivedPart.description,
+              quantity: receivedPart.receivingQuantity,
+              cost: 0, // This would need to be determined
+              itemType: "part",
+              createdAt: serverTimestamp(),
+              lastUpdated: serverTimestamp()
+            });
+          }
+        }
+        
+        // Update local state
+        setOrders(prev => prev.map(order => 
+          order.id === selectedOrder.id ? updatedOrder : order
+        ));
+        
+        setIsReceivePartsModalOpen(false);
+        alert('Parts received successfully! Inventory has been updated.');
+      } catch (error) {
+        console.error("Error receiving parts:", error);
+        alert("Failed to update inventory. Please try again.");
+      }
     }
-    setIsReceivePartsModalOpen(false);
-    console.log('Parts received:', receivedParts);
   };
 
   const handleViewOrder = (order: PartOrder) => {
@@ -540,11 +627,16 @@ const PartsOrderingPage: React.FC = () => {
                               size="sm"
                               variant="outline"
                               onClick={() => {
-                                setSelectedOrder(order);
-                                setIsReceivePartsModalOpen(true);
+                                // Option 1: Modal approach 
+                                // setSelectedOrder(order);
+                                // setIsReceivePartsModalOpen(true);
+                                
+                                // Option 2: Navigate to dedicated receive page with PO information
+                                window.location.href = `/receive-parts?poNumber=${order.orderNumber}`;
                               }}
                               icon={<Package className="w-4 h-4" />}
                             >
+                              Receive
                             </Button>
                           )}
                           

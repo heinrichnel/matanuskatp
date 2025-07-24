@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Archive, 
@@ -16,25 +16,78 @@ import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import AddNewTyreForm from '../../components/forms/AddTyreForm';
+import { collection, query, getDocs, orderBy, where, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../firebase';
 
-// Mock tyre data
-const mockTyres = [
-  { id: 'TY-4321', size: '295/80R22.5', manufacturer: 'Michelin', pattern: 'X Multi D', status: 'In-Service', vehicle: 'TRK-7890', position: 'Front Right' },
-  { id: 'TY-4322', size: '295/80R22.5', manufacturer: 'Michelin', pattern: 'X Multi D', status: 'In-Service', vehicle: 'TRK-7890', position: 'Front Left' },
-  { id: 'TY-4323', size: '295/80R22.5', manufacturer: 'Bridgestone', pattern: 'R297', status: 'In-Stock', vehicle: '', position: '' },
-  { id: 'TY-4324', size: '295/80R22.5', manufacturer: 'Goodyear', pattern: 'Marathon LHS', status: 'Repair', vehicle: 'TRK-5432', position: 'Rear Right Inner' },
-  { id: 'TY-4325', size: '315/70R22.5', manufacturer: 'Continental', pattern: 'HDR2+', status: 'In-Service', vehicle: 'TRK-3344', position: 'Rear Left Outer' },
-  { id: 'TY-4326', size: '315/70R22.5', manufacturer: 'Continental', pattern: 'HDR2+', status: 'Scrap', vehicle: '', position: '' },
-  { id: 'TY-4327', size: '315/80R22.5', manufacturer: 'Dunlop', pattern: 'SP246', status: 'In-Stock', vehicle: '', position: '' },
-];
+interface TyreData {
+  id: string;
+  tyreNumber: string;
+  tyreSize: string;
+  type: string;
+  pattern: string;
+  manufacturer: string;
+  year: string;
+  cost: number;
+  condition: 'New' | 'Used' | 'Retreaded' | 'Scrap';
+  status: 'In-Service' | 'In-Stock' | 'Repair' | 'Scrap';
+  vehicleAssigned: string;
+  axlePosition: string;
+  mountStatus: 'Mounted' | 'Not Mounted' | 'Removed';
+  kmRun: number;
+  kmLimit: number;
+  treadDepth: number;
+  notes: string;
+  datePurchased?: string;
+  lastInspection?: string;
+}
 
 const TyreManagementPage: React.FC = () => {
+  const [tyres, setTyres] = useState<TyreData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   
+  // Function to fetch tyres from Firestore
+  const fetchTyres = async () => {
+    try {
+      setLoading(true);
+      
+      // Create a query against the 'tyres' collection
+      const q = query(
+        collection(db, 'tyres'),
+        orderBy('datePurchased', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const tyreList: TyreData[] = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as Omit<TyreData, 'id'>;
+        tyreList.push({
+          id: doc.id,
+          ...data
+        });
+      });
+      
+      setTyres(tyreList);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching tyre data:', err);
+      setError('Failed to load tyre inventory data. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load tyres on component mount
+  useEffect(() => {
+    fetchTyres();
+  }, []);
+  
   // Filter tyres based on search query and status filter
-  const filteredTyres = mockTyres.filter(tyre => {
+  const filteredTyres = tyres.filter(tyre => {
     const matchesSearch = !searchQuery || 
       Object.values(tyre).some(value => 
         String(value).toLowerCase().includes(searchQuery.toLowerCase())
@@ -45,13 +98,34 @@ const TyreManagementPage: React.FC = () => {
     return matchesSearch && matchesFilter;
   });
   
-  const handleAddTyre = (data: any) => {
-    console.log('Adding new tyre:', data);
-    // In a real app, this would save to Firestore
-    // After successful addition, close the form
-    setShowAddForm(false);
-    // Show a success toast/notification here
-    alert('Tyre added successfully!');
+  const handleAddTyre = async (data: Omit<TyreData, 'id'>) => {
+    try {
+      console.log('Adding new tyre:', data);
+      
+      // Save to Firestore
+      const docRef = await addDoc(collection(db, 'tyres'), {
+        ...data,
+        createdAt: serverTimestamp(),
+      });
+      
+      // Add the new tyre to the local state with the Firestore ID
+      setTyres(prevTyres => [
+        {
+          id: docRef.id,
+          ...data
+        },
+        ...prevTyres
+      ]);
+      
+      // Close the form
+      setShowAddForm(false);
+      
+      // Show a success toast/notification
+      alert('Tyre added successfully!');
+    } catch (err) {
+      console.error('Error adding tyre:', err);
+      alert('Failed to add tyre. Please try again.');
+    }
   };
   
   const getStatusColor = (status: string) => {
@@ -76,6 +150,12 @@ const TyreManagementPage: React.FC = () => {
           <Button
             variant="outline"
             icon={<RotateCw className="w-4 h-4" />}
+            onClick={() => {
+              setLoading(true);
+              setError(null);
+              // Re-fetch data
+              fetchTyres();
+            }}
           >
             Refresh
           </Button>
@@ -93,71 +173,90 @@ const TyreManagementPage: React.FC = () => {
           </Button>
         </div>
       </div>
+      
+      {/* Loading and Error States */}
+      {loading && (
+        <div className="bg-white p-8 rounded-lg shadow flex justify-center items-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-700"></div>
+          <span className="ml-3 text-gray-700">Loading tyre inventory...</span>
+        </div>
+      )}
+      
+      {error && (
+        <div className="bg-red-50 p-4 rounded-lg shadow border border-red-200">
+          <p className="text-red-700 flex items-center">
+            <AlertCircle className="h-5 w-5 mr-2" />
+            {error}
+          </p>
+        </div>
+      )}
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 rounded-lg mr-4">
-                <Archive className="text-blue-600 w-5 h-5" />
+      {/* Stats Cards - Only show when not loading */}
+      {!loading && !error && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="bg-blue-50 border-blue-200">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="p-2 bg-blue-100 rounded-lg mr-4">
+                  <Archive className="text-blue-600 w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Tyres</p>
+                  <p className="text-xl font-bold text-gray-900">{tyres.length}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Tyres</p>
-                <p className="text-xl font-bold text-gray-900">{mockTyres.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-green-50 border-green-200">
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <div className="p-2 bg-green-100 rounded-lg mr-4">
-                <Truck className="text-green-600 w-5 h-5" />
+          <Card className="bg-green-50 border-green-200">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="p-2 bg-green-100 rounded-lg mr-4">
+                  <Truck className="text-green-600 w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">In Service</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {tyres.filter(t => t.status === 'In-Service').length}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">In Service</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {mockTyres.filter(t => t.status === 'In-Service').length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-amber-50 border-amber-200">
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <div className="p-2 bg-amber-100 rounded-lg mr-4">
-                <CircleDashed className="text-amber-600 w-5 h-5" />
+          <Card className="bg-amber-50 border-amber-200">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="p-2 bg-amber-100 rounded-lg mr-4">
+                  <CircleDashed className="text-amber-600 w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">In Stock</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {tyres.filter(t => t.status === 'In-Stock').length}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">In Stock</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {mockTyres.filter(t => t.status === 'In-Stock').length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        <Card className="bg-red-50 border-red-200">
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <div className="p-2 bg-red-100 rounded-lg mr-4">
-                <AlertCircle className="text-red-600 w-5 h-5" />
+          <Card className="bg-red-50 border-red-200">
+            <CardContent className="p-4">
+              <div className="flex items-center">
+                <div className="p-2 bg-red-100 rounded-lg mr-4">
+                  <AlertCircle className="text-red-600 w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">For Repair/Scrap</p>
+                  <p className="text-xl font-bold text-gray-900">
+                    {tyres.filter(t => ['Repair', 'Scrap'].includes(t.status)).length}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-600">For Repair/Scrap</p>
-                <p className="text-xl font-bold text-gray-900">
-                  {mockTyres.filter(t => ['Repair', 'Scrap'].includes(t.status)).length}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Search and Filter */}
       <div className="flex flex-col md:flex-row gap-4">

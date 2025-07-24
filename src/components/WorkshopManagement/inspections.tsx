@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Input } from "@/components/ui";
 import { Badge } from "@/components/ui/Badge";
-import { Search, FileWarning, Eye, Share, FileText, MoreHorizontal } from "lucide-react";
+import { Search, FileWarning } from "lucide-react";
 import { DefectItemModal } from "../Models/Workshop/DefectItemModal";
 import InspectionDetailsModal from "../Models/Workshop/InspectionDetailsModal";
 import { parseInspectionDefects } from "@/utils/inspectionUtils";
@@ -90,27 +90,8 @@ const inspections: Inspection[] = [
 const InspectionHistory = () => {
   // State for managing modals
   const [isDefectModalOpen, setIsDefectModalOpen] = useState(false);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedInspection, setSelectedInspection] = useState<Inspection | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showActionMenu, setShowActionMenu] = useState<number | null>(null);
-
-  // Handle opening the defect modal
-  const handleOpenDefectModal = (inspection: Inspection) => {
-    setSelectedInspection(inspection);
-    setIsDefectModalOpen(true);
-  };
-  
-  // Handle opening the details modal
-  const handleOpenDetailsModal = (inspection: Inspection) => {
-    setSelectedInspection(inspection);
-    setIsDetailsModalOpen(true);
-  };
-  
-  // Toggle action menu for a specific row
-  const toggleActionMenu = (index: number) => {
-    setShowActionMenu(showActionMenu === index ? null : index);
-  };
 
   // Filter inspections based on search term
   const filteredInspections = searchTerm 
@@ -178,7 +159,6 @@ const InspectionHistory = () => {
                 <TableCell>
                   <button
                     className="border-0 bg-transparent p-0 cursor-pointer"
-                    onClick={onClick}
                     aria-label="View fault details"
                   >
                     <Badge className="bg-red-100 text-red-800">
@@ -226,6 +206,19 @@ const InspectionHistory = () => {
             defects: {
               repair: parseInspectionDefects(selectedInspection.notes)
                 .filter(item => item.type === 'repair')
+                .map(item => item.name),
+              replace: parseInspectionDefects(selectedInspection.notes)
+                .filter(item => item.type === 'replace')
+                .map(item => item.name)
+            },
+            status: {
+              inspection: "COMPLETED",
+              workOrder: selectedInspection.workOrder || null,
+              completion: selectedInspection.correctiveAction === "TAKEN" ? "COMPLETED" : null
+            }
+          }}
+          onClose={() => setIsDefectModalOpen(false)}
+        />  .filter(item => item.type === 'repair')
                 .map(item => item.name),
               replace: parseInspectionDefects(selectedInspection.notes)
                 .filter(item => item.type === 'replace')

@@ -9,10 +9,10 @@ const AddFuelEntryPage: React.FC = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Add Fuel Entry</h1>
         <div className="flex space-x-2">
-          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick}}>
+          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick}>
             Scan Receipt
           </button>
-          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick}}>
+          <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-200" onClick={onClick}>
             Import From File
           </button>
         </div>
@@ -248,7 +248,7 @@ const AddFuelEntryPage: React.FC = () => {
                     </p>
                   </div>
                   <input type="file" className="hidden" />
-                  <button type="button" className="mt-2 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" onClick={onClick}}>
+                  <button type="button" className="mt-2 inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" onClick={onClick}>
                     Upload Receipt
                   </button>
                 </div>
