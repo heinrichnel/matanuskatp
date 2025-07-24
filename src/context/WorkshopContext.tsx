@@ -32,6 +32,9 @@ export interface StockItem {
   vendorId: string;
   location: string;
   lastRestocked: string;
+  qrCode?: string;
+  serialNumber?: string;
+  barcode?: string;
   createdAt?: string;
   updatedAt?: string;
 }
