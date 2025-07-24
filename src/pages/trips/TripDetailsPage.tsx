@@ -6,14 +6,21 @@ import { Card, CardHeader, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import {
   ArrowLeft,
+  Truck,
+  Calendar,
+  MapPin,
   FileText,
   Plus,
+  Share2,
+  Clipboard,
   AlertTriangle,
   CheckCircle,
   TruckIcon,
-  PackageCheck
+  PackageCheck,
+  Flag
 } from 'lucide-react';
 import CostList from '../../components/lists/CostList';
+import TripDetails from '../../components/TripManagement/TripDetails';
 import TripCostEntryModal from '../../components/Models/Trips/TripCostEntryModal';
 import SystemCostsModal from '../../components/Models/Trips/SystemCostsModal';
 
@@ -452,7 +459,7 @@ const TripDetailsPage: React.FC = () => {
         <TripCostEntryModal
           isOpen={!!editingCost}
           onClose={() => setEditingCost(null)}
-          onSubmit={(data) => handleUpdateCost({ ...editingCost, ...data })}
+          onSubmit={(data, files) => handleUpdateCost({ ...editingCost, ...data })}
           initialData={editingCost}
         />
       )}
