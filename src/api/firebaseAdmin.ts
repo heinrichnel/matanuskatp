@@ -1,5 +1,4 @@
-// Firebase Admin SDK initialization
-const admin = require('firebase-admin');
+import * as admin from 'firebase-admin';
 
 // Check if we're in the serverless environment
 const isServerless = process.env.VERCEL || process.env.NODE_ENV === 'production';
@@ -186,7 +185,7 @@ const deleteInventoryItem = async (id) => {
   }
 };
 
-module.exports = {
+export {
   db,
   admin,
   importInventoryItems,

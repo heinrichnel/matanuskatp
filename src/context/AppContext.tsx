@@ -1,9 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { loadGoogleMapsScript } from '../utils/googleMapsLoader';
 import { 
-  getFirestore, collection, getDocs, doc, getDoc, query, where, 
-  deleteDoc, updateDoc, addDoc, onSnapshotExternal, enableNetwork, 
-  disableNetwork 
+  getFirestore, collection, doc,
+  deleteDoc, addDoc
 } from 'firebase/firestore';
 import {
   Trip,
@@ -44,8 +43,7 @@ import {
   addConnectionListener, 
   removeConnectionListener,
   enableFirestoreNetwork,
-  disableFirestoreNetwork,
-  getConnectionStatus
+  disableFirestoreNetwork
 } from '../utils/firestoreConnection';
 
 interface AppContextType {

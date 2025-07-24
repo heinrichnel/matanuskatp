@@ -1,16 +1,10 @@
 // Serverless API Function for Vercel
-const express = require('express');
-const cors = require('cors');
-const { parse } = require('csv-parse/sync');
+import express from 'express';
+import cors from 'cors';
+import { parse } from 'csv-parse/sync';
 
-// Import Firebase utilities
-let firebase;
-try {
-  firebase = require('./firebase');
-} catch (error) {
-  console.error('Firebase initialization error:', error);
-  // Continue without Firebase if initialization fails
-}
+// Import Firebase Admin utilities
+import * as firebaseAdmin from './firebaseAdmin';
 
 const app = express();
 
@@ -44,7 +38,7 @@ app.get('/api/health', (req, res) => {
 // CSV Import for Inventory
 app.post('/api/inventory/import', async (req, res) => {
   try {
-    const { importInventoryItems } = require('./firebase');
+    const { importInventoryItems } = await import('./firebase');
     
     // Check if there's CSV data in the request
     if (!req.body.csvData) {
@@ -355,7 +349,7 @@ app.delete('/api/inventory/:id', async (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   console.error(err.stack);
   res.status(500).json({
     error: 'Internal Server Error',
