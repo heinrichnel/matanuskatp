@@ -1,8 +1,15 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
+// ✅ Gebruik net EEN config object
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+    },
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,
@@ -14,8 +21,8 @@ export default defineConfig({
     reportCompressedSize: false,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Vendor chunks
+        manualChunks(id) {
+          // Vendor splitting
           if (id.includes('node_modules')) {
             if (id.includes('react')) return 'react';
             if (id.includes('firebase')) {
@@ -33,6 +40,7 @@ export default defineConfig({
             if (id.includes('@ant-design')) return 'ant-design';
             return 'vendor';
           }
+          // App-specific chunking
           if (id.includes('src/pages')) return 'pages';
           if (id.includes('src/components')) return 'components';
         }
