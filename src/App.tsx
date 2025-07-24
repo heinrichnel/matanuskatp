@@ -129,7 +129,8 @@ import AnalyticsDashboard from './pages/analytics/AnalyticsDashboard';
 
     // === WORKSHOP ===
 import WorkshopPage from './pages/workshop/WorkshopPage';
-import QRGenerator from './components/WorkshopManagement/QRGenerator';
+import QRGenerator from './pages/workshop/QRGenerator';
+import QRScannerPage from './pages/workshop/QRScannerPage';
 import QRCodeBatchGenerator from './components/WorkshopManagement/QRCodeBatchGenerator';
 import DriverInspectionForm from './pages/workshop/DriverInspectionForm';
 import InspectionHistory from './pages/workshop/InspectionHistory';
@@ -414,7 +415,8 @@ const App: React.FC = () => {
                       <Route path="/workshop/purchase-orders" element={<PurchaseOrderPage />} />
                       <Route path="/workshop/stock-inventory" element={<StockInventoryPage />} />
                       {/* TODO: Implement FleetTable component */}
-                      <Route path="/workshop/fleet-setup" element={<WorkshopPage />} />
+                      <Route path="/workshop/qr-generator" element={<QRGenerator />} />
+                      <Route path="/workshop/qr-scanner" element={<QRScannerPage />} />
                       <Route path="/workshop/qr-generator" element={<QRGenerator />} />
                       <Route path="/workshop/inspections" element={<InspectionHistoryPage />} />
                       <Route path="/workshop/job-cards" element={<JobCardManagement />} />
