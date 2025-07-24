@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { QRCode } from "qrcode.react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { getFirestore, collection, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
-// Using a relative import instead of an alias import to fix build issues
-import { TyreInspectionPDFGenerator } from "../../components/TyreInspectionPDFGenerator";
+// Removing unused imports: updateDoc and TyreInspectionPDFGenerator
 
 interface TyreInspectionFormProps {
   fleetNumber?: string;
@@ -51,7 +50,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
     try {
       setIsLoading(true);
       const db = getFirestore();
-      const tyreRef = collection(db, 'tyre_inspections');
+      // Removing unused tyreRef variable
       const inspectionQuery = await getDoc(doc(db, 'tyre_inspections', `${fleet}-${position}`));
       
       if (inspectionQuery.exists()) {

@@ -465,7 +465,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           
           {/* File upload button */}
           <button
-            onClick={onClick}
+            onClick={handleFileUploadClick}
             className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 flex items-center"
             disabled={isUploading}
           >
@@ -489,7 +489,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           
           {/* Template download button */}
           <button
-            onClick={onClick}
+            onClick={handleDownloadTemplate}
             className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 flex items-center"
           >
             <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -680,13 +680,13 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
             
             <div className="mt-6 flex justify-end space-x-3">
               <button
-                onClick={onClick}
+                onClick={handleCancel}
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
-                onClick={onClick}
+                onClick={handleSave}
                 className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700"
               >
                 Save Changes
@@ -772,7 +772,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                       <button className="text-indigo-600 hover:text-indigo-900" onClick={() => {}}>View</button>
                       <button 
                         className="text-blue-600 hover:text-blue-900"
-                        onClick={() => {}}
+                        onClick={() => handleEditClick(trip)}
                       >
                         Edit Costs
                       </button>
