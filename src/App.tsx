@@ -114,83 +114,84 @@ import DriverDashboard from './pages/drivers/DriverDashboard';
 import ClientSelectionExample from './pages/examples/ClientSelectionExample';
 
 // === COMPLIANCE ===
-import ComplianceManagementPage from './pages/compliance/ComplianceManagementPage';
-import AuditManagement from './pages/compliance/AuditManagement';
-import ViolationTracking from './pages/compliance/ViolationTracking';
-import InsuranceManagement from './pages/compliance/InsuranceManagement';
-import ComplianceDashboard from './pages/compliance/ComplianceDashboard';
+import ComplianceManagementPage from './pages/ComplianceManagementPage';
+import AuditManagement from './pages/AuditManagement';
+import ViolationTracking from './pages/ViolationTracking';
+import InsuranceManagement from './pages/InsuranceManagement';
+import ComplianceDashboard from './pages/ComplianceDashboard';
 
 // === ANALYTICS ===
-import FleetAnalyticsPage from './pages/analytics/FleetAnalyticsPage';
-import CreateCustomReport from './pages/analytics/CreateCustomReport';
-import AnalyticsInsights from './pages/analytics/AnalyticsInsights';
-import VehiclePerformance from './pages/analytics/VehiclePerformance';
-import AnalyticsDashboard from './pages/analytics/AnalyticsDashboard';
+import FleetAnalyticsPage from './pages/FleetAnalyticsPage';
+import CreateCustomReport from './pages/CreateCustomReport';
+import AnalyticsInsights from './pages/AnalyticsInsights';
+import VehiclePerformance from './pages/VehiclePerformance';
+import AnalyticsDashboard from './pages/AnalyticsDashboard';
 
     // === WORKSHOP ===
 import WorkshopPage from './pages/workshop/WorkshopPage';
 import QRGenerator from './pages/workshop/QRGenerator';
 import QRScannerPage from './pages/workshop/QRScannerPage';
 import QRCodeBatchGenerator from './components/WorkshopManagement/QRCodeBatchGenerator';
-import DriverInspectionForm from './pages/workshop/DriverInspectionForm';
-import InspectionHistory from './pages/workshop/InspectionHistory';
-import InspectionHistoryPage from './pages/workshop/inspections';
-import InspectionForm from './components/workshop/InspectionForm';
-import InspectionManagement from './components/workshop/InspectionManagement';
-import InspectionTemplatesPage from './pages/workshop/InspectionTemplatesPage';
-import JobCardManagement from './pages/workshop/JobCardManagement';
-import JobCardKanbanBoard from './components/workshop/JobCardKanbanBoard';
-import JobCardTemplatesPage from './pages/workshop/JobCardTemplatesPage';
-import FaultTracking from './pages/workshop/FaultTracking';
-import TyreManagement from './pages/workshop/TyreManagement';
-import TyreStoresPage from './pages/tyres/TyreStoresPage';
-import TyreFleetMap from './pages/tyres/TyreFleetMap';
-import TyreHistoryPage from './pages/tyres/TyreHistoryPage';
-import TyrePerformanceDashboard from './pages/tyres/TyrePerformanceDashboard';
-import TyreAddPage from './pages/tyres/AddNewTyre';
+import DriverInspectionForm from './pages/DriverInspectionForm';
+import InspectionHistory from './pages/InspectionHistory';
+import InspectionHistoryPage from './components/WorkshopManagement/inspections';
+import InspectionForm from './components/WorkshopManagement/InspectionForm';
+import InspectionManagement from './components/WorkshopManagement/InspectionManagement';
+import InspectionTemplatesPage from './pages/InspectionTemplatesPage';
+import JobCardManagement from './pages/JobCardManagement';
+import JobCardKanbanBoard from './components/WorkshopManagement/JobCardKanbanBoard';
+import JobCardTemplatesPage from './pages/JobCardTemplatesPage';
+import FaultTracking from './components/WorkshopManagement/FaultTracking';
+import TyreManagement from './pages/TyreManagementPage';
+import TyreStoresPage from './pages/TyreStoresPage';
+import TyreFleetMap from './pages/TyreFleetMap';
+import TyreHistoryPage from './pages/TyreHistoryPage';
+import TyrePerformanceDashboard from './pages/TyrePerformanceDashboard';
+import TyreAddPage from './pages/tyres/AddNewTyrePage';
 import TyreManagementPage from './pages/tyres/TyreManagementPage';
-import StockAlertsPage from './pages/inventory/StockAlertsPage';
-import PartsOrderingPage from './pages/inventory/PartsOrderingPage';
-import VehicleInspectionPage from './pages/workshop/vehicle-inspection';
-import PurchaseOrderTracker from './pages/inventory/PurchaseOrderTracker';
-import VendorScorecard from './pages/inventory/VendorScorecard';
-import InventoryDashboard from './pages/inventory/InventoryDashboard';
-import StockManager from './components/workshop/StockManager';
-import IndirectCostBreakdown from './pages/workshop/IndirectCostBreakdown';
-import WorkshopAnalyticsComp from './pages/workshop/WorkshopAnalytics';
-import WorkshopReportsPage from './pages/workshop/WorkshopReportsPage';
-import WorkshopCostReportsPage from './pages/workshop/WorkshopCostReportsPage';
+import StockAlertsPage from './pages/StockAlertsPage';
+// import PartsOrderingPage from './pages/PartsOrderingPage'; // File doesn't exist
+import VehicleInspectionPage from './components/WorkshopManagement/vehicle-inspection';
+import PurchaseOrderTracker from './pages/PurchaseOrderTracker';
+import VendorScorecard from './pages/VendorScorecard';
+import InventoryDashboard from './pages/InventoryDashboard';
+import StockManager from './components/WorkshopManagement/StockManager';
+import IndirectCostBreakdown from './pages/IndirectCostBreakdown';
+import WorkshopAnalyticsComp from './pages/WorkshopAnalytics';
+import WorkshopReportsPage from './pages/WorkshopReportsPage';
+import WorkshopCostReportsPage from './pages/WorkshopCostReportsPage';
 import VendorPage from './pages/workshop/VendorPage';
 import StockInventoryPage from './pages/workshop/StockInventoryPage';
 import PurchaseOrderPage from './pages/workshop/PurchaseOrderPage';
 import TripDetailsPage from './pages/trips/TripDetailsPage';
+import MainTripWorkflow from './pages/trips/MainTripWorkflow';
 
 // === TYRES ===
-import TyreInspection from './pages/tyres/inspection';
-import TyreInventory from './pages/tyres/inventory';
-import TyreReports from './pages/tyres/reports';
-import AddNewTyrePage from './pages/tyres/add-new-tyre';
+import TyreInspection from './components/Tyremanagement/TyreInspection';
+import TyreInventory from './components/Tyremanagement/TyreInventory';
+import TyreReports from './components/Tyremanagement/TyreReports';
+import AddNewTyrePage from './pages/tyres/AddNewTyrePage';
 
 // === INVENTORY ===
-import InventoryPage from './pages/inventory/InventoryPage';
-import PartsInventoryPage from './pages/inventory/PartsInventoryPage';
-import ReceivePartsPage from './pages/inventory/ReceivePartsPage';
-import InventoryReportsPage from './pages/inventory/InventoryReportsPage';
+import InventoryPage from './pages/InventoryPage';
+import PartsInventoryPage from './pages/PartsInventoryPage';
+import ReceivePartsPage from './pages/ReceivePartsPage';
+import InventoryReportsPage from './pages/InventoryReportsPage';
 
 // === WIALON ===
-import WialonDashboard from './pages/wialon/WialonDashboard';
-import WialonUnitsPage from './pages/wialon/WialonUnitsPage';
-import WialonConfigPage from './pages/wialon/WialonConfigPage';
+import WialonDashboard from './pages/WialonDashboard';
+import WialonUnitsPage from './pages/WialonUnitsPage';
+import WialonConfigPage from './pages/WialonConfigPage';
 
 // === REPORTS & OTHER ===
-import ActionLog from './pages/reports/ActionLog';
-import CurrencyFleetReport from './pages/reports/CurrencyFleetReport';
-import InvoiceAgingDashboard from './pages/reports/InvoiceAgingDashboard';
-import CustomerRetentionDashboard from './pages/Performance/CustomerRetentionDashboard';
-import NotificationsPage from './pages/NotificationsPage';
-import SettingsPage from './pages/SettingsPage';
-import MapTestPage from './pages/Map/MapTestPage';
-import MapsView from './pages/Map/MapsView';
+import ActionLog from './pages/ActionLog';
+import CurrencyFleetReport from './pages/CurrencyFleetReport';
+import InvoiceAgingDashboard from './pages/InvoiceAgingDashboard';
+import CustomerRetentionDashboard from './pages/CustomerRetentionDashboard';
+import NotificationsPage from './components/ui/GenericPlaceholderPage';
+import SettingsPage from './components/ui/GenericPlaceholderPage';
+import MapTestPage from './pages/MapTestPage';
+import MapsView from './pages/MapsView';
 import UIConnector from './components/UIConnector';
 import { ScanQRButton } from "./components/ScanQRButton";
 
@@ -339,6 +340,7 @@ const App: React.FC = () => {
                       <Route path="/trips/load-planning" element={<LoadPlanningPage />} />
                       <Route path="/trips/calendar" element={<TripCalendarPage />} />
                       <Route path="/trips/add" element={<AddTripPage />} />
+                      <Route path="/trips/workflow" element={<MainTripWorkflow />} />
                       <Route path="/trips/map" element={<FleetLocationMapPage />} />
                       <Route path="/trips/active-dashboard" element={<ActiveTrips />} />
                       <Route path="/trips/completed-dashboard" element={<CompletedTrips />} />
@@ -422,7 +424,7 @@ const App: React.FC = () => {
                       <Route path="/workshop/job-cards" element={<JobCardManagement />} />
                       <Route path="/workshop/faults" element={<FaultTracking />} />
                       <Route path="/workshop/tyres" element={<TyreManagement />} />
-                      <Route path="/workshop/parts-ordering" element={<PartsOrderingPage />} />
+                      <Route path="/workshop/parts-ordering" element={<GenericPlaceholderPage pageTitle="Parts Ordering" />} />
                       <Route path="/workshop/vehicle-inspection" element={<VehicleInspectionPage />} />
 
                       {/* === EXAMPLES ===

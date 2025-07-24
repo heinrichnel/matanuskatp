@@ -74,6 +74,22 @@ export const sidebarConfig: SidebarItem[] = [
         subComponents: ['components/TripManagement/TripForm']
       },
       { 
+        id: 'trip-workflow', 
+        label: 'Trip Workflow', 
+        path: '/trips/workflow', 
+        component: 'pages/trips/MainTripWorkflow',
+        subComponents: [
+          'pages/trips/TripForm',
+          'pages/trips/CostEntryForm', 
+          'pages/trips/SystemCostGenerator',
+          'pages/trips/FlagInvestigationPanel',
+          'pages/trips/TripCompletionPanel',
+          'pages/trips/TripInvoicingPanel',
+          'pages/trips/PaymentTrackingPanel',
+          'pages/trips/ReportingPanel'
+        ]
+      },
+      { 
         id: 'driver-performance', 
         label: 'Driver Performance', 
         path: '/trips/driver-performance', 

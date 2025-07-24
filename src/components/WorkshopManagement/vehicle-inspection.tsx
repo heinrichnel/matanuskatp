@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import InspectionReportForm from '../../components/Workshop Management/InspectionReportForm';
+import InspectionReportForm from '../forms/InspectionReportForm';
 
 /**
  * Vehicle Inspection Page
