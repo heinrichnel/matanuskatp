@@ -160,6 +160,10 @@ const InspectionHistory = () => {
                   <button
                     className="border-0 bg-transparent p-0 cursor-pointer"
                     aria-label="View fault details"
+                    onClick={() => {
+                      setSelectedInspection(inspection);
+                      setIsDefectModalOpen(true);
+                    }}
                   >
                     <Badge className="bg-red-100 text-red-800">
                       ⚠ {inspection.faultCount}

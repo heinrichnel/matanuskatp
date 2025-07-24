@@ -97,6 +97,9 @@ const DieselDashboardComponent: React.FC = () => {
             <div className="text-center">
               <p className="text-gray-500">Fuel Consumption Chart</p>
               <p className="text-gray-400 text-sm">Monthly consumption trend visualization</p>
+              <p className="text-sm mt-2">
+                Highest consumption: {Math.max(...chartData.consumption).toLocaleString()} L ({chartData.months[chartData.consumption.indexOf(Math.max(...chartData.consumption))]})
+              </p>
             </div>
           </div>
         </div>
@@ -108,6 +111,9 @@ const DieselDashboardComponent: React.FC = () => {
             <div className="text-center">
               <p className="text-gray-500">Fuel Cost Chart</p>
               <p className="text-gray-400 text-sm">Monthly cost trend visualization</p>
+              <p className="text-sm mt-2">
+                Highest cost: ${Math.max(...chartData.costs).toLocaleString()} ({chartData.months[chartData.costs.indexOf(Math.max(...chartData.costs))]})
+              </p>
             </div>
           </div>
         </div>
