@@ -1,0 +1,3 @@
+// Import the actual modal components
+import TripCostEntryModal from '../../components/Models/Trips/TripCostEntryModal';
+import SystemCostsModal from '../../components/Models/Trips/SystemCostsModal';

@@ -22,6 +22,9 @@ export {
   TableRow 
 } from './table';
 
+// Re-export GenericPlaceholderPage component
+export { default as GenericPlaceholderPage } from './GenericPlaceholderPage';
+
 // Re-export ApplicantInfoCard component - temporarily commented due to missing file
 // export { default as ApplicantInfoCard } from './ApplicantInfoCard';
 

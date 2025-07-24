@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { SupportedCurrency, formatCurrency } from '../../lib/currency';
+import { useRealtimeTrips } from '../../hooks/useRealtimeTrips';
 // Uncomment when API integration is ready
 // import { fetchTripsFromAPI } from '../../api/tripsApi';
 
@@ -97,7 +98,31 @@ const initialActiveTrips: Trip[] = [
 ];
 
 const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
+  // Use the real-time trips hook instead of mock data
+  const { trips: fetchedTrips } = useRealtimeTrips({ status: 'active' });
   const [activeTrips, setActiveTrips] = useState<Trip[]>(initialActiveTrips);
+  
+  // Update state when real data arrives
+  useEffect(() => {
+    if (fetchedTrips && fetchedTrips.length > 0) {
+      // Map the fetched trips to the expected format
+      const formattedTrips = fetchedTrips.map(trip => ({
+        id: trip.id,
+        tripNumber: trip.loadRef || `TR-${trip.id.substring(0, 8)}`,
+        origin: trip.origin || 'Unknown',
+        destination: trip.destination || 'Unknown',
+        startDate: trip.startTime || new Date().toISOString(),
+        endDate: trip.endTime || new Date().toISOString(),
+        status: trip.status as 'active' | 'completed' | 'scheduled',
+        driver: trip.driver || 'Unassigned',
+        vehicle: trip.vehicle || 'Unassigned',
+        distance: trip.distance || 0,
+        cost: trip.totalCost || 0,
+        costBreakdown: trip.costBreakdown || {}
+      }));
+      setActiveTrips(formattedTrips);
+    }
+  }, [fetchedTrips]);
   const [webhookTrips, setWebhookTrips] = useState<Trip[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

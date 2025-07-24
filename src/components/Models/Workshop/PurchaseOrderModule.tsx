@@ -1,11 +1,25 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Card, { CardContent, CardHeader } from '../ui/Card';
 import Button from '../ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/Tabs';
 import { FileText, ShoppingCart, Check, Package, Store, Plus, RefreshCw } from 'lucide-react';
 
-const PurchaseOrderModule: React.FC = () => {
+interface PurchaseOrderModuleProps {
+  onCreatePO?: () => void;
+}
+
+const PurchaseOrderModule: React.FC<PurchaseOrderModuleProps> = ({ onCreatePO }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('orders');
+  
+  const handleCreatePO = () => {
+    if (onCreatePO) {
+      onCreatePO();
+    } else {
+      navigate('/workshop/purchase-orders/new');
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -23,6 +37,7 @@ const PurchaseOrderModule: React.FC = () => {
           </Button>
           <Button
             icon={<Plus className="w-4 h-4" />}
+            onClick={handleCreatePO}
           >
             New Purchase Order
           </Button>
@@ -60,6 +75,7 @@ const PurchaseOrderModule: React.FC = () => {
                 <div className="mt-6">
                   <Button
                     icon={<Plus className="w-4 h-4" />}
+                    onClick={handleCreatePO}
                   >
                     Create Purchase Order
                   </Button>

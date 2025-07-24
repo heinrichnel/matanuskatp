@@ -156,7 +156,7 @@ const DriverInspectionForm: React.FC = () => {
               <Button 
                 variant="outline" 
                 className="flex items-center gap-1" 
-                onClick={onClick}`) : navigate('/workshop/inspection-history')}
+                onClick={() => navigate('/workshop/inspection-history')}
               >
                 <Clipboard className="w-4 h-4" />
                 View Inspection History
