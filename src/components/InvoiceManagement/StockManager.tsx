@@ -418,19 +418,19 @@ const StockManager: React.FC = () => {
         <div className="flex items-center space-x-2">
           {syncing ? <SyncIndicator /> : null}
           <Button 
-            onClick={onClick}
+            onClick={() => setIsAddModalOpen(true)}
             variant="primary"
           >
             Add New Item
           </Button>
           <Button 
-            onClick={onClick}
+            onClick={handleExport}
             variant="secondary"
           >
             Export CSV
           </Button>
           <Button 
-            onClick={onClick}
+            onClick={handleExportExcel}
             variant="secondary"
           >
             Export Excel
@@ -681,13 +681,13 @@ const StockManager: React.FC = () => {
             
             <div className="mt-6 flex justify-end gap-3">
               <Button 
-                onClick={onClick}
+                onClick={() => setIsAddModalOpen(false)}
                 variant="secondary"
               >
                 Cancel
               </Button>
               <Button 
-                onClick={onClick}
+                onClick={handleAddItem}
                 variant="primary"
                 disabled={!newItem.name || !newItem.sku}
               >

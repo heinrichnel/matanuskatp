@@ -135,14 +135,14 @@ const JobCard: React.FC = () => {
   const [tasks, setTasks] = useState(mockTasks);
   // These variables are needed for the commented out components below
   // They will be used once the TaskManager and QAReviewPanel components are implemented
-  // @ts-expect-error: Variable used in commented out code, kept for future implementation
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const taskHistory = mockTaskHistory;
-  // @ts-expect-error: Variable used in commented out code, kept for future implementation
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const assignedParts = mockAssignedParts;
   const [notes, setNotes] = useState(mockNotes);
   const [userRole, setUserRole] = useState<'technician' | 'supervisor'>('technician');
   // Adding isLoading state that's used in the functions
-  // @ts-expect-error: Used in commented out components, kept for future implementation
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(false);
   const [setTaskHistory] = useState(() => (newEntries: TaskHistoryEntry[]) => {
     // This will be replaced with actual function when components are implemented
@@ -151,7 +151,7 @@ const JobCard: React.FC = () => {
   
   // Handler functions for tasks
   // These handlers will be used once the TaskManager component is implemented
-  const handleTaskUpdate = (taskId: string, updates: any) => {
+  const handleTaskUpdate = (taskId: string, updates: Partial<JobCardTask>) => {
     setTasks(prevTasks => 
       prevTasks.map(task => 
         task.id === taskId ? { ...task, ...updates } : task
@@ -159,8 +159,9 @@ const JobCard: React.FC = () => {
     );
   };
   
+  // Will be used once the TaskManager component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleTaskAdd = (task: any) => {
+  const handleTaskAdd = (task: Omit<JobCardTask, 'id'>) => {
     const newTask = {
       ...task,
       id: uuidv4()
@@ -168,6 +169,7 @@ const JobCard: React.FC = () => {
     setTasks(prevTasks => [...prevTasks, newTask]);
   };
   
+  // Will be used once the TaskManager component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleTaskDelete = (taskId: string) => {
     setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
@@ -183,6 +185,7 @@ const JobCard: React.FC = () => {
   };
 
   // Handler for verifying a task (supervisor only)
+  // Will be used when QAReviewPanel component is implemented
   // Will be used when QAReviewPanel component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleVerifyTask = async (taskId: string) => {
@@ -223,6 +226,7 @@ const JobCard: React.FC = () => {
   };
 
   // Handler for verifying all tasks at once (supervisor only)
+  // Will be used when QAReviewPanel component is implemented
   // Will be used when QAReviewPanel component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleVerifyAllTasks = async () => {
@@ -267,20 +271,23 @@ const JobCard: React.FC = () => {
   
   // Handler functions for parts
   // Will be used when InventoryPanel component is implemented
+  // Will be used when InventoryPanel component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleAssignPart = (partId: string, quantity: number) => {
     // Implementation will be used when component is ready
     console.log(`Would assign part ${partId} with quantity ${quantity}`);
   };
   
+  // Will be used when InventoryPanel component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleRemovePart = (assignmentId: string) => {
     // Implementation will be used when component is ready
     console.log(`Would remove part assignment ${assignmentId}`);
   };
   
+  // Will be used when InventoryPanel component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleUpdatePart = (assignmentId: string, updates: any) => {
+  const handleUpdatePart = (assignmentId: string, updates: { quantity?: number; status?: string }) => {
     // Implementation will be used when component is ready
     console.log(`Would update part assignment ${assignmentId} with`, updates);
   };
