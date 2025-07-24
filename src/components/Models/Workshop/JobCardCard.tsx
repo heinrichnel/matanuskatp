@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Calendar, Clock, Truck, User } from 'lucide-react';
+import { AlertTriangle, Calendar, Truck, User } from 'lucide-react';
 import { formatDate } from '../../../utils/helpers';
 
 interface JobCardProps {

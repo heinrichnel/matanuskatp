@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, Button } from '../../components/ui';
-import { format } from 'date-fns';
+// Using our custom formatDate helper instead of date-fns
 
 interface DriverAuthorization {
   authorization: string;
