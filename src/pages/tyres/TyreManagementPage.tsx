@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import AddNewTyreForm from '../../components/forms/AddTyreForm';
-import { collection, query, getDocs, orderBy, where, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 interface TyreData {
