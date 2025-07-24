@@ -90,3 +90,22 @@ export interface Inspection {
   criticalIssues: number;
   notes: string;
 }
+
+/**
+ * Vehicle inspection interface for detailed vehicle inspections
+ */
+export interface VehicleInspection {
+  id: string;
+  date: string;
+  inspector: string;
+  vehicleId: string;
+  faults: string[];
+  status: "PASSED" | "FAILED" | "REQUIRES_ATTENTION";
+  images?: string[];
+  notes?: string;
+  mileage?: number;
+  followUpActions?: string[];
+  signatureUrl?: string;
+  createdAt: string;
+  completedAt?: string;
+}
