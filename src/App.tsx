@@ -150,7 +150,7 @@ import TyrePerformanceDashboard from './pages/TyrePerformanceDashboard';
 import TyreAddPage from './pages/tyres/AddNewTyrePage';
 import TyreManagementPage from './pages/tyres/TyreManagementPage';
 import StockAlertsPage from './pages/StockAlertsPage';
-// import PartsOrderingPage from './pages/PartsOrderingPage'; // File doesn't exist
+import PartsOrderingPage from './pages/PartsOrderingPage';
 import VehicleInspectionPage from './components/WorkshopManagement/vehicle-inspection';
 import PurchaseOrderTracker from './pages/PurchaseOrderTracker';
 import VendorScorecard from './pages/VendorScorecard';
@@ -424,8 +424,16 @@ const App: React.FC = () => {
                       <Route path="/workshop/job-cards" element={<JobCardManagement />} />
                       <Route path="/workshop/faults" element={<FaultTracking />} />
                       <Route path="/workshop/tyres" element={<TyreManagement />} />
-                      <Route path="/workshop/parts-ordering" element={<GenericPlaceholderPage pageTitle="Parts Ordering" />} />
+                      <Route path="/workshop/parts-ordering" element={<PartsOrderingPage />} />
                       <Route path="/workshop/vehicle-inspection" element={<VehicleInspectionPage />} />
+
+                      {/* === INVENTORY === */}
+                      <Route path="/inventory" element={<InventoryPage />} />
+                      <Route path="/inventory/dashboard" element={<InventoryDashboard />} />
+                      <Route path="/inventory/stock" element={<PartsInventoryPage />} />
+                      <Route path="/inventory/ordering" element={<PartsOrderingPage />} />
+                      <Route path="/inventory/receive" element={<ReceivePartsPage />} />
+                      <Route path="/inventory/reports" element={<InventoryReportsPage />} />
 
                       {/* === EXAMPLES ===
                       <Route path="/examples/clients" element={<ClientSelectionExample />} />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useWialonUnits, WialonUnitData } from '../../hooks/useWialonUnits';
+import { useWialonUnits, WialonUnitData } from '../../../hooks/useWialonUnits';
 
 // Extended Wialon unit interface with additional properties we might receive
 interface ExtendedWialonUnit extends WialonUnitData {

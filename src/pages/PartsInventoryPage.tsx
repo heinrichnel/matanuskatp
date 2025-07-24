@@ -1,5 +1,8 @@
 import React from "react";
-import { Button, Card, CardContent, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui";
+import { Button } from "../components/ui/Button";
+import Card, { CardContent } from "../components/ui/Card";
+import Table from "../components/ui/Table";
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/Table";
 import { Settings, Plus, Upload, Search } from "lucide-react";
 
 const inventory = [
