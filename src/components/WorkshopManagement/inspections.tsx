@@ -218,19 +218,6 @@ const InspectionHistory = () => {
             }
           }}
           onClose={() => setIsDefectModalOpen(false)}
-        />  .filter(item => item.type === 'repair')
-                .map(item => item.name),
-              replace: parseInspectionDefects(selectedInspection.notes)
-                .filter(item => item.type === 'replace')
-                .map(item => item.name)
-            },
-            status: {
-              inspection: "COMPLETED",
-              workOrder: selectedInspection.workOrder || null,
-              completion: selectedInspection.correctiveAction === "TAKEN" ? "COMPLETED" : null
-            }
-          }}
-          onClose={() => setIsDetailsModalOpen(false)}
         />
       )}
     </div>

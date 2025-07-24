@@ -311,7 +311,7 @@ const TyreManagementPage: React.FC = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tyre ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tyre Number</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manufacturer</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pattern</th>
@@ -324,8 +324,8 @@ const TyreManagementPage: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredTyres.map((tyre) => (
                   <tr key={tyre.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{tyre.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.size}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{tyre.tyreNumber}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.tyreSize}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.manufacturer}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.pattern}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -333,8 +333,8 @@ const TyreManagementPage: React.FC = () => {
                         {tyre.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.vehicle || '—'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.position || '—'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.vehicleAssigned || '—'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tyre.axlePosition || '—'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex space-x-2">
                         <button 
