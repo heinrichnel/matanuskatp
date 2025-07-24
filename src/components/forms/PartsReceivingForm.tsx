@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
-import { Box, Save, FileText, Truck, Calendar, Info, Plus, Trash } from 'lucide-react';
+import { Box, Save, FileText, Calendar, Info, Plus, Trash } from 'lucide-react';
 
 interface PartToReceive {
   id: string;
@@ -148,7 +148,7 @@ const PartsReceivingForm: React.FC<PartsReceivingFormProps> = ({
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={onClick}
+                onClick={handleAddPart}
                 icon={<Plus className="w-4 h-4 mr-1" />}
               >
                 Add Item
@@ -262,7 +262,7 @@ const PartsReceivingForm: React.FC<PartsReceivingFormProps> = ({
                         <button
                           type="button"
                           className="text-red-600 hover:text-red-900"
-                          onClick={onClick}
+                          onClick={() => handleRemovePart(part.id)}
                           disabled={parts.length <= 1}
                         >
                           <Trash className="h-5 w-5" />
