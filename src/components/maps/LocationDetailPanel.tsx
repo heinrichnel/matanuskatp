@@ -21,7 +21,7 @@ interface LocationDetailPanelState {
   error: string | null;
 }
 
-export class LocationDetailPanel extends React.Component<LocationDetailPanelProps, LocationDetailPanelState> {
+export default class LocationDetailPanel extends React.Component<LocationDetailPanelProps, LocationDetailPanelState> {
   constructor(props: LocationDetailPanelProps) {
     super(props);
     this.state = {
@@ -82,3 +82,4 @@ export class LocationDetailPanel extends React.Component<LocationDetailPanelProp
     );
   }
 }
+export default LocationDetailPanel;

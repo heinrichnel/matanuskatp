@@ -553,10 +553,10 @@ const StockManager: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">{item.supplier}</td>
                       <td className="px-6 py-4 whitespace-nowrap">${(item.quantity * item.unitCost).toFixed(2)}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button className="text-indigo-600 hover:text-indigo-900 mr-3" onClick={onClick}}>
+                        <button className="text-indigo-600 hover:text-indigo-900 mr-3" onClick={onClick}>
                           Edit
                         </button>
-                        <button className="text-red-600 hover:text-red-900" onClick={onClick}}>
+                        <button className="text-red-600 hover:text-red-900" onClick={onClick}>
                           Delete
                         </button>
                       </td>

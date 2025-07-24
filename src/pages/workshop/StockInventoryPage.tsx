@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import Papa from 'papaparse';
 
-interface StockInventoryPageProps {}
+// Replace the empty interface with a type alias for clarity
+type StockInventoryPageProps = object;
 
 const StockInventoryPage: React.FC<StockInventoryPageProps> = () => {
   const { 

@@ -376,7 +376,7 @@ const ActionLog: React.FC = () => {
             <Button
               size="sm"
               variant="outline"
-              onClick={onClick})}
+              onClick={onClick}
             >
               Clear Filters
             </Button>

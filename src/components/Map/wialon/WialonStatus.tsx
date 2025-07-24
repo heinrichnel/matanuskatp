@@ -1,6 +1,6 @@
 import React from 'react';
-import useWialonConnection from '../../hooks/useWialonConnection';
-import { useWialonUnits } from '../../hooks/useWialonUnits';
+import useWialonConnection from '../../../hooks/useWialonConnection';
+import { useWialonUnits } from '../../../hooks/useWialonUnits'; // fixed import path
 
 interface WialonStatusProps {
   showDetails?: boolean;
