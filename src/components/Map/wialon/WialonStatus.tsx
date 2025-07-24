@@ -20,16 +20,12 @@ const WialonStatus: React.FC<WialonStatusProps> = ({
   const { status, loading: connectionLoading, refresh } = useWialonConnection();
   const { units, loading: unitsLoading, error: unitsError } = useWialonUnits();
 
-  const handleRefresh = () => {
-    refresh();
-  };
-
   return (
     <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Wialon Integration Status</h3>
         <button
-          onClick={onClick}
+          onClick={refresh}
           className="px-3 py-1.5 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-800 dark:hover:bg-blue-700 dark:text-blue-100 rounded transition-colors"
         >
           Refresh

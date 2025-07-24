@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AddNewTireForm from '../../components/forms/AddTyreForm';
-import { Card, CardContent, CardHeader, Button } from '../../components/ui';
+import { Card, CardContent, Button } from '../../components/ui';
 import { Package, Check } from 'lucide-react';
 
 interface TyreData {
@@ -49,11 +49,16 @@ const AddNewTyrePage: React.FC = () => {
     console.log('Submitting tyre data:', data);
     
     try {
-      // In a real app, this would save to Firestore
-      // const db = getFirestore();
-      // await addDoc(collection(db, 'tyres'), data);
+      // Save the data to Firestore
+      const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+      const { db } = await import('../../firebase');
       
-      // For demo purposes, we'll just show a success message
+      await addDoc(collection(db, 'tyres'), {
+        ...data,
+        createdAt: serverTimestamp()
+      });
+      
+      // Show success message
       setSubmitted(true);
       
       // And redirect after a delay

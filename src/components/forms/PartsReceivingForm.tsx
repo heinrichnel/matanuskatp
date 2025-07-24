@@ -21,6 +21,7 @@ interface PartsReceivingFormProps {
   onSubmit?: (data: PartToReceive[]) => void;
   onCancel?: () => void;
   initialData?: PartToReceive[];
+  isLoading?: boolean;
 }
 
 const PartsReceivingForm: React.FC<PartsReceivingFormProps> = ({

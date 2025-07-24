@@ -314,7 +314,7 @@ const PredictiveModels: React.FC = () => {
                     
                     {insight.actionRequired && (
                       <div className="mt-2">
-                        <button className="px-3 py-1 bg-white text-sm font-medium rounded border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onClick={onClick}}>
+                        <button className="px-3 py-1 bg-white text-sm font-medium rounded border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onClick={onClick}>
                           View Action Plan
                         </button>
                       </div>

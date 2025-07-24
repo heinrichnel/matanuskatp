@@ -94,22 +94,6 @@ const WialonUnitsList: React.FC<WialonUnitsListProps> = ({
         name: typeof type === 'number' ? `Class ${type}` : type 
       })) : [];
 
-  const handleSort = (key: string) => {
-    setSortConfig(prevConfig => ({
-      key,
-      direction: 
-        prevConfig.key === key && prevConfig.direction === 'ascending' 
-          ? 'descending' 
-          : 'ascending'
-    }));
-  };
-
-  const handleUnitClick = (unit: ExtendedWialonUnit) => {
-    if (onSelectUnit) {
-      onSelectUnit(unit.id, unit);
-    }
-  };
-
   if (loading) {
     return (
       <div className="p-4 text-center">
@@ -178,7 +162,13 @@ const WialonUnitsList: React.FC<WialonUnitsListProps> = ({
             <tr>
               <th 
                 className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={onClick}
+                onClick={() => setSortConfig(prevConfig => ({
+                  key: 'name',
+                  direction: 
+                    prevConfig.key === 'name' && prevConfig.direction === 'ascending' 
+                      ? 'descending' 
+                      : 'ascending'
+                }))}
               >
                 Name
                 {sortConfig.key === 'name' && (
@@ -192,7 +182,13 @@ const WialonUnitsList: React.FC<WialonUnitsListProps> = ({
               </th>
               <th 
                 className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                onClick={onClick}
+                onClick={() => setSortConfig(prevConfig => ({
+                  key: 'last_message',
+                  direction: 
+                    prevConfig.key === 'last_message' && prevConfig.direction === 'ascending' 
+                      ? 'descending' 
+                      : 'ascending'
+                }))}
               >
                 Last Active
                 {sortConfig.key === 'last_message' && (
@@ -210,7 +206,9 @@ const WialonUnitsList: React.FC<WialonUnitsListProps> = ({
             {filteredUnits.map((unit) => (
               <tr 
                 key={unit.id} 
-                onClick={onClick}
+                onClick={() => {
+                  if (onSelectUnit) onSelectUnit(unit.id, unit);
+                }}
                 className="hover:bg-blue-50 cursor-pointer"
               >
                 <td className="px-4 py-3">

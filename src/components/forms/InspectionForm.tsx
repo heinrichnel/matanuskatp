@@ -145,8 +145,8 @@ const InspectionForm: React.FC<InspectionFormProps> = ({
       <div className="modal">
         <h2>Create Job Card</h2>
         <p>Critical fault detected: {jobCardItem.description}</p>
-        <button onClick={onClick}}> setShowJobCardModal(false)}>Cancel</button>
-        <button onClick={onClick}}> {
+        <button onClick={() => setShowJobCardModal(false)}>Cancel</button>
+        <button onClick={() => {
           console.log('Job card created for:', jobCardItem);
           setShowJobCardModal(false);
         }}>Create Job Card</button>
