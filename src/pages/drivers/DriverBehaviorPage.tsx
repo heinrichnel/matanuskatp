@@ -60,25 +60,27 @@ const DriverBehaviorPage: React.FC = () => {
     driverBehaviorEvents 
   } = useAppContext();
   
-  // Note: SyncContext could be used here for real-time updates if needed
-  
-  // Get driver behavior specific context
+  // Get driver behavior specific context with real-time updates from Firestore
   const { events, webBookEvents, loading, error } = useDriverBehavior();
   
   // Subscribe to driver behavior events when the component mounts
   useEffect(() => {
     console.log("Subscribing to driver behavior events");
     
-    // Optional: Subscribe to real-time updates if needed
-    // subscribeToDriverBehavior(); 
+    // Real-time updates are now handled by the DriverBehaviorContext provider
+    // The useDriverBehavior hook already provides real-time data from Firestore
     
     // Check if we have any events, if not and we're online, trigger a sync
-    if (driverBehaviorEvents.length === 0 && navigator.onLine) {
+    if ((driverBehaviorEvents.length === 0 && events.length === 0) && navigator.onLine) {
       handleSyncNow();
     }
     
-    // Cleanup function is not needed as the subscription is managed by the SyncContext
-  }, []);
+    // Log the number of events coming from the context
+    console.log(`Real-time driver behavior events loaded: ${events.length}`);
+    console.log(`Web book events loaded: ${webBookEvents.length}`);
+    
+    // Cleanup function is not needed as the subscription is managed by the DriverBehaviorContext
+  }, [driverBehaviorEvents.length, events.length, webBookEvents.length]);
 
   // Handle initiating CAR from event
   const handleInitiateCAR = (event: DriverBehaviorEvent) => {
