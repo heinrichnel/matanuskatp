@@ -1,11 +1,38 @@
-import React, { useState } from "react";
-import { TyreInspectionPDFGenerator } from "@/components/TyreInspectionPDFGenerator";
+impor  const [photo, setPhoto] = useState<string | null>(null);
+  const [signature, setSignature] = useState<string | null>(null);
+  const [gpsLocation, setGpsLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [inspectionData, setInspectionData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);act, { useState, useEffect } from "react";
+import { QRCode } from "qrcode.react";
+import { getFirestore, collection, doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { useParams, useLocation } from "react-router-dom";
 
-const EnhancedTyreInspectionForm: React.FC = () => {
+// Using a relative import instead of an alias import to fix build issues
+import { TyreInspectionPDFGenerator } from "../../components/TyreInspectionPDFGenerator";
+
+interface TyreInspectionFormProps {
+  fleetNumber?: string;
+  position?: string;
+  onComplete?: (data: any) => void;
+}
+
+const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
+  fleetNumber,
+  position,
+  onComplete
+}) => {
+  const params = useParams();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  
+  // Use provided props or extract from URL params/query
+  const vehicleId = fleetNumber || params.fleetId || queryParams.get('fleet') || '';
+  const tyrePosition = position || params.position || queryParams.get('position') || '';
+  
   const [odometer, setOdometer] = useState<number | "">("");
   const [photo, setPhoto] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [gpsLocation, setGpsLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [inspectionData, setInspectionData] = useState<any>(null);
 
   const handlePhotoCapture = () => {
