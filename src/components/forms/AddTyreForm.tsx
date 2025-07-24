@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
-import { Save, X, Truck, Calendar, Ruler, Plus } from 'lucide-react';
+import { Truck, Save, X, Plus, Calendar, Ruler } from 'lucide-react';
 
 interface TyreData {
   id?: string;
@@ -106,11 +106,11 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    let parsedValue = value;
+    let parsedValue: any = value;
 
     // Convert number inputs to numbers
     if (type === 'number') {
-      parsedValue = value;
+      parsedValue = value === '' ? '' : Number(value);
     }
 
     setFormData(prev => ({
@@ -131,7 +131,7 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
     if (!formData.tyreNumber) newErrors.tyreNumber = 'Tyre number is required';
     if (!formData.tyreSize) newErrors.tyreSize = 'Tyre size is required';
     if (!formData.manufacturer) newErrors.manufacturer = 'Manufacturer is required';
-    
+
     // If mounted, vehicle and axle position are required
     if (formData.mountStatus === 'Mounted') {
       if (!formData.vehicleAssigned) newErrors.vehicleAssigned = 'Vehicle is required for mounted tyres';
@@ -145,13 +145,13 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       if (onSubmit) {
@@ -193,7 +193,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     <p className="mt-1 text-sm text-red-600">{errors.tyreNumber}</p>
                   )}
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="tyreSize">
                     Tyre Size <span className="text-red-500">*</span>
@@ -214,7 +213,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     <p className="mt-1 text-sm text-red-600">{errors.tyreSize}</p>
                   )}
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="type">
                     Type
@@ -232,7 +230,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     ))}
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="pattern">
                     Pattern
@@ -249,7 +246,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                 </div>
               </div>
             </div>
-
             {/* Manufacturer Details */}
             <div className="lg:col-span-3">
               <h3 className="font-medium text-gray-700 mb-3">Manufacturer & Purchase Details</h3>
@@ -274,7 +270,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     <p className="mt-1 text-sm text-red-600">{errors.manufacturer}</p>
                   )}
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="year">
                     Year
@@ -295,7 +290,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     </select>
                   </div>
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="cost">
                     Cost
@@ -314,7 +308,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     />
                   </div>
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="datePurchased">
                     Date Purchased
@@ -330,7 +323,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                 </div>
               </div>
             </div>
-            
             {/* Status Information */}
             <div className="lg:col-span-3">
               <h3 className="font-medium text-gray-700 mb-3">Status & Condition</h3>
@@ -352,7 +344,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     <option value="Scrap">Scrap</option>
                   </select>
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="status">
                     Tyre Status
@@ -370,7 +361,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     <option value="Scrap">Scrap</option>
                   </select>
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="mountStatus">
                     Mount Status
@@ -387,7 +377,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     <option value="Removed">Removed</option>
                   </select>
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="treadDepth">
                     Tread Depth (mm)
@@ -409,7 +398,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                 </div>
               </div>
             </div>
-            
             {/* Vehicle Assignment */}
             <div className="lg:col-span-3">
               <h3 className="font-medium text-gray-700 mb-3">Vehicle Assignment</h3>
@@ -440,7 +428,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     <p className="mt-1 text-sm text-red-600">{errors.vehicleAssigned}</p>
                   )}
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="axlePosition">
                     Axle Position {formData.mountStatus === 'Mounted' && <span className="text-red-500">*</span>}
@@ -462,7 +449,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     <p className="mt-1 text-sm text-red-600">{errors.axlePosition}</p>
                   )}
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="kmRun">
                     KM Run
@@ -477,7 +463,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     onChange={handleInputChange}
                   />
                 </div>
-                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="kmLimit">
                     KM Limit
@@ -494,7 +479,6 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                 </div>
               </div>
             </div>
-            
             {/* Notes */}
             <div className="lg:col-span-3">
               <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="notes">
