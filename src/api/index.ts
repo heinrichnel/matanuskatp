@@ -3,9 +3,6 @@ import express from 'express';
 import cors from 'cors';
 import { parse } from 'csv-parse/sync';
 
-// Import Firebase Admin utilities
-import * as firebaseAdmin from './firebaseAdmin';
-
 const app = express();
 
 // Middleware
