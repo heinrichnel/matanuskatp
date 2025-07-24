@@ -129,9 +129,8 @@ import AnalyticsDashboard from './pages/analytics/AnalyticsDashboard';
 
     // === WORKSHOP ===
 import WorkshopPage from './pages/workshop/WorkshopPage';
-import FleetTable from './pages/workshop/FleetTable';
-import QRGenerator from './pages/workshop/QRGenerator';
-import QRCodeBatchGenerator from './pages/workshop/QRCodeBatchGenerator';
+import QRGenerator from './components/WorkshopManagement/QRGenerator';
+import QRCodeBatchGenerator from './components/WorkshopManagement/QRCodeBatchGenerator';
 import DriverInspectionForm from './pages/workshop/DriverInspectionForm';
 import InspectionHistory from './pages/workshop/InspectionHistory';
 import InspectionHistoryPage from './pages/workshop/inspections';
@@ -161,8 +160,11 @@ import WorkshopAnalyticsComp from './pages/workshop/WorkshopAnalytics';
 import WorkshopReportsPage from './pages/workshop/WorkshopReportsPage';
 import WorkshopCostReportsPage from './pages/workshop/WorkshopCostReportsPage';
 import VendorPage from './pages/workshop/VendorPage';
+import StockInventoryPage from './pages/workshop/StockInventoryPage';
 import PurchaseOrderPage from './pages/workshop/PurchaseOrderPage';
-import TripDetailsPage from './pages/trips/TripDetailsPage';// === TYRES ===
+import TripDetailsPage from './pages/trips/TripDetailsPage';
+
+// === TYRES ===
 import TyreInspection from './pages/tyres/inspection';
 import TyreInventory from './pages/tyres/inventory';
 import TyreReports from './pages/tyres/reports';
@@ -189,6 +191,7 @@ import SettingsPage from './pages/SettingsPage';
 import MapTestPage from './pages/Map/MapTestPage';
 import MapsView from './pages/Map/MapsView';
 import UIConnector from './components/UIConnector';
+import { ScanQRButton } from "./components/ScanQRButton";
 
 // UI Components
 import { GenericPlaceholderPage } from './components/ui';
@@ -409,7 +412,9 @@ const App: React.FC = () => {
                       <Route path="/workshop" element={<WorkshopPage />} />
                       <Route path="/workshop/vendors" element={<VendorPage />} />
                       <Route path="/workshop/purchase-orders" element={<PurchaseOrderPage />} />
-                      <Route path="/workshop/fleet-setup" element={<FleetTable />} />
+                      <Route path="/workshop/stock-inventory" element={<StockInventoryPage />} />
+                      {/* TODO: Implement FleetTable component */}
+                      <Route path="/workshop/fleet-setup" element={<WorkshopPage />} />
                       <Route path="/workshop/qr-generator" element={<QRGenerator />} />
                       <Route path="/workshop/inspections" element={<InspectionHistoryPage />} />
                       <Route path="/workshop/job-cards" element={<JobCardManagement />} />
@@ -418,7 +423,7 @@ const App: React.FC = () => {
                       <Route path="/workshop/parts-ordering" element={<PartsOrderingPage />} />
                       <Route path="/workshop/vehicle-inspection" element={<VehicleInspectionPage />} />
 
-                      {/* === EXAMPLES === */}
+                      {/* === EXAMPLES ===
                       <Route path="/examples/clients" element={<ClientSelectionExample />} />
 
                       {/* === FALLBACK === */}
@@ -435,6 +440,12 @@ const App: React.FC = () => {
                   onClose={() => setShowTripForm(false)}
                   editingTrip={editingTrip}
                 />
+                {/* Show Scan QR button only on mobile app */}
+                {typeof window !== "undefined" && (window as any).Capacitor && (
+                  <div className="fixed bottom-6 right-6 z-50">
+                    <ScanQRButton />
+                  </div>
+                )}
                 </WorkshopProvider>
               </DriverBehaviorProvider>
             </TripProvider>
