@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { QRCode } from "qrcode.react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { ArrowDownToLine, QrCode, Truck, Tool, FileText, Clipboard, PackagePlus, Wrench } from "lucide-react";
+import { ArrowDownToLine, QrCode, Truck, Clipboard, Wrench } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 
 interface Vehicle {
