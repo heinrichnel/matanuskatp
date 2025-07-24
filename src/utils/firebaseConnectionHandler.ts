@@ -1,6 +1,5 @@
 import { getFirestore, connectFirestoreEmulator, enableNetwork, disableNetwork } from 'firebase/firestore';
 import { firebaseApp } from '../firebaseConfig';
-import { firestore } from './src/utils/firebaseConnectionHandler';
 
 
 // Initialize Firestore

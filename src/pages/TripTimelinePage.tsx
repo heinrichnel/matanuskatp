@@ -3,7 +3,7 @@ import Timeline, { TimelineHeaders, SidebarHeader, DateHeader, TimelineMarkers }
 import 'react-calendar-timeline/dist/style.css';
 import { format, addWeeks, subWeeks, parseISO, isValid, startOfWeek, endOfWeek } from 'date-fns';
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
-import { db } from "../../firebase"; // Adjust to your path
+import { firestore as db } from "../utils/firebaseConnectionHandler"; // Using firestore from connection handler
 import { Card, CardContent } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { 

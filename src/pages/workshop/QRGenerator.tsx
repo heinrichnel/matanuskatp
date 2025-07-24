@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { QRCode } from "qrcode.react";
+import { QRCodeSVG } from "qrcode.react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { ArrowDownToLine, QrCode, Truck, Clipboard, Wrench } from "lucide-react";
@@ -14,7 +14,9 @@ interface Vehicle {
 }
 
 const QRGenerator = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const navigate = useNavigate();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { isGoogleMapsLoaded } = useAppContext();
   const [qrType, setQrType] = useState<string>('fleet');
   const [fleetNumber, setFleetNumber] = useState<string>('');
@@ -399,12 +401,11 @@ const QRGenerator = () => {
           {qrGenerated ? (
             <div className="flex-1 flex flex-col items-center justify-center space-y-6">
               <div className="qr-container bg-white p-4 rounded-lg shadow-sm">
-                <QRCode 
+                <QRCodeSVG 
                   value={qrValue} 
                   size={200} 
                   level="M" 
-                  includeMargin={true}
-                  renderAs="svg"
+                  marginSize={4}
                 />
               </div>
               <div className="text-sm text-gray-500 text-center break-all">
