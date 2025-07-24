@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {

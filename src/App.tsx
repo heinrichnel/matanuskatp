@@ -55,6 +55,7 @@ import ActiveTrips from './components/TripManagement/ActiveTrips';
 import CompletedTrips from './pages/CompletedTrips';
 import FlagsInvestigations from './pages/FlagsInvestigationsPage';
 import TripDashboard from './pages/TripDashboard';
+import CreateLoadConfirmationPage from './pages/trips/CreateLoadConfirmationPage';
 
 // === INVOICES ===
 import InvoiceManagementPage from './pages/invoices/InvoiceManagementPage';
@@ -65,6 +66,8 @@ import InvoiceApprovalFlow from './pages/invoices/InvoiceApprovalFlow';
 import TaxReportExport from './pages/invoices/TaxReportExport';
 import PendingInvoicesPage from './pages/invoices/PendingInvoicesPage';
 import PaidInvoicesPage from './pages/invoices/PaidInvoicesPage';
+import CreateInvoicePage from './pages/invoices/CreateInvoicePage';
+import CreateQuotePage from './pages/invoices/CreateQuotePage';
 
 // === DIESEL ===
 import DieselManagementPage from './pages/diesel/DieselManagementPage';
@@ -93,6 +96,7 @@ import DriverManagementPage from './pages/drivers/DriverManagementPage';
 import AddNewDriver from './pages/drivers/AddNewDriver';
 import DriverProfiles from './pages/drivers/DriverProfiles';
 import DriverDetails from './pages/drivers/DriverDetails';
+import DriverDetailsPage from './pages/drivers/DriverDetailsPage';
 import EditDriver from './pages/drivers/EditDriver';
 import LicenseManagement from './pages/drivers/LicenseManagement';
 import TrainingRecords from './pages/drivers/TrainingRecords';
@@ -104,6 +108,9 @@ import DriverRewards from './pages/drivers/DriverRewards';
 import DriverBehaviorPage from './pages/drivers/DriverBehaviorPage';
 import SafetyScores from './pages/drivers/SafetyScores';
 import DriverDashboard from './pages/drivers/DriverDashboard';
+
+// === EXAMPLES ===
+import ClientSelectionExample from './pages/examples/ClientSelectionExample';
 
 // === COMPLIANCE ===
 import ComplianceManagementPage from './pages/compliance/ComplianceManagementPage';
@@ -180,6 +187,9 @@ import SettingsPage from './pages/SettingsPage';
 import MapTestPage from './pages/Map/MapTestPage';
 import MapsView from './pages/Map/MapsView';
 import UIConnector from './components/UIConnector';
+
+// UI Components
+import { GenericPlaceholderPage } from './components/ui';
 
 // App.tsx - Simplified version to fix build errors
 const App: React.FC = () => {
@@ -315,6 +325,7 @@ const App: React.FC = () => {
                       {/* ==== TRIPS ==== */}
                       <Route path="/trips" element={<TripManagementPage />} />
                       <Route path="/trips/active" element={<ActiveTripsPage />} />
+                      <Route path="/trips/:id" element={<TripDetailsPage />} />
                       <Route path="/trips/timeline" element={<TripTimelinePage />} />
                       <Route path="/trips/planning" element={<RoutePlanningPage />} />
                       <Route path="/trips/optimization" element={<RouteOptimizationPage />} />
@@ -326,6 +337,16 @@ const App: React.FC = () => {
                       <Route path="/trips/completed-dashboard" element={<CompletedTrips />} />
                       <Route path="/trips/flags" element={<FlagsInvestigations />} />
                       <Route path="/trips/dashboard" element={<TripDashboard />} />
+                      <Route path="/trips/driver-performance" element={<GenericPlaceholderPage title="Driver Performance" />} />
+                      <Route path="/trips/cost-analysis" element={<GenericPlaceholderPage title="Trip Cost Analysis" />} />
+                      <Route path="/trips/utilization" element={<GenericPlaceholderPage title="Fleet Utilization" />} />
+                      <Route path="/trips/confirmations" element={<GenericPlaceholderPage title="Delivery Confirmations" />} />
+                      <Route path="/trips/new-load-confirmation" element={<CreateLoadConfirmationPage />} />
+                      <Route path="/trips/templates" element={<GenericPlaceholderPage title="Trip Templates" />} />
+                      <Route path="/trips/reports" element={<GenericPlaceholderPage title="Trip Reports" />} />
+                      <Route path="/trips/maps" element={<GenericPlaceholderPage title="Trip Maps" />} />
+                      <Route path="/trips/fleet-location" element={<GenericPlaceholderPage title="Fleet Location" />} />
+                      <Route path="/trips/wialon-tracking" element={<GenericPlaceholderPage title="Wialon Tracking" />} />
 
                       {/* ==== INVOICES ==== */}
                       <Route path="/invoices" element={<InvoiceManagementPage />} />
@@ -336,6 +357,12 @@ const App: React.FC = () => {
                       <Route path="/invoices/tax-export" element={<TaxReportExport />} />
                       <Route path="/invoices/pending" element={<PendingInvoicesPage />} />
                       <Route path="/invoices/paid" element={<PaidInvoicesPage />} />
+                      <Route path="/invoices/new" element={<CreateInvoicePage />} />
+                      <Route path="/invoices/new-quote" element={<CreateQuotePage />} />
+                      <Route path="/invoices/batch-processing" element={<GenericPlaceholderPage title="Batch Invoice Processing" />} />
+                      <Route path="/invoices/reconciliation" element={<GenericPlaceholderPage title="Invoice Reconciliation" />} />
+                      <Route path="/invoices/archives" element={<GenericPlaceholderPage title="Invoice Archives" />} />
+                      <Route path="/invoices/reports" element={<GenericPlaceholderPage title="Invoice Reports" />} />
 
                       {/* ==== DIESEL ==== */}
                       <Route path="/diesel" element={<DieselManagementPage />} />
@@ -347,7 +374,7 @@ const App: React.FC = () => {
                       <Route path="/diesel/carbon-footprint" element={<CarbonFootprintCalc />} />
                       <Route path="/diesel/driver-behavior" element={<DriverFuelBehavior />} />
                       <Route path="/diesel/efficiency" element={<FuelEfficiencyReport />} />
-                      <Route path="/diesel/budget" element={<GenericPlaceholderPage title="Budget Planning" />} />
+                      <Route path="/diesel/budget" element={<BudgetPlanning />} />
 
                       {/* ==== CLIENTS ==== */}
                       <Route path="/clients" element={<ClientManagementPage />} />
@@ -362,18 +389,21 @@ const App: React.FC = () => {
                       <Route path="/drivers" element={<DriverManagementPage />} />
                       <Route path="/drivers/new" element={<AddNewDriver />} />
                       <Route path="/drivers/profiles" element={<DriverProfiles />} />
-                      <Route path="/drivers/profiles/:id" element={<GenericPlaceholderPage title="Driver Details" />} />
-                      <Route path="/drivers/profiles/:id/edit" element={<GenericPlaceholderPage title="Edit Driver" />} />
-                      <Route path="/drivers/licenses" element={<GenericPlaceholderPage title="License Management" />} />
-                      <Route path="/drivers/training" element={<GenericPlaceholderPage title="Training Records" />} />
-                      <Route path="/drivers/performance" element={<GenericPlaceholderPage title="Performance Analytics" />} />
-                      <Route path="/drivers/scheduling" element={<GenericPlaceholderPage title="Driver Scheduling" />} />
-                      <Route path="/drivers/hours" element={<GenericPlaceholderPage title="Hours of Service" />} />
+                      <Route path="/drivers/profiles/:id" element={<DriverDetailsPage />} />
+                      <Route path="/drivers/profiles/:id/edit" element={<EditDriver />} />
+                      <Route path="/drivers/licenses" element={<LicenseManagement />} />
+                      <Route path="/drivers/training" element={<TrainingRecords />} />
+                      <Route path="/drivers/performance" element={<PerformanceAnalytics />} />
+                      <Route path="/drivers/scheduling" element={<DriverScheduling />} />
+                      <Route path="/drivers/hours" element={<HoursOfService />} />
                       <Route path="/drivers/violations" element={<DriverBehaviorPage />} />
-                      <Route path="/drivers/rewards" element={<GenericPlaceholderPage title="Driver Rewards" />} />
+                      <Route path="/drivers/rewards" element={<DriverRewards />} />
                       <Route path="/drivers/behavior" element={<DriverBehaviorPage />} />
                       <Route path="/drivers/safety-scores" element={<GenericPlaceholderPage title="Safety Scores" />} />
                       <Route path="/drivers/dashboard" element={<DriverDashboard />} />
+
+                      {/* === EXAMPLES === */}
+                      <Route path="/examples/clients" element={<ClientSelectionExample />} />
 
                       {/* === FALLBACK === */}
                       <Route path="*" element={<DashboardPage />} />

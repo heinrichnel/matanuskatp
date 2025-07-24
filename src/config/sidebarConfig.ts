@@ -102,6 +102,12 @@ export const sidebarConfig: SidebarItem[] = [
         subComponents: ['components/TripManagement/DeliveryConfirmationPanel']
       },
       { 
+        id: 'create-load-confirmation', 
+        label: 'Create Load Confirmation', 
+        path: '/trips/new-load-confirmation', 
+        component: 'pages/trips/CreateLoadConfirmationPage'
+      },
+      { 
         id: 'trip-templates', 
         label: 'Trip Templates', 
         path: '/trips/templates', 
@@ -155,10 +161,15 @@ export const sidebarConfig: SidebarItem[] = [
       },
       { 
         id: 'create-invoice', 
-        label: 'Create New', 
+        label: 'Create New Invoice', 
         path: '/invoices/new', 
-        component: 'pages/invoices/CreateInvoice',
-        subComponents: ['components/InvoiceManagement/InvoiceBuilder']
+        component: 'pages/invoices/CreateInvoicePage'
+      },
+      { 
+        id: 'create-quote', 
+        label: 'Create New Quote', 
+        path: '/invoices/new-quote', 
+        component: 'pages/invoices/CreateQuotePage'
       },
       { 
         id: 'pending-invoices', 
