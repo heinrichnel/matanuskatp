@@ -20,6 +20,13 @@ interface FuelCard {
 const FuelCardManager: React.FC = () => {
   const { isLoading } = useAppContext();
   
+  // Handler for adding a new card
+  const handleAddNewCard = () => {
+    // In a real implementation, this would open a modal or navigate to a form
+    console.log('Add new fuel card');
+    // This would be replaced with actual implementation
+  };
+  
   // State for fuel cards
   const [fuelCards, setFuelCards] = useState<FuelCard[]>([]);
   const [filteredCards, setFilteredCards] = useState<FuelCard[]>([]);
@@ -155,9 +162,10 @@ const FuelCardManager: React.FC = () => {
           <Button
             variant="primary"
             icon={<Plus className="w-4 h-4" />}
-            onClick={onClick}
+            onClick={handleAddNewCard}
+            disabled={isLoading}
           >
-            New Card
+            {isLoading ? 'Loading...' : 'New Card'}
           </Button>
           <SyncIndicator />
         </div>
@@ -212,7 +220,16 @@ const FuelCardManager: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredCards.length === 0 ? (
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={9} className="px-6 py-4 text-center text-sm text-gray-500">
+                      <div className="flex justify-center items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                        <span>Loading fuel cards...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : filteredCards.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="px-6 py-4 text-center text-sm text-gray-500">
                       No fuel cards found matching your criteria

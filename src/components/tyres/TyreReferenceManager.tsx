@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useTyreReferenceData } from '../context/TyreReferenceDataContext';
-import { Card, CardContent } from './ui/Card';
+import { useTyreReferenceData } from '../../context/TyreReferenceDataContext';
+import { Card, CardContent } from '../ui/Card';
 import Button from './ui/Button';
 import { Plus, Edit, Trash, Save, X, RefreshCcw } from 'lucide-react';
 
@@ -464,6 +464,249 @@ const TyreReferenceManager: React.FC = () => {
     </div>
   );
   
+  // --- VEHICLE POSITION MANAGEMENT ---
+  const handlePositionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingPosition) {
+        await updateVehiclePosition(positionForm.id, {
+          vehicleType: positionForm.vehicleType,
+          name: positionForm.name,
+          positions: positionForm.positions
+        });
+      } else {
+        await addVehiclePosition({
+          vehicleType: positionForm.vehicleType,
+          name: positionForm.name,
+          positions: positionForm.positions
+        });
+      }
+      setPositionForm({
+        id: '',
+        vehicleType: '',
+        name: '',
+        positions: []
+      });
+      setEditingPosition(false);
+    } catch (error) {
+      console.error('Error saving vehicle position:', error);
+    }
+  };
+  
+  const handleEditPosition = (position: { id: string; vehicleType: string; name: string; positions: { id: string, name: string }[] }) => {
+    setPositionForm({
+      id: position.id,
+      vehicleType: position.vehicleType,
+      name: position.name,
+      positions: [...position.positions]
+    });
+    setEditingPosition(true);
+  };
+  
+  const handleDeletePosition = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this vehicle position configuration?')) {
+      try {
+        await deleteVehiclePosition(id);
+      } catch (error) {
+        console.error('Error deleting vehicle position:', error);
+      }
+    }
+  };
+  
+  const handleAddPositionItem = () => {
+    if (newPosition.name.trim() === '') return;
+    
+    // Generate a temporary ID for the new position
+    const tempId = Date.now().toString();
+    
+    setPositionForm({
+      ...positionForm,
+      positions: [
+        ...positionForm.positions,
+        { id: tempId, name: newPosition.name }
+      ]
+    });
+    
+    // Reset the new position input
+    setNewPosition({ id: '', name: '' });
+  };
+  
+  const handleRemovePositionItem = (id: string) => {
+    setPositionForm({
+      ...positionForm,
+      positions: positionForm.positions.filter(pos => pos.id !== id)
+    });
+  };
+  
+  const renderPositionsTab = () => (
+    <div>
+      <form onSubmit={handlePositionSubmit} className="mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label htmlFor="vehicleType" className="block text-sm font-medium text-gray-700 mb-1">
+              Vehicle Type
+            </label>
+            <input
+              id="vehicleType"
+              type="text"
+              value={positionForm.vehicleType}
+              onChange={(e) => setPositionForm({ ...positionForm, vehicleType: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              placeholder="e.g. Truck, Trailer, Bus"
+              required
+            />
+          </div>
+          
+          <div>
+            <label htmlFor="positionName" className="block text-sm font-medium text-gray-700 mb-1">
+              Configuration Name
+            </label>
+            <input
+              id="positionName"
+              type="text"
+              value={positionForm.name}
+              onChange={(e) => setPositionForm({ ...positionForm, name: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              placeholder="e.g. Standard 18-Wheeler"
+              required
+            />
+          </div>
+        </div>
+        
+        <div className="mb-4">
+          <h3 className="text-lg font-medium mb-2">Tyre Positions</h3>
+          <div className="flex flex-wrap gap-3 mb-2">
+            <div className="flex-grow">
+              <input
+                type="text"
+                value={newPosition.name}
+                onChange={(e) => setNewPosition({ ...newPosition, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="Position name (e.g. Front Left, Rear Right)"
+              />
+            </div>
+            <div>
+              <Button
+                type="button"
+                onClick={handleAddPositionItem}
+                disabled={newPosition.name.trim() === ''}
+              >
+                <Plus size={16} className="mr-1" />
+                Add Position
+              </Button>
+            </div>
+          </div>
+          
+          <div className="mt-3">
+            {positionForm.positions.length === 0 ? (
+              <p className="text-gray-500 italic">No positions added yet. Add at least one position.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                {positionForm.positions.map((pos) => (
+                  <div key={pos.id} className="flex items-center justify-between p-2 border rounded-md">
+                    <span>{pos.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePositionItem(pos.id)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <Trash size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex gap-3">
+          <Button
+            type="submit"
+            disabled={positionForm.positions.length === 0}
+          >
+            {editingPosition ? <Save size={16} className="mr-1" /> : <Plus size={16} className="mr-1" />}
+            {editingPosition ? 'Update' : 'Add'} Vehicle Position
+          </Button>
+          
+          {editingPosition && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setPositionForm({
+                  id: '',
+                  vehicleType: '',
+                  name: '',
+                  positions: []
+                });
+                setEditingPosition(false);
+              }}
+            >
+              <X size={16} className="mr-1" />
+              Cancel
+            </Button>
+          )}
+        </div>
+      </form>
+      
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Vehicle Type
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Configuration Name
+              </th>
+              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Positions
+              </th>
+              <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {vehiclePositions.map((position) => (
+              <tr key={position.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {position.vehicleType}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {position.name}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-500">
+                  <div className="flex flex-wrap gap-1">
+                    {position.positions.map((pos) => (
+                      <span key={pos.id} className="px-2 py-1 bg-gray-100 rounded-md text-xs">
+                        {pos.name}
+                      </span>
+                    ))}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button
+                    onClick={() => handleEditPosition(position)}
+                    className="text-blue-600 hover:text-blue-800 mr-2"
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDeletePosition(position.id)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    <Trash size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+  
   // Tab navigation
   const tabs: { id: TabType; label: string }[] = [
     { id: 'brands', label: 'Brands' },
@@ -523,7 +766,7 @@ const TyreReferenceManager: React.FC = () => {
         {activeTab === 'brands' && renderBrandsTab()}
         {activeTab === 'sizes' && renderSizesTab()}
         {activeTab === 'patterns' && renderPatternsTab()}
-        {/* {activeTab === 'positions' && renderPositionsTab()} */}
+        {activeTab === 'positions' && renderPositionsTab()}
       </CardContent>
     </Card>
   );

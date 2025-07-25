@@ -104,8 +104,46 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
   
   const metrics = calculateClientMetrics();
   
+  // Handle client deletion
+  const handleDelete = () => {
+    // Here you would implement the actual deletion logic
+    // For example, calling an API or dispatching an action
+    console.log(`Deleting client: ${client.id}`);
+    
+    // Close the modal after deletion
+    setShowConfirmDelete(false);
+    
+    // You might want to redirect the user after deletion
+    // or show a success message
+  };
+
   return (
     <div className="space-y-6">
+      {/* Delete Confirmation Modal */}
+      {showConfirmDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Confirm Deletion</h3>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete client "{client.name}"? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowConfirmDelete(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="danger"
+                onClick={handleDelete}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Client Header Card */}
       <Card>
         <CardContent className="p-6">
@@ -145,16 +183,23 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
               <Button
                 variant="outline"
                 icon={<Link className="w-4 h-4" />}
-                onClick={onClick}
+                onClick={onManageRelationships}
               >
                 Manage Relationships
               </Button>
               <Button
                 variant="outline"
                 icon={<Edit className="w-4 h-4" />}
-                onClick={onClick}
+                onClick={onEdit}
               >
                 Edit Client
+              </Button>
+              <Button
+                variant="outline"
+                color="danger"
+                onClick={() => setShowConfirmDelete(true)}
+              >
+                Delete
               </Button>
             </div>
           </div>
@@ -373,7 +418,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
                 size="sm" 
                 variant="outline" 
                 icon={<Edit className="w-4 h-4" />}
-                onClick={onClick}
+                onClick={onEdit}
               >
                 Edit
               </Button>
@@ -402,7 +447,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
                 size="sm" 
                 variant="outline" 
                 icon={<Link className="w-4 h-4" />}
-                onClick={onClick}
+                onClick={onManageRelationships}
               >
                 Manage
               </Button>
@@ -448,7 +493,7 @@ const ClientDetail: React.FC<ClientDetailProps> = ({
                 <div className="mt-4">
                   <Button 
                     size="sm" 
-                    onClick={onClick}
+                    onClick={onManageRelationships}
                     icon={<Link className="w-4 h-4" />}
                   >
                     Add Relationship

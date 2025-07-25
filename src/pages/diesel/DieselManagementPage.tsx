@@ -88,7 +88,25 @@ const DieselManagementPage: React.FC<DieselManagementPageProps> = ({ className =
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4">
+                <div className="animate-pulse flex space-x-4">
+                  <div className="flex-1 space-y-4 py-1">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-6 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                  </div>
+                  <div className="rounded-full bg-gray-200 h-12 w-12"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Consumption Card */}
         <Card>
           <CardContent className="p-4">
@@ -166,8 +184,19 @@ const DieselManagementPage: React.FC<DieselManagementPageProps> = ({ className =
             </div>
             <div className="mt-4">
               <div className="flex items-center text-xs">
-                <span className="text-red-600">↑ 3.2%</span>
-                <span className="text-gray-500 ml-1">vs target</span>
+                {dieselNorms && dieselNorms.targetCostPerKm ? (
+                  <>
+                    <span className={dieselNorms.targetCostPerKm < 0.47 ? "text-red-600" : "text-green-600"}>
+                      {dieselNorms.targetCostPerKm < 0.47 ? "↑" : "↓"} {Math.abs((0.47 / dieselNorms.targetCostPerKm - 1) * 100).toFixed(1)}%
+                    </span>
+                    <span className="text-gray-500 ml-1">vs target ({dieselNorms.targetCostPerKm.toFixed(2)})</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-red-600">↑ 3.2%</span>
+                    <span className="text-gray-500 ml-1">vs target</span>
+                  </>
+                )}
               </div>
             </div>
           </CardContent>

@@ -196,7 +196,7 @@ const FuelTheftDetection: React.FC = () => {
                 <div key={anomaly.id} className="py-3">
                   <div 
                     className="flex justify-between items-center cursor-pointer"
-                    onClick={onClick}
+                    onClick={() => toggleExpand(anomaly.id)}
                   >
                     <div className="flex items-center">
                       {expandedId === anomaly.id ? 

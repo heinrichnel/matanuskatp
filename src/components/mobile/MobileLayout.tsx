@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import { NavigationBar } from '@capacitor/navigation-bar';
+// Import NavigationBar conditionally to avoid build errors
+// import { NavigationBar } from '@capacitor/navigation-bar';
 import { App } from '@capacitor/app';
 
 interface MobileLayoutProps {
@@ -14,14 +15,13 @@ interface MobileLayoutProps {
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({
   children,
-  title: _title = 'Tyre Management', // Renamed with underscore to indicate it's intentionally unused
+  title = 'Tyre Management',
   showStatusBar = true,
   statusBarStyle = 'dark',
   backgroundColor = '#ffffff'
 }) => {
   const [isNativeApp, setIsNativeApp] = useState(false);
-  // We still need setDeviceInfo for the initializeNativeFeatures function
-  const [_deviceInfo, setDeviceInfo] = useState<any>(null);
+  const [deviceInfo, setDeviceInfo] = useState<any>(null);
 
   useEffect(() => {
     setIsNativeApp(Capacitor.isNativePlatform());
@@ -47,11 +47,12 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
       }
 
       // Set navigation bar color on Android
-      if (Capacitor.getPlatform() === 'android') {
-        await NavigationBar.setColor({
-          color: backgroundColor
-        });
-      }
+      // Commented out due to missing @capacitor/navigation-bar package
+      // if (Capacitor.getPlatform() === 'android') {
+      //   await NavigationBar.setColor({
+      //     color: backgroundColor
+      //   });
+      // }
 
       // Get device info
       const info = await App.getInfo();
@@ -66,6 +67,17 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
     <div className={`mobile-layout ${isNativeApp ? 'native-app' : 'web-app'}`}>
       {/* Safe area handling for iOS */}
       <div className="safe-area-top" />
+      
+      {/* Title bar */}
+      <div className="mobile-title-bar">
+        <h1 className="mobile-title">{title}</h1>
+        {deviceInfo && (
+          <div className="device-info-indicator">
+            <span className="device-badge">{deviceInfo.platform}</span>
+            <span className="device-version">{deviceInfo.appVersion}</span>
+          </div>
+        )}
+      </div>
       
       {/* Main content area */}
       <div className="mobile-content">
@@ -97,6 +109,41 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
           padding-top: 0;
         }
 
+        .mobile-title-bar {
+          padding: 12px 16px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+          background-color: ${backgroundColor};
+        }
+        
+        .mobile-title {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
+          color: #333;
+        }
+        
+        .device-info-indicator {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        
+        .device-badge {
+          font-size: 12px;
+          padding: 2px 6px;
+          background-color: #f0f0f0;
+          border-radius: 4px;
+          color: #666;
+        }
+        
+        .device-version {
+          font-size: 11px;
+          color: #888;
+        }
+        
         .mobile-content {
           flex: 1;
           display: flex;

@@ -1,197 +1,352 @@
-# KiloCode Agent Rules
+# KiloCode Configuration Documentation
 
-## File Edit Rules
+## Core Settings
 
-When editing files, the following rules apply:
+```json
+{
+  "kilo-code.enabled": true,
+  "kilo-code.agentMode": true,
+  "kilo-code.agentModesAllowed": true,
+  "kilo-code.customModesFile": true,
+  "kilo-code.globalCustomModesFile": "~/.kilocode/custom_modes.yaml",
+  "kilo-code.workflowDirectory": ".kilocode/workflows",
+  "kilo-code.globalWorkflowDirectory": "~/.kilocode/workflows"
+}
+```
 
-- If a file or import is not found, first search the entire 'src' directory for a file with the same or a logical name
-- Never automatically create a new file/component, or delete or comment out any existing file, without explicit permission from the user
-- If the file still cannot be found after searching, report exactly which import, page, or component is missing, and ask the user if you may create it
-- Do not remove or comment out any working code—only integrate new code or resolve duplicate implementations by keeping the best or most complete version
-- If you find a hardcoded duplicate of exactly the same functionality, consolidate it so functionality is preserved, but never remove critical UI or backend features
-- Use the sidebar/navigation routes to list all existing pages/modules and verify which routes do not have a corresponding page or component
-- Always report the total number of unique pages/components based on navigation/sidebar, and list any unlinked or missing routes
-- Always ask for permission before creating, deleting, or overwriting any file, import, page, route, or component
-- All existing functional code and features must remain untouched unless explicitly requested
-- Never comment out or remove any file, import, or functional code without the user's explicit permission
-- Explicitly validate and report on all mobile support, QR code components, modal dialogs, and Google Maps components for import, existence, and sidebar/routing connection
-- If any QR code, modal, map, or mobile-specific feature is missing, report it and request approval before any auto-generation or integration
-- On every edit, ensure all .tsx files under src/ correctly import and connect mobile, QR code, modal, and map components, with valid paths and consistent use
+## Telemetry & Logging
 
-## Save Rules
+```json
+{
+  "kilo-code.telemetry.enabled": true,
+  "kilo-code.telemetry.level": "full",
+  "kilo-code.logging.verbose": true
+}
+```
 
-When saving files:
+## Chat Features
 
-- Run all file edit checks
-- Validate imports, routes, navigation, and the existence of all referenced pages/components
-- Clearly report if any are missing and ask for permission before making any changes
-- Repeat the checks for QR code, modal, maps, and mobile features across all routes/components
+```json
+{
+  "kilo-code.chat.renderRelatedFiles": true,
+  "kilo-code.chat.inlineEnabled": true,
+  "kilo-code.chat.autoApproveTools": true,
+  "kilo-code.chat.codeSearch.enabled": true,
+  "kilo-code.chat.showDiffSummary": true
+}
+```
 
-## Project Build Rules
+## Edit Features
 
-During project builds:
+```json
+{
+  "kilo-code.edit.safeMode": true,
+  "kilo-code.edit.autoStageCommits": true,
+  "kilo-code.edit.auditTrail": true
+}
+```
 
-- Scan the entire project for missing or duplicate imports, exports, pages, or components
-- Never automatically create, delete, or comment out any file/component/page
-- Always report all findings for user confirmation and action
-- Explicitly list any missing or duplicate QR code, modal, maps, or mobile UI components for action
+## Prompt Configuration
 
-## Layout Requirements
+```json
+{
+  "kilo-code.prompt.customInstructionFile": ".clinerules-{mode-slug}",
+  "kilo-code.prompt.appendWorkspaceInstructions": true
+}
+```
 
-- Enforce main layout
-- Required components: navbar, sidebar, notifications, footer
-- Prevent component duplication
+## Security Settings
 
-## Sidebar Configuration
+```json
+{
+  "kilo-code.security.confirmDestructiveEdits": true,
+  "kilo-code.security.auditLogFile": ".kilocode/audit.log"
+}
+```
 
-- Validate all routes
-- Require component imports
-- Auto-flag missing routes
-- Ensure submenu logic works
-- Check mobile, QR, modal, and maps integration
+## Experimental Features
 
-## Import Rules
+```json
+{
+  "kilo-code.experimental.features": [
+    "multimodal",
+    "workflowOrchestration"
+  ]
+}
+```
 
-### Scope
-- File types: .tsx
-- Directories: src/
-- Focus areas: pages, components, mobile, qr, modal, maps
+## UI Settings
 
-### Rules
-- Validate all paths
-- Search entire tree for imports
-- No auto-creation allowed
-- No deletion allowed
-- No commenting out allowed
 
-### Reporting
-Must report:
-- Unresolved imports
-- Path changes
-- Require permission for:
-  - File creation
-  - Component creation
-  - Multi-file changes
+{
+  "kilo-code.sidebar.enabled": true,
+  "kilo-code.statusbar.showMode": true,
+  "kilo-code.statusbar.showModeTooltip": true
+}
+```
+
+## Agent Rules
+
+### File Operations
+
+#### onFileEdit Rules:
+
+- Search entire 'src' directory for missing files before reporting
+- Never create/delete files without explicit permission
+- Report missing imports/components before taking action
+- Preserve all working code
+- Consolidate duplicates while preserving functionality
+- Verify all routes against navigation/sidebar
+- Report unlinked/missing routes
+- Always request permission for file operations
+- Never remove functional code without permission
+- Validate mobile/QR/modal/map components on every edit
+
+#### onSave Rules:
+
+- Re-run file edit validations
+- Validate all imports and routes
+- Re-check mobile/QR/modal/map features
+
+#### onProjectBuild Rules:
+
+- Scan for missing/duplicate components
+- Never auto-create/delete files
+- Report all findings for confirmation
+- List missing mobile/QR/modal/map components
+
+## Layout Management
+
+```json
+{
+  "layout": {
+    "enforceMainLayout": true,
+    "requiredComponents": ["navbar", "sidebar", "notifications", "footer"],
+    "preventDuplication": true
+  }
+}
+```
+
+## Sidebar Management
+
+```json
+{
+  "sidebar": {
+    "validateRoutes": true,
+    "requireComponentImport": true,
+    "autoFlagMissingRoutes": true,
+    "ensureSubMenuLogic": true,
+    "checkMobileQRModalMaps": true
+  }
+}
+```
+
+## Import Management
+
+```json
+{
+  "imports": {
+    "scope": {
+      "fileTypes": [".tsx"],
+      "directories": ["src/"],
+      "focus": ["pages", "components", "mobile", "qr", "modal", "maps"]
+    },
+    "rules": {
+      "validatePaths": true,
+      "searchEntireTree": true,
+      "allowAutoCreate": false,
+      "allowDelete": false,
+      "allowCommentOut": false
+    },
+    "reporting": {
+      "listUnresolvedImports": true,
+      "showPathChanges": true,
+      "requirePermission": [
+        "fileCreation",
+        "componentCreation",
+        "multiFileChanges"
+      ]
+    }
+  }
+}
+```
 
 ## CRUD Functionality
 
-### Validate Screens
-- Edit
-- Delete
-- View
+```json
+{
+  "crudFunctionality": {
+    "validateScreens": ["edit", "delete", "view"],
+    "modules": [
+      "trips",
+      "drivers",
+      "workshop",
+      "tyres",
+      "diesel",
+      "clients",
+      "inventory"
+    ],
+    "ensureOperations": ["create", "read", "update", "delete"],
+    "validateModalAccess": true
+  }
+}
+```
 
-### Modules
-- Trips
-- Drivers
-- Workshop
-- Tyres
-- Diesel
-- Clients
-- Inventory
+## Data View Patterns
 
-### Operations
-- Create
-- Read
-- Update
-- Delete
+```json
+{
+  "dataView": {
+    "softViewPattern": {
+      "progressiveLoading": true,
+      "optimisticUpdates": true,
+      "fallbackStates": true,
+      "realtimeSync": true
+    },
+    "connectivity": {
+      "loadingStates": true,
+      "offlineHandling": true,
+      "firestorePagination": true,
+      "realtimeUpdates": true,
+      "dataValidation": true
+    }
+  }
+}
+```
 
-Modal access validation required
+## Special Features
 
-## Data View Requirements
+```json
+{
+  "mobileQRCodeModalMapFeatures": {
+    "requireMobileSupport": true,
+    "requireQRCode": true,
+    "requireModalSupport": true,
+    "requireGoogleMaps": true,
+    "validateImportAndRouting": true
+  },
+  "mobileSupport": {
+    "validateComponents": true,
+    "ensureResponsiveDesign": true,
+    "checkForMobileSpecificFeatures": true,
+    "reportMissingFeatures": true
+  }
+}
+```
 
-### Soft View Pattern
-- Progressive loading
-- Optimistic updates
-- Fallback states
-- Realtime sync
+## Document Sync
 
-### Connectivity
-- Loading states
-- Offline handling
-- Firestore pagination
-- Realtime updates
-- Data validation
-
-## Mobile, QR Code, Modal, and Map Features
-
-- Require mobile support
-- Require QR code functionality
-- Require modal support
-- Require Google Maps integration
-- Validate imports and routing
-
-## Document Synchronization
-
-- Validate models
-- Ensure collection access
-- Validate UI handlers
+```json
+{
+  "documentSync": {
+    "validateModels": true,
+    "ensureCollectionAccess": true,
+    "validateUIHandlers": true
+  }
+}
+```
 
 ## Integration Rules
 
-### Permitted Actions
-- Import edits
-- Component scaffolding
-- Sidebar sync
-- CRUD flow fixes
-
-### Forbidden Actions
-- Feature removal
-- Workflow changes
-
-### Deduplication Rules
-- Preserve all features
-- Use robust base
-- Integrate all features
-- Never remove logic
-- Require approval
+```json
+{
+  "integration": {
+    "permitted": {
+      "importEdits": true,
+      "componentScaffolding": true,
+      "sidebarSync": true,
+      "crudFlowFixes": true
+    },
+    "forbidden": {
+      "featureRemoval": true,
+      "workflowChanges": true
+    },
+    "deduplication": {
+      "preserveFeatures": true,
+      "useRobustBase": true,
+      "integrateAllFeatures": true,
+      "neverRemoveLogic": true,
+      "requireApproval": true
+    }
+  }
+}
+```
 
 ## Permissions
 
-### Allowed Actions
-- Auto edit
-- Component scaffolding
-- Sidebar update
-- Import auto-fix
-- Report major changes
-
-### Require Approval
-- File creation
-- Component addition
-- Duplicate removal
-- Hierarchy changes
-- Routing changes
-
-## File Type Rules
-
-### TypeScript (.ts, .tsx)
-- Ensure valid imports
-- Ensure correct component references
-- Never remove working code without permission
-
-### JSON
-- Validate structure
-- No critical config changes without permission
-
-## Build Configuration
-
-### Vite Manual Chunks
-- react-ui
-- firebase-core
-- firebase-firestore
-- firebase-storage
-- charts
-- pdf
-- spreadsheet
-- utils
-- icons
-- mui
-- mobileQRCodeModalMapFeatures
-
-### Ignored Imports
-- @ant-design
-- @mui
+```json
+{
+  "permissions": {
+    "allowAutoEdit": true,
+    "allowComponentScaffolding": true,
+    "allowSidebarUpdate": true,
+    "allowImportAutoFix": true,
+    "reportMajorChanges": true,
+    "requireApproval": [
+      "fileCreation",
+      "componentAddition",
+      "duplicateRemoval",
+      "hierarchyChanges",
+      "routingChanges"
+    ]
+  }
+}
+```
 
 ## Exclusions
 
-- No existing functionality, component, feature, or code may be deleted or commented out unless explicitly requested
-- Never add, remove, or change files, components, imports, pages, or routes without permission
+- No existing functionality may be deleted/commented without explicit request
+- Never modify files/components/imports/routes without permission
+
+## File Type Rules
+
+```json
+{
+  "fileTypes": {
+    "typescript": {
+      "extensions": [".ts", ".tsx"],
+      "rules": [
+        "Ensure valid imports and component references",
+        "Never remove functional code without permission"
+      ]
+    },
+    "json": {
+      "extensions": [".json"],
+      "rules": [
+        "Validate JSON structure",
+        "Never alter critical configurations without permission"
+      ]
+    }
+  }
+}
+```
+
+## Vite Configuration Rules
+
+```json
+{
+  "rules": {
+    "vite.config.ts": {
+      "manualChunks": [
+        "react-ui",
+        "firebase-core",
+        "firebase-firestore",
+        "firebase-storage",
+        "charts",
+        "pdf",
+        "spreadsheet",
+        "utils",
+        "icons",
+        "mui",
+        "mobileQRCodeModalMapFeatures"
+      ],
+      "ignoreImports": [
+        "@ant-design",
+        "@mui"
+      ]
+    }
+  }
+}
+```
+
+This markdown file provides comprehensive documentation of your KiloCode configuration in a well-organized format that's easy to read and maintain. The structure follows logical groupings of related settings and includes both JSON snippets for machine-readable content and bullet points for human-readable rules.
