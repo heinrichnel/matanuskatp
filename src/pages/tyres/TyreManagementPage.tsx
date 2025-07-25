@@ -14,7 +14,9 @@ import {
   BarChart3,
   Layout,
   Gauge,
-  ClipboardList
+  ClipboardList,
+  DollarSign,
+  FileText
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
@@ -30,20 +32,25 @@ import TyreAnalytics from '../../components/Tyremanagement/TyreAnalytics';
 import { TyreInventory } from '../../components/Tyremanagement/TyreInventory';
 import { TyreInventoryStats } from '../../components/Tyremanagement/TyreInventoryStats';
 import { TyreReports } from '../../components/Tyremanagement/TyreReports';
+import { TyreCostAnalysis } from '../../components/Tyremanagement/TyreCostAnalysis';
+import { TyrePerformanceReport } from '../../components/Tyremanagement/TyrePerformanceReport';
+import { TyreReportGenerator } from '../../components/Tyremanagement/TyreReportGenerator';
 
 // Using Tyre type from TyreModel
 
 // Define tabs for navigation
 type TabType = 'inventory' | 'dashboard' | 'analytics' | 'reports';
 
-// Adapter function to convert between different tyre formats if needed
-// This allows us to use the same data across all components regardless of what format they expect
-// Adapter functions to handle compatibility between different component data formats
+/**
+ * Adapts the tyre data format for different components that may expect slightly different structures
+ * This ensures backward compatibility with all components while standardizing on one data model
+ */
 const adaptTyreFormatIfNeeded = (tyres: Tyre[], targetComponent: string) => {
-  // For some legacy components that might expect a different format
+  if (!tyres) return [];
+  
   switch (targetComponent) {
     case 'TyreDashboard':
-      // TyreDashboard expects a format from workshop-tyre-inventory
+      // TyreDashboard might expect additional calculated fields
       return tyres.map(tyre => ({
         ...tyre,
         // Map any missing properties needed by TyreDashboard
@@ -63,17 +70,46 @@ const adaptTyreFormatIfNeeded = (tyres: Tyre[], targetComponent: string) => {
         // Always ensure these properties exist
         type: tyre.type || { code: 'unknown', name: 'Unknown' },
         size: tyre.size || { width: 0, profile: 0, rimSize: 0, displayString: 'Unknown' },
+        calculatedValue: tyre.condition?.treadDepth ? tyre.purchaseDetails?.cost / tyre.condition.treadDepth : 0,
+        ageInDays: tyre.manufacturingDate ? 
+          Math.floor((new Date().getTime() - new Date(tyre.manufacturingDate).getTime()) / (1000 * 60 * 60 * 24)) : 0
+      }));
+      
+    case 'TyreCostAnalysis':
+      // Ensure cost data is properly formatted
+      return tyres.map(tyre => ({
+        ...tyre,
+        costPerKm: tyre.milesRun > 0 ? tyre.purchaseDetails?.cost / (tyre.milesRun * 1.60934) : 0,
+        totalCost: tyre.purchaseDetails?.cost || 0
+      }));
+      
+    case 'TyrePerformanceReport':
+      // Add performance metrics
+      return tyres.map(tyre => ({
+        ...tyre,
+        performance: {
+          wearRate: tyre.milesRun > 0 && tyre.condition?.treadDepth ? 
+            (10 - tyre.condition.treadDepth) / tyre.milesRun * 10000 : 0,
+          costEfficiency: tyre.milesRun > 0 ? 
+            tyre.purchaseDetails?.cost / tyre.milesRun : 0
+        }
       }));
       
     case 'TyreAnalytics':
-      // TyreAnalytics expects types from the tyre.ts file
-      return tyres;
-      
-    case 'TyreInventory':
-      // TyreInventory works with the standard Tyre format
-      return tyres;
+      // Ensure analytics-specific fields are present
+      return tyres.map(tyre => ({
+        ...tyre,
+        metrics: {
+          costPerMile: tyre.milesRun > 0 ? tyre.purchaseDetails?.cost / tyre.milesRun : 0,
+          treadWearRate: tyre.milesRun > 0 && tyre.condition?.treadDepth ? 
+            (10 - tyre.condition.treadDepth) / tyre.milesRun * 10000 : 0,
+          expectedRemainingLife: tyre.condition?.treadDepth ? 
+            (tyre.condition.treadDepth / 10) * (tyre.kmRunLimit || 50000) : 0
+        }
+      }));
       
     default:
+      // Return the original format for most components
       return tyres;
   }
 };
@@ -87,6 +123,10 @@ const TyreManagementPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabType>('inventory');
+  
+  // Sub-tab states for Analytics and Reports sections
+  const [analyticsSubTab, setAnalyticsSubTab] = useState<'overview' | 'cost'>('overview');
+  const [reportsSubTab, setReportsSubTab] = useState<'summary' | 'performance' | 'generator'>('summary');
   
   // Function to fetch tyres from Firestore
   const fetchTyres = async () => {
@@ -183,8 +223,9 @@ const TyreManagementPage: React.FC = () => {
       // Reference to the tyre document
       const tyreRef = doc(db, 'tyres', data.id);
       
-      // Remove id from the data to be updated
-      const { id, ...updateData } = data;
+      // Create a copy of the data without the id
+      const updateData = { ...data };
+      delete updateData.id;
       
       // Update the document
       await updateDoc(tyreRef, {
@@ -574,59 +615,136 @@ const TyreManagementPage: React.FC = () => {
           {/* Analytics Tab */}
           {activeTab === 'analytics' && (
             <div className="space-y-6">
-              {/* Wrap components with error boundaries or try-catch as needed */}
-              <Card>
-                <CardHeader>
-                  <h2 className="text-xl font-semibold">Tyre Analytics</h2>
-                </CardHeader>
-                <CardContent>
-                  {tyres.length > 0 ? (
-                    <TyreAnalytics />
-                  ) : (
-                    <div className="p-6 text-center">
-                      <p className="text-gray-500">No tyre data available for analytics.</p>
-                      <p className="mt-2">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setShowAddForm(true)}
-                          icon={<Plus className="w-4 h-4 mr-1" />}
-                        >
-                          Add Tyres
-                        </Button>
-                      </p>
+              {loading ? (
+                <div className="flex items-center justify-center p-10">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-700"></div>
+                  <span className="ml-3 text-gray-700">Loading analytics...</span>
+                </div>
+              ) : error ? (
+                <div className="bg-red-50 p-4 rounded-lg shadow border border-red-200">
+                  <p className="text-red-700 flex items-center">
+                    <AlertCircle className="h-5 w-5 mr-2" />
+                    Error loading analytics data
+                  </p>
+                </div>
+              ) : tyres.length === 0 ? (
+                <div className="bg-blue-50 p-6 rounded-lg shadow-sm border border-blue-100 text-center">
+                  <FileSearch className="h-12 w-12 mx-auto text-blue-500 mb-3" />
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">No Tyre Data Available</h3>
+                  <p className="text-gray-600 mb-4">
+                    Please add some tyres to your inventory to see analytics.
+                  </p>
+                  <Button
+                    onClick={() => setShowAddForm(true)}
+                    icon={<Plus className="w-4 h-4" />}
+                  >
+                    Add Your First Tyre
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <div className="mb-6 border-b border-gray-200">
+                    <div className="flex space-x-4 pb-2">
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        className={`${analyticsSubTab === 'overview' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'} rounded-none px-2 py-1 h-auto`}
+                        onClick={() => setAnalyticsSubTab('overview')}
+                      >
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Overview
+                      </Button>
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        className={`${analyticsSubTab === 'cost' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'} rounded-none px-2 py-1 h-auto`}
+                        onClick={() => setAnalyticsSubTab('cost')}
+                      >
+                        <DollarSign className="w-4 h-4 mr-2" />
+                        Cost Analysis
+                      </Button>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </div>
+                  
+                  {analyticsSubTab === 'overview' && <TyreAnalytics />}
+                  {analyticsSubTab === 'cost' && <TyreCostAnalysis />}
+                </div>
+              )}
             </div>
           )}
           
           {/* Reports Tab */}
           {activeTab === 'reports' && (
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <h2 className="text-xl font-semibold">Tyre Reports</h2>
-                </CardHeader>
-                <CardContent>
-                  {tyres.length > 0 ? (
-                    <TyreReports />
-                  ) : (
-                    <div className="p-6 text-center">
-                      <p className="text-gray-500">No tyre data available for reporting.</p>
-                      <p className="mt-2">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setShowAddForm(true)}
-                          icon={<Plus className="w-4 h-4 mr-1" />}
-                        >
-                          Add Tyres
-                        </Button>
-                      </p>
+              {loading ? (
+                <div className="flex items-center justify-center p-10">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-700"></div>
+                  <span className="ml-3 text-gray-700">Loading reports...</span>
+                </div>
+              ) : error ? (
+                <div className="bg-red-50 p-4 rounded-lg shadow border border-red-200">
+                  <p className="text-red-700 flex items-center">
+                    <AlertCircle className="h-5 w-5 mr-2" />
+                    Error loading report data
+                  </p>
+                </div>
+              ) : tyres.length === 0 ? (
+                <div className="bg-blue-50 p-6 rounded-lg shadow-sm border border-blue-100 text-center">
+                  <FileSearch className="h-12 w-12 mx-auto text-blue-500 mb-3" />
+                  <h3 className="text-lg font-semibold text-gray-800 mb-1">No Tyre Data Available</h3>
+                  <p className="text-gray-600 mb-4">
+                    Please add some tyres to your inventory to see reports.
+                  </p>
+                  <Button
+                    onClick={() => setShowAddForm(true)}
+                    icon={<Plus className="w-4 h-4" />}
+                  >
+                    Add Your First Tyre
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <div className="mb-6 border-b border-gray-200">
+                    <div className="flex space-x-4 pb-2">
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        className={`${reportsSubTab === 'summary' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'} rounded-none px-2 py-1 h-auto`}
+                        onClick={() => setReportsSubTab('summary')}
+                      >
+                        <FileText className="w-4 h-4 mr-2" />
+                        Summary Reports
+                      </Button>
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        className={`${reportsSubTab === 'performance' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'} rounded-none px-2 py-1 h-auto`}
+                        onClick={() => setReportsSubTab('performance')}
+                      >
+                        <TrendingUp className="w-4 h-4 mr-2" />
+                        Performance Reports
+                      </Button>
+                      <Button 
+                        variant="ghost"
+                        size="sm"
+                        className={`${reportsSubTab === 'generator' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-600'} rounded-none px-2 py-1 h-auto`}
+                        onClick={() => setReportsSubTab('generator')}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Report Generator
+                      </Button>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </div>
+                  
+                  {reportsSubTab === 'summary' && <TyreReports />}
+                  {reportsSubTab === 'performance' && <TyrePerformanceReport />}
+                  {reportsSubTab === 'generator' && <TyreReportGenerator onGenerateReport={(type, dateRange, brand) => {
+                    console.log(`Generating ${type} report for ${brand} over ${dateRange} days`);
+                    // Implementation for report generation would go here
+                    alert(`Generated ${type} report for ${brand} over ${dateRange} days`);
+                  }} />}
+                </div>
+              )}
             </div>
           )}
         </>

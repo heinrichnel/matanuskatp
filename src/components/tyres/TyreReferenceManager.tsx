@@ -524,7 +524,7 @@ const TyreReferenceManager: React.FC = () => {
         {activeTab === 'sizes' && renderSizesTab()}
         {activeTab === 'patterns' && renderPatternsTab()}
         {/* {activeTab === 'positions' && renderPositionsTab()} */}
-      </Card>
+      </CardContent>
     </Card>
   );
 };
