@@ -3,7 +3,7 @@ import { useTyreReferenceData } from '@/context/TyreReferenceDataContext';
 import { Button } from '@/components/ui/Button';
 import { Input, Select, Textarea } from '@/components/ui/FormElements';
 import VehiclePositionDiagram from '@/components/tyres/VehiclePositionDiagram';
-import { Tyre, TyreType, TyrePosition } from '@/components/Models/Tyre/TyreModel';
+import { Tyre } from '@/components/Models/Tyre/TyreModel';
 
 interface TyreFormProps {
   initialData?: Partial<Tyre>;
@@ -24,12 +24,8 @@ const TyreForm: React.FC<TyreFormProps> = ({
   const {
     brands,
     sizes,
-    patterns,
-    vehiclePositions,
-    loading,
     getPositionsForVehicleType,
-    getPatternsForBrand,
-    getPatternsForSize
+    getPatternsForBrand
   } = useTyreReferenceData();
 
   // Form state
@@ -124,7 +120,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
       // Parse size format like "295/80R22.5"
       const parts = selectedSize.match(/^(\d+)\/(\d+)R(\d+\.?\d*)$/);
       if (parts) {
-        const [_, width, aspectRatio, rimDiameter] = parts;
+        const [, width, aspectRatio, rimDiameter] = parts;
         setFormData(prev => ({
           ...prev,
           size: {

@@ -143,9 +143,8 @@ import JobCardManagement from './pages/JobCardManagement';
 import JobCardKanbanBoard from './components/WorkshopManagement/JobCardKanbanBoard';
 import JobCardTemplatesPage from './pages/JobCardTemplatesPage';
 import FaultTracking from './components/WorkshopManagement/FaultTracking';
-import TyreManagement from './pages/TyreManagementPage';
 import TyreStoresPage from './pages/TyreStoresPage';
-// import TyreFleetMap from './pages/TyreFleetMap'; // File doesn't exist - commented out
+import TyreFleetMap from './pages/TyreFleetMap';
 import TyreHistoryPage from './pages/TyreHistoryPage';
 import TyrePerformanceDashboard from './pages/TyrePerformanceDashboard';
 import TyreAddPage from './pages/tyres/AddNewTyrePage';
@@ -426,7 +425,7 @@ const App: React.FC = () => {
                       <Route path="/workshop/inspections" element={<InspectionHistoryPage />} />
                       <Route path="/workshop/job-cards" element={<JobCardManagement />} />
                       <Route path="/workshop/faults" element={<FaultTracking />} />
-                      <Route path="/workshop/tyres" element={<TyreManagement />} />
+                      <Route path="/workshop/tyres" element={<TyreManagementPage />} />
                       <Route path="/workshop/tyres/reference-data" element={<TyreReferenceManagerPage />} />
                       <Route path="/workshop/parts-ordering" element={<PartsOrderingPage />} />
                       <Route path="/workshop/vehicle-inspection" element={<VehicleInspectionPage />} />
@@ -435,7 +434,7 @@ const App: React.FC = () => {
                       <Route path="/tyres" element={<TyreManagementPage />} />
                       <Route path="/tyres/add" element={<AddNewTyrePage />} />
                       <Route path="/tyres/reference-data" element={<TyreReferenceManagerPage />} />
-                      {/* <Route path="/tyres/fleet-map" element={<TyreFleetMap />} /> */}
+                      <Route path="/tyres/fleet-map" element={<TyreFleetMap />} />
                       <Route path="/tyres/history" element={<TyreHistoryPage />} />
                       <Route path="/tyres/dashboard" element={<TyrePerformanceDashboard />} />
 

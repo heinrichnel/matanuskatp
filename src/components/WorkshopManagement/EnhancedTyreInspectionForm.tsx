@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import { QRCode } from "qrcode.react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import SignaturePad from 'react-signature-canvas';
 
-// Removing unused imports: updateDoc and TyreInspectionPDFGenerator
+// 1. Import your custom useCapacitor hook (update path as needed)
+import { useCapacitor } from "@/hooks/useCapacitor"; // <-- Update if needed
 
 interface TyreInspectionFormProps {
   fleetNumber?: string;
@@ -20,11 +22,11 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
   const navigate = useNavigate();
   const locationHook = useLocation();
   const queryParams = new URLSearchParams(locationHook.search);
-  
+
   // Use provided props or extract from URL params/query
   const vehicleId = fleetNumber || params.fleetId || queryParams.get('fleet') || '';
   const tyrePosition = position || params.position || queryParams.get('position') || '';
-  
+
   const [odometer, setOdometer] = useState<number | "">("");
   const [photo, setPhoto] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
@@ -38,21 +40,32 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
   const [condition, setCondition] = useState<string>("good");
   const [notes, setNotes] = useState<string>("");
   const [inspectorName, setInspectorName] = useState<string>("");
-  
+  const [showSig, setShowSig] = useState<boolean>(false);
+  const [sigPad, setSigPad] = useState<any>(null);
+
+  // 2. Use the Capacitor hook
+  const {
+    isNative,
+    hasPermissions,
+    scanQRCode,
+    takePhoto,
+    stopScan,
+    requestPermissions
+  } = useCapacitor();
+
   // Load any existing inspection data
   useEffect(() => {
     if (vehicleId && tyrePosition) {
       loadInspectionData(vehicleId, tyrePosition);
     }
   }, [vehicleId, tyrePosition]);
-  
+
   const loadInspectionData = async (fleet: string, position: string) => {
     try {
       setIsLoading(true);
       const db = getFirestore();
-      // Removing unused tyreRef variable
       const inspectionQuery = await getDoc(doc(db, 'tyre_inspections', `${fleet}-${position}`));
-      
+
       if (inspectionQuery.exists()) {
         const data = inspectionQuery.data();
         setInspectionData(data);
@@ -64,8 +77,6 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
         setNotes(data.notes || "");
         setInspectorName(data.inspectorName || "");
         setOdometer(data.odometer || "");
-        
-        // Only set these if they exist
         if (data.photo) setPhoto(data.photo);
         if (data.signature) setSignature(data.signature);
         if (data.gpsLocation) setGpsLocation(data.gpsLocation);
@@ -77,30 +88,66 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
     }
   };
 
-  const handlePhotoCapture = () => {
-    // In a real implementation, this would use the device camera
-    // For now, we'll simulate with a placeholder
+  // 3. Integrate hook-enhanced photo capture, but retain placeholder for web!
+  const handlePhotoCapture = async () => {
+    // Try native first, fallback to placeholder
+    if (isNative) {
+      const granted = await requestPermissions();
+      if (!granted) {
+        alert("Camera permission required.");
+        return;
+      }
+      const base64 = await takePhoto();
+      if (base64) {
+        setPhoto("data:image/jpeg;base64," + base64);
+        return;
+      }
+    }
+    // Web fallback (preserved!)
     setPhoto("data:image/png;base64,iVBORw0KG...");
   };
 
+  // Replace the old handleSignatureCapture with new signature handling
   const handleSignatureCapture = () => {
-    // In a real implementation, this would open a signature pad
-    // For now, we'll simulate with a placeholder
-    setSignature("data:image/png;base64,iVBORw0KG...");
+    setShowSig(true);
   };
 
+  const saveSignature = () => {
+    if (sigPad) {
+      setSignature(sigPad.getTrimmedCanvas().toDataURL('image/png'));
+      setShowSig(false);
+    }
+  };
+
+  const clearSignature = () => {
+    if (sigPad) {
+      sigPad.clear();
+    }
+  };
+
+  // 5. Integrate geolocation for both web/mobile
   const handleLocationCapture = () => {
-    // In a real implementation, this would use the device GPS
-    // For now, we'll simulate with fixed coordinates
-    setGpsLocation({ lat: -33.8688, lng: 151.2093 });
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setGpsLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        (err) => {
+          alert("Failed to get location: " + err.message);
+          // Fallback: use the existing static default
+          setGpsLocation({ lat: -33.8688, lng: 151.2093 });
+        }
+      );
+    } else {
+      // Fallback: use the existing static default
+      setGpsLocation({ lat: -33.8688, lng: 151.2093 });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setIsLoading(true);
-      
+
       const inspectionDataToSave = {
         fleetNumber: vehicleId,
         position: tyrePosition,
@@ -118,21 +165,21 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
         inspectionDate: new Date().toISOString(),
         lastUpdated: new Date().toISOString()
       };
-      
+
       // Save to Firestore
       const db = getFirestore();
       const docId = `${vehicleId}-${tyrePosition}`;
       await setDoc(doc(db, 'tyre_inspections', docId), inspectionDataToSave, { merge: true });
-      
+
       setInspectionData(inspectionDataToSave);
-      
+
       // Call onComplete callback if provided
       if (onComplete) {
         onComplete(inspectionDataToSave);
       }
-      
+
       alert("Inspection saved successfully!");
-      
+
       // Navigate back or to a confirmation page
       navigate(`/workshop/tyres?fleet=${vehicleId}`);
     } catch (error) {
@@ -146,13 +193,14 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
   return (
     <div className="p-4 bg-white rounded-lg shadow">
       <h2 className="text-2xl font-semibold mb-4">Tyre Inspection Form</h2>
-      
+
       {isLoading ? (
         <div className="flex justify-center my-8">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* ... everything below remains unchanged ... */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="form-group">
               <label className="block text-sm font-medium text-gray-700">Vehicle ID / Fleet Number</label>
@@ -163,7 +211,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
                 readOnly
               />
             </div>
-            
+
             <div className="form-group">
               <label className="block text-sm font-medium text-gray-700">Tyre Position</label>
               <input
@@ -174,7 +222,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="form-group">
               <label className="block text-sm font-medium text-gray-700">Tyre Brand</label>
@@ -186,7 +234,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="block text-sm font-medium text-gray-700">Tyre Size</label>
               <input
@@ -198,7 +246,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="form-group">
               <label className="block text-sm font-medium text-gray-700">Tread Depth (mm)</label>
@@ -211,7 +259,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="block text-sm font-medium text-gray-700">Pressure (PSI)</label>
               <input
@@ -223,7 +271,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="form-group">
               <label className="block text-sm font-medium text-gray-700">Odometer</label>
@@ -235,7 +283,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="block text-sm font-medium text-gray-700">Condition</label>
               <select
@@ -252,7 +300,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
               </select>
             </div>
           </div>
-          
+
           <div className="form-group">
             <label className="block text-sm font-medium text-gray-700">Inspector Name</label>
             <input
@@ -263,7 +311,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label className="block text-sm font-medium text-gray-700">Notes</label>
             <textarea
@@ -273,7 +321,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
               rows={3}
             />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               type="button"
@@ -282,7 +330,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
             >
               {photo ? "Retake Photo" : "Take Photo"}
             </button>
-            
+
             <button
               type="button"
               className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -290,7 +338,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
             >
               {signature ? "Redo Signature" : "Add Signature"}
             </button>
-            
+
             <button
               type="button"
               className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -298,8 +346,26 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
             >
               {gpsLocation ? "Update Location" : "Get Location"}
             </button>
+
+            <button
+              type="button"
+              className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              onClick={async () => {
+                if (isNative) {
+                  const result = await scanQRCode();
+                  if (result) {
+                    alert("QR code scanned: " + result);
+                    // You can parse the result and navigate or update form data here
+                  }
+                } else {
+                  alert("QR scanning is only available in the mobile app");
+                }
+              }}
+            >
+              Scan Tyre QR Code
+            </button>
           </div>
-          
+
           {/* Preview area for photo and signature */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {photo && (
@@ -310,7 +376,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
                 </div>
               </div>
             )}
-            
+
             {signature && (
               <div>
                 <p className="text-sm font-medium text-gray-700 mb-1">Signature:</p>
@@ -320,13 +386,13 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
               </div>
             )}
           </div>
-          
+
           {/* QR Code for this tyre */}
           <div className="mt-6 text-center">
             <p className="text-sm font-medium text-gray-700 mb-2">Tyre QR Code:</p>
             <div className="inline-block bg-white p-3 rounded-md shadow-sm border border-gray-200">
-              <QRCode 
-                value={`${window.location.origin}/workshop/tyres/scan?fleet=${vehicleId}&position=${tyrePosition}`} 
+              <QRCode
+                value={`${window.location.origin}/workshop/tyres/scan?fleet=${vehicleId}&position=${tyrePosition}`}
                 size={150}
                 level="H"
                 includeMargin={true}
@@ -334,7 +400,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
             </div>
             <p className="text-xs text-gray-500 mt-2">Scan to view this tyre's details</p>
           </div>
-          
+
           <div className="flex justify-end mt-6">
             <button
               type="button"
@@ -343,7 +409,7 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
             >
               Cancel
             </button>
-            
+
             <button
               type="submit"
               className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
@@ -354,7 +420,47 @@ const EnhancedTyreInspectionForm: React.FC<TyreInspectionFormProps> = ({
           </div>
         </form>
       )}
-      
+
+      {/* Add Signature Modal */}
+      {showSig && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-lg w-full max-w-lg">
+            <h3 className="text-lg font-medium mb-4">Add Signature</h3>
+            <div className="border border-gray-300 rounded">
+              <SignaturePad
+                ref={setSigPad}
+                canvasProps={{
+                  className: 'w-full h-64'
+                }}
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                type="button"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+                onClick={clearSignature}
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 text-sm font-medium text-white bg-gray-500 rounded hover:bg-gray-600"
+                onClick={() => setShowSig(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+                onClick={saveSignature}
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {inspectionData && (
         <div className="mt-8 border-t border-gray-200 pt-4">
           <h3 className="text-lg font-medium text-gray-900">Generate Report</h3>
