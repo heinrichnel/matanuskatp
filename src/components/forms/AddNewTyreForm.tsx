@@ -39,6 +39,16 @@ const AddNewTyreForm: React.FC<AddNewTyreFormProps> = ({
   onCancel,
   initialData
 }) => {
+  // Use the reference data context for dynamic data
+  const {
+    brands,
+    sizes,
+    patterns,
+    getPositionsForVehicleType,
+    getPatternsForBrand,
+    getPatternsForSize
+  } = useTyreReferenceData();
+
   const [formData, setFormData] = useState<TyreData>({
     tyreNumber: initialData?.tyreNumber || '',
     tyreSize: initialData?.tyreSize || '',
@@ -63,7 +73,7 @@ const AddNewTyreForm: React.FC<AddNewTyreFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof TyreData, string>>>({});
 
-  // Default tyre sizes list, will be overridden by Firestore data if available
+  // Default tyre sizes list, will be overridden by reference data context
   const [tyreSizes, setTyreSizes] = useState([
     '295/80R22.5',
     '315/80R22.5',
@@ -74,34 +84,43 @@ const AddNewTyreForm: React.FC<AddNewTyreFormProps> = ({
     '275/70R22.5'
   ]);
   
-  // Fetch tyre sizes from Firestore
+  // Update tyre sizes when reference data is loaded
   useEffect(() => {
-    const fetchTyreSizes = async () => {
-      try {
-        const db = getFirestore();
-        const sizesQuery = query(collection(db, 'tyreSizes'));
-        const querySnapshot = await getDocs(sizesQuery);
-        
-        const sizes: string[] = [];
-        
-        querySnapshot.forEach(doc => {
-          const data = doc.data();
-          if (data.size) {
-            sizes.push(data.size);
+    if (sizes && sizes.length > 0) {
+      setTyreSizes(sizes.map(size => size.size || size.id).sort());
+    }
+  }, [sizes]);
+  
+  // Legacy Firestore fetch (kept for backward compatibility)
+  useEffect(() => {
+    if (!sizes || sizes.length === 0) {
+      const fetchTyreSizes = async () => {
+        try {
+          const db = getFirestore();
+          const sizesQuery = query(collection(db, 'tyreSizes'));
+          const querySnapshot = await getDocs(sizesQuery);
+          
+          const fetchedSizes: string[] = [];
+          
+          querySnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.size) {
+              fetchedSizes.push(data.size);
+            }
+          });
+          
+          if (fetchedSizes.length > 0) {
+            setTyreSizes(fetchedSizes.sort());
+            console.log('Tyre sizes loaded from Firestore:', fetchedSizes);
           }
-        });
-        
-        if (sizes.length > 0) {
-          setTyreSizes(sizes.sort());
-          console.log('Tyre sizes loaded from Firestore:', sizes);
+        } catch (error) {
+          console.error('Error fetching tyre sizes:', error);
         }
-      } catch (error) {
-        console.error('Error fetching tyre sizes:', error);
-      }
-    };
-    
-    fetchTyreSizes();
-  }, []);
+      };
+      
+      fetchTyreSizes();
+    }
+  }, [sizes]);
 
   const tyreTypes = [
     'Drive',
@@ -110,7 +129,7 @@ const AddNewTyreForm: React.FC<AddNewTyreFormProps> = ({
     'All-Position'
   ];
 
-  // Default manufacturers list, will be overridden by Firestore data if available
+  // Default manufacturers list, will be overridden by reference data context
   const [manufacturers, setManufacturers] = useState([
     'Michelin',
     'Goodyear',
@@ -124,7 +143,43 @@ const AddNewTyreForm: React.FC<AddNewTyreFormProps> = ({
     'Firestone'
   ]);
   
-  // Fetch tyre brands from Firestore
+  // Update manufacturers when reference data is loaded
+  useEffect(() => {
+    if (brands && brands.length > 0) {
+      setManufacturers(brands.map(brand => brand.name || brand.id));
+    }
+  }, [brands]);
+  
+  // Get available patterns based on selected manufacturer and size
+  const getAvailablePatterns = () => {
+    if (!patterns) return [];
+    
+    let filteredPatterns = patterns;
+    
+    if (formData.manufacturer) {
+      filteredPatterns = getPatternsForBrand(formData.manufacturer);
+    }
+    
+    if (formData.tyreSize) {
+      filteredPatterns = filteredPatterns.filter(pattern => 
+        getPatternsForSize(formData.tyreSize).some(p => p.id === pattern.id)
+      );
+    }
+    
+    return filteredPatterns.map(pattern => pattern.pattern || pattern.name || pattern.id);
+  };
+  
+  // Get available vehicle positions based on vehicle type
+  const getAvailablePositions = () => {
+    if (!formData.vehicleType || !getPositionsForVehicleType) {
+      return vehicleConfigurations[formData.vehicleType]?.positions || [];
+    }
+    
+    const positions = getPositionsForVehicleType(formData.vehicleType);
+    return positions || vehicleConfigurations[formData.vehicleType]?.positions || [];
+  };
+  
+  // Fetch tyre brands from Firestore (legacy support)
   useEffect(() => {
     const fetchTyreBrands = async () => {
       try {
@@ -413,15 +468,18 @@ const AddNewTyreForm: React.FC<AddNewTyreFormProps> = ({
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="pattern">
                     Pattern
                   </label>
-                  <input
-                    type="text"
+                  <select
                     id="pattern"
                     name="pattern"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    placeholder="e.g. X MultiWay 3D XZE"
                     value={formData.pattern}
                     onChange={handleInputChange}
-                  />
+                  >
+                    <option value="">Select Pattern</option>
+                    {getAvailablePatterns().map(pattern => (
+                      <option key={pattern} value={pattern}>{pattern}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>
@@ -671,7 +729,7 @@ const AddNewTyreForm: React.FC<AddNewTyreFormProps> = ({
                     disabled={formData.mountStatus !== 'Mounted'}
                   >
                     <option value="">Select Position</option>
-                    {availablePositions.map(pos => (
+                    {getAvailablePositions().map(pos => (
                       <option key={pos.id} value={pos.id}>{pos.name}</option>
                     ))}
                   </select>

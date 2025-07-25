@@ -20,16 +20,14 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import Modal from '../../components/ui/Modal';
 import TyreFormModal from '../../components/Models/Tyre/TyreFormModal';
-import { collection, query, getDocs, orderBy, addDoc, doc, updateDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Tyre } from '../../components/Models/Tyre/TyreModel';
 
 // Import tyre components that need to be integrated
 import TyreDashboard from '../../components/Tyremanagement/TyreDashboard';
 import TyreAnalytics from '../../components/Tyremanagement/TyreAnalytics';
-import { TyreInventory } from '../../components/Tyremanagement/TyreInventory';
 import { TyreInventoryStats } from '../../components/Tyremanagement/TyreInventoryStats';
 import { TyreReports } from '../../components/Tyremanagement/TyreReports';
 import { TyreCostAnalysis } from '../../components/Tyremanagement/TyreCostAnalysis';

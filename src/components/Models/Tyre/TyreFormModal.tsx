@@ -6,7 +6,7 @@ import { X, Save, ChevronRight } from 'lucide-react';
 import { useTyreReferenceData } from '@/context/TyreReferenceDataContext';
 import VehiclePositionDiagram from '@/components/tyres/VehiclePositionDiagram';
 import { Timestamp } from 'firebase/firestore';
-import { Tyre, TyreType, TyrePosition } from '@/components/Models/Tyre/TyreModel';
+import { Tyre } from '@/components/Models/Tyre/TyreModel';
 
 interface TyreFormModalProps {
   isOpen: boolean;
@@ -27,12 +27,8 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
   const {
     brands,
     sizes,
-    patterns,
-    vehiclePositions,
-    loading,
     getPositionsForVehicleType,
-    getPatternsForBrand,
-    getPatternsForSize
+    getPatternsForBrand
   } = useTyreReferenceData();
 
   // Form state
@@ -120,7 +116,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
       // Parse size format like "295/80R22.5"
       const parts = selectedSize.match(/^(\d+)\/(\d+)R(\d+\.?\d*)$/);
       if (parts) {
-        const [_, width, aspectRatio, rimDiameter] = parts;
+        const [, width, aspectRatio, rimDiameter] = parts;
         setFormData(prev => ({
           ...prev,
           size: {
