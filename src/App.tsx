@@ -149,6 +149,7 @@ import TyreHistoryPage from './pages/TyreHistoryPage';
 import TyrePerformanceDashboard from './pages/TyrePerformanceDashboard';
 import TyreAddPage from './pages/tyres/AddNewTyrePage';
 import TyreManagementPage from './pages/tyres/TyreManagementPage';
+import TyreMobilePage from './pages/mobile/TyreMobilePage';
 import StockAlertsPage from './pages/StockAlertsPage';
 import PartsOrderingPage from './pages/PartsOrderingPage';
 import VehicleInspectionPage from './components/WorkshopManagement/vehicle-inspection';
@@ -432,6 +433,9 @@ const App: React.FC = () => {
                       
                       {/* === TYRES === */}
                       <Route path="/tyres" element={<TyreManagementPage />} />
+                      <Route path="/tyres/mobile" element={<TyreMobilePage />} />
+                      <Route path="/tyres/mobile/inspection/:tyreId?" element={<TyreMobilePage mode="inspection" />} />
+                      <Route path="/tyres/mobile/scanner" element={<TyreMobilePage mode="scanner" />} />
                       <Route path="/tyres/add" element={<AddNewTyrePage />} />
                       <Route path="/tyres/reference-data" element={<TyreReferenceManagerPage />} />
                       <Route path="/tyres/fleet-map" element={<TyreFleetMap />} />

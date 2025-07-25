@@ -43,7 +43,7 @@ export interface Tyre {
     repairs: TyreRepair[];
     inspections: TyreInspection[];
   };
-  milesRun: number;
+  kmRun: number;             // Use kilometers for all calculations
   kmRunLimit: number;
   notes: string;
   location: TyreStoreLocation;
@@ -169,36 +169,56 @@ export enum TyreStoreLocation {
   SCRAPPED = 'Scrapped'
 }
 
-// Helper functions for tyre management
+// --- Helper functions for tyre management ---
+
+/**
+ * Calculate remaining life in kilometers for the given tyre
+ */
 export function calculateRemainingLife(tyre: Tyre): number {
   const currentTread = tyre.condition.treadDepth;
   const minimumTread = 3; // Legal minimum in mm
   const newTyreDepth = 20; // Typical new tyre tread depth in mm
-  
+
   // Calculate wear rate (mm per km)
   const usedTread = newTyreDepth - currentTread;
-  const wearRate = tyre.milesRun > 0 ? usedTread / tyre.milesRun : 0;
-  
+  const wearRate = tyre.kmRun > 0 ? usedTread / tyre.kmRun : 0;
+
   // Calculate remaining life
   const remainingTread = currentTread - minimumTread;
   const remainingKm = wearRate > 0 ? remainingTread / wearRate : 0;
-  
+
   return Math.max(remainingKm, 0);
 }
 
+/**
+ * Calculate the cost per kilometer for the given tyre
+ */
 export function calculateCostPerKm(tyre: Tyre): number {
-  if (tyre.milesRun <= 0) return 0;
-  return tyre.purchaseDetails.cost / tyre.milesRun;
+  if (!tyre.kmRun || tyre.kmRun <= 0) return 0;
+  return Number((tyre.purchaseDetails.cost / tyre.kmRun).toFixed(4));
 }
 
+/**
+ * Optionally, convert miles to kilometers (if needed for any legacy data)
+ */
+export function milesToKm(miles: number): number {
+  return miles * 1.60934;
+}
+
+/**
+ * Format TyreSize to a human-readable string
+ */
 export function formatTyreSize(size: TyreSize): string {
   return `${size.width}/${size.aspectRatio}R${size.rimDiameter}`;
 }
 
+/**
+ * Parse a TyreSize string to a TyreSize object
+ */
 export function parseTyreSize(sizeStr: string): TyreSize {
   const regex = /(\d+)\/(\d+)R(\d+\.?\d*)/;
   const match = sizeStr.match(regex);
-  
+
   if (match) {
     return {
       width: parseInt(match[1], 10),
@@ -207,7 +227,7 @@ export function parseTyreSize(sizeStr: string): TyreSize {
       displayString: sizeStr
     };
   }
-  
+
   return {
     width: 0,
     aspectRatio: 0,
