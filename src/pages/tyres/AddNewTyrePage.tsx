@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AddNewTireForm from '../../components/forms/AddTyreForm';
+import AddNewTyreForm from '../../components/forms/AddNewTyreForm';
 import { Card, CardContent, Button } from '../../components/ui';
 import { Package, Check } from 'lucide-react';
 
@@ -113,7 +113,7 @@ const AddNewTyrePage: React.FC = () => {
             </div>
           </div>
           
-          <AddNewTireForm
+          <AddNewTyreForm
             initialData={initialData}
             onSubmit={handleSubmit}
             onCancel={handleCancel}
