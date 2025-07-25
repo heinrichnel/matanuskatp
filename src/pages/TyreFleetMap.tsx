@@ -3,16 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { mappingData, TyreMappingRow, buildVehicleTyreStore } from '../data/tyreMappingData';
-import { TyrePosition } from '../types/tyre';
-import { 
-  Search, 
-  Filter, 
-  MapPin, 
-  Truck, 
+import {
+  Search,
+  MapPin,
+  Truck,
   Circle,
   AlertCircle,
-  CheckCircle,
-  Clock
+  CheckCircle
 } from 'lucide-react';
 
 interface VehicleView {
@@ -29,7 +26,7 @@ const TyreFleetMap: React.FC = () => {
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterBy, setFilterBy] = useState<'all' | 'complete' | 'incomplete'>('all');
-  const [vehicleTyreStore, setVehicleTyreStore] = useState<any>(null);
+  const [_vehicleTyreStore, setVehicleTyreStore] = useState<any>(null);
 
   useEffect(() => {
     // Build the vehicle tyre store from mapping data

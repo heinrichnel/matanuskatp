@@ -60,6 +60,22 @@ const MobileNavigation: React.FC<MobileNavigationProps> = ({
       icon: BarChart3,
       path: '/tyres/stats',
       action: () => navigate('/tyres')
+    },
+    {
+      id: 'profile',
+      label: 'Profile',
+      icon: User,
+      path: '/profile',
+      action: () => navigate('/profile'),
+      hidden: true // Hidden for now, will be enabled in future release
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: Settings,
+      path: '/settings',
+      action: () => navigate('/settings'),
+      hidden: true // Hidden for now, will be enabled in future release
     }
   ];
 

@@ -14,13 +14,14 @@ interface MobileLayoutProps {
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({
   children,
-  title = 'Tyre Management',
+  title: _title = 'Tyre Management', // Renamed with underscore to indicate it's intentionally unused
   showStatusBar = true,
   statusBarStyle = 'dark',
   backgroundColor = '#ffffff'
 }) => {
   const [isNativeApp, setIsNativeApp] = useState(false);
-  const [deviceInfo, setDeviceInfo] = useState<any>(null);
+  // We still need setDeviceInfo for the initializeNativeFeatures function
+  const [_deviceInfo, setDeviceInfo] = useState<any>(null);
 
   useEffect(() => {
     setIsNativeApp(Capacitor.isNativePlatform());
