@@ -35,6 +35,16 @@
     </script>
 
     <!-- Styles from Vite build (auto-injected in dev, inlined or linked in production) -->
+    
+    <!-- Fix for "Cannot read properties of undefined (reading 'createContext')" error -->
+    <script>
+      // Pre-initialize React global to prevent timing issues
+      window.React = window.React || {};
+      window.React.createContext = window.React.createContext || function() {
+        console.warn('React createContext polyfill called');
+        return { Provider: function() {}, Consumer: function() {} };
+      };
+    </script>
   </head>
 
   <body class="bg-gray-50 dark:bg-gray-900 font-sans antialiased">

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Typography, Table, Tag, Button, Space, Tooltip, Input } from 'antd';
+// Ensure React is fully loaded before importing Ant Design
+const AntDesign = React.lazy(() => import('antd'));
 import { SearchOutlined, FilterOutlined, EyeOutlined, CheckOutlined, ClockCircleOutlined } from '@ant-design/icons';
+
+// Extract components from Ant Design
+const { Card, Typography, Table, Tag, Button, Space, Tooltip, Input } = AntDesign;
 import { useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;

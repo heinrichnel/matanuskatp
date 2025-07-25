@@ -145,7 +145,7 @@ import JobCardTemplatesPage from './pages/JobCardTemplatesPage';
 import FaultTracking from './components/WorkshopManagement/FaultTracking';
 import TyreManagement from './pages/TyreManagementPage';
 import TyreStoresPage from './pages/TyreStoresPage';
-import TyreFleetMap from './pages/TyreFleetMap';
+// import TyreFleetMap from './pages/TyreFleetMap'; // File doesn't exist - commented out
 import TyreHistoryPage from './pages/TyreHistoryPage';
 import TyrePerformanceDashboard from './pages/TyrePerformanceDashboard';
 import TyreAddPage from './pages/tyres/AddNewTyrePage';
@@ -435,7 +435,7 @@ const App: React.FC = () => {
                       <Route path="/tyres" element={<TyreManagementPage />} />
                       <Route path="/tyres/add" element={<AddNewTyrePage />} />
                       <Route path="/tyres/reference-data" element={<TyreReferenceManagerPage />} />
-                      <Route path="/tyres/fleet-map" element={<TyreFleetMap />} />
+                      {/* <Route path="/tyres/fleet-map" element={<TyreFleetMap />} /> */}
                       <Route path="/tyres/history" element={<TyreHistoryPage />} />
                       <Route path="/tyres/dashboard" element={<TyrePerformanceDashboard />} />
 
