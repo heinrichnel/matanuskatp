@@ -1,7 +1,8 @@
 
 
 import React, { useState } from "react";
-import { Button, Card, CardContent } from "./Card";
+import { Card, CardContent } from "./Card";
+import { Button } from "./Button";
 
 interface Step {
   title: string;

@@ -31,7 +31,7 @@ import TyreAnalytics from '../../components/Tyremanagement/TyreAnalytics';
 import { TyreInventoryStats } from '../../components/Tyremanagement/TyreInventoryStats';
 import { TyreReports } from '../../components/Tyremanagement/TyreReports';
 import { TyreCostAnalysis } from '../../components/Tyremanagement/TyreCostAnalysis';
-import { TyrePerformanceReport } from '../../components/Tyremanagement/TyrePerformanceReport';
+import TyrePerformanceReport from '../../components/Tyremanagement/TyrePerformanceReport';
 import { TyreReportGenerator } from '../../components/Tyremanagement/TyreReportGenerator';
 
 // Using Tyre type from TyreModel
