@@ -1,115 +1,84 @@
-## Enforce Front-End Layout, Sidebar, Import, and Full UI Integration Consistency – Copilot Agent Rules
+# Frontend Architecture and Integration Standards
 
-### ##Instructions to the Agent:
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Layout & App Structure](#layout--app-structure)
+3. [Sidebar & Navigation](#sidebar--navigation)
+4. [Import Management](#import-management)
+5. [UI CRUD Operations](#ui-crud-operations)
+6. [Data Handling Patterns](#data-handling-patterns)
+7. [Performance Optimization](#performance-optimization)
+8. [Error Handling & Resilience](#error-handling--resilience)
+9. [Component Integration & Deduplication](#component-integration--deduplication)
+10. [Permission & Authorization](#permission--authorization)
+11. [Permitted & Prohibited Actions](#permitted--prohibited-actions)
 
-You must, for every commit and refactor, do the following checks and (if needed) automated edits:
+## Introduction
 
-## Layout & App Structure:
+This document defines the standards for frontend architecture, integration, and code quality. These standards ensure a consistent, maintainable, and high-performance application with proper error handling and user experience.
 
-Ensure that the main layout component (usually Layout.tsx or equivalent) correctly wraps all pages/routes.
+**Goal:** A fully connected, production-ready frontend that matches the intended layout, sidebar navigation, and UI CRUD expectations—with every route, component, provider, and data model linked and working end-to-end.
 
-Validate that the layout imports all shared UI (navigation bar, sidebar, notifications, footer, etc.) and that these are not duplicated across subcomponents.
+## Layout & App Structure
 
-## Sidebar Menu Integration:
+### Requirements
+- The main layout component (typically `Layout.tsx`) must correctly wrap all pages/routes
+- Layout must import all shared UI components:
+  - Navigation bar
+  - Sidebar
+  - Notifications
+  - Footer
+- Shared UI components must not be duplicated across subcomponents
+- All routes must be properly configured in the router (typically `App.tsx` or equivalent)
 
-Parse the sidebar config file (often Sidebar.tsx, sidebarConfig.ts, or equivalent).
+### Implementation Example
+```tsx
+// App.tsx
+import Layout from './components/layout/Layout';
+import { Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+// Other page imports...
 
-Check that every sidebar entry maps to a valid and existing route, and that the linked component is imported and present in the router (App.tsx or your router config).
+function App() {
+  return (
+    <Layout>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        {/* Other routes... */}
+      </Routes>
+    </Layout>
+  );
+}
+```
 
-## Auto-flag and auto-generate (if allowed) placeholder pages/components for any missing sidebar route targets.
+## Sidebar & Navigation
 
-Ensure submenus, icons, and collapse logic work as expected in the sidebar.
+### Requirements
+- Parse the sidebar configuration file (typically `sidebarConfig.ts` or equivalent)
+- Every sidebar entry must map to a valid and existing route
+- All linked components must be properly imported in the router configuration
+- Flag and optionally generate placeholder components for missing sidebar route targets
+- Ensure submenus, icons, and collapse logic work as expected
 
-## Import Consistency:
+### Validation Process
+1. Extract all routes from sidebar configuration
+2. Verify each route exists in the router configuration
+3. Confirm that each route's component is properly imported
+4. Report any missing routes or components
+5. Test submenu functionality and icon rendering
 
-Ensure that every component referenced in routes, layouts, or the sidebar is actually imported where it is needed, with the correct case and path.
-
-Remove any dead imports, duplicate imports, or imports from test/dev files.
-
-## UI CRUD Functionality:
-
-Verify that every editable (edit), delete, or view screen for each module (trips, drivers, workshop, tyres, diesel, clients, inventory, etc.) is available via UI and correctly referenced in the sidebar/routing.
-
-Ensure all Create, Read, Update, Delete (CRUD) operations in the UI can reach their respective backend endpoints or Firestore collections (check for missing or broken hooks/services).
-
-For every modal, dialog, or drawer, check that it is reachable from the UI and does not leave orphaned logic in the codebase.
-
-## Soft View Integration & Data Display:
-
-Ensure that every data view implements the twalwant soft view pattern:
-
-* Progressive data loading
-* Optimistic UI updates
-* Fallback placeholder states
-* Real-time sync with Firestore
-
-## Enhanced Data Connectivity:
-
-Verify that all data views and forms:
-
-* Implement proper loading states
-* Handle offline/error scenarios
-* Use proper Firestore pagination
-* Support real-time updates via onSnapshot
-* Include proper data validation
-
-## Permission-Based UI:
-
-Ensure all UI elements:
-
-* Respect user role permissions
-* Implement proper access control
-* Show/hide based on user authorization
-* Handle unauthorized access gracefully
-
-Document Connections:
-
-All key data documents (e.g. Trip, Driver, Job Card, Tyre, Fleet) must be synchronized:
-
-Their models/types must match between Firestore, the backend, and frontend.
-
-Every Firestore collection used in the code must be accessible via a component or page in the sidebar or dashboard.
-
-Any UI element (like download/export buttons, import forms) must be connected to the correct handler.
-
-UI Consistency and Availability:
-
-Auto-flag (and optionally create) any missing Edit, Delete, or View screen/component.
-
-Ensure that all menu/CRUD screens work for the current user’s permissions.
-
-Prevent any component from being unlinked or “floating” in the codebase (i.e., every UI component must be used or reachable).
-
-### Full Front-End to Back-End Flow:
-
-Enforce that for every menu/sidebar/dashboard entry, the data flow (fetch, sync, save) reaches the correct Firestore or backend endpoint, with proper error handling and state management.
-
-Report and auto-fix any missing provider, context, or integration that breaks this flow.
-
-You are permitted to:
-
-Auto-edit imports, generate missing components or placeholder screens, synchronize sidebar/menu configs, and fix broken CRUD flows.
-
-Report to the user any major refactors or auto-generated screens so nothing is hidden.
-
-## You must not:
-
-Remove or disable any existing functional feature without explicit user approval.
-
-Break the architecture or change workflow logic not related to routing or UI/CRUD/data connectivity.
-
-## Strict Import Path Enforcement Rules
+## Import Management
 
 ### Scope & Focus
-- Only enforced on .tsx files within src/ directory
+- Only enforced on `.tsx` files within `src/` directory
 - Limited to pages and components
 - Focus on import statement correctness and resolution
 - No file operations without explicit approval
 
 ### Import Resolution Process
-1. For each import statement in .tsx files:
+1. For each import statement in `.tsx` files:
    - Verify the import path resolves to an existing file
-   - Search entire src/ tree if import cannot be resolved
+   - Search entire `src/` tree if import cannot be resolved
    - Only update import paths, never modify component logic
 
 2. Import Path Rules:
@@ -119,23 +88,201 @@ Break the architecture or change workflow logic not related to routing or UI/CRU
    - Only fix paths to existing files
    - Report unresolved imports for manual review
 
-### Required Agent Reporting
+### Required Reporting
 For every file modification:
-- List any unresolved .tsx imports found
+- List any unresolved `.tsx` imports found
 - Show before/after paths for any fixed imports
 - Request explicit permission before:
   - Creating new files
   - Suggesting new components
   - Modifying multiple files
 
-### Permission Requirements
-- Must get explicit approval before:
-  - Creating any new files
-  - Moving any existing files
-  - Updating imports in multiple files
-  - Adding new components or pages
+## UI CRUD Operations
 
-## Deduplication & Integration Rules
+### Requirements
+- Every module (trips, drivers, workshop, tyres, diesel, clients, inventory, etc.) must have:
+  - Create screens/forms
+  - Read/View screens
+  - Update/Edit screens
+  - Delete functionality
+- All CRUD operations must be properly connected to backend endpoints or Firestore collections
+- All modals, dialogs, and drawers must be reachable from the UI
+- No orphaned logic or components should exist in the codebase
+
+### Validation Process
+1. For each module, verify existence of all CRUD screens
+2. Confirm each screen is accessible via sidebar or navigation
+3. Test data flow from UI to backend/Firestore
+4. Verify proper hooks and services are implemented
+5. Check for orphaned components or unreachable UI elements
+
+## Data Handling Patterns
+
+### Soft View Pattern Implementation
+All data views must implement the soft view pattern:
+- **Progressive data loading**: Show data as it becomes available
+- **Optimistic UI updates**: Update UI before server confirmation
+- **Fallback placeholder states**: Show skeletons, spinners, or placeholders during loading
+- **Real-time sync**: Connect to Firestore or other real-time data sources
+
+### Enhanced Data Connectivity
+All data views and forms must:
+- Implement proper loading states with visual indicators
+- Handle offline/error scenarios gracefully
+- Use proper Firestore pagination for large datasets
+- Support real-time updates via `onSnapshot` or equivalent
+- Include proper data validation with user feedback
+
+### Example Implementation
+```tsx
+function DataList() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    // Initial loading state
+    setLoading(true);
+    
+    // Real-time subscription
+    const unsubscribe = db.collection('items')
+      .limit(20) // Pagination
+      .onSnapshot(
+        (snapshot) => {
+          // Progressive loading
+          const items = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setData(items);
+          setLoading(false);
+          setError(null);
+        },
+        (err) => {
+          // Error handling
+          setError(err);
+          setLoading(false);
+        }
+      );
+      
+    return () => unsubscribe();
+  }, []);
+  
+  // Optimistic update example
+  const updateItem = (id, newData) => {
+    // Update local state immediately
+    setData(prev => prev.map(item => 
+      item.id === id ? {...item, ...newData} : item
+    ));
+    
+    // Then update server
+    db.collection('items').doc(id).update(newData)
+      .catch(err => {
+        // Revert on error
+        setError(err);
+        // Refresh data from server
+        // ...
+      });
+  };
+  
+  if (loading && data.length === 0) {
+    return <SkeletonLoader />; // Fallback state
+  }
+  
+  if (error) {
+    return <ErrorDisplay error={error} retry={() => /* retry logic */} />;
+  }
+  
+  return (
+    <>
+      {data.map(item => (
+        <ItemCard key={item.id} item={item} onUpdate={updateItem} />
+      ))}
+      {loading && <LoadingMoreIndicator />} {/* Progressive loading indicator */}
+    </>
+  );
+}
+```
+
+## Performance Optimization
+
+### Code Splitting and Lazy Loading
+- Use React.lazy and Suspense for component-level code splitting
+- Implement route-based code splitting for all major routes
+- Defer loading of non-critical components
+
+```tsx
+// Route-based code splitting example
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Settings = React.lazy(() => import('./pages/Settings'));
+
+function App() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/settings" element={<Settings />} />
+      </Routes>
+    </Suspense>
+  );
+}
+```
+
+### Render Optimization
+- Implement memoization for expensive components using React.memo
+- Use useMemo for expensive calculations
+- Use useCallback for event handlers passed to child components
+- Avoid unnecessary re-renders by properly structuring component hierarchy
+- Implement virtualization for long lists using react-window or similar libraries
+
+### Asset Optimization
+- Optimize images and use proper formats (WebP, SVG)
+- Implement responsive images with srcset
+- Use font-display: swap for web fonts
+- Implement proper caching strategies
+
+## Error Handling & Resilience
+
+### Error Boundaries
+- Implement error boundaries at strategic levels in the component tree
+- Provide meaningful fallback UIs for different types of errors
+- Log errors to monitoring service
+
+```tsx
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+  
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  
+  componentDidCatch(error, info) {
+    // Log to error monitoring service
+    logErrorToService(error, info);
+  }
+  
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback error={this.state.error} />;
+    }
+    return this.props.children;
+  }
+}
+```
+
+### Network Error Handling
+- Implement retry mechanisms for failed network requests
+- Provide clear feedback to users about network status
+- Cache critical data for offline access
+- Implement optimistic updates with rollback capability
+
+### Data Validation
+- Validate all user inputs on the client side
+- Implement server-side validation as well
+- Provide clear error messages for validation failures
+- Use proper form state management (Formik, React Hook Form, etc.)
+
+## Component Integration & Deduplication
 
 ### Component & Page Integration
 - Must merge duplicate components/pages without losing functionality
@@ -144,6 +291,18 @@ For every file modification:
 - Preserve all business logic and data handling
 - Update imports and sidebar references after merge
 - Report all integrations with feature-by-feature summary
+
+### Integration Process
+1. Identify most feature-complete version
+2. Merge all unique elements from duplicates:
+   - Props and types
+   - UI components and elements
+   - Business logic and rules
+   - State management and data handling
+   - Comments and documentation
+3. Update all references to use merged version
+4. Report detailed integration summary
+5. Await approval before removing duplicates
 
 ### What Is Permitted
 - Update sidebar/menu configs to maintain navigation
@@ -161,34 +320,74 @@ For every file modification:
 - Leave unmerged duplicates
 - Disable any UI or navigation elements
 
-### Integration Process
-1. Identify most feature-complete version
-2. Merge all unique elements from duplicates:
-   - Props and types
-   - UI components and elements
-   - Business logic and rules
-   - State management and data handling
-   - Comments and documentation
-3. Update all references to use merged version
-4. Report detailed integration summary
-5. Await approval before removing duplicates
+## Permission & Authorization
 
-### Permission Requirements
-- Must get explicit approval before:
-  - Creating any new files
-  - Moving any existing files
-  - Updating imports in multiple files
-  - Adding new components or pages
-  - Removing duplicate files after merge
-  - Restructuring component hierarchy
-  - Modifying routing configuration
+### Requirements
+- All UI elements must respect user role permissions
+- Implement proper access control at component level
+- Show/hide elements based on user authorization
+- Handle unauthorized access gracefully with proper feedback
 
-### Your goal:
+### Implementation
+- Use context or hooks to provide permission information
+- Check permissions before rendering sensitive UI elements
+- Redirect unauthorized users with clear messaging
+- Implement role-based routing guards
 
-A fully connected, always functional, and production-ready frontend that matches the intended layout, sidebar navigation, and UI CRUD expectations—with every route, component, provider, and data model linked and working end-to-end, including all views, edits, and deletes.
+```tsx
+function ProtectedComponent({ requiredRole, children }) {
+  const { user } = useAuth();
+  
+  if (!user) {
+    return <LoginPrompt />;
+  }
+  
+  if (!hasRole(user, requiredRole)) {
+    return <UnauthorizedMessage />;
+  }
+  
+  return children;
+}
+```
 
-Additional Requirements:
+## Document Connections
 
-* Implement soft view patterns for all data displays
-* Ensure proper loading states and error boundaries
-* Implement proper data caching and persistence strategies
+### Data Synchronization
+- All key data documents (Trip, Driver, Job Card, Tyre, Fleet) must be synchronized
+- Models/types must match between Firestore, backend, and frontend
+- Every Firestore collection used in code must be accessible via UI
+- All UI elements (download/export buttons, import forms) must connect to correct handlers
+
+### UI Consistency
+- Auto-flag (and optionally create) any missing Edit, Delete, or View screen/component
+- Ensure all menu/CRUD screens work for the current user's permissions
+- Prevent any component from being "floating" in the codebase (every component must be used)
+
+## Permitted & Prohibited Actions
+
+### Permitted Actions
+- Auto-edit imports
+- Generate missing components or placeholder screens (with approval)
+- Synchronize sidebar/menu configurations
+- Fix broken CRUD flows
+- Report major refactors or auto-generated screens
+
+### Prohibited Actions
+- Remove or disable any existing functional feature without explicit user approval
+- Break the architecture or change workflow logic not related to routing or UI/CRUD/data connectivity
+- Create new files without permission
+- Move existing files without permission
+- Update imports in multiple files without permission
+- Add new components or pages without permission
+- Remove duplicate files after merge without permission
+- Restructure component hierarchy without permission
+- Modify routing configuration without permission
+
+## Additional Requirements
+
+- Implement soft view patterns for all data displays
+- Ensure proper loading states and error boundaries
+- Implement proper data caching and persistence strategies
+- Follow accessibility best practices (WCAG 2.1 AA)
+- Ensure responsive design for all screen sizes
+- Implement proper testing (unit, integration, e2e)

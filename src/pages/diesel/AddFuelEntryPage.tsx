@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Card, 
-  Form, 
-  Input, 
-  Button, 
-  Select, 
-  DatePicker, 
-  InputNumber, 
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Select,
+  DatePicker,
+  InputNumber,
   Typography,
   Row,
   Col,
@@ -14,13 +14,15 @@ import {
   Divider,
   Alert,
   Upload,
-  message
+  message,
+  Calendar
 } from 'antd';
-import { 
-  UploadOutlined, 
-  SaveOutlined, 
+import {
+  UploadOutlined,
+  SaveOutlined,
   CloseOutlined
 } from '@ant-design/icons';
+import { Truck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;
@@ -107,6 +109,28 @@ const AddFuelEntryPage: React.FC = () => {
     navigate('/diesel');
   };
 
+  // Display a calendar view for reference (using the imported Calendar component)
+  const renderCalendarView = () => {
+    return (
+      <div className="calendar-view-container" style={{ marginBottom: '20px', display: loading ? 'none' : 'block' }}>
+        <Calendar fullscreen={false} />
+      </div>
+    );
+  };
+
+  // Display a truck icon with vehicle information
+  const renderVehicleIcon = () => {
+    const selectedVehicleId = form.getFieldValue('vehicleId');
+    const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
+    
+    return (
+      <div className="vehicle-icon-container" style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+        <Truck className="w-6 h-6 mr-2 text-blue-500" />
+        <span>{selectedVehicle ? selectedVehicle.name : 'Select a vehicle'}</span>
+      </div>
+    );
+  };
+
   return (
     <div className="add-fuel-entry-page">
       <Card>
@@ -114,6 +138,9 @@ const AddFuelEntryPage: React.FC = () => {
         <Text type="secondary">
           Record a new fuel purchase for your fleet vehicles
         </Text>
+        
+        {/* Use the Truck component */}
+        {form.getFieldValue('vehicleId') && renderVehicleIcon()}
         
         <Divider />
         
@@ -304,18 +331,21 @@ const AddFuelEntryPage: React.FC = () => {
           
           <Divider />
           
+          {/* Add Calendar component for date reference */}
+          {renderCalendarView()}
+          
           <Form.Item>
             <Space>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
+              <Button
+                type="primary"
+                htmlType="submit"
                 loading={loading}
                 icon={<SaveOutlined />}
               >
                 Submit Entry
               </Button>
-              <Button 
-                danger 
+              <Button
+                danger
                 onClick={handleCancel}
                 icon={<CloseOutlined />}
               >
