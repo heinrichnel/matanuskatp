@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { useNavigate } from 'react-router-dom';
-import MobileLayout from '../components/mobile/MobileLayout';
-import MobileNavigation from '../components/mobile/MobileNavigation';
-import TyreListMobile from '../components/mobile/tyre/TyreListMobile';
-import TyreInspectionMobile from '../components/mobile/tyre/TyreInspectionMobile';
-import TyreScanner from '../components/mobile/tyre/TyreScanner';
-import TyreFormModal from '../components/Models/Tyre/TyreFormModal';
+import MobileLayout from '../../components/mobile/MobileLayout';
+import MobileNavigation from '../../components/mobile/MobileNavigation';
+import TyreListMobile from '../../components/mobile/tyre/TyreListMobile';
+import TyreInspectionMobile from '../../components/mobile/tyre/TyreInspectionMobile';
+import TyreScanner from '../../components/mobile/tyre/TyreScanner';
+import TyreFormModal from '../../components/Models/Tyre/TyreFormModal';
 import { collection, query, getDocs, orderBy, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 
