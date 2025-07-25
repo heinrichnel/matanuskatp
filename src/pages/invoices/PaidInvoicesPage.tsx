@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Typography, Table, Tag, Button, Space, Tooltip, Input, DatePicker } from 'antd';
+// Ensure React is fully loaded before importing Ant Design
+const AntDesign = React.lazy(() => import('antd'));
 import { SearchOutlined, FilterOutlined, EyeOutlined, DownloadOutlined, PrinterOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 
+// Extract components from Ant Design
+const { Card, Typography, Table, Tag, Button, Space, Tooltip, Input, DatePicker } = AntDesign;
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 

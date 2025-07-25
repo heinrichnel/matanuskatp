@@ -44,17 +44,24 @@ try {
 import ErrorBoundary from './components/ErrorBoundary';
 
 const renderApp = (isDev: boolean) => {
+  // Import AntDesignProvider lazily to ensure React is fully initialized
+  const AntDesignProvider = React.lazy(() => import('./components/ui/AntDesignProvider'));
+  
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <ErrorBoundary>
-        <TyreStoresProvider>
-          <TyreProvider>
-            <>
-              {isDev && <div className="dev-indicator">Development Mode</div>}
-              <App />
-            </>
-          </TyreProvider>
-        </TyreStoresProvider>
+        <React.Suspense fallback={<div>Loading UI components...</div>}>
+          <AntDesignProvider>
+            <TyreStoresProvider>
+              <TyreProvider>
+                <>
+                  {isDev && <div className="dev-indicator">Development Mode</div>}
+                  <App />
+                </>
+              </TyreProvider>
+            </TyreStoresProvider>
+          </AntDesignProvider>
+        </React.Suspense>
       </ErrorBoundary>
     </React.StrictMode>
   );
