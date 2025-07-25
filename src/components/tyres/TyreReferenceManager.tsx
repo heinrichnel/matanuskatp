@@ -8,11 +8,11 @@ import { Plus, Edit, Trash, Save, X, RefreshCcw } from 'lucide-react';
 type TabType = 'brands' | 'sizes' | 'patterns' | 'positions';
 
 const TyreReferenceManager: React.FC = () => {
-  const { 
-    brands, 
-    sizes, 
-    patterns, 
-    vehiclePositions, 
+  const {
+    brands,
+    sizes,
+    patterns,
+    vehiclePositions,
     loading,
     error,
     addBrand,

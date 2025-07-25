@@ -1,12 +1,12 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
+import {
+  getFirestore,
+  collection,
+  addDoc,
   updateDoc,
   deleteDoc,
   doc,
-  getDocs, 
+  getDocs,
   query,
   where,
   serverTimestamp 
