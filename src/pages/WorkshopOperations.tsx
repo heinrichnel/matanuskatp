@@ -15,7 +15,7 @@ import {
 import JobCardManagement from './JobCardManagement';
 
 const WorkOrderManagement = () => <div>Work Order Management Component</div>;
-import TyreManagement from '../components/Tyremanagement/TyreManagementPage';
+import TyreManagement from './tyres/TyreManagementPage';
 import PurchaseOrderTracker from './PurchaseOrderTracker';
 import InspectionManagement from './InspectionManagement';
 import InventoryDashboard from './InventoryDashboard';
