@@ -268,7 +268,7 @@ const TyreInventoryDashboard: React.FC<TyreInventoryDashboardProps> = ({
           <Button
             variant="primary"
             icon={<Plus className="w-4 h-4" />}
-            onClick={onClick}
+            onClick={onAddTyre}
           >
             Add Tyre
           </Button>

@@ -1,7 +1,8 @@
 import type { WialonUnit, WialonPosition } from '../types/wialon';
 
-const WIALON_API_URL = 'https://hosting.wialon.com';
+export const WIALON_LOGIN_URL = 'https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en';
 const WIALON_SESSION_TOKEN = 'c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053';
+const WIALON_API_URL = 'https://hosting.wialon.com';
 
 /** Raw Wialon API response type for search_items */
 interface WialonApiResponse {
