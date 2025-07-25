@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../ui/Card';
 import Button from '../ui/Button';
 import { Save, X, Truck, Calendar, Ruler, Plus } from 'lucide-react';
+import VehiclePositionDiagram from '../tyres/VehiclePositionDiagram';
+import { useTyreReferenceData } from '../../context/TyreReferenceDataContext';
 
 interface TyreData {
   id?: string;
@@ -15,6 +17,7 @@ interface TyreData {
   condition: 'New' | 'Used' | 'Retreaded' | 'Scrap';
   status: 'In-Service' | 'In-Stock' | 'Repair' | 'Scrap';
   vehicleAssigned: string;
+  vehicleType?: 'standard' | 'reefer' | 'horse' | 'interlink';  // Added vehicle type
   axlePosition: string;
   mountStatus: 'Mounted' | 'Not Mounted' | 'Removed';
   kmRun: number;
@@ -25,13 +28,13 @@ interface TyreData {
   lastInspection?: string;
 }
 
-interface AddNewTireFormProps {
+interface AddNewTyreFormProps {
   onSubmit?: (data: TyreData) => void;
   onCancel?: () => void;
   initialData?: Partial<TyreData>;
 }
 
-const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
+const AddNewTyreForm: React.FC<AddNewTyreFormProps> = ({
   onSubmit,
   onCancel,
   initialData
@@ -47,6 +50,7 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
     condition: initialData?.condition || 'New',
     status: initialData?.status || 'In-Stock',
     vehicleAssigned: initialData?.vehicleAssigned || '',
+    vehicleType: initialData?.vehicleType || 'standard',
     axlePosition: initialData?.axlePosition || '',
     mountStatus: initialData?.mountStatus || 'Not Mounted',
     kmRun: initialData?.kmRun || 0,
@@ -59,7 +63,8 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof TyreData, string>>>({});
 
-  const tyreSizes = [
+  // Default tyre sizes list, will be overridden by Firestore data if available
+  const [tyreSizes, setTyreSizes] = useState([
     '295/80R22.5',
     '315/80R22.5',
     '295/75R22.5',
@@ -67,7 +72,36 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
     '12R22.5',
     '385/65R22.5',
     '275/70R22.5'
-  ];
+  ]);
+  
+  // Fetch tyre sizes from Firestore
+  useEffect(() => {
+    const fetchTyreSizes = async () => {
+      try {
+        const db = getFirestore();
+        const sizesQuery = query(collection(db, 'tyreSizes'));
+        const querySnapshot = await getDocs(sizesQuery);
+        
+        const sizes: string[] = [];
+        
+        querySnapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.size) {
+            sizes.push(data.size);
+          }
+        });
+        
+        if (sizes.length > 0) {
+          setTyreSizes(sizes.sort());
+          console.log('Tyre sizes loaded from Firestore:', sizes);
+        }
+      } catch (error) {
+        console.error('Error fetching tyre sizes:', error);
+      }
+    };
+    
+    fetchTyreSizes();
+  }, []);
 
   const tyreTypes = [
     'Drive',
@@ -76,7 +110,8 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
     'All-Position'
   ];
 
-  const manufacturers = [
+  // Default manufacturers list, will be overridden by Firestore data if available
+  const [manufacturers, setManufacturers] = useState([
     'Michelin',
     'Goodyear',
     'Bridgestone',
@@ -87,9 +122,39 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
     'Yokohama',
     'Hankook',
     'Firestone'
-  ];
+  ]);
+  
+  // Fetch tyre brands from Firestore
+  useEffect(() => {
+    const fetchTyreBrands = async () => {
+      try {
+        const db = getFirestore();
+        const brandsQuery = query(collection(db, 'tyreBrands'));
+        const querySnapshot = await getDocs(brandsQuery);
+        
+        const brands: string[] = [];
+        
+        querySnapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.name) {
+            brands.push(data.name);
+          }
+        });
+        
+        if (brands.length > 0) {
+          setManufacturers(brands.sort());
+          console.log('Tyre brands loaded from Firestore:', brands);
+        }
+      } catch (error) {
+        console.error('Error fetching tyre brands:', error);
+      }
+    };
+    
+    fetchTyreBrands();
+  }, []);
 
-  const axlePositions = [
+  // Standard axle positions (legacy format)
+  const standardAxlePositions = [
     'Front Left',
     'Front Right',
     'Drive Axle Left Inner',
@@ -102,23 +167,132 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
     'Trailer Axle 2 Right',
     'Spare'
   ];
+  
+  // Vehicle-specific axle position configurations
+  // State for storing vehicle configurations from Firestore
+  const [vehicleConfigurations, setVehicleConfigurations] = useState<Record<string, {
+    name: string;
+    positions: Array<{id: string, name: string}>;
+  }>>({});
+  
+  // Vehicle type dropdown options (will be populated from Firestore)
+  const [vehicleTypes, setVehicleTypes] = useState([
+    { id: 'standard', name: 'Standard' },
+    { id: 'reefer', name: 'Reefer (3-Axle Trailer)' },
+    { id: 'horse', name: 'Horse (Truck Tractor)' },
+    { id: 'interlink', name: 'Interlink (4-Axle Trailer)' },
+    { id: 'lmv', name: 'Light Motor Vehicle (LMV)' }
+  ]);
+  
+  // Fetch vehicle position configurations from Firestore
+  useEffect(() => {
+    const fetchVehiclePositions = async () => {
+      try {
+        const db = getFirestore();
+        const vehiclePositionsQuery = query(collection(db, 'vehiclePositions'));
+        const querySnapshot = await getDocs(vehiclePositionsQuery);
+        
+        const configs: Record<string, {
+          name: string;
+          positions: Array<{id: string, name: string}>;
+        }> = {};
+        
+        const types: Array<{id: string, name: string}> = [];
+        
+        querySnapshot.forEach(doc => {
+          const data = doc.data();
+          const vehicleType = doc.id;
+          
+          configs[vehicleType] = {
+            name: data.name,
+            positions: data.positions || []
+          };
+          
+          types.push({ 
+            id: vehicleType, 
+            name: data.name 
+          });
+        });
+        
+        if (Object.keys(configs).length > 0) {
+          setVehicleConfigurations(configs);
+          setVehicleTypes(types);
+          console.log('Vehicle positions loaded from Firestore:', configs);
+        } else {
+          console.warn('No vehicle positions found in Firestore, using defaults');
+        }
+      } catch (error) {
+        console.error('Error fetching vehicle positions:', error);
+      }
+    };
+    
+    fetchVehiclePositions();
+  }, []);
+  
+  // State for selected vehicle type and position mapping
+  const [selectedVehicleType, setSelectedVehicleType] = useState<string>(
+    initialData?.vehicleType || 'standard'
+  );
+  const [availablePositions, setAvailablePositions] = useState<Array<{id: string, name: string}>>(() => {
+    // Initially set to standard positions, will be updated when Firestore data loads
+    return standardAxlePositions.map(pos => ({ id: pos, name: pos }));
+  });
+  
+  // Update available positions when vehicleConfigurations loads from Firestore
+  useEffect(() => {
+    if (Object.keys(vehicleConfigurations).length > 0) {
+      const vehicleType = formData.vehicleType;
+      
+      if (vehicleType === 'standard') {
+        setAvailablePositions(standardAxlePositions.map(pos => ({ id: pos, name: pos })));
+      } else if (vehicleConfigurations[vehicleType]) {
+        setAvailablePositions(vehicleConfigurations[vehicleType].positions);
+      }
+    }
+  }, [vehicleConfigurations, formData.vehicleType]);
+
 
   // Handle input changes
+  // Handle vehicle type change
+  const handleVehicleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const vehicleType = e.target.value;
+    setSelectedVehicleType(vehicleType);
+    
+    // Reset axle position when vehicle type changes
+    setFormData(prev => ({ 
+      ...prev, 
+      axlePosition: '',
+      vehicleType: vehicleType as 'standard' | 'reefer' | 'horse' | 'interlink'
+    }));
+    
+    // Update available positions based on vehicle type
+    if (vehicleType === 'standard') {
+      setAvailablePositions(standardAxlePositions.map(pos => ({ id: pos, name: pos })));
+    } else if (vehicleConfigurations[vehicleType]) {
+      // Use the positions from the Firestore data
+      setAvailablePositions(vehicleConfigurations[vehicleType].positions);
+    } else {
+      console.warn(`No positions found for vehicle type: ${vehicleType}, using standard positions`);
+      setAvailablePositions(standardAxlePositions.map(pos => ({ id: pos, name: pos })));
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    let parsedValue = value;
-
-    // Convert number inputs to numbers
+    let parsedValue: any = value;
+    
     if (type === 'number') {
-      parsedValue = value;
+      parsedValue = value === '' ? '' : Number(value);
     }
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: parsedValue
-    }));
-
-    // Clear validation error when field is edited
+    
+    // Special handling for vehicleType
+    if (name === 'vehicleType') {
+      handleVehicleTypeChange(e as React.ChangeEvent<HTMLSelectElement>);
+      return;
+    }
+    
+    setFormData(prev => ({ ...prev, [name]: parsedValue }));
+    
     if (errors[name as keyof TyreData]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
@@ -127,17 +301,18 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
   // Validate form
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof TyreData, string>> = {};
-
     if (!formData.tyreNumber) newErrors.tyreNumber = 'Tyre number is required';
     if (!formData.tyreSize) newErrors.tyreSize = 'Tyre size is required';
+    if (!formData.type) newErrors.type = 'Type is required';
+    if (!formData.pattern) newErrors.pattern = 'Pattern is required';
     if (!formData.manufacturer) newErrors.manufacturer = 'Manufacturer is required';
-    
+    if (!formData.cost || formData.cost <= 0) newErrors.cost = 'Cost must be greater than 0';
+    if (!formData.datePurchased) newErrors.datePurchased = 'Date purchased is required';
     // If mounted, vehicle and axle position are required
     if (formData.mountStatus === 'Mounted') {
       if (!formData.vehicleAssigned) newErrors.vehicleAssigned = 'Vehicle is required for mounted tyres';
       if (!formData.axlePosition) newErrors.axlePosition = 'Axle position is required for mounted tyres';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -145,17 +320,18 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-    
+    if (isSubmitting) return;
+    if (!validateForm()) return;
     setIsSubmitting(true);
-    
+    // Ensure datePurchased is ISO string
+    const dataToSubmit = {
+      ...formData,
+      datePurchased: formData.datePurchased ? new Date(formData.datePurchased).toISOString() : null
+    };
     // Simulate API call
     setTimeout(() => {
       if (onSubmit) {
-        onSubmit(formData);
+        onSubmit(dataToSubmit as TyreData);
       }
       setIsSubmitting(false);
     }, 800);
@@ -413,7 +589,48 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
             {/* Vehicle Assignment */}
             <div className="lg:col-span-3">
               <h3 className="font-medium text-gray-700 mb-3">Vehicle Assignment</h3>
+              
+              {/* Vehicle Position Diagram */}
+              {formData.vehicleType && formData.mountStatus === 'Mounted' && (
+                <div className="mb-4">
+                  <VehiclePositionDiagram
+                    vehicleType={formData.vehicleType}
+                    positions={availablePositions}
+                    selectedPosition={formData.axlePosition}
+                    onPositionClick={(positionId) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        axlePosition: positionId
+                      }));
+                      if (errors.axlePosition) {
+                        setErrors(prev => ({ ...prev, axlePosition: undefined }));
+                      }
+                    }}
+                  />
+                </div>
+              )}
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="vehicleType">
+                    Vehicle Type
+                  </label>
+                  <div className="relative">
+                    <Truck className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                    <select
+                      id="vehicleType"
+                      name="vehicleType"
+                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      value={selectedVehicleType}
+                      onChange={handleVehicleTypeChange}
+                    >
+                      {vehicleTypes.map(vType => (
+                        <option key={vType.id} value={vType.id}>{vType.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="vehicleAssigned">
                     Vehicle Assigned {formData.mountStatus === 'Mounted' && <span className="text-red-500">*</span>}
@@ -454,8 +671,8 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                     disabled={formData.mountStatus !== 'Mounted'}
                   >
                     <option value="">Select Position</option>
-                    {axlePositions.map(pos => (
-                      <option key={pos} value={pos}>{pos}</option>
+                    {availablePositions.map(pos => (
+                      <option key={pos.id} value={pos.id}>{pos.name}</option>
                     ))}
                   </select>
                   {errors.axlePosition && (
@@ -494,6 +711,53 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
                 </div>
               </div>
             </div>
+            
+            {/* Tyre Configuration Guide */}
+            {selectedVehicleType !== 'standard' && (
+              <div className="lg:col-span-3 mt-4">
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h4 className="text-sm font-medium text-gray-800 mb-2">
+                    {selectedVehicleType === 'reefer' && 'REEFER (3-Axle Trailer, Single Tyres)'}
+                    {selectedVehicleType === 'horse' && 'HORSE (Truck Tractor)'}
+                    {selectedVehicleType === 'interlink' && 'INTERLINK (4-Axle Trailer, Dual Tyres)'} 
+                    Tyre Position Guide
+                  </h4>
+                  <div className="text-xs text-gray-600 font-mono whitespace-pre-wrap">
+                    {selectedVehicleType === 'reefer' && `
+| Axle   | Left Side | Right Side |
+|--------|-----------|------------|
+| 1      | T1        | T2         |
+| 2      | T3        | T4         |
+| 3      | T5        | T6         |
+| Spare  | SP1       | SP2        |
+
+Array Format: [T1, T2, T3, T4, T5, T6, SP1, SP2]
+                    `}
+                    {selectedVehicleType === 'horse' && `
+| Axle   | Left Side | Right Side |
+|--------|-----------|------------|
+| 1      | V1        | V2         |
+| 2      | V3, V4    | V5, V6     |
+| 3      | V7, V8    | V9, V10    |
+| Spare  |   SP      |            |
+
+Array Format: [V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, SP]
+                    `}
+                    {selectedVehicleType === 'interlink' && `
+| Axle     | Left Rear Outer | Left Rear Inner | Right Rear Outer | Right Rear Inner |
+|----------|-----------------|-----------------|------------------|------------------|
+| Axle 1   | T1              | T5              | T2               | T6               |
+| Axle 2   | T3              | T7              | T4               | T8               |
+| Axle 3   | T9              | T13             | T10              | T14              |
+| Axle 4   | T11             | T15             | T12              | T16              |
+| Spare    | SP1             | SP2             |                  |                  |
+
+Array Format: [T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, SP1, SP2]
+                    `}
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Notes */}
             <div className="lg:col-span-3">
@@ -539,4 +803,4 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
   );
 };
 
-export default AddNewTireForm;
+export default AddNewTyreForm;

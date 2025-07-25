@@ -523,4 +523,4 @@ const AddNewTireForm: React.FC<AddNewTireFormProps> = ({
   );
 };
 
-export default AddNewTireForm;
+export default AddNewTyreForm;

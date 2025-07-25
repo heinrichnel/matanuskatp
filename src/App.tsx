@@ -14,6 +14,7 @@ import { TyreStoresProvider } from './context/TyreStoresContext';
 import { TripProvider } from './context/TripContext';
 import { DriverBehaviorProvider } from './context/DriverBehaviorContext';
 import { WorkshopProvider } from './context/WorkshopContext';
+import { TyreReferenceDataProvider } from './context/TyreReferenceDataContext';
 
 // Error Handling
 import ErrorBoundary from './components/ErrorBoundary';
@@ -171,6 +172,7 @@ import TyreInspection from './components/Tyremanagement/TyreInspection';
 import TyreInventory from './components/Tyremanagement/TyreInventory';
 import TyreReports from './components/Tyremanagement/TyreReports';
 import AddNewTyrePage from './pages/tyres/AddNewTyrePage';
+import TyreReferenceManagerPage from './pages/tyres/TyreReferenceManagerPage';
 
 // === INVENTORY ===
 import InventoryPage from './pages/InventoryPage';
@@ -306,7 +308,8 @@ const App: React.FC = () => {
             <TripProvider>
               <DriverBehaviorProvider>
                 <WorkshopProvider>
-                {connectionError ? (
+                  <TyreReferenceDataProvider>
+                  {connectionError ? (
                   <div className="fixed top-0 left-0 right-0 z-50 p-4">
                     <FirestoreConnectionError error={connectionError} />
                   </div>
@@ -424,8 +427,17 @@ const App: React.FC = () => {
                       <Route path="/workshop/job-cards" element={<JobCardManagement />} />
                       <Route path="/workshop/faults" element={<FaultTracking />} />
                       <Route path="/workshop/tyres" element={<TyreManagement />} />
+                      <Route path="/workshop/tyres/reference-data" element={<TyreReferenceManagerPage />} />
                       <Route path="/workshop/parts-ordering" element={<PartsOrderingPage />} />
                       <Route path="/workshop/vehicle-inspection" element={<VehicleInspectionPage />} />
+                      
+                      {/* === TYRES === */}
+                      <Route path="/tyres" element={<TyreManagementPage />} />
+                      <Route path="/tyres/add" element={<AddNewTyrePage />} />
+                      <Route path="/tyres/reference-data" element={<TyreReferenceManagerPage />} />
+                      <Route path="/tyres/fleet-map" element={<TyreFleetMap />} />
+                      <Route path="/tyres/history" element={<TyreHistoryPage />} />
+                      <Route path="/tyres/dashboard" element={<TyrePerformanceDashboard />} />
 
                       {/* === INVENTORY === */}
                       <Route path="/inventory" element={<InventoryPage />} />
@@ -458,6 +470,7 @@ const App: React.FC = () => {
                     <ScanQRButton />
                   </div>
                 )}
+                  </TyreReferenceDataProvider>
                 </WorkshopProvider>
               </DriverBehaviorProvider>
             </TripProvider>

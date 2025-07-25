@@ -1045,6 +1045,12 @@ export const sidebarConfig: SidebarItem[] = [
         component: 'pages/tyres/inventory' 
       },
       {
+        id: 'tyre-reference-data',
+        label: 'Reference Data',
+        path: '/tyres/reference-data',
+        component: 'pages/tyres/TyreReferenceManagerPage'
+      },
+      {
         id: 'tyre-add',
         label: 'Add New Tyre',
         path: '/tyres/add',
