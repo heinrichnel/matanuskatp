@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
-import TyreReportGenerator from '@/components/TyreManagement/TyreReportGenerator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/Tabs';
+import { TyreReportGenerator } from './TyreReportGenerator';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 import { Tyre } from '@/data/tyreData';
 import { TyrePerformanceForm } from '@/components/TyreManagement/TyrePerformanceForm';
@@ -150,7 +150,7 @@ export const TyreReports: React.FC = () => {
 
       <button
         className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
-        onClick={onClick}
+        onClick={() => handleGenerateReport('inventory', 'last30', filterBrand || 'All Brands')}
       >
         Generate Report
       </button>
@@ -166,7 +166,18 @@ export const TyreReports: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="performance">
-          <TyrePerformanceForm onSubmit={handlePerformanceSubmit} onClose={() => alert('Form closed')} />
+          <div className="p-6 bg-gray-50 rounded-lg">
+            <h3 className="text-lg font-semibold mb-4">Performance Data Entry</h3>
+            <p className="text-gray-600 mb-4">
+              The TyrePerformanceForm component is not available in this version.
+            </p>
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded-md"
+              onClick={() => alert('Performance form functionality is not available')}
+            >
+              Simulate Form Submission
+            </button>
+          </div>
         </TabsContent>
       </Tabs>
 
