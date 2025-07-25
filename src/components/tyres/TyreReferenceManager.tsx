@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTyreReferenceData } from '../../context/TyreReferenceDataContext';
 import { Card, CardContent } from '../ui/Card';
-import Button from './ui/Button';
+import Button from '../ui/Button';
 import { Plus, Edit, Trash, Save, X, RefreshCcw } from 'lucide-react';
 
 // Tab management for the different sections

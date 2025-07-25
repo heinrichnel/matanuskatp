@@ -22,6 +22,7 @@ export default defineConfig({
     cssCodeSplit: true,       // Beter CSS caching
     reportCompressedSize: false, // Bou vinniger
     rollupOptions: {
+      external: ['@zxing/library'],
       output: {
         manualChunks: (id: string) => {
           // Slim code splitting vir vinniger laai
