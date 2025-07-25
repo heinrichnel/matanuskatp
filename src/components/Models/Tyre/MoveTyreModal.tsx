@@ -78,8 +78,8 @@ export const MoveTyreModal: React.FC<MoveTyreModalProps> = ({ isOpen, onClose, f
           onChange={(e) => setOdometer(Number(e.target.value))}
         />
         <div className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={onClick}>Cancel</Button>
-          <Button onClick={onClick} disabled={!toStoreId}>Move</Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={!toStoreId}>Move</Button>
         </div>
       </div>
     </Modal>

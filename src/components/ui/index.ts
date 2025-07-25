@@ -26,9 +26,9 @@ export {
 export { default as GenericPlaceholderPage } from './GenericPlaceholderPage';
 
 // Re-export ApplicantInfoCard component - temporarily commented due to missing file
-// export { default as ApplicantInfoCard } from './ApplicantInfoCard';
+export { default as ApplicantInfoCard } from './ApplicantInfoCard';
 
 // Re-export new UI components
-// export { default as ProgressStepper } from './ProgressStepper'; // Temporarily commented due to missing file
-// export { default as VerticalStepper } from './VerticalStepper'; // Temporarily commented due to missing file
-// export { default as StatsCardGroup } from './StatsCardGroup'; // Temporarily commented due to missing file
+export { default as ProgressStepper } from './ProgressStepper';
+export { default as VerticalStepper } from './VerticalStepper';
+export { default as StatsCardGroup } from './StatsCardGroup';
