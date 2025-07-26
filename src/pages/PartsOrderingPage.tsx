@@ -4,15 +4,15 @@ import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { Input, Select } from '../components/ui/FormElements';
 import Modal from '../components/ui/Modal';
-import { Badge } from '../components/ui/Badge';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Download, 
+import { Badge } from '../components/ui/badge';
+import {
+  Plus,
+  Search,
+  Filter,
+  Download,
   Upload,
-  Package, 
-  ShoppingCart, 
+  Package,
+  ShoppingCart,
   CheckCircle,
   Clock,
   XCircle,
@@ -62,7 +62,7 @@ const PartsOrderingPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [urgencyFilter, setUrgencyFilter] = useState<string>('ALL');
-  
+
   // Modal states
   const [isCreateOrderModalOpen, setIsCreateOrderModalOpen] = useState(false);
   const [isReceivePartsModalOpen, setIsReceivePartsModalOpen] = useState(false);
@@ -237,7 +237,7 @@ const PartsOrderingPage: React.FC = () => {
 
       // Update with Firestore ID
       const orderWithId = { ...newOrder, id: docRef.id };
-      
+
       // Update local state
       setOrders(prev => [...prev, orderWithId]);
       setIsCreateOrderModalOpen(false);
@@ -253,7 +253,7 @@ const PartsOrderingPage: React.FC = () => {
     if (selectedOrder) {
       try {
         const updatedOrder = { ...selectedOrder };
-        
+
         // Update parts quantities and statuses
         updatedOrder.parts = updatedOrder.parts.map(part => {
           const receivedPart = receivedParts.find(rp => rp.id === part.id);
@@ -266,34 +266,34 @@ const PartsOrderingPage: React.FC = () => {
           }
           return part;
         });
-        
+
         // Determine overall order status
         const allReceived = updatedOrder.parts.every(part => part.status === 'RECEIVED');
         const anyReceived = updatedOrder.parts.some(part => part.status === 'RECEIVED' || part.status === 'PARTIALLY_RECEIVED');
-        
+
         if (allReceived) {
           updatedOrder.status = 'RECEIVED';
         } else if (anyReceived) {
           updatedOrder.status = 'PARTIALLY_RECEIVED';
         }
-        
+
         // Update in Firestore
         await updateDoc(doc(db, "partOrders", updatedOrder.id), {
           parts: updatedOrder.parts,
           status: updatedOrder.status,
           updatedAt: new Date().toISOString()
         });
-        
+
         // Update parts inventory quantities
         for (const receivedPart of receivedParts) {
           // Query for existing part in inventory
           const partsQuery = query(
-            collection(db, "parts"), 
+            collection(db, "parts"),
             where("sku", "==", receivedPart.sku)
           );
-          
+
           const partsSnapshot = await getDocs(partsQuery);
-          
+
           if (!partsSnapshot.empty) {
             // Update existing part quantity
             const partDoc = partsSnapshot.docs[0];
@@ -315,12 +315,12 @@ const PartsOrderingPage: React.FC = () => {
             });
           }
         }
-        
+
         // Update local state
-        setOrders(prev => prev.map(order => 
+        setOrders(prev => prev.map(order =>
           order.id === selectedOrder.id ? updatedOrder : order
         ));
-        
+
         setIsReceivePartsModalOpen(false);
         alert('Parts received successfully! Inventory has been updated.');
       } catch (error) {
@@ -342,8 +342,8 @@ const PartsOrderingPage: React.FC = () => {
   };
 
   const handleCancelOrder = (orderId: string) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId 
+    setOrders(prev => prev.map(order =>
+      order.id === orderId
         ? { ...order, status: 'CANCELLED' as const }
         : order
     ));
@@ -370,7 +370,7 @@ const PartsOrderingPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">Parts Ordering</h1>
             <p className="text-gray-600">Manage parts orders, track deliveries, and maintain inventory</p>
           </div>
-          
+
           <div className="flex flex-wrap gap-3 mt-4 lg:mt-0">
             <Button
               onClick={() => setIsCreateOrderModalOpen(true)}
@@ -473,7 +473,7 @@ const PartsOrderingPage: React.FC = () => {
                   className="pl-10"
                 />
               </div>
-              
+
               <Select
                 label=""
                 value={statusFilter}
@@ -487,7 +487,7 @@ const PartsOrderingPage: React.FC = () => {
                   { label: 'Cancelled', value: 'CANCELLED' }
                 ]}
               />
-              
+
               <Select
                 label=""
                 value={urgencyFilter}
@@ -500,7 +500,7 @@ const PartsOrderingPage: React.FC = () => {
                   { label: 'Emergency', value: 'EMERGENCY' }
                 ]}
               />
-              
+
               <div className="flex justify-end">
                 <Button
                   variant="outline"
@@ -568,21 +568,21 @@ const PartsOrderingPage: React.FC = () => {
                           </div>
                         </div>
                       </td>
-                      
+
                       <td className="px-6 py-4">
                         <Badge className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
                           {getStatusIcon(order.status)}
                           <span className="ml-1">{order.status.replace('_', ' ')}</span>
                         </Badge>
                       </td>
-                      
+
                       <td className="px-6 py-4">
                         <Badge className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getUrgencyColor(order.urgency)}`}>
                           {order.urgency === 'EMERGENCY' && <AlertCircle className="w-3 h-3 mr-1" />}
                           {order.urgency}
                         </Badge>
                       </td>
-                      
+
                       <td className="px-6 py-4">
                         <div className="text-sm">
                           {order.workOrderId && (
@@ -599,19 +599,19 @@ const PartsOrderingPage: React.FC = () => {
                           )}
                         </div>
                       </td>
-                      
+
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {order.supplier || '-'}
                       </td>
-                      
+
                       <td className="px-6 py-4 text-sm text-gray-900">
                         ${order.totalCost.toFixed(2)}
                       </td>
-                      
+
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {order.expectedDelivery || '-'}
                       </td>
-                      
+
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center space-x-2">
                           <Button
@@ -621,16 +621,16 @@ const PartsOrderingPage: React.FC = () => {
                             icon={<Eye className="w-4 h-4" />}
                           >
                           </Button>
-                          
+
                           {(order.status === 'ORDERED' || order.status === 'PARTIALLY_RECEIVED') && (
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() => {
-                                // Option 1: Modal approach 
+                                // Option 1: Modal approach
                                 // setSelectedOrder(order);
                                 // setIsReceivePartsModalOpen(true);
-                                
+
                                 // Option 2: Navigate to dedicated receive page with PO information
                                 window.location.href = `/receive-parts?poNumber=${order.orderNumber}`;
                               }}
@@ -639,7 +639,7 @@ const PartsOrderingPage: React.FC = () => {
                               Receive
                             </Button>
                           )}
-                          
+
                           {order.status === 'PENDING' && (
                             <Button
                               size="sm"
@@ -649,7 +649,7 @@ const PartsOrderingPage: React.FC = () => {
                             >
                             </Button>
                           )}
-                          
+
                           {order.status !== 'CANCELLED' && order.status !== 'RECEIVED' && (
                             <Button
                               size="sm"
@@ -665,7 +665,7 @@ const PartsOrderingPage: React.FC = () => {
                   ))}
                 </tbody>
               </table>
-              
+
               {filteredOrders.length === 0 && (
                 <div className="text-center py-12">
                   <Package className="mx-auto h-12 w-12 text-gray-400" />
@@ -740,7 +740,7 @@ const PartsOrderingPage: React.FC = () => {
                   <p className="text-sm text-gray-900">${selectedOrder.totalCost.toFixed(2)}</p>
                 </div>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Parts</label>
                 <div className="border rounded-lg overflow-hidden">
@@ -768,7 +768,7 @@ const PartsOrderingPage: React.FC = () => {
                   </table>
                 </div>
               </div>
-              
+
               {selectedOrder.notes && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Notes</label>
