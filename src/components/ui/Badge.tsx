@@ -1,21 +1,7 @@
-import React from 'react';
+// Re-export from the consolidated badge component
+import { Badge as BadgeComponent } from "./badge";
 
-interface BadgeProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-export const Badge: React.FC<BadgeProps> = ({ 
-  children, 
-  className = ''
-}) => {
-  return (
-    <span 
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${className}`}
-    >
-      {children}
-    </span>
-  );
-};
-
+// Re-export the Badge component with both named and default exports
+// to maintain backward compatibility
+export const Badge = BadgeComponent;
 export default Badge;
