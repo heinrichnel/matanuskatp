@@ -4,9 +4,6 @@
   publish = "dist"
   # Disable build cache to ensure fresh builds
   ignore = "false"
-  # Skip git submodule checkout
-  [build.git]
-    submodules = false
 
 # Production context settings
 [context.production]

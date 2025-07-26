@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
 import { VehicleSelector } from '@/components/common/VehicleSelector';
 import { CircleDot, Wrench, Eye } from "lucide-react";

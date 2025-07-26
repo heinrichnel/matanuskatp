@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Input } from "@/components/ui";
-import { Badge } from "@/components/ui/Badge";
+import { Badge } from "@/components/ui/badge";
 import { Search, FileWarning } from "lucide-react";
 import { DefectItemModal } from "../components/Models/Workshop/DefectItemModal";
 import InspectionDetailsModal from "../components/Models/Workshop/InspectionDetailsModal";
@@ -95,8 +95,8 @@ const InspectionHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filter inspections based on search term
-  const filteredInspections = searchTerm 
-    ? inspections.filter(inspection => 
+  const filteredInspections = searchTerm
+    ? inspections.filter(inspection =>
         inspection.report.toLowerCase().includes(searchTerm.toLowerCase()) ||
         inspection.vehicle.toLowerCase().includes(searchTerm.toLowerCase()) ||
         inspection.notes.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -108,21 +108,21 @@ const InspectionHistory = () => {
         <h2 className="text-lg font-semibold">Inspection History</h2>
         <Button>Start New Inspection</Button>
       </div>
-      
+
       <div className="flex items-center gap-2">
         <div className="relative flex-1 max-w-sm">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Search className="w-4 h-4 text-gray-400" />
           </div>
-          <Input 
-            placeholder="Search" 
-            className="pl-10" 
+          <Input
+            placeholder="Search"
+            className="pl-10"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
-      
+
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -142,8 +142,8 @@ const InspectionHistory = () => {
             {filteredInspections.map((inspection, idx) => (
               <TableRow key={idx}>
                 <TableCell>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                       setSelectedInspection(inspection);
@@ -181,9 +181,9 @@ const InspectionHistory = () => {
                   </button>
                 </TableCell>
                 <TableCell>
-                  <Badge 
-                    className={inspection.correctiveAction === "TAKEN" 
-                      ? "bg-green-100 text-green-800" 
+                  <Badge
+                    className={inspection.correctiveAction === "TAKEN"
+                      ? "bg-green-100 text-green-800"
                       : "border border-gray-300 bg-white text-gray-800"}
                   >
                     {inspection.correctiveAction}
@@ -199,7 +199,7 @@ const InspectionHistory = () => {
           </TableBody>
         </Table>
       </div>
-      
+
       {/* Defect Item Modal */}
       {selectedInspection && isDefectModalOpen && (
         <DefectItemModal
@@ -211,7 +211,7 @@ const InspectionHistory = () => {
           defectItems={parseInspectionDefects(selectedInspection.notes)}
         />
       )}
-      
+
       {/* Inspection Details Modal */}
       {selectedInspection && isDetailsModalOpen && (
         <InspectionDetailsModal

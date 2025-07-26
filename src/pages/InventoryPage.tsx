@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import PageWrapper from '../components/ui/PageWrapper';
 import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
-import { 
-  Package, 
-  Search, 
-  TrendingUp, 
+import { Badge } from '../components/ui/badge';
+import {
+  Package,
+  Search,
+  TrendingUp,
   TrendingDown,
   AlertTriangle,
   BarChart3,
@@ -127,14 +127,14 @@ const InventoryPage: React.FC = () => {
 
   // Filter items
   const filteredItems = inventoryItems.filter(item => {
-    const matchesSearch = 
+    const matchesSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.supplier.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
     const matchesStatus = selectedStatus === 'ALL' || item.status === selectedStatus;
-    
+
     return matchesSearch && matchesCategory && matchesStatus;
   });
 
@@ -167,7 +167,7 @@ const InventoryPage: React.FC = () => {
             <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
             <p className="text-gray-600">Track stock levels, manage reorders, and monitor inventory value</p>
           </div>
-          
+
           <div className="flex flex-wrap gap-3 mt-4 lg:mt-0">
             <Button
               onClick={() => console.log('Navigate to add item')}
@@ -286,7 +286,7 @@ const InventoryPage: React.FC = () => {
                   className="pl-10 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -298,7 +298,7 @@ const InventoryPage: React.FC = () => {
                   </option>
                 ))}
               </select>
-              
+
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
@@ -310,7 +310,7 @@ const InventoryPage: React.FC = () => {
                 <option value="OUT_OF_STOCK">Out of Stock</option>
                 <option value="REORDER">Reorder</option>
               </select>
-              
+
               <div className="flex justify-end">
                 <Button
                   variant="outline"
@@ -375,40 +375,40 @@ const InventoryPage: React.FC = () => {
                           </div>
                         </div>
                       </td>
-                      
+
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {item.category}
                       </td>
-                      
+
                       <td className="px-6 py-4">
                         <Badge className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
                           {getStatusIcon(item.status)}
                           <span className="ml-1">{item.status.replace('_', ' ')}</span>
                         </Badge>
                       </td>
-                      
+
                       <td className="px-6 py-4 text-center">
                         <span className={`text-sm font-medium ${
-                          item.quantity <= item.reorderLevel 
-                            ? 'text-red-600' 
+                          item.quantity <= item.reorderLevel
+                            ? 'text-red-600'
                             : 'text-gray-900'
                         }`}>
                           {item.quantity}
                         </span>
                       </td>
-                      
+
                       <td className="px-6 py-4 text-center text-sm text-gray-500">
                         {item.reorderLevel}
                       </td>
-                      
+
                       <td className="px-6 py-4 text-right text-sm text-gray-900">
                         ${item.unitCost.toFixed(2)}
                       </td>
-                      
+
                       <td className="px-6 py-4 text-right text-sm font-medium text-gray-900">
                         ${item.totalValue.toFixed(2)}
                       </td>
-                      
+
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {item.supplier}
                       </td>
@@ -416,7 +416,7 @@ const InventoryPage: React.FC = () => {
                   ))}
                 </tbody>
               </table>
-              
+
               {filteredItems.length === 0 && (
                 <div className="text-center py-12">
                   <Package className="mx-auto h-12 w-12 text-gray-400" />

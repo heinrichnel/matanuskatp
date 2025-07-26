@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 // Remove Label import as we'll use a simple label element
-import { Badge } from '../components/ui/Badge';
+import { Badge } from '../components/ui/badge';
 import { useTyres } from '../context/TyreContext';
 import { TyreStoreLocation } from '../types/tyre';
 import { ArrowRightLeft } from 'lucide-react';

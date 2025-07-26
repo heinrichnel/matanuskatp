@@ -16,7 +16,7 @@ import {
   Package,
   BarChart3
 } from "lucide-react";
-import { Badge } from '@/components/ui/Badge';
+import { Badge } from '@/components/ui/badge';
 
 interface TyreSize {
   width: number;
