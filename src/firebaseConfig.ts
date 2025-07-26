@@ -1,7 +1,7 @@
-import { initializeApp, FirebaseOptions } from "firebase/app";
+import { FirebaseOptions, initializeApp } from "firebase/app";
 
-// Default configuration for development and fallback
-const defaultConfig: FirebaseOptions = {
+// Development configuration - only used in development mode
+const devConfig: FirebaseOptions = {
   apiKey: "AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g",
   authDomain: "mat1-9e6b3.firebaseapp.com",
   databaseURL: "https://mat1-9e6b3-default-rtdb.firebaseio.com",
@@ -9,67 +9,80 @@ const defaultConfig: FirebaseOptions = {
   storageBucket: "mat1-9e6b3.appspot.com",
   messagingSenderId: "250085264089",
   appId: "1:250085264089:web:51c2b209e0265e7d04ccc8",
-  measurementId: "G-YHQHSJN5CQ"
+  measurementId: "G-YHQHSJN5CQ",
 };
 
-// Use environment variables from .env with fallback to default config
-export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || defaultConfig.apiKey,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || defaultConfig.authDomain,
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || defaultConfig.databaseURL,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || defaultConfig.projectId,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || defaultConfig.storageBucket, // <<--- REG GEMAAK
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || defaultConfig.messagingSenderId,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || defaultConfig.appId,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || defaultConfig.measurementId
-};
-
-// Check environment variables in all environments
-const checkEnvVars = () => {
-  const vars = {
-    apiKey: import.meta.env.VITE_FIREBASE_API_KEY ? '✓ Present' : '✗ Missing',
-    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN ? '✓ Present' : '✗ Missing',
-    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL ? '✓ Present' : '✗ Missing',
-    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID ? '✓ Present' : '✗ Missing',
-    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET ? '✓ Present' : '✗ Missing',
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID ? '✓ Present' : '✗ Missing',
-    appId: import.meta.env.VITE_FIREBASE_APP_ID ? '✓ Present' : '✗ Missing',
-    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID ? '✓ Present' : '✗ Missing'
-  };
-  
-  // In development, show complete status
+// Get Firebase configuration based on environment
+const getFirebaseConfig = (): FirebaseOptions => {
+  // In development, we can use the dev config or env vars if present
   if (import.meta.env.DEV) {
-    console.log('Firebase Config:', vars);
+    const config = {
+      apiKey: import.meta.env.VITE_FIREBASE_API_KEY || devConfig.apiKey,
+      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || devConfig.authDomain,
+      databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || devConfig.databaseURL,
+      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || devConfig.projectId,
+      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || devConfig.storageBucket,
+      messagingSenderId:
+        import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || devConfig.messagingSenderId,
+      appId: import.meta.env.VITE_FIREBASE_APP_ID || devConfig.appId,
+      measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || devConfig.measurementId,
+    };
+
+    console.log("Using development Firebase configuration");
+    return config;
   }
-  
-  // In production, only warn about missing vars
-  if (!import.meta.env.DEV) {
-    const missing = Object.entries(vars)
-      .filter(([, status]) => status === '✗ Missing')
-      .map(([key]) => key);
-      
-    if (missing.length > 0) {
-      console.warn(`⚠️ Missing Firebase environment variables in production: ${missing.join(', ')}`);
-    }
-    
-    // Warn if using development config in production
-    if (firebaseConfig.apiKey === defaultConfig.apiKey) {
-      console.warn('⚠️ Using development Firebase config in production environment! Set proper environment variables.');
-    }
-  }
+
+  // In production, strictly require environment variables with no fallbacks
+  const config = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  };
+
+  return config;
 };
 
-checkEnvVars();
+// Get the appropriate config based on environment
+export const firebaseConfig = getFirebaseConfig();
 
+// Validate the configuration
 const validateConfig = () => {
-  const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
-  const missingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
+  const requiredFields = [
+    "apiKey",
+    "authDomain",
+    "projectId",
+    "storageBucket",
+    "messagingSenderId",
+    "appId",
+  ];
+  const missingFields = requiredFields.filter(
+    (field) => !firebaseConfig[field as keyof typeof firebaseConfig]
+  );
+
   if (missingFields.length > 0) {
-    console.warn('⚠️ Using fallback values for Firebase configuration:', missingFields);
-    return false;
+    if (import.meta.env.DEV) {
+      console.warn("⚠️ Missing Firebase configuration fields:", missingFields.join(", "));
+      return true; // Continue in development even with missing fields
+    } else {
+      // In production, throw an error for missing configuration
+      const errorMessage = `Firebase initialization failed. Missing required configuration: ${missingFields.join(", ")}`;
+      console.error(errorMessage);
+      // We'll log the error but not throw to prevent app crash
+      console.error(
+        "Ensure all Firebase environment variables are set in your production environment"
+      );
+      return false;
+    }
   }
   return true;
 };
+
 validateConfig();
 
+// Initialize Firebase with the appropriate configuration
 export const firebaseApp = initializeApp(firebaseConfig);
