@@ -4,6 +4,9 @@
   publish = "dist"
   # Disable build cache to ensure fresh builds
   ignore = "false"
+  # Skip git submodule checkout
+  [build.git]
+    submodules = false
 
 # Production context settings
 [context.production]
@@ -48,15 +51,15 @@
   # Force clean build
   NETLIFY_USE_YARN = "false"
   NETLIFY_CLEAN_URLS = "true"
-  
+
   # Build optimization
   CI = "true"
-  
+
   # Netlify project identification
   VITE_NETLIFY_PROJECT_NAME = "matanuskatpt"
   VITE_NETLIFY_OWNER = "heinNell"
   VITE_NETLIFY_SITE_ID = "41739ca7-d1e2-4f31-ae11-b7bbd848da4c"
-  
+
   # Environment variables for build (these will be set in Netlify UI)
   VITE_FIREBASE_API_KEY = "${VITE_FIREBASE_API_KEY}"
   VITE_FIREBASE_AUTH_DOMAIN = "${VITE_FIREBASE_AUTH_DOMAIN}"
