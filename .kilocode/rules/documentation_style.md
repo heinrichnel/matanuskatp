@@ -1,503 +1,346 @@
-# Heavy Vehicle Fleet System: Module Mapping & Functional Requirements
+# Heavy Vehicle Fleet Management System Specification
 
-## 1. Work Order Module
+## Table of Contents
 
-### Work Order General Flow
-States:  
-Initiated → In Progress (start timer) → Completed (auto on all tasks done)
+1. [Introduction](#introduction)
+2. [Core Modules and Functional Requirements](#core-modules-and-functional-requirements)
+   1. [Work Order (Job Card) Module](#work-order-job-card-module)
+   2. [Inspection & Fault Management Module](#inspection--fault-management-module)
+   3. [Root Cause Analysis (RCA) Module](#root-cause-analysis-rca-module)
+   4. [Purchase Order (PO) Module](#purchase-order-po-module)
+   5. [Incident Reporting Module](#incident-reporting-module)
+   6. [Tyre Management Module](#tyre-management-module)
+   7. [Users and Roles Module](#users-and-roles-module)
+3. [System Mapping Matrix](#system-mapping-matrix)
+4. [Key Workflows and Integrations](#key-workflows-and-integrations)
+5. [UI/UX and Functional Rules](#uiux-and-functional-rules)
+6. [Attachments and Audit](#attachments-and-audit)
+7. [Data Export/Integration](#data-exportintegration)
+8. [Legend of Key Mappings](#legend-of-key-mappings)
 
-**Required Actions:**
-- On view: Show full work order details, tasks, parts, costs, attachments, logs.
-- Edit: All data editable (tasks, parts, add/edit attachments, labor, remarks).
-- Attachments: Quotes, invoices, photos (PDF download support).
-- Status, timestamps, and PO linkage must display on each work order.
+## Introduction
 
-**Fault/Inspection Integration:**
-- Linked faults must show as badges/icons (with escalation when major/recurring).
-- Clicking faults opens full history, corrective action, and job card/work order links.
+This document provides a detailed specification for the Heavy Vehicle Fleet Management System, outlining the functional requirements, data models, and critical integration points across its core modules. The goal is to ensure a unified, robust, and maintainable system that supports end-to-end fleet operations.
 
-**Corrective Actions:**
-- Completion of a task on the inspection auto-populates/completes the work order’s corresponding task.
-- Root Cause Analysis (RCA) modal required if critical/frequent item changed within 3 months.
+## Core Modules and Functional Requirements
 
-#### Database/Model Mapping
-##### WorkOrder
-- workOrderId (string)
-- vehicleId (string)
-- status (enum: Initiated, In Progress, Completed)
-- tasks: [ TaskEntry ]
-- partsUsed: [ PartEntry ]
-- laborEntries: [ LaborEntry ]
-- attachments: [ Attachment ]
-- remarks: [ Remark ]
-- timeLog: [ TimeLogEntry ]
-- linkedInspectionId (string)
-- linkedPOIds: [ string ]
-- createdBy (UserRef)
-- createdAt, updatedAt (timestamp)
+### Work Order (Job Card) Module
 
----
+The Work Order (WO) module manages all vehicle maintenance and repair tasks.
 
-## 2. Inspection & Fault Management
+#### Work Order General Flow & States
 
-### Inspection List
-- Show all completed inspections per vehicle with date, inspector, location.
-- Highlight faults (red badge) and link to corrective action status and work order number.
-- Mechanic must complete the corrective action form for each flagged item.
+Work Orders progress through the following states:
 
-#### Fault/Corrective Action Model
-##### Inspection
-- inspectionId (string)
-- vehicleId (string)
-- reportNumber (string)
-- date, time, location
-- inspector (UserRef)
-- faults: [ FaultEntry ]
-- notes (string)
-- correctiveActions: [ CorrectiveAction ]
-- linkedWorkOrderId (string)
+- **Initiated**: A new work order has been created.
+- **In Progress**: Work has begun (timer starts).
+- **Completed**: All tasks are marked as done (status automatically updates).
 
-##### CorrectiveAction
-- status: Not Taken, Taken (color-coded)
-- mechanicName
-- dateCompleted
-- note
-- RCARequired (bool, auto if recurring/major)
-- RCADetails (RootCauseAnalysisEntry)
+#### Required Actions
 
----
+- **View**: Display comprehensive work order details, including tasks, parts used, costs, attachments, and historical logs.
+- **Edit**: All data fields (tasks, parts, attachments, labor, remarks) must be editable, respecting user permissions.
+- **Attachments**: Support for uploading and downloading various file types (quotes, invoices, photos). PDF download for attachments is required.
+- **Details Display**: Each work order must display its current status, associated timestamps (creation, last update, completion), and linked Purchase Order (PO) numbers.
 
-## 3. System Mapping Matrix
+#### Fault/Inspection Integration
 
-### 1. Vehicle ↔ Tyre Management
-| Vehicle Asset Field | Tyre Field      | Mapping/Logic                                                      |
-|---------------------|-----------------|--------------------------------------------------------------------|
-| Fleet Number        | Vehicle Assign  | Tyres are assigned by fleet number and position                    |
-| Axle/Position No.   | Axle Position   | Tyre positions auto-map (1-N) based on vehicle config              |
-| Tyre History        | Tyre Number/Status | All tyres fitted (past/present) with status and change history  |
-| Tyre Inspection Date| Last Inspection | Each tyre logs last inspection, and overall inspection schedule    |
-| Tyre Cost/KM        | Cost per KM     | Calculated per tyre and aggregated to vehicle                      |
+- **Fault Highlighting**: Linked faults from inspections must be visible as badges or icons on the work order. Major or recurring faults should trigger an escalation visual.
+- **Drill-down**: Clicking a fault badge/icon must open its full history, including corrective actions and links to other relevant job cards or work orders.
 
-### 2. Job Card ↔ Inspections ↔ RCA
+#### Corrective Actions & RCA
+
+- **Task Synchronization**: When a task linked to an inspection fault is completed, it must automatically update/complete the corresponding task on the associated work order.
+- **Root Cause Analysis (RCA)**: A dedicated RCA modal is required if a critical or frequently serviced item on the vehicle is replaced or repaired within a 3-month period. Completion of the RCA is mandatory for closing such flagged work orders.
+
+#### Data Model: WorkOrder
+
+| Field | Type | Description |
+|-------|------|-------------|
+| workOrderId | string | Unique identifier |
+| vehicleId | string | Link to the associated vehicle |
+| status | enum | Initiated, In Progress, Completed |
+| tasks | [ TaskEntry ] | List of tasks to be performed |
+| partsUsed | [ PartEntry ] | List of parts consumed |
+| laborEntries | [ LaborEntry ] | Records of labor hours and technicians |
+| attachments | [ Attachment ] | Linked documents/images |
+| remarks | [ Remark ] | General notes and comments |
+| timeLog | [ TimeLogEntry ] | Automated time tracking entries |
+| linkedInspectionId | string | ID of the inspection that initiated this WO |
+| linkedPOIds | [ string ] | List of associated Purchase Order IDs |
+| createdBy | UserRef | Reference to the user who created the WO |
+| createdAt, updatedAt | timestamp | Timestamps for record management |
+
+### Inspection & Fault Management Module
+
+This module handles vehicle inspections and tracks detected faults.
+
+#### Inspection List View
+
+- **Display**: Show all completed inspections per vehicle, including date, inspector, and location.
+- **Fault Highlighting**: Faults detected during an inspection must be visually highlighted (e.g., red badge).
+- **Actionable Links**: Faults should link directly to their corrective action status and the associated work order number.
+- **Mechanic Action**: The assigned mechanic must complete a corrective action form for each flagged item.
+
+#### Data Model: Inspection & CorrectiveAction
+
+**Inspection**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| inspectionId | string | Unique identifier |
+| vehicleId | string | Linked vehicle |
+| reportNumber | string | Unique inspection report number |
+| date, time, location | timestamp/string | When and where inspection occurred |
+| inspector | UserRef | User who performed the inspection |
+| faults | [ FaultEntry ] | List of identified faults |
+| notes | string | General inspection notes |
+| correctiveActions | [ CorrectiveAction ] | List of actions taken for each fault |
+| linkedWorkOrderId | string | ID of the work order generated from this inspection |
+
+**CorrectiveAction**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| status | enum | Not Taken, Taken (Color-coded for quick visual assessment) |
+| mechanicName | string | Name of the mechanic who performed the action |
+| dateCompleted | timestamp | When the action was completed |
+| note | string | Details about the action taken |
+| RCARequired | boolean | Automatically set to true if the item is recurring or critical |
+| RCADetails | RootCauseAnalysisEntry | Link to RCA details if required |
+
+### Root Cause Analysis (RCA) Module
+
+This module facilitates the investigation of recurring or critical failures.
+
+#### RCA Trigger & Form
+
+- **Auto-Trigger**: The RCA form is automatically triggered for flagged work orders (e.g., same major item replaced/repaired within 3 months).
+
+**RCA Form Fields**:
+
+- **Root Cause**: Dropdown selection (e.g., Driver Negligence, Poor Part, Bad Road, Workshop Fault).
+- **RCA Conducted By**: User selection.
+- **Responsible Person**: Assignee for follow-up actions.
+- **Notes**: Free text for detailed analysis.
+- **Attachments**: Optional file uploads.
+- **Mandatory Completion**: RCA completion is mandatory to close any flagged work orders.
+
+### Purchase Order (PO) Module
+
+The PO module manages the procurement of parts and services.
+
+#### PO Creation
+
+- **Trigger**: POs can be created directly from a Job Card when required parts are not in stock.
+- **Fields**: PO Number (auto-generated), Title, Description, Due Date, Vendor, Requester, Priority, Site/Project, Shipping Address.
+- **Item Details Table**: Includes Item Number, Item Name, Quantity, Unit, Item Cost, and Total Cost.
+- **Attachments**: Support for quotes and approval documents.
+- **Terms & Conditions**: Dedicated field.
+- **Part Sourcing Buttons**: "Pick from Demand List," "Scan Parts," "Pick from Parts List" for efficient item selection.
+
+#### PO View
+
+- **Read-only view** of all PO fields with PDF download support.
+- **Status**: Displays PO lifecycle (Open, Approved, Received, Closed, etc.).
+
+### Incident Reporting Module
+
+This module allows logging and managing incidents related to vehicles and operations.
+
+#### Incident Dashboard
+
+**Columns**: Action (View/Edit), Incident Number, Incident Date/Time, Vehicle, Location, Reported By, Download Report.
+
+#### Incident Entry Form
+
+- **Core Fields**: Incident Number (auto), Date, Time, Vehicle Number, Vehicle Name, VIN, Operator, Type, Location, Weather, Severity Rating (e.g., Critical, Major, Minor).
+- **Images**: Support for uploading up to 6 incident-related images.
+- **Narrative**: Fields for incident description, cause, damage list, and additional comments.
+- **Linkage**: Incidents must be linkable to a specific vehicle and its logbook history.
+
+### Tyre Management Module
+
+This module provides comprehensive management of vehicle tyres.
+
+#### Tyre Inventory Dashboard
+
+**List View Columns**: Action (Edit/View/Delete), Tire Number (unique serial), Manufacturer, Tyre Condition (OK, NEEDS ATTENTION), Vehicle Assigned (linked to position, e.g., "1H-ACO8468"), Status (NEW, OLD, RETREADED), Miles/KM Run (with progress bar), Tread Depth (mm), Mount Status (ON VEHICLE, IN STORE).
+
+**Filters/Features**: Search by Tyre Number, Vehicle, Status. Export to CSV/PDF. Sort by any column.
+
+#### Tyre Add/Edit Form
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| Tire Number | Text | Yes | Unique Tyre Serial |
+| Tire Size | Text | Yes | Structured: e.g., 315/80R22.5 |
+| Tire Type | Dropdown | Yes | Steer, Drive, Trailer, etc. |
+| Tire Pattern | Text | No | Tread Pattern |
+| Manufacturer | Text | No | Manufacturer name |
+| Year | Number | No | Manufacturing Year |
+| Tire Cost | Currency | No | For Cost/KM calculation |
+| Tire Condition | Dropdown | Yes | OK/Needs Attention |
+| Tire Status | Dropdown | Yes | New/Used/Retreaded |
+| Vehicle Assign | Dropdown | No | Fleet number/plate |
+| Axle Position | Dropdown | No | 1–16 (auto for each vehicle configuration) |
+| Mount Status | Dropdown | Yes | On Vehicle/In Store/Spare |
+| Miles/KM Run | Number | No | Running km |
+| Miles/KM Limit | Number | No | Expected lifespan |
+| Tread Depth | Number (mm) | No | Current tread depth |
+| Load Index | Number | No | (if available) |
+| Speed Rating | Text | No | (if available) |
+| Tyre Pressure | Number | No | Current PSI/kPa |
+| Notes | Text | No | Free text |
+
+- **CSV Import**: Support bulk import for all fields.
+- **Auto-allocation**: Tyre position should auto-number (1–X) based on vehicle type (e.g., Interlink 1–20, Horse 1–10).
+
+#### Vehicle Tyre Overview (Per Asset)
+
+- **Display**: Shows all tyres by position and serial for a specific vehicle.
+- **Details**: Includes Tyre Status, Tread Depth, Last Inspection Date, complete Tyre History (past and present tyres fitted).
+- **Performance Metrics**: Displays when a tyre was last changed/replaced, total km run, and cost per km.
+- **Integration**: Shows inspection history and faults related to specific tyre positions.
+
+#### Reporting & Analytics
+
+- **Cost Per KM Calculation**: Cost per km = Tire Cost / Estimated Life (KM).
+- **Brand/Pattern Matrix**: Compare fitted brands by km, cost, and pattern.
+- **Visual Recommendations**: Color-coded badges for best/worst ROI.
+- **Export/Download**: All data exportable as CSV/PDF.
+
+### Users and Roles Module
+
+Manages system users and their access permissions.
+
+#### User Roles
+
+- **Operator**: Limited create/view access (Fuel, Inspection, Logbook). Cannot approve/close Work Orders.
+- **Technician**: Can enter corrective actions and complete tasks on Inspections and Job Cards. Can create RCA.
+- **Admin/Sub Admin**: Full CRUD (Create, Read, Update, Delete) access to all modules. PO Approval, RCA Approval.
+- **Workshop/Employee**: Access to all Workshop-related Modules (Labour, Checklist, Inventory, Job Cards).
+
+#### User/Team Assignment Logic
+
+- Every job/task must support assignment to existing users.
+- Ability to search/select from active users, showing their roles and access areas.
+- User info: Name, Role, User ID, Email, Status, User Access Area.
+
+## System Mapping Matrix
+
+This matrix details the critical data flows and logical connections between modules.
+
+### Vehicle ↔ Tyre Management
+
+| Vehicle Asset Field | Tyre Field | Mapping/Logic |
+|---------------------|------------|---------------|
+| Fleet Number | Vehicle Assign | Tyres are assigned by fleet number and position |
+| Axle/Position No. | Axle Position | Tyre positions auto-map (1-N) based on vehicle configuration |
+| Tyre History | Tyre Number/Status | All tyres fitted (past/present) with status and change history |
+| Tyre Inspection Date | Last Inspection | Each tyre logs last inspection, and overall inspection schedule |
+| Tyre Cost/KM | Cost per KM | Calculated per tyre and aggregated to vehicle |
+
+### Job Card ↔ Inspections ↔ RCA
+
 | Inspection Item | Fault Flag/Status | Job Card Task | RCA Required (Flagged) |
 |-----------------|-------------------|---------------|------------------------|
 | Checklist Item (e.g. Tyre) | Fault Detected | Auto-created as task on WO | If re-replaced in < 3 months |
 | Fault Description | Memo | Task Description on WO | RCA auto-triggered and required |
-| Corrective Action Taken | Yes/No | Task Marked Complete/NA | Completion of RCA unlocks closure |
-| Mechanic Name | Workshop Assigned | Labor Log | |
+| Corrective Action Taken | Yes/No (by Mechanic) | Task Marked Complete/NA | Completion of RCA unlocks WO closure |
+| Mechanic Name | Workshop Assigned | Labor Log | - |
 
-### 3. Job Card ↔ Parts Inventory ↔ Purchase Order
+### Job Card ↔ Parts Inventory ↔ Purchase Order
+
 | Job Card Parts Request | Inventory Check | PO Generation | Parts Allocation |
 |-----------------------|-----------------|---------------|------------------|
 | Part Needed | In Stock? | If NO: create PO | PO links to WO and closes loop |
 | WO Number | Linked WO | PO stores WO Reference | On receipt, part booked to WO |
-| Task Completion | All Parts Avail | Mark Task as Complete | Update Inventory |
+| Task Completion | All Parts Available | Mark Task as Complete | Update Inventory |
 
-### 4. Tyre Management ↔ Reporting & Analytics
+### Tyre Management ↔ Reporting & Analytics
+
 | Tyre Data Field | Analytics/Report Output | Mapping / Business Use |
-|-----------------|------------------------|-----------------------|
+|-----------------|-------------------------|------------------------|
 | Tyre Number | Fleet Tyre History | Track total use, lifespan, cost |
 | Cost, Lifespan (km) | Cost per KM | Used for cost/brand analysis |
 | Brand/Pattern | Brand ROI Report | Data-driven purchase recommendations |
-| Tread Depth | Safety/Replacement Schedule | Automatic notifications/flags |
+| Tread Depth | Safety/Replacement Schedule | Automatic notifications/flags for replacement |
 | Last Inspection Date | Inspection Compliance Report | Compliance and maintenance scheduling |
 
-### 5. Incident Report ↔ Vehicle & Users
+### Incident Report ↔ Vehicle & Users
+
 | Incident Form Field | Vehicle/User Field | Mapping / Logic |
-|---------------------|-------------------|-----------------|
+|--------------------|-------------------|-----------------|
 | Incident Number | Vehicle Number | Incident logs to vehicle logbook/history |
 | Reported By | User ID / Operator | Mapped for accountability and notification |
 | Incident Severity | Safety Dashboard | Rollup for HSE and operational management |
 | Images/Docs | Attachments | Linked to Incident, downloadable from report |
 
-### 6. User & Access Control
-| User Role | Module Access | Comments |
-|-----------|---------------|----------|
-| Operator | Fuel, Inspection, Logbook | Limited create/view, cannot approve/close WO |
-| Technician | Inspections, Job Cards, RCA | Can enter corrective action and complete tasks |
-| Admin/Sub Admin | All Modules | Full CRUD, PO Approval, RCA Approval |
-| Workshop/Employee | All Workshop Modules | Labour, Checklist, Inventory, Job Cards |
+## Key Workflows and Integrations
 
----
+### Inspection → Work Order → RCA → Completion
 
-## 4. Workflows and Integration
+1. Inspection detects a fault on a vehicle.
+2. Fault is flagged, and a Job Card (Work Order) is automatically created with corresponding tasks.
+3. If the same fault/item repeats within 3 months, an RCA is triggered and required before the Work Order can be closed.
+4. All corrective actions (tasks on the WO) must be marked "Fixed" by the Workshop.
+5. A Work Order can only be closed once all its tasks are complete and (if flagged) the RCA is finalized.
 
-### A. Inspection → Work Order → RCA → Completion
-- Inspection detects fault.
-- Fault flagged: create Job Card (WO) with tasks.
-- If fault repeats < 3 months, RCA is triggered before WO can close.
-- All corrective actions (tasks) must be marked “Fixed” by Workshop.
-- WO can only be closed when all tasks and (if flagged) RCA are complete.
+### Job Card → Parts Inventory → PO
 
-### B. Job Card → Parts Inventory → PO
-- Job Card created, lists required parts.
-- System checks stock.
-- If available: part booked out and task marked ready.
-- If not: create PO linked to WO; parts received and booked to job.
-- Only after all parts/tasks are fulfilled, WO can close.
+1. A Job Card is created, listing required parts.
+2. The system checks the Parts Inventory for availability.
+3. If parts are in stock, they are booked out, and the task is marked as ready.
+4. If parts are not in stock, a Purchase Order (PO) is automatically created and linked to the Work Order.
+5. Upon receipt of the parts, they are booked to the job, updating inventory.
+6. The Work Order can only be closed after all required parts and tasks are fulfilled.
 
-### C. Tyre Lifecycle
-- Tyre assigned on vehicle (position 1–N).
-- Each tyre tracks: install date, km, inspections, pressure, tread, faults.
-- Tyre replaced: record out-of-service, record cost per km, flag if early.
-- Data available for analytics, cost control, and replacement planning.
+### Tyre Lifecycle
 
-### D. Incident Entry → Notification → Reporting
-- Incident logged via form (linked to vehicle, user, images, severity).
-- Notifications to safety/admin (if severe).
-- Incident report downloadable, visible in vehicle history.
+1. A tyre is assigned to a vehicle at a specific axle position.
+2. Each tyre tracks its install date, current kilometers run, inspection history, pressure, tread depth, and any associated faults.
+3. When a tyre is replaced, the old tyre's out-of-service status is recorded, its final cost per kilometer is calculated, and it's flagged if replaced prematurely.
+4. Tyre data is continuously available for analytics, cost control, and proactive replacement planning.
 
----
+### Incident Entry → Notification → Reporting
 
-## 5. Attachments and Audit
+1. An Incident is logged via a dedicated form (linking to vehicle, user, images, and severity).
+2. Notifications are sent to safety/admin personnel if the incident severity is critical.
+3. The incident report is downloadable and becomes part of the vehicle's historical logbook.
 
-- Every record (WO, PO, RCA, Inspection, Incident) can have attachments.
-- Every action (status change, completion, approval, edit) is audit-logged by user and timestamp.
+## UI/UX and Functional Rules
 
----
+- **Tab-based Navigation**: Implement tabs for all multi-section views (e.g., Job Card details).
+- **Drill-down & Back-navigation**: Dashboards link to detail views, always providing clear back-navigation.
+- **Edit and Download (PDF)**: Available on all detailed screens for records (Work Orders, POs, Incidents).
+- **Flagging**: Any repeated critical maintenance or failure within 3 months automatically prompts an RCA.
+- **Attachments**: All major forms (Work Order, PO, Incident) must support file attachments (PDF, images, etc.) with view and download capabilities.
+- **Dynamic Field Loading**: Dropdowns (users, vehicles, parts) must dynamically load and reflect current master data.
+- **Team Assignments**: Always allow searching/selecting from the active user/team list for assignments.
 
-## 6. Data Export/Integration
+## Attachments and Audit
 
-- All tables (tyres, job cards, incidents, inspections, POs) can be exported as CSV/PDF for BI/PowerBI integration.
-- Bulk Import: CSV upload for tyres, parts, users, inspection templates.
+- **Attachments Everywhere**: Every record (Work Order, PO, RCA, Inspection, Incident) must support the addition, viewing, and downloading of various attachment types.
+- **Comprehensive Audit Logging**: Every significant action (status change, task completion, approval, edit, RCA entry) must be logged with the performing user's ID and a timestamp, ensuring full traceability and compliance.
 
----
+## Data Export/Integration
 
-## 7. Legend of Key Mappings
+- **Universal Export**: All major data tables (tyres, job cards, incidents, inspections, POs, etc.) must support export to CSV and PDF formats for external Business Intelligence (BI) tools like PowerBI.
+- **Bulk Import**: Support CSV upload for initial data seeding or mass updates for modules like tyres, parts, users, and inspection templates.
+- **Search/Filter/Sort**: All list/table views must include robust search, filter, and sort functionalities.
+- **Visual Summaries**: Utilize visual cues like badges and progress bars on dashboards (e.g., for Tyre KM run, WO completion).
+
+## Legend of Key Mappings
 
 | Abbreviation/Field | Explanation |
-|--------------------|-------------|
-| WO | Work Order/Job Card |
+|-------------------|-------------|
+| WO | Work Order / Job Card |
 | RCA | Root Cause Analysis |
 | PO | Purchase Order |
 | Tyre Number | Unique Serial for Each Tyre |
-| Vehicle Assign | Fleet/Asset ID/Plate |
-| Axle Position | Mapped Position Number (e.g., 1,2...20) |
-| Status | Lifecycle State (New, On Vehicle, In Store, etc) |
+| Vehicle Assign | Fleet/Asset ID/Plate Number |
+| Axle Position | Mapped Position Number (e.g., 1, 2...20) |
+| Status | Lifecycle State (New, On Vehicle, In Store, etc.) |
 | Fault Flag | Visual Alert for Fault/Inspection |
 | Attachment | Files/Images/Documents linked to record |
-
----
-
-This mapping ensures full traceability, compliance, and tight workflow integration between all major modules—delivering actionable insights, eliminating data silos, and supporting process automation from inspection all the way to analytics.
-
----
-
-# Fleet Management System – Module Specification
-
-## 1. Tyre Management Module
-
-### 1.1. Tyre Inventory Dashboard
-**List View Columns:**
-- Action (Edit/View/Delete)
-- Tire Number
-- Manufacturer
-- Tyre Condition (OK, NEEDS ATTENTION, etc.)
-- Vehicle Assigned (linked to position, e.g. 1H-ACO8468)
-- Status (NEW, OLD, RETREADED)
-- Miles/KM Run (with progress bar)
-- Tread Depth (mm)
-- Mount Status (ON VEHICLE, IN STORE)
-
-**Filters/Features:**
-- Search by Tyre Number, Vehicle, Status
-- Export to CSV/PDF
-- Sort by any column
-
-### 1.2. Tyre Add/Edit Form
-| Field           | Type           | Required | Description                       |
-|-----------------|----------------|----------|-----------------------------------|
-| Tire Number     | Text           | Yes      | Unique Tyre Serial                |
-| Tire Size       | Text           | Yes      | Structured: 315/80R22.5           |
-| Tire Type       | Dropdown       | Yes      | Steer, Drive, Trailer, etc.       |
-| Tire Pattern    | Text           | No       | Tread Pattern                     |
-| Manufacturer    | Text           | No       |                                   |
-| Year            | Number         | No       | Manufacturing Year                |
-| Tire Cost       | Currency       | No       | For Cost/KM calc                  |
-| Tire Condition  | Dropdown       | Yes      | OK/Needs Attention                |
-| Tire Status     | Dropdown       | Yes      | New/Used/Retreaded                |
-| Vehicle Assign  | Dropdown       | No       | Fleet number/plate                |
-| Axle Position   | Dropdown       | No       | 1–16 (auto for each vehicle config)|
-| Mount Status    | Dropdown       | Yes      | On Vehicle/In Store/Spare         |
-| Miles/KM Run    | Number         | No       | Running km                        |
-| Miles/KM Limit  | Number         | No       | Expected lifespan                 |
-| Tread Depth     | Number (mm)    | No       | Current tread depth               |
-| Load Index      | Number         | No       | (if available)                    |
-| Speed Rating    | Text           | No       | (if available)                    |
-| Tyre Pressure   | Number         | No       | Current PSI/kPa                   |
-| Notes           | Text           | No       | Free text                         |
-
-- CSV Import: Must support bulk import with all above fields.
-- Auto-allocation: Tyre position auto-numbered 1–X for each vehicle type (e.g., Interlink 1–20, Horse 1–10, Reefer 1–6).
-
-### 1.3. Vehicle Tyre Overview (Per Asset)
-- Shows all tyres by position and serial.
-- Show Tyre Status, Tread Depth, Last Inspection Date, Complete Tyre History.
-- Show when tyre was last changed/replaced, total km run, cost per km.
-- Show inspections history and faults related to tyre positions.
-
-### 1.4. Reporting & Analytics
-- Cost Per KM Calculation: Cost per km = Tire Cost / Estimated Life (KM)
-- Brand/Pattern Matrix: Compare all fitted brands by km, cost, and pattern.
-- Visual Recommendations: Color badges for best/worst ROI.
-- Export/Download: All data exportable as CSV/PDF.
-
----
-
-## 2. Job Card/Work Order Module
-
-### 2.1. Job Card List View
-- Columns: Action, WO Number, Vehicle, Due Date, Status, Priority, Assigned, Memo/Description
-- States: Initiated, Scheduled, Inspected, Approved, In Progress, Completed
-- Action Buttons: View/Edit, Start Progress, Complete
-
-### 2.2. Job Card Details Page
-**Tabs:**
-- General Details
-- Task Details (lists tasks; editable)
-- Parts Details (link to inventory/PO)
-- Labor Details (hours, technician)
-- Additional Cost
-- Attachments (quotes, invoices)
-- Remarks
-- Time Log (automated per state)
-
-- Mandatory: Attachments, Cost Tracking, PDF Download
-
-### 2.3. Task Auto-population/Completion Logic
-- If a work order is created from an inspection, all faults/tasks auto-populate as tasks on the job card.
-- After workshop attends and marks tasks as done, this auto-updates the job card and marks the WO as completed when all tasks are done.
-
-### 2.4. RCA Flagging Logic
-- If the same major item (tyre, brakes, etc.) is reported/replaced within 3 months: system must flag the item and require a Root Cause Analysis (RCA) before closing the WO.
-
----
-
-## 3. Root Cause Analysis (RCA) Module
-
-- RCA form is auto-triggered on flagged jobs.
-- RCA form includes:
-  - Root Cause (Dropdown: Driver Negligence, Poor Part, Bad Road, Workshop Fault, etc.)
-  - RCA Conducted By (name)
-  - Responsible Person
-  - Notes
-  - Attachments (optional)
-- RCA is mandatory to close flagged WOs.
-
----
-
-## 4. Purchase Order (PO) Module
-
-### 4.1. PO Creation
-- POs can be created directly from Job Card for parts not in stock.
-- Fields: PO Number, Title, Description, Due Date, Vendor, Requester, Priority, Site/Project, Shipping Address
-- Item Details Table: Item Number, Item Name, Quantity, Unit, Item Cost, Total Cost
-- Attachments: Quotes, Approvals
-- Terms & Conditions
-- Button to "Pick from Demand List", "Scan Parts", "Pick from Parts List"
-
-### 4.2. PO View
-- Same fields as above, read-only with download to PDF.
-- Status: Open, Approved, Received, Closed, etc.
-
----
-
-## 5. Incident Reporting Module
-
-### 5.1. Incident Dashboard
-- Columns: Action, Incident Number, Incident Date/Time, Vehicle, Location, Reported By, Download Report
-
-### 5.2. Incident Entry Form
-- Incident Number, Date, Time, Vehicle Number, Vehicle Name, VIN, Operator, Type, Location, Weather, Severity Rating
-- Incident Images (upload up to 6)
-- Narrative: How incident occurred, cause, damage list, additional comments, reported by
-- Must be able to attach incident to a vehicle and logbook.
-
----
-
-## 6. Inspections & Corrective Actions
-
-### 6.1. Inspection List View
-- Report Number, Date, Vehicle, Location, Inspector, Faults (with icons), Corrective Action Status, Linked WO
-
-### 6.2. Inspection Form
-- All checklist items (tyres, brakes, bushings, etc.)
-- For each: Status (OK/Not OK/NA), Notes
-- After job: Workshop must fill corrective action status for each item (Fixed/Not Fixed/NA, notes)
-- Mechanic Name (required to complete)
-- When action taken, updates job card automatically.
-
-### 6.3. Fault Linking/Highlighting
-- All faults are clickable to open related Job Card.
-- If a WO is created from an inspection, the WO number must be linked and clickable from inspection view.
-
----
-
-## 7. Users and Roles
-
-- Operators, Technicians, Admins, Sub Admins (role matrix)
-- Access Control: Each user has permissions for their modules only (see your provided table)
-
----
-
-## 8. Attachments Everywhere
-
-- All forms (WO, PO, RCA, Incident) must support attachments (images, PDFs, quotes, etc.).
-- Attachments can be added, viewed, and downloaded at any stage.
-
----
-
-## 9. Audit & History
-
-- All changes (state, corrective actions, RCA) must be logged in history per record.
-- Every inspection, tyre swap, PO, WO, incident must be viewable in history with date/user.
-
----
-
-## 10. Reporting & Export
-
-- Every module allows export to PDF/CSV.
-- All tables have search/filter/sort.
-- Visual summaries (badges, progress bars) on Tyres, WOs, Inspections.
-
----
-
-## 11. Advanced Features
-
-- Auto-flag logic: Tyres/parts replaced within threshold triggers RCA.
-- Bulk Import/Export: Tyres and POs.
-- Cost Analysis: Tyre cost per km, WO cost by type, parts cost, labor cost.
-- Recommendation Engine: Best tyre brand/pattern by cost per km.
-
----
-
-# Job Card / Workorder Management
-
-## 1.1 General Requirements
-- View and Edit: Users must be able to view all workorders, drill down into the details, and edit/update them where permissions allow.
-- Progress Tracking: Dashboard must show status (Initiated, Scheduled, Inspected, etc.), % completion of tasks, and highlight overdue workorders.
-- Worker Assignment: Show which users are assigned per task. Allow updates.
-- PDF Export: Each job card/workorder must support export as PDF, reflecting all tabbed data (General, Tasks, Parts, Labor, Attachments, etc.).
-- Attachments: Allow upload of related files (quotes, invoices, images, etc.) on both view and edit.
-
-## 1.2 Data Model (Tab Structure)
-- General Details
-- Task Details
-- Parts Details
-- Labor Details
-- Additional Cost
-- Attachments
-- Remarks
-- Time Log
-- Vehicle Details
-
-## 1.3 Store Integration
-- When editing a job card, users must be able to book parts out of stock (inventory decrement logic).
-- If a part is not in stock, create a PO Request (see below).
-
-## 1.4 RCA Auto-Flag (Root Cause Analysis)
-- If a critical part/inspection item (as defined in the master inspection template) is reported and replaced within 3 months since last replacement, auto-flag the workorder.
-- RCA Modal: Auto-prompt completion of RCA form (root cause, RCA conducted by, responsible, notes).
-- RCA result must be logged and linked to the job card.
-
----
-
-# 2. Purchase Order (PO) Workflow
-
-## 2.1 Trigger
-- PO requests must be automatically creatable from job cards for any part not in stock.
-
-## 2.2 PO Entry & View
-- Entry/Edit: Must allow entry of all core PO fields:
-  - PO Number, Title, Description, Due Date, Vendor, Requester, Priority
-  - Item List: SKU, Item Name, Qty, Cost
-  - Attachments (scan/email/upload)
-  - Shipping Details: Site, Address, Recipient
-  - Terms & Conditions
-- PO Approval: Support for “Self Approval” or multi-stage approval logic.
-- PO-Workorder Link: Must reference originating job card.
-- PO Status: Show PO status (Open, Approved, Received, etc.).
-- PDF Export: Same export logic as workorder.
-
----
-
-# 3. User/Team Assignment Logic
-
-- Every job/task must support assignment to existing users.
-- Must be able to search/select from active users (with roles, access areas).
-- User info: Name, Role, User ID, Email, Status, User Access Area (from your listing).
-
----
-
-# 4. Incident Report Module
-
-## 4.1 Requirements
-- Incident Dashboard: List all reported incidents with filters by date, vehicle, reporter, severity, status.
-- PDF Export: Download incident reports.
-- Entry/Edit Modal: Support all fields:
-  - Incident Number, Date, Time, Vehicle, Location, Type, Area, Severity, Weather, Activity, Description, Additional Comments, Reported By
-  - Image Uploads (multiple slots)
-- View/Drilldown: Show full incident details on click.
-- Team Linkage: Show the reporting and assigned user.
-
----
-
-# 5. RCA Entry Modal
-
-## 5.1 Fields
-- Root Cause (dropdown: Driver Negligence, Part Quality, Refit Error, etc.)
-- RCA Conducted By (user select)
-- Responsible Person
-- Notes
-- Save/Cancel
-
----
-
-# 6. UI/UX and Functional Rules
-
-- Tab-based navigation for all multi-section views.
-- Drilldown from dashboard to details, always with back-navigation.
-- Edit and Download (PDF) on all detailed screens.
-- Flagging: Any repeated critical maintenance or failure within 3 months auto-prompts RCA.
-- Attachments: All major forms (workorder, PO, incident) must support file attachments (PDF, image, etc.), both for view and edit.
-- Dynamic field loading: Drop-downs (users, vehicles, parts) must always reflect current master data.
-- Team Assignments: Always allow searching/selecting from user/team list.
-
----
-
-# 7. Sample Data Field Table
-
-| Module    | Field           | Type     | Notes                                 |
-|-----------|-----------------|----------|---------------------------------------|
-| Workorder | WO Number       | String   | Unique, auto-generated                |
-| Vehicle   | Lookup          | Select   | Select from fleet list                |
-| Status    | Enum            |          | Initiated, Scheduled, Inspected, etc. |
-| Task List | Sub-table       |          | Description, Status, Assigned, Note   |
-| Parts Booked | Sub-table    |          | SKU, Name, Qty, Cost                  |
-| Labor     | Sub-table       |          | Worker, Code, Time, Rate, Cost        |
-| Attachments | Files         |          | Quotes, photos, etc.                  |
-| RCA       | Link/Modal      |          | If flagged, required                  |
-| PO        | PO Number       | String   | Unique                                |
-| Items     | Sub-table       |          | SKU, Name, Qty, Cost                  |
-| Attachments | Files         |          | Quotes, docs, etc.                    |
-| Incident  | Incident Number | String   | Unique                                |
-| Images    | Files           |          | Up to 6                               |
-| Severity  | Enum            |          | Critical, Major, Minor                |
-| User      | Name            | String   |                                       |
-| Role      | Enum            |          | Operator, Technician, Admin           |
-| Access Areas | String/Enum  |          | From user master                      |
-
----
-
-# 8. Compliance and Audit
-
-- All edit actions, RCA entries, and PO approvals must be logged with timestamp and user.
-- RCA entries are required on flagged events before workorder can be closed.
-
----
-
-# 9. Integration / API Notes
-
-- All modules should be API-driven to enable external reporting, Power BI integration, or mobile app extensions in future.
-- Standard endpoints: /workorders, /po, /incident, /users, /rca, /attachments
-

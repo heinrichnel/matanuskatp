@@ -2,11 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ES2020"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "module": "ESNext",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
@@ -14,18 +10,15 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "noEmit": true,
+    "emitDeclarationOnly": true,
     "jsx": "react-jsx",
+    "composite": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "types": [
-      "react",
-      "react-dom",
-      "node"
-    ],
+    "types": ["react", "react-dom", "node"],
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
@@ -40,7 +33,11 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.js",
-    "**/*.json"
-, "route-component-map.cjs", "sidebar-validator.cjs", "find-form-usage.js", "index.js"  ],
+    "**/*.json",
+    "route-component-map.cjs",
+    "sidebar-validator.cjs",
+    "find-form-usage.js",
+    "index.js"
+  ],
   "exclude": []
 }

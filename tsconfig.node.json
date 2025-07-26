@@ -6,7 +6,8 @@
     "moduleResolution": "node",
     "skipLibCheck": true,
     "strict": true,
-    "noEmit": true,
+    "emitDeclarationOnly": true,
+    "composite": true,
     "esModuleInterop": true,
     "types": ["node"]
   },

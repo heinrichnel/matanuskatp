@@ -17,24 +17,19 @@
     "noFallthroughCasesInSwitch": true,
     "allowJs": true,
     "jsx": "react-jsx",
+    "types": ["node"],
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
     },
     "outDir": "dist"
   },
-  "include": [
-    "src",
-    "netlify/functions"
-  ],
+  "include": ["src", "netlify/functions"],
   "exclude": [
     "node_modules",
     "build",
     "dist",
-    ".netlify"  // Netlify se build output
+    ".netlify" // Netlify se build output
   ],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
 }

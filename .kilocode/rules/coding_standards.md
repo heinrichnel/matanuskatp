@@ -1,393 +1,294 @@
-# Frontend Architecture and Integration Standards
+# Code Standards for transportmat-monorepo
 
 ## Table of Contents
-1. [Introduction](#introduction)
-2. [Layout & App Structure](#layout--app-structure)
-3. [Sidebar & Navigation](#sidebar--navigation)
-4. [Import Management](#import-management)
-5. [UI CRUD Operations](#ui-crud-operations)
-6. [Data Handling Patterns](#data-handling-patterns)
-7. [Performance Optimization](#performance-optimization)
-8. [Error Handling & Resilience](#error-handling--resilience)
-9. [Component Integration & Deduplication](#component-integration--deduplication)
-10. [Permission & Authorization](#permission--authorization)
-11. [Permitted & Prohibited Actions](#permitted--prohibited-actions)
+- [Introduction](#introduction)
+- [Core Principles](#core-principles)
+- [Project Structure & Naming Conventions](#project-structure--naming-conventions)
+- [TypeScript & React Best Practices](#typescript--react-best-practices)
+- [Styling: Tailwind CSS](#styling-tailwind-css)
+- [Data Handling & API Interaction](#data-handling--api-interaction)
+- [Routing & Navigation](#routing--navigation)
+- [Performance Optimization](#performance-optimization)
+- [Error Handling & Resilience](#error-handling--resilience)
+- [Testing](#testing)
+- [Mobile (Capacitor) Considerations](#mobile-capacitor-considerations)
+- [Cloud & Deployment (Firebase, Vercel, Azure)](#cloud--deployment-firebase-vercel-azure)
+- [Code Quality & Automation](#code-quality--automation)
+- [AI-Assisted Development](#ai-assisted-development)
+- [Accessibility (A11y)](#accessibility-a11y)
+- [Documentation & Comments](#documentation--comments)
+- [Review & Enforcement](#review--enforcement)
 
 ## Introduction
+This document outlines the coding standards and best practices for the transportmat-monorepo project. Adhering to these guidelines ensures code consistency, maintainability, scalability, and a unified development experience across our frontend (Vite React) and backend (Express API).
 
-This document defines the standards for frontend architecture, integration, and code quality. These standards ensure a consistent, maintainable, and high-performance application with proper error handling and user experience.
+### Goal
+To build a fully connected, high-performance, and production-ready fleet management application with a focus on user experience, reliability, and ease of collaboration.
 
-**Goal:** A fully connected, production-ready frontend that matches the intended layout, sidebar navigation, and UI CRUD expectations—with every route, component, provider, and data model linked and working end-to-end.
+### Tech Stack Highlights
+- **Frontend**: React (Vite), TypeScript, Tailwind CSS, Material-UI
+- **Backend**: Express.js, Firebase (Firestore, Realtime Database, Authentication, Cloud Functions)
+- **Mobile**: Capacitor
+- **Deployment**: Vercel (Frontend), Firebase (Backend/Functions/Hosting), Azure (various services)
+- **Tooling**: ESLint, Prettier, Jest, Vitest, Playwright, Cypress, Storybook, GitHub Copilot, Google Gemini, Kilo Code
 
-## Layout & App Structure
+## Core Principles
+- **Readability**: Code must be easy to understand by others (and your future self).
+- **Consistency**: Follow established patterns and conventions across the entire codebase.
+- **Maintainability**: Write code that is easy to extend, debug, and refactor.
+- **Performance**: Optimize for fast loading times and smooth user interactions.
+- **Reliability**: Implement robust error handling, testing, and data validation.
+- **Security**: Be mindful of common vulnerabilities, especially with backend integrations.
+- **Accessibility**: Ensure the application is usable by all individuals, including those with disabilities.
+- **DRY (Don't Repeat Yourself)**: Abstract common logic and UI patterns into reusable components or utilities.
 
-### Requirements
-- The main layout component (typically `Layout.tsx`) must correctly wrap all pages/routes
-- Layout must import all shared UI components:
-  - Navigation bar
-  - Sidebar
-  - Notifications
-  - Footer
-- Shared UI components must not be duplicated across subcomponents
-- All routes must be properly configured in the router (typically `App.tsx` or equivalent)
+## Project Structure & Naming Conventions
 
-### Implementation Example
-```tsx
-// App.tsx
-import Layout from './components/layout/Layout';
-import { Routes, Route } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-// Other page imports...
+### Monorepo Structure
+The project is a monorepo containing a frontend (Vite React) and a backend (Express API), organized as follows:
 
-function App() {
-  return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        {/* Other routes... */}
-      </Routes>
-    </Layout>
-  );
-}
+```
+transportmat-monorepo/
+├── apps/
+│   ├── frontend/        # Vite React application
+│   └── backend/         # Express API, Firebase Functions, etc.
+├── packages/            # Reusable packages
+│   ├── ui-components/
+│   ├── shared-utils/
+│   └── types/
+├── .devcontainer/       # Dev container configuration
+├── .github/             # GitHub workflows, templates, Copilot instructions
+├── .vscode/             # Workspace-specific VS Code settings
+├── public/
+├── scripts/             # Utility scripts
+├── tools/               # Build/integration tools
+├── .env.development
+├── .env.production
+├── package.json         # Root package.json
+└── README.md
 ```
 
-## Sidebar & Navigation
+### File & Folder Naming
+- **Folders**: kebab-case (e.g., `user-management`, `data-services`)
+- **Component Files**: PascalCase.tsx (e.g., `UserProfile.tsx`)
+- **Hook Files**: useCamelCase.ts (e.g., `useAuth.ts`)
+- **Utility/Helper Files**: camelCase.ts or kebab-case.ts (e.g., `dateUtils.ts`, `api-helpers.ts`)
+- **Type Definition Files**: PascalCase.d.ts or types.ts (e.g., `UserTypes.d.ts`, `api-types.ts`)
+- **Index Files**: index.ts or index.tsx for barrel exports or root component
 
-### Requirements
-- Parse the sidebar configuration file (typically `sidebarConfig.ts` or equivalent)
-- Every sidebar entry must map to a valid and existing route
-- All linked components must be properly imported in the router configuration
-- Flag and optionally generate placeholder components for missing sidebar route targets
-- Ensure submenus, icons, and collapse logic work as expected
+### Component Naming
+- **React Components**: PascalCase (e.g., `DashboardLayout`, `ActionButton`)
+- **Functional Components**: Use arrow function syntax or function declaration
+  ```typescript
+  const ComponentName: React.FC<Props> = ({ prop }) => { ... };
+  // or
+  function ComponentName({ prop }: Props) { ... }
+  ```
+- **Props**: Use camelCase with defined types/interfaces
 
-### Validation Process
-1. Extract all routes from sidebar configuration
-2. Verify each route exists in the router configuration
-3. Confirm that each route's component is properly imported
-4. Report any missing routes or components
-5. Test submenu functionality and icon rendering
+### Variable & Function Naming
+- **Variables**: camelCase (e.g., `userName`, `isLoggedIn`)
+- **Functions**: camelCase (e.g., `fetchUserData`, `calculateTotal`)
+- **Constants**: SCREAMING_SNAKE_CASE for global, immutable values (e.g., `API_BASE_URL`)
+- **Booleans**: Prefix with is, has, should (e.g., `isLoading`, `hasError`, `shouldRender`)
 
-## Import Management
+## TypeScript & React Best Practices
 
-### Scope & Focus
-- Only enforced on `.tsx` files within `src/` directory
-- Limited to pages and components
-- Focus on import statement correctness and resolution
-- No file operations without explicit approval
+### Typing
+- **Strict Typing**: Always use explicit types; avoid `any`
+- **Interfaces vs. Types**: Use interface for object shapes, type for aliases, unions, etc.
+- **Type Aliases for Props**: Define dedicated types/interfaces for component props
+- **Shared Types**: Place reusable types in packages/types or src/types
+- **Generics**: Use for reusable components and functions
 
-### Import Resolution Process
-1. For each import statement in `.tsx` files:
-   - Verify the import path resolves to an existing file
-   - Search entire `src/` tree if import cannot be resolved
-   - Only update import paths, never modify component logic
+### Components
+- **Functional Components**: Prefer functional components with hooks over class components
+- **Component Composition**: Break down large components into smaller ones
+- **Prop Drilling**: Minimize; use Context API or state management for deeply nested data
+- **Conditional Rendering**: Use short-circuiting (&&), ternary operators, or helper components
 
-2. Import Path Rules:
-   - Never auto-create missing files
-   - Never delete existing imports
-   - Never comment out unresolved imports
-   - Only fix paths to existing files
-   - Report unresolved imports for manual review
+### Hooks
+- **Rules of Hooks**:
+  - Only call hooks at the top level
+  - Only call hooks from React function components or custom hooks
+- **Custom Hooks**: Abstract reusable logic into custom hooks prefixed with `use`
+- **useEffect**:
+  - Understand dependency arrays
+  - Use for side effects
+  - Provide cleanup functions
 
-### Required Reporting
-For every file modification:
-- List any unresolved `.tsx` imports found
-- Show before/after paths for any fixed imports
-- Request explicit permission before:
-  - Creating new files
-  - Suggesting new components
-  - Modifying multiple files
+### State Management
+- **Local State**: Use `useState` for component-specific state
+- **Global State**: Use Context API or dedicated libraries (Zustand, Jotai, Recoil)
 
-## UI CRUD Operations
+### Context API Usage
+- Use for passing data without prop drilling
+- Avoid for frequently updating state causing many re-renders
 
-### Requirements
-- Every module (trips, drivers, workshop, tyres, diesel, clients, inventory, etc.) must have:
-  - Create screens/forms
-  - Read/View screens
-  - Update/Edit screens
-  - Delete functionality
-- All CRUD operations must be properly connected to backend endpoints or Firestore collections
-- All modals, dialogs, and drawers must be reachable from the UI
-- No orphaned logic or components should exist in the codebase
+### JSX Guidelines
+- **Self-closing Tags**: Always self-close tags without children
+- **Fragment Usage**: Use `<>...</>` for multiple elements
+- **Readability**: Keep JSX concise; extract complex logic
+- **Accessibility**: Use semantic HTML elements
 
-### Validation Process
-1. For each module, verify existence of all CRUD screens
-2. Confirm each screen is accessible via sidebar or navigation
-3. Test data flow from UI to backend/Firestore
-4. Verify proper hooks and services are implemented
-5. Check for orphaned components or unreachable UI elements
+## Styling: Tailwind CSS
+- **Utility-First**: Prefer Tailwind's utility classes
+- **Component-Driven Styling**: Encapsulate Tailwind classes within components
+- **Configuration**: Manage via tailwind.config.js
+- **Atomic CSS**: Avoid creating overly specific CSS classes
 
-## Data Handling Patterns
+## Data Handling & API Interaction
 
-### Soft View Pattern Implementation
-All data views must implement the soft view pattern:
-- **Progressive data loading**: Show data as it becomes available
-- **Optimistic UI updates**: Update UI before server confirmation
-- **Fallback placeholder states**: Show skeletons, spinners, or placeholders during loading
-- **Real-time sync**: Connect to Firestore or other real-time data sources
+### Firebase (Firestore/Realtime Database)
+- **Firestore First**: Prefer Firestore for new features
+- **Security Rules**: Protect all database access with robust rules
+- **Indexes**: Create necessary Firestore indexes
+- **Transactions/Batches**: Use for atomic/multiple updates
+- **Data Models**: Define TypeScript interfaces for documents
+- **Cloud Functions**: Use for backend logic and sensitive operations
+- **Emulators**: Use extensively for local development
 
-### Enhanced Data Connectivity
-All data views and forms must:
-- Implement proper loading states with visual indicators
-- Handle offline/error scenarios gracefully
-- Use proper Firestore pagination for large datasets
-- Support real-time updates via `onSnapshot` or equivalent
-- Include proper data validation with user feedback
+### Express API Integration
+- **Centralized API Calls**: Create dedicated service files
+- **Error Handling**: Implement consistent error handling
+- **Request/Response Types**: Define interfaces for all API data
+- **Environment Variables**: Use .env files for API URLs and keys
 
-### Example Implementation
-```tsx
-function DataList() {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  
-  useEffect(() => {
-    // Initial loading state
-    setLoading(true);
-    
-    // Real-time subscription
-    const unsubscribe = db.collection('items')
-      .limit(20) // Pagination
-      .onSnapshot(
-        (snapshot) => {
-          // Progressive loading
-          const items = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-          setData(items);
-          setLoading(false);
-          setError(null);
-        },
-        (err) => {
-          // Error handling
-          setError(err);
-          setLoading(false);
-        }
-      );
-      
-    return () => unsubscribe();
-  }, []);
-  
-  // Optimistic update example
-  const updateItem = (id, newData) => {
-    // Update local state immediately
-    setData(prev => prev.map(item => 
-      item.id === id ? {...item, ...newData} : item
-    ));
-    
-    // Then update server
-    db.collection('items').doc(id).update(newData)
-      .catch(err => {
-        // Revert on error
-        setError(err);
-        // Refresh data from server
-        // ...
-      });
-  };
-  
-  if (loading && data.length === 0) {
-    return <SkeletonLoader />; // Fallback state
-  }
-  
-  if (error) {
-    return <ErrorDisplay error={error} retry={() => /* retry logic */} />;
-  }
-  
-  return (
-    <>
-      {data.map(item => (
-        <ItemCard key={item.id} item={item} onUpdate={updateItem} />
-      ))}
-      {loading && <LoadingMoreIndicator />} {/* Progressive loading indicator */}
-    </>
-  );
-}
-```
+### Soft View Pattern
+- **Progressive Data Loading**: Display data as it becomes available
+- **Optimistic UI Updates**: Update UI immediately, confirm with server later
+- **Fallback States**: Show skeletons/spinners during loading
+- **Real-time Sync**: Use Firestore's onSnapshot where applicable
+
+### Data Validation
+- **Client-Side**: Use react-hook-form with resolvers (yup, zod)
+- **Server-Side**: Implement comprehensive validation on API and Functions
+
+## Routing & Navigation
+- **React Router DOM**: Use for client-side routing
+- **Centralized Routes**: Define all routes centrally
+- **Layout Wrapper**: Wrap routes in main layout component
+- **Sidebar Integration**: Map sidebar entries to valid routes
+- **Route Guards**: Implement auth guards for protected routes
+- **Deep Linking**: Support deep linking and proper URL handling
 
 ## Performance Optimization
 
-### Code Splitting and Lazy Loading
-- Use React.lazy and Suspense for component-level code splitting
-- Implement route-based code splitting for all major routes
-- Defer loading of non-critical components
-
-```tsx
-// Route-based code splitting example
-const Dashboard = React.lazy(() => import('./pages/Dashboard'));
-const Settings = React.lazy(() => import('./pages/Settings'));
-
-function App() {
-  return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/settings" element={<Settings />} />
-      </Routes>
-    </Suspense>
-  );
-}
-```
+### Code Splitting & Lazy Loading
+- **React.lazy and Suspense**: Use for component-level code splitting
+- **Route-Based Splitting**: Implement for all major routes
+- **Dynamic Imports**: Use for non-critical components/modules
 
 ### Render Optimization
-- Implement memoization for expensive components using React.memo
-- Use useMemo for expensive calculations
-- Use useCallback for event handlers passed to child components
-- Avoid unnecessary re-renders by properly structuring component hierarchy
-- Implement virtualization for long lists using react-window or similar libraries
+- **Memoization**:
+  - `React.memo`: For expensive components
+  - `useMemo`: For expensive calculations
+  - `useCallback`: For memoizing event handlers
+- **Component Hierarchy**: Structure to minimize unnecessary re-renders
+- **Virtualization**: Use for long lists and large data tables
 
 ### Asset Optimization
-- Optimize images and use proper formats (WebP, SVG)
-- Implement responsive images with srcset
-- Use font-display: swap for web fonts
-- Implement proper caching strategies
+- **Images**: Optimize and use modern formats
+- **Fonts**: Use font-display: swap
+- **Caching**: Implement proper caching strategies
 
 ## Error Handling & Resilience
 
 ### Error Boundaries
-- Implement error boundaries at strategic levels in the component tree
-- Provide meaningful fallback UIs for different types of errors
-- Log errors to monitoring service
-
-```tsx
-class ErrorBoundary extends React.Component {
-  state = { hasError: false, error: null };
-  
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-  
-  componentDidCatch(error, info) {
-    // Log to error monitoring service
-    logErrorToService(error, info);
-  }
-  
-  render() {
-    if (this.state.hasError) {
-      return <ErrorFallback error={this.state.error} />;
-    }
-    return this.props.children;
-  }
-}
-```
+- **Strategic Placement**: Implement at key levels in component tree
+- **Fallback UI**: Provide meaningful fallback interfaces
+- **Logging**: Log errors to monitoring service
 
 ### Network Error Handling
-- Implement retry mechanisms for failed network requests
-- Provide clear feedback to users about network status
-- Cache critical data for offline access
-- Implement optimistic updates with rollback capability
+- **Retry Mechanisms**: Implement for transient failures
+- **User Feedback**: Provide clear status information
+- **Offline Access**: Cache critical data for offline use
+- **Optimistic Updates**: Include rollback capability
 
-### Data Validation
-- Validate all user inputs on the client side
-- Implement server-side validation as well
-- Provide clear error messages for validation failures
-- Use proper form state management (Formik, React Hook Form, etc.)
+## Testing
+All code must be adequately tested using the defined frameworks.
 
-## Component Integration & Deduplication
+### Unit Testing
+- **Frameworks**: Jest/Vitest with @testing-library/react
+- **Scope**: Test individual functions, components, hooks
+- **Coverage**: Focus on critical paths and complex logic
 
-### Component & Page Integration
-- Must merge duplicate components/pages without losing functionality
-- Use most robust version as base
-- Integrate all unique features, props, UI elements from duplicates
-- Preserve all business logic and data handling
-- Update imports and sidebar references after merge
-- Report all integrations with feature-by-feature summary
+### Integration Testing
+- **Scope**: Test interactions between components/services
+- **Frameworks**: Jest/Vitest with @testing-library/react
 
-### Integration Process
-1. Identify most feature-complete version
-2. Merge all unique elements from duplicates:
-   - Props and types
-   - UI components and elements
-   - Business logic and rules
-   - State management and data handling
-   - Comments and documentation
-3. Update all references to use merged version
-4. Report detailed integration summary
-5. Await approval before removing duplicates
+### End-to-End (E2E) Testing
+- **Frameworks**: Playwright and Cypress
+- **Scope**: Test critical user flows end-to-end
+- **CI/CD Integration**: Run as part of pipeline
 
-### What Is Permitted
-- Update sidebar/menu configs to maintain navigation
-- Merge duplicate components using robust-first approach
-- Integrate missing features from duplicates into base
-- Update import paths to consolidated components
-- Add props, types, or handlers to preserve functionality
-- Expand component depth or features during merge
+### Storybook
+- **Component Development**: Create stories for reusable components
+- **Documentation**: Document props, usage, variations
+- **Visual Regression**: Integrate with testing tools
 
-### What Is Not Permitted
-- Delete or comment out any code without explicit approval
-- Drop functionality during merge operations
-- Auto-resolve conflicts through deletion
-- Move/rename files without permission
-- Leave unmerged duplicates
-- Disable any UI or navigation elements
+## Mobile (Capacitor) Considerations
 
-## Permission & Authorization
+### Platform-Specific Code
+- Minimize platform-specific code. Use Capacitor plugins for native functionality.
 
-### Requirements
-- All UI elements must respect user role permissions
-- Implement proper access control at component level
-- Show/hide elements based on user authorization
-- Handle unauthorized access gracefully with proper feedback
+### Device APIs
+- Abstract Capacitor plugin calls into reusable hooks or services.
 
-### Implementation
-- Use context or hooks to provide permission information
-- Check permissions before rendering sensitive UI elements
-- Redirect unauthorized users with clear messaging
-- Implement role-based routing guards
+### UI Adaptability
+- Ensure responsive design and adaptable UI for various mobile screen sizes and orientations.
 
-```tsx
-function ProtectedComponent({ requiredRole, children }) {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return <LoginPrompt />;
-  }
-  
-  if (!hasRole(user, requiredRole)) {
-    return <UnauthorizedMessage />;
-  }
-  
-  return children;
-}
-```
+### Build Process
+- Understand and integrate Capacitor sync/build commands into the CI/CD pipeline.
 
-## Document Connections
+### Permissions
+- Handle mobile device permissions gracefully with user prompts.
 
-### Data Synchronization
-- All key data documents (Trip, Driver, Job Card, Tyre, Fleet) must be synchronized
-- Models/types must match between Firestore, backend, and frontend
-- Every Firestore collection used in code must be accessible via UI
-- All UI elements (download/export buttons, import forms) must connect to correct handlers
+## Cloud & Deployment (Firebase, Vercel, Azure)
 
-### UI Consistency
-- Auto-flag (and optionally create) any missing Edit, Delete, or View screen/component
-- Ensure all menu/CRUD screens work for the current user's permissions
-- Prevent any component from being "floating" in the codebase (every component must be used)
+### Firebase Hosting
+- Deploy frontend to Firebase Hosting for reliable serving.
 
-## Permitted & Prohibited Actions
+### Firebase Functions
+- Deploy backend functions to Firebase Cloud Functions.
 
-### Permitted Actions
-- Auto-edit imports
-- Generate missing components or placeholder screens (with approval)
-- Synchronize sidebar/menu configurations
-- Fix broken CRUD flows
-- Report major refactors or auto-generated screens
+### Vercel
+- Utilize Vercel for continuous deployment of specific frontend previews/staging environments, as indicated by vercel:prepare, vercel:deploy, vercel:preview scripts.
 
-### Prohibited Actions
-- Remove or disable any existing functional feature without explicit user approval
-- Break the architecture or change workflow logic not related to routing or UI/CRUD/data connectivity
-- Create new files without permission
-- Move existing files without permission
-- Update imports in multiple files without permission
-- Add new components or pages without permission
-- Remove duplicate files after merge without permission
-- Restructure component hierarchy without permission
-- Modify routing configuration without permission
+### Azure Services
+- If integrating with Azure (e.g., Azure Functions, Static Web Apps, other Azure services), ensure proper configuration, authentication, and adherence to Azure best practices. Use the Azure CLI where needed.
 
-## Additional Requirements
+### Environment Variables
+- All environment-specific configurations (API keys, URLs) must be managed through environment variables (.env files) and secured in deployment environments. Never hardcode sensitive information.
 
-- Implement soft view patterns for all data displays
-- Ensure proper loading states and error boundaries
-- Implement proper data caching and persistence strategies
-- Follow accessibility best practices (WCAG 2.1 AA)
-- Ensure responsive design for all screen sizes
-- Implement proper testing (unit, integration, e2e)
+### Service Workers
+- Ensure service workers are correctly registered, updated, and handle caching/offline capabilities effectively for your PWA.
+
+## Code Quality & Automation
+
+### Linting & Formatting
+- **ESLint**: All code must conform to ESLint rules
+- **Prettier**: All code must be formatted using Prettier
+- **Pre-commit Hooks**: Use husky and lint-staged for auto-fixing
+
+### Automated Import Management
+- Enable auto-organize imports and fix issues on save
+- Configure auto-updating of import paths when files move
+
+### Code Metrics
+- Monitor code complexity
+- Use analyze:unused script to identify unused files
+
+## AI-Assisted Development
+- **General AI Usage**: Guidelines for using AI tools
+- **Copilot/Gemini Directives**: Specific usage patterns
+- **Kilo Code Usage**: Integration with workflow
+
+## Accessibility (A11y)
+- Guidelines for making the application accessible to all users
+
+## Documentation & Comments
+- Standards for code comments and documentation
+
+## Review & Enforcement
+- Process for code review and standards enforcement
