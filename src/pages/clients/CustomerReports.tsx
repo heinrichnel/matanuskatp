@@ -72,14 +72,15 @@ const ClientAnalytics: React.FC<ClientAnalyticsProps> = ({
       };
     }
 
-    // Sort trips by date (descending order - newest first)
-    const sortedTrips = [...clientTrips].sort(
-      (a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+    // Sort trips by date (oldest to newest by start date)
+    const sortedByStartDate = [...clientTrips].sort(
+      (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
     );
 
-    const mostRecentTrip = sortedTrips[0];
-    const firstTrip = [...clientTrips].sort(
-      (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    // Find the first trip (oldest) and most recent trip
+    const firstTrip = sortedByStartDate[0];
+    const mostRecentTrip = [...clientTrips].sort(
+      (a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
     )[0];
 
     // Calculate metrics
@@ -97,7 +98,7 @@ const ClientAnalytics: React.FC<ClientAnalyticsProps> = ({
 
     // Calculate relationship length
     const firstTripDate = new Date(firstTrip.startDate);
-    const lastTripDate = new Date(lastTrip.endDate);
+    const lastTripDate = new Date(mostRecentTrip.endDate);
     const relationshipLength = Math.floor(
       (Date.now() - firstTripDate.getTime()) / (1000 * 60 * 60 * 24)
     );
@@ -139,13 +140,13 @@ const ClientAnalytics: React.FC<ClientAnalyticsProps> = ({
         completedTrips,
         flaggedTrips,
         averageTripValue,
-        lastTripDate: lastTrip.endDate,
+        lastTripDate: mostRecentTrip.endDate,
         firstTripDate: firstTrip.startDate,
         relationshipLength,
         revenueTrend,
         tripFrequency,
         onTimeDeliveryRate: 0.95, // Placeholder - would be calculated in a real implementation
-        mostRecentTrip: lastTrip,
+        mostRecentTrip: mostRecentTrip,
       };
     }
 
@@ -156,13 +157,13 @@ const ClientAnalytics: React.FC<ClientAnalyticsProps> = ({
       completedTrips,
       flaggedTrips,
       averageTripValue,
-      lastTripDate: lastTrip.endDate,
+      lastTripDate: mostRecentTrip.endDate,
       firstTripDate: firstTrip.startDate,
       relationshipLength,
       revenueTrend,
       tripFrequency: 0,
       onTimeDeliveryRate: 0, // Placeholder
-      mostRecentTrip: lastTrip,
+      mostRecentTrip: mostRecentTrip,
     };
   }, [selectedClient, trips]);
 
@@ -348,7 +349,6 @@ const ClientAnalytics: React.FC<ClientAnalyticsProps> = ({
                     )}
 
                     <div className="flex justify-between items-center">
-                      <p className="text-sm text-gray-600">Flags & Investigations</p>
                       <div className="flex items-center">
                         <Flag className="w-4 h-4 text-amber-500 mr-1" />
                         <p className="text-sm font-medium text-gray-900">
