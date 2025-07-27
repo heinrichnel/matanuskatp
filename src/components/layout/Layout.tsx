@@ -72,7 +72,8 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
     <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
       <Sidebar currentView={currentView} onNavigate={handleNavigate} />
       <main className="ml-64 p-6 pt-8">
-        <div className="max-w-6xl mx-auto w-full">
+        {/* widened container: no max-w cap, full width with responsive padding */}
+        <div className="mx-auto w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center mb-4">
             {/* The title should be rendered by the page component instead of here */}
             <div></div>

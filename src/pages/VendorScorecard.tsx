@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardContent } from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import SyncIndicator from '../components/ui/SyncIndicator';
-import { useAppContext } from '../context/AppContext';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React, { useEffect, useState } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import Button from "../components/ui/Button";
+import { Card, CardContent, CardHeader } from "../components/ui/Card";
+import SyncIndicator from "../components/ui/SyncIndicator";
+import { useAppContext } from "../context/AppContext";
 
 interface VendorScore {
   id: string;
@@ -21,10 +30,10 @@ const VendorScorecard: React.FC = () => {
   const { isLoading } = useAppContext();
   const [vendors, setVendors] = useState<VendorScore[]>([]);
   const [filteredVendors, setFilteredVendors] = useState<VendorScore[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [scoreThreshold, setScoreThreshold] = useState(70);
-  const [sortField, setSortField] = useState<keyof VendorScore>('overallScore');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sortField, setSortField] = useState<keyof VendorScore>("overallScore");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedVendor, setSelectedVendor] = useState<VendorScore | null>(null);
 
   // Mock data - in real app, this would come from Firestore
@@ -33,60 +42,60 @@ const VendorScorecard: React.FC = () => {
     setTimeout(() => {
       const mockData: VendorScore[] = [
         {
-          id: 'v1',
-          name: 'Premium Parts Ltd',
+          id: "v1",
+          name: "Premium Parts Ltd",
           reliabilityScore: 92,
           qualityScore: 88,
           costScore: 78,
           deliveryScore: 94,
           overallScore: 88,
-          lastOrderDate: '2023-10-15',
-          activeOrders: 3
+          lastOrderDate: "2023-10-15",
+          activeOrders: 3,
         },
         {
-          id: 'v2',
-          name: 'AutoZone Supplies',
+          id: "v2",
+          name: "AutoZone Supplies",
           reliabilityScore: 85,
           qualityScore: 90,
           costScore: 95,
           deliveryScore: 82,
           overallScore: 88,
-          lastOrderDate: '2023-10-22',
-          activeOrders: 1
+          lastOrderDate: "2023-10-22",
+          activeOrders: 1,
         },
         {
-          id: 'v3',
-          name: 'Truck Parts Express',
+          id: "v3",
+          name: "Truck Parts Express",
           reliabilityScore: 65,
           qualityScore: 72,
           costScore: 91,
           deliveryScore: 70,
           overallScore: 74,
-          lastOrderDate: '2023-09-30',
-          activeOrders: 0
+          lastOrderDate: "2023-09-30",
+          activeOrders: 0,
         },
         {
-          id: 'v4',
-          name: 'Fleet Maintenance Supplies',
+          id: "v4",
+          name: "Fleet Maintenance Supplies",
           reliabilityScore: 78,
           qualityScore: 80,
           costScore: 83,
           deliveryScore: 76,
           overallScore: 79,
-          lastOrderDate: '2023-10-18',
-          activeOrders: 2
+          lastOrderDate: "2023-10-18",
+          activeOrders: 2,
         },
         {
-          id: 'v5',
-          name: 'Diesel Components Inc',
+          id: "v5",
+          name: "Diesel Components Inc",
           reliabilityScore: 94,
           qualityScore: 96,
           costScore: 79,
           deliveryScore: 91,
           overallScore: 90,
-          lastOrderDate: '2023-10-25',
-          activeOrders: 4
-        }
+          lastOrderDate: "2023-10-25",
+          activeOrders: 4,
+        },
       ];
       setVendors(mockData);
       setFilteredVendors(mockData);
@@ -96,42 +105,42 @@ const VendorScorecard: React.FC = () => {
   useEffect(() => {
     // Apply filters and sorting
     let result = [...vendors];
-    
+
     // Apply search filter
     if (searchTerm) {
-      result = result.filter(v => v.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      result = result.filter((v) => v.name.toLowerCase().includes(searchTerm.toLowerCase()));
     }
-    
+
     // Apply score threshold
-    result = result.filter(v => v.overallScore >= scoreThreshold);
-    
+    result = result.filter((v) => v.overallScore >= scoreThreshold);
+
     // Apply sorting
     result.sort((a, b) => {
-      if (sortDirection === 'asc') {
+      if (sortDirection === "asc") {
         return a[sortField] > b[sortField] ? 1 : -1;
       } else {
         return a[sortField] < b[sortField] ? 1 : -1;
       }
     });
-    
+
     setFilteredVendors(result);
   }, [vendors, searchTerm, scoreThreshold, sortField, sortDirection]);
 
   const handleSort = (field: keyof VendorScore) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      setSortDirection('desc');
+      setSortDirection("desc");
     }
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-green-600';
-    if (score >= 80) return 'text-green-500';
-    if (score >= 70) return 'text-yellow-500';
-    if (score >= 60) return 'text-orange-500';
-    return 'text-red-500';
+    if (score >= 90) return "text-green-600";
+    if (score >= 80) return "text-green-500";
+    if (score >= 70) return "text-yellow-500";
+    if (score >= 60) return "text-orange-500";
+    return "text-red-500";
   };
 
   return (
@@ -179,25 +188,46 @@ const VendorScorecard: React.FC = () => {
               <table className="min-w-full bg-white">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="px-4 py-2 text-left cursor-pointer" onClick={onClick}>
+                    <th
+                      className="px-4 py-2 text-left cursor-pointer"
+                      onClick={() => handleSort("name")}
+                    >
                       Vendor Name
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
+                    <th
+                      className="px-4 py-2 text-center cursor-pointer"
+                      onClick={() => handleSort("reliabilityScore")}
+                    >
                       Reliability
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
+                    <th
+                      className="px-4 py-2 text-center cursor-pointer"
+                      onClick={() => handleSort("qualityScore")}
+                    >
                       Quality
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
+                    <th
+                      className="px-4 py-2 text-center cursor-pointer"
+                      onClick={() => handleSort("costScore")}
+                    >
                       Cost
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
+                    <th
+                      className="px-4 py-2 text-center cursor-pointer"
+                      onClick={() => handleSort("deliveryScore")}
+                    >
                       Delivery
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
+                    <th
+                      className="px-4 py-2 text-center cursor-pointer"
+                      onClick={() => handleSort("overallScore")}
+                    >
                       Overall Score
                     </th>
-                    <th className="px-4 py-2 text-center cursor-pointer" onClick={onClick}>
+                    <th
+                      className="px-4 py-2 text-center cursor-pointer"
+                      onClick={() => handleSort("activeOrders")}
+                    >
                       Active Orders
                     </th>
                     <th className="px-4 py-2 text-center">Actions</th>
@@ -207,7 +237,9 @@ const VendorScorecard: React.FC = () => {
                   {filteredVendors.map((vendor) => (
                     <tr key={vendor.id} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-2">{vendor.name}</td>
-                      <td className={`px-4 py-2 text-center ${getScoreColor(vendor.reliabilityScore)}`}>
+                      <td
+                        className={`px-4 py-2 text-center ${getScoreColor(vendor.reliabilityScore)}`}
+                      >
                         {vendor.reliabilityScore}%
                       </td>
                       <td className={`px-4 py-2 text-center ${getScoreColor(vendor.qualityScore)}`}>
@@ -216,20 +248,22 @@ const VendorScorecard: React.FC = () => {
                       <td className={`px-4 py-2 text-center ${getScoreColor(vendor.costScore)}`}>
                         {vendor.costScore}%
                       </td>
-                      <td className={`px-4 py-2 text-center ${getScoreColor(vendor.deliveryScore)}`}>
+                      <td
+                        className={`px-4 py-2 text-center ${getScoreColor(vendor.deliveryScore)}`}
+                      >
                         {vendor.deliveryScore}%
                       </td>
-                      <td className={`px-4 py-2 text-center font-bold ${getScoreColor(vendor.overallScore)}`}>
+                      <td
+                        className={`px-4 py-2 text-center font-bold ${getScoreColor(vendor.overallScore)}`}
+                      >
                         {vendor.overallScore}%
                       </td>
+                      <td className="px-4 py-2 text-center">{vendor.activeOrders}</td>
                       <td className="px-4 py-2 text-center">
-                        {vendor.activeOrders}
-                      </td>
-                      <td className="px-4 py-2 text-center">
-                        <Button 
-                          variant="outline" 
-                          className="text-sm" 
-                          onClick={onClick}
+                        <Button
+                          variant="outline"
+                          className="text-sm"
+                          onClick={() => setSelectedVendor(vendor)}
                         >
                           View Details
                         </Button>
@@ -248,13 +282,15 @@ const VendorScorecard: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      
+
       {selectedVendor && (
         <Card>
           <CardHeader>
             <div className="flex justify-between">
               <h3 className="text-lg font-medium">{selectedVendor.name} - Performance Details</h3>
-              <Button variant="outline" onClick={onClick}>Close</Button>
+              <Button variant="outline" onClick={() => setSelectedVendor(null)}>
+                Close
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -265,30 +301,30 @@ const VendorScorecard: React.FC = () => {
                   <BarChart
                     data={[
                       {
-                        category: 'Reliability',
+                        category: "Reliability",
                         score: selectedVendor.reliabilityScore,
-                        fill: '#10B981'
+                        fill: "#10B981",
                       },
                       {
-                        category: 'Quality',
+                        category: "Quality",
                         score: selectedVendor.qualityScore,
-                        fill: '#3B82F6'
+                        fill: "#3B82F6",
                       },
                       {
-                        category: 'Cost',
+                        category: "Cost",
                         score: selectedVendor.costScore,
-                        fill: '#8B5CF6'
+                        fill: "#8B5CF6",
                       },
                       {
-                        category: 'Delivery',
+                        category: "Delivery",
                         score: selectedVendor.deliveryScore,
-                        fill: '#EC4899'
+                        fill: "#EC4899",
                       },
                       {
-                        category: 'Overall',
+                        category: "Overall",
                         score: selectedVendor.overallScore,
-                        fill: '#F59E0B'
-                      }
+                        fill: "#F59E0B",
+                      },
                     ]}
                     margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                   >
@@ -321,8 +357,10 @@ const VendorScorecard: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Status</p>
-                      <p className={`font-medium ${selectedVendor.overallScore >= 80 ? 'text-green-500' : 'text-yellow-500'}`}>
-                        {selectedVendor.overallScore >= 80 ? 'Preferred Vendor' : 'Standard Vendor'}
+                      <p
+                        className={`font-medium ${selectedVendor.overallScore >= 80 ? "text-green-500" : "text-yellow-500"}`}
+                      >
+                        {selectedVendor.overallScore >= 80 ? "Preferred Vendor" : "Standard Vendor"}
                       </p>
                     </div>
                   </div>
@@ -341,9 +379,9 @@ const VendorScorecard: React.FC = () => {
                       {selectedVendor.deliveryScore < 75 && (
                         <li className="text-sm">Discuss delivery performance issues</li>
                       )}
-                      {Object.values(selectedVendor).every(val => typeof val === 'number' ? val >= 75 : true) && (
-                        <li className="text-sm text-green-500">No immediate actions needed</li>
-                      )}
+                      {Object.values(selectedVendor).every((val) =>
+                        typeof val === "number" ? val >= 75 : true
+                      ) && <li className="text-sm text-green-500">No immediate actions needed</li>}
                     </ul>
                   </div>
                 </div>
