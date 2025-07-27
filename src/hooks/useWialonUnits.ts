@@ -7,8 +7,11 @@ export interface WialonUnitData {
   pos?: { x: number; y: number; s: number; t: number };
 }
 
-const WIALON_API_URL = getEnvVar("VITE_WIALON_API_URL", "https://hst-api.wialon.com");
-const TOKEN = getEnvVar('VITE_WIALON_SESSION_TOKEN', '');
+const WIALON_API_URL = getEnvVar(
+  "VITE_WIALON_API_URL",
+  "https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en"
+);
+const TOKEN = getEnvVar("VITE_WIALON_SESSION_TOKEN", "");
 
 export function useWialonUnits(sdkReady: boolean = true) {
   const [units, setUnits] = useState<WialonUnitData[]>([]);
@@ -31,8 +34,7 @@ export function useWialonUnits(sdkReady: boolean = true) {
 
     function fetchUnits() {
       const flags =
-        window.wialon.item.Item.dataFlag.base |
-        window.wialon.item.Unit.dataFlag.lastMessage;
+        window.wialon.item.Item.dataFlag.base | window.wialon.item.Unit.dataFlag.lastMessage;
 
       sess.loadLibrary("itemIcon");
       sess.updateDataFlags(
