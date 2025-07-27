@@ -81,3 +81,5 @@ client_secret_*.json
 !.env.example
 *.keystore
 *.jks
+
+ENV_SETUP_GUIDE.md

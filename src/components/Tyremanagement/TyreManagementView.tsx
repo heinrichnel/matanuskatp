@@ -287,10 +287,14 @@ const TyreManagementView: React.FC<TyreManagementViewProps> = ({ activeTab = "in
           Tyre Management System
         </h2>
         <div className="flex space-x-2">
-          <Button variant="outline" icon={<Download className="w-4 h-4" />} onClick={onClick}>
+          <Button
+            variant="outline"
+            icon={<Download className="w-4 h-4" />}
+            onClick={handleExportClick}
+          >
             Export
           </Button>
-          <Button icon={<Plus className="w-4 h-4" />} onClick={onClick}>
+          <Button icon={<Plus className="w-4 h-4" />} onClick={handleAddTyreClick}>
             Add Tyre Stock
           </Button>
         </div>
@@ -448,7 +452,7 @@ const TyreManagementView: React.FC<TyreManagementViewProps> = ({ activeTab = "in
                     variant="outline"
                     className="ml-auto"
                     icon={<Filter className="w-4 h-4" />}
-                    onClick={onClick}
+                    onClick={handleClearFiltersClick}
                   >
                     Clear
                   </Button>
@@ -522,7 +526,10 @@ const TyreManagementView: React.FC<TyreManagementViewProps> = ({ activeTab = "in
                           className={`hover:bg-gray-50 ${tyre.quantity <= tyre.reorderLevel ? "bg-red-50" : ""}`}
                         >
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <button className="flex items-center" onClick={onClick}>
+                            <button
+                              className="flex items-center"
+                              onClick={() => handleExpandTyreClick(tyre.id)}
+                            >
                               {expandedTyre === tyre.id ? (
                                 <ChevronDown className="w-4 h-4 mr-2 text-gray-400" />
                               ) : (
@@ -692,7 +699,10 @@ const TyreManagementView: React.FC<TyreManagementViewProps> = ({ activeTab = "in
                           <p className="font-medium">{entry.tyreId}</p>
                           <p className="text-sm text-gray-600">Status: {entry.status}</p>
                         </div>
-                        <Button size="sm" onClick={onClick}>
+                        <Button
+                          size="sm"
+                          onClick={() => handleMoveTyreClick("VehicleTyreStore", entry)}
+                        >
                           Move
                         </Button>
                       </div>
@@ -736,7 +746,7 @@ const TyreManagementView: React.FC<TyreManagementViewProps> = ({ activeTab = "in
             </div>
 
             <div className="mt-6 text-center">
-              <Button variant="outline" onClick={onClick}>
+              <Button variant="outline" onClick={handleInspectTyreClick}>
                 Inspect Tyre (Demo)
               </Button>
             </div>
@@ -1170,7 +1180,10 @@ const TyreManagementView: React.FC<TyreManagementViewProps> = ({ activeTab = "in
                       <p className="font-medium">{entry.tyreId}</p>
                       <p className="text-sm text-gray-600">Status: {entry.status}</p>
                     </div>
-                    <Button size="sm" onClick={onClick}>
+                    <Button
+                      size="sm"
+                      onClick={() => handleMoveTyreClick("VehicleTyreStore", entry)}
+                    >
                       Move
                     </Button>
                   </div>
