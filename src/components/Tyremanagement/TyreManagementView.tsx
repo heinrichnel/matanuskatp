@@ -20,7 +20,8 @@ import Modal from "../ui/Modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
 
 // Import type utilities from the tyreConstants file
-import MoveTyreModal from "@/components/Tyremanagement/MoveTyreModal";
+import MoveTyreModal from "@/components/Models/Tyre/MoveTyreModal";
+import TyreForm from "@/components/Models/Tyre/TyreForm";
 import { useTyreStores } from "@/context/TyreStoresContext";
 import type { StockEntry } from "@/types/tyre";
 import { getUniqueTyreBrands } from "../../utils/tyreConstants";
@@ -181,15 +182,42 @@ const TyreManagementView: React.FC<TyreManagementViewProps> = ({ activeTab = "in
     });
   };
 
+  // Button click handlers
+  const handleExportClick = () => {
+    console.log("Export clicked");
+    // Add export functionality here
+  };
+
+  const handleAddTyreClick = () => {
+    setShowTyreForm(true);
+  };
+
+  const handleClearFiltersClick = () => {
+    clearFilters();
+  };
+
+  const handleExpandTyreClick = (id: string) => {
+    toggleExpand(id);
+  };
+
+  const handleMoveTyreClick = (storeId: string, entry: StockEntry) => {
+    openMoveModal(storeId, entry);
+  };
+
+  const handleInspectTyreClick = () => {
+    openInspectionModal("demo-position", "demo-fleet");
+  };
+
   // Toggle expanded view for a tyre
   const toggleExpand = (id: string) => {
     setExpandedTyre(expandedTyre === id ? null : id);
   };
 
   // Handlers for inventory and inspection
-  const handleTyreSubmit = (tyre: any) => {
+  const handleTyreSubmit = async (tyre: any): Promise<void> => {
     console.log("New tyre submitted", tyre);
     setShowTyreForm(false);
+    return Promise.resolve();
   };
   const handleInspectionSubmit = (inspection: any) => {
     console.log("Inspection submitted", inspection);

@@ -215,7 +215,7 @@ const TyreInspection: React.FC = () => {
         cost: tyre.purchaseDetails.cost?.toString() ?? "",
         estimatedLifespan: tyre.kmRunLimit?.toString() ?? "",
         currentMileage:
-          tyre.milesRun?.toString() ?? tyre.installation?.mileageAtInstallation?.toString() ?? "0",
+          tyre.kmRun?.toString() ?? tyre.installation?.mileageAtInstallation?.toString() ?? "0",
       }));
       if (tyre.brand) {
         const brandTyres = getTyresByBrand(tyre.brand);
@@ -534,7 +534,7 @@ const TyreInspection: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={onClick}
+                      onClick={handleToggleInspectionHistory}
                       icon={<ShoppingBag className="w-4 h-4" />}
                     >
                       {showInspectionHistory ? "Hide History" : "View History"}
@@ -690,7 +690,7 @@ const TyreInspection: React.FC = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={onClick}
+                        onClick={handleToggleNewTyreFields}
                         icon={<ShoppingBag className="w-4 h-4" />}
                         size="sm"
                       >
@@ -892,7 +892,7 @@ const TyreInspection: React.FC = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={onClick}
+                        onClick={handlePhotoUpload}
                         icon={<Camera className="w-4 h-4" />}
                         size="sm"
                       >
@@ -901,7 +901,7 @@ const TyreInspection: React.FC = () => {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={onClick}
+                        onClick={handlePhotoUpload}
                         icon={<Upload className="w-4 h-4" />}
                         size="sm"
                       >
@@ -956,7 +956,7 @@ const TyreInspection: React.FC = () => {
                     <Button
                       type="button"
                       variant="primary"
-                      onClick={onClick}
+                      onClick={handleSubmit}
                       icon={<Save className="w-4 h-4" />}
                       isLoading={isSubmitting}
                       disabled={
@@ -1176,7 +1176,7 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
       </div>
 
       <Button
-        onClick={onClick}
+        onClick={handleSave}
         className="w-full"
         disabled={!inspectionData.vehicleId || !inspectionData.position}
       >
