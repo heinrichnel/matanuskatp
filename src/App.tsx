@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+// FIXED: Removed 'BrowserRouter as Router' from this import
+import { Route, Routes } from "react-router-dom";
 
 // Context Providers
 import { AppProvider } from "./context/AppContext";
@@ -290,268 +291,268 @@ const App: React.FC = () => {
 
                       {renderUIConnector()}
 
-                      <Router>
-                        <Routes>
+                      {/* FIXED: The extra <Router> component was removed from here. */}
+                      {/* The <Routes> component now correctly uses the router from main.tsx */}
+                      <Routes>
+                        <Route
+                          path="/*"
+                          element={
+                            <Layout
+                              setShowTripForm={setShowTripForm}
+                              setEditingTrip={setEditingTrip}
+                            />
+                          }
+                        >
+                          {/* ==== Main Navigation ==== */}
+                          <Route path="/" element={<DashboardPage />} />
+                          <Route path="/dashboard" element={<DashboardPage />} />
+
+                          {/* ==== TRIPS ==== */}
+                          <Route path="/trips" element={<TripManagementPage />} />
+                          <Route path="/trips/active" element={<ActiveTripsPage />} />
+                          <Route path="/trips/:id" element={<TripDetailsPage />} />
+                          <Route path="/trips/timeline" element={<TripTimelinePage />} />
+                          <Route path="/trips/planning" element={<RoutePlanningPage />} />
+                          <Route path="/trips/optimization" element={<RouteOptimizationPage />} />
+                          <Route path="/trips/load-planning" element={<LoadPlanningPage />} />
+                          <Route path="/trips/calendar" element={<TripCalendarPage />} />
+                          <Route path="/trips/add" element={<AddTripPage />} />
+                          <Route path="/trips/workflow" element={<MainTripWorkflow />} />
+                          <Route path="/trips/map" element={<FleetLocationMapPage />} />
                           <Route
-                            path="/*"
+                            path="/trips/active-dashboard"
+                            element={<ActiveTrips displayCurrency="ZAR" />}
+                          />
+                          <Route
+                            path="/trips/completed-dashboard"
+                            element={<CompletedTrips displayCurrency="ZAR" />}
+                          />
+                          <Route path="/trips/flags" element={<FlagsInvestigations />} />
+                          <Route path="/trips/dashboard" element={<TripDashboard />} />
+                          <Route
+                            path="/trips/driver-performance"
+                            element={<GenericPlaceholderPage title="Driver Performance" />}
+                          />
+                          <Route
+                            path="/trips/cost-analysis"
+                            element={<GenericPlaceholderPage title="Trip Cost Analysis" />}
+                          />
+                          <Route
+                            path="/trips/utilization"
+                            element={<GenericPlaceholderPage title="Fleet Utilization" />}
+                          />
+                          <Route
+                            path="/trips/confirmations"
+                            element={<GenericPlaceholderPage title="Delivery Confirmations" />}
+                          />
+                          <Route
+                            path="/trips/new-load-confirmation"
+                            element={<CreateLoadConfirmationPage />}
+                          />
+                          <Route
+                            path="/trips/templates"
+                            element={<GenericPlaceholderPage title="Trip Templates" />}
+                          />
+                          <Route
+                            path="/trips/reports"
+                            element={<GenericPlaceholderPage title="Trip Reports" />}
+                          />
+                          <Route
+                            path="/trips/maps"
+                            element={<GenericPlaceholderPage title="Trip Maps" />}
+                          />
+                          <Route
+                            path="/trips/fleet-location"
+                            element={<GenericPlaceholderPage title="Fleet Location" />}
+                          />
+                          <Route
+                            path="/trips/wialon-tracking"
+                            element={<GenericPlaceholderPage title="Wialon Tracking" />}
+                          />
+
+                          {/* ==== INVOICES ==== */}
+                          <Route path="/invoices" element={<InvoiceManagementPage />} />
+                          <Route path="/invoices/templates" element={<InvoiceTemplatesPage />} />
+                          <Route path="/invoices/dashboard" element={<InvoiceDashboard />} />
+                          <Route path="/invoices/builder" element={<InvoiceBuilder />} />
+                          <Route path="/invoices/approval" element={<InvoiceApprovalFlow />} />
+                          <Route path="/invoices/tax-export" element={<TaxReportExport />} />
+                          <Route path="/invoices/pending" element={<PendingInvoicesPage />} />
+                          <Route path="/invoices/paid" element={<PaidInvoicesPage />} />
+                          <Route path="/invoices/new" element={<CreateInvoicePage />} />
+                          <Route path="/invoices/new-quote" element={<CreateQuotePage />} />
+                          <Route
+                            path="/invoices/batch-processing"
+                            element={<GenericPlaceholderPage title="Batch Invoice Processing" />}
+                          />
+                          <Route
+                            path="/invoices/reconciliation"
+                            element={<GenericPlaceholderPage title="Invoice Reconciliation" />}
+                          />
+                          <Route
+                            path="/invoices/archives"
+                            element={<GenericPlaceholderPage title="Invoice Archives" />}
+                          />
+                          <Route
+                            path="/invoices/reports"
+                            element={<GenericPlaceholderPage title="Invoice Reports" />}
+                          />
+
+                          {/* ==== DIESEL ==== */}
+                          <Route path="/diesel" element={<DieselManagementPage />} />
+                          <Route path="/diesel/add-fuel" element={<AddFuelEntryPage />} />
+                          <Route
+                            path="/diesel/dashboard"
+                            element={<DieselDashboardComponent />}
+                          />
+                          <Route path="/diesel/logs" element={<FuelLogs />} />
+                          <Route path="/diesel/card-manager" element={<FuelCardManager />} />
+                          <Route
+                            path="/diesel/theft-detection"
+                            element={<FuelTheftDetection />}
+                          />
+                          <Route
+                            path="/diesel/carbon-footprint"
+                            element={<CarbonFootprintCalc />}
+                          />
+                          <Route
+                            path="/diesel/driver-behavior"
+                            element={<DriverFuelBehavior />}
+                          />
+                          <Route path="/diesel/efficiency" element={<FuelEfficiencyReport />} />
+                          <Route path="/diesel/budget" element={<BudgetPlanning />} />
+
+                          {/* ==== CLIENTS ==== */}
+                          <Route path="/clients" element={<ClientManagementPage />} />
+                          <Route path="/clients/new" element={<AddNewCustomer />} />
+                          <Route
+                            path="/clients/active"
                             element={
-                              <Layout
-                                setShowTripForm={setShowTripForm}
-                                setEditingTrip={setEditingTrip}
+                              <ActiveCustomers
+                                clients={[]}
+                                searchTerm=""
+                                onSelectClient={() => {}}
+                                onAddClient={() => {}}
                               />
                             }
-                          >
-                            {/* ==== Main Navigation ==== */}
-                            <Route path="/" element={<DashboardPage />} />
-                            <Route path="/dashboard" element={<DashboardPage />} />
+                          />
+                          <Route
+                            path="/clients/reports"
+                            element={
+                              <CustomerReports
+                                clients={[]}
+                                trips={[]}
+                                selectedClientId={null}
+                                onSelectClient={() => {}}
+                              />
+                            }
+                          />
+                          <Route
+                            path="/customers/retention"
+                            element={
+                              <RetentionMetrics
+                                clients={[]}
+                                selectedClientId={null}
+                                onSelectClient={() => {}}
+                              />
+                            }
+                          />
+                          <Route path="/clients/relationships" element={<ClientNetworkMap />} />
+                          <Route path="/clients/network" element={<ClientNetworkMap />} />
 
-                            {/* ==== TRIPS ==== */}
-                            <Route path="/trips" element={<TripManagementPage />} />
-                            <Route path="/trips/active" element={<ActiveTripsPage />} />
-                            <Route path="/trips/:id" element={<TripDetailsPage />} />
-                            <Route path="/trips/timeline" element={<TripTimelinePage />} />
-                            <Route path="/trips/planning" element={<RoutePlanningPage />} />
-                            <Route path="/trips/optimization" element={<RouteOptimizationPage />} />
-                            <Route path="/trips/load-planning" element={<LoadPlanningPage />} />
-                            <Route path="/trips/calendar" element={<TripCalendarPage />} />
-                            <Route path="/trips/add" element={<AddTripPage />} />
-                            <Route path="/trips/workflow" element={<MainTripWorkflow />} />
-                            <Route path="/trips/map" element={<FleetLocationMapPage />} />
-                            <Route
-                              path="/trips/active-dashboard"
-                              element={<ActiveTrips displayCurrency="ZAR" />}
-                            />
-                            <Route
-                              path="/trips/completed-dashboard"
-                              element={<CompletedTrips displayCurrency="ZAR" />}
-                            />
-                            <Route path="/trips/flags" element={<FlagsInvestigations />} />
-                            <Route path="/trips/dashboard" element={<TripDashboard />} />
-                            <Route
-                              path="/trips/driver-performance"
-                              element={<GenericPlaceholderPage title="Driver Performance" />}
-                            />
-                            <Route
-                              path="/trips/cost-analysis"
-                              element={<GenericPlaceholderPage title="Trip Cost Analysis" />}
-                            />
-                            <Route
-                              path="/trips/utilization"
-                              element={<GenericPlaceholderPage title="Fleet Utilization" />}
-                            />
-                            <Route
-                              path="/trips/confirmations"
-                              element={<GenericPlaceholderPage title="Delivery Confirmations" />}
-                            />
-                            <Route
-                              path="/trips/new-load-confirmation"
-                              element={<CreateLoadConfirmationPage />}
-                            />
-                            <Route
-                              path="/trips/templates"
-                              element={<GenericPlaceholderPage title="Trip Templates" />}
-                            />
-                            <Route
-                              path="/trips/reports"
-                              element={<GenericPlaceholderPage title="Trip Reports" />}
-                            />
-                            <Route
-                              path="/trips/maps"
-                              element={<GenericPlaceholderPage title="Trip Maps" />}
-                            />
-                            <Route
-                              path="/trips/fleet-location"
-                              element={<GenericPlaceholderPage title="Fleet Location" />}
-                            />
-                            <Route
-                              path="/trips/wialon-tracking"
-                              element={<GenericPlaceholderPage title="Wialon Tracking" />}
-                            />
+                          {/* ==== DRIVERS ==== */}
+                          <Route path="/drivers" element={<DriverManagementPage />} />
+                          <Route path="/drivers/new" element={<AddNewDriver />} />
+                          <Route path="/drivers/profiles" element={<DriverProfiles />} />
+                          <Route path="/drivers/profiles/:id" element={<DriverDetailsPage />} />
+                          <Route path="/drivers/profiles/:id/edit" element={<EditDriver />} />
+                          <Route path="/drivers/licenses" element={<LicenseManagement />} />
+                          <Route path="/drivers/training" element={<TrainingRecords />} />
+                          <Route path="/drivers/performance" element={<PerformanceAnalytics />} />
+                          <Route path="/drivers/scheduling" element={<DriverScheduling />} />
+                          <Route path="/drivers/hours" element={<HoursOfService />} />
+                          <Route path="/drivers/violations" element={<DriverBehaviorPage />} />
+                          <Route path="/drivers/rewards" element={<DriverRewards />} />
+                          <Route path="/drivers/behavior" element={<DriverBehaviorPage />} />
+                          <Route
+                            path="/drivers/safety-scores"
+                            element={<GenericPlaceholderPage title="Safety Scores" />}
+                          />
+                          <Route path="/drivers/dashboard" element={<DriverDashboard />} />
 
-                            {/* ==== INVOICES ==== */}
-                            <Route path="/invoices" element={<InvoiceManagementPage />} />
-                            <Route path="/invoices/templates" element={<InvoiceTemplatesPage />} />
-                            <Route path="/invoices/dashboard" element={<InvoiceDashboard />} />
-                            <Route path="/invoices/builder" element={<InvoiceBuilder />} />
-                            <Route path="/invoices/approval" element={<InvoiceApprovalFlow />} />
-                            <Route path="/invoices/tax-export" element={<TaxReportExport />} />
-                            <Route path="/invoices/pending" element={<PendingInvoicesPage />} />
-                            <Route path="/invoices/paid" element={<PaidInvoicesPage />} />
-                            <Route path="/invoices/new" element={<CreateInvoicePage />} />
-                            <Route path="/invoices/new-quote" element={<CreateQuotePage />} />
-                            <Route
-                              path="/invoices/batch-processing"
-                              element={<GenericPlaceholderPage title="Batch Invoice Processing" />}
-                            />
-                            <Route
-                              path="/invoices/reconciliation"
-                              element={<GenericPlaceholderPage title="Invoice Reconciliation" />}
-                            />
-                            <Route
-                              path="/invoices/archives"
-                              element={<GenericPlaceholderPage title="Invoice Archives" />}
-                            />
-                            <Route
-                              path="/invoices/reports"
-                              element={<GenericPlaceholderPage title="Invoice Reports" />}
-                            />
+                          {/* ==== WORKSHOP ==== */}
+                          <Route path="/workshop" element={<WorkshopPage />} />
+                          <Route path="/workshop/vendors" element={<VendorPage />} />
+                          <Route
+                            path="/workshop/purchase-orders"
+                            element={<PurchaseOrderPage />}
+                          />
+                          <Route
+                            path="/workshop/stock-inventory"
+                            element={<StockInventoryPage />}
+                          />
+                          {/* TODO: Implement FleetTable component */}
+                          <Route path="/workshop/qr-generator" element={<QRGenerator />} />
+                          <Route path="/workshop/qr-scanner" element={<QRScannerPage />} />
+                          <Route path="/workshop/qr-generator" element={<QRGenerator />} />
+                          <Route
+                            path="/workshop/inspections"
+                            element={<InspectionHistoryPage />}
+                          />
+                          <Route path="/workshop/job-cards" element={<JobCardManagement />} />
+                          <Route path="/workshop/faults" element={<FaultTracking />} />
+                          <Route path="/workshop/tyres" element={<TyreManagementPage />} />
+                          <Route
+                            path="/workshop/tyres/reference-data"
+                            element={<TyreReferenceManagerPage />}
+                          />
+                          <Route
+                            path="/workshop/parts-ordering"
+                            element={<PartsOrderingPage />}
+                          />
+                          <Route
+                            path="/workshop/vehicle-inspection"
+                            element={<VehicleInspectionPage />}
+                          />
 
-                            {/* ==== DIESEL ==== */}
-                            <Route path="/diesel" element={<DieselManagementPage />} />
-                            <Route path="/diesel/add-fuel" element={<AddFuelEntryPage />} />
-                            <Route
-                              path="/diesel/dashboard"
-                              element={<DieselDashboardComponent />}
-                            />
-                            <Route path="/diesel/logs" element={<FuelLogs />} />
-                            <Route path="/diesel/card-manager" element={<FuelCardManager />} />
-                            <Route
-                              path="/diesel/theft-detection"
-                              element={<FuelTheftDetection />}
-                            />
-                            <Route
-                              path="/diesel/carbon-footprint"
-                              element={<CarbonFootprintCalc />}
-                            />
-                            <Route
-                              path="/diesel/driver-behavior"
-                              element={<DriverFuelBehavior />}
-                            />
-                            <Route path="/diesel/efficiency" element={<FuelEfficiencyReport />} />
-                            <Route path="/diesel/budget" element={<BudgetPlanning />} />
+                          {/* ==== TYRES ==== */}
+                          <Route path="/tyres" element={<TyreManagementPage />} />
+                          <Route path="/tyres/mobile" element={<TyreMobilePage />} />
+                          <Route
+                            path="/tyres/mobile/inspection/:tyreId?"
+                            element={<TyreMobilePage mode="inspection" />}
+                          />
+                          <Route
+                            path="/tyres/mobile/scanner"
+                            element={<TyreMobilePage mode="scanner" />}
+                          />
+                          <Route path="/tyres/add" element={<AddNewTyrePage />} />
+                          <Route
+                            path="/tyres/reference-data"
+                            element={<TyreReferenceManagerPage />}
+                          />
+                          <Route path="/tyres/fleet-map" element={<TyreFleetMap />} />
+                          <Route path="/tyres/history" element={<TyreHistoryPage />} />
+                          <Route path="/tyres/dashboard" element={<TyrePerformanceDashboard />} />
 
-                            {/* ==== CLIENTS ==== */}
-                            <Route path="/clients" element={<ClientManagementPage />} />
-                            <Route path="/clients/new" element={<AddNewCustomer />} />
-                            <Route
-                              path="/clients/active"
-                              element={
-                                <ActiveCustomers
-                                  clients={[]}
-                                  searchTerm=""
-                                  onSelectClient={() => {}}
-                                  onAddClient={() => {}}
-                                />
-                              }
-                            />
-                            <Route
-                              path="/clients/reports"
-                              element={
-                                <CustomerReports
-                                  clients={[]}
-                                  trips={[]}
-                                  selectedClientId={null}
-                                  onSelectClient={() => {}}
-                                />
-                              }
-                            />
-                            <Route
-                              path="/customers/retention"
-                              element={
-                                <RetentionMetrics
-                                  clients={[]}
-                                  selectedClientId={null}
-                                  onSelectClient={() => {}}
-                                />
-                              }
-                            />
-                            <Route path="/clients/relationships" element={<ClientNetworkMap />} />
-                            <Route path="/clients/network" element={<ClientNetworkMap />} />
+                          {/* ==== INVENTORY ==== */}
+                          <Route path="/inventory" element={<InventoryPage />} />
+                          <Route path="/inventory/dashboard" element={<InventoryDashboard />} />
+                          <Route path="/inventory/stock" element={<PartsInventoryPage />} />
+                          <Route path="/inventory/ordering" element={<PartsOrderingPage />} />
+                          <Route path="/inventory/receive" element={<ReceivePartsPage />} />
+                          <Route path="/inventory/reports" element={<InventoryReportsPage />} />
 
-                            {/* ==== DRIVERS ==== */}
-                            <Route path="/drivers" element={<DriverManagementPage />} />
-                            <Route path="/drivers/new" element={<AddNewDriver />} />
-                            <Route path="/drivers/profiles" element={<DriverProfiles />} />
-                            <Route path="/drivers/profiles/:id" element={<DriverDetailsPage />} />
-                            <Route path="/drivers/profiles/:id/edit" element={<EditDriver />} />
-                            <Route path="/drivers/licenses" element={<LicenseManagement />} />
-                            <Route path="/drivers/training" element={<TrainingRecords />} />
-                            <Route path="/drivers/performance" element={<PerformanceAnalytics />} />
-                            <Route path="/drivers/scheduling" element={<DriverScheduling />} />
-                            <Route path="/drivers/hours" element={<HoursOfService />} />
-                            <Route path="/drivers/violations" element={<DriverBehaviorPage />} />
-                            <Route path="/drivers/rewards" element={<DriverRewards />} />
-                            <Route path="/drivers/behavior" element={<DriverBehaviorPage />} />
-                            <Route
-                              path="/drivers/safety-scores"
-                              element={<GenericPlaceholderPage title="Safety Scores" />}
-                            />
-                            <Route path="/drivers/dashboard" element={<DriverDashboard />} />
+                          {/* === EXAMPLES ===
+                    <Route path="/examples/clients" element={<ClientSelectionExample />} />
 
-                            {/* === WORKSHOP === */}
-                            <Route path="/workshop" element={<WorkshopPage />} />
-                            <Route path="/workshop/vendors" element={<VendorPage />} />
-                            <Route
-                              path="/workshop/purchase-orders"
-                              element={<PurchaseOrderPage />}
-                            />
-                            <Route
-                              path="/workshop/stock-inventory"
-                              element={<StockInventoryPage />}
-                            />
-                            {/* TODO: Implement FleetTable component */}
-                            <Route path="/workshop/qr-generator" element={<QRGenerator />} />
-                            <Route path="/workshop/qr-scanner" element={<QRScannerPage />} />
-                            <Route path="/workshop/qr-generator" element={<QRGenerator />} />
-                            <Route
-                              path="/workshop/inspections"
-                              element={<InspectionHistoryPage />}
-                            />
-                            <Route path="/workshop/job-cards" element={<JobCardManagement />} />
-                            <Route path="/workshop/faults" element={<FaultTracking />} />
-                            <Route path="/workshop/tyres" element={<TyreManagementPage />} />
-                            <Route
-                              path="/workshop/tyres/reference-data"
-                              element={<TyreReferenceManagerPage />}
-                            />
-                            <Route
-                              path="/workshop/parts-ordering"
-                              element={<PartsOrderingPage />}
-                            />
-                            <Route
-                              path="/workshop/vehicle-inspection"
-                              element={<VehicleInspectionPage />}
-                            />
+                    {/* === FALLBACK === */}
+                          <Route path="*" element={<DashboardPage />} />
 
-                            {/* === TYRES === */}
-                            <Route path="/tyres" element={<TyreManagementPage />} />
-                            <Route path="/tyres/mobile" element={<TyreMobilePage />} />
-                            <Route
-                              path="/tyres/mobile/inspection/:tyreId?"
-                              element={<TyreMobilePage mode="inspection" />}
-                            />
-                            <Route
-                              path="/tyres/mobile/scanner"
-                              element={<TyreMobilePage mode="scanner" />}
-                            />
-                            <Route path="/tyres/add" element={<AddNewTyrePage />} />
-                            <Route
-                              path="/tyres/reference-data"
-                              element={<TyreReferenceManagerPage />}
-                            />
-                            <Route path="/tyres/fleet-map" element={<TyreFleetMap />} />
-                            <Route path="/tyres/history" element={<TyreHistoryPage />} />
-                            <Route path="/tyres/dashboard" element={<TyrePerformanceDashboard />} />
-
-                            {/* === INVENTORY === */}
-                            <Route path="/inventory" element={<InventoryPage />} />
-                            <Route path="/inventory/dashboard" element={<InventoryDashboard />} />
-                            <Route path="/inventory/stock" element={<PartsInventoryPage />} />
-                            <Route path="/inventory/ordering" element={<PartsOrderingPage />} />
-                            <Route path="/inventory/receive" element={<ReceivePartsPage />} />
-                            <Route path="/inventory/reports" element={<InventoryReportsPage />} />
-
-                            {/* === EXAMPLES ===
-                      <Route path="/examples/clients" element={<ClientSelectionExample />} />
-
-                      {/* === FALLBACK === */}
-                            <Route path="*" element={<DashboardPage />} />
-
-                            {/* Dynamic routes from config - commented out as file doesn't exist */}
-                            {/* <AppRoutes /> */}
-                          </Route>
-                        </Routes>
-                      </Router>
+                          {/* Dynamic routes from config - commented out as file doesn't exist */}
+                          {/* <AppRoutes /> */}
+                        </Route>
+                      </Routes>
 
                       <TripFormModal
                         isOpen={showTripForm}

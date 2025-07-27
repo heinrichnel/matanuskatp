@@ -7,6 +7,7 @@ import { TyreStoresProvider } from "./context/TyreStoresContext";
 import "./index.css";
 import { getEnvVar, initBrowserEnv } from "./utils/envUtils";
 import { initializeConnectionMonitoring } from "./utils/firebaseConnectionHandler";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Initialize global environment variables for safer access
 // This prevents "import.meta" errors in non-module contexts
@@ -41,9 +42,6 @@ try {
 }
 
 // Function to render the application
-// Import ErrorBoundary (create one if it doesn't exist)
-import ErrorBoundary from "./components/ErrorBoundary";
-
 const renderApp = (isDev: boolean) => {
   // Import AntDesignProvider lazily to ensure React is fully initialized
   const AntDesignProvider = React.lazy(() => import("./components/ui/AntDesignProvider"));
@@ -55,6 +53,7 @@ const renderApp = (isDev: boolean) => {
           <AntDesignProvider>
             <TyreStoresProvider>
               <TyreProvider>
+                {/* This is the single, correct top-level Router for the entire app */}
                 <BrowserRouter>
                   {isDev && <div className="dev-indicator">Development Mode</div>}
                   <App />
