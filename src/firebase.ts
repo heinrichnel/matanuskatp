@@ -1,10 +1,24 @@
-import { collection, addDoc, setDoc, doc, serverTimestamp, onSnapshot, deleteDoc, getDoc, updateDoc, query, where, getDocs, orderBy } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { firebaseApp } from './firebaseConfig';
-import { DieselConsumptionRecord } from './types/diesel';
-import { Trip } from './types';
-import { Tyre, TyreInspection, TyreStore, StockEntry } from './types/tyre';
-import { firestore, handleFirestoreError } from './utils/firebaseConnectionHandler';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { firebaseApp } from "./firebaseConfig";
+import { Trip } from "./types";
+import { DieselConsumptionRecord } from "./types/diesel";
+import { Tyre, TyreInspection } from "./types/tyre";
+import { firestore, handleFirestoreError } from "./utils/firebaseConnectionHandler";
 
 // Gebruik Storage service
 const storage = getStorage(firebaseApp);
@@ -12,16 +26,16 @@ const storage = getStorage(firebaseApp);
 // Add audit log function
 export const addAuditLogToFirebase = async (auditLogData: any) => {
   try {
-    const auditLogsRef = collection(firestore, 'auditLogs');
+    const auditLogsRef = collection(firestore, "auditLogs");
     const docRef = await addDoc(auditLogsRef, {
       ...auditLogData,
       timestamp: serverTimestamp(),
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
     });
-    console.log('Audit log added with ID:', docRef.id);
+    console.log("Audit log added with ID:", docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('Error adding audit log:', error);
+    console.error("Error adding audit log:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -30,16 +44,16 @@ export const addAuditLogToFirebase = async (auditLogData: any) => {
 // Add diesel record to Firebase
 export const addDieselToFirebase = async (dieselRecord: DieselConsumptionRecord) => {
   try {
-    const dieselRef = doc(firestore, 'diesel', dieselRecord.id);
+    const dieselRef = doc(firestore, "diesel", dieselRecord.id);
     await setDoc(dieselRef, {
       ...dieselRecord,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
-    console.log('Diesel record added with ID:', dieselRecord.id);
+    console.log("Diesel record added with ID:", dieselRecord.id);
     return dieselRecord.id;
   } catch (error) {
-    console.error('Error adding diesel record:', error);
+    console.error("Error adding diesel record:", error);
     throw error;
   }
 };
@@ -47,16 +61,16 @@ export const addDieselToFirebase = async (dieselRecord: DieselConsumptionRecord)
 // Add trip to Firebase
 export const addTripToFirebase = async (trip: Trip) => {
   try {
-    const tripRef = doc(firestore, 'trips', trip.id);
+    const tripRef = doc(firestore, "trips", trip.id);
     await setDoc(tripRef, {
       ...trip,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
-    console.log('Trip added with ID:', trip.id);
+    console.log("Trip added with ID:", trip.id);
     return trip.id;
   } catch (error) {
-    console.error('Error adding trip:', error);
+    console.error("Error adding trip:", error);
     throw error;
   }
 };
@@ -64,38 +78,45 @@ export const addTripToFirebase = async (trip: Trip) => {
 // Add missed load to Firebase
 export const addMissedLoadToFirebase = async (missedLoadData: any) => {
   try {
-    const missedLoadsRef = collection(firestore, 'missedLoads');
+    const missedLoadsRef = collection(firestore, "missedLoads");
     const docRef = await addDoc(missedLoadsRef, {
       ...missedLoadData,
       createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
-    console.log('Missed load added with ID:', docRef.id);
+    console.log("Missed load added with ID:", docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('Error adding missed load:', error);
+    console.error("Error adding missed load:", error);
     throw error;
   }
 };
 
 // Function to update a trip in Firebase
 export async function updateTripInFirebase(tripId: string, tripData: Partial<Trip>) {
-  const tripRef = doc(firestore, 'trips', tripId);
+  const tripRef = doc(firestore, "trips", tripId);
   await setDoc(tripRef, { ...tripData, updatedAt: serverTimestamp() }, { merge: true });
 }
 
 // Function to update a diesel record in Firebase
-export async function updateDieselInFirebase(dieselId: string, dieselData: Partial<DieselConsumptionRecord>) {
+export async function updateDieselInFirebase(
+  dieselId: string,
+  dieselData: Partial<DieselConsumptionRecord>
+) {
   try {
-    const dieselRef = doc(firestore, 'diesel', dieselId);
-    await setDoc(dieselRef, {
-      ...dieselData,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    console.log('Diesel record updated with ID:', dieselId);
+    const dieselRef = doc(firestore, "diesel", dieselId);
+    await setDoc(
+      dieselRef,
+      {
+        ...dieselData,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+    console.log("Diesel record updated with ID:", dieselId);
     return dieselId;
   } catch (error) {
-    console.error('Error updating diesel record:', error);
+    console.error("Error updating diesel record:", error);
     throw error;
   }
 }
@@ -103,12 +124,12 @@ export async function updateDieselInFirebase(dieselId: string, dieselData: Parti
 // Function to delete a trip from Firebase
 export async function deleteTripFromFirebase(tripId: string) {
   try {
-    const tripRef = doc(firestore, 'trips', tripId);
+    const tripRef = doc(firestore, "trips", tripId);
     await deleteDoc(tripRef);
-    console.log('Trip deleted with ID:', tripId);
+    console.log("Trip deleted with ID:", tripId);
     return tripId;
   } catch (error) {
-    console.error('Error deleting trip:', error);
+    console.error("Error deleting trip:", error);
     throw error;
   }
 }
@@ -116,12 +137,12 @@ export async function deleteTripFromFirebase(tripId: string) {
 // Function to delete a diesel record from Firebase
 export async function deleteDieselFromFirebase(dieselId: string) {
   try {
-    const dieselRef = doc(firestore, 'diesel', dieselId);
+    const dieselRef = doc(firestore, "diesel", dieselId);
     await deleteDoc(dieselRef);
-    console.log('Diesel record deleted with ID:', dieselId);
+    console.log("Diesel record deleted with ID:", dieselId);
     return dieselId;
   } catch (error) {
-    console.error('Error deleting diesel record:', error);
+    console.error("Error deleting diesel record:", error);
     throw error;
   }
 }
@@ -129,12 +150,12 @@ export async function deleteDieselFromFirebase(dieselId: string) {
 // Function to delete a missed load from Firebase
 export async function deleteMissedLoadFromFirebase(missedLoadId: string) {
   try {
-    const missedLoadRef = doc(firestore, 'missedLoads', missedLoadId);
+    const missedLoadRef = doc(firestore, "missedLoads", missedLoadId);
     await deleteDoc(missedLoadRef);
-    console.log('Missed load deleted with ID:', missedLoadId);
+    console.log("Missed load deleted with ID:", missedLoadId);
     return missedLoadId;
   } catch (error) {
-    console.error('Error deleting missed load:', error);
+    console.error("Error deleting missed load:", error);
     throw error;
   }
 }
@@ -142,15 +163,19 @@ export async function deleteMissedLoadFromFirebase(missedLoadId: string) {
 // Function to update a missed load in Firebase
 export async function updateMissedLoadInFirebase(missedLoadId: string, missedLoadData: any) {
   try {
-    const missedLoadRef = doc(firestore, 'missedLoads', missedLoadId);
-    await setDoc(missedLoadRef, {
-      ...missedLoadData,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-    console.log('Missed load updated with ID:', missedLoadId);
+    const missedLoadRef = doc(firestore, "missedLoads", missedLoadId);
+    await setDoc(
+      missedLoadRef,
+      {
+        ...missedLoadData,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+    console.log("Missed load updated with ID:", missedLoadId);
     return missedLoadId;
   } catch (error) {
-    console.error('Error updating missed load:', error);
+    console.error("Error updating missed load:", error);
     throw error;
   }
 }
@@ -159,13 +184,39 @@ export async function updateMissedLoadInFirebase(missedLoadId: string, missedLoa
 export function listenToDriverBehaviorEvents(callback: (events: any[]) => void) {
   const eventsRef = collection(firestore, "driverBehaviorEvents");
   const unsubscribe = onSnapshot(eventsRef, (snapshot) => {
-    const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const events = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
     callback(events);
   });
   return unsubscribe;
 }
 
 // --- New TyreStores Helpers ---
+import {
+  addTyreStore,
+  deleteTyreStore,
+  getAllTyreStores,
+  getTyreStoreById,
+  getTyreStoreEntriesByTyreId,
+  getTyreStoreStats,
+  listenToTyreStores,
+  removeTyreStoreEntry,
+  updateTyreStore,
+  updateTyreStoreEntry,
+} from "./firebase/tyreStores";
+
+// Re-export tyre store functions
+export {
+  addTyreStore,
+  deleteTyreStore,
+  getAllTyreStores,
+  getTyreStoreById,
+  getTyreStoreEntriesByTyreId,
+  getTyreStoreStats,
+  listenToTyreStores,
+  removeTyreStoreEntry,
+  updateTyreStore,
+  updateTyreStoreEntry,
+};
 
 // --- New Tyre Management Helpers ---
 
@@ -176,27 +227,27 @@ export async function saveTyre(tyre: Tyre): Promise<string> {
   try {
     // Validate essential tyre data
     if (!tyre.serialNumber || !tyre.brand || !tyre.size) {
-      throw new Error('Tyre must have serial number, brand and size');
+      throw new Error("Tyre must have serial number, brand and size");
     }
 
     const tyreRef = tyre.id
-      ? doc(firestore, 'tyres', tyre.id)
-      : doc(collection(firestore, 'tyres'));
+      ? doc(firestore, "tyres", tyre.id)
+      : doc(collection(firestore, "tyres"));
 
     const tyreId = tyre.id || tyreRef.id;
-    
+
     // Add ID and timestamps if this is a new tyre
     const tyreData = {
       ...tyre,
       id: tyreId,
       updatedAt: serverTimestamp(),
-      createdAt: tyre.createdAt || serverTimestamp()
+      createdAt: tyre.createdAt || serverTimestamp(),
     };
-    
+
     await setDoc(tyreRef, tyreData);
     return tyreId;
   } catch (error) {
-    console.error('Error saving tyre:', error);
+    console.error("Error saving tyre:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -207,14 +258,14 @@ export async function saveTyre(tyre: Tyre): Promise<string> {
  */
 export async function getTyreById(tyreId: string): Promise<Tyre | null> {
   try {
-    const tyreRef = doc(firestore, 'tyres', tyreId);
+    const tyreRef = doc(firestore, "tyres", tyreId);
     const tyreSnap = await getDoc(tyreRef);
-    
+
     if (!tyreSnap.exists()) return null;
-    
+
     return { id: tyreSnap.id, ...tyreSnap.data() } as Tyre;
   } catch (error) {
-    console.error('Error getting tyre:', error);
+    console.error("Error getting tyre:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -240,44 +291,48 @@ export async function getTyres(filters?: {
     // Apply filters if provided
     if (filters) {
       if (filters.status) {
-        queryObject = query(queryObject, where('status', '==', filters.status));
+        queryObject = query(queryObject, where("status", "==", filters.status));
       }
       if (filters.mountStatus) {
-        queryObject = query(queryObject, where('mountStatus', '==', filters.mountStatus));
+        queryObject = query(queryObject, where("mountStatus", "==", filters.mountStatus));
       }
       if (filters.brand) {
-        queryObject = query(queryObject, where('brand', '==', filters.brand));
+        queryObject = query(queryObject, where("brand", "==", filters.brand));
       }
       if (filters.location) {
-        queryObject = query(queryObject, where('location', '==', filters.location));
+        queryObject = query(queryObject, where("location", "==", filters.location));
       }
       if (filters.vehicleId) {
-        queryObject = query(queryObject, where('installation.vehicleId', '==', filters.vehicleId));
+        queryObject = query(queryObject, where("installation.vehicleId", "==", filters.vehicleId));
       }
       if (filters.condition) {
-        queryObject = query(queryObject, where('condition.status', '==', filters.condition));
+        queryObject = query(queryObject, where("condition.status", "==", filters.condition));
       }
       // Add sorting by default
-      queryObject = query(queryObject, orderBy('updatedAt', 'desc'));
+      queryObject = query(queryObject, orderBy("updatedAt", "desc"));
     } else {
       // Default sorting if no filters
-      queryObject = query(q, orderBy('updatedAt', 'desc'));
+      queryObject = query(q, orderBy("updatedAt", "desc"));
     }
-    
+
     const querySnapshot = await getDocs(queryObject);
-    return querySnapshot.docs.map(doc => {
+    return querySnapshot.docs.map((doc) => {
       const data = doc.data();
       // Convert any Firestore Timestamps to ISO strings
       if (data.createdAt) {
-        data.createdAt = data.createdAt.toDate ? data.createdAt.toDate().toISOString() : data.createdAt;
+        data.createdAt = data.createdAt.toDate
+          ? data.createdAt.toDate().toISOString()
+          : data.createdAt;
       }
       if (data.updatedAt) {
-        data.updatedAt = data.updatedAt.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt;
+        data.updatedAt = data.updatedAt.toDate
+          ? data.updatedAt.toDate().toISOString()
+          : data.updatedAt;
       }
       return { id: doc.id, ...data } as Tyre;
     });
   } catch (error) {
-    console.error('Error getting tyres:', error);
+    console.error("Error getting tyres:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -288,10 +343,10 @@ export async function getTyres(filters?: {
  */
 export async function deleteTyre(tyreId: string): Promise<void> {
   try {
-    const tyreRef = doc(firestore, 'tyres', tyreId);
+    const tyreRef = doc(firestore, "tyres", tyreId);
     await deleteDoc(tyreRef);
   } catch (error) {
-    console.error('Error deleting tyre:', error);
+    console.error("Error deleting tyre:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -300,43 +355,44 @@ export async function deleteTyre(tyreId: string): Promise<void> {
 /**
  * Add a tyre inspection record
  */
-export async function addTyreInspection(tyreId: string, inspection: TyreInspection): Promise<string> {
+export async function addTyreInspection(
+  tyreId: string,
+  inspection: TyreInspection
+): Promise<string> {
   try {
     if (!tyreId) {
-      throw new Error('Tyre ID is required');
+      throw new Error("Tyre ID is required");
     }
-    
+
     // Validate inspection data
     if (!inspection.date || !inspection.inspector || inspection.treadDepth === undefined) {
-      throw new Error('Inspection requires date, inspector and tread depth');
+      throw new Error("Inspection requires date, inspector and tread depth");
     }
-    
+
     // Add to inspections subcollection
-    const inspectionsRef = collection(firestore, 'tyres', tyreId, 'inspections');
-    const inspectionDoc = inspection.id 
-      ? doc(inspectionsRef, inspection.id)
-      : doc(inspectionsRef);
-    
+    const inspectionsRef = collection(firestore, "tyres", tyreId, "inspections");
+    const inspectionDoc = inspection.id ? doc(inspectionsRef, inspection.id) : doc(inspectionsRef);
+
     const inspectionId = inspection.id || inspectionDoc.id;
-    
+
     await setDoc(inspectionDoc, {
       ...inspection,
       id: inspectionId,
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
     });
-    
+
     // Update the tyre document with latest inspection results
-    const tyreRef = doc(firestore, 'tyres', tyreId);
+    const tyreRef = doc(firestore, "tyres", tyreId);
     await updateDoc(tyreRef, {
-      'condition.treadDepth': inspection.treadDepth,
-      'condition.pressure': inspection.pressure,
-      'condition.lastInspectionDate': inspection.date,
-      updatedAt: serverTimestamp()
+      "condition.treadDepth": inspection.treadDepth,
+      "condition.pressure": inspection.pressure,
+      "condition.lastInspectionDate": inspection.date,
+      updatedAt: serverTimestamp(),
     });
-    
+
     return inspectionId;
   } catch (error) {
-    console.error('Error adding tyre inspection:', error);
+    console.error("Error adding tyre inspection:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -347,13 +403,13 @@ export async function addTyreInspection(tyreId: string, inspection: TyreInspecti
  */
 export async function getTyreInspections(tyreId: string): Promise<TyreInspection[]> {
   try {
-    const inspectionsRef = collection(firestore, 'tyres', tyreId, 'inspections');
-    const q = query(inspectionsRef, orderBy('date', 'desc'));
+    const inspectionsRef = collection(firestore, "tyres", tyreId, "inspections");
+    const q = query(inspectionsRef, orderBy("date", "desc"));
     const querySnapshot = await getDocs(q);
-    
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TyreInspection));
+
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as TyreInspection);
   } catch (error) {
-    console.error('Error getting tyre inspections:', error);
+    console.error("Error getting tyre inspections:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -365,15 +421,15 @@ export async function getTyreInspections(tyreId: string): Promise<TyreInspection
 export async function getTyresByVehicle(vehicleId: string): Promise<Tyre[]> {
   try {
     const q = query(
-      collection(firestore, 'tyres'),
-      where('mountStatus', '==', 'mounted'),
-      where('installation.vehicleId', '==', vehicleId)
+      collection(firestore, "tyres"),
+      where("mountStatus", "==", "mounted"),
+      where("installation.vehicleId", "==", vehicleId)
     );
-    
+
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Tyre));
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Tyre);
   } catch (error) {
-    console.error('Error getting tyres by vehicle:', error);
+    console.error("Error getting tyres by vehicle:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -384,69 +440,37 @@ export async function getTyresByVehicle(vehicleId: string): Promise<Tyre[]> {
  */
 export function listenToTyres(callback: (tyres: Tyre[]) => void) {
   // Query with sorting for consistent ordering
-  const q = query(
-    collection(firestore, 'tyres'),
-    orderBy('updatedAt', 'desc')
+  const q = query(collection(firestore, "tyres"), orderBy("updatedAt", "desc"));
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const tyres = snapshot.docs.map((doc) => {
+        const data = doc.data();
+        // Convert Firestore Timestamps to standard dates
+        if (data.createdAt) {
+          data.createdAt = data.createdAt.toDate
+            ? data.createdAt.toDate().toISOString()
+            : data.createdAt;
+        }
+        if (data.updatedAt) {
+          data.updatedAt = data.updatedAt.toDate
+            ? data.updatedAt.toDate().toISOString()
+            : data.updatedAt;
+        }
+        return { id: doc.id, ...data } as Tyre;
+      });
+      callback(tyres);
+    },
+    (error) => {
+      console.error("Error listening to tyres:", error);
+      handleFirestoreError(error);
+    }
   );
-  
-  return onSnapshot(q, (snapshot) => {
-    const tyres = snapshot.docs.map(doc => {
-      const data = doc.data();
-      // Convert Firestore Timestamps to standard dates
-      if (data.createdAt) {
-        data.createdAt = data.createdAt.toDate ? data.createdAt.toDate().toISOString() : data.createdAt;
-      }
-      if (data.updatedAt) {
-        data.updatedAt = data.updatedAt.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt;
-      }
-      return { id: doc.id, ...data } as Tyre;
-    });
-    callback(tyres);
-  }, (error) => {
-    console.error('Error listening to tyres:', error);
-    handleFirestoreError(error);
-  });
 }
 
-/**
- * Add a new TyreStore document
- */
-export async function addTyreStore(store: TyreStore): Promise<void> {
-  const storeRef = doc(firestore, 'tyreStores', store.id);
-  await setDoc(storeRef, {
-    ...store,
-    dateAdded: serverTimestamp()
-  });
-}
-
-/**
- * Update or insert a stock entry in a specific TyreStore
- */
-export async function updateTyreStoreEntry(storeId: string, entry: StockEntry): Promise<void> {
-  const storeRef = doc(firestore, 'tyreStores', storeId);
-  const snap = await getDoc(storeRef);
-  if (!snap.exists()) throw new Error(`TyreStore ${storeId} does not exist`);
-  const data = snap.data() as TyreStore;
-  const entries = data.entries || [];
-  const idx = entries.findIndex(e => e.tyreId === entry.tyreId);
-  if (idx >= 0) {
-    entries[idx] = entry;
-  } else {
-    entries.push(entry);
-  }
-  await updateDoc(storeRef, { entries });
-}
-
-/**
- * Listen to all TyreStore documents in real time
- */
-export function listenToTyreStores(onChange: (stores: TyreStore[]) => void) {
-  const collRef = collection(firestore, 'tyreStores');
-  return onSnapshot(collRef, snapshot => {
-    const stores: TyreStore[] = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Omit<TyreStore, 'id'>) }));
-    onChange(stores);
-  });
-}
+// The tyre store functions are now imported from ./firebase/tyreStores
+// Removing duplicate implementations
 
 /**
  * Get tyre statistics for dashboard
@@ -460,44 +484,44 @@ export async function getTyreStats(): Promise<{
   byCondition: Record<string, number>;
 }> {
   try {
-    const totalSnapshot = await getDocs(collection(firestore, 'tyres'));
-    const mountedSnapshot = await getDocs(query(
-      collection(firestore, 'tyres'),
-      where('mountStatus', '==', 'mounted')
-    ));
-    const inStockSnapshot = await getDocs(query(
-      collection(firestore, 'tyres'),
-      where('mountStatus', '==', 'in_storage')
-    ));
-    const needsAttentionSnapshot = await getDocs(query(
-      collection(firestore, 'tyres'),
-      where('condition.status', 'in', ['critical', 'needs_replacement'])
-    ));
-    
+    const totalSnapshot = await getDocs(collection(firestore, "tyres"));
+    const mountedSnapshot = await getDocs(
+      query(collection(firestore, "tyres"), where("mountStatus", "==", "mounted"))
+    );
+    const inStockSnapshot = await getDocs(
+      query(collection(firestore, "tyres"), where("mountStatus", "==", "in_storage"))
+    );
+    const needsAttentionSnapshot = await getDocs(
+      query(
+        collection(firestore, "tyres"),
+        where("condition.status", "in", ["critical", "needs_replacement"])
+      )
+    );
+
     // Get brand distribution
     const byBrand: Record<string, number> = {};
-    totalSnapshot.docs.forEach(doc => {
-      const brand = doc.data().brand || 'Unknown';
+    totalSnapshot.docs.forEach((doc) => {
+      const brand = doc.data().brand || "Unknown";
       byBrand[brand] = (byBrand[brand] || 0) + 1;
     });
-    
+
     // Get condition distribution
     const byCondition: Record<string, number> = {};
-    totalSnapshot.docs.forEach(doc => {
-      const condition = doc.data().condition?.status || 'Unknown';
+    totalSnapshot.docs.forEach((doc) => {
+      const condition = doc.data().condition?.status || "Unknown";
       byCondition[condition] = (byCondition[condition] || 0) + 1;
     });
-    
+
     return {
       total: totalSnapshot.size,
       mounted: mountedSnapshot.size,
       inStock: inStockSnapshot.size,
       needsAttention: needsAttentionSnapshot.size,
       byBrand,
-      byCondition
+      byCondition,
     };
   } catch (error) {
-    console.error('Error getting tyre stats:', error);
+    console.error("Error getting tyre stats:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -505,6 +529,5 @@ export async function getTyreStats(): Promise<{
 
 // --- End TyreStores Helpers ---
 
-export { firestore, storage };
-export { firestore as db };
+export { firestore as db, firestore, storage };
 export default firebaseApp;
