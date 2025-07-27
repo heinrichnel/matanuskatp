@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/Card';
-import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/ui/Card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import React, { useState } from "react";
 
 interface WorkOrder {
   workOrderId: string;
   vehicleId: string;
-  status: 'initiated' | 'in_progress' | 'completed';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: "initiated" | "in_progress" | "completed";
+  priority: "low" | "medium" | "high" | "critical";
   title: string;
   description: string;
   tasks: TaskEntry[];
@@ -31,7 +31,7 @@ interface WorkOrder {
 interface TaskEntry {
   taskId: string;
   description: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'not_applicable';
+  status: "pending" | "in_progress" | "completed" | "not_applicable";
   assignedTo?: string;
   estimatedHours: number;
   actualHours?: number;
@@ -47,7 +47,7 @@ interface PartEntry {
   unitCost: number;
   totalCost: number;
   supplier?: string;
-  status: 'requested' | 'ordered' | 'received' | 'installed';
+  status: "requested" | "ordered" | "received" | "installed";
 }
 
 interface LaborEntry {
@@ -76,7 +76,7 @@ interface Remark {
   text: string;
   addedBy: string;
   addedAt: string;
-  type: 'general' | 'technical' | 'safety' | 'customer';
+  type: "general" | "technical" | "safety" | "customer";
 }
 
 interface TimeLogEntry {
@@ -90,125 +90,139 @@ interface TimeLogEntry {
 export const WorkOrderManagement: React.FC = () => {
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([
     {
-      workOrderId: 'WO-2024-001',
-      vehicleId: '14L',
-      status: 'in_progress',
-      priority: 'high',
-      title: 'Brake System Inspection & Repair',
-      description: 'Complete brake system overhaul required',
+      workOrderId: "WO-2024-001",
+      vehicleId: "14L",
+      status: "in_progress",
+      priority: "high",
+      title: "Brake System Inspection & Repair",
+      description: "Complete brake system overhaul required",
       tasks: [
         {
-          taskId: 'T001',
-          description: 'Replace brake pads - front axle',
-          status: 'completed',
-          assignedTo: 'Workshop',
+          taskId: "T001",
+          description: "Replace brake pads - front axle",
+          status: "completed",
+          assignedTo: "Workshop",
           estimatedHours: 2,
           actualHours: 1.5,
-          linkedFaultId: 'F001'
+          linkedFaultId: "F001",
         },
         {
-          taskId: 'T002',
-          description: 'Check brake fluid levels',
-          status: 'in_progress',
-          assignedTo: 'Workshop',
+          taskId: "T002",
+          description: "Check brake fluid levels",
+          status: "in_progress",
+          assignedTo: "Workshop",
           estimatedHours: 0.5,
-          linkedFaultId: 'F002'
-        }
+          linkedFaultId: "F002",
+        },
       ],
       partsUsed: [
         {
-          partId: 'P001',
-          partNumber: 'BP-FL-001',
-          description: 'Front Brake Pads',
+          partId: "P001",
+          partNumber: "BP-FL-001",
+          description: "Front Brake Pads",
           quantity: 2,
           unitCost: 450,
           totalCost: 900,
-          status: 'installed'
-        }
+          status: "installed",
+        },
       ],
       laborEntries: [
         {
-          laborId: 'L001',
-          technicianId: 'W',
-          technicianName: 'Workshop',
-          laborCode: 'BRAKE',
+          laborId: "L001",
+          technicianId: "W",
+          technicianName: "Workshop",
+          laborCode: "BRAKE",
           hoursWorked: 1.5,
           hourlyRate: 350,
           totalCost: 525,
-          date: '2024-01-15'
-        }
+          date: "2024-01-15",
+        },
       ],
       attachments: [],
       remarks: [],
       timeLog: [
         {
-          logId: 'TL001',
-          status: 'initiated',
-          timestamp: '2024-01-15T08:00:00Z',
-          userId: 'W'
+          logId: "TL001",
+          status: "initiated",
+          timestamp: "2024-01-15T08:00:00Z",
+          userId: "W",
         },
         {
-          logId: 'TL002',
-          status: 'in_progress',
-          timestamp: '2024-01-15T09:00:00Z',
-          userId: 'W'
-        }
+          logId: "TL002",
+          status: "in_progress",
+          timestamp: "2024-01-15T09:00:00Z",
+          userId: "W",
+        },
       ],
-      linkedInspectionId: 'INS-001',
-      linkedPOIds: ['PO-001'],
-      createdBy: 'W',
-      createdAt: '2024-01-15T08:00:00Z',
-      updatedAt: '2024-01-15T12:00:00Z',
-      startedAt: '2024-01-15T09:00:00Z',
+      linkedInspectionId: "INS-001",
+      linkedPOIds: ["PO-001"],
+      createdBy: "W",
+      createdAt: "2024-01-15T08:00:00Z",
+      updatedAt: "2024-01-15T12:00:00Z",
+      startedAt: "2024-01-15T09:00:00Z",
       rcaRequired: true,
-      rcaCompleted: false
-    }
+      rcaCompleted: false,
+    },
   ]);
 
   const [selectedWorkOrder, setSelectedWorkOrder] = useState<WorkOrder | null>(null);
-  const [activeTab, setActiveTab] = useState('list');
-  const [filterStatus, setFilterStatus] = useState('all');
-  const [filterPriority, setFilterPriority] = useState('all');
+  const [activeTab, setActiveTab] = useState("list");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterPriority, setFilterPriority] = useState("all");
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'initiated': return 'bg-blue-100 text-blue-800';
-      case 'in_progress': return 'bg-yellow-100 text-yellow-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "initiated":
+        return "bg-blue-100 text-blue-800";
+      case "in_progress":
+        return "bg-yellow-100 text-yellow-800";
+      case "completed":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "critical":
+        return "bg-red-100 text-red-800";
+      case "high":
+        return "bg-orange-100 text-orange-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "low":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const handleStartWorkOrder = (workOrderId: string) => {
-    setWorkOrders(prev => prev.map(wo =>
-      wo.workOrderId === workOrderId
-        ? {
-            ...wo,
-            status: 'in_progress',
-            startedAt: new Date().toISOString(),
-            timeLog: [...wo.timeLog, {
-              logId: `TL${Date.now()}`,
-              status: 'in_progress',
-              timestamp: new Date().toISOString(),
-              userId: 'W'
-            }]
-          }
-        : wo
-    ));
+    setWorkOrders((prev) =>
+      prev.map((wo) =>
+        wo.workOrderId === workOrderId
+          ? {
+              ...wo,
+              status: "in_progress",
+              startedAt: new Date().toISOString(),
+              timeLog: [
+                ...wo.timeLog,
+                {
+                  logId: `TL${Date.now()}`,
+                  status: "in_progress",
+                  timestamp: new Date().toISOString(),
+                  userId: "W",
+                },
+              ],
+            }
+          : wo
+      )
+    );
   };
 
   const handleCompleteWorkOrder = (workOrderId: string) => {
-    const workOrder = workOrders.find(wo => wo.workOrderId === workOrderId);
+    const workOrder = workOrders.find((wo) => wo.workOrderId === workOrderId);
     if (!workOrder) return;
 
     // Check if RCA is required
@@ -217,34 +231,39 @@ export const WorkOrderManagement: React.FC = () => {
     }
 
     // Check if all tasks are completed
-    const incompleteTasks = workOrder.tasks.filter(task =>
-      task.status !== 'completed' && task.status !== 'not_applicable'
+    const incompleteTasks = workOrder.tasks.filter(
+      (task) => task.status !== "completed" && task.status !== "not_applicable"
     );
 
     if (incompleteTasks.length > 0) {
       return;
     }
 
-    setWorkOrders(prev => prev.map(wo =>
-      wo.workOrderId === workOrderId
-        ? {
-            ...wo,
-            status: 'completed',
-            completedAt: new Date().toISOString(),
-            timeLog: [...wo.timeLog, {
-              logId: `TL${Date.now()}`,
-              status: 'completed',
-              timestamp: new Date().toISOString(),
-              userId: 'W'
-            }]
-          }
-        : wo
-    ));
+    setWorkOrders((prev) =>
+      prev.map((wo) =>
+        wo.workOrderId === workOrderId
+          ? {
+              ...wo,
+              status: "completed",
+              completedAt: new Date().toISOString(),
+              timeLog: [
+                ...wo.timeLog,
+                {
+                  logId: `TL${Date.now()}`,
+                  status: "completed",
+                  timestamp: new Date().toISOString(),
+                  userId: "W",
+                },
+              ],
+            }
+          : wo
+      )
+    );
   };
 
-  const filteredWorkOrders = workOrders.filter(wo => {
-    const statusMatch = filterStatus === 'all' || wo.status === filterStatus;
-    const priorityMatch = filterPriority === 'all' || wo.priority === filterPriority;
+  const filteredWorkOrders = workOrders.filter((wo) => {
+    const statusMatch = filterStatus === "all" || wo.status === filterStatus;
+    const priorityMatch = filterPriority === "all" || wo.priority === filterPriority;
     return statusMatch && priorityMatch;
   });
 
@@ -256,8 +275,8 @@ export const WorkOrderManagement: React.FC = () => {
 
   const getTaskCompletionPercentage = (tasks: TaskEntry[]) => {
     if (tasks.length === 0) return 0;
-    const completedTasks = tasks.filter(task =>
-      task.status === 'completed' || task.status === 'not_applicable'
+    const completedTasks = tasks.filter(
+      (task) => task.status === "completed" || task.status === "not_applicable"
     ).length;
     return Math.round((completedTasks / tasks.length) * 100);
   };
@@ -269,9 +288,7 @@ export const WorkOrderManagement: React.FC = () => {
           <h1 className="text-3xl font-bold">Work Order Management</h1>
           <p className="text-gray-600">Manage work orders from initiation to completion</p>
         </div>
-        <Button>
-          Create Work Order
-        </Button>
+        <Button>Create Work Order</Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -289,7 +306,7 @@ export const WorkOrderManagement: React.FC = () => {
                   <label className="text-sm text-gray-600">Status</label>
                   <select
                     value={filterStatus}
-                    onChange={e => setFilterStatus(e.target.value)}
+                    onChange={(e) => setFilterStatus(e.target.value)}
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50"
                   >
                     <option value="all">All Status</option>
@@ -302,7 +319,7 @@ export const WorkOrderManagement: React.FC = () => {
                   <label className="text-sm text-gray-600">Priority</label>
                   <select
                     value={filterPriority}
-                    onChange={e => setFilterPriority(e.target.value)}
+                    onChange={(e) => setFilterPriority(e.target.value)}
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50"
                   >
                     <option value="all">All Priorities</option>
@@ -326,7 +343,7 @@ export const WorkOrderManagement: React.FC = () => {
                       <div className="flex items-center space-x-3 mb-2">
                         <h3 className="font-semibold text-lg">{workOrder.workOrderId}</h3>
                         <Badge className={getStatusColor(workOrder.status)}>
-                          {workOrder.status.replace('_', ' ').toUpperCase()}
+                          {workOrder.status.replace("_", " ").toUpperCase()}
                         </Badge>
                         <Badge className={getPriorityColor(workOrder.priority)}>
                           {workOrder.priority.toUpperCase()}
@@ -356,15 +373,21 @@ export const WorkOrderManagement: React.FC = () => {
                             <div className="w-full bg-gray-200 rounded-full h-2">
                               <div
                                 className="bg-blue-600 h-2 rounded-full"
-                                style={{ width: `${getTaskCompletionPercentage(workOrder.tasks)}%` }}
+                                style={{
+                                  width: `${getTaskCompletionPercentage(workOrder.tasks)}%`,
+                                }}
                               />
                             </div>
-                            <span className="text-xs">{getTaskCompletionPercentage(workOrder.tasks)}%</span>
+                            <span className="text-xs">
+                              {getTaskCompletionPercentage(workOrder.tasks)}%
+                            </span>
                           </div>
                         </div>
                         <div>
                           <p className="text-gray-600">Total Cost</p>
-                          <p className="font-medium">R {calculateTotalCost(workOrder).toLocaleString()}</p>
+                          <p className="font-medium">
+                            R {calculateTotalCost(workOrder).toLocaleString()}
+                          </p>
                         </div>
                         <div>
                           <p className="text-gray-600">Created</p>
@@ -378,11 +401,15 @@ export const WorkOrderManagement: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col space-y-2 ml-4">
-                      <Button variant="outline" size="sm" onClick={() => setSelectedWorkOrder(workOrder)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedWorkOrder(workOrder)}
+                      >
                         View
                       </Button>
 
-                      {workOrder.status === 'initiated' && (
+                      {workOrder.status === "initiated" && (
                         <Button
                           size="sm"
                           onClick={() => handleStartWorkOrder(workOrder.workOrderId)}
@@ -391,11 +418,15 @@ export const WorkOrderManagement: React.FC = () => {
                         </Button>
                       )}
 
-                      {workOrder.status === 'in_progress' && (
+                      {workOrder.status === "in_progress" && (
                         <Button
                           size="sm"
                           onClick={() => handleCompleteWorkOrder(workOrder.workOrderId)}
-                          className={workOrder.rcaRequired && !workOrder.rcaCompleted ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
+                          className={
+                            workOrder.rcaRequired && !workOrder.rcaCompleted
+                              ? "bg-yellow-600 hover:bg-yellow-700"
+                              : ""
+                          }
                         >
                           Complete
                         </Button>
@@ -427,7 +458,7 @@ export const WorkOrderManagement: React.FC = () => {
                   <div>
                     <p className="text-sm font-medium">In Progress</p>
                     <p className="text-2xl font-bold text-yellow-600">
-                      {workOrders.filter(wo => wo.status === 'in_progress').length}
+                      {workOrders.filter((wo) => wo.status === "in_progress").length}
                     </p>
                   </div>
                 </div>
@@ -440,7 +471,7 @@ export const WorkOrderManagement: React.FC = () => {
                   <div>
                     <p className="text-sm font-medium">Completed</p>
                     <p className="text-2xl font-bold text-green-600">
-                      {workOrders.filter(wo => wo.status === 'completed').length}
+                      {workOrders.filter((wo) => wo.status === "completed").length}
                     </p>
                   </div>
                 </div>
@@ -453,7 +484,7 @@ export const WorkOrderManagement: React.FC = () => {
                   <div>
                     <p className="text-sm font-medium">RCA Required</p>
                     <p className="text-2xl font-bold text-red-600">
-                      {workOrders.filter(wo => wo.rcaRequired && !wo.rcaCompleted).length}
+                      {workOrders.filter((wo) => wo.rcaRequired && !wo.rcaCompleted).length}
                     </p>
                   </div>
                 </div>
@@ -468,7 +499,9 @@ export const WorkOrderManagement: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Work Order Details - {selectedWorkOrder.workOrderId}</h2>
+              <h2 className="text-xl font-bold">
+                Work Order Details - {selectedWorkOrder.workOrderId}
+              </h2>
               <Button variant="outline" onClick={() => setSelectedWorkOrder(null)}>
                 Close
               </Button>
@@ -484,7 +517,7 @@ export const WorkOrderManagement: React.FC = () => {
                 <div>
                   <p className="text-sm text-gray-600">Status</p>
                   <Badge className={getStatusColor(selectedWorkOrder.status)}>
-                    {selectedWorkOrder.status.replace('_', ' ').toUpperCase()}
+                    {selectedWorkOrder.status.replace("_", " ").toUpperCase()}
                   </Badge>
                 </div>
               </div>
@@ -503,11 +536,11 @@ export const WorkOrderManagement: React.FC = () => {
                         <div>
                           <p className="font-medium">{task.description}</p>
                           <p className="text-sm text-gray-600">
-                            Assigned to: {task.assignedTo || 'Unassigned'}
+                            Assigned to: {task.assignedTo || "Unassigned"}
                           </p>
                         </div>
                         <Badge className={getStatusColor(task.status)}>
-                          {task.status.replace('_', ' ').toUpperCase()}
+                          {task.status.replace("_", " ").toUpperCase()}
                         </Badge>
                       </div>
                     </div>
