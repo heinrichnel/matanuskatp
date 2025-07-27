@@ -173,8 +173,8 @@ const ActiveTripsPageEnhanced: React.FC<{ displayCurrency?: SupportedCurrency }>
     [rtUITrips, webhookTrips, csvTrips]
   );
 
-  const webBookTrips = allTrips.filter((t) => t.importSource === "web_book");
-  const manualTrips = allTrips.filter((t) => t.importSource === "manual" || t.importSource === "csv");
+  const webBookTrips = allTrips.filter((trip) => trip.importSource === "web_book");
+  const manualTrips = allTrips.filter((trip) => trip.importSource !== "web_book");
 
   // -------------------- Actions --------------------
   const handleEdit = (trip: UITrip) => {
