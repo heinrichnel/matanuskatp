@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import type { WialonSession, WialonDriver, WialonGeofence } from "../types/wialon";
 
-
-const WIALON_HOST = "https://hst-api.wialon.com";
+const WIALON_HOST =
+  "https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en";
 const WIALON_TOKEN = "c1099bc37c906fd0832d8e783b60ae0d462BADEC45A6E5503B1BEADDE71E232800E9C406"; // Replace with yours
 
 export interface WialonUnit {
@@ -49,8 +48,7 @@ export function useWialonUnits() {
 
       // Flags: base data + last message
       const flags =
-        window.wialon.item.Item.dataFlag.base |
-        window.wialon.item.Unit.dataFlag.lastMessage;
+        window.wialon.item.Item.dataFlag.base | window.wialon.item.Unit.dataFlag.lastMessage;
 
       sess.loadLibrary("itemIcon");
       sess.updateDataFlags(

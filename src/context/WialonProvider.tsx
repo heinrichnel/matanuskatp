@@ -104,7 +104,9 @@ export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
 
     try {
       setInitializing(true);
-      session.initSession("https://hst-api.wialon.com");
+      session.initSession(
+        "https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en"
+      );
       session.loginToken(TOKEN, "", async (code: number) => {
         const success = code === 0;
         setLoggedIn(success);

@@ -133,6 +133,7 @@ import TrainingRecords from "./pages/drivers/TrainingRecords";
 import FaultTracking from "./components/WorkshopManagement/FaultTracking";
 import InspectionHistoryPage from "./components/WorkshopManagement/inspections";
 import VehicleInspectionPage from "./components/WorkshopManagement/vehicle-inspection";
+import WorkshopIntegration from "./components/workshop/WorkshopIntegration";
 import InventoryDashboard from "./pages/InventoryDashboard";
 import JobCardManagement from "./pages/JobCardManagement";
 import PartsOrderingPage from "./pages/PartsOrderingPage";
@@ -151,53 +152,44 @@ import VendorPage from "./pages/workshop/VendorPage";
 import WorkshopPage from "./pages/workshop/WorkshopPage";
 
 // === TYRES ===
+import TyreIntegration from "./components/tyres/TyreIntegration";
 import AddNewTyrePage from "./pages/tyres/AddNewTyrePage";
 import TyreReferenceManagerPage from "./pages/tyres/TyreReferenceManagerPage";
-
 // === INVENTORY ===
 import InventoryPage from "./pages/InventoryPage";
 import InventoryReportsPage from "./pages/InventoryReportsPage";
 import PartsInventoryPage from "./pages/PartsInventoryPage";
 import ReceivePartsPage from "./pages/ReceivePartsPage";
-
 // === WIALON ===
-
 // === REPORTS & OTHER ===
 import { ScanQRButton } from "./components/ScanQRButton";
 import UIConnector from "./components/UIConnector";
-
 // UI Components
 import { GenericPlaceholderPage } from "./components/ui";
-
 // App.tsx - Simplified version to fix build errors
 const App: React.FC = () => {
   const [connectionError, setConnectionError] = useState<Error | null>(null);
   const [editingTrip, setEditingTrip] = useState<any>();
   const [showTripForm, setShowTripForm] = useState(false);
-
   useEffect(() => {
     console.log("App is running");
-
     // Initialize error handlers
     const unregisterErrorHandler = registerErrorHandler((error) => {
       // Add application-wide error handling logic
       if (error.severity === ErrorSeverity.FATAL) {
         setConnectionError(error.originalError);
       }
-
       // Send errors to analytics in production
       if (process.env.NODE_ENV === "production") {
         // Example: send to an analytics service
         // analyticsService.trackError(error);
       }
     });
-
     // Initialize Firebase connection monitoring
     initializeConnectionMonitoring().catch((error) => {
       console.error("Failed to initialize Firebase connection monitoring:", error);
       setConnectionError(new Error(`Failed to initialize Firebase connection: ${error.message}`));
     });
-
     // Initialize offline cache with error handling
     handleError(async () => await initOfflineCache(), {
       category: ErrorCategory.DATABASE,
@@ -206,10 +198,8 @@ const App: React.FC = () => {
     }).catch((error) => {
       setConnectionError(new Error(`Failed to initialize offline cache: ${error.message}`));
     });
-
     // Start network monitoring
     startNetworkMonitoring(30000); // Check every 30 seconds
-
     // Sync offline operations when online with enhanced error handling
     const handleOnline = async () => {
       try {
@@ -228,7 +218,6 @@ const App: React.FC = () => {
         // This will be handled by the error handler
       }
     };
-
     window.addEventListener("online", handleOnline);
 
     // Setup global error handling for uncaught errors
@@ -500,6 +489,11 @@ const App: React.FC = () => {
                             path="workshop/vehicle-inspection"
                             element={<VehicleInspectionPage />}
                           />
+                          {/* Workshop Component Integration Route */}
+                          <Route
+                            path="integration-debug/workshop"
+                            element={<WorkshopIntegration />}
+                          />
 
                           {/* ==== TYRES ==== */}
                           <Route path="tyres" element={<TyreManagementPage />} />
@@ -520,6 +514,9 @@ const App: React.FC = () => {
                           <Route path="tyres/fleet-map" element={<TyreFleetMap />} />
                           <Route path="tyres/history" element={<TyreHistoryPage />} />
                           <Route path="tyres/dashboard" element={<TyrePerformanceDashboard />} />
+
+                          {/* Tyre Component Integration Route */}
+                          <Route path="integration-debug/tyres" element={<TyreIntegration />} />
 
                           {/* ==== INVENTORY ==== */}
                           <Route path="inventory" element={<InventoryPage />} />
