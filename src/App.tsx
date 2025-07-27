@@ -19,6 +19,7 @@ import FirestoreConnectionError from "./components/ui/FirestoreConnectionError";
 import OfflineBanner from "./components/ui/OfflineBanner";
 
 // Offline & Network Support
+import { initializeConnectionMonitoring } from "./utils/firebaseConnectionHandler";
 import { startNetworkMonitoring } from "./utils/networkDetection";
 import { initOfflineCache } from "./utils/offlineCache";
 import { syncOfflineOperations } from "./utils/offlineOperations";
@@ -191,6 +192,12 @@ const App: React.FC = () => {
       }
     });
 
+    // Initialize Firebase connection monitoring
+    initializeConnectionMonitoring().catch((error) => {
+      console.error("Failed to initialize Firebase connection monitoring:", error);
+      setConnectionError(new Error(`Failed to initialize Firebase connection: ${error.message}`));
+    });
+
     // Initialize offline cache with error handling
     handleError(async () => await initOfflineCache(), {
       category: ErrorCategory.DATABASE,
@@ -274,11 +281,14 @@ const App: React.FC = () => {
                 <DriverBehaviorProvider>
                   <WorkshopProvider>
                     <TyreReferenceDataProvider>
-                      {connectionError ? (
-                        <div className="fixed top-0 left-0 right-0 z-50 p-4">
-                          <FirestoreConnectionError error={connectionError} />
-                        </div>
-                      ) : null}
+                      {/* Enhanced FirestoreConnectionError that listens for connection events */}
+                      <div className="fixed top-0 left-0 right-0 z-50 p-4">
+                        {/* This instance listens for connection events and custom errors */}
+                        <FirestoreConnectionError />
+
+                        {/* Also show the explicit error if one is set at app level */}
+                        {connectionError && <FirestoreConnectionError error={connectionError} />}
+                      </div>
 
                       {/* Wialon Status Indicator */}
                       <WialonStatusIndicator className="fixed bottom-16 right-4 z-40" />

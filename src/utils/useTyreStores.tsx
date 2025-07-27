@@ -1,22 +1,31 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import {
   listenToTyreStores,
   addTyreStore,
   updateTyreStoreEntry
-} from '@/firebase/tyreStores';
-import { TyreStore, StockEntry } from '@/types/tyre';
+} from '../firebase';
+import { TyreStore, StockEntry } from '../types/tyre';
 
-const TyreStoresContext = createContext<{
+// Define the context type
+type TyreStoresContextType = {
   stores: TyreStore[];
   addStore: (store: TyreStore) => Promise<void>;
   updateEntry: (storeId: string, entry: StockEntry) => Promise<void>;
-}>({
+};
+
+// Create the context with default values
+const TyreStoresContext = createContext<TyreStoresContextType>({
   stores: [],
   addStore: async () => {},
   updateEntry: async () => {}
 });
 
-export function TyreStoresProvider({ children }) {
+// Props type for the provider
+interface TyreStoresProviderProps {
+  children: ReactNode;
+}
+
+export function TyreStoresProvider({ children }: TyreStoresProviderProps) {
   const [stores, setStores] = useState<TyreStore[]>([]);
 
   useEffect(() => {

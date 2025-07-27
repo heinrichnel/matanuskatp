@@ -1,26 +1,31 @@
+import { Clock, Filter, Globe, MapPin, RefreshCw, Truck } from "lucide-react";
 import React, { useState } from "react";
-import { useRealtimeTrips } from "../hooks/useRealtimeTrips";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "../components/ui/Card";
-import { Truck, MapPin, Clock, Globe, Filter, RefreshCw } from "lucide-react";
+import { useRealtimeTrips } from "../hooks/useRealtimeTrips";
 
 const ActiveTripsPage: React.FC = () => {
   const [filterWebBookOnly, setFilterWebBookOnly] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("");
 
   // Get real-time active trips
-  const { trips, loading, error } = useRealtimeTrips({ 
+  const { trips, loading, error } = useRealtimeTrips({
     onlyWebBook: filterWebBookOnly || undefined,
-    status: statusFilter || undefined
+    status: statusFilter || undefined,
   });
 
   // Separate web book and manual trips
-  const webBookTrips = trips.filter(trip => trip.importSource === "web_book");
-  const manualTrips = trips.filter(trip => trip.importSource !== "web_book");
+  const webBookTrips = trips.filter((trip) => trip.importSource === "web_book");
+  const manualTrips = trips.filter((trip) => trip.importSource !== "web_book");
 
-  const StatusBadge = ({ status, shipped, delivered }: { 
-    status: string; 
-    shipped: boolean; 
-    delivered: boolean; 
+  const StatusBadge = ({
+    status,
+    shipped,
+    delivered,
+  }: {
+    status: string;
+    shipped: boolean;
+    delivered: boolean;
   }) => {
     if (delivered) {
       return (
@@ -38,7 +43,7 @@ const ActiveTripsPage: React.FC = () => {
     }
     return (
       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-        {status || 'Pending'}
+        {status || "Pending"}
       </span>
     );
   };
@@ -82,9 +87,7 @@ const ActiveTripsPage: React.FC = () => {
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <Globe className="h-5 w-5 text-green-600" />
-            <span className="text-sm font-medium text-green-600">
-              Real-time updates enabled
-            </span>
+            <span className="text-sm font-medium text-green-600">Real-time updates enabled</span>
           </div>
         </div>
       </div>
@@ -133,12 +136,8 @@ const ActiveTripsPage: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Total Active
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {trips.length}
-                  </dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Total Active</dt>
+                  <dd className="text-lg font-medium text-gray-900">{trips.length}</dd>
                 </dl>
               </div>
             </div>
@@ -153,12 +152,8 @@ const ActiveTripsPage: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Web Book
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {webBookTrips.length}
-                  </dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Web Book</dt>
+                  <dd className="text-lg font-medium text-gray-900">{webBookTrips.length}</dd>
                 </dl>
               </div>
             </div>
@@ -173,12 +168,8 @@ const ActiveTripsPage: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Manual
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {manualTrips.length}
-                  </dd>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Manual</dt>
+                  <dd className="text-lg font-medium text-gray-900">{manualTrips.length}</dd>
                 </dl>
               </div>
             </div>
@@ -193,11 +184,9 @@ const ActiveTripsPage: React.FC = () => {
               </div>
               <div className="ml-5 w-0 flex-1">
                 <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Delivered
-                  </dt>
+                  <dt className="text-sm font-medium text-gray-500 truncate">Delivered</dt>
                   <dd className="text-lg font-medium text-gray-900">
-                    {trips.filter(t => t.deliveredStatus).length}
+                    {trips.filter((t) => t.deliveredStatus).length}
                   </dd>
                 </dl>
               </div>
@@ -209,21 +198,15 @@ const ActiveTripsPage: React.FC = () => {
       {/* Active Trips Table */}
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-medium text-gray-900">
-            Live Active Trips ({trips.length})
-          </h3>
-          <p className="text-sm text-gray-600">
-            Real-time updates from Firestore
-          </p>
+          <h3 className="text-lg font-medium text-gray-900">Live Active Trips ({trips.length})</h3>
+          <p className="text-sm text-gray-600">Real-time updates from Firestore</p>
         </CardHeader>
         <CardContent>
           {trips.length === 0 ? (
             <div className="text-center py-12">
               <Truck className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No active trips</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                No trips match the current filters.
-              </p>
+              <p className="mt-1 text-sm text-gray-500">No trips match the current filters.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -255,10 +238,14 @@ const ActiveTripsPage: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {trips.map((trip) => (
-                    <tr key={trip.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => window.location.href = `/trips/${trip.id}`}>
+                    <tr
+                      key={trip.id}
+                      className="hover:bg-gray-50 cursor-pointer"
+                      onClick={() => (window.location.href = `/trips/${trip.id}`)}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
                         <Link to={`/trips/${trip.id}`}>
-                          {trip.loadRef || trip.id.substring(0, 8) + '...'}
+                          {trip.loadRef || trip.id.substring(0, 8) + "..."}
                         </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -272,10 +259,10 @@ const ActiveTripsPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusBadge 
-                          status={trip.status} 
-                          shipped={trip.shippedStatus} 
-                          delivered={trip.deliveredStatus} 
+                        <StatusBadge
+                          status={trip.status}
+                          shipped={trip.shippedStatus}
+                          delivered={trip.deliveredStatus}
                         />
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -294,10 +281,10 @@ const ActiveTripsPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {trip.startTime ? new Date(trip.startTime).toLocaleString() : '-'}
+                        {trip.startTime ? new Date(trip.startTime).toLocaleString() : "-"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {trip.endTime ? new Date(trip.endTime).toLocaleString() : '-'}
+                        {trip.endTime ? new Date(trip.endTime).toLocaleString() : "-"}
                       </td>
                     </tr>
                   ))}
