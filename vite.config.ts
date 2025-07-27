@@ -58,7 +58,7 @@ export default defineConfig({
           // Date handling
           "date-utils": ["date-fns"],
           // UI components and icons
-          "ui-components": ["lucide-react", "tailwindcss", "@radix-ui"],
+          "ui-components": ["lucide-react", "tailwindcss", "@radix-ui/react-tabs", "@radix-ui/react-label"],
         },
       },
     },

@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { 
-  saveTyre, 
-  getTyres, 
-  getTyreById, 
-  deleteTyre, 
-  addTyreInspection, 
+import {
+  saveTyre,
+  getTyres,
+  getTyreById,
+  deleteTyre,
+  addTyreInspection,
   getTyreInspections,
   getTyresByVehicle,
   listenToTyres
@@ -43,12 +43,12 @@ export const TyreProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Set up real-time listener for tyres collection
   useEffect(() => {
     setLoading(true);
-    
+
     const unsubscribe = listenToTyres((updatedTyres: Tyre[]) => {
       setTyres(updatedTyres);
       setLoading(false);
     });
-    
+
     return () => {
       unsubscribe();
     };

@@ -22,7 +22,8 @@ import TyreFormModal from "../../components/Models/Tyre/TyreFormModal";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../../components/ui/Card";
 // Firebase will be dynamically imported when needed
-import { Tyre } from "../../components/Models/Tyre/TyreModel";
+import { Tyre } from "../../data/tyreData";
+import { TyreStoreLocation } from "../../types/tyre";
 
 // Import tyre components that need to be integrated
 import TyreAnalytics from "../../components/Tyremanagement/TyreAnalytics";
@@ -84,7 +85,7 @@ const adaptTyreFormatIfNeeded = (tyres: Tyre[], targetComponent: string) => {
       // Ensure cost data is properly formatted
       return tyres.map((tyre) => ({
         ...tyre,
-        costPerKm: <tyre className="km"></tyre>Run > 0 ? tyre.purchaseDetails?.cost / (tyre.milesRun * 1.60934) : 0,
+        costPerKm: tyre.milesRun > 0 ? tyre.purchaseDetails?.cost / (tyre.milesRun * 1.60934) : 0,
         totalCost: tyre.purchaseDetails?.cost || 0,
       }));
 
@@ -94,10 +95,11 @@ const adaptTyreFormatIfNeeded = (tyres: Tyre[], targetComponent: string) => {
         ...tyre,
         performance: {
           wearRate:
-            <tyre className="km"></tyre>Run > 0 && tyre.condition?.treadDepth
-              ? ((10 - tyre.condition.treadDepth) / tyre.milesRun) * 10000
+            tyre.milesRun > 0 && tyre.condition?.treadDepth
+              ? ((10 - tyre.condition.treadDepth) / (tyre.milesRun * 1.60934)) * 10000
               : 0,
-          costEfficiency: tyre.milesRun > 0 ? tyre.purchaseDetails?.cost / tyre.milesRun : 0,
+          costEfficiency:
+            tyre.milesRun > 0 ? tyre.purchaseDetails?.cost / (tyre.milesRun * 1.60934) : 0,
         },
       }));
 
@@ -109,7 +111,7 @@ const adaptTyreFormatIfNeeded = (tyres: Tyre[], targetComponent: string) => {
           costPerMile: tyre.milesRun > 0 ? tyre.purchaseDetails?.cost / tyre.milesRun : 0,
           treadWearRate:
             tyre.milesRun > 0 && tyre.condition?.treadDepth
-              ? ((10 - tyre.condition.treadDepth) / tyre.milesRun) * 10000
+              ? ((10 - tyre.condition.treadDepth) / (tyre.milesRun * 1.60934)) * 10000
               : 0,
           expectedRemainingLife: tyre.condition?.treadDepth
             ? (tyre.condition.treadDepth / 10) * (tyre.kmRunLimit || 50000)
@@ -185,7 +187,7 @@ const TyreManagementPage: React.FC = () => {
       tyre.brand,
       tyre.model,
       tyre.pattern,
-      tyre.size?.displayString,
+      tyre.size ? `${tyre.size.width}/${tyre.size.aspectRatio}R${tyre.size.rimDiameter}` : "",
       tyre.status,
       tyre.notes,
     ]
@@ -198,6 +200,13 @@ const TyreManagementPage: React.FC = () => {
 
     return matchesSearch && matchesFilter;
   });
+
+  // Convert tyres to inventory format for TyreInventoryStats
+  const inventoryData = tyres.map((tyre) => ({
+    quantity: 1, // Each tyre is counted as 1
+    minStock: 2, // Default minimum stock level
+    cost: tyre.purchaseDetails?.cost || 0,
+  }));
 
   // Handle adding a new tyre
   const handleAddTyre = async (data: Omit<Tyre, "id">) => {
@@ -469,7 +478,7 @@ const TyreManagementPage: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                   {tyres.length > 0 ? (
-                    <TyreDashboard tyres={adaptTyreFormatIfNeeded(tyres, "TyreDashboard")} />
+                    <TyreDashboard />
                   ) : (
                     <div className="p-6 text-center">
                       <p className="text-gray-500">No tyre data available for the dashboard.</p>
@@ -493,7 +502,7 @@ const TyreManagementPage: React.FC = () => {
           {activeTab === "inventory" && (
             <div className="space-y-6">
               {/* Inventory Stats from TyreInventoryStats */}
-              <TyreInventoryStats tyres={tyres} />
+              <TyreInventoryStats inventory={inventoryData} />
 
               {/* Search and Filter */}
               <div className="flex flex-col md:flex-row gap-4">
@@ -510,42 +519,42 @@ const TyreManagementPage: React.FC = () => {
 
                 <div className="flex gap-2">
                   <Button
-                    variant={filterStatus === null ? "default" : "outline"}
+                    variant={filterStatus === null ? "primary" : "outline"}
                     size="sm"
                     onClick={() => setFilterStatus(null)}
                   >
                     All
                   </Button>
                   <Button
-                    variant={filterStatus === "in_service" ? "default" : "outline"}
+                    variant={filterStatus === "in_service" ? "primary" : "outline"}
                     size="sm"
                     onClick={() => setFilterStatus("in_service")}
                   >
                     In Service
                   </Button>
                   <Button
-                    variant={filterStatus === "new" ? "default" : "outline"}
+                    variant={filterStatus === "new" ? "primary" : "outline"}
                     size="sm"
                     onClick={() => setFilterStatus("new")}
                   >
                     New
                   </Button>
                   <Button
-                    variant={filterStatus === "spare" ? "default" : "outline"}
+                    variant={filterStatus === "spare" ? "primary" : "outline"}
                     size="sm"
                     onClick={() => setFilterStatus("spare")}
                   >
                     Spare
                   </Button>
                   <Button
-                    variant={filterStatus === "retreaded" ? "default" : "outline"}
+                    variant={filterStatus === "retreaded" ? "primary" : "outline"}
                     size="sm"
                     onClick={() => setFilterStatus("retreaded")}
                   >
                     Retreaded
                   </Button>
                   <Button
-                    variant={filterStatus === "scrapped" ? "default" : "outline"}
+                    variant={filterStatus === "scrapped" ? "primary" : "outline"}
                     size="sm"
                     onClick={() => setFilterStatus("scrapped")}
                   >
@@ -595,7 +604,9 @@ const TyreManagementPage: React.FC = () => {
                               {tyre.serialNumber}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {tyre.size?.displayString || "-"}
+                              {tyre.size
+                                ? `${tyre.size.width}/${tyre.size.aspectRatio}R${tyre.size.rimDiameter}`
+                                : "-"}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {tyre.brand}
@@ -614,7 +625,7 @@ const TyreManagementPage: React.FC = () => {
                               {tyre.installation?.vehicleId || "—"}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {tyre.installation?.position?.name || "—"}
+                              {tyre.installation?.position || "—"}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               <div className="flex space-x-2">
@@ -688,7 +699,7 @@ const TyreManagementPage: React.FC = () => {
                   <div className="mb-6 border-b border-gray-200">
                     <div className="flex space-x-4 pb-2">
                       <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
                         className={`${analyticsSubTab === "overview" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"} rounded-none px-2 py-1 h-auto`}
                         onClick={() => setAnalyticsSubTab("overview")}
@@ -697,7 +708,7 @@ const TyreManagementPage: React.FC = () => {
                         Overview
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
                         className={`${analyticsSubTab === "cost" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"} rounded-none px-2 py-1 h-auto`}
                         onClick={() => setAnalyticsSubTab("cost")}
@@ -709,7 +720,9 @@ const TyreManagementPage: React.FC = () => {
                   </div>
 
                   {analyticsSubTab === "overview" && <TyreAnalytics />}
-                  {analyticsSubTab === "cost" && <TyreCostAnalysis />}
+                  {analyticsSubTab === "cost" && (
+                    <TyreCostAnalysis tyreData={adaptTyreFormatIfNeeded(tyres, "TyreAnalytics")} />
+                  )}
                 </div>
               )}
             </div>
@@ -748,7 +761,7 @@ const TyreManagementPage: React.FC = () => {
                   <div className="mb-6 border-b border-gray-200">
                     <div className="flex space-x-4 pb-2">
                       <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
                         className={`${reportsSubTab === "summary" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"} rounded-none px-2 py-1 h-auto`}
                         onClick={() => setReportsSubTab("summary")}
@@ -757,7 +770,7 @@ const TyreManagementPage: React.FC = () => {
                         Summary Reports
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
                         className={`${reportsSubTab === "performance" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"} rounded-none px-2 py-1 h-auto`}
                         onClick={() => setReportsSubTab("performance")}
@@ -766,7 +779,7 @@ const TyreManagementPage: React.FC = () => {
                         Performance Reports
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="secondary"
                         size="sm"
                         className={`${reportsSubTab === "generator" ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-600"} rounded-none px-2 py-1 h-auto`}
                         onClick={() => setReportsSubTab("generator")}
@@ -802,19 +815,19 @@ const TyreManagementPage: React.FC = () => {
         <TyreFormModal
           isOpen={showAddForm}
           onClose={() => setShowAddForm(false)}
-          onSubmit={handleAddTyre}
-          mode="add"
-          defaultValues={{
+          onSubmit={(tyreData: Partial<Tyre>) => handleAddTyre(tyreData as Omit<Tyre, "id">)}
+          editMode={false}
+          initialData={{
             serialNumber: "TY-" + Math.floor(1000 + Math.random() * 9000),
             dotCode: "",
             manufacturingDate: new Date().toISOString().split("T")[0],
             brand: "",
             model: "",
             pattern: "",
-            size: { width: 0, profile: 0, rimSize: 0, displayString: "" },
+            size: { width: 0, aspectRatio: 0, rimDiameter: 0, displayString: "" },
             loadIndex: 0,
             speedRating: "",
-            type: { code: "", name: "" },
+            type: "spare",
             purchaseDetails: {
               date: new Date().toISOString().split("T")[0],
               cost: 0,
@@ -836,10 +849,10 @@ const TyreManagementPage: React.FC = () => {
               repairs: [],
               inspections: [],
             },
-            milesRun: 0,
+            kmRun: 0,
             kmRunLimit: 0,
             notes: "",
-            location: { code: "", name: "" },
+            location: TyreStoreLocation.VICHELS_STORE,
           }}
         />
       )}
@@ -849,9 +862,9 @@ const TyreManagementPage: React.FC = () => {
         <TyreFormModal
           isOpen={!!editTyre}
           onClose={() => setEditTyre(null)}
-          onSubmit={handleUpdateTyre}
-          mode="edit"
-          defaultValues={editTyre}
+          onSubmit={(tyreData: Partial<Tyre>) => handleUpdateTyre(tyreData as Tyre)}
+          editMode={true}
+          initialData={editTyre as any}
         />
       )}
     </div>
