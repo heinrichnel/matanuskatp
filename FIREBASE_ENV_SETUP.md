@@ -5,9 +5,8 @@ This guide explains how to properly configure Firebase environment variables for
 ## Issue Addressed
 
 The warning message:
-```
+
 src-C0jcwm4_.js:sourcemap:2 ⚠️ Using development Firebase config in production environment! Set proper environment variables.
-```
 
 This occurs when the application is running in a production environment but is using Firebase configuration meant for development.
 
@@ -35,7 +34,6 @@ For production deployment, you must set up proper environment variables:
 
 #### Required Firebase Variables for Production
 
-```
 VITE_FIREBASE_API_KEY=your-production-api-key
 VITE_FIREBASE_AUTH_DOMAIN=your-production-auth-domain
 VITE_FIREBASE_DATABASE_URL=your-production-database-url
@@ -44,7 +42,6 @@ VITE_FIREBASE_STORAGE_BUCKET=your-production-storage-bucket
 VITE_FIREBASE_MESSAGING_SENDER_ID=your-production-messaging-sender-id
 VITE_FIREBASE_APP_ID=your-production-app-id
 VITE_FIREBASE_MEASUREMENT_ID=your-production-measurement-id
-```
 
 ## Deployment Platform Instructions
 

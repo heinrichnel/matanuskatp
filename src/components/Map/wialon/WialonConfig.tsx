@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../../../firebase';
+import React, { useEffect, useState } from "react";
 
 interface WialonConfigProps {
   /** Optional company ID to load/save config for a specific company */
@@ -12,38 +10,38 @@ interface WialonConfig {
   token: string;
   refreshToken?: string;
   language: string;
-  defaultView: 'monitoring' | 'tracks' | 'dashboard';
+  defaultView: "monitoring" | "tracks" | "dashboard";
   expiresAt?: number;
 }
 
 /**
  * WialonConfig Component
- * 
+ *
  * Allows administrators to configure Wialon integration settings
  * such as host URL, access tokens and default views.
  */
-const WialonConfig: React.FC<WialonConfigProps> = ({ companyId = 'default' }) => {
+const WialonConfig: React.FC<WialonConfigProps> = ({ companyId = "default" }) => {
   const [config, setConfig] = useState<WialonConfig>({
-    baseUrl: 'https://hosting.wialon.com/',
-    token: '',
-    language: 'en',
-    defaultView: 'monitoring'
+    baseUrl: "https://hosting.wialon.com/",
+    token: "",
+    language: "en",
+    defaultView: "monitoring",
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isTokenVisible, setIsTokenVisible] = useState(false);
 
   // Languages supported by Wialon
   const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'ru', name: 'Russian' },
-    { code: 'es', name: 'Spanish' },
-    { code: 'de', name: 'German' },
-    { code: 'fr', name: 'French' },
-    { code: 'zh', name: 'Chinese' },
-    { code: 'ar', name: 'Arabic' }
+    { code: "en", name: "English" },
+    { code: "ru", name: "Russian" },
+    { code: "es", name: "Spanish" },
+    { code: "de", name: "German" },
+    { code: "fr", name: "French" },
+    { code: "zh", name: "Chinese" },
+    { code: "ar", name: "Arabic" },
   ];
 
   // Load configuration from Firestore
@@ -51,15 +49,20 @@ const WialonConfig: React.FC<WialonConfigProps> = ({ companyId = 'default' }) =>
     const fetchConfig = async () => {
       try {
         setIsLoading(true);
-        const configRef = doc(db, 'integrationConfig', `wialon-${companyId}`);
+
+        // Dynamically import Firebase modules
+        const { doc, getDoc } = await import("firebase/firestore");
+        const { db } = await import("../../../firebase");
+
+        const configRef = doc(db, "integrationConfig", `wialon-${companyId}`);
         const docSnap = await getDoc(configRef);
-        
+
         if (docSnap.exists()) {
-          setConfig({ ...config, ...docSnap.data() as WialonConfig });
+          setConfig({ ...config, ...(docSnap.data() as WialonConfig) });
         }
       } catch (err) {
-        console.error('Error fetching Wialon configuration:', err);
-        setError('Failed to load configuration. Please try again.');
+        console.error("Error fetching Wialon configuration:", err);
+        setError("Failed to load configuration. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -72,48 +75,52 @@ const WialonConfig: React.FC<WialonConfigProps> = ({ companyId = 'default' }) =>
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      setError('');
+      setError("");
       setSaveSuccess(false);
-      
+
       // Validate required fields
       if (!config.baseUrl || !config.token) {
-        setError('Base URL and Token are required fields.');
+        setError("Base URL and Token are required fields.");
         return;
       }
 
       // Format base URL to ensure it ends with '/'
       let formattedBaseUrl = config.baseUrl;
-      if (!formattedBaseUrl.endsWith('/')) {
-        formattedBaseUrl += '/';
+      if (!formattedBaseUrl.endsWith("/")) {
+        formattedBaseUrl += "/";
       }
-      
-      const configRef = doc(db, 'integrationConfig', `wialon-${companyId}`);
+
+      // Dynamically import Firebase modules
+      const { doc, getDoc, updateDoc, setDoc } = await import("firebase/firestore");
+      const { db } = await import("../../../firebase");
+
+      const configRef = doc(db, "integrationConfig", `wialon-${companyId}`);
       const docSnap = await getDoc(configRef);
-      
+
       if (docSnap.exists()) {
         await updateDoc(configRef, {
           ...config,
           baseUrl: formattedBaseUrl,
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         });
       } else {
         await setDoc(configRef, {
           ...config,
           baseUrl: formattedBaseUrl,
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          updatedAt: new Date().toISOString(),
         });
       }
-      
+
       setSaveSuccess(true);
-      
+
       // Reset success message after 3 seconds
       setTimeout(() => {
         setSaveSuccess(false);
       }, 3000);
     } catch (err) {
-      console.error('Error saving Wialon configuration:', err);
-      setError('Failed to save configuration. Please try again.');
+      console.error("Error saving Wialon configuration:", err);
+      setError("Failed to save configuration. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -131,19 +138,17 @@ const WialonConfig: React.FC<WialonConfigProps> = ({ companyId = 'default' }) =>
   return (
     <div className="p-4 bg-white rounded shadow">
       <h2 className="text-xl font-semibold mb-4">Wialon Integration Configuration</h2>
-      
+
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-300 text-red-700 rounded">
-          {error}
-        </div>
+        <div className="mb-4 p-3 bg-red-50 border border-red-300 text-red-700 rounded">{error}</div>
       )}
-      
+
       {saveSuccess && (
         <div className="mb-4 p-3 bg-green-50 border border-green-300 text-green-700 rounded">
           Configuration saved successfully!
         </div>
       )}
-      
+
       <div className="mb-4">
         <label htmlFor="baseUrl" className="block text-sm font-medium text-gray-700 mb-1">
           Wialon Base URL
@@ -160,7 +165,7 @@ const WialonConfig: React.FC<WialonConfigProps> = ({ companyId = 'default' }) =>
           The base URL for your Wialon instance (e.g., https://hosting.wialon.com/)
         </p>
       </div>
-      
+
       <div className="mb-4">
         <label htmlFor="token" className="block text-sm font-medium text-gray-700 mb-1">
           Wialon Token
@@ -190,7 +195,7 @@ const WialonConfig: React.FC<WialonConfigProps> = ({ companyId = 'default' }) =>
           The authentication token for accessing your Wialon account
         </p>
       </div>
-      
+
       <div className="mb-4">
         <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
           Default Language
@@ -201,14 +206,14 @@ const WialonConfig: React.FC<WialonConfigProps> = ({ companyId = 'default' }) =>
           onChange={(e) => setConfig({ ...config, language: e.target.value })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
-          {languages.map(lang => (
+          {languages.map((lang) => (
             <option key={lang.code} value={lang.code}>
               {lang.name} ({lang.code})
             </option>
           ))}
         </select>
       </div>
-      
+
       <div className="mb-4">
         <label htmlFor="defaultView" className="block text-sm font-medium text-gray-700 mb-1">
           Default View
@@ -224,7 +229,7 @@ const WialonConfig: React.FC<WialonConfigProps> = ({ companyId = 'default' }) =>
           <option value="dashboard">Dashboard</option>
         </select>
       </div>
-      
+
       <div className="flex justify-end mt-6">
         <button
           type="button"
@@ -232,7 +237,7 @@ const WialonConfig: React.FC<WialonConfigProps> = ({ companyId = 'default' }) =>
           disabled={isSaving}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
         >
-          {isSaving ? 'Saving...' : 'Save Configuration'}
+          {isSaving ? "Saving..." : "Save Configuration"}
         </button>
       </div>
     </div>

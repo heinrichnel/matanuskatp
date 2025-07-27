@@ -7,10 +7,11 @@ echo "🚀 Matanuska Fleet Management - Netlify Deployment"
 echo "================================================="
 
 # Netlify site information
-SITE_NAME="matanuskatptapp"
-SITE_ID="46e4911a-e9ef-4286-bc3e-2278d3642860"
-BUILD_HOOK_URL="https://api.netlify.com/build_hooks/687f588f0858d3cca13b3628"
-SITE_URL="https://matanuskatptapp.netlify.app/"
+SITE_NAME="matanuskatransportt"
+SITE_ID="58378633-127a-44c4-878e-61f92936861d"
+# TODO: Update the build hook URL after creating it in the Netlify dashboard
+BUILD_HOOK_URL="https://api.netlify.com/build_hooks/YOUR_NEW_BUILD_HOOK_ID"
+SITE_URL="https://matanuskatransportt.netlify.app/"
 
 echo "📋 Site Information:"
 echo "   Name: $SITE_NAME"
@@ -21,13 +22,13 @@ echo ""
 # Function to trigger build via webhook
 trigger_build() {
     echo "🔄 Triggering Netlify build via webhook..."
-    
+
     # Use curl to trigger the build hook
     response=$(curl -X POST "$BUILD_HOOK_URL" \
         -H "Content-Type: application/json" \
         -w "%{http_code}" \
         -s -o /dev/null)
-    
+
     if [ "$response" = "200" ]; then
         echo "✅ Build triggered successfully!"
         echo "🌐 Monitor deployment at: https://app.netlify.com/sites/$SITE_NAME/deploys"
@@ -41,21 +42,21 @@ trigger_build() {
 # Function to run local build test
 local_build() {
     echo "🏗️ Running local build test..."
-    
+
     # Install dependencies if needed
     if [ ! -d "node_modules" ]; then
         echo "📦 Installing dependencies..."
         npm install
     fi
-    
+
     # Ensure QR code dependencies are installed
     echo "📦 Installing QR code dependencies..."
     npm install qrcode.react html5-qrcode --save
-    
+
     # Run the build
     echo "🔨 Building project..."
     npm run build
-    
+
     if [ $? -eq 0 ]; then
         echo "✅ Local build successful!"
         echo "📁 Build output in ./dist directory"

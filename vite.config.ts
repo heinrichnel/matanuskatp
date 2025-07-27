@@ -22,33 +22,43 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["firebase/app", "firebase/firestore", "jspdf", "jspdf-autotable", "xlsx", "date-fns"],
+    include: [
+      "firebase/app",
+      "firebase/firestore",
+      "firebase/auth",
+      "jspdf",
+      "jspdf-autotable",
+      "xlsx",
+      "date-fns",
+      "@capacitor-community/barcode-scanner",
+    ],
     exclude: ["lucide-react"],
   },
   build: {
     outDir: "dist",
     sourcemap: true,
-    chunkSizeWarningLimit: 1600,
+    // Increase warning limit slightly to reduce noise while we optimize
+    chunkSizeWarningLimit: 1800,
     // Ensure the output directory is emptied before building
     emptyOutDir: true,
     // Create output folder structure based on src
     assetsDir: "assets",
     rollupOptions: {
       output: {
-        // Adjust chunk size warning limit
-        manualChunks: (id) => {
-          // Group React and React DOM into vendor chunk
-          if (id.includes("node_modules/react") || id.includes("node_modules/react-dom")) {
-            return "vendor";
-          }
-          // Group Firebase modules
-          if (id.includes("node_modules/firebase")) {
-            return "firebase";
-          }
-          // Create a dedicated src folder in the output to mirror source structure
-          if (id.includes("/src/")) {
-            return "src";
-          }
+        // Create more granular chunks to optimize loading
+        manualChunks: {
+          // Core vendor libraries
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          // Firebase modules - grouped to prevent mixed import issues
+          "firebase-core": ["firebase/app", "firebase/auth", "firebase/firestore"],
+          // Scanning/barcode functionality
+          scanner: ["@capacitor-community/barcode-scanner", "@capacitor/core"],
+          // Document generation libraries
+          "document-tools": ["jspdf", "jspdf-autotable", "xlsx"],
+          // Date handling
+          "date-utils": ["date-fns"],
+          // UI components and icons
+          "ui-components": ["lucide-react", "tailwindcss", "@radix-ui"],
         },
       },
     },
