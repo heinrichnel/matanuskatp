@@ -3,19 +3,33 @@
  * This file provides basic Google Maps functionality using the API
  */
 
-// Define the API key for Google Maps
-const API_KEY = "AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg";
+// Get API key from environment variables for consistency across environments
+const API_KEY =
+  import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg";
 
 /**
- * Initialize the Google Maps with a marker at Pretoria
+ * Initialize the Google Maps API
+ * This is the entry point called by the Google Maps JavaScript API when loaded
  */
-function initMap(): void {
+async function initMap(): Promise<void> {
+  console.log("Maps JavaScript API loaded.");
+
+  // Initialize map functionality if a map element exists
+  initializeMapIfElementExists();
+}
+
+/**
+ * Initialize the map with a marker at Pretoria if the map element exists
+ * This function is separated from initMap to allow the core initMap function
+ * to match the required signature while preserving functionality
+ */
+function initializeMapIfElementExists(): void {
   const center = { lat: -25.7479, lng: 28.2293 };
   const mapElement = document.getElementById("map");
 
   // Add null check to satisfy TypeScript
   if (!mapElement) {
-    console.error("Map element not found");
+    console.log("Map element not found, skipping map initialization");
     return;
   }
 
@@ -56,9 +70,15 @@ function loadGoogleMapsScript(): void {
   };
 }
 
+// Declare global interface for TypeScript
+declare global {
+  interface Window {
+    initMap: () => void;
+  }
+}
+
 // Make initMap globally accessible for Google Maps callback
-// Using type assertion to avoid TypeScript errors
-(window as any).initMap = initMap;
+window.initMap = initMap;
 
 // Attach the script loader to window.onload
 window.onload = loadGoogleMapsScript;

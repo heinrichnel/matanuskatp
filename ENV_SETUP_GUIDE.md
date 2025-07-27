@@ -150,3 +150,10 @@ Database secretsmat1-9e6b3-default-rtdb	0MpRyYXn67xayFt4C8uNcXMII2IJWlXISzbwDQ3C
 j7p2x0nwjjkuVOSn1xN7nkF3gt_OaZKxuNxRJ7j2w74
 https://www.google.com/search?q=250085264089-compute%40developer.gserviceaccount.com&rlz=1C1ONGR_enZA1072ZA1072&oq=250085264089-compute%40developer.gserviceaccount.com&gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MgYIARBFGDrSAQgxODcyajBqNKgCALACAQ&sourceid=chrome&ie=UTF-8
 Firebase Cloud Messaging API (V1)
+
+{"web":{"client_id":"250085264089-tsqf0br8rq5qt7c24ntj1ohmb4ehhffo.apps.googleusercontent.com","project_id":"mat1-9e6b3","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","redirect_uris":["https://matanuskatransportt.netlify.app","https://github.com/heinrichnel/matanuskatp.git"],"javascript_origins":["https://matanuskatransportt.netlify.app","https://maps.googleapis.com","https://maps-250085264089.africa-south1.run.app"]}}
+
+{"installed":{"client_id":"250085264089-0e3rkp3gj3cbjlntt3hm5gg9lluvplr5.apps.googleusercontent.com","project_id":"mat1-9e6b3","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","redirect_uris":["http://localhost"]}}
+
+
+{"installed":{"client_id":"250085264089-edui6nsubppc3dqtdp9seumglmddlg95.apps.googleusercontent.com","project_id":"mat1-9e6b3","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs"}}
