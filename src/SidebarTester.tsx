@@ -2,21 +2,40 @@ import { useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./AppRoutes";
 import { sidebarConfig } from "./config/sidebarConfig";
+import { CSSProperties } from "react";
 
-// Styling for the testing UI
-const styles = {
-  container: {
-    display: "flex",
-    height: "100vh",
+// Define sidebar item interface
+interface SidebarItem {
+  id: string;
+  path: string;
+  label: string;
+  icon?: string;
+  component?: React.ComponentType<any>;
+  children?: SidebarItem[];
+}
+
+// Define test results interface
+interface TestResults {
+  totalRoutes: number;
+  accessibleRoutes: number;
+  nestedRoutes: number;
+  maxNestingLevel: number;
+  sidebarTitle: {
+    fontSize: "0.9rem",
+    textTransform: "uppercase" as const,
+    marginBottom: "0.5rem",
+    color: "#a0aec0",
+    fontWeight: "bold",
+  } as CSSProperties,
     overflow: "hidden",
-  },
+  } as CSSProperties,
   sidebar: {
     width: "280px",
     backgroundColor: "#1a2236",
     color: "white",
     padding: "1rem",
-    overflowY: "auto",
-  },
+    overflowY: "auto" as const,
+  } as CSSProperties,
   sidebarSection: {
     marginBottom: "1.5rem",
   },
@@ -27,12 +46,12 @@ const styles = {
     color: "#a0aec0",
     fontWeight: "bold",
   },
-  sidebarItem: {
-    padding: "0.5rem 0.75rem",
-    marginBottom: "0.25rem",
-    borderRadius: "4px",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
+  content: {
+    flex: 1,
+    padding: "1rem",
+    backgroundColor: "#f7fafc",
+    overflowY: "auto" as const,
+  } as CSSProperties,
   },
   sidebarItemActive: {
     backgroundColor: "#2d3748",
@@ -66,28 +85,9 @@ const styles = {
     padding: "1rem",
     backgroundColor: "#e2e8f0",
     borderRadius: "4px",
-  },
-  button: {
-    padding: "0.5rem 0.75rem",
-    backgroundColor: "#4299e1",
-    color: "white",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    marginRight: "0.5rem",
-  },
-  testResult: {
-    marginTop: "1rem",
-    padding: "1rem",
-    backgroundColor: "#ffffff",
-    borderRadius: "4px",
-    border: "1px solid #e2e8f0",
-  },
-};
-
 // Group sidebar items into sections for rendering
-const groupSidebarItems = (items) => {
-  const sections = {
+const groupSidebarItems = (items: SidebarItem[]) => {
+  const sections: Record<string, SidebarItem[]> = {
     Dashboard: [],
     "Trip Management": [],
     Invoices: [],
@@ -101,8 +101,8 @@ const groupSidebarItems = (items) => {
     Notifications: [],
     Settings: [],
   };
-
-  items.forEach((item) => {
+  },
+  items.forEach((item: SidebarItem) => {
     if (item.id === "dashboard") {
       sections["Dashboard"].push(item);
     } else if (item.id === "trip-management") {
@@ -129,34 +129,58 @@ const groupSidebarItems = (items) => {
       sections["Settings"].push(item);
     }
   });
-
-  return sections;
-};
-
+      sections["Diesel Management"].push(item);
+    } else if (item.id === "clients") {
+      sections["Clients"].push(item);
+    } else if (item.id === "drivers") {
 const SidebarTester = () => {
   const [activePath, setActivePath] = useState("/dashboard");
-  const [testResults, setTestResults] = useState({});
-  const [expandedSections, setExpandedSections] = useState({});
+  const [testResults, setTestResults] = useState<TestResults>({
+    totalRoutes: 0,
+    accessibleRoutes: 0,
+    nestedRoutes: 0,
+    maxNestingLevel: 0
+  });
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
-  const sections = groupSidebarItems(sidebarConfig);
+  const sections = groupSidebarItems(sidebarConfig as SidebarItem[]);
 
-  const toggleSection = (sectionName) => {
+  const toggleSection = (sectionName: string) => {
     setExpandedSections({
       ...expandedSections,
       [sectionName]: !expandedSections[sectionName],
     });
   };
-
-  const handleItemClick = (path) => {
-    setActivePath(path);
-  };
-
   const runRouteTest = () => {
-    const results = {
+    const results: TestResults = {
       totalRoutes: 0,
       accessibleRoutes: 0,
       nestedRoutes: 0,
       maxNestingLevel: 0,
+    };
+
+    const countRoutes = (items: SidebarItem[], level = 1) => {
+      items.forEach((item: SidebarItem) => {
+        results.totalRoutes++;
+
+        if (item.component) {
+          results.accessibleRoutes++;
+        }
+
+        if (item.children && item.children.length) {
+          results.nestedRoutes += item.children.length;
+          results.maxNestingLevel = Math.max(results.maxNestingLevel, level + 1);
+          countRoutes(item.children, level + 1);
+        }
+      });
+    };
+
+    countRoutes(sidebarConfig as SidebarItem[]);
+    setTestResults(results);
+  };
+
+  const renderSidebarItems = (items: SidebarItem[], isChild = false) => {
+    return items.map((item: SidebarItem) => (
     };
 
     const countRoutes = (items, level = 1) => {
@@ -275,8 +299,8 @@ const SidebarTester = () => {
                   }}
                   onClick={() => {
                     console.log(
-                      "UI Elements:",
-                      document.querySelectorAll('button, a.btn, input[type="submit"], form').length
+                      (btn as HTMLElement).style.outline = "2px solid red";
+                      btn.setAttribute("data-highlighted", "true");
                     );
                     alert(
                       `Found ${document.querySelectorAll('button, a.btn, input[type="submit"]').length} UI interaction elements and ${document.querySelectorAll("form").length} forms on this page`
@@ -295,7 +319,7 @@ const SidebarTester = () => {
                     cursor: "pointer",
                   }}
                   onClick={() => {
-                    const buttons = Array.from(
+                      (form as HTMLElement).style.outline = "2px dashed blue";
                       document.querySelectorAll('button, a.btn, input[type="submit"]')
                     );
                     buttons.forEach((btn) => {
