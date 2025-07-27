@@ -44,7 +44,7 @@ import DriverPerformancePage from "./components/DriverManagement/DriverPerforman
 import MapsView from "./components/Map/MapsView";
 import LoadConfirmation from "./components/TripManagement/LoadConfirmation";
 import TripTemplateManager from "./components/TripManagement/TripTemplateManager";
-import ActiveTripsPage from "./pages/ActiveTripsPage";
+import ActiveTripsPage from "./pages/ActiveTripsPageEnhanced";
 import AddTripPage from "./pages/AddTripPage";
 import FlagsInvestigations from "./pages/FlagsInvestigationsPage";
 import FleetManagementPage from "./pages/FleetManagementPage";

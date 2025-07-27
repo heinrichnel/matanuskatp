@@ -1,4 +1,3 @@
-// src/pages/ActiveTripsPageEnhanced.tsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,

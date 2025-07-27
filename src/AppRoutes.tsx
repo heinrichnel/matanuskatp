@@ -1,6 +1,6 @@
 // src/AppRoutes.tsx
 import React, { Suspense, lazy } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/layout/Layout"; // adjust alias/path if needed
 
 // A tiny helper to keep JSX clean
@@ -25,7 +25,7 @@ const TripManagementPage = lazy(() => import("./pages/TripManagementPage"));
 const TripCalendarPage = lazy(() => import("./pages/TripCalendarPage"));
 const TripTimelinePage = lazy(() => import("./pages/TripTimelinePage"));
 const TripReportPage = lazy(() => import("./pages/TripReportPage"));
-const ActiveTripsPage = lazy(() => import("./pages/ActiveTripsPage"));
+const ActiveTripsPage = lazy(() => import("./pages/ActiveTripsPageEnhanced"));
 const CompletedTrips = lazy(() => import("./pages/CompletedTrips"));
 const AddTripPage = lazy(() => import("./pages/AddTripPage"));
 const TripDetailsPage = lazy(() => import("./pages/trips/TripDetailsPage"));
@@ -47,9 +47,7 @@ const MissedLoadsTracker = lazy(() => import("./pages/MissedLoadsTracker"));
  * ----------------------------- */
 const DieselDashboard = lazy(() => import("./pages/DieselDashboard"));
 const DieselAnalysis = lazy(() => import("./pages/DieselAnalysis"));
-const DieselDashboardComponent = lazy(
-  () => import("./pages/diesel/DieselDashboardComponent")
-);
+const DieselDashboardComponent = lazy(() => import("./pages/diesel/DieselDashboardComponent"));
 const AddFuelEntryPage = lazy(() => import("./pages/diesel/AddFuelEntryPage"));
 const FuelLogs = lazy(() => import("./pages/diesel/FuelLogs"));
 const FuelTheftDetection = lazy(() => import("./pages/diesel/FuelTheftDetection"));
@@ -119,9 +117,7 @@ const InspectionManagement = lazy(() => import("./pages/InspectionManagement"));
  * Tyres
  * ----------------------------- */
 const TyreManagementPage = lazy(() => import("./pages/tyres/TyreManagementPage"));
-const TyreReferenceManagerPage = lazy(
-  () => import("./pages/tyres/TyreReferenceManagerPage")
-);
+const TyreReferenceManagerPage = lazy(() => import("./pages/tyres/TyreReferenceManagerPage"));
 const AddNewTyrePage = lazy(() => import("./pages/tyres/AddNewTyrePage"));
 const TyrePerformanceDashboard = lazy(() => import("./pages/TyrePerformanceDashboard"));
 const TyreHistoryPage = lazy(() => import("./pages/TyreHistoryPage"));
@@ -149,9 +145,7 @@ const WialonDashboard = lazy(() => import("./pages/WialonDashboard"));
 const WialonConfigPage = lazy(() => import("./pages/WialonConfigPage"));
 const WialonUnitsPage = lazy(() => import("./pages/WialonUnitsPage"));
 const FleetManagementPage = lazy(() => import("./pages/FleetManagementPage"));
-const FleetLocationMapPage = lazy(
-  () => import("./components/Map/pages/FleetLocationMapPage")
-);
+const FleetLocationMapPage = lazy(() => import("./components/Map/pages/FleetLocationMapPage"));
 
 /* -----------------------------
  * Flags / Investigations
@@ -169,13 +163,12 @@ const PurchaseOrderTracker = lazy(() => import("./pages/PurchaseOrderTracker"));
 const PurchaseOrderDetailView = lazy(() => import("./pages/PurchaseOrderDetailView"));
 const ReportNewIncidentPage = lazy(() => import("./pages/ReportNewIncidentPage"));
 
-
 /* -----------------------------
  * 404
  * ----------------------------- */
 const NotFound = () => <div className="p-6">404 – Page not found</div>;
 
-interface Trip {}  // Add the Trip interface or import it
+interface Trip {} // Add the Trip interface or import it
 
 export const AppRoutes: React.FC = () => {
   const [showTripForm, setShowTripForm] = React.useState(false);
@@ -184,7 +177,10 @@ export const AppRoutes: React.FC = () => {
   return (
     <Routes>
       {/* All app pages live under the Layout */}
-      <Route path="/" element={<Layout setShowTripForm={setShowTripForm} setEditingTrip={setEditingTrip} />}>
+      <Route
+        path="/"
+        element={<Layout setShowTripForm={setShowTripForm} setEditingTrip={setEditingTrip} />}
+      >
         {/* Default redirect to /dashboard */}
         <Route index element={<Navigate to="/dashboard" replace />} />
 
@@ -212,10 +208,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="payments/:tripId" element={withSuspense(PaymentTrackingPanel)} />
           <Route path="reports/:tripId" element={withSuspense(ReportingPanel)} />
           <Route path="load-planning" element={withSuspense(LoadPlanningPage)} />
-          <Route
-            path="load-planning/component"
-            element={withSuspense(LoadPlanningComponentPage)}
-          />
+          <Route path="load-planning/component" element={withSuspense(LoadPlanningComponentPage)} />
         </Route>
 
         {/* Diesel */}
@@ -299,10 +292,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="manage" element={withSuspense(TyreManagementPage)} />
           <Route path="reference" element={withSuspense(TyreReferenceManagerPage)} />
           <Route path="new" element={withSuspense(AddNewTyrePage)} />
-          <Route
-            path="performance"
-            element={withSuspense(TyrePerformanceDashboard)}
-          />
+          <Route path="performance" element={withSuspense(TyrePerformanceDashboard)} />
           <Route path="history" element={withSuspense(TyreHistoryPage)} />
           <Route path="fleet-map" element={withSuspense(TyreFleetMap)} />
           <Route path="stores" element={withSuspense(TyreStores)} />
@@ -343,10 +333,7 @@ export const AppRoutes: React.FC = () => {
 
         {/* Misc / other */}
         <Route path="load-planning" element={withSuspense(LoadPlanningPage)} />
-        <Route
-          path="load-planning/component"
-          element={withSuspense(LoadPlanningComponentPage)}
-        />
+        <Route path="load-planning/component" element={withSuspense(LoadPlanningComponentPage)} />
         <Route path="route-planning" element={withSuspense(RoutePlanningPage)} />
         <Route path="route-optimization" element={withSuspense(RouteOptimizationPage)} />
         <Route path="trip-calendar" element={withSuspense(TripCalendarTop)} />
