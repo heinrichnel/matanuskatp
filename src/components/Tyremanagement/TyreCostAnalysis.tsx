@@ -14,41 +14,6 @@ import { SAMPLE_TYRES, TYRE_BRANDS, TYRE_PATTERNS, Tyre } from "@/data/tyreData"
 import { BarChart3, DollarSign, Download, TrendingDown, TrendingUp } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-// DEBUG ONLY - Log import diagnostics
-useEffect(() => {
-  console.log("=== TYRE COMPONENT IMPORT DIAGNOSTICS ===");
-
-  // Check UI component imports
-  console.log("UI Components:");
-  try {
-    console.log("Card imported:", !!Card);
-    console.log("Button imported:", !!Button);
-    console.log("Badge imported:", !!Badge);
-    console.log("Table imported:", !!Table);
-  } catch (error) {
-    console.error("UI component import error:", error);
-  }
-
-  // Check data imports
-  console.log("Data imports:");
-  try {
-    console.log("SAMPLE_TYRES:", SAMPLE_TYRES ? SAMPLE_TYRES.length : "undefined");
-    console.log("TYRE_BRANDS:", TYRE_BRANDS ? TYRE_BRANDS.length : "undefined");
-    console.log("TYRE_PATTERNS:", TYRE_PATTERNS ? TYRE_PATTERNS.length : "undefined");
-  } catch (error) {
-    console.error("Data import error:", error);
-  }
-
-  // Log expected vs actual names
-  console.log("Import names check:");
-  try {
-    const dataModule = require("@/data/tyreData");
-    console.log("Available exports:", Object.keys(dataModule));
-  } catch (error) {
-    console.error("Module inspection error:", error);
-  }
-}, []);
-
 interface TyreCostMetrics {
   brand: string;
   pattern: string;
