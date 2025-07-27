@@ -74,6 +74,7 @@
     "@mui/lab": "^7.0.0-beta.14",
     "@mui/material": "^7.2.0",
     "@mui/x-data-grid": "^8.8.0",
+    "@netlify/functions": "^4.1.15",
     "@paypal/checkout-server-sdk": "^1.0.3",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-tabs": "^1.1.12",
