@@ -4,8 +4,7 @@
  */
 
 // Get API key from environment variables for consistency across environments
-const API_KEY =
-  import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg";
+const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY";
 
 /**
  * Initialize the Google Maps API

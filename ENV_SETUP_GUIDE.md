@@ -97,17 +97,17 @@ For different environments (development, staging, production), you can create:
 - Consider using environment variable encryption for production deployments
 
 
-VITE_FIREBASE_API_KEY=AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g
-VITE_FIREBASE_AUTH_DOMAIN=mat1-9e6b3.firebaseapp.com
-VITE_FIREBASE_DATABASE_URL=https://mat1-9e6b3-default-rtdb.firebaseio.com
-VITE_FIREBASE_PROJECT_ID=mat1-9e6b3
-VITE_FIREBASE_STORAGE_BUCKET=mat1-9e6b3.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=250085264089
-VITE_FIREBASE_APP_ID=1:250085264089:web:51c2b209e0265e7d04ccc8
-VITE_FIREBASE_MEASUREMENT_ID=G-YHQHSJN5CQ
-VITE_MOBILESERVICE_APP_ID=1:250085264089:android:eddb5bd08de0b1b604ccc8
-VITE_MOBILESERVICE_PACKAGE_NAME=matmobile.com
-VITE_MOBILESERVICE_API_KEY=AIzaSyDNk9iW1PTGM9hvcjJ0utBABs7ZiWCj3Xc
+VITE_FIREBASE_API_KEY=YOUR_FIREBASE_API_KEY_HERE
+VITE_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
+VITE_FIREBASE_DATABASE_URL=https://your-project-id-default-rtdb.firebaseio.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=YOUR_MESSAGING_SENDER_ID
+VITE_FIREBASE_APP_ID=YOUR_APP_ID
+VITE_FIREBASE_MEASUREMENT_ID=YOUR_MEASUREMENT_ID
+VITE_MOBILESERVICE_APP_ID=YOUR_MOBILE_APP_ID
+VITE_MOBILESERVICE_PACKAGE_NAME=your.package.name
+VITE_MOBILESERVICE_API_KEY=YOUR_MOBILE_SERVICE_API_KEY
 
 # Google Cloud Run container URLs
 VITE_CONTAINER_IMAGE=africa-south1-docker.pkg.dev/mat1-9e6b3/cloud-run-source-deploy/maps@sha256:5c17a017781479f9a428e897b914a637ea1a2e92ece21c8d834600d00bb1bbe6
@@ -117,25 +117,25 @@ VITE_CLOUD_RUN_URL_ALTERNATIVE=https://maps-3ongv2xd5a-bq.a.run.app
 # --------------------------------------
 # WAILON FUNCTION
 # --------------------------------------
-VITE_WIALON_SESSION_TOKEN=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053
+VITE_WIALON_SESSION_TOKEN=YOUR_WIALON_SESSION_TOKEN_HERE
 VITE_WIALON_API_URL=https://hst-api.wialon.com
-VITE_WIALON_LOGIN_URL=https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en
+VITE_WIALON_LOGIN_URL=https://hosting.wialon.com/?token=YOUR_WIALON_TOKEN_HERE&lang=en
 # --------------------------------------
 # GOOGLE MAPS CONFIGURATION
 # --------------------------------------
-VITE_GOOGLE_MAPS_API_KEY=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg
-VITE_MAPS_SERVICE_URL=https://maps-250085264089.africa-south1.run.app//=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg
-VITE_MAPS_DOCKER_SERVICE_URL=https://maps-250085264089.africa-south1.run.appafrica-south1-docker.pkg.dev/mat1-9e6b3/cloud-run-source-deploy/maps@sha256:994cecbac15d657e4e1401132b32970bafaa64d6b923294f629636543b551a2c
-VITE_GOOGLE_MAPS_API_KEY=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg
-VITE__GOOGLE_MAPS_EMBED_URL=https://www.google.com/maps/embed/v1/place?key=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg
+VITE_GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY_HERE
+VITE_MAPS_SERVICE_URL=https://your-maps-service-url.run.app
+VITE_MAPS_DOCKER_SERVICE_URL=https://your-maps-service-url.run.app
+VITE_GOOGLE_MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY_HERE
+VITE__GOOGLE_MAPS_EMBED_URL=https://www.google.com/maps/embed/v1/place?key=YOUR_GOOGLE_MAPS_API_KEY_HERE
 
 # Firebase Service Account Configuration
-VITE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCSftyXJgpaQ0Ji\nZ/k1xTjKhcTwgOxmnCpIPx3rST/zlwCdf3Gf8Gdzkf68C5rYg7fhg8IwicrmU4+q\n5DNwqIvwybaQbUV+IX+oCq44fYluLurDq5+ZLm7PxjYEyLBF+kVn5rbmjeI+1tWH\nkAqpMpAdX7+CgJr3Ue85c47Vi5k1OBEeHLRNqiv0Ms0EeEJ5FaZxl1SyUjl6LlBL\nS/nx8C5mR9fta0LiQCmfgYNFLUNlC8uS/vaGHdvMJPl45PzBItH+o5zOAaL5Swl0\ns0h1LAd+CBBhzA4IeQURhuaeWsiH8oW6R56bjx0C5onyoTzqzCFDOz2xRW7Zb8N9\nH2s4xcg5AgMBAAECggEACxaFyv1uuWn/lWvt94FJ1P9Wuobhjbsqcp0vXiqFSAJB\nAkq9/odvRxaw54n/0n02vt+OhEa7qB8BP+OllpR1Qhh8ZFZW9Q7jRwRm7yDmVOQB\nciW0bt9ONRT5K/fGKsfAdtamN5Fb41p2nzv6aJfKg2SmvcGO6SMHFqu9zwExy46p\nU4QiE2o+4rdnFRKaIrsuzPxwYzLrKByB0mWj/y9kY07S2J/9ftV283hPq3hTD2H4\n78dpeaNXODM/6HHrIUUiGLM1jQSLS4jakbonNq42BaZ5e31KbWrir3MuQvoStBGY\nU62aoJqDHrbvLjO5YrAhvoQRMPxbBvwzWNumLLxqgQKBgQDNvHRzQKIYAYyH6N+V\nN9TjBDVK7d5RkIPM7M3W0dmrjQSMyxUWRQiyNvRVN95TThxU3sr4k6wgYQsV7iFH\nU5WBGo/jf6L3VpUo9VzCjEHbXBvSCcvucDe4aE6qFrLO8/stCjeKqQVel71B6oqP\n2n+sVhNSAEeyFcB0ueG7MeLYgQKBgQC2SUSD1JmRSelxaLDTUzw1Dhz/j6DH64qV\nYra0xmJir5p96eDcXWDeMpMEdBnS/aOMul2C3rGoPlae32ffgV6DdP4ECYMVdK4x\n2tXxO52X8cWU3+LDHrm8lWiigEwo3s2el0f5W6ozZ41h6A6ldLP85uvFyCX1nrOe\nhXcWiOXTuQKBgQCTJgk8LaxB80mqI5tWxLoVLPtY/k0WlYBPX8fRsAI5uwDYGqCY\nbwPLQ5b6JJ11g9artTYDGMvx1LbzFoDi3Rt/XZowoyfSNDE3PFb+Jwcrd/PGBI/B\nmK2hzakF6no1nze1fStAl6dpgqowrSoxvZu3jVEAQ4cEDp66XgDfvMx9AQKBgQCb\nzeQSChV4aYRuutzow6wibP28MjdqqZi6NrWTrj1JvG6AUPcxY174jKG8nL+157Vz\nA5gJ0+5lr2K6SJmwIBN4qPa03Kx+Gk0Jr9JNbnc0+CG5LePUgt6eodXdj2uJQ2bc\nttF+ASto5ImjtYVPRoDRGU9MrdZEKnG8fLddO4W1gQKBgG6ITERMZjBrgo7AHkHm\nKOL99I2/+g5+9S/Ss+qD7ivIKFMbBmzFk4tnW//XB0+ATLmLSkpxcLBEVD9l/Flq\n3iP7whqO3LrxuEN7C5C/KmQZjbgeg5ylzMaqxG6BbDdnjGDWSFWgWzkO7FFFVEmc\nxeMDJh9JowhnRh/6MBOIuBfT\n-----END PRIVATE KEY-----\n"
+# IMPORTANT: Replace with your own Firebase service account credentials
+VITE_SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n"
 
-
-VITE_SERVICE_ACCOUNT_PRIVATE_KEY_ID="036a90e4691c595a348aabbe6515d8291acd6574"
-VITE_CLIENT_EMAIL="firebase-adminsdk-fbsvc@mat1-9e6b3.iam.gserviceaccount.com"
-VITE_CLIENT_ID="101330162184304566760"
+VITE_SERVICE_ACCOUNT_PRIVATE_KEY_ID="YOUR_PRIVATE_KEY_ID"
+VITE_CLIENT_EMAIL="your-service-account@your-project-id.iam.gserviceaccount.com"
+VITE_CLIENT_ID="YOUR_CLIENT_ID"
 VITE_AUTH_URI="https://accounts.google.com/o/oauth2/auth"
 VITE_TOKEN_URI="https://oauth2.googleapis.com/token"
 VITE_AUTH_PROVIDER_X509_CERT_URL="https://www.googleapis.com/oauth2/v1/certs"
@@ -143,17 +143,23 @@ VITE_CLIENT_X509_CERT_URL="https://www.googleapis.com/robot/v1/metadata/x509/fir
 VITE_UNIVERSE_DOMAIN="googleapis.com"
 
 
-VITE_MAP_ID=d35f5614ad4e1438af0aca58
-VITE_MAPS_SERVICE_URL="https://maps-250085264089.africa-south1.run.app"
-AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg
-Database secretsmat1-9e6b3-default-rtdb	0MpRyYXn67xayFt4C8uNcXMII2IJWlXISzbwDQ3C
-j7p2x0nwjjkuVOSn1xN7nkF3gt_OaZKxuNxRJ7j2w74
-https://www.google.com/search?q=250085264089-compute%40developer.gserviceaccount.com&rlz=1C1ONGR_enZA1072ZA1072&oq=250085264089-compute%40developer.gserviceaccount.com&gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MgYIARBFGDrSAQgxODcyajBqNKgCALACAQ&sourceid=chrome&ie=UTF-8
-Firebase Cloud Messaging API (V1)
+VITE_MAP_ID=YOUR_MAP_ID
+VITE_MAPS_SERVICE_URL="https://your-maps-service.run.app"
+# REMOVED: API keys and database secrets
+// REMOVED: Sensitive API credentials and OAuth secrets
+// NOTE: If you need to set up OAuth credentials, please create your own in the Google Cloud Console.
+// Do not commit real credentials to the repository.
 
-{"web":{"client_id":"250085264089-tsqf0br8rq5qt7c24ntj1ohmb4ehhffo.apps.googleusercontent.com","project_id":"mat1-9e6b3","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","redirect_uris":["https://matanuskatransportt.netlify.app","https://github.com/heinrichnel/matanuskatp.git"],"javascript_origins":["https://matanuskatransportt.netlify.app","https://maps.googleapis.com","https://maps-250085264089.africa-south1.run.app"]}}
-
-{"installed":{"client_id":"250085264089-0e3rkp3gj3cbjlntt3hm5gg9lluvplr5.apps.googleusercontent.com","project_id":"mat1-9e6b3","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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","redirect_uris":["http://localhost"]}}
-
-
-{"installed":{"client_id":"250085264089-edui6nsubppc3dqtdp9seumglmddlg95.apps.googleusercontent.com","project_id":"mat1-9e6b3","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs"}}
+// Example OAuth credentials structure (with placeholder values):
+{
+  "web": {
+    "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+    "project_id": "your-project-id",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_secret": "YOUR_CLIENT_SECRET",
+    "redirect_uris": ["https://your-app-domain.com"],
+    "javascript_origins": ["https://your-app-domain.com"]
+  }
+}

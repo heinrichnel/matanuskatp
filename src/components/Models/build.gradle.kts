@@ -24,7 +24,7 @@ dependencies {
 
 
 // index.js
-const API_KEY = 'AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg';
+const API_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY';
 
 function initMap() {
   const center = { lat: -25.7479, lng: 28.2293 };

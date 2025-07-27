@@ -1,5 +1,5 @@
 // googlemaps/index.js - Standalone Google Maps implementation
-const API_KEY = "AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg";
+const API_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY";
 
 /**
  * Initialize the Google Maps API
