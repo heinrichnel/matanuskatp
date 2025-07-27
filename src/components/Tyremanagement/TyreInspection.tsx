@@ -1,21 +1,29 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
-import { VehicleSelector } from '../common/VehicleSelector';
-import { TyreSize as TyreSizeData, TyreInspectionEntry } from '../../data/tyreData'; 
-import { Tyre } from '../../types/tyre'; // Import Tyre from types/tyre to match VehicleTyreView
-import VehicleTyreView from "./VehicleTyreView";
+import React, { ChangeEvent, useEffect, useState } from "react";
+import { TyreInspectionEntry, TyreSize as TyreSizeData } from "../../data/tyreData";
+import VehicleTyreView from "../../pages/VehicleTyreView";
+import { Tyre } from "../../types/tyre"; // Import Tyre from types/tyre to match VehicleTyreView
+import { VehicleSelector } from "../common/VehicleSelector";
 
 // Import tyre reference data
 import {
+  AlertTriangle,
+  Camera,
+  CheckCircle2,
+  Ruler,
+  Save,
+  ShoppingBag,
+  Upload,
+} from "lucide-react";
+import { tyreBrands, tyrePatterns, tyreSizes } from "../../data/tyreData";
+import {
+  getPositionsByFleet,
   getTyresByBrand,
   getTyresBySize,
   VENDORS,
-  getPositionsByFleet,
 } from "../../utils/tyreConstants";
-import { tyreSizes, tyreBrands, tyrePatterns } from '../../data/tyreData';
-import { Input, Select, TextArea } from '../ui/FormElements';
-import Button from '../ui/Button';
-import ErrorMessage from '../ui/ErrorMessage';
-import { CheckCircle2, Ruler, ShoppingBag, Camera, Upload, AlertTriangle, Save } from 'lucide-react';
+import Button from "../ui/Button";
+import ErrorMessage from "../ui/ErrorMessage";
+import { Input, Select, TextArea } from "../ui/FormElements";
 
 // Thresholds for tyre condition assessment
 const TYRE_THRESHOLDS = {
@@ -56,7 +64,8 @@ const parseTyreSize = (sizeStr: string): TyreSizeData => {
 };
 
 // Helper function to format tyre size as string
-const formatTyreSize = (size: TyreSizeData): string => `${size.width}/${size.aspectRatio}R${size.rimDiameter}`;
+const formatTyreSize = (size: TyreSizeData): string =>
+  `${size.width}/${size.aspectRatio}R${size.rimDiameter}`;
 
 // Interface for the inspection form data
 interface TyreInspectionFormData {
@@ -99,7 +108,7 @@ export interface TyreInspectionData {
   inspectorName: string;
   treadDepth: string;
   pressure: string;
-  condition: TyreConditionStatus | '';
+  condition: TyreConditionStatus | "";
   damage: string;
   notes: string;
   photos: string[];
@@ -153,8 +162,7 @@ const TyreInspection: React.FC = () => {
 
   // Add state for new tyre option
   const [showNewTyreFields, setShowNewTyreFields] = useState<boolean>(false);
-  const [showInspectionHistory, setShowInspectionHistory] =
-    useState<boolean>(false);
+  const [showInspectionHistory, setShowInspectionHistory] = useState<boolean>(false);
 
   // Update position options when fleet number changes
   useEffect(() => {
@@ -195,7 +203,7 @@ const TyreInspection: React.FC = () => {
     if (tyre) {
       setFormData((prevData) => ({
         ...prevData,
-        tyrePosition: tyre.installation?.position || '',
+        tyrePosition: tyre.installation?.position || "",
         treadDepth: tyre.condition.treadDepth.toString(),
         pressure: tyre.condition.pressure.toString(),
         brand: tyre.brand,
@@ -206,11 +214,14 @@ const TyreInspection: React.FC = () => {
         tyreSize: tyre.size,
         cost: tyre.purchaseDetails.cost?.toString() ?? "",
         estimatedLifespan: tyre.kmRunLimit?.toString() ?? "",
-        currentMileage: tyre.milesRun?.toString() ?? tyre.installation?.mileageAtInstallation?.toString() ?? '0',
+        currentMileage:
+          tyre.milesRun?.toString() ?? tyre.installation?.mileageAtInstallation?.toString() ?? "0",
       }));
       if (tyre.brand) {
         const brandTyres = getTyresByBrand(tyre.brand);
-        const patterns = Array.from(new Set(brandTyres.map((t) => t.pattern).filter((p) => p !== "")));
+        const patterns = Array.from(
+          new Set(brandTyres.map((t) => t.pattern).filter((p) => p !== ""))
+        );
         setPatternOptions(patterns);
       }
     }
@@ -222,11 +233,7 @@ const TyreInspection: React.FC = () => {
       const newData = { ...prevData, [field]: value };
 
       // Auto-detect issues based on thresholds when these values change
-      if (
-        field === "treadDepth" ||
-        field === "pressure" ||
-        field === "sidewallCondition"
-      ) {
+      if (field === "treadDepth" || field === "pressure" || field === "sidewallCondition") {
         const detected = {
           treadDepthIssue:
             field === "treadDepth"
@@ -324,10 +331,10 @@ const TyreInspection: React.FC = () => {
         parseFloat(formData.treadDepth) < TYRE_THRESHOLDS.treadDepth.worn
           ? "urgent"
           : formData.detected.treadDepthIssue ||
-            formData.detected.pressureIssue ||
-            formData.detected.sidewallIssue
-          ? "worn"
-          : "good";
+              formData.detected.pressureIssue ||
+              formData.detected.sidewallIssue
+            ? "worn"
+            : "good";
 
       // Create inspection entry
       const inspectionEntry: TyreInspectionEntry = {
@@ -381,10 +388,7 @@ const TyreInspection: React.FC = () => {
           // Add the new inspection to history
           maintenanceHistory: {
             ...selectedTyre.maintenanceHistory,
-            inspections: [
-              ...(selectedTyre.maintenanceHistory?.inspections ?? []),
-              inspectionEntry,
-            ],
+            inspections: [...(selectedTyre.maintenanceHistory?.inspections ?? []), inspectionEntry],
           },
         };
 
@@ -470,14 +474,10 @@ const TyreInspection: React.FC = () => {
         <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-4">
           <div className="flex items-center">
             <CheckCircle2 className="h-5 w-5 text-green-500 mr-2" />
-            <h3 className="text-green-800 font-medium">
-              Inspection saved successfully
-            </h3>
+            <h3 className="text-green-800 font-medium">Inspection saved successfully</h3>
           </div>
           {hasIssues && (
-            <p className="mt-2 text-green-700">
-              Issues were detected and logged to the system.
-            </p>
+            <p className="mt-2 text-green-700">Issues were detected and logged to the system.</p>
           )}
         </div>
       )}
@@ -504,7 +504,9 @@ const TyreInspection: React.FC = () => {
               <Input
                 label="Inspector"
                 value={formData.inspector}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange("inspector", e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  handleChange("inspector", e.target.value)
+                }
                 placeholder="Your name"
                 required
               />
@@ -513,7 +515,9 @@ const TyreInspection: React.FC = () => {
                 label="Date"
                 type="date"
                 value={formData.date}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange("date", e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                  handleChange("date", e.target.value)
+                }
                 required
               />
             </div>
@@ -542,8 +546,8 @@ const TyreInspection: React.FC = () => {
                 // Inspection History View
                 <div className="space-y-4">
                   <div className="text-sm text-gray-500 mb-4">
-                    Showing inspection history for {selectedTyre.brand}{" "}
-                    {selectedTyre.model} ({selectedTyre.serialNumber})
+                    Showing inspection history for {selectedTyre.brand} {selectedTyre.model} (
+                    {selectedTyre.serialNumber})
                   </div>
 
                   {/* Tread Depth Chart */}
@@ -551,35 +555,27 @@ const TyreInspection: React.FC = () => {
                   selectedTyre.maintenanceHistory?.inspections.length > 0 ? (
                     <>
                       <div className="mb-4">
-                        <h4 className="font-medium text-gray-700 mb-2">
-                          Tread Depth History
-                        </h4>
+                        <h4 className="font-medium text-gray-700 mb-2">Tread Depth History</h4>
                         <div className="h-24 flex items-end space-x-1">
                           {selectedTyre.maintenanceHistory.inspections.map((insp, index) => {
-                            const height = Math.min(
-                              100,
-                              (insp.treadDepth / 10) * 100
-                            );
+                            const height = Math.min(100, (insp.treadDepth / 10) * 100);
                             return (
-                              <div
-                                key={index}
-                                className="flex flex-col items-center"
-                              >
+                              <div key={index} className="flex flex-col items-center">
                                 <div
                                   className={`w-10 rounded-t transition-all ${
                                     insp.treadDepth > 6
                                       ? "bg-green-500"
                                       : insp.treadDepth > 3
-                                      ? "bg-yellow-500"
-                                      : "bg-red-500"
+                                        ? "bg-yellow-500"
+                                        : "bg-red-500"
                                   }`}
                                   style={{ height: `${height}%` }}
                                 ></div>
                                 <div className="text-xs mt-1 w-10 text-center">
-                                  {new Date(insp.date).toLocaleDateString(
-                                    undefined,
-                                    { month: "short", day: "numeric" }
-                                  )}
+                                  {new Date(insp.date).toLocaleDateString(undefined, {
+                                    month: "short",
+                                    day: "numeric",
+                                  })}
                                 </div>
                               </div>
                             );
@@ -625,38 +621,36 @@ const TyreInspection: React.FC = () => {
                             </tr>
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
-                            {selectedTyre.maintenanceHistory.inspections.map(
-                              (insp, index) => (
-                                <tr key={index}>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    {new Date(insp.date).toLocaleDateString()}
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    {insp.inspector}
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    {insp.treadDepth} mm
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    {insp.pressure} PSI
-                                  </td>
-                                  <td className="px-3 py-2 whitespace-nowrap text-sm">
-                                    <span
-                                      className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            {selectedTyre.maintenanceHistory.inspections.map((insp, index) => (
+                              <tr key={index}>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                  {new Date(insp.date).toLocaleDateString()}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                  {insp.inspector}
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                  {insp.treadDepth} mm
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                  {insp.pressure} PSI
+                                </td>
+                                <td className="px-3 py-2 whitespace-nowrap text-sm">
+                                  <span
+                                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
                                     ${
                                       insp.condition === "good"
                                         ? "bg-green-100 text-green-800"
                                         : insp.condition === "worn"
-                                        ? "bg-yellow-100 text-yellow-800"
-                                        : "bg-red-100 text-red-800"
+                                          ? "bg-yellow-100 text-yellow-800"
+                                          : "bg-red-100 text-red-800"
                                     }`}
-                                    >
-                                      {insp.condition}
-                                    </span>
-                                  </td>
-                                </tr>
-                              )
-                            )}
+                                  >
+                                    {insp.condition}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
                           </tbody>
                         </table>
                       </div>
@@ -679,17 +673,12 @@ const TyreInspection: React.FC = () => {
                       <p className="text-sm">
                         Position:{" "}
                         <span className="font-medium capitalize">
-                          {selectedTyre.installation?.position?.replace(
-                            /-/g,
-                            " "
-                          )}
+                          {selectedTyre.installation?.position?.replace(/-/g, " ")}
                         </span>
                       </p>
                       <div className="ml-2 flex items-center text-sm text-gray-500">
                         <Ruler className="w-3 h-3 mr-1" />
-                        <span>
-                          {formatTyreSize(selectedTyre.size)}
-                        </span>
+                        <span>{formatTyreSize(selectedTyre.size)}</span>
                       </div>
                     </div>
                   </div>
@@ -697,9 +686,7 @@ const TyreInspection: React.FC = () => {
                   {/* Tyre Details Section */}
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-md font-medium">
-                        Tyre Specifications
-                      </h3>
+                      <h3 className="text-md font-medium">Tyre Specifications</h3>
                       <Button
                         type="button"
                         variant="outline"
@@ -707,9 +694,7 @@ const TyreInspection: React.FC = () => {
                         icon={<ShoppingBag className="w-4 h-4" />}
                         size="sm"
                       >
-                        {showNewTyreFields
-                          ? "Hide New Tyre Options"
-                          : "Show New Tyre Options"}
+                        {showNewTyreFields ? "Hide New Tyre Options" : "Show New Tyre Options"}
                       </Button>
                     </div>
 
@@ -730,10 +715,7 @@ const TyreInspection: React.FC = () => {
                             onChange={(e) =>
                               handleChange("tyreSize", {
                                 ...formData.tyreSize,
-                                width: parseInt(
-                                  (e.target ? e.target.value : e) as string,
-                                  10
-                                ) || 0,
+                                width: parseInt((e.target ? e.target.value : e) as string, 10) || 0,
                               })
                             }
                             placeholder="e.g., 315"
@@ -744,11 +726,7 @@ const TyreInspection: React.FC = () => {
                             value={formData.tyreSize.aspectRatio.toString()}
                             onChange={(e) => {
                               const value =
-                                typeof e === "string"
-                                  ? e
-                                  : e && e.target
-                                  ? e.target.value
-                                  : "";
+                                typeof e === "string" ? e : e && e.target ? e.target.value : "";
                               handleChange("tyreSize", {
                                 ...formData.tyreSize,
                                 aspectRatio: parseInt(value, 10) || 0,
@@ -763,11 +741,7 @@ const TyreInspection: React.FC = () => {
                             value={formData.tyreSize.rimDiameter.toString()}
                             onChange={(e) => {
                               const value =
-                                typeof e === "string"
-                                  ? e
-                                  : e && e.target
-                                  ? e.target.value
-                                  : "";
+                                typeof e === "string" ? e : e && e.target ? e.target.value : "";
                               handleChange("tyreSize", {
                                 ...formData.tyreSize,
                                 rimDiameter: parseFloat(value) || 0,
@@ -789,16 +763,17 @@ const TyreInspection: React.FC = () => {
                             label="Pattern"
                             value={formData.pattern}
                             onChange={(value) => handleChange("pattern", value)}
-                            options={patternOptions.map((pattern) => ({ label: pattern, value: pattern }))}
+                            options={patternOptions.map((pattern) => ({
+                              label: pattern,
+                              value: pattern,
+                            }))}
                           />
                         )}
 
                         <Input
                           label="Serial Number"
                           value={formData.serialNumber}
-                          onChange={(value) =>
-                            handleChange("serialNumber", value)
-                          }
+                          onChange={(value) => handleChange("serialNumber", value)}
                           placeholder="Tyre serial number"
                         />
 
@@ -835,18 +810,14 @@ const TyreInspection: React.FC = () => {
                             label="Est. Lifespan (km)"
                             type="number"
                             value={formData.estimatedLifespan}
-                            onChange={(value) =>
-                              handleChange("estimatedLifespan", value)
-                            }
+                            onChange={(value) => handleChange("estimatedLifespan", value)}
                             placeholder="Expected km"
                           />
                           <Input
                             label="Current Mileage"
                             type="number"
                             value={formData.currentMileage}
-                            onChange={(value) =>
-                              handleChange("currentMileage", value)
-                            }
+                            onChange={(value) => handleChange("currentMileage", value)}
                             placeholder="Current km"
                           />
                         </div>
@@ -854,9 +825,7 @@ const TyreInspection: React.FC = () => {
                         {formData.cost && formData.estimatedLifespan && (
                           <div className="pt-2">
                             <p className="text-xs text-gray-500">Cost per KM</p>
-                            <p className="font-medium">
-                              ${calculateCostPerKm() ?? "N/A"}
-                            </p>
+                            <p className="font-medium">${calculateCostPerKm() ?? "N/A"}</p>
                           </div>
                         )}
                       </div>
@@ -873,12 +842,9 @@ const TyreInspection: React.FC = () => {
                     step="0.1"
                     required
                     error={
-                      formData.detected.treadDepthIssue
-                        ? "Tread depth below threshold"
-                        : undefined
+                      formData.detected.treadDepthIssue ? "Tread depth below threshold" : undefined
                     }
                   />
-
 
                   <Input
                     label="Pressure (PSI)"
@@ -890,18 +856,14 @@ const TyreInspection: React.FC = () => {
                     step="1"
                     required
                     error={
-                      formData.detected.pressureIssue
-                        ? "Pressure outside normal range"
-                        : undefined
+                      formData.detected.pressureIssue ? "Pressure outside normal range" : undefined
                     }
                   />
 
                   <Select
                     label="Sidewall Condition"
                     value={formData.sidewallCondition}
-                    onChange={(value) =>
-                      handleChange("sidewallCondition", value)
-                    }
+                    onChange={(value) => handleChange("sidewallCondition", value)}
                     options={SIDEWALL_CONDITIONS.map((cond) => ({
                       label: cond.label,
                       value: cond.value,
@@ -967,9 +929,7 @@ const TyreInspection: React.FC = () => {
                     <div className="bg-amber-50 border-l-4 border-amber-500 p-3">
                       <div className="flex items-center">
                         <AlertTriangle className="h-5 w-5 text-amber-500 mr-2" />
-                        <h3 className="text-amber-800 font-medium text-sm">
-                          Issues Detected
-                        </h3>
+                        <h3 className="text-amber-800 font-medium text-sm">Issues Detected</h3>
                       </div>
                       <ul className="mt-1 list-disc list-inside text-sm text-amber-700">
                         {formData.detected.treadDepthIssue && (
@@ -983,11 +943,9 @@ const TyreInspection: React.FC = () => {
                         )}
                       </ul>
                       {formData.detected.treadDepthIssue &&
-                        parseFloat(formData.treadDepth) <
-                          TYRE_THRESHOLDS.treadDepth.worn && (
+                        parseFloat(formData.treadDepth) < TYRE_THRESHOLDS.treadDepth.worn && (
                           <p className="mt-1 text-sm text-amber-700 font-bold">
-                            A job card will be created for urgent tyre
-                            replacement.
+                            A job card will be created for urgent tyre replacement.
                           </p>
                         )}
                     </div>
@@ -1028,12 +986,9 @@ const TyreInspection: React.FC = () => {
           ) : (
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 h-96 flex items-center justify-center">
               <div className="text-center text-gray-500">
-                <p className="text-lg font-medium mb-2">
-                  Select a Fleet Vehicle
-                </p>
+                <p className="text-lg font-medium mb-2">Select a Fleet Vehicle</p>
                 <p className="text-sm">
-                  To begin the inspection, select a vehicle from the dropdown
-                  menu.
+                  To begin the inspection, select a vehicle from the dropdown menu.
                 </p>
               </div>
             </div>
@@ -1057,7 +1012,7 @@ export interface TyreInspectionData {
   inspectorName: string;
   treadDepth: string;
   pressure: string;
-  condition: TyreConditionStatus | '';
+  condition: TyreConditionStatus | "";
   damage: string;
   notes: string;
   photos: string[];
@@ -1069,58 +1024,58 @@ interface TyreInspectionFormProps {
 
 export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }) => {
   const [inspectionData, setInspectionData] = useState<TyreInspectionData>({
-    vehicleId: '',
-    position: '',
-    inspectorName: '',
-    treadDepth: '', // Default to empty string
-    pressure: '', // Default to empty string
-    condition: 'good', // Default to 'good'
-    damage: '',
-    notes: '',
-    photos: []
+    vehicleId: "",
+    position: "",
+    inspectorName: "",
+    treadDepth: "", // Default to empty string
+    pressure: "", // Default to empty string
+    condition: "good", // Default to 'good'
+    damage: "",
+    notes: "",
+    photos: [],
   });
 
   const tyrePositions = [
-    { label: 'Front Left (FL)', value: 'FL' },
-    { label: 'Front Right (FR)', value: 'FR' },
-    { label: 'Rear Left Outer (RL1)', value: 'RL1' },
-    { label: 'Rear Left Inner (RL2)', value: 'RL2' },
-    { label: 'Rear Right Outer (RR1)', value: 'RR1' },
-    { label: 'Rear Right Inner (RR2)', value: 'RR2' }
+    { label: "Front Left (FL)", value: "FL" },
+    { label: "Front Right (FR)", value: "FR" },
+    { label: "Rear Left Outer (RL1)", value: "RL1" },
+    { label: "Rear Left Inner (RL2)", value: "RL2" },
+    { label: "Rear Right Outer (RR1)", value: "RR1" },
+    { label: "Rear Right Inner (RR2)", value: "RR2" },
   ];
 
   const conditionOptions = [
-    { label: 'Select condition...', value: '' },
-    { label: 'Good', value: 'good' },
-    { label: 'Warning', value: 'warning' },
-    { label: 'Critical', value: 'critical' },
-    { label: 'Needs Replacement', value: 'needs_replacement' }
+    { label: "Select condition...", value: "" },
+    { label: "Good", value: "good" },
+    { label: "Warning", value: "warning" },
+    { label: "Critical", value: "critical" },
+    { label: "Needs Replacement", value: "needs_replacement" },
   ];
 
   const damageTypes = [
-    { label: 'No damage', value: 'none' },
-    { label: 'Uneven wear', value: 'uneven_wear' },
-    { label: 'Cracking', value: 'cracking' },
-    { label: 'Bulge', value: 'bulge' },
-    { label: 'Puncture', value: 'puncture' },
-    { label: 'Sidewall damage', value: 'sidewall_damage' },
-    { label: 'Tread separation', value: 'tread_separation' }
+    { label: "No damage", value: "none" },
+    { label: "Uneven wear", value: "uneven_wear" },
+    { label: "Cracking", value: "cracking" },
+    { label: "Bulge", value: "bulge" },
+    { label: "Puncture", value: "puncture" },
+    { label: "Sidewall damage", value: "sidewall_damage" },
+    { label: "Tread separation", value: "tread_separation" },
   ];
 
   const handleSave = () => {
     onSave(inspectionData);
-    
+
     // Reset form
     setInspectionData({
-      vehicleId: '',
-      position: '',
-      inspectorName: '',
-      treadDepth: '',
-      pressure: '',
-      condition: 'good',
-      damage: '',
-      notes: '',
-      photos: []
+      vehicleId: "",
+      position: "",
+      inspectorName: "",
+      treadDepth: "",
+      pressure: "",
+      condition: "good",
+      damage: "",
+      notes: "",
+      photos: [],
     });
   };
 
@@ -1128,7 +1083,9 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
     <div className="space-y-4">
       <VehicleSelector
         value={inspectionData.vehicleId}
-        onChange={(value: string) => setInspectionData((prev: TyreInspectionData) => ({ ...prev, vehicleId: value }))}
+        onChange={(value: string) =>
+          setInspectionData((prev: TyreInspectionData) => ({ ...prev, vehicleId: value }))
+        }
         label="Vehicle"
         placeholder="Select vehicle for inspection..."
         activeOnly={false}
@@ -1138,14 +1095,18 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
       <Select
         label="Tyre Position"
         value={inspectionData.position}
-        onChange={(e: ChangeEvent<HTMLSelectElement>) => setInspectionData(prev => ({ ...prev, position: e.target.value }))}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+          setInspectionData((prev) => ({ ...prev, position: e.target.value }))
+        }
         options={tyrePositions}
       />
 
       <Input
         label="Inspector Name"
         value={inspectionData.inspectorName}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => setInspectionData(prev => ({ ...prev, inspectorName: e.target.value }))}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setInspectionData((prev) => ({ ...prev, inspectorName: e.target.value }))
+        }
         placeholder="Enter inspector name"
       />
 
@@ -1155,7 +1116,9 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
           type="number"
           step="0.1"
           value={inspectionData.treadDepth}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setInspectionData(prev => ({ ...prev, treadDepth: e.target.value }))}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setInspectionData((prev) => ({ ...prev, treadDepth: e.target.value }))
+          }
           placeholder="0.0"
         />
 
@@ -1163,7 +1126,9 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
           label="Tyre Pressure (PSI)"
           type="number"
           value={inspectionData.pressure}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setInspectionData(prev => ({ ...prev, pressure: e.target.value }))}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setInspectionData((prev) => ({ ...prev, pressure: e.target.value }))
+          }
           placeholder="0"
         />
       </div>
@@ -1171,21 +1136,30 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
       <Select
         label="Overall Condition"
         value={inspectionData.condition}
-        onChange={(e: ChangeEvent<HTMLSelectElement>) => setInspectionData(prev => ({ ...prev, condition: e.target.value as TyreConditionStatus | '' }))}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+          setInspectionData((prev) => ({
+            ...prev,
+            condition: e.target.value as TyreConditionStatus | "",
+          }))
+        }
         options={conditionOptions}
       />
 
       <Select
         label="Damage Type"
         value={inspectionData.damage}
-        onChange={(e: ChangeEvent<HTMLSelectElement>) => setInspectionData(prev => ({ ...prev, damage: e.target.value }))}
+        onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+          setInspectionData((prev) => ({ ...prev, damage: e.target.value }))
+        }
         options={damageTypes}
       />
 
       <TextArea
         label="Additional Notes"
         value={inspectionData.notes}
-        onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setInspectionData(prev => ({ ...prev, notes: e.target.value }))}
+        onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
+          setInspectionData((prev) => ({ ...prev, notes: e.target.value }))
+        }
         placeholder="Any additional observations or recommendations..."
         rows={4}
       />
@@ -1201,7 +1175,7 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
         </div>
       </div>
 
-      <Button 
+      <Button
         onClick={onClick}
         className="w-full"
         disabled={!inspectionData.vehicleId || !inspectionData.position}
@@ -1212,6 +1186,5 @@ export const TyreInspectionForm: React.FC<TyreInspectionFormProps> = ({ onSave }
     </div>
   );
 };
-
 
 export default TyreInspection;
