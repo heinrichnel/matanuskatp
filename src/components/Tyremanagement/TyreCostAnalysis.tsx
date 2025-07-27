@@ -1,44 +1,51 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Select } from '@/components/ui/FormElements';
-import { Badge } from '@/components/ui/badge';
-import { SAMPLE_TYRES, TYRE_BRANDS, TYRE_PATTERNS, Tyre } from '@/data/tyreData';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DollarSign, TrendingUp, TrendingDown, BarChart3, Download } from 'lucide-react';
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Select } from "@/components/ui/FormElements";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { SAMPLE_TYRES, TYRE_BRANDS, TYRE_PATTERNS, Tyre } from "@/data/tyreData";
+import { BarChart3, DollarSign, Download, TrendingDown, TrendingUp } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 // DEBUG ONLY - Log import diagnostics
 useEffect(() => {
-  console.log('=== TYRE COMPONENT IMPORT DIAGNOSTICS ===');
-  
+  console.log("=== TYRE COMPONENT IMPORT DIAGNOSTICS ===");
+
   // Check UI component imports
-  console.log('UI Components:');
+  console.log("UI Components:");
   try {
-    console.log('Card imported:', !!Card);
-    console.log('Button imported:', !!Button);
-    console.log('Badge imported:', !!Badge);
-    console.log('Table imported:', !!Table);
+    console.log("Card imported:", !!Card);
+    console.log("Button imported:", !!Button);
+    console.log("Badge imported:", !!Badge);
+    console.log("Table imported:", !!Table);
   } catch (error) {
-    console.error('UI component import error:', error);
+    console.error("UI component import error:", error);
   }
-  
+
   // Check data imports
-  console.log('Data imports:');
+  console.log("Data imports:");
   try {
-    console.log('SAMPLE_TYRES:', SAMPLE_TYRES ? SAMPLE_TYRES.length : 'undefined');
-    console.log('TYRE_BRANDS:', TYRE_BRANDS ? TYRE_BRANDS.length : 'undefined');
-    console.log('TYRE_PATTERNS:', TYRE_PATTERNS ? TYRE_PATTERNS.length : 'undefined');
+    console.log("SAMPLE_TYRES:", SAMPLE_TYRES ? SAMPLE_TYRES.length : "undefined");
+    console.log("TYRE_BRANDS:", TYRE_BRANDS ? TYRE_BRANDS.length : "undefined");
+    console.log("TYRE_PATTERNS:", TYRE_PATTERNS ? TYRE_PATTERNS.length : "undefined");
   } catch (error) {
-    console.error('Data import error:', error);
+    console.error("Data import error:", error);
   }
-  
+
   // Log expected vs actual names
-  console.log('Import names check:');
+  console.log("Import names check:");
   try {
-    const dataModule = require('@/data/tyreData');
-    console.log('Available exports:', Object.keys(dataModule));
+    const dataModule = require("@/data/tyreData");
+    console.log("Available exports:", Object.keys(dataModule));
   } catch (error) {
-    console.error('Module inspection error:', error);
+    console.error("Module inspection error:", error);
   }
 }, []);
 
@@ -57,39 +64,78 @@ interface TyreCostAnalysisProps {
 }
 
 export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) => {
-  const [filterBrand, setFilterBrand] = useState('');
-  const [filterPattern, setFilterPattern] = useState('');
-  const [sortBy, setSortBy] = useState('costPerKm');
+  const [filterBrand, setFilterBrand] = useState("");
+  const [filterPattern, setFilterPattern] = useState("");
+  const [sortBy, setSortBy] = useState("costPerKm");
+
+  // DEBUG ONLY - Log import diagnostics
+  useEffect(() => {
+    console.log("=== TYRE COMPONENT IMPORT DIAGNOSTICS ===");
+
+    // Check UI component imports
+    console.log("UI Components:");
+    try {
+      console.log("Card imported:", !!Card);
+      console.log("Button imported:", !!Button);
+      console.log("Badge imported:", !!Badge);
+      console.log("Table imported:", !!Table);
+    } catch (error) {
+      console.error("UI component import error:", error);
+    }
+
+    // Check data imports
+    console.log("Data imports:");
+    try {
+      console.log("SAMPLE_TYRES:", SAMPLE_TYRES ? SAMPLE_TYRES.length : "undefined");
+      console.log("TYRE_BRANDS:", TYRE_BRANDS ? TYRE_BRANDS.length : "undefined");
+      console.log("TYRE_PATTERNS:", TYRE_PATTERNS ? TYRE_PATTERNS.length : "undefined");
+    } catch (error) {
+      console.error("Data import error:", error);
+    }
+
+    // Log expected vs actual names
+    console.log("Import names check:");
+    try {
+      const dataModule = require("@/data/tyreData");
+      console.log("Available exports:", Object.keys(dataModule));
+    } catch (error) {
+      console.error("Module inspection error:", error);
+    }
+  }, []);
 
   const calculateTyreMetrics = (): TyreCostMetrics[] => {
-    const metricsMap = new Map<string, {
-      costs: number[];
-      lifespans: number[];
-      tyres: Tyre[];
-    }>();
+    const metricsMap = new Map<
+      string,
+      {
+        costs: number[];
+        lifespans: number[];
+        tyres: Tyre[];
+      }
+    >();
 
     SAMPLE_TYRES.forEach((tyre: Tyre) => {
       const key = `${tyre.brand}-${tyre.pattern}`;
       if (!metricsMap.has(key)) {
         metricsMap.set(key, { costs: [], lifespans: [], tyres: [] });
       }
-      
+
       const group = metricsMap.get(key)!;
       group.costs.push(tyre.purchaseDetails.cost);
       group.tyres.push(tyre);
-      
+
       const estimatedLifespan = estimateTyreLifespan(tyre);
       group.lifespans.push(estimatedLifespan);
     });
 
     const metrics: TyreCostMetrics[] = [];
     metricsMap.forEach((data, key) => {
-      const [brand, pattern] = key.split('-');
+      const [brand, pattern] = key.split("-");
       const averageCost = data.costs.reduce((sum, cost) => sum + cost, 0) / data.costs.length;
-      const averageLifespan = data.lifespans.reduce((sum, life) => sum + life, 0) / data.lifespans.length;
+      const averageLifespan =
+        data.lifespans.reduce((sum, life) => sum + life, 0) / data.lifespans.length;
       const costPerKm = averageLifespan > 0 ? averageCost / averageLifespan : 0;
-      
-      const recommendationScore = costPerKm > 0 ? Math.max(0, 100 - (costPerKm * 10)) : 0;
+
+      const recommendationScore = costPerKm > 0 ? Math.max(0, 100 - costPerKm * 10) : 0;
 
       metrics.push({
         brand,
@@ -98,7 +144,7 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
         averageLifespan: Math.round(averageLifespan),
         costPerKm: Math.round(costPerKm * 100) / 100,
         totalTyres: data.tyres.length,
-        recommendationScore: Math.round(recommendationScore)
+        recommendationScore: Math.round(recommendationScore),
       });
     });
 
@@ -109,21 +155,21 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
     const newTreadDepth = 20;
     const currentTread = tyre.condition.treadDepth;
     const minimumTread = 3;
-    
+
     const usedTread = newTreadDepth - currentTread;
     const remainingTread = currentTread - minimumTread;
-    
+
     if (usedTread <= 0) return 100000;
-    
+
     const treadWearRate = usedTread / 50000;
     const remainingLife = remainingTread / treadWearRate;
-    
+
     return Math.max(remainingLife, 0);
   };
 
   const metrics = calculateTyreMetrics();
 
-  const filteredMetrics = metrics.filter(metric => {
+  const filteredMetrics = metrics.filter((metric) => {
     const brandMatch = !filterBrand || metric.brand === filterBrand;
     const patternMatch = !filterPattern || metric.pattern === filterPattern;
     return brandMatch && patternMatch;
@@ -131,13 +177,13 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
 
   const sortedMetrics = [...filteredMetrics].sort((a, b) => {
     switch (sortBy) {
-      case 'costPerKm':
+      case "costPerKm":
         return a.costPerKm - b.costPerKm;
-      case 'averageCost':
+      case "averageCost":
         return a.averageCost - b.averageCost;
-      case 'averageLifespan':
+      case "averageLifespan":
         return b.averageLifespan - a.averageLifespan;
-      case 'recommendationScore':
+      case "recommendationScore":
         return b.recommendationScore - a.recommendationScore;
       default:
         return a.costPerKm - b.costPerKm;
@@ -153,17 +199,33 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
 
   const exportData = () => {
     const csvContent = [
-      ['Brand', 'Pattern', 'Avg Cost (R)', 'Est. Lifespan (km)', 'Cost per KM (R)', 'Total Tyres', 'Score'].join(','),
-      ...sortedMetrics.map(m => 
-        [m.brand, m.pattern, m.averageCost, m.averageLifespan, m.costPerKm, m.totalTyres, m.recommendationScore].join(',')
-      )
-    ].join('\n');
+      [
+        "Brand",
+        "Pattern",
+        "Avg Cost (R)",
+        "Est. Lifespan (km)",
+        "Cost per KM (R)",
+        "Total Tyres",
+        "Score",
+      ].join(","),
+      ...sortedMetrics.map((m) =>
+        [
+          m.brand,
+          m.pattern,
+          m.averageCost,
+          m.averageLifespan,
+          m.costPerKm,
+          m.totalTyres,
+          m.recommendationScore,
+        ].join(",")
+      ),
+    ].join("\n");
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'tyre-cost-analysis.csv';
+    a.download = "tyre-cost-analysis.csv";
     a.click();
   };
 
@@ -178,7 +240,7 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
           <h3 className="text-xl font-bold text-gray-900">Tyre Cost per Kilometer Analysis</h3>
           <p className="text-gray-600">Compare tyre brands and patterns for best value</p>
         </div>
-        <Button onClick={onClick} variant="outline">
+        <Button onClick={exportData} variant="outline">
           <Download className="w-4 h-4 mr-2" />
           Export CSV
         </Button>
@@ -196,8 +258,8 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
               value={filterBrand}
               onChange={(e) => setFilterBrand(e.target.value)}
               options={[
-                { label: 'All Brands', value: '' },
-              ...TYRE_BRANDS.map((brand: string) => ({ label: brand, value: brand }))
+                { label: "All Brands", value: "" },
+                ...TYRE_BRANDS.map((brand: string) => ({ label: brand, value: brand })),
               ]}
             />
             <Select
@@ -205,8 +267,8 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
               value={filterPattern}
               onChange={(e) => setFilterPattern(e.target.value)}
               options={[
-                { label: 'All Patterns', value: '' },
-                ...TYRE_PATTERNS.map((pattern: string) => ({ label: pattern, value: pattern }))
+                { label: "All Patterns", value: "" },
+                ...TYRE_PATTERNS.map((pattern: string) => ({ label: pattern, value: pattern })),
               ]}
             />
             <Select
@@ -214,10 +276,10 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               options={[
-                { label: 'Cost per KM', value: 'costPerKm' },
-                { label: 'Purchase Cost', value: 'averageCost' },
-                { label: 'Lifespan', value: 'averageLifespan' },
-                { label: 'Recommendation Score', value: 'recommendationScore' }
+                { label: "Cost per KM", value: "costPerKm" },
+                { label: "Purchase Cost", value: "averageCost" },
+                { label: "Lifespan", value: "averageLifespan" },
+                { label: "Recommendation Score", value: "recommendationScore" },
               ]}
             />
           </div>
@@ -233,10 +295,12 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
               <div>
                 <p className="text-sm font-medium">Best Value</p>
                 <p className="text-lg font-bold">
-                  {sortedMetrics[0] ? `${sortedMetrics[0].brand} ${sortedMetrics[0].pattern}` : 'N/A'}
+                  {sortedMetrics[0]
+                    ? `${sortedMetrics[0].brand} ${sortedMetrics[0].pattern}`
+                    : "N/A"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {sortedMetrics[0] ? `R${sortedMetrics[0].costPerKm}/km` : ''}
+                  {sortedMetrics[0] ? `R${sortedMetrics[0].costPerKm}/km` : ""}
                 </p>
               </div>
             </div>
@@ -250,10 +314,14 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
               <div>
                 <p className="text-sm font-medium">Longest Lasting</p>
                 <p className="text-lg font-bold">
-                  {[...sortedMetrics].sort((a, b) => b.averageLifespan - a.averageLifespan)[0]?.brand || 'N/A'}
+                  {[...sortedMetrics].sort((a, b) => b.averageLifespan - a.averageLifespan)[0]
+                    ?.brand || "N/A"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {[...sortedMetrics].sort((a, b) => b.averageLifespan - a.averageLifespan)[0]?.averageLifespan.toLocaleString() || ''} km
+                  {[...sortedMetrics]
+                    .sort((a, b) => b.averageLifespan - a.averageLifespan)[0]
+                    ?.averageLifespan.toLocaleString() || ""}{" "}
+                  km
                 </p>
               </div>
             </div>
@@ -267,10 +335,13 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
               <div>
                 <p className="text-sm font-medium">Lowest Cost</p>
                 <p className="text-lg font-bold">
-                  {[...sortedMetrics].sort((a, b) => a.averageCost - b.averageCost)[0]?.brand || 'N/A'}
+                  {[...sortedMetrics].sort((a, b) => a.averageCost - b.averageCost)[0]?.brand ||
+                    "N/A"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  R{[...sortedMetrics].sort((a, b) => a.averageCost - b.averageCost)[0]?.averageCost || 0}
+                  R
+                  {[...sortedMetrics].sort((a, b) => a.averageCost - b.averageCost)[0]
+                    ?.averageCost || 0}
                 </p>
               </div>
             </div>
@@ -283,7 +354,7 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
               <BarChart3 className="w-5 h-5 text-purple-600" />
               <div>
                 <p className="text-sm font-medium">Brands Analyzed</p>
-                <p className="text-2xl font-bold">{new Set(metrics.map(m => m.brand)).size}</p>
+                <p className="text-2xl font-bold">{new Set(metrics.map((m) => m.brand)).size}</p>
               </div>
             </div>
           </CardContent>
@@ -315,9 +386,7 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
                   <TableCell>{metric.pattern}</TableCell>
                   <TableCell>R{metric.averageCost.toLocaleString()}</TableCell>
                   <TableCell>{metric.averageLifespan.toLocaleString()}</TableCell>
-                  <TableCell className="font-semibold text-blue-600">
-                    R{metric.costPerKm}
-                  </TableCell>
+                  <TableCell className="font-semibold text-blue-600">R{metric.costPerKm}</TableCell>
                   <TableCell>{metric.totalTyres}</TableCell>
                   <TableCell>{getRecommendationBadge(metric.recommendationScore)}</TableCell>
                 </TableRow>
@@ -333,7 +402,8 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
         <ul>
           {tyreData.map((tyre) => (
             <li key={tyre.id}>
-              {tyre.brand} {tyre.model} ({String(tyre.size)}): ${calculateCostPerKm(tyre).toFixed(2)} per KM
+              {tyre.brand} {tyre.model} ({String(tyre.size)}): $
+              {calculateCostPerKm(tyre).toFixed(2)} per KM
             </li>
           ))}
         </ul>

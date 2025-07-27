@@ -59,6 +59,7 @@ export function isWialonInitialized(): boolean {
  * Get all available Wialon units
  */
 export async function getUnits(): Promise<WialonUnit[]> {
+  // Configure request parameters
   const params = new URLSearchParams({
     svc: "core/search_items",
     params: JSON.stringify({
@@ -77,27 +78,82 @@ export async function getUnits(): Promise<WialonUnit[]> {
   });
 
   const url = `${WIALON_API_URL}/wialon/ajax.html?${params.toString()}`;
-
-  try {
-    const response = await fetch(url);
-    const json: WialonApiResponse = await response.json();
-
-    if (json.error) {
-      throw new Error(`Wialon API error: ${json.error}`);
+  
+  // Configure retry settings
+  const MAX_RETRIES = 2;
+  const FETCH_TIMEOUT = 15000; // 15 seconds
+  let retries = 0;
+  
+  while (retries <= MAX_RETRIES) {
+    try {
+      // Create an AbortController for timeout management
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+      
+      try {
+        const response = await fetch(url, {
+          signal: controller.signal,
+          credentials: 'include', // Include credentials to handle potential CORS issues
+        });
+        
+        // Clear the timeout since fetch completed
+        clearTimeout(timeoutId);
+        
+        // Check if response was successful
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+        }
+        
+        const json: WialonApiResponse = await response.json();
+        
+        if (json.error) {
+          throw new Error(`Wialon API error: ${json.error}`);
+        }
+        
+        // Mark as initialized on successful API call
+        wialonInitialized = true;
+        
+        // Map and return the units
+        return (json.items || []).map((item) => ({
+          getId: () => item.id,
+          getName: () => item.nm,
+          getPosition: () => item.pos,
+          getIconUrl: (size?: number) => (item.ic ? `${item.ic}${size ? `?size=${size}` : ""}` : ""),
+        }));
+      } catch (error) {
+        // Clear the timeout if there was an error
+        clearTimeout(timeoutId);
+        throw error; // Re-throw to be caught by the outer try-catch
+      }
+    } catch (error) {
+      // Set the initialization flag to false
+      wialonInitialized = false;
+      
+      // Handle different types of errors with specific messages
+      let errorMessage = "Error fetching Wialon units";
+      
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        errorMessage = `Request timed out after ${FETCH_TIMEOUT}ms`;
+      } else if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        errorMessage = "Network error: Unable to connect to Wialon API. Please check your internet connection.";
+      }
+      
+      console.error(`${errorMessage}:`, error);
+      
+      // If we have retries left, try again after a delay
+      if (retries < MAX_RETRIES) {
+        retries++;
+        console.log(`Retrying Wialon API request (${retries}/${MAX_RETRIES})...`);
+        // Wait for 1 second before retrying (increase delay with each retry)
+        await new Promise(resolve => setTimeout(resolve, 1000 * retries));
+        continue;
+      }
+      
+      // If we've exhausted all retries, throw the error
+      throw error;
     }
-
-    // Mark as initialized on successful API call
-    wialonInitialized = true;
-
-    return (json.items || []).map((item) => ({
-      getId: () => item.id,
-      getName: () => item.nm,
-      getPosition: () => item.pos,
-      getIconUrl: (size?: number) => (item.ic ? `${item.ic}${size ? `?size=${size}` : ""}` : ""),
-    }));
-  } catch (error) {
-    console.error("Error fetching Wialon units:", error);
-    wialonInitialized = false;
-    throw error;
   }
+  
+  // This code should never be reached, but TypeScript requires it for type safety
+  throw new Error("Failed to fetch Wialon units after maximum retries");
 }
