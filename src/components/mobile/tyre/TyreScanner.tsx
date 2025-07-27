@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { BarcodeScanner } from '@capacitor-community/barcode-scanner';
-import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+// Import only Capacitor core statically as it's lightweight and essential
 import { Capacitor } from '@capacitor/core';
+// Import types for type safety without bundling the modules
+import type { BarcodeScanner as BarcodeScannerType } from '@capacitor-community/barcode-scanner';
+import type { Camera as CameraType } from '@capacitor/camera';
 import { Scan, Camera as CameraIcon, X, Check, RefreshCw, Info } from 'lucide-react';
 import { Button } from '../../ui/Button';
 import { Card, CardContent, CardHeader } from '../../ui/Card';
@@ -29,17 +31,50 @@ const TyreScanner: React.FC<TyreScannerProps> = ({
   const [scanResult, setScanResult] = useState<ScanResult>({});
   const [error, setError] = useState<string | null>(null);
   const [isNativeApp, setIsNativeApp] = useState(false);
+  // State for dynamically loaded modules
+  const [barcodeScannerModule, setBarcodeScannerModule] = useState<typeof BarcodeScannerType | null>(null);
+  const [cameraModule, setCameraModule] = useState<any>(null);
+  // Store enum values from dynamic imports
+  const [cameraEnums, setCameraEnums] = useState<{
+    resultType: Record<string, any>;
+    source: Record<string, any>;
+  }>({ resultType: {}, source: {} });
 
   useEffect(() => {
     setIsNativeApp(Capacitor.isNativePlatform());
-    checkPermissions();
+    
+    // Dynamically load modules
+    const loadModules = async () => {
+      try {
+        // Load BarcodeScanner module
+        const barcodeModule = await import('@capacitor-community/barcode-scanner');
+        setBarcodeScannerModule(barcodeModule.BarcodeScanner);
+        
+        // Load Camera module and store enums
+        const cameraModule = await import('@capacitor/camera');
+        setCameraModule(cameraModule.Camera);
+        setCameraEnums({
+          resultType: cameraModule.CameraResultType,
+          source: cameraModule.CameraSource
+        });
+        
+        // Check permissions after modules are loaded
+        await checkPermissions();
+      } catch (err) {
+        console.error('Failed to load scanner modules:', err);
+        setError('Failed to initialize scanner. Please try again.');
+      }
+    };
+    
+    loadModules();
   }, []);
 
   const checkPermissions = async () => {
     try {
-      if (Capacitor.isNativePlatform()) {
-        const status = await BarcodeScanner.checkPermission({ force: true });
-        setHasPermission(status.granted);
+      if (Capacitor.isNativePlatform() && barcodeScannerModule) {
+        const status = await barcodeScannerModule.checkPermission({ force: true });
+        // Handle potentially undefined status.granted
+        setHasPermission(status.granted === true);
       } else {
         setHasPermission(true); // Web fallback
       }
@@ -64,11 +99,15 @@ const TyreScanner: React.FC<TyreScannerProps> = ({
         return;
       }
 
+      if (!barcodeScannerModule) {
+        throw new Error('Barcode scanner not initialized');
+      }
+
       // Hide background
-      await BarcodeScanner.hideBackground();
+      await barcodeScannerModule.hideBackground();
       document.body.classList.add('scanner-active');
 
-      const result = await BarcodeScanner.startScan();
+      const result = await barcodeScannerModule.startScan();
       
       if (result.hasContent) {
         setScanResult(prev => ({ ...prev, barcode: result.content }));
@@ -79,7 +118,9 @@ const TyreScanner: React.FC<TyreScannerProps> = ({
     } finally {
       setIsScanning(false);
       document.body.classList.remove('scanner-active');
-      await BarcodeScanner.showBackground();
+      if (barcodeScannerModule) {
+        await barcodeScannerModule.showBackground();
+      }
     }
   };
 
@@ -87,15 +128,20 @@ const TyreScanner: React.FC<TyreScannerProps> = ({
     try {
       setError(null);
 
-      const image = await Camera.getPhoto({
+      if (!cameraModule || !cameraEnums.resultType || !cameraEnums.source) {
+        throw new Error('Camera not initialized');
+      }
+
+      // Use the dynamically loaded Camera module with properly loaded enums
+      const cameraResult = await cameraModule.getPhoto({
         quality: 80,
         allowEditing: false,
-        resultType: CameraResultType.Base64,
-        source: CameraSource.Camera,
+        resultType: cameraEnums.resultType.Base64,
+        source: cameraEnums.source.Camera,
       });
 
-      if (image.base64String) {
-        const photoData = `data:image/jpeg;base64,${image.base64String}`;
+      if (cameraResult.base64String) {
+        const photoData = `data:image/jpeg;base64,${cameraResult.base64String}`;
         setScanResult(prev => ({ ...prev, photo: photoData }));
       }
     } catch (err) {
@@ -106,9 +152,9 @@ const TyreScanner: React.FC<TyreScannerProps> = ({
 
   const stopScanning = async () => {
     try {
-      if (isNativeApp) {
-        await BarcodeScanner.stopScan();
-        await BarcodeScanner.showBackground();
+      if (isNativeApp && barcodeScannerModule) {
+        await barcodeScannerModule.stopScan();
+        await barcodeScannerModule.showBackground();
         document.body.classList.remove('scanner-active');
       }
       setIsScanning(false);
@@ -164,7 +210,7 @@ const TyreScanner: React.FC<TyreScannerProps> = ({
         <CardHeader className="flex flex-row items-center justify-between">
           <h3 className="text-lg font-semibold">{title}</h3>
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={isScanning ? stopScanning : onCancel}
           >
@@ -184,9 +230,9 @@ const TyreScanner: React.FC<TyreScannerProps> = ({
             <div className="space-y-2">
               <Button
                 onClick={startBarcodeScanning}
-                disabled={isScanning}
+                disabled={isScanning || !barcodeScannerModule}
                 className="w-full"
-                variant={scanResult.barcode ? "outline" : "default"}
+                variant={scanResult.barcode ? "outline" : "primary"}
               >
                 <Scan className="h-4 w-4 mr-2" />
                 {isScanning ? 'Scanning...' : scanResult.barcode ? 'Scan Again' : 'Scan Barcode'}
@@ -207,8 +253,9 @@ const TyreScanner: React.FC<TyreScannerProps> = ({
             <div className="space-y-2">
               <Button
                 onClick={takePhoto}
+                disabled={!cameraModule || !cameraEnums.resultType}
                 className="w-full"
-                variant={scanResult.photo ? "outline" : "default"}
+                variant={scanResult.photo ? "outline" : "primary"}
               >
                 <CameraIcon className="h-4 w-4 mr-2" />
                 {scanResult.photo ? 'Take Another Photo' : 'Take Photo'}
@@ -244,6 +291,7 @@ const TyreScanner: React.FC<TyreScannerProps> = ({
             <Button
               onClick={handleComplete}
               className="flex-1"
+              variant="primary"
               disabled={!scanResult.barcode && !scanResult.photo}
             >
               <Check className="h-4 w-4 mr-2" />
