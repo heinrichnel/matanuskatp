@@ -74,3 +74,10 @@ storybook-static
 chalk/
 glob/
 test-results/
+# Ignore sensitive configuration files
+client_secret_*.json
+**/google-services.json
+.env*
+!.env.example
+*.keystore
+*.jks
