@@ -4,12 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/Button';
 import { VehicleSelector } from '@/components/common/VehicleSelector';
 import { CircleDot, Wrench, Eye } from "lucide-react";
-import { 
-  getTyresByVehicle, 
-  getTyreStatusColor, 
+import {
+  getTyresByVehicle,
+  getTyreStatusColor,
   getTyreConditionColor,
   getVehicleTyreConfiguration,
-  Tyre 
+  Tyre
 } from "@/data/tyreData";
 import { FLEET_VEHICLES } from "@/data/vehicles";
 import type { FleetTyreMapping, TyreAllocation } from '@/types/tyre';
@@ -24,7 +24,7 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
   onVehicleSelect
 }) => {
   const [selectedTyre, setSelectedTyre] = useState<Tyre | null>(null);
-  
+
   const vehicle = FLEET_VEHICLES.find(v => v.fleetNo === selectedVehicle);
   const vehicleTyres = selectedVehicle ? getTyresByVehicle(selectedVehicle) : [];
   // derive mapping of permitted positions for this vehicle
@@ -196,14 +196,14 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
           <CardContent>
             <div className="space-y-3">
               {vehicleTyres.map(tyre => (
-                <div key={tyre.id} className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer" 
-                     onClick={onClick}>
+                <div key={tyre.id} className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer"
+                     onClick={() => setSelectedTyre(tyre)}>
                   <div className="flex justify-between items-center">
                     <div>
                       <h4 className="font-medium">{tyre.brand} {tyre.model}</h4>
                       <p className="text-sm text-gray-600">Position: {tyre.installation.position} | Pattern: {tyre.pattern}</p>
                       <p className="text-xs text-gray-500">
-                        Tread: {tyre.condition.treadDepth}mm | Pressure: {tyre.condition.pressure} PSI | 
+                        Tread: {tyre.condition.treadDepth}mm | Pressure: {tyre.condition.pressure} PSI |
                         Miles: {tyre.milesRun.toLocaleString()}
                       </p>
                     </div>
@@ -230,3 +230,5 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
     </div>
   );
 };
+
+export default VehicleTyreView;

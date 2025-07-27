@@ -2,7 +2,7 @@ import React from 'react';
 import Card, { CardContent, CardHeader } from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { CheckCircle, AlertTriangle, Clock, User, Shield, FileText } from 'lucide-react';
-import { JobCardTask, TaskHistoryEntry } from '../../types';
+import { JobCardTask, TaskHistoryEntry } from '../types';
 import { formatDateTime } from '../utils/helpers';
 
 interface QAReviewPanelProps {
@@ -34,7 +34,7 @@ const QAReviewPanel: React.FC<QAReviewPanelProps> = ({
       default: return <Clock className="w-4 h-4 text-yellow-600" />;
     }
   };
-  
+
   const getStatusClass = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800';
@@ -50,7 +50,7 @@ const QAReviewPanel: React.FC<QAReviewPanelProps> = ({
   const completedTasksCount = tasks.filter(task => task.status === 'completed').length;
   const verifiedTasksCount = tasks.filter(task => task.status === 'verified').length;
   const notApplicableTasksCount = tasks.filter(task => task.status === 'not_applicable').length;
-  const tasksReadyForVerification = tasks.filter(task => 
+  const tasksReadyForVerification = tasks.filter(task =>
     task.status === 'completed' && task.completedBy && task.completedAt
   ).length;
 
@@ -131,7 +131,7 @@ const QAReviewPanel: React.FC<QAReviewPanelProps> = ({
                       <div className="flex justify-end">
                         <Button
                           size="sm"
-                          onClick={onClick}
+                          onClick={() => onVerifyTask(task.id)}
                           disabled={isLoading}
                           icon={<Shield className="w-4 h-4" />}
                         >
@@ -145,7 +145,7 @@ const QAReviewPanel: React.FC<QAReviewPanelProps> = ({
               {canVerifyAllTasks && (
                 <div className="flex justify-center mt-4">
                   <Button
-                    onClick={onClick}
+                    onClick={onVerifyAllTasks}
                     disabled={isLoading || tasksReadyForVerification === 0}
                     isLoading={isLoading}
                     icon={<Shield className="w-4 h-4" />}
@@ -175,7 +175,7 @@ const QAReviewPanel: React.FC<QAReviewPanelProps> = ({
                 {taskHistory.map((entry) => {
                   // Get the task information
                   const task = tasks.find(t => t.id === entry.taskId);
-                  
+
                   return (
                     <div key={entry.id} className="p-3 hover:bg-gray-50">
                       <div className="flex items-start text-sm">

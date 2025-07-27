@@ -175,11 +175,16 @@ const ReportNewIncidentPage = lazy(() => import("./pages/ReportNewIncidentPage")
  * ----------------------------- */
 const NotFound = () => <div className="p-6">404 – Page not found</div>;
 
+interface Trip {}  // Add the Trip interface or import it
+
 export const AppRoutes: React.FC = () => {
+  const [showTripForm, setShowTripForm] = React.useState(false);
+  const [editingTrip, setEditingTrip] = React.useState<Trip | undefined>(undefined);
+
   return (
     <Routes>
       {/* All app pages live under the Layout */}
-      <Route path="/" element={<Layout />}>
+      <Route path="/" element={<Layout setShowTripForm={setShowTripForm} setEditingTrip={setEditingTrip} />}>
         {/* Default redirect to /dashboard */}
         <Route index element={<Navigate to="/dashboard" replace />} />
 

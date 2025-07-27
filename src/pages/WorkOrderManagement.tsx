@@ -190,10 +190,10 @@ export const WorkOrderManagement: React.FC = () => {
   };
 
   const handleStartWorkOrder = (workOrderId: string) => {
-    setWorkOrders(prev => prev.map(wo => 
-      wo.workOrderId === workOrderId 
-        ? { 
-            ...wo, 
+    setWorkOrders(prev => prev.map(wo =>
+      wo.workOrderId === workOrderId
+        ? {
+            ...wo,
             status: 'in_progress',
             startedAt: new Date().toISOString(),
             timeLog: [...wo.timeLog, {
@@ -217,7 +217,7 @@ export const WorkOrderManagement: React.FC = () => {
     }
 
     // Check if all tasks are completed
-    const incompleteTasks = workOrder.tasks.filter(task => 
+    const incompleteTasks = workOrder.tasks.filter(task =>
       task.status !== 'completed' && task.status !== 'not_applicable'
     );
 
@@ -225,10 +225,10 @@ export const WorkOrderManagement: React.FC = () => {
       return;
     }
 
-    setWorkOrders(prev => prev.map(wo => 
-      wo.workOrderId === workOrderId 
-        ? { 
-            ...wo, 
+    setWorkOrders(prev => prev.map(wo =>
+      wo.workOrderId === workOrderId
+        ? {
+            ...wo,
             status: 'completed',
             completedAt: new Date().toISOString(),
             timeLog: [...wo.timeLog, {
@@ -256,7 +256,7 @@ export const WorkOrderManagement: React.FC = () => {
 
   const getTaskCompletionPercentage = (tasks: TaskEntry[]) => {
     if (tasks.length === 0) return 0;
-    const completedTasks = tasks.filter(task => 
+    const completedTasks = tasks.filter(task =>
       task.status === 'completed' || task.status === 'not_applicable'
     ).length;
     return Math.round((completedTasks / tasks.length) * 100);
@@ -287,9 +287,9 @@ export const WorkOrderManagement: React.FC = () => {
               <div className="flex gap-4">
                 <div>
                   <label className="text-sm text-gray-600">Status</label>
-                  <select 
-                    value={filterStatus} 
-                    onChange={e => setFilterStatus(e.target.value)} 
+                  <select
+                    value={filterStatus}
+                    onChange={e => setFilterStatus(e.target.value)}
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50"
                   >
                     <option value="all">All Status</option>
@@ -300,9 +300,9 @@ export const WorkOrderManagement: React.FC = () => {
                 </div>
                 <div>
                   <label className="text-sm text-gray-600">Priority</label>
-                  <select 
-                    value={filterPriority} 
-                    onChange={e => setFilterPriority(e.target.value)} 
+                  <select
+                    value={filterPriority}
+                    onChange={e => setFilterPriority(e.target.value)}
                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50"
                   >
                     <option value="all">All Priorities</option>
@@ -354,8 +354,8 @@ export const WorkOrderManagement: React.FC = () => {
                           <p className="text-gray-600">Tasks Progress</p>
                           <div className="flex items-center space-x-2">
                             <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div 
-                                className="bg-blue-600 h-2 rounded-full" 
+                              <div
+                                className="bg-blue-600 h-2 rounded-full"
                                 style={{ width: `${getTaskCompletionPercentage(workOrder.tasks)}%` }}
                               />
                             </div>
@@ -378,23 +378,23 @@ export const WorkOrderManagement: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col space-y-2 ml-4">
-                      <Button variant="outline" size="sm" onClick={onClick}>
+                      <Button variant="outline" size="sm" onClick={() => setSelectedWorkOrder(workOrder)}>
                         View
                       </Button>
-                      
+
                       {workOrder.status === 'initiated' && (
-                        <Button 
+                        <Button
                           size="sm"
-                          onClick={onClick}
+                          onClick={() => handleStartWorkOrder(workOrder.workOrderId)}
                         >
                           Start
                         </Button>
                       )}
-                      
+
                       {workOrder.status === 'in_progress' && (
-                        <Button 
+                        <Button
                           size="sm"
-                          onClick={onClick}
+                          onClick={() => handleCompleteWorkOrder(workOrder.workOrderId)}
                           className={workOrder.rcaRequired && !workOrder.rcaCompleted ? 'bg-yellow-600 hover:bg-yellow-700' : ''}
                         >
                           Complete
@@ -469,11 +469,11 @@ export const WorkOrderManagement: React.FC = () => {
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Work Order Details - {selectedWorkOrder.workOrderId}</h2>
-              <Button variant="outline" onClick={onClick}>
+              <Button variant="outline" onClick={() => setSelectedWorkOrder(null)}>
                 Close
               </Button>
             </div>
-            
+
             {/* Work Order detail tabs would go here */}
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -488,7 +488,7 @@ export const WorkOrderManagement: React.FC = () => {
                   </Badge>
                 </div>
               </div>
-              
+
               <div>
                 <p className="text-sm text-gray-600">Description</p>
                 <p>{selectedWorkOrder.description}</p>
@@ -521,3 +521,5 @@ export const WorkOrderManagement: React.FC = () => {
     </div>
   );
 };
+
+export default WorkOrderManagement;
