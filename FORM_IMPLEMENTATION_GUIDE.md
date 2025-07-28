@@ -9,25 +9,25 @@ This guide provides instructions for implementing and connecting form components
 ### 1. Adding a Form to a Page
 
 ```jsx
-import React, { useState } from 'react';
-import FormSelector from '../components/forms/FormSelector';
-import { useFormSubmit } from '../utils/formIntegration';
+import React, { useState } from "react";
+import FormSelector from "../components/forms/FormSelector";
+import { useFormSubmit } from "../utils/formIntegration";
 
 const MyPage = () => {
-  const [selectedVehicle, setSelectedVehicle] = useState('');
-  
+  const [selectedVehicle, setSelectedVehicle] = useState("");
+
   const { handleSubmit, isSubmitting, error } = useFormSubmit({
-    collection: 'trips',
+    collection: "trips",
     onSuccess: () => {
       // Handle successful submission
-      alert('Form submitted successfully!');
-    }
+      alert("Form submitted successfully!");
+    },
   });
-  
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">Trip Form</h1>
-      
+
       <form onSubmit={handleSubmit}>
         <FormSelector
           label="Select Vehicle"
@@ -39,22 +39,18 @@ const MyPage = () => {
           valueField="id"
           required={true}
         />
-        
+
         {/* Add more form fields as needed */}
-        
-        <button 
+
+        <button
           type="submit"
           className="bg-blue-600 text-white px-4 py-2 rounded mt-4"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Submitting...' : 'Submit'}
+          {isSubmitting ? "Submitting..." : "Submit"}
         </button>
-        
-        {error && (
-          <div className="text-red-500 mt-2">
-            {error}
-          </div>
-        )}
+
+        {error && <div className="text-red-500 mt-2">{error}</div>}
       </form>
     </div>
   );
@@ -128,8 +124,8 @@ For selecting vehicles from the fleet:
 <FleetSelectionForm
   onVehicleSelect={handleVehicleSelect}
   fleetFilter={{
-    status: 'active',
-    vehicleType: 'truck'
+    status: "active",
+    vehicleType: "truck",
   }}
   allowMultiple={false}
   onSubmit={handleFleetFormSubmit}
@@ -169,28 +165,24 @@ For inventory management:
 This hook fetches options from Firestore collections for use in dropdowns and selectors:
 
 ```jsx
-import { useFirestoreOptions } from '../utils/formIntegration';
+import { useFirestoreOptions } from "../utils/formIntegration";
 
 const MyComponent = () => {
-  const { 
-    options, 
-    loading, 
-    error 
-  } = useFirestoreOptions({
-    collection: 'drivers',
-    labelField: 'name',
-    valueField: 'id',
-    sortField: 'name',
-    filterField: 'status',
-    filterValue: 'active'
+  const { options, loading, error } = useFirestoreOptions({
+    collection: "drivers",
+    labelField: "name",
+    valueField: "id",
+    sortField: "name",
+    filterField: "status",
+    filterValue: "active",
   });
-  
+
   return (
     <select>
       {loading ? (
         <option>Loading...</option>
       ) : (
-        options.map(option => (
+        options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
@@ -206,39 +198,34 @@ const MyComponent = () => {
 This hook handles form submission with validation and error handling:
 
 ```jsx
-import { useFormSubmit } from '../utils/formIntegration';
+import { useFormSubmit } from "../utils/formIntegration";
 
 const MyForm = () => {
-  const {
-    handleSubmit,
-    isSubmitting,
-    error,
-    isSuccess
-  } = useFormSubmit({
-    collection: 'trips',
+  const { handleSubmit, isSubmitting, error, isSuccess } = useFormSubmit({
+    collection: "trips",
     validationSchema: {
       // Zod schema or validation function
-      driverId: (value) => value ? null : 'Driver is required',
-      vehicleId: (value) => value ? null : 'Vehicle is required',
+      driverId: (value) => (value ? null : "Driver is required"),
+      vehicleId: (value) => (value ? null : "Vehicle is required"),
     },
     onSuccess: () => {
-      console.log('Form submitted successfully');
+      console.log("Form submitted successfully");
       // Additional success handling
     },
     onError: (err) => {
-      console.error('Form submission failed', err);
+      console.error("Form submission failed", err);
       // Additional error handling
-    }
+    },
   });
-  
+
   return (
     <form onSubmit={handleSubmit}>
       {/* Form fields */}
-      
+
       <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Submitting...' : 'Submit'}
+        {isSubmitting ? "Submitting..." : "Submit"}
       </button>
-      
+
       {error && <div className="error">{error}</div>}
       {isSuccess && <div className="success">Form submitted successfully!</div>}
     </form>
@@ -251,11 +238,11 @@ const MyForm = () => {
 The forms system integrates with the SyncContext to handle offline operations:
 
 ```jsx
-import { useSyncContext } from '../context/SyncContext';
+import { useSyncContext } from "../context/SyncContext";
 
 const OfflineAwareComponent = () => {
   const { isOnline, pendingOperations, syncNow } = useSyncContext();
-  
+
   return (
     <div>
       {!isOnline && (
@@ -264,17 +251,14 @@ const OfflineAwareComponent = () => {
           {pendingOperations > 0 && (
             <div>
               <p>You have {pendingOperations} pending operations.</p>
-              <button 
-                onClick={syncNow}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-              >
+              <button onClick={syncNow} className="bg-blue-500 text-white px-4 py-2 rounded">
                 Sync when online
               </button>
             </div>
           )}
         </div>
       )}
-      
+
       {/* Form components */}
     </div>
   );

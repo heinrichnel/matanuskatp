@@ -37,8 +37,8 @@ import Layout from "./components/layout/Layout";
 
 // Core Components
 import TripFormModal from "./components/Models/Trips/TripFormModal";
-import DashboardPage from "./pages/DashboardPage";
 import Dashboard from "./pages/Dashboard";
+import DashboardPage from "./pages/DashboardPage";
 import FormsIntegrationPage from "./pages/FormsIntegrationPage";
 
 // === TRIPS ===

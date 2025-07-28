@@ -30,6 +30,7 @@ Provides centralized error handling with:
 #### Form Selector (`FormSelector.tsx`)
 
 A reusable dropdown component that:
+
 - Connects directly to Firestore collections
 - Provides filtering and sorting capabilities
 - Handles loading states and error display
@@ -47,6 +48,7 @@ A reusable dropdown component that:
 #### SyncContext
 
 The SyncContext provides a central service for:
+
 - **Online/Offline Detection**: Determines if the app is connected
 - **Operation Queueing**: Stores operations when offline
 - **Synchronization**: Processes queued operations when back online
@@ -54,6 +56,7 @@ The SyncContext provides a central service for:
 #### Navigation System
 
 The navigation components ensure:
+
 - **Consistent Access**: All forms are accessible through the navigation
 - **Context Awareness**: Navigation adapts to connection status
 - **User Guidance**: Provides clear paths to form functionality
@@ -61,6 +64,7 @@ The navigation components ensure:
 #### Dashboard Integration
 
 The Dashboard serves as a central hub that:
+
 - **Displays Key Metrics**: Shows important fleet statistics
 - **Provides Quick Access**: Links to all form components
 - **Shows Status**: Indicates connection status and pending operations
@@ -108,17 +112,17 @@ The Dashboard serves as a central hub that:
 ### Basic Form Integration
 
 ```jsx
-import { useFormSubmit, useFirestoreOptions } from '../utils/formIntegration';
-import FormSelector from '../components/forms/FormSelector';
+import { useFormSubmit, useFirestoreOptions } from "../utils/formIntegration";
+import FormSelector from "../components/forms/FormSelector";
 
 const MyComponent = () => {
-  const [selectedVehicle, setSelectedVehicle] = useState('');
-  
+  const [selectedVehicle, setSelectedVehicle] = useState("");
+
   const { handleSubmit, isSubmitting, error } = useFormSubmit({
-    collection: 'trips',
-    onSuccess: () => console.log('Success!'),
+    collection: "trips",
+    onSuccess: () => console.log("Success!"),
   });
-  
+
   return (
     <form onSubmit={handleSubmit}>
       <FormSelector
@@ -130,11 +134,11 @@ const MyComponent = () => {
         labelField="registrationNumber"
         required={true}
       />
-      
+
       <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Submitting...' : 'Submit'}
+        {isSubmitting ? "Submitting..." : "Submit"}
       </button>
-      
+
       {error && <p className="error">{error}</p>}
     </form>
   );
@@ -144,22 +148,20 @@ const MyComponent = () => {
 ### Offline-Aware Component
 
 ```jsx
-import { useSyncContext } from '../context/SyncContext';
+import { useSyncContext } from "../context/SyncContext";
 
 const OfflineAwareForm = () => {
   const { isOnline, pendingOperations } = useSyncContext();
-  
+
   return (
     <div>
       {!isOnline && (
         <div className="offline-warning">
           You are currently offline. Form submissions will be queued.
-          {pendingOperations > 0 && (
-            <p>You have {pendingOperations} pending operations.</p>
-          )}
+          {pendingOperations > 0 && <p>You have {pendingOperations} pending operations.</p>}
         </div>
       )}
-      
+
       {/* Form components here */}
     </div>
   );
