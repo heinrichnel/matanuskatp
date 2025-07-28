@@ -74,6 +74,7 @@ import InvoiceTemplatesPage from "./pages/invoices/InvoiceTemplatesPage";
 import PaidInvoicesPage from "./pages/invoices/PaidInvoicesPage";
 import PendingInvoicesPage from "./pages/invoices/PendingInvoicesPage";
 import TaxReportExport from "./pages/invoices/TaxReportExport";
+import CashManagerRequestPage from "./pages/CashManagerRequestPage";
 
 // === DIESEL ===
 import AddFuelEntryPage from "./pages/diesel/AddFuelEntryPage";
@@ -286,6 +287,7 @@ const App: React.FC = () => {
                           <Route path="invoices/analytics" element={<CurrencyFleetReport />} />
                           <Route path="invoices/pending" element={<PendingInvoicesPage />} />
                           <Route path="invoices/paid" element={<PaidInvoicesPage />} />
+                          <Route path="invoices/cash-manager" element={<CashManagerRequestPage />} />
 
                           {/* Diesel */}
                           <Route path="diesel" element={<DieselManagementPage />} />
