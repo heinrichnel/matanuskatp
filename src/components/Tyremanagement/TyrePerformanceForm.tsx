@@ -1,13 +1,5 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Paper,
-  Grid,
-  Slider,
-} from '@mui/material';
+import { Box, Button, Paper, Slider, Stack, TextField, Typography } from "@mui/material";
+import React, { useState } from "react";
 
 interface TyrePerformanceData {
   brand: string;
@@ -21,9 +13,9 @@ interface TyrePerformanceData {
 
 const TyrePerformanceForm = () => {
   const [formData, setFormData] = useState<TyrePerformanceData>({
-    brand: '',
-    model: '',
-    size: '',
+    brand: "",
+    model: "",
+    size: "",
     dryGrip: 5,
     wetGrip: 5,
     rollingResistance: 5,
@@ -37,119 +29,110 @@ const TyrePerformanceForm = () => {
     });
   };
 
-  const handleSliderChange = (name: keyof TyrePerformanceData) => (
-    _event: Event,
-    newValue: number | number[]
-  ) => {
-    setFormData({
-      ...formData,
-      [name]: newValue as number,
-    });
-  };
+  const handleSliderChange =
+    (name: keyof TyrePerformanceData) => (_event: Event, newValue: number | number[]) => {
+      setFormData({
+        ...formData,
+        [name]: newValue as number,
+      });
+    };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    console.log('Form Data:', formData);
+    console.log("Form Data:", formData);
     // Add your form submission logic here
   };
 
   return (
-    <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mx: 'auto', mt: 4 }}>
+    <Paper elevation={3} sx={{ p: 3, maxWidth: 500, mx: "auto", mt: 4 }}>
       <Typography variant="h5" component="h2" gutterBottom>
         Tyre Performance Evaluation
       </Typography>
-      <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Tyre Brand"
-              name="brand"
-              value={formData.brand}
-              onChange={handleChange}
-              required
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Tyre Model"
-              name="model"
-              value={formData.model}
-              onChange={handleChange}
-              required
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Tyre Size"
-              name="size"
-              value={formData.size}
-              onChange={handleChange}
-              required
-            />
-          </Grid>
-          <Grid item xs={12}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%" }}>
+        <Stack spacing={2}>
+          <TextField
+            fullWidth
+            label="Tyre Brand"
+            name="brand"
+            value={formData.brand}
+            onChange={handleChange}
+            required
+          />
+
+          <TextField
+            fullWidth
+            label="Tyre Model"
+            name="model"
+            value={formData.model}
+            onChange={handleChange}
+            required
+          />
+
+          <TextField
+            fullWidth
+            label="Tyre Size"
+            name="size"
+            value={formData.size}
+            onChange={handleChange}
+            required
+          />
+
+          <Box>
             <Typography gutterBottom>Dry Grip</Typography>
             <Slider
               value={formData.dryGrip}
-              onChange={handleSliderChange('dryGrip')}
+              onChange={handleSliderChange("dryGrip")}
               min={1}
               max={10}
               step={1}
               marks
               valueLabelDisplay="auto"
             />
-          </Grid>
-          <Grid item xs={12}>
+          </Box>
+
+          <Box>
             <Typography gutterBottom>Wet Grip</Typography>
             <Slider
               value={formData.wetGrip}
-              onChange={handleSliderChange('wetGrip')}
+              onChange={handleSliderChange("wetGrip")}
               min={1}
               max={10}
               step={1}
               marks
               valueLabelDisplay="auto"
             />
-          </Grid>
-          <Grid item xs={12}>
+          </Box>
+
+          <Box>
             <Typography gutterBottom>Rolling Resistance</Typography>
             <Slider
               value={formData.rollingResistance}
-              onChange={handleSliderChange('rollingResistance')}
+              onChange={handleSliderChange("rollingResistance")}
               min={1}
               max={10}
               step={1}
               marks
               valueLabelDisplay="auto"
             />
-          </Grid>
-          <Grid item xs={12}>
+          </Box>
+
+          <Box>
             <Typography gutterBottom>Noise Level</Typography>
             <Slider
               value={formData.noiseLevel}
-              onChange={handleSliderChange('noiseLevel')}
+              onChange={handleSliderChange("noiseLevel")}
               min={1}
               max={10}
               step={1}
               marks
               valueLabelDisplay="auto"
             />
-          </Grid>
-          <Grid item xs={12}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              fullWidth
-              size="large"
-            >
-              Submit
-            </Button>
-          </Grid>
-        </Grid>
+          </Box>
+
+          <Button type="submit" variant="contained" color="primary" fullWidth size="large">
+            Submit
+          </Button>
+        </Stack>
       </Box>
     </Paper>
   );
