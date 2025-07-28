@@ -16,27 +16,22 @@ import {
   TrendingUp,
   Truck,
 } from "lucide-react";
-import React, { useEffect, useState, useMemo } from "react"; // Added useMemo
+import React, { useEffect, useMemo, useState } from "react"; // Added useMemo
 import { Link } from "react-router-dom";
 import TyreFormModal from "../../components/Models/Tyre/TyreFormModal";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../../components/ui/Card";
-import { collection, doc, getDocs, deleteDoc, updateDoc, addDoc, query, where, Timestamp } from "firebase/firestore";
-import { db } from '@/firebase'; // Check this path and if 'db' is exported
-import { Table } from "../../components/ui/table"; // Using relative path instead of alias
 // Using the Tyre type directly from tyreData.ts instead of TyreModel
 import { useTyreReferenceData } from "@/context/TyreReferenceDataContext";
-import { Input, Select } from "@/components/ui/FormElements"; // Not directly used at top level here
-
 
 // Import all necessary Enums and Types from your tyreData.ts file
 // Ensure this path is correct relative to TyreManagementPage.tsx
 import {
   Tyre,
-  TyreStoreLocation,
   TyreConditionStatus,
-  TyreStatus,
   TyreMountStatus,
+  TyreStatus,
+  TyreStoreLocation,
   tyreTypes, // This is the array, not an enum
 } from "../../data/tyreData"; // ADJUST THIS PATH IF NECESSARY
 
@@ -45,7 +40,6 @@ import {
 // you should consolidate to one source or ensure they can merge.
 // For now, I'm assuming tyreData.ts is the single source as per previous conversation.
 // import { TyreStoreLocation } from "../../types/tyre"; // REMOVE THIS LINE IF TyreStoreLocation is in tyreData.ts
-
 
 // Import tyre components that need to be integrated
 import TyreAnalytics from "../../components/Tyremanagement/TyreAnalytics";
@@ -118,8 +112,7 @@ const adaptTyreFormatIfNeeded = (tyres: Tyre[], targetComponent: string) => {
             tyre.kmRun > 0 && tyre.condition?.treadDepth
               ? ((10 - tyre.condition.treadDepth) / (tyre.kmRun * 1.60934)) * 10000
               : 0,
-          costEfficiency:
-            tyre.kmRun > 0 ? tyre.purchaseDetails?.cost / (tyre.kmRun * 1.60934) : 0,
+          costEfficiency: tyre.kmRun > 0 ? tyre.purchaseDetails?.cost / (tyre.kmRun * 1.60934) : 0,
         },
       }));
 
@@ -167,51 +160,54 @@ const TyreManagementPage: React.FC = () => {
 
   // Define defaultNewTyre using Enum members and ensuring all required fields are present
   // This is wrapped in useMemo to prevent re-creation on every render, which is good practice.
-  const defaultNewTyre: Partial<Tyre> = useMemo(() => ({
-    serialNumber: `TY-${Math.floor(1000 + Math.random() * 9000)}`,
-    dotCode: "",
-    manufacturingDate: new Date().toISOString().split("T")[0],
-    brand: "",
-    model: "",
-    pattern: "",
-    size: { width: 0, aspectRatio: 0, rimDiameter: 0 },
-    loadIndex: 0,
-    speedRating: "",
-    type: tyreTypes[0], // Using the first value from the tyreTypes array
-    purchaseDetails: {
-      date: new Date().toISOString().split("T")[0],
-      cost: 0,
-      supplier: "",
-      warranty: "",
-      invoiceNumber: "", // Added as it's optional but good to initialize
-    },
-    installation: {
-      vehicleId: "",
-      position: "",
-      mileageAtInstallation: 0,
-      installationDate: "",
-      installedBy: "",
-    },
-    condition: {
-      treadDepth: 20,
-      pressure: 0,
-      temperature: 0,
-      status: TyreConditionStatus.GOOD, // Corrected to use enum member
-      lastInspectionDate: new Date().toISOString().split("T")[0],
-      nextInspectionDue: "", // Corrected: Ensures this required field is present
-    },
-    status: TyreStatus.NEW, // Corrected to use enum member
-    mountStatus: TyreMountStatus.UNMOUNTED, // Corrected to use enum member
-    maintenanceHistory: {
-      rotations: [],
-      repairs: [],
-      inspections: [],
-    },
-    kmRun: 0,
-    kmRunLimit: 60000,
-    notes: "",
-    location: TyreStoreLocation.HOLDING_BAY, // Corrected to use enum member
-  }), []); // Empty dependency array means it's created once
+  const defaultNewTyre: Partial<Tyre> = useMemo(
+    () => ({
+      serialNumber: `TY-${Math.floor(1000 + Math.random() * 9000)}`,
+      dotCode: "",
+      manufacturingDate: new Date().toISOString().split("T")[0],
+      brand: "",
+      model: "",
+      pattern: "",
+      size: { width: 0, aspectRatio: 0, rimDiameter: 0 },
+      loadIndex: 0,
+      speedRating: "",
+      type: tyreTypes[0], // Using the first value from the tyreTypes array
+      purchaseDetails: {
+        date: new Date().toISOString().split("T")[0],
+        cost: 0,
+        supplier: "",
+        warranty: "",
+        invoiceNumber: "", // Added as it's optional but good to initialize
+      },
+      installation: {
+        vehicleId: "",
+        position: "",
+        mileageAtInstallation: 0,
+        installationDate: "",
+        installedBy: "",
+      },
+      condition: {
+        treadDepth: 20,
+        pressure: 0,
+        temperature: 0,
+        status: TyreConditionStatus.GOOD, // Corrected to use enum member
+        lastInspectionDate: new Date().toISOString().split("T")[0],
+        nextInspectionDue: "", // Corrected: Ensures this required field is present
+      },
+      status: TyreStatus.NEW, // Corrected to use enum member
+      mountStatus: TyreMountStatus.UNMOUNTED, // Corrected to use enum member
+      maintenanceHistory: {
+        rotations: [],
+        repairs: [],
+        inspections: [],
+      },
+      kmRun: 0,
+      kmRunLimit: 60000,
+      notes: "",
+      location: TyreStoreLocation.HOLDING_BAY, // Corrected to use enum member
+    }),
+    []
+  ); // Empty dependency array means it's created once
 
   // Function to fetch tyres from Firestore
   const fetchTyres = async () => {
@@ -283,7 +279,7 @@ const TyreManagementPage: React.FC = () => {
   }));
 
   // Handle adding a new tyre
-  const handleAddTyre = async (data: Omit<Tyre, "id">) => {
+  const handleAddTyre = async (data: Omit<Tyre, "id">): Promise<void> => {
     try {
       console.log("Adding new tyre:", data);
 
@@ -316,11 +312,12 @@ const TyreManagementPage: React.FC = () => {
       console.error("Error adding tyre:", err);
       // toast.error("Failed to add tyre. Please try again.");
       alert("Failed to add tyre. Please try again."); // Fallback to alert
+      throw err; // Re-throw to ensure Promise rejection
     }
   };
 
   // Handle updating an existing tyre
-  const handleUpdateTyre = async (data: Tyre) => {
+  const handleUpdateTyre = async (data: Tyre): Promise<void> => {
     try {
       if (!data.id) throw new Error("Tyre ID is required for updates");
 
@@ -353,10 +350,12 @@ const TyreManagementPage: React.FC = () => {
       console.error("Error updating tyre:", err);
       // toast.error("Failed to update tyre. Please try again.");
       alert("Failed to update tyre. Please try again."); // Fallback to alert
+      throw err; // Re-throw to ensure Promise rejection
     }
   };
 
-  const getStatusColor = (status: TyreStatus) => { // Changed 'status: string' to 'status: TyreStatus'
+  const getStatusColor = (status: TyreStatus) => {
+    // Changed 'status: string' to 'status: TyreStatus'
     switch (status) {
       case TyreStatus.IN_SERVICE: // Use enum member
         return "text-green-600 bg-green-50";
@@ -523,7 +522,11 @@ const TyreManagementPage: React.FC = () => {
                       <div>
                         <p className="text-sm text-gray-600">Available (New/Spare)</p>
                         <p className="text-xl font-bold text-gray-900">
-                          {tyres.filter((t) => [TyreStatus.NEW, TyreStatus.SPARE].includes(t.status)).length}
+                          {
+                            tyres.filter((t) =>
+                              [TyreStatus.NEW, TyreStatus.SPARE].includes(t.status)
+                            ).length
+                          }
                         </p>
                       </div>
                     </div>
@@ -539,7 +542,11 @@ const TyreManagementPage: React.FC = () => {
                       <div>
                         <p className="text-sm text-gray-600">Retreaded/Scrapped</p>
                         <p className="text-xl font-bold text-gray-900">
-                          {tyres.filter((t) => [TyreStatus.RETREADED, TyreStatus.SCRAPPED].includes(t.status)).length}
+                          {
+                            tyres.filter((t) =>
+                              [TyreStatus.RETREADED, TyreStatus.SCRAPPED].includes(t.status)
+                            ).length
+                          }
                         </p>
                       </div>
                     </div>
@@ -891,15 +898,23 @@ const TyreManagementPage: React.FC = () => {
         <TyreFormModal
           isOpen={showAddForm}
           onClose={() => setShowAddForm(false)}
-          onSubmit={(tyreData: Partial<Tyre>) => {
+          onSubmit={async (tyreData: Partial<Tyre>): Promise<void> => {
             // Check if initialData.purchaseDetails.invoiceNumber is missing, set to empty string
-            if (!tyreData.purchaseDetails?.invoiceNumber) {
-              if (!tyreData.purchaseDetails) {
-                tyreData.purchaseDetails = {};
+            if (tyreData.purchaseDetails) {
+              if (!tyreData.purchaseDetails.invoiceNumber) {
+                tyreData.purchaseDetails.invoiceNumber = "";
               }
-              tyreData.purchaseDetails.invoiceNumber = "";
+            } else {
+              // Create a properly typed purchase details object
+              tyreData.purchaseDetails = {
+                date: new Date().toISOString().split("T")[0],
+                cost: 0,
+                supplier: "",
+                warranty: "",
+                invoiceNumber: "",
+              };
             }
-            handleAddTyre(tyreData as Omit<Tyre, "id">);
+            await handleAddTyre(tyreData as Omit<Tyre, "id">);
           }}
           editMode={false}
           initialData={defaultNewTyre} // Pass the memoized default new tyre data
@@ -911,7 +926,9 @@ const TyreManagementPage: React.FC = () => {
         <TyreFormModal
           isOpen={!!editTyre}
           onClose={() => setEditTyre(null)}
-          onSubmit={(tyreData: Partial<Tyre>) => handleUpdateTyre(tyreData as Tyre)}
+          onSubmit={async (tyreData: Partial<Tyre>): Promise<void> => {
+            await handleUpdateTyre(tyreData as Tyre);
+          }}
           editMode={true}
           initialData={editTyre} // Pass the selected tyre directly
         />
@@ -921,7 +938,6 @@ const TyreManagementPage: React.FC = () => {
 };
 
 export default TyreManagementPage;
-function useAuth(): { currentUser: any; } {
+function useAuth(): { currentUser: any } {
   throw new Error("Function not implemented.");
 }
-
