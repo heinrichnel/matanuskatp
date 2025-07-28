@@ -1,4 +1,4 @@
-import { Tyre, tyreBrands, tyrePatterns, tyreSizes } from "@/data/tyreData";
+import { Tyre, TYRE_BRANDS, TYRE_PATTERNS, TYRE_SIZES } from "@/data/tyreData";
 import { getBestTyres, getTyrePerformanceStats, RankedTyre } from "@/utils/tyreAnalytics";
 import { collection, getFirestore, onSnapshot } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -55,9 +55,10 @@ export const TyreReports: React.FC = () => {
         status: doc.data().status || "Unknown",
         mountStatus: doc.data().mountStatus || "Unknown",
         maintenanceHistory: doc.data().maintenanceHistory || [],
-        milesRun: doc.data().milesRun || 0,
+        kmRun: doc.data().kmRun || doc.data().milesRun || 0,
         kmRunLimit: doc.data().kmRunLimit || 0,
         notes: doc.data().notes || "None",
+        location: doc.data().location || "HOLDING_BAY",
       }));
       setTyreData(tyres);
     });
@@ -109,7 +110,7 @@ export const TyreReports: React.FC = () => {
             onChange={(e) => setFilterBrand(e.target.value)}
           >
             <option value="">All Brands</option>
-            {tyreBrands.map((brand) => (
+            {TYRE_BRANDS.map((brand) => (
               <option key={brand} value={brand}>
                 {brand}
               </option>
@@ -126,7 +127,7 @@ export const TyreReports: React.FC = () => {
             onChange={(e) => setFilterPattern(e.target.value)}
           >
             <option value="">All Patterns</option>
-            {tyrePatterns.map((pattern) => (
+            {TYRE_PATTERNS.map((pattern) => (
               <option key={pattern} value={pattern}>
                 {pattern}
               </option>
@@ -143,7 +144,7 @@ export const TyreReports: React.FC = () => {
             onChange={(e) => setFilterSize(e.target.value)}
           >
             <option value="">All Sizes</option>
-            {tyreSizes.map((size) => (
+            {TYRE_SIZES.map((size) => (
               <option key={size} value={size}>
                 {size}
               </option>
