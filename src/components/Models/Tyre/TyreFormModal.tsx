@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import Modal from '@/components/ui/Modal';
-import { Button } from '@/components/ui/Button';
-import { Input, Select, Textarea } from '@/components/ui/FormElements';
-import { X, Save, ChevronRight } from 'lucide-react';
-import { useTyreReferenceData } from '@/context/TyreReferenceDataContext';
-import VehiclePositionDiagram from '@/components/tyres/VehiclePositionDiagram';
-import { Timestamp } from 'firebase/firestore';
-import { Tyre } from '@/components/Models/Tyre/TyreModel';
+import React, { useState, useEffect } from "react";
+import Modal from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
+import { Input, Select, Textarea } from "@/components/ui/FormElements";
+import { X, Save, ChevronRight } from "lucide-react";
+import { useTyreReferenceData } from "@/context/TyreReferenceDataContext";
+import VehiclePositionDiagram from "@/components/tyres/VehiclePositionDiagram";
+import { Timestamp } from "firebase/firestore";
+import { Tyre, TyreStoreLocation } from "@/components/Models/Tyre/TyreModel";
 
 interface TyreFormModalProps {
   isOpen: boolean;
@@ -21,80 +21,87 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
   onClose,
   onSubmit,
   initialData = {},
-  editMode = false
+  editMode = false,
 }) => {
   // Use the reference data context for brands, sizes, patterns
-  const {
-    brands,
-    sizes,
-    getPositionsForVehicleType,
-    getPatternsForBrand
-  } = useTyreReferenceData();
+  const { brands, sizes, getPositionsForVehicleType, getPatternsForBrand } = useTyreReferenceData();
 
   // Form state
   const [formData, setFormData] = useState<Partial<Tyre>>({
     serialNumber: initialData.serialNumber || `TY-${Math.floor(1000 + Math.random() * 9000)}`,
-    dotCode: initialData.dotCode || '',
-    manufacturingDate: initialData.manufacturingDate || new Date().toISOString().split('T')[0],
-    brand: initialData.brand || '',
-    model: initialData.model || '',
-    pattern: initialData.pattern || '',
+    dotCode: initialData.dotCode || "",
+    manufacturingDate: initialData.manufacturingDate || new Date().toISOString().split("T")[0],
+    brand: initialData.brand || "",
+    model: initialData.model || "",
+    pattern: initialData.pattern || "",
     size: initialData.size || { width: 0, aspectRatio: 0, rimDiameter: 0 },
     loadIndex: initialData.loadIndex || 0,
-    speedRating: initialData.speedRating || '',
-    type: initialData.type || 'standard',
+    speedRating: initialData.speedRating || "",
+    type: initialData.type || "standard",
     purchaseDetails: initialData.purchaseDetails || {
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split("T")[0],
       cost: 0,
-      supplier: '',
-      warranty: '',
-      invoiceNumber: ''
+      supplier: "",
+      warranty: "",
+      invoiceNumber: "",
     },
     installation: initialData.installation || {
-      vehicleId: '',
-      position: 'front_left',
+      vehicleId: "",
+      position: "front_left",
       mileageAtInstallation: 0,
-      installationDate: '',
-      installedBy: ''
+      installationDate: "",
+      installedBy: "",
     },
     condition: initialData.condition || {
       treadDepth: 20, // New tyre typical depth
       pressure: 0,
       temperature: 0,
-      status: 'good',
-      lastInspectionDate: new Date().toISOString().split('T')[0],
-      nextInspectionDue: ''
+      status: "good",
+      lastInspectionDate: new Date().toISOString().split("T")[0],
+      nextInspectionDue: "",
     },
-    status: initialData.status || 'new',
-    mountStatus: initialData.mountStatus || 'unmounted',
+    status: initialData.status || "new",
+    mountStatus: initialData.mountStatus || "unmounted",
     maintenanceHistory: initialData.maintenanceHistory || {
       rotations: [],
       repairs: [],
-      inspections: []
+      inspections: [],
     },
-    milesRun: initialData.mleisRun || 0,
+    kmRun: initialData.kmRun || 0,
     kmRunLimit: initialData.kmRunLimit || 60000,
-    notes: initialData.notes || '',
-    location: initialData.location || { storeId: '', position: '' }
+    notes: initialData.notes || "",
+    location: initialData.location ?? TyreStoreLocation.HOLDING_BAY,
   });
 
   // Form section management
   const [activeSection, setActiveSection] = useState<
-    'basic' | 'technical' | 'installation' | 'condition'
-  >('basic');
+    "basic" | "technical" | "installation" | "condition"
+  >("basic");
 
   // Derived state
   const [availablePatterns, setAvailablePatterns] = useState<string[]>([]);
-  const [vehicleTypePositions, setVehicleTypePositions] = useState<{ id: string; name: string; }[]>([]);
+  const [vehicleTypePositions, setVehicleTypePositions] = useState<{ id: string; name: string }[]>(
+    []
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<string>("");
+
+  // Helper functions for type safety
+  const safeString = (value: string | undefined): string => value ?? "";
+  const safeNumber = (value: number | undefined): number => value ?? 0;
+  
+  // Helper to handle potentially undefined values for form inputs
+  const safeValue = (value: string | number | undefined): string | number => {
+    if (value === undefined) return "";
+    return value;
+  };
 
   // Update available patterns when brand or size changes
   useEffect(() => {
     if (formData.brand) {
       const patterns = getPatternsForBrand(formData.brand)
-        .map(p => p.pattern)
+        .map((p) => p.pattern)
         .filter((v, i, a) => a.indexOf(v) === i); // Unique values
       setAvailablePatterns(patterns);
     } else {
@@ -117,37 +124,39 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
       const parts = selectedSize.match(/^(\d+)\/(\d+)R(\d+\.?\d*)$/);
       if (parts) {
         const [, width, aspectRatio, rimDiameter] = parts;
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           size: {
             width: parseInt(width),
             aspectRatio: parseInt(aspectRatio),
             rimDiameter: parseFloat(rimDiameter),
-            displayString: selectedSize
-          }
+            displayString: selectedSize,
+          },
         }));
       }
     }
   }, [selectedSize]);
 
   // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
 
     // Handle nested properties
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
         ...prev,
         [parent]: {
           ...(prev[parent as keyof typeof prev] as Record<string, any>),
-          [child]: value
-        }
+          [child]: value,
+        },
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
@@ -158,19 +167,19 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
     const numValue = parseFloat(value);
 
     // Handle nested properties
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
         ...prev,
         [parent]: {
           ...(prev[parent as keyof typeof prev] as Record<string, any>),
-          [child]: isNaN(numValue) ? 0 : numValue
-        }
+          [child]: isNaN(numValue) ? 0 : numValue,
+        },
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: isNaN(numValue) ? 0 : numValue
+        [name]: isNaN(numValue) ? 0 : numValue,
       }));
     }
   };
@@ -180,17 +189,21 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
     const newErrors: Record<string, string> = {};
 
     // Basic validation
-    if (!formData.serialNumber) newErrors.serialNumber = 'Serial number is required';
-    if (!formData.brand) newErrors.brand = 'Brand is required';
-    if (!formData.pattern) newErrors.pattern = 'Pattern is required';
-    if (!selectedSize) newErrors.size = 'Size is required';
-    if (!formData.purchaseDetails?.date) newErrors['purchaseDetails.date'] = 'Purchase date is required';
-    if (formData.purchaseDetails?.cost === 0) newErrors['purchaseDetails.cost'] = 'Cost is required';
+    if (!formData.serialNumber) newErrors.serialNumber = "Serial number is required";
+    if (!formData.brand) newErrors.brand = "Brand is required";
+    if (!formData.pattern) newErrors.pattern = "Pattern is required";
+    if (!selectedSize) newErrors.size = "Size is required";
+    if (!formData.purchaseDetails?.date)
+      newErrors["purchaseDetails.date"] = "Purchase date is required";
+    if (formData.purchaseDetails?.cost === 0)
+      newErrors["purchaseDetails.cost"] = "Cost is required";
 
     // Additional validation for mounted tyres
-    if (formData.mountStatus === 'mounted') {
-      if (!formData.installation?.vehicleId) newErrors['installation.vehicleId'] = 'Vehicle ID is required for mounted tyres';
-      if (!formData.installation?.position) newErrors['installation.position'] = 'Position is required for mounted tyres';
+    if (formData.mountStatus === "mounted") {
+      if (!formData.installation?.vehicleId)
+        newErrors["installation.vehicleId"] = "Vehicle ID is required for mounted tyres";
+      if (!formData.installation?.position)
+        newErrors["installation.position"] = "Position is required for mounted tyres";
     }
 
     setErrors(newErrors);
@@ -206,7 +219,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
       // Prepare data for submission
       const submissionData: Partial<Tyre> = {
         ...formData,
-        updatedAt: Timestamp.now()
+        updatedAt: Timestamp.now(),
       };
 
       // If new tyre, add createdAt
@@ -217,54 +230,49 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
       await onSubmit(submissionData);
       onClose();
     } catch (error) {
-      console.error('Error saving tyre:', error);
-      setErrors({ submit: 'Failed to save tyre. Please try again.' });
+      console.error("Error saving tyre:", error);
+      setErrors({ submit: "Failed to save tyre. Please try again." });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // Determine the modal title based on edit mode
-  const modalTitle = editMode ? `Edit Tyre: ${formData.serialNumber}` : 'Add New Tyre';
+  const modalTitle = editMode ? `Edit Tyre: ${formData.serialNumber}` : "Add New Tyre";
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={modalTitle}
-      maxWidth="lg"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} maxWidth="lg">
       <div className="space-y-6">
         {/* Section Navigation */}
         <div className="flex space-x-1 border-b">
           <button
-            className={`px-4 py-2 ${activeSection === 'basic' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
-            onClick={() => setActiveSection('basic')}
+            className={`px-4 py-2 ${activeSection === "basic" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
+            onClick={() => setActiveSection("basic")}
           >
             Basic Info
           </button>
           <button
-            className={`px-4 py-2 ${activeSection === 'technical' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
-            onClick={() => setActiveSection('technical')}
+            className={`px-4 py-2 ${activeSection === "technical" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
+            onClick={() => setActiveSection("technical")}
           >
             Technical Details
           </button>
           <button
-            className={`px-4 py-2 ${activeSection === 'installation' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
-            onClick={() => setActiveSection('installation')}
+            className={`px-4 py-2 ${activeSection === "installation" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
+            onClick={() => setActiveSection("installation")}
           >
             Installation
           </button>
           <button
-            className={`px-4 py-2 ${activeSection === 'condition' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
-            onClick={() => setActiveSection('condition')}
+            className={`px-4 py-2 ${activeSection === "condition" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
+            onClick={() => setActiveSection("condition")}
           >
             Condition & Status
           </button>
         </div>
 
         {/* Basic Information Section */}
-        {activeSection === 'basic' && (
+        {activeSection === "basic" && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
@@ -300,8 +308,8 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                 onChange={handleChange}
                 error={errors.brand}
                 options={[
-                  { label: 'Select brand...', value: '' },
-                  ...brands.map(brand => ({ label: brand.name, value: brand.name }))
+                  { label: "Select brand...", value: "" },
+                  ...brands.map((brand) => ({ label: brand.name, value: brand.name })),
                 ]}
               />
             </div>
@@ -314,8 +322,8 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                 onChange={(e) => setSelectedSize(e.target.value)}
                 error={errors.size}
                 options={[
-                  { label: 'Select size...', value: '' },
-                  ...sizes.map(size => ({ label: size.size, value: size.size }))
+                  { label: "Select size...", value: "" },
+                  ...sizes.map((size) => ({ label: size.size, value: size.size })),
                 ]}
               />
               <Select
@@ -325,31 +333,26 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                 onChange={handleChange}
                 error={errors.pattern}
                 options={[
-                  { label: 'Select pattern...', value: '' },
-                  ...availablePatterns.map(pattern => ({ label: pattern, value: pattern }))
+                  { label: "Select pattern...", value: "" },
+                  ...availablePatterns.map((pattern) => ({ label: pattern, value: pattern })),
                 ]}
                 disabled={!formData.brand}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Model"
-                name="model"
-                value={formData.model}
-                onChange={handleChange}
-              />
+              <Input label="Model" name="model" value={formData.model} onChange={handleChange} />
               <Select
                 label="Type"
                 name="type"
                 value={formData.type as string}
                 onChange={handleChange}
                 options={[
-                  { label: 'Standard', value: 'standard' },
-                  { label: 'Winter', value: 'winter' },
-                  { label: 'All Season', value: 'all_season' },
-                  { label: 'Mud Terrain', value: 'mud_terrain' },
-                  { label: 'All Terrain', value: 'all_terrain' }
+                  { label: "Standard", value: "standard" },
+                  { label: "Winter", value: "winter" },
+                  { label: "All Season", value: "all_season" },
+                  { label: "Mud Terrain", value: "mud_terrain" },
+                  { label: "All Terrain", value: "all_terrain" },
                 ]}
               />
             </div>
@@ -357,7 +360,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
         )}
 
         {/* Technical Details Section */}
-        {activeSection === 'technical' && (
+        {activeSection === "technical" && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
@@ -382,7 +385,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                 type="date"
                 value={formData.purchaseDetails?.date}
                 onChange={handleChange}
-                error={errors['purchaseDetails.date']}
+                error={errors["purchaseDetails.date"]}
               />
               <Input
                 label="Purchase Cost"
@@ -390,7 +393,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                 type="number"
                 value={formData.purchaseDetails?.cost}
                 onChange={handleNumberChange}
-                error={errors['purchaseDetails.cost']}
+                error={errors["purchaseDetails.cost"]}
               />
             </div>
 
@@ -438,7 +441,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
         )}
 
         {/* Installation Section */}
-        {activeSection === 'installation' && (
+        {activeSection === "installation" && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Select
@@ -447,23 +450,23 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                 value={formData.mountStatus as string}
                 onChange={handleChange}
                 options={[
-                  { label: 'Unmounted', value: 'unmounted' },
-                  { label: 'Mounted', value: 'mounted' },
-                  { label: 'In Storage', value: 'in_storage' }
+                  { label: "Unmounted", value: "unmounted" },
+                  { label: "Mounted", value: "mounted" },
+                  { label: "In Storage", value: "in_storage" },
                 ]}
               />
-              {formData.mountStatus === 'mounted' && (
+              {formData.mountStatus === "mounted" && (
                 <Input
                   label="Vehicle ID/Registration"
                   name="installation.vehicleId"
                   value={formData.installation?.vehicleId}
                   onChange={handleChange}
-                  error={errors['installation.vehicleId']}
+                  error={errors["installation.vehicleId"]}
                 />
               )}
             </div>
 
-            {formData.mountStatus === 'mounted' && (
+            {formData.mountStatus === "mounted" && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Select
@@ -472,10 +475,10 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                     value={formData.type as string}
                     onChange={handleChange}
                     options={[
-                      { label: 'Standard', value: 'standard' },
-                      { label: 'Reefer', value: 'reefer' },
-                      { label: 'Horse', value: 'horse' },
-                      { label: 'Interlink', value: 'interlink' }
+                      { label: "Standard", value: "standard" },
+                      { label: "Reefer", value: "reefer" },
+                      { label: "Horse", value: "horse" },
+                      { label: "Interlink", value: "interlink" },
                     ]}
                   />
                   <Select
@@ -483,10 +486,10 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                     name="installation.position"
                     value={formData.installation?.position as string}
                     onChange={handleChange}
-                    error={errors['installation.position']}
+                    error={errors["installation.position"]}
                     options={[
-                      { label: 'Select position...', value: '' },
-                      ...vehicleTypePositions.map(pos => ({ label: pos.name, value: pos.id }))
+                      { label: "Select position...", value: "" },
+                      ...vehicleTypePositions.map((pos) => ({ label: pos.name, value: pos.id })),
                     ]}
                   />
                 </div>
@@ -517,17 +520,20 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
 
                 {/* Vehicle Position Diagram */}
                 <div className="mt-4 bg-gray-50 border border-gray-200 rounded-md p-4">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Vehicle Position Diagram</h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    Vehicle Position Diagram
+                  </h3>
                   <VehiclePositionDiagram
-                    vehicleType={formData.type as 'standard' | 'reefer' | 'horse' | 'interlink'}
+                    vehicleType={formData.type as "standard" | "reefer" | "horse" | "interlink"}
                     selectedPosition={formData.installation?.position as string}
-                    onPositionSelect={(position) => {
-                      setFormData(prev => ({
+                    positions={vehicleTypePositions}
+                    onPositionClick={(position) => {
+                      setFormData((prev) => ({
                         ...prev,
                         installation: {
                           ...prev.installation!,
-                          position
-                        }
+                          position,
+                        },
                       }));
                     }}
                   />
@@ -538,7 +544,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
         )}
 
         {/* Condition & Status Section */}
-        {activeSection === 'condition' && (
+        {activeSection === "condition" && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Select
@@ -547,11 +553,11 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                 value={formData.status as string}
                 onChange={handleChange}
                 options={[
-                  { label: 'New', value: 'new' },
-                  { label: 'In Service', value: 'in_service' },
-                  { label: 'Spare', value: 'spare' },
-                  { label: 'Retreaded', value: 'retreaded' },
-                  { label: 'Scrapped', value: 'scrapped' }
+                  { label: "New", value: "new" },
+                  { label: "In Service", value: "in_service" },
+                  { label: "Spare", value: "spare" },
+                  { label: "Retreaded", value: "retreaded" },
+                  { label: "Scrapped", value: "scrapped" },
                 ]}
               />
               <Input
@@ -577,10 +583,10 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                 value={formData.condition?.status as string}
                 onChange={handleChange}
                 options={[
-                  { label: 'Good', value: 'good' },
-                  { label: 'Warning', value: 'warning' },
-                  { label: 'Critical', value: 'critical' },
-                  { label: 'Needs Replacement', value: 'needs_replacement' }
+                  { label: "Good", value: "good" },
+                  { label: "Warning", value: "warning" },
+                  { label: "Critical", value: "critical" },
+                  { label: "Needs Replacement", value: "needs_replacement" },
                 ]}
               />
             </div>
@@ -614,11 +620,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
 
         {/* Form Actions */}
         <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
-          <div>
-            {errors.submit && (
-              <p className="text-sm text-red-600">{errors.submit}</p>
-            )}
-          </div>
+          <div>{errors.submit && <p className="text-sm text-red-600">{errors.submit}</p>}</div>
           <div className="flex space-x-3">
             <Button
               variant="outline"
@@ -629,11 +631,15 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
               Cancel
             </Button>
 
-            {activeSection !== 'condition' ? (
+            {activeSection !== "condition" ? (
               <Button
                 onClick={() => {
-                  const sections: Array<'basic' | 'technical' | 'installation' | 'condition'> =
-                    ['basic', 'technical', 'installation', 'condition'];
+                  const sections: Array<"basic" | "technical" | "installation" | "condition"> = [
+                    "basic",
+                    "technical",
+                    "installation",
+                    "condition",
+                  ];
                   const currentIndex = sections.indexOf(activeSection);
                   setActiveSection(sections[currentIndex + 1]);
                 }}
@@ -644,10 +650,10 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
             ) : (
               <Button
                 onClick={handleSubmit}
-                loading={isSubmitting}
+                isLoading={isSubmitting}
                 icon={<Save className="w-4 h-4" />}
               >
-                {editMode ? 'Update Tyre' : 'Save Tyre'}
+                {editMode ? "Update Tyre" : "Save Tyre"}
               </Button>
             )}
           </div>
