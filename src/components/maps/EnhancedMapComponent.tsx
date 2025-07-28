@@ -233,18 +233,13 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
           )}
         </GoogleMap>
       )}
-      
+
       {/* Location detail panel */}
       {selectedLocation && (
         <div className="mt-4">
-          <LocationDetailPanel 
-            selectedLocation={selectedLocation}
+          <LocationDetailPanel
+            locationId={selectedLocation.id || ''}
             onClose={() => setSelectedLocation(null)}
-            onViewDirections={(location: Location) => {
-              // Open directions in Google Maps
-              const url = `https://www.google.com/maps/dir/?api=1&destination=${location.lat},${location.lng}`;
-              window.open(url, '_blank');
-            }}
           />
         </div>
       )}
