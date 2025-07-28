@@ -7,7 +7,7 @@ import ErrorMessage from "../ui/ErrorMessage";
 import Button from "../ui/Button";
 import { formatDateTime } from "../../utils/helpers";
 import { CheckCircle, Clock, Truck, MapPin, User, Calendar, Edit, DollarSign } from "lucide-react";
-import CompletedTripEditModal from "./CompletedTripEditModal";
+import CompletedTripEditModal from "../Models/Trips/CompletedTripEditModal";
 import { Trip } from "../../types";
 
 export default function WebBookTripsList() {
@@ -26,32 +26,32 @@ export default function WebBookTripsList() {
       route: `${webTrip.origin} to ${webTrip.destination}`,
       startDate: webTrip.shippedDate || webTrip.startTime || new Date().toISOString().split('T')[0],
       endDate: webTrip.deliveredDate || webTrip.endTime || new Date().toISOString().split('T')[0],
-      
+
       // Required fields with default values
       baseRevenue: 0, // Default value
       revenueCurrency: 'ZAR', // Default value
       status: webTrip.deliveredStatus ? 'completed' : 'active',
       costs: [], // Empty array as default
       additionalCosts: [], // Empty array as default
-      
+
       // Optional fields we can set
       distanceKm: webTrip.tripDurationHours ? webTrip.tripDurationHours * 60 : 0, // Rough estimate
-      
+
       // Keep original web book data
       loadRef: webTrip.loadRef,
       customer: webTrip.customer,
       importSource: webTrip.importSource,
       importedAt: webTrip.importedAt,
-      
+
       // Payment fields (required by type but can be defaulted)
       paymentStatus: 'unpaid',
       followUpHistory: [],
-      
+
       // Metadata
       createdAt: webTrip.updatedAt, // Use updateAt as fallback
       shippedAt: webTrip.shippedAt,
       deliveredAt: webTrip.deliveredAt,
-      
+
       // Empty arrays for references that might be used
       editHistory: []
     };
@@ -79,10 +79,10 @@ export default function WebBookTripsList() {
     );
   }
 
-  const StatusBadge = ({ status, shipped, delivered }: { 
-    status: string; 
-    shipped: boolean; 
-    delivered: boolean; 
+  const StatusBadge = ({ status, shipped, delivered }: {
+    status: string;
+    shipped: boolean;
+    delivered: boolean;
   }) => {
     if (delivered || status === "delivered") {
       return <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium flex items-center gap-1">
@@ -117,7 +117,7 @@ export default function WebBookTripsList() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -129,7 +129,7 @@ export default function WebBookTripsList() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -196,10 +196,10 @@ export default function WebBookTripsList() {
                       </div>
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap">
-                      <StatusBadge 
-                        status={trip.status} 
-                        shipped={trip.shippedStatus} 
-                        delivered={trip.deliveredStatus} 
+                      <StatusBadge
+                        status={trip.status}
+                        shipped={trip.shippedStatus}
+                        delivered={trip.deliveredStatus}
                       />
                     </td>
                     <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -237,7 +237,7 @@ export default function WebBookTripsList() {
                         size="sm"
                         variant="outline"
                         icon={<Edit className="w-4 h-4" />}
-                        onClick={onClick}
+                        onClick={() => setEditingTrip(convertToTripFormat(trip))}
                       >
                         Edit
                       </Button>
