@@ -89,7 +89,7 @@ The `FormSelector` component provides a dropdown that connects directly to Fires
 />
 ```
 
-#### Props:
+#### Props
 
 - `label`: Display label for the form field
 - `name`: Name attribute for the form field
