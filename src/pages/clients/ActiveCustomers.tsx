@@ -3,16 +3,16 @@ import { Client, CLIENT_TYPES, CLIENT_STATUSES } from '../../types/client';
 import Card, { CardContent, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { Badge } from '../../components/ui/badge';
-import { 
-  Users, 
-  Filter, 
-  UserPlus, 
-  Building, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Tag, 
-  ArrowUpDown 
+import {
+  Users,
+  Filter,
+  UserPlus,
+  Building,
+  Mail,
+  Phone,
+  MapPin,
+  Tag,
+  ArrowUpDown
 } from 'lucide-react';
 import { formatDate } from '../../utils/helpers';
 
@@ -34,47 +34,47 @@ const ClientList: React.FC<ClientListProps> = ({
     status: '',
     currency: ''
   });
-  
+
   const [sortField, setSortField] = useState<keyof Client>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  
+
   // Filter and sort clients
   const filteredClients = clients.filter(client => {
-    const matchesSearch = searchTerm 
+    const matchesSearch = searchTerm
       ? client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.industry?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         client.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       : true;
-      
+
     const matchesType = filters.type ? client.type === filters.type : true;
     const matchesStatus = filters.status ? client.status === filters.status : true;
     const matchesCurrency = filters.currency ? client.currency === filters.currency : true;
-    
+
     return matchesSearch && matchesType && matchesStatus && matchesCurrency;
   });
-  
+
   // Apply sorting
   const sortedClients = [...filteredClients].sort((a, b) => {
     let valueA = a[sortField];
     let valueB = b[sortField];
-    
+
     // Handle nested fields or fields that might be undefined
     if (valueA === undefined) valueA = '';
     if (valueB === undefined) valueB = '';
-    
+
     // Convert to strings for comparison
     const strA = String(valueA).toLowerCase();
     const strB = String(valueB).toLowerCase();
-    
+
     if (sortDirection === 'asc') {
       return strA.localeCompare(strB);
     } else {
       return strB.localeCompare(strA);
     }
   });
-  
+
   // Handle sort toggle
   const toggleSort = (field: keyof Client) => {
     if (field === sortField) {
@@ -84,12 +84,12 @@ const ClientList: React.FC<ClientListProps> = ({
       setSortDirection('asc');
     }
   };
-  
+
   // Handle filter change
   const handleFilterChange = (field: string, value: string) => {
     setFilters(prev => ({ ...prev, [field]: value }));
   };
-  
+
   // Clear all filters
   const clearFilters = () => {
     setFilters({
@@ -98,7 +98,7 @@ const ClientList: React.FC<ClientListProps> = ({
       currency: ''
     });
   };
-  
+
   // Get status class for badge
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -109,17 +109,17 @@ const ClientList: React.FC<ClientListProps> = ({
       default: return 'bg-blue-100 text-blue-800';
     }
   };
-  
+
   // Get currency symbol
   const getCurrencySymbol = (currency: 'ZAR' | 'USD') => {
     return currency === 'USD' ? '$' : 'R';
   };
-  
+
   return (
     <div className="space-y-6">
       {/* Filters */}
       <Card>
-        <CardHeader 
+        <CardHeader
           title={
             <div className="flex items-center">
               <Filter className="w-5 h-5 mr-2 text-gray-500" />
@@ -130,7 +130,7 @@ const ClientList: React.FC<ClientListProps> = ({
             <Button
               size="sm"
               variant="outline"
-              onClick={onClick}
+              onClick={clearFilters}
             >
               Clear Filters
             </Button>
@@ -153,7 +153,7 @@ const ClientList: React.FC<ClientListProps> = ({
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Status
@@ -169,7 +169,7 @@ const ClientList: React.FC<ClientListProps> = ({
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Currency
@@ -187,10 +187,10 @@ const ClientList: React.FC<ClientListProps> = ({
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Client List */}
       <Card>
-        <CardHeader 
+        <CardHeader
           title={
             <div className="flex items-center">
               <Users className="w-5 h-5 mr-2 text-blue-500" />
@@ -201,7 +201,7 @@ const ClientList: React.FC<ClientListProps> = ({
             <Button
               size="sm"
               icon={<UserPlus className="w-4 h-4" />}
-              onClick={onClick}
+              onClick={onAddClient}
             >
               Add Client
             </Button>
@@ -218,7 +218,7 @@ const ClientList: React.FC<ClientListProps> = ({
                   : 'Get started by adding your first client.'}
               </p>
               <div className="mt-6">
-                <Button onClick={onClick} icon={<UserPlus className="w-4 h-4" />}>
+                <Button onClick={onAddClient} icon={<UserPlus className="w-4 h-4" />}>
                   Add New Client
                 </Button>
               </div>
@@ -228,10 +228,10 @@ const ClientList: React.FC<ClientListProps> = ({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th 
-                      scope="col" 
+                    <th
+                      scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={onClick}
+                      onClick={() => toggleSort('name')}
                     >
                       <div className="flex items-center">
                         <span>Client Name</span>
@@ -255,10 +255,10 @@ const ClientList: React.FC<ClientListProps> = ({
                     <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Currency
                     </th>
-                    <th 
-                      scope="col" 
+                    <th
+                      scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                      onClick={onClick}
+                      onClick={() => toggleSort('createdAt')}
                     >
                       <div className="flex items-center">
                         <span>Created</span>
@@ -271,10 +271,10 @@ const ClientList: React.FC<ClientListProps> = ({
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {sortedClients.map((client) => (
-                    <tr 
-                      key={client.id} 
+                    <tr
+                      key={client.id}
                       className="hover:bg-gray-50 cursor-pointer"
-                      onClick={onClick}
+                      onClick={() => onSelectClient(client.id)}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
