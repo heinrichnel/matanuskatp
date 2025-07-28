@@ -8,7 +8,7 @@ import { SyncProvider } from "./context/SyncContext";
 import { TripProvider } from "./context/TripContext";
 import { TyreReferenceDataProvider } from "./context/TyreReferenceDataContext";
 import { TyreStoresProvider } from "./context/TyreStoresContext";
-import { WialonProvider, useWialon } from "./context/WialonProvider";
+import { WialonProvider, useWialon } from "./context/WialonContext";
 import { WorkshopProvider } from "./context/WorkshopContext";
 
 // Error Handling
@@ -64,6 +64,7 @@ import TripTimelinePage from "./pages/trips/TripTimelinePage";
 // === INVOICES ===
 import CurrencyFleetReport from "./components/InvoiceManagement/CurrencyFleetReport";
 import ReportsUI from "./components/ui/reports";
+import CashManagerRequestPage from "./pages/CashManagerRequestPage";
 import CreateInvoicePage from "./pages/invoices/CreateInvoicePage";
 import CreateQuotePage from "./pages/invoices/CreateQuotePage";
 import InvoiceApprovalFlow from "./pages/invoices/InvoiceApprovalFlow";
@@ -74,7 +75,6 @@ import InvoiceTemplatesPage from "./pages/invoices/InvoiceTemplatesPage";
 import PaidInvoicesPage from "./pages/invoices/PaidInvoicesPage";
 import PendingInvoicesPage from "./pages/invoices/PendingInvoicesPage";
 import TaxReportExport from "./pages/invoices/TaxReportExport";
-import CashManagerRequestPage from "./pages/CashManagerRequestPage";
 
 // === DIESEL ===
 import AddFuelEntryPage from "./pages/diesel/AddFuelEntryPage";
@@ -161,12 +161,12 @@ import { ScanQRButton } from "./components/ScanQRButton";
 import UIConnector from "./components/UIConnector";
 
 const WialonStatusIndicator: React.FC<{ className?: string }> = ({ className = "" }) => {
-  const { initialized, initializing, error } = useWialon();
+  const { loggedIn, initializing, error } = useWialon();
 
   if (error) return <div className={`text-sm text-red-500 ${className}`}>Wialon: Error</div>;
   if (initializing)
     return <div className={`text-sm text-amber-500 ${className}`}>Wialon: Connecting...</div>;
-  if (initialized)
+  if (loggedIn)
     return <div className={`text-sm text-green-500 ${className}`}>Wialon: Connected</div>;
   return <div className={`text-sm text-gray-500 ${className}`}>Wialon: Disconnected</div>;
 };
@@ -287,7 +287,10 @@ const App: React.FC = () => {
                           <Route path="invoices/analytics" element={<CurrencyFleetReport />} />
                           <Route path="invoices/pending" element={<PendingInvoicesPage />} />
                           <Route path="invoices/paid" element={<PaidInvoicesPage />} />
-                          <Route path="invoices/cash-manager" element={<CashManagerRequestPage />} />
+                          <Route
+                            path="invoices/cash-manager"
+                            element={<CashManagerRequestPage />}
+                          />
 
                           {/* Diesel */}
                           <Route path="diesel" element={<DieselManagementPage />} />
