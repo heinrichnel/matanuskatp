@@ -1,284 +1,342 @@
 // TyreModel.ts - Domain model for Tyre Management
 
 /**
- * This file serves as the central entry point for all tyre-related functionality.
- * It consolidates types, API functions, and utility methods from various sources
- * to provide a comprehensive interface for tyre management.
+ * CENTRAL TYRE DOMAIN MODULE
+ * All types, Firestore converters, analytics, API, and helpers for Tyre management.
+ * This file is the single entry point for all tyre-related business logic, type safety,
+ * and data operations.
  */
 
-// Firestore types
-import { Timestamp } from 'firebase/firestore';
-// Re-export Timestamp for convenience
-export { Timestamp };
-import {
-  Tyre,
-  TyreSize,
-  TyreType,
-  TyrePosition,
-  TyreRotation,
-  TyreRepair,
-  TyreInspection,
-  TyreStoreLocation,
-  TyreStore,
-  StockEntry
-} from '../../../types/tyre';
+import { FirestoreDataConverter, Timestamp } from "firebase/firestore";
 
-// Re-export the types for convenience
-export type {
-  Tyre,
-  TyreSize,
-  TyreType,
-  TyrePosition,
-  TyreRotation,
-  TyreRepair,
-  TyreInspection,
-  TyreStoreLocation,
-  TyreStore,
-  StockEntry
+// =========================
+// Tyre Types & Interfaces
+// =========================
+
+export interface TyreSize {
+  width: number; // e.g. 315
+  aspectRatio: number; // e.g. 80
+  rimDiameter: number; // e.g. 22.5
+  displayString?: string; // "315/80R22.5"
+}
+
+export type TyreType =
+  | "standard"
+  | "winter"
+  | "all_season"
+  | "mud_terrain"
+  | "all_terrain"
+  | "reefer"
+  | "horse"
+  | "interlink"
+  | "steer" // Added from types/tyre.ts
+  | "drive" // Added from types/tyre.ts
+  | "trailer" // Added from types/tyre.ts
+  | "spare"; // Added from types/tyre.ts
+
+export interface TyrePosition {
+  id: string;
+  name: string; // "front_left", "drive_1_left", etc.
+}
+
+export interface PurchaseDetails {
+  date: string;
+  cost: number;
+  supplier: string;
+  warranty?: string;
+  invoiceNumber?: string;
+}
+
+export interface Installation {
+  vehicleId: string;
+  position: string;
+  mileageAtInstallation: number;
+  installationDate: string; // ISO date string
+  installedBy: string;
+}
+
+export interface TyreCondition {
+  treadDepth: number;
+  pressure: number;
+  temperature?: number;
+  status: "good" | "warning" | "critical" | "needs_replacement";
+  lastInspectionDate: string;
+  nextInspectionDue?: string;
+}
+
+export interface TyreRotation {
+  id: string;
+  date: string;
+  fromPosition: string; // Keep as string to avoid circular reference
+  toPosition: string; // Keep as string to avoid circular reference
+  mileage: number;
+  technician: string; // Changed from 'by' to match types/tyre.ts
+  notes?: string;
+}
+
+export interface TyreRepair {
+  id: string;
+  date: string;
+  type: string;
+  description: string;
+  cost: number;
+  technician: string; // Changed from 'by' to match types/tyre.ts
+  notes?: string;
+}
+
+export interface TyreInspection {
+  id: string;
+  date: string;
+  inspector: string;
+  treadDepth: number;
+  pressure: number;
+  temperature: number;
+  condition: string; // Changed from 'status' to match types/tyre.ts
+  notes: string;
+  images?: string[];
+  sidewallCondition?: string; // Keep for backward compatibility
+}
+
+export interface MaintenanceHistory {
+  rotations: TyreRotation[];
+  repairs: TyreRepair[];
+  inspections: TyreInspection[];
+}
+
+// Define tyre store location enum to match types/tyre.ts
+export enum TyreStoreLocation {
+  VICHELS_STORE = "Vichels Store",
+  HOLDING_BAY = "Holding Bay",
+  RFR = "RFR",
+  SCRAPPED = "Scrapped",
+}
+
+export interface TyreStore {
+  id: string;
+  name: string;
+  location: string;
+  capacity: number;
+  currentStock: number;
+}
+
+export interface StockEntry {
+  tyreId: string;
+  date: string;
+  action: "in" | "out" | "adjust";
+  quantity: number;
+  notes?: string;
+}
+
+export type TyreStatus = "new" | "in_service" | "spare" | "retreaded" | "scrapped";
+export type TyreMountStatus = "mounted" | "unmounted" | "in_storage";
+
+export interface Tyre {
+  id: string;
+  serialNumber: string;
+  dotCode: string;
+  manufacturingDate: string;
+  brand: string;
+  model: string;
+  pattern: string;
+  size: TyreSize;
+  loadIndex: number;
+  speedRating: string;
+  type: TyreType;
+  purchaseDetails: PurchaseDetails;
+  installation?: Installation;
+  condition: TyreCondition;
+  status: TyreStatus;
+  mountStatus: TyreMountStatus;
+  maintenanceHistory: MaintenanceHistory;
+  kmRun: number;
+  kmRunLimit: number;
+  notes?: string;
+  location: TyreStoreLocation;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+// ===========================
+// Firestore Converter
+// ===========================
+
+export const tyreConverter: FirestoreDataConverter<Tyre> = {
+  toFirestore(tyre: Tyre) {
+    return {
+      ...tyre,
+      createdAt: tyre.createdAt ?? Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    };
+  },
+  fromFirestore(snapshot, options) {
+    const data = snapshot.data(options);
+    return {
+      ...data,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+    } as Tyre;
+  },
 };
 
-// Firebase interaction functions related to Tyres
-import {
-  saveTyre,
-  getTyreById,
-  getTyres,
-  deleteTyre,
-  addTyreInspection,
-  getTyreInspections,
-  getTyresByVehicle,
-  listenToTyres,
-  addTyreStore,
-  updateTyreStoreEntry,
-  listenToTyreStores,
-  getTyreStats
-} from '../../../firebase';
+// ==========================
+// Firebase API Functions
+// ==========================
 
-// Re-export the functions
+import {
+  addTyreInspection,
+  addTyreStore,
+  deleteTyre,
+  getTyreById,
+  getTyreInspections,
+  getTyreStats,
+  getTyres,
+  getTyresByVehicle,
+  listenToTyreStores,
+  listenToTyres,
+  moveTyreStoreEntry,
+  saveTyre,
+  updateTyreStoreEntry,
+} from "../../../firebase";
+
 export {
-  saveTyre,
-  getTyreById,
-  getTyres,
-  deleteTyre,
   addTyreInspection,
-  getTyreInspections,
-  getTyresByVehicle,
-  listenToTyres,
   addTyreStore,
-  updateTyreStoreEntry,
+  deleteTyre,
+  getTyreById,
+  getTyreInspections,
+  getTyreStats,
+  getTyres,
+  getTyresByVehicle,
   listenToTyreStores,
-  getTyreStats
+  listenToTyres,
+  moveTyreStoreEntry,
+  saveTyre,
+  updateTyreStoreEntry,
 };
 
-// Import additional utility functions from tyreAnalytics
+// =========================
+// Analytics & Utility Types
+// =========================
+
 import {
-  TyreStat,
   RankedTyre,
-  getBestTyres,
-  getTyrePerformanceStats,
-  filterTyresByPerformance,
-  getTyreBrandPerformance
-} from '../../../utils/tyreAnalytics';
-
-// Re-export analytics types and functions
-export type {
   TyreStat,
-  RankedTyre
-};
-
-export {
-  getBestTyres,
-  getTyrePerformanceStats,
   filterTyresByPerformance,
-  getTyreBrandPerformance
-};
+  getBestTyres,
+  getTyreBrandPerformance,
+  getTyrePerformanceStats,
+} from "../../../utils/tyreAnalytics";
 
-// Import utility functions from types/tyre.ts
+export type { RankedTyre, TyreStat };
+
+export { filterTyresByPerformance, getBestTyres, getTyreBrandPerformance, getTyrePerformanceStats };
+
+// ========================
+// Format/Parse Utilities
+// ========================
+
 import {
   formatTyreSize as _formatTyreSize,
-  parseTyreSize as _parseTyreSize
-} from '../../../types/tyre';
+  parseTyreSize as _parseTyreSize,
+} from "../../../types/tyre";
 
-// Re-export utility functions from types
 export const formatTyreSize = _formatTyreSize;
 export const parseTyreSize = _parseTyreSize;
 
-// Additional helper methods for the domain could be added here
-export class TyreService {
-  // Calculate tyre wear rate (mm/1000km)
-  static calculateWearRate(tyre: Tyre): number | null {
-    if (!tyre.installation || !tyre.condition || tyre.kmRun <= 0) {
-      return null;
-    }
+// ===========================
+// TyreService: Core Domain Logic
+// ===========================
 
-    // Assuming new tyre tread depth is 8mm and we track current tread depth
-    const newTyreDepth = 8; // mm
+export class TyreService {
+  static calculateWearRate(tyre: Tyre): number | null {
+    if (!tyre.installation || !tyre.condition || tyre.kmRun <= 0) return null;
+    const newTyreDepth = 20; // mm (your policy - adjust as needed)
     const currentDepth = tyre.condition.treadDepth;
     const wornDepth = newTyreDepth - currentDepth;
-
-    // Use the kmRun directly
-    const kmRun = tyre.kmRun;
-
-    // Calculate wear per 1000 km
-    return (wornDepth / kmRun) * 1000;
+    return (wornDepth / tyre.kmRun) * 1000;
   }
 
-  /**
-   * Calculate cost per kilometer for a tyre
-   *
-   * @param tyre Tyre object
-   * @returns Cost per kilometer or 0 if no distance traveled
-   */
   static calculateCostPerKm(tyre: Tyre): number {
     if (tyre.kmRun <= 0) return 0;
     return tyre.purchaseDetails.cost / tyre.kmRun;
   }
 
-  /**
-   * Calculate the remaining useful life of a tyre based on tread depth
-   *
-   * @param tyre Tyre object
-   * @returns Remaining kilometers
-   */
   static calculateRemainingLife(tyre: Tyre): number {
     const currentTread = tyre.condition.treadDepth;
-    const minimumTread = 3; // Legal minimum in mm
-    const newTyreDepth = 20; // Typical new tyre tread depth in mm
-
-    // Calculate wear rate (mm per km)
+    const minimumTread = 3; // mm, legal minimum
+    const newTyreDepth = 20; // mm
     const usedTread = newTyreDepth - currentTread;
     const wearRate = tyre.kmRun > 0 ? usedTread / tyre.kmRun : 0;
-
-    // Calculate remaining life
     const remainingTread = currentTread - minimumTread;
     const remainingKm = wearRate > 0 ? remainingTread / wearRate : 0;
-
     return Math.max(remainingKm, 0);
   }
 
-  /**
-   * Estimate remaining life based on current wear rate with detailed breakdown
-   *
-   * @param tyre Tyre object
-   * @returns Object with kilometers and days remaining or null if cannot be calculated
-   */
   static estimateRemainingLife(tyre: Tyre): { kilometers: number; days: number } | null {
     const wearRate = this.calculateWearRate(tyre);
-    if (wearRate === null || wearRate <= 0) {
-      return null;
-    }
-
-    const minSafeDepth = 1.6; // mm
+    if (wearRate === null || wearRate <= 0) return null;
+    const minSafeDepth = 1.6;
     const currentDepth = tyre.condition.treadDepth;
     const usableDepthRemaining = currentDepth - minSafeDepth;
-
-    if (usableDepthRemaining <= 0) {
-      return { kilometers: 0, days: 0 };
-    }
-
-    // Calculate remaining kilometers
+    if (usableDepthRemaining <= 0) return { kilometers: 0, days: 0 };
     const remainingKm = (usableDepthRemaining / wearRate) * 1000;
-
-    // Estimate days based on average daily usage
-    const avgDailyKm = 150; // Example value
+    const avgDailyKm = 150;
     const remainingDays = remainingKm / avgDailyKm;
-
     return {
       kilometers: Math.round(remainingKm),
-      days: Math.round(remainingDays)
+      days: Math.round(remainingDays),
     };
   }
 
-  /**
-   * Get tyres that need attention soon
-   *
-   * @returns Promise with array of tyres needing attention
-   */
   static async getTyresNeedingAttention(): Promise<Tyre[]> {
     try {
-      // Get tyres with critical condition or low tread depth
-      const tyres = await getTyres({
-        condition: 'warning'
-      });
-
+      const tyres = await getTyres({ condition: "warning" });
       return tyres;
     } catch (error) {
-      console.error('Error getting tyres needing attention:', error);
+      console.error("Error getting tyres needing attention:", error);
       throw error;
     }
   }
 
-  /**
-   * Calculate the total cost of ownership for a tyre
-   *
-   * @param tyre Tyre object
-   * @param includeRepairs Whether to include repair costs
-   * @returns Total cost of ownership
-   */
   static calculateTotalCostOfOwnership(tyre: Tyre, includeRepairs: boolean = true): number {
     let totalCost = tyre.purchaseDetails.cost;
-
-    // Add repair costs if requested
     if (includeRepairs && tyre.maintenanceHistory && tyre.maintenanceHistory.repairs) {
-      const repairCosts = tyre.maintenanceHistory.repairs.reduce(
-        (sum, repair) => sum + repair.cost, 0
-      );
-      totalCost += repairCosts;
+      totalCost += tyre.maintenanceHistory.repairs.reduce((sum, repair) => sum + repair.cost, 0);
     }
-
     return totalCost;
   }
 
-  /**
-   * Calculate the average cost per km over the entire fleet
-   *
-   * @param tyres Array of tyres
-   * @returns The average cost per km
-   */
   static calculateFleetAverageCostPerKm(tyres: Tyre[]): number {
     if (!tyres.length) return 0;
-
     let totalCost = 0;
     let totalDistance = 0;
-
-    tyres.forEach(tyre => {
+    tyres.forEach((tyre) => {
       totalCost += this.calculateTotalCostOfOwnership(tyre);
       totalDistance += tyre.kmRun;
     });
-
     return totalDistance > 0 ? totalCost / totalDistance : 0;
   }
 
-  /**
-   * Convert tyre data to the TyreStat format used by analytics functions
-   *
-   * @param tyres Array of tyres
-   * @returns Array of TyreStat objects
-   */
   static convertToTyreStats(tyres: Tyre[]): TyreStat[] {
-    return tyres.map(tyre => ({
+    return tyres.map((tyre) => ({
       brand: tyre.brand,
       model: tyre.model,
       totalDistance: tyre.kmRun,
-      totalCost: this.calculateTotalCostOfOwnership(tyre)
+      totalCost: this.calculateTotalCostOfOwnership(tyre),
     }));
   }
 
-  /**
-   * Get comprehensive performance analysis for tyres
-   *
-   * @param tyres Array of tyres
-   * @returns Performance analysis report
-   */
   static getTyrePerformanceAnalysis(tyres: Tyre[]) {
     const tyreStats = this.convertToTyreStats(tyres);
     const performanceStats = getTyrePerformanceStats(tyreStats);
     const brandPerformance = getTyreBrandPerformance(tyreStats);
-
     return {
       performanceStats,
       brandPerformance,
-      excellentPerformers: filterTyresByPerformance(tyreStats, 'excellent'),
-      poorPerformers: filterTyresByPerformance(tyreStats, 'poor')
+      excellentPerformers: filterTyresByPerformance(tyreStats, "excellent"),
+      poorPerformers: filterTyresByPerformance(tyreStats, "poor"),
     };
   }
 }
+
+// END OF DOMAIN MODULE

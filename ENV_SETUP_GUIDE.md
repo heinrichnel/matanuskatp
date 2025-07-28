@@ -163,3 +163,86 @@ VITE_MAPS_SERVICE_URL="https://your-maps-service.run.app"
     "javascript_origins": ["https://your-app-domain.com"]
   }
 }
+# ============================================
+# ENVIRONMENT
+# ============================================
+VITE_ENV_MODE=development
+
+# ============================================
+# GOOGLE OAUTH CONFIGURATION
+# ============================================
+VITE_GOOGLE_OAUTH_CLIENT_ID=250085264089-tsqf0br8rq5qt7c24ntj1ohmb4ehhffo.apps.googleusercontent.com
+VITE_GOOGLE_OAUTH_CLIENT_SECRET=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
+VITE_GOOGLE_OAUTH_REDIRECT_URI=https://matanuskatransportt.netlify.app
+VITE_GOOGLE_OAUTH_AUTH_URI=https://accounts.google.com/o/oauth2/auth
+VITE_GOOGLE_OAUTH_TOKEN_URI=https://oauth2.googleapis.com/token
+VITE_GOOGLE_OAUTH_CERT_URL=https://www.googleapis.com/oauth2/v1/certs
+
+# ============================================
+# FIREBASE CONFIGURATION (Frontend/Browser)
+# ============================================
+VITE_FIREBASE_API_KEY=AIzaSyBtq7Z6qqaVmb22d3aNcwNiqkrbGtIhJ7g
+VITE_FIREBASE_AUTH_DOMAIN=mat1-9e6b3.firebaseapp.com
+VITE_FIREBASE_DATABASE_URL=https://mat1-9e6b3-default-rtdb.firebaseio.com
+VITE_FIREBASE_PROJECT_ID=mat1-9e6b3
+VITE_FIREBASE_STORAGE_BUCKET=mat1-9e6b3.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=250085264089
+VITE_FIREBASE_APP_ID=1:250085264089:web:51c2b209e0265e7d04ccc8
+VITE_FIREBASE_MEASUREMENT_ID=G-YHQHSJN5CQ
+
+# ============================================
+# FIREBASE MOBILE SERVICE CONFIG (if applicable)
+# ============================================
+VITE_MOBILESERVICE_APP_ID=1:250085264089:android:eddb5bd08de0b1b604ccc8
+VITE_MOBILESERVICE_PACKAGE_NAME=matmobile.com
+VITE_MOBILESERVICE_API_KEY=AIzaSyDNk9iW1PTGM9hvcjJ0utBABs7ZiWCj3Xc
+
+# ============================================
+# FIREBASE SERVICE ACCOUNT (Backend/Server Only)
+# NEVER expose these in a public repo or Vite frontend.
+# Use these **only** in secure Node.js server scripts.
+# ============================================
+SERVICE_ACCOUNT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n2c1d3949...YOUR-KEY...\n-----END PRIVATE KEY-----\n"
+SERVICE_ACCOUNT_PRIVATE_KEY_ID=036a90e4691c595a348aabbe6515d8291acd6574
+SERVICE_ACCOUNT_CLIENT_EMAIL=firebase-adminsdk-fbsvc@mat1-9e6b3.iam.gserviceaccount.com
+SERVICE_ACCOUNT_CLIENT_ID=101330162184304566760
+SERVICE_ACCOUNT_AUTH_URI=https://accounts.google.com/o/oauth2/auth
+SERVICE_ACCOUNT_TOKEN_URI=https://oauth2.googleapis.com/token
+SERVICE_ACCOUNT_CERT_URL=https://www.googleapis.com/oauth2/v1/certs
+SERVICE_ACCOUNT_CLIENT_X509_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40mat1-9e6b3.iam.gserviceaccount.com
+
+# ============================================
+# GOOGLE MAPS CONFIGURATION
+# ============================================
+VITE_GOOGLE_MAPS_API_KEY=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg
+VITE_GOOGLE_MAPS_IFRAME_URL=https://www.google.com/maps/embed/v1/place?key=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg
+
+# ============================================
+# WIALON GPS/TELEMATICS INTEGRATION
+# ============================================
+VITE_WIALON_SESSION_TOKEN=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053
+VITE_WIALON_API_URL=https://hst-api.wialon.com
+VITE_WIALON_LOGIN_URL=https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en
+
+# ============================================
+# ADDITIONAL CLOUD / SAGE / OTHER INTEGRATIONS
+# ============================================
+# VITE_SAGE_API_KEY=
+# VITE_SAGE_CLIENT_ID=
+# VITE_SAGE_CLIENT_SECRET=
+# VITE_CONTAINER_IMAGE=
+# VITE_CLOUD_RUN_URL=
+# VITE_CLOUD_RUN_URL_ALTERNATIVE=
+
+# ============================================
+# NODE/EXPRESS SERVER PORT (if needed)
+# ============================================
+PORT=3000
+
+# ============================================
+# SECURITY & DEPLOYMENT WARNINGS
+# ============================================
+# - Never commit real secrets to version control
+# - .env should always be in .gitignore
+# - Only commit .env.example with placeholder values
+

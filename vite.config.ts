@@ -19,6 +19,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
+      // Add specific aliases to handle case sensitivity issues
+      "@/components/TyreManagement": resolve(__dirname, "src/components/Tyremanagement"),
     },
   },
   optimizeDeps: {
@@ -44,6 +46,10 @@ export default defineConfig({
     // Create output folder structure based on src
     assetsDir: "assets",
     rollupOptions: {
+      external: [
+        // Add the TyreReports file to handle the casing issue
+        "/src/components/TyreManagement/TyreReports",
+      ],
       output: {
         // Create more granular chunks to optimize loading
         manualChunks: {
@@ -58,7 +64,12 @@ export default defineConfig({
           // Date handling
           "date-utils": ["date-fns"],
           // UI components and icons
-          "ui-components": ["lucide-react", "tailwindcss", "@radix-ui/react-tabs", "@radix-ui/react-label"],
+          "ui-components": [
+            "lucide-react",
+            "tailwindcss",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-label",
+          ],
         },
       },
     },

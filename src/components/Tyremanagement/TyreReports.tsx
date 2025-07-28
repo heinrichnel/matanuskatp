@@ -1,65 +1,63 @@
-import React, { useEffect, useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/Tabs';
-import { TyreReportGenerator } from './TyreReportGenerator';
-import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
-import { Tyre } from '@/data/tyreData';
-import { TyrePerformanceForm } from '@/components/TyreManagement/TyrePerformanceForm';
-import { getBestTyres, getTyrePerformanceStats, RankedTyre } from '@/utils/tyreAnalytics';
-import { tyreSizes, tyreBrands, tyrePatterns } from '@/data/tyreData';
+import { Tyre, tyreBrands, tyrePatterns, tyreSizes } from "@/data/tyreData";
+import { getBestTyres, getTyrePerformanceStats, RankedTyre } from "@/utils/tyreAnalytics";
+import { collection, getFirestore, onSnapshot } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
+import { TyreReportGenerator } from "./TyreReportGenerator";
 
 export const TyreReports: React.FC = () => {
   const [tyreData, setTyreData] = useState<Tyre[]>([]);
   const [bestTyres, setBestTyres] = useState<RankedTyre[]>([]);
   const [performanceStats, setPerformanceStats] = useState<any>(null);
-  const [filterBrand, setFilterBrand] = useState<string>('');
-  const [filterPattern, setFilterPattern] = useState<string>('');
-  const [filterSize, setFilterSize] = useState<string>('');
+  const [filterBrand, setFilterBrand] = useState<string>("");
+  const [filterPattern, setFilterPattern] = useState<string>("");
+  const [filterSize, setFilterSize] = useState<string>("");
 
   useEffect(() => {
     const db = getFirestore();
-    const tyresCollection = collection(db, 'tyres');
+    const tyresCollection = collection(db, "tyres");
 
     const unsubscribe = onSnapshot(tyresCollection, (snapshot) => {
       const tyres = snapshot.docs.map((doc) => ({
         id: doc.id,
-        tyreId: doc.data().tyreId || 'Unknown',
-        serialNumber: doc.data().serialNumber || 'Unknown',
-        dotCode: doc.data().dotCode || 'Unknown',
-        manufacturingDate: doc.data().manufacturingDate || 'Unknown',
-        brand: doc.data().brand || 'Unknown',
-        model: doc.data().model || 'Unknown',
+        tyreId: doc.data().tyreId || "Unknown",
+        serialNumber: doc.data().serialNumber || "Unknown",
+        dotCode: doc.data().dotCode || "Unknown",
+        manufacturingDate: doc.data().manufacturingDate || "Unknown",
+        brand: doc.data().brand || "Unknown",
+        model: doc.data().model || "Unknown",
         size: doc.data().size || { width: 0, aspectRatio: 0, rimDiameter: 0 },
-        pattern: doc.data().pattern || 'Unknown',
+        pattern: doc.data().pattern || "Unknown",
         loadIndex: doc.data().loadIndex || 0,
-        speedRating: doc.data().speedRating || 'Unknown',
-        type: doc.data().type || 'Unknown',
+        speedRating: doc.data().speedRating || "Unknown",
+        type: doc.data().type || "Unknown",
         purchaseDetails: doc.data().purchaseDetails || {
-          date: 'Unknown',
+          date: "Unknown",
           cost: 0,
-          supplier: 'Unknown',
-          warranty: 'Unknown',
+          supplier: "Unknown",
+          warranty: "Unknown",
         },
         installation: doc.data().installation || {
-          vehicleId: 'Unknown',
-          position: 'Unknown',
+          vehicleId: "Unknown",
+          position: "Unknown",
           mileageAtInstallation: 0,
-          installationDate: 'Unknown',
-          installedBy: 'Unknown',
+          installationDate: "Unknown",
+          installedBy: "Unknown",
         },
         condition: doc.data().condition || {
           treadDepth: 0,
           pressure: 0,
           temperature: 0,
-          status: 'good',
-          lastInspectionDate: 'Unknown',
-          nextInspectionDue: 'Unknown',
+          status: "good",
+          lastInspectionDate: "Unknown",
+          nextInspectionDue: "Unknown",
         },
-        status: doc.data().status || 'Unknown',
-        mountStatus: doc.data().mountStatus || 'Unknown',
+        status: doc.data().status || "Unknown",
+        mountStatus: doc.data().mountStatus || "Unknown",
         maintenanceHistory: doc.data().maintenanceHistory || [],
         milesRun: doc.data().milesRun || 0,
         kmRunLimit: doc.data().kmRunLimit || 0,
-        notes: doc.data().notes || 'None',
+        notes: doc.data().notes || "None",
       }));
       setTyreData(tyres);
     });
@@ -72,7 +70,7 @@ export const TyreReports: React.FC = () => {
     brand: tyre.brand,
     model: tyre.model,
     totalDistance: tyre.installation.mileageAtInstallation || 0, // Derived from installation data
-    totalCost: tyre.purchaseDetails.cost || 0,                  // Derived from purchase details
+    totalCost: tyre.purchaseDetails.cost || 0, // Derived from purchase details
   }));
 
   useEffect(() => {
@@ -85,13 +83,13 @@ export const TyreReports: React.FC = () => {
   }, [tyreData]);
 
   const handleGenerateReport = (type: string, dateRange: string, brand: string) => {
-    console.log('Generating report:', { type, dateRange, brand });
+    console.log("Generating report:", { type, dateRange, brand });
     alert(`Generating ${type} report for ${dateRange} days`);
   };
 
   const handlePerformanceSubmit = (data: any) => {
-    console.log('Performance data submitted:', data);
-    alert('Performance data saved successfully!');
+    console.log("Performance data submitted:", data);
+    alert("Performance data saved successfully!");
   };
 
   return (
@@ -112,7 +110,9 @@ export const TyreReports: React.FC = () => {
           >
             <option value="">All Brands</option>
             {tyreBrands.map((brand) => (
-              <option key={brand} value={brand}>{brand}</option>
+              <option key={brand} value={brand}>
+                {brand}
+              </option>
             ))}
           </select>
         </div>
@@ -127,7 +127,9 @@ export const TyreReports: React.FC = () => {
           >
             <option value="">All Patterns</option>
             {tyrePatterns.map((pattern) => (
-              <option key={pattern} value={pattern}>{pattern}</option>
+              <option key={pattern} value={pattern}>
+                {pattern}
+              </option>
             ))}
           </select>
         </div>
@@ -142,7 +144,9 @@ export const TyreReports: React.FC = () => {
           >
             <option value="">All Sizes</option>
             {tyreSizes.map((size) => (
-              <option key={size} value={size}>{size}</option>
+              <option key={size} value={size}>
+                {size}
+              </option>
             ))}
           </select>
         </div>
@@ -150,7 +154,7 @@ export const TyreReports: React.FC = () => {
 
       <button
         className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
-        onClick={() => handleGenerateReport('inventory', 'last30', filterBrand || 'All Brands')}
+        onClick={() => handleGenerateReport("inventory", "last30", filterBrand || "All Brands")}
       >
         Generate Report
       </button>
@@ -173,7 +177,7 @@ export const TyreReports: React.FC = () => {
             </p>
             <button
               className="px-4 py-2 bg-blue-600 text-white rounded-md"
-              onClick={() => alert('Performance form functionality is not available')}
+              onClick={() => alert("Performance form functionality is not available")}
             >
               Simulate Form Submission
             </button>
@@ -188,7 +192,9 @@ export const TyreReports: React.FC = () => {
             <h4 className="font-medium">Top Performing Tyres</h4>
             <ul>
               {bestTyres.map((tyre, index) => (
-                <li key={index}>{tyre.brand} {tyre.model} - Rank: {tyre.rank}, Rating: {tyre.performanceRating}</li>
+                <li key={index}>
+                  {tyre.brand} {tyre.model} - Rank: {tyre.rank}, Rating: {tyre.performanceRating}
+                </li>
               ))}
             </ul>
           </div>
