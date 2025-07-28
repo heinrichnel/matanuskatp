@@ -2,32 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { SupportedCurrency, formatCurrency } from '../../lib/currency';
 import { useRealtimeTrips } from '../../hooks/useRealtimeTrips';
-// Uncomment when API integration is ready
-// import { fetchTripsFromAPI } from '../../api/tripsApi';
-
-interface Trip {
-  id: string;
-  tripNumber: string;
-  origin: string;
-  destination: string;
-  startDate: string;
-  endDate: string;
-  status: 'active' | 'completed' | 'scheduled';
-  driver: string;
-  vehicle: string;
-  distance: number;
-  cost: number;
-  costBreakdown?: {
-    fuel?: number;
-    maintenance?: number;
-    driver?: number;
-    tolls?: number;
-    other?: number;
-  };
-  source?: 'internal' | 'webhook' | 'api'; // Indicates where the trip data came from
-  externalId?: string; // For tracking trips from external systems
-  lastUpdated?: string; // Timestamp for last update
-}
+import { fetchTripsFromAPI, updateTrip, deleteTrip, Trip } from '../../api/tripsApi';
 
 interface ActiveTripsProps {
   displayCurrency: SupportedCurrency;
@@ -97,32 +72,10 @@ const initialActiveTrips: Trip[] = [
   }
 ];
 
-const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
-  // Use the real-time trips hook instead of mock data
+const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency = 'USD' }) => {
+  // State variables
   const { trips: fetchedTrips } = useRealtimeTrips({ status: 'active' });
   const [activeTrips, setActiveTrips] = useState<Trip[]>(initialActiveTrips);
-  
-  // Update state when real data arrives
-  useEffect(() => {
-    if (fetchedTrips && fetchedTrips.length > 0) {
-      // Map the fetched trips to the expected format
-      const formattedTrips = fetchedTrips.map(trip => ({
-        id: trip.id,
-        tripNumber: trip.loadRef || `TR-${trip.id.substring(0, 8)}`,
-        origin: trip.origin || 'Unknown',
-        destination: trip.destination || 'Unknown',
-        startDate: trip.startTime || new Date().toISOString(),
-        endDate: trip.endTime || new Date().toISOString(),
-        status: trip.status as 'active' | 'completed' | 'scheduled',
-        driver: trip.driver || 'Unassigned',
-        vehicle: trip.vehicle || 'Unassigned',
-        distance: trip.distance || 0,
-        cost: trip.totalCost || 0,
-        costBreakdown: trip.costBreakdown || {}
-      }));
-      setActiveTrips(formattedTrips);
-    }
-  }, [fetchedTrips]);
   const [webhookTrips, setWebhookTrips] = useState<Trip[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -145,17 +98,39 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
     tolls: 0,
     other: 0
   });
-  
+
+  // Update state when real data arrives
+  useEffect(() => {
+    if (fetchedTrips && fetchedTrips.length > 0) {
+      // Map the fetched trips to the expected format
+      const formattedTrips = fetchedTrips.map(trip => ({
+        id: trip.id,
+        tripNumber: trip.loadRef || `TR-${trip.id.substring(0, 8)}`,
+        origin: trip.origin || 'Unknown',
+        destination: trip.destination || 'Unknown',
+        startDate: trip.startTime || new Date().toISOString(),
+        endDate: trip.endTime || new Date().toISOString(),
+        status: trip.status as 'active' | 'completed' | 'scheduled',
+        driver: trip.driver || 'Unassigned',
+        vehicle: trip.vehicle || 'Unassigned',
+        distance: trip.distance || 0,
+        cost: trip.totalCost || 0,
+        costBreakdown: trip.costBreakdown || {}
+      }));
+      setActiveTrips(formattedTrips);
+    }
+  }, [fetchedTrips]);
+
   // Mock function to fetch webhook trips - replace with actual API call
   const fetchWebhookTrips = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // This is a placeholder - replace with actual API call
       // Example: const response = await fetch('/api/webhook-trips');
       // const data = await response.json();
-      
+
       // Simulate API response with mock data
       const mockWebhookData: Trip[] = [
         {
@@ -191,7 +166,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           lastUpdated: new Date().toISOString()
         }
       ];
-      
+
       setWebhookTrips(mockWebhookData);
     } catch (err) {
       console.error('Error fetching webhook trips:', err);
@@ -200,7 +175,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
       setIsLoading(false);
     }
   };
-  
+
   // Fetch webhook trips when component mounts
   useEffect(() => {
     fetchWebhookTrips();
@@ -208,7 +183,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
 
   // Combine internal and webhook trips
   const allTrips = [...activeTrips, ...webhookTrips];
-  
+
   const handleEditClick = (trip: Trip) => {
     setEditingTrip(trip);
     setEditForm({
@@ -224,21 +199,21 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const numValue = parseFloat(value) || 0;
-    
-    setEditForm(prev => ({ 
-      ...prev, 
-      [name]: numValue 
+
+    setEditForm(prev => ({
+      ...prev,
+      [name]: numValue
     }));
-    
+
     // Auto-calculate total cost
     if (name !== 'cost') {
       const updatedValues = { ...editForm, [name]: numValue };
-      const totalCost = (updatedValues.fuel || 0) + 
-                        (updatedValues.maintenance || 0) + 
-                        (updatedValues.driver || 0) + 
-                        (updatedValues.tolls || 0) + 
+      const totalCost = (updatedValues.fuel || 0) +
+                        (updatedValues.maintenance || 0) +
+                        (updatedValues.driver || 0) +
+                        (updatedValues.tolls || 0) +
                         (updatedValues.other || 0);
-      
+
       setEditForm(prev => ({
         ...prev,
         [name]: numValue,
@@ -249,10 +224,10 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
 
   const handleSave = () => {
     if (!editingTrip) return;
-    
+
     // Determine if the editing trip is from webhook source
     const isWebhookTrip = editingTrip.source === 'webhook';
-    
+
     if (isWebhookTrip) {
       // Update webhook trips
       const updatedWebhookTrips = webhookTrips.map(trip => {
@@ -272,9 +247,9 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
         }
         return trip;
       });
-      
+
       setWebhookTrips(updatedWebhookTrips);
-      
+
       // In a real application, you might want to sync this data with the backend
       // Example: await updateTripInAPI(editingTrip.id, editForm);
       console.log('Updated webhook trip:', editingTrip.id, editForm);
@@ -297,17 +272,17 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
         }
         return trip;
       });
-      
+
       setActiveTrips(updatedTrips);
     }
-    
+
     setEditingTrip(null);
   };
 
   const handleCancel = () => {
     setEditingTrip(null);
   };
-  
+
   // File upload handlers
   const handleFileUploadClick = () => {
     if (fileInputRef.current) {
@@ -319,18 +294,18 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
     try {
       const lines = text.split('\n').filter(line => line.trim() !== '');
       const headers = lines[0].split(',').map(h => h.trim());
-      
+
       const trips: Trip[] = [];
-      
+
       for (let i = 1; i < lines.length; i++) {
         const values = lines[i].split(',').map(v => v.trim());
         if (values.length < headers.length) continue;
-        
+
         const tripData: Record<string, any> = {};
         headers.forEach((header, index) => {
           tripData[header] = values[index];
         });
-        
+
         // Create trip object with required fields
         const trip: Trip = {
           id: `imported-${Date.now()}-${i}`,
@@ -347,7 +322,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           source: 'internal',
           lastUpdated: new Date().toISOString()
         };
-        
+
         // Add cost breakdown if available
         if (
           tripData['Fuel Cost'] ||
@@ -364,10 +339,10 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
             other: parseFloat(tripData['Other Costs']) || 0
           };
         }
-        
+
         trips.push(trip);
       }
-      
+
       return trips;
     } catch (error) {
       console.error('Error parsing CSV:', error);
@@ -379,18 +354,18 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
+
     setIsUploading(true);
     setError(null);
     setSuccess(null);
-    
+
     const reader = new FileReader();
-    
+
     reader.onload = (event) => {
       try {
         const content = event.target?.result as string;
         const importedTrips = parseCSV(content);
-        
+
         if (importedTrips.length > 0) {
           setActiveTrips(prev => [...prev, ...importedTrips]);
           setSuccess(`Successfully imported ${importedTrips.length} trips.`);
@@ -408,15 +383,15 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
         }
       }
     };
-    
+
     reader.onerror = () => {
       setError('Error reading the file.');
       setIsUploading(false);
     };
-    
+
     reader.readAsText(file);
   };
-  
+
   // Function to generate sample CSV for users to download
   const handleDownloadTemplate = () => {
     const headers = [
@@ -424,17 +399,17 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
       'Driver', 'Vehicle', 'Distance', 'Cost',
       'Fuel Cost', 'Maintenance Cost', 'Driver Cost', 'Tolls', 'Other Costs'
     ];
-    
+
     const sampleData = [
       'TR-2023-004,New York NY,Boston MA,2023-07-20,2023-07-22,John Doe,Truck 101,215,1200,600,200,300,75,25'
     ];
-    
+
     const csvContent = [headers.join(','), ...sampleData].join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', `trips-import-template.csv`);
     link.style.visibility = 'hidden';
@@ -443,13 +418,20 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
     document.body.removeChild(link);
   };
 
+  // Handle clearing error/success messages and refreshing webhook trips
+  const handleRefresh = () => {
+    setError(null);
+    setSuccess(null);
+    fetchWebhookTrips();
+  };
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Active Trips</h1>
           <p className="text-gray-600">
-            Showing {allTrips.length} active trips 
+            Showing {allTrips.length} active trips
             ({activeTrips.length} manual, {webhookTrips.length} from webhooks)
           </p>
         </div>
@@ -462,7 +444,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
             className="hidden"
             onChange={handleFileUpload}
           />
-          
+
           {/* File upload button */}
           <button
             onClick={handleFileUploadClick}
@@ -486,25 +468,22 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
               </>
             )}
           </button>
-          
+
           {/* Template download button */}
           <button
             onClick={handleDownloadTemplate}
             className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 flex items-center"
           >
-            <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-            Template
+            Download Template
           </button>
-          
-          <button 
-            onClick={onClick}
+
+          <button
+            onClick={handleRefresh}
             className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
           >
             Refresh Webhook Trips
           </button>
-          
+
           <Link
             to="/trips/new"
             className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
@@ -513,14 +492,13 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           </Link>
         </div>
       </div>
-      
-      {/* Success message */}
+
       {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4">
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 relative">
           <span className="block sm:inline">{success}</span>
-          <span 
-            className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" 
-            onClick={onClick}
+          <span
+            className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer"
+            onClick={() => setSuccess(null)}
           >
             <svg className="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
               <title>Close</title>
@@ -529,14 +507,14 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           </span>
         </div>
       )}
-      
+
       {/* Error message */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 relative">
           <span className="block sm:inline">{error}</span>
-          <span 
-            className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer" 
-            onClick={onClick}
+          <span
+            className="absolute top-0 bottom-0 right-0 px-4 py-3 cursor-pointer"
+            onClick={() => setError(null)}
           >
             <svg className="fill-current h-6 w-6 text-red-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
               <title>Close</title>
@@ -545,7 +523,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
           </span>
         </div>
       )}
-      
+
       {isLoading && (
         <div className="text-center py-4">
           <p>Loading webhook trips...</p>
@@ -571,7 +549,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                 <p><span className="font-medium">External ID:</span> {editingTrip.externalId}</p>
               )}
             </div>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -590,7 +568,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance Cost</label>
                   <div className="mt-1 relative rounded-md shadow-sm">
@@ -607,7 +585,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Driver Cost</label>
                   <div className="mt-1 relative rounded-md shadow-sm">
@@ -624,7 +602,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Tolls</label>
                   <div className="mt-1 relative rounded-md shadow-sm">
@@ -641,7 +619,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Other Costs</label>
                   <div className="mt-1 relative rounded-md shadow-sm">
@@ -658,7 +636,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Total Cost</label>
                   <div className="mt-1 relative rounded-md shadow-sm bg-gray-50">
@@ -677,7 +655,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-6 flex justify-end space-x-3">
               <button
                 onClick={handleCancel}
@@ -712,7 +690,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {allTrips.map((trip) => (
+              {allTrips.map((trip: Trip) => (
                 <tr key={trip.id} className={trip.source === 'webhook' ? 'bg-blue-50' : ''}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {trip.tripNumber}
@@ -754,7 +732,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     <div>
                       <div className="font-medium">{formatCurrency(trip.cost, displayCurrency)}</div>
-                      <button 
+                      <button
                         className="text-xs text-blue-600 hover:underline mt-1"
                         onClick={() => handleEditClick(trip)}
                       >
@@ -770,7 +748,7 @@ const ActiveTrips: React.FC<ActiveTripsProps> = ({ displayCurrency }) => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button className="text-indigo-600 hover:text-indigo-900" onClick={() => {}}>View</button>
-                      <button 
+                      <button
                         className="text-blue-600 hover:text-blue-900"
                         onClick={() => handleEditClick(trip)}
                       >

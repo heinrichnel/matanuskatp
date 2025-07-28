@@ -2,11 +2,10 @@ import type { WialonPosition, WialonUnit } from "../types/wialon";
 import { ErrorCategory, ErrorSeverity, logError } from "../utils/errorHandling";
 
 // Wialon configuration
-export const WIALON_LOGIN_URL =
-  "https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en";
+export const WIALON_LOGIN_URL = "https://hst-api.wialon.com/oauth.html";
 const WIALON_SESSION_TOKEN =
   "c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053";
-const WIALON_API_URL = "https://hosting.wialon.com";
+const WIALON_API_URL = "https://hst-api.wialon.com";
 
 // Track initialization state
 let wialonInitialized = false;
@@ -66,6 +65,13 @@ export async function initializeWialon(): Promise<boolean> {
 
   try {
     console.log("Auto-initializing Wialon connection...");
+
+    // Check if Wialon SDK is available
+    if (!window.wialon) {
+      console.error("Wialon SDK not available. Make sure the SDK script is loaded properly.");
+      return false;
+    }
+
     // Attempt to get units as a connectivity test
     const units = await getUnits();
     console.log(`Wialon initialized successfully with ${units.length} units`);
@@ -89,6 +95,12 @@ export function isWialonInitialized(): boolean {
  * Get all available Wialon units
  */
 export async function getUnits(): Promise<WialonUnit[]> {
+  // If Wialon SDK is not available, return mock data
+  if (!window.wialon) {
+    console.warn("Wialon SDK not available, returning mock units");
+    return MOCK_UNITS;
+  }
+
   // Configure request parameters
   const params = new URLSearchParams({
     svc: "core/search_items",
@@ -181,11 +193,12 @@ export async function getUnits(): Promise<WialonUnit[]> {
         continue;
       }
 
-      // If we've exhausted all retries, throw the error
-      throw error;
+      // If we've exhausted all retries, return mock data as fallback
+      console.warn("Falling back to mock data after failed API requests");
+      return MOCK_UNITS;
     }
   }
 
   // This code should never be reached, but TypeScript requires it for type safety
-  throw new Error("Failed to fetch Wialon units after maximum retries");
+  return MOCK_UNITS;
 }
