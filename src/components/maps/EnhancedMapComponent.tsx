@@ -1,21 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import {
-  GoogleMap,
-  Marker,
-  InfoWindow,
-} from '@react-google-maps/api';
-import { Location, RouteOptions } from '../../types/mapTypes';
+import { GoogleMap, InfoWindow, Marker } from "@react-google-maps/api";
+import React, { useEffect, useState } from "react";
+import { Location, RouteOptions } from "../../types/mapTypes";
+import { isGoogleMapsAPILoaded, useLoadGoogleMaps } from "../../utils/googleMapsLoader";
 import {
   DEFAULT_MAP_CENTER,
   DEFAULT_MAP_OPTIONS,
   MAP_STYLES,
   createMarkerIcon,
   getBoundsForLocations,
-} from '../../utils/mapConfig';
-import { useLoadGoogleMaps, isGoogleMapsAPILoaded } from '../../utils/googleMapsLoader';
-import { initPlacesService, searchPlacesByText, placeToLocation } from '../../utils/placesService';
-import RouteDrawer from '../Models/RouteDrawer';
-import LocationDetailPanel from './LocationDetailPanel';
+} from "../../utils/mapConfig";
+import { initPlacesService, placeToLocation, searchPlacesByText } from "../../utils/placesService";
+import RouteDrawer from "../Models/RouteDrawer";
+import LocationDetailPanel from "./LocationDetailPanel";
 
 interface EnhancedMapProps {
   locations?: Location[];
@@ -42,16 +38,16 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
   locations = [],
   center = DEFAULT_MAP_CENTER,
   zoom = 10,
-  height = '400px',
-  width = '100%',
+  height = "400px",
+  width = "100%",
   showInfoOnHover = false,
-  className = '',
+  className = "",
   showFullscreenControl = true,
   showZoomControl = true,
   showStreetViewControl = true,
   showMapTypeControl = false,
   customMapStyles,
-  defaultIconType = 'default',
+  defaultIconType = "default",
   showRoutes = false,
   routeOptions = {},
   showPlacesSearch = false,
@@ -61,7 +57,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
   const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   const [placesService, setPlacesService] = useState<any>(null);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Location[]>([]);
   const [isSearching, setIsSearching] = useState<boolean>(false);
   // Removed unused loadError state
@@ -71,8 +67,8 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
   const containerStyle = {
     width,
     height,
-    borderRadius: '0.375rem',
-    position: 'relative' as const,
+    borderRadius: "0.375rem",
+    position: "relative" as const,
   };
 
   // Initialize Places service when map is loaded
@@ -107,7 +103,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
         }
       }
     } catch (error) {
-      console.error('Place search failed:', error);
+      console.error("Place search failed:", error);
     } finally {
       setIsSearching(false);
     }
@@ -145,7 +141,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
               disabled={isSearching}
               className="ml-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
             >
-              {isSearching ? '...' : 'Search'}
+              {isSearching ? "..." : "Search"}
             </button>
           </div>
         </div>
@@ -214,10 +210,7 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
 
           {/* Info window for selected location */}
           {selectedLocation && (
-            <InfoWindow
-              position={selectedLocation}
-              onCloseClick={() => setSelectedLocation(null)}
-            >
+            <InfoWindow position={selectedLocation} onCloseClick={() => setSelectedLocation(null)}>
               <div className="p-2 max-w-xs">
                 {selectedLocation.title && (
                   <h3 className="font-medium text-sm mb-1">{selectedLocation.title}</h3>
@@ -235,10 +228,10 @@ const EnhancedMapComponent: React.FC<EnhancedMapProps> = ({
       )}
 
       {/* Location detail panel */}
-      {selectedLocation && (
+      {selectedLocation && selectedLocation.id && (
         <div className="mt-4">
           <LocationDetailPanel
-            locationId={selectedLocation.id || ''}
+            locationId={selectedLocation.id}
             onClose={() => setSelectedLocation(null)}
           />
         </div>
