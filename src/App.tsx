@@ -38,6 +38,8 @@ import Layout from "./components/layout/Layout";
 // Core Components
 import TripFormModal from "./components/Models/Trips/TripFormModal";
 import DashboardPage from "./pages/DashboardPage";
+import Dashboard from "./pages/Dashboard";
+import FormsIntegrationPage from "./pages/FormsIntegrationPage";
 
 // === TRIPS ===
 import DriverPerformancePage from "./components/DriverManagement/DriverPerformancePage";
@@ -243,6 +245,8 @@ const App: React.FC = () => {
                           {/* Main */}
                           <Route index element={<DashboardPage />} />
                           <Route path="dashboard" element={<DashboardPage />} />
+                          <Route path="new-dashboard" element={<Dashboard />} />
+                          <Route path="forms-integration" element={<FormsIntegrationPage />} />
 
                           {/* Trips */}
                           <Route path="trips" element={<TripManagementPage />} />
