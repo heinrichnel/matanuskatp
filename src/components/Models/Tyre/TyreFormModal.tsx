@@ -6,7 +6,17 @@ import { X, Save, ChevronRight } from "lucide-react";
 import { useTyreReferenceData } from "@/context/TyreReferenceDataContext";
 import VehiclePositionDiagram from "@/components/tyres/VehiclePositionDiagram";
 import { Timestamp } from "firebase/firestore";
-import { Tyre, TyreStoreLocation } from "@/components/Models/Tyre/TyreModel";
+
+// *** HIERDIE IS JOU ENIGSTE TYRE DATA BRON ***
+import type { Tyre } from "@/data/tyreData";
+import {
+  tyreTypes,
+  TyreStoreLocation,
+  TyreConditionStatus, // <-- Import TyreConditionStatus
+  TyreStatus, // <-- Import TyreStatus
+  TyreMountStatus, // <-- Import TyreMountStatus
+  TyreType, // <-- Import TyreType
+} from "@/data/tyreData";
 
 interface TyreFormModalProps {
   isOpen: boolean;
@@ -23,8 +33,14 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
   initialData = {},
   editMode = false,
 }) => {
-  // Use the reference data context for brands, sizes, patterns
+  // Reference data (brands, sizes, patterns)
   const { brands, sizes, getPositionsForVehicleType, getPatternsForBrand } = useTyreReferenceData();
+
+  // Serialiseer init size na string (bv. "295/80R22.5") as daar initialData is
+  const initialSelectedSize =
+    initialData.size
+      ? `${initialData.size.width}/${initialData.size.aspectRatio}R${initialData.size.rimDiameter}`
+      : "";
 
   // Form state
   const [formData, setFormData] = useState<Partial<Tyre>>({
@@ -37,7 +53,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
     size: initialData.size || { width: 0, aspectRatio: 0, rimDiameter: 0 },
     loadIndex: initialData.loadIndex || 0,
     speedRating: initialData.speedRating || "",
-    type: initialData.type || "standard",
+    type: initialData.type || "steer",
     purchaseDetails: initialData.purchaseDetails || {
       date: new Date().toISOString().split("T")[0],
       cost: 0,
@@ -47,21 +63,21 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
     },
     installation: initialData.installation || {
       vehicleId: "",
-      position: "front_left",
+      position: "",
       mileageAtInstallation: 0,
       installationDate: "",
       installedBy: "",
     },
     condition: initialData.condition || {
-      treadDepth: 20, // New tyre typical depth
+      treadDepth: 20,
       pressure: 0,
       temperature: 0,
-      status: "good",
+      status: TyreConditionStatus.GOOD, // <-- Changed here
       lastInspectionDate: new Date().toISOString().split("T")[0],
       nextInspectionDue: "",
     },
-    status: initialData.status || "new",
-    mountStatus: initialData.mountStatus || "unmounted",
+    status: initialData.status || TyreStatus.NEW, // <-- Changed here
+    mountStatus: initialData.mountStatus || TyreMountStatus.UNMOUNTED, // <-- Changed here
     maintenanceHistory: initialData.maintenanceHistory || {
       rotations: [],
       repairs: [],
@@ -73,54 +89,48 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
     location: initialData.location ?? TyreStoreLocation.HOLDING_BAY,
   });
 
-  // Form section management
+  // Section management
   const [activeSection, setActiveSection] = useState<
     "basic" | "technical" | "installation" | "condition"
   >("basic");
 
-  // Derived state
   const [availablePatterns, setAvailablePatterns] = useState<string[]>([]);
-  const [vehicleTypePositions, setVehicleTypePositions] = useState<{ id: string; name: string }[]>(
-    []
-  );
+  const [vehicleTypePositions, setVehicleTypePositions] = useState<{ id: string; name: string }[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState<string>(initialSelectedSize);
 
-  // Helper functions for type safety
   const safeString = (value: string | undefined): string => value ?? "";
   const safeNumber = (value: number | undefined): number => value ?? 0;
-  
-  // Helper to handle potentially undefined values for form inputs
   const safeValue = (value: string | number | undefined): string | number => {
     if (value === undefined) return "";
     return value;
   };
 
-  // Update available patterns when brand or size changes
+  // Patterns update
   useEffect(() => {
     if (formData.brand) {
       const patterns = getPatternsForBrand(formData.brand)
         .map((p) => p.pattern)
-        .filter((v, i, a) => a.indexOf(v) === i); // Unique values
+        .filter((v, i, a) => a.indexOf(v) === i);
       setAvailablePatterns(patterns);
     } else {
       setAvailablePatterns([]);
     }
   }, [formData.brand, getPatternsForBrand]);
 
-  // Update vehicle positions when type changes
+  // Positions update
   useEffect(() => {
     if (formData.type) {
-      const positions = getPositionsForVehicleType(formData.type as string);
+      // Corrected: Ensure formData.type is cast to TyreType as expected by getPositionsForVehicleType
+      const positions = getPositionsForVehicleType(formData.type);
       setVehicleTypePositions(positions);
     }
   }, [formData.type, getPositionsForVehicleType]);
 
-  // Convert size string to object when selected from dropdown
+  // Size parse
   useEffect(() => {
     if (selectedSize) {
-      // Parse size format like "295/80R22.5"
       const parts = selectedSize.match(/^(\d+)\/(\d+)R(\d+\.?\d*)$/);
       if (parts) {
         const [, width, aspectRatio, rimDiameter] = parts;
@@ -130,44 +140,55 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
             width: parseInt(width),
             aspectRatio: parseInt(aspectRatio),
             rimDiameter: parseFloat(rimDiameter),
-            displayString: selectedSize,
           },
         }));
       }
     }
   }, [selectedSize]);
 
-  // Handle input changes
+  // Handlers
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
 
-    // Handle nested properties
-    if (name.includes(".")) {
+    // Handle string to enum conversion for specific fields if necessary
+    // This is important for Select components where the 'value' will be a string
+    let parsedValue: any = value;
+    if (name === "condition.status" && Object.values(TyreConditionStatus).includes(value as TyreConditionStatus)) {
+        parsedValue = value as TyreConditionStatus;
+    } else if (name === "status" && Object.values(TyreStatus).includes(value as TyreStatus)) {
+        parsedValue = value as TyreStatus;
+    } else if (name === "mountStatus" && Object.values(TyreMountStatus).includes(value as TyreMountStatus)) {
+        parsedValue = value as TyreMountStatus;
+    } else if (name === "location" && Object.values(TyreStoreLocation).includes(value as TyreStoreLocation)) {
+        parsedValue = value as TyreStoreLocation;
+    } else if (name === "type" && tyreTypes.includes(value as TyreType)) {
+        parsedValue = value as TyreType;
+    }
+
+
+    if (name && name.includes(".")) {
       const [parent, child] = name.split(".");
       setFormData((prev) => ({
         ...prev,
         [parent]: {
           ...(prev[parent as keyof typeof prev] as Record<string, any>),
-          [child]: value,
+          [child]: parsedValue, // Use parsedValue here
         },
       }));
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: parsedValue, // Use parsedValue here
       }));
     }
   };
 
-  // Handle number input changes
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const numValue = parseFloat(value);
-
-    // Handle nested properties
-    if (name.includes(".")) {
+    if (name && name.includes(".")) {
       const [parent, child] = name.split(".");
       setFormData((prev) => ({
         ...prev,
@@ -184,11 +205,9 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
     }
   };
 
-  // Validate form before submission
+  // Validation
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-
-    // Basic validation
     if (!formData.serialNumber) newErrors.serialNumber = "Serial number is required";
     if (!formData.brand) newErrors.brand = "Brand is required";
     if (!formData.pattern) newErrors.pattern = "Pattern is required";
@@ -197,36 +216,28 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
       newErrors["purchaseDetails.date"] = "Purchase date is required";
     if (formData.purchaseDetails?.cost === 0)
       newErrors["purchaseDetails.cost"] = "Cost is required";
-
-    // Additional validation for mounted tyres
-    if (formData.mountStatus === "mounted") {
+    if (formData.mountStatus === TyreMountStatus.MOUNTED) { // <-- Use enum member
       if (!formData.installation?.vehicleId)
         newErrors["installation.vehicleId"] = "Vehicle ID is required for mounted tyres";
       if (!formData.installation?.position)
         newErrors["installation.position"] = "Position is required for mounted tyres";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handle form submission
+  // Submission
   const handleSubmit = async () => {
     if (!validateForm()) return;
-
     setIsSubmitting(true);
     try {
-      // Prepare data for submission
       const submissionData: Partial<Tyre> = {
         ...formData,
         updatedAt: Timestamp.now(),
       };
-
-      // If new tyre, add createdAt
       if (!editMode) {
         submissionData.createdAt = Timestamp.now();
       }
-
       await onSubmit(submissionData);
       onClose();
     } catch (error) {
@@ -237,7 +248,6 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
     }
   };
 
-  // Determine the modal title based on edit mode
   const modalTitle = editMode ? `Edit Tyre: ${formData.serialNumber}` : "Add New Tyre";
 
   return (
@@ -245,246 +255,138 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
       <div className="space-y-6">
         {/* Section Navigation */}
         <div className="flex space-x-1 border-b">
-          <button
-            className={`px-4 py-2 ${activeSection === "basic" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
-            onClick={() => setActiveSection("basic")}
-          >
-            Basic Info
-          </button>
-          <button
-            className={`px-4 py-2 ${activeSection === "technical" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
-            onClick={() => setActiveSection("technical")}
-          >
-            Technical Details
-          </button>
-          <button
-            className={`px-4 py-2 ${activeSection === "installation" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
-            onClick={() => setActiveSection("installation")}
-          >
-            Installation
-          </button>
-          <button
-            className={`px-4 py-2 ${activeSection === "condition" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
-            onClick={() => setActiveSection("condition")}
-          >
-            Condition & Status
-          </button>
+          {["basic", "technical", "installation", "condition"].map((sec) => (
+            <button
+              key={sec}
+              className={`px-4 py-2 ${activeSection === sec
+                ? "border-b-2 border-blue-500 text-blue-600 font-medium"
+                : "text-gray-500"
+                }`}
+              onClick={() => setActiveSection(sec as any)}
+            >
+              {sec.charAt(0).toUpperCase() + sec.slice(1)}
+            </button>
+          ))}
         </div>
-
-        {/* Basic Information Section */}
+        {/* Basic Section */}
         {activeSection === "basic" && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Serial Number / ID"
-                name="serialNumber"
-                value={formData.serialNumber}
-                onChange={handleChange}
-                error={errors.serialNumber}
-                disabled={editMode} // Can't change serial number in edit mode
-              />
-              <Input
-                label="DOT Code"
-                name="dotCode"
-                value={formData.dotCode}
-                onChange={handleChange}
-                error={errors.dotCode}
-              />
+              <Input label="Serial Number / ID" name="serialNumber"
+                value={safeValue(formData.serialNumber)} onChange={handleChange}
+                error={errors.serialNumber} disabled={editMode} />
+              <Input label="DOT Code" name="dotCode" value={safeValue(formData.dotCode)} onChange={handleChange} error={errors.dotCode} />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Manufacturing Date"
-                name="manufacturingDate"
-                type="date"
-                value={formData.manufacturingDate}
-                onChange={handleChange}
-                error={errors.manufacturingDate}
-              />
-              <Select
-                label="Tyre Brand"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                error={errors.brand}
-                options={[
-                  { label: "Select brand...", value: "" },
-                  ...brands.map((brand) => ({ label: brand.name, value: brand.name })),
-                ]}
-              />
+              <Input label="Manufacturing Date" name="manufacturingDate" type="date"
+                value={safeValue(formData.manufacturingDate)} onChange={handleChange}
+                error={errors.manufacturingDate} />
+              <Select label="Tyre Brand" name="brand" value={safeString(formData.brand)} // Added name prop
+                onChange={handleChange} error={errors.brand}
+                options={[{ label: "Select brand...", value: "" }, ...brands.map((b: any) => ({ label: b.name, value: b.name }))]} />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Select
-                label="Tyre Size"
-                name="selectedSize"
-                value={selectedSize}
+              <Select label="Tyre Size" name="size" value={safeString(selectedSize)} // Added name prop
                 onChange={(e) => setSelectedSize(e.target.value)}
                 error={errors.size}
-                options={[
-                  { label: "Select size...", value: "" },
-                  ...sizes.map((size) => ({ label: size.size, value: size.size })),
-                ]}
-              />
-              <Select
-                label="Tyre Pattern"
-                name="pattern"
-                value={formData.pattern}
-                onChange={handleChange}
-                error={errors.pattern}
-                options={[
-                  { label: "Select pattern...", value: "" },
-                  ...availablePatterns.map((pattern) => ({ label: pattern, value: pattern })),
-                ]}
+                options={[{ label: "Select size...", value: "" }, ...sizes.map((s: any) => ({ label: s.size, value: s.size }))]} />
+              <Select label="Tyre Pattern" name="pattern" value={safeString(formData.pattern)} // Added name prop
+                onChange={handleChange} error={errors.pattern}
+                options={[{ label: "Select pattern...", value: "" }, ...availablePatterns.map((pattern) => ({ label: pattern, value: pattern }))]}
                 disabled={!formData.brand}
               />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input label="Model" name="model" value={formData.model} onChange={handleChange} />
+              <Input label="Model" name="model" value={safeValue(formData.model)} onChange={handleChange} />
               <Select
                 label="Type"
-                name="type"
-                value={formData.type as string}
+                name="type" // Added name prop
+                value={safeString(formData.type as string)}
                 onChange={handleChange}
                 options={[
-                  { label: "Standard", value: "standard" },
-                  { label: "Winter", value: "winter" },
-                  { label: "All Season", value: "all_season" },
-                  { label: "Mud Terrain", value: "mud_terrain" },
-                  { label: "All Terrain", value: "all_terrain" },
+                  { label: "Select type...", value: "" },
+                  ...tyreTypes.map((type) => ({
+                    label: type.charAt(0).toUpperCase() + type.slice(1),
+                    value: type,
+                  })),
                 ]}
               />
             </div>
+            <Select
+                label="Location"
+                name="location" // Added name prop
+                value={safeString(formData.location as string)}
+                onChange={handleChange}
+                options={[
+                    { label: "Select location...", value: "" },
+                    ...Object.values(TyreStoreLocation).map(loc => ({ label: loc, value: loc }))
+                ]}
+            />
           </div>
         )}
-
-        {/* Technical Details Section */}
+        {/* Technical Section */}
         {activeSection === "technical" && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Load Index"
-                name="loadIndex"
-                type="number"
-                value={formData.loadIndex}
-                onChange={handleNumberChange}
-              />
-              <Input
-                label="Speed Rating"
-                name="speedRating"
-                value={formData.speedRating}
-                onChange={handleChange}
-              />
+              <Input label="Load Index" name="loadIndex" type="number" value={safeValue(formData.loadIndex)} onChange={handleNumberChange} />
+              <Input label="Speed Rating" name="speedRating" value={safeValue(formData.speedRating)} onChange={handleChange} />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Purchase Date"
-                name="purchaseDetails.date"
-                type="date"
-                value={formData.purchaseDetails?.date}
-                onChange={handleChange}
-                error={errors["purchaseDetails.date"]}
-              />
-              <Input
-                label="Purchase Cost"
-                name="purchaseDetails.cost"
-                type="number"
-                value={formData.purchaseDetails?.cost}
-                onChange={handleNumberChange}
-                error={errors["purchaseDetails.cost"]}
-              />
+              <Input label="Purchase Date" name="purchaseDetails.date" type="date"
+                value={safeValue(formData.purchaseDetails?.date)} onChange={handleChange} error={errors["purchaseDetails.date"]} />
+              <Input label="Purchase Cost" name="purchaseDetails.cost" type="number"
+                value={safeValue(formData.purchaseDetails?.cost)} onChange={handleNumberChange} error={errors["purchaseDetails.cost"]} />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Supplier"
-                name="purchaseDetails.supplier"
-                value={formData.purchaseDetails?.supplier}
-                onChange={handleChange}
-              />
-              <Input
-                label="Invoice Number"
-                name="purchaseDetails.invoiceNumber"
-                value={formData.purchaseDetails?.invoiceNumber}
-                onChange={handleChange}
-              />
+              <Input label="Supplier" name="purchaseDetails.supplier"
+                value={safeValue(formData.purchaseDetails?.supplier)} onChange={handleChange} />
+              <Input label="Invoice Number" name="purchaseDetails.invoiceNumber"
+                value={safeValue(formData.purchaseDetails?.invoiceNumber)} onChange={handleChange} />
             </div>
-
             <div className="grid grid-cols-1 gap-4">
-              <Input
-                label="Warranty Information"
-                name="purchaseDetails.warranty"
-                value={formData.purchaseDetails?.warranty}
-                onChange={handleChange}
-              />
+              <Input label="Warranty Information" name="purchaseDetails.warranty"
+                value={safeValue(formData.purchaseDetails?.warranty)} onChange={handleChange} />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Distance Run (km)"
-                name="kmRun"
-                type="number"
-                value={formData.kmRun}
-                onChange={handleNumberChange}
-              />
-              <Input
-                label="Distance Limit (km)"
-                name="kmRunLimit"
-                type="number"
-                value={formData.kmRunLimit}
-                onChange={handleNumberChange}
-              />
+              <Input label="Distance Run (km)" name="kmRun" type="number"
+                value={safeValue(formData.kmRun)} onChange={handleNumberChange} />
+              <Input label="Distance Limit (km)" name="kmRunLimit" type="number"
+                value={safeValue(formData.kmRunLimit)} onChange={handleNumberChange} />
             </div>
           </div>
         )}
-
         {/* Installation Section */}
         {activeSection === "installation" && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Select
                 label="Mount Status"
-                name="mountStatus"
-                value={formData.mountStatus as string}
+                name="mountStatus" // Added name prop
+                value={safeString(formData.mountStatus as string)}
                 onChange={handleChange}
                 options={[
-                  { label: "Unmounted", value: "unmounted" },
-                  { label: "Mounted", value: "mounted" },
-                  { label: "In Storage", value: "in_storage" },
+                  { label: "Unmounted", value: TyreMountStatus.UNMOUNTED }, // <-- Use enum member
+                  { label: "Mounted", value: TyreMountStatus.MOUNTED }, // <-- Use enum member
+                  { label: "In Storage", value: TyreMountStatus.IN_STORAGE }, // <-- Use enum member
                 ]}
               />
-              {formData.mountStatus === "mounted" && (
+              {formData.mountStatus === TyreMountStatus.MOUNTED && ( // <-- Use enum member
                 <Input
                   label="Vehicle ID/Registration"
                   name="installation.vehicleId"
-                  value={formData.installation?.vehicleId}
+                  value={safeValue(formData.installation?.vehicleId)}
                   onChange={handleChange}
                   error={errors["installation.vehicleId"]}
                 />
               )}
             </div>
-
-            {formData.mountStatus === "mounted" && (
+            {formData.mountStatus === TyreMountStatus.MOUNTED && ( // <-- Use enum member
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Select
-                    label="Vehicle Type"
-                    name="type"
-                    value={formData.type as string}
-                    onChange={handleChange}
-                    options={[
-                      { label: "Standard", value: "standard" },
-                      { label: "Reefer", value: "reefer" },
-                      { label: "Horse", value: "horse" },
-                      { label: "Interlink", value: "interlink" },
-                    ]}
-                  />
-                  <Select
                     label="Axle Position"
-                    name="installation.position"
-                    value={formData.installation?.position as string}
+                    name="installation.position" // Added name prop
+                    value={safeString(formData.installation?.position as string)}
                     onChange={handleChange}
                     error={errors["installation.position"]}
                     options={[
@@ -492,40 +394,32 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                       ...vehicleTypePositions.map((pos) => ({ label: pos.name, value: pos.id })),
                     ]}
                   />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     label="Installation Date"
                     name="installation.installationDate"
                     type="date"
-                    value={formData.installation?.installationDate}
+                    value={safeValue(formData.installation?.installationDate)}
                     onChange={handleChange}
                   />
-                  <Input
-                    label="Mileage at Installation"
-                    name="installation.mileageAtInstallation"
-                    type="number"
-                    value={formData.installation?.mileageAtInstallation}
-                    onChange={handleNumberChange}
-                  />
                 </div>
-
+                <Input
+                  label="Mileage at Installation"
+                  name="installation.mileageAtInstallation"
+                  type="number"
+                  value={safeValue(formData.installation?.mileageAtInstallation)}
+                  onChange={handleNumberChange}
+                />
                 <Input
                   label="Installed By"
                   name="installation.installedBy"
-                  value={formData.installation?.installedBy}
+                  value={safeValue(formData.installation?.installedBy)}
                   onChange={handleChange}
                 />
-
-                {/* Vehicle Position Diagram */}
                 <div className="mt-4 bg-gray-50 border border-gray-200 rounded-md p-4">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">
-                    Vehicle Position Diagram
-                  </h3>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Vehicle Position Diagram</h3>
                   <VehiclePositionDiagram
-                    vehicleType={formData.type as "standard" | "reefer" | "horse" | "interlink"}
-                    selectedPosition={formData.installation?.position as string}
+                    vehicleType={formData.type as TyreType}
+                    selectedPosition={safeString(formData.installation?.position as string)}
                     positions={vehicleTypePositions}
                     onPositionClick={(position) => {
                       setFormData((prev) => ({
@@ -542,95 +436,84 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
             )}
           </div>
         )}
-
         {/* Condition & Status Section */}
         {activeSection === "condition" && (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Select
                 label="Current Status"
-                name="status"
-                value={formData.status as string}
+                name="status" // Added name prop
+                value={safeString(formData.status as string)}
                 onChange={handleChange}
                 options={[
-                  { label: "New", value: "new" },
-                  { label: "In Service", value: "in_service" },
-                  { label: "Spare", value: "spare" },
-                  { label: "Retreaded", value: "retreaded" },
-                  { label: "Scrapped", value: "scrapped" },
+                  { label: "New", value: TyreStatus.NEW }, // <-- Use enum member
+                  { label: "In Service", value: TyreStatus.IN_SERVICE }, // <-- Use enum member
+                  { label: "Spare", value: TyreStatus.SPARE }, // <-- Use enum member
+                  { label: "Retreaded", value: TyreStatus.RETREADED }, // <-- Use enum member
+                  { label: "Scrapped", value: TyreStatus.SCRAPPED }, // <-- Use enum member
                 ]}
               />
               <Input
                 label="Tread Depth (mm)"
                 name="condition.treadDepth"
                 type="number"
-                value={formData.condition?.treadDepth}
+                value={safeValue(formData.condition?.treadDepth)}
                 onChange={handleNumberChange}
               />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Pressure (kPa)"
                 name="condition.pressure"
                 type="number"
-                value={formData.condition?.pressure}
+                value={safeValue(formData.condition?.pressure)}
                 onChange={handleNumberChange}
               />
               <Select
                 label="Condition Status"
-                name="condition.status"
-                value={formData.condition?.status as string}
+                name="condition.status" // Added name prop
+                value={safeString(formData.condition?.status as string)}
                 onChange={handleChange}
                 options={[
-                  { label: "Good", value: "good" },
-                  { label: "Warning", value: "warning" },
-                  { label: "Critical", value: "critical" },
-                  { label: "Needs Replacement", value: "needs_replacement" },
+                  { label: "Good", value: TyreConditionStatus.GOOD }, // <-- Use enum member
+                  { label: "Warning", value: TyreConditionStatus.WARNING }, // <-- Use enum member
+                  { label: "Critical", value: TyreConditionStatus.CRITICAL }, // <-- Use enum member
+                  { label: "Needs Replacement", value: TyreConditionStatus.NEEDS_REPLACEMENT }, // <-- Use enum member
                 ]}
               />
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Last Inspection Date"
                 name="condition.lastInspectionDate"
                 type="date"
-                value={formData.condition?.lastInspectionDate}
+                value={safeValue(formData.condition?.lastInspectionDate)}
                 onChange={handleChange}
               />
               <Input
                 label="Next Inspection Due"
                 name="condition.nextInspectionDue"
                 type="date"
-                value={formData.condition?.nextInspectionDue}
+                value={safeValue(formData.condition?.nextInspectionDue)}
                 onChange={handleChange}
               />
             </div>
-
             <Textarea
               label="Notes"
-              name="notes"
-              value={formData.notes}
+              name="notes" // Added name prop
+              value={safeString(formData.notes)}
               onChange={handleChange}
               rows={4}
             />
           </div>
         )}
-
-        {/* Form Actions */}
+        {/* Actions */}
         <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
           <div>{errors.submit && <p className="text-sm text-red-600">{errors.submit}</p>}</div>
           <div className="flex space-x-3">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              icon={<X className="w-4 h-4" />}
-              disabled={isSubmitting}
-            >
+            <Button variant="outline" onClick={onClose} icon={<X className="w-4 h-4" />} disabled={isSubmitting}>
               Cancel
             </Button>
-
             {activeSection !== "condition" ? (
               <Button
                 onClick={() => {
@@ -648,11 +531,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                 Next
               </Button>
             ) : (
-              <Button
-                onClick={handleSubmit}
-                isLoading={isSubmitting}
-                icon={<Save className="w-4 h-4" />}
-              >
+              <Button onClick={handleSubmit} isLoading={isSubmitting} icon={<Save className="w-4 h-4" />}>
                 {editMode ? "Update Tyre" : "Save Tyre"}
               </Button>
             )}

@@ -16,14 +16,36 @@ import {
   TrendingUp,
   Truck,
 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react"; // Added useMemo
 import { Link } from "react-router-dom";
 import TyreFormModal from "../../components/Models/Tyre/TyreFormModal";
 import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../../components/ui/Card";
-// Firebase will be dynamically imported when needed
-import { Tyre } from "../../data/tyreData";
-import { TyreStoreLocation } from "../../types/tyre";
+import { collection, doc, getDocs, deleteDoc, updateDoc, addDoc, query, where, Timestamp } from "firebase/firestore";
+import { db } from '@/firebase'; // Check this path and if 'db' is exported
+import { Table } from "../../components/ui/table"; // Using relative path instead of alias
+// Using the Tyre type directly from tyreData.ts instead of TyreModel
+import { useTyreReferenceData } from "@/context/TyreReferenceDataContext";
+import { Input, Select } from "@/components/ui/FormElements"; // Not directly used at top level here
+
+
+// Import all necessary Enums and Types from your tyreData.ts file
+// Ensure this path is correct relative to TyreManagementPage.tsx
+import {
+  Tyre,
+  TyreStoreLocation,
+  TyreConditionStatus,
+  TyreStatus,
+  TyreMountStatus,
+  tyreTypes, // This is the array, not an enum
+} from "../../data/tyreData"; // ADJUST THIS PATH IF NECESSARY
+
+// Import TyreStoreLocation from your types/tyre.ts if it's the canonical source
+// If TyreStoreLocation is defined in both tyreData.ts AND types/tyre.ts,
+// you should consolidate to one source or ensure they can merge.
+// For now, I'm assuming tyreData.ts is the single source as per previous conversation.
+// import { TyreStoreLocation } from "../../types/tyre"; // REMOVE THIS LINE IF TyreStoreLocation is in tyreData.ts
+
 
 // Import tyre components that need to be integrated
 import TyreAnalytics from "../../components/Tyremanagement/TyreAnalytics";
@@ -33,8 +55,6 @@ import { TyreInventoryStats } from "../../components/Tyremanagement/TyreInventor
 import TyrePerformanceReport from "../../components/Tyremanagement/TyrePerformanceReport";
 import { TyreReportGenerator } from "../../components/Tyremanagement/TyreReportGenerator";
 import { TyreReports } from "../../components/Tyremanagement/TyreReports";
-
-// Using Tyre type from TyreModel
 
 // Define tabs for navigation
 type TabType = "inventory" | "dashboard" | "analytics" | "reports";
@@ -68,8 +88,8 @@ const adaptTyreFormatIfNeeded = (tyres: Tyre[], targetComponent: string) => {
           wearStatus: tyre.condition?.status || "unknown",
         },
         // Always ensure these properties exist
-        type: tyre.type || { code: "unknown", name: "Unknown" },
-        size: tyre.size || { width: 0, profile: 0, rimSize: 0, displayString: "Unknown" },
+        type: tyre.type,
+        size: tyre.size || { width: 0, aspectRatio: 0, rimDiameter: 0, displayString: "Unknown" },
         calculatedValue: tyre.condition?.treadDepth
           ? tyre.purchaseDetails?.cost / tyre.condition.treadDepth
           : 0,
@@ -85,7 +105,7 @@ const adaptTyreFormatIfNeeded = (tyres: Tyre[], targetComponent: string) => {
       // Ensure cost data is properly formatted
       return tyres.map((tyre) => ({
         ...tyre,
-        costPerKm: tyre.milesRun > 0 ? tyre.purchaseDetails?.cost / (tyre.milesRun * 1.60934) : 0,
+        costPerKm: tyre.kmRun > 0 ? tyre.purchaseDetails?.cost / (tyre.kmRun * 1.60934) : 0,
         totalCost: tyre.purchaseDetails?.cost || 0,
       }));
 
@@ -95,11 +115,11 @@ const adaptTyreFormatIfNeeded = (tyres: Tyre[], targetComponent: string) => {
         ...tyre,
         performance: {
           wearRate:
-            tyre.milesRun > 0 && tyre.condition?.treadDepth
-              ? ((10 - tyre.condition.treadDepth) / (tyre.milesRun * 1.60934)) * 10000
+            tyre.kmRun > 0 && tyre.condition?.treadDepth
+              ? ((10 - tyre.condition.treadDepth) / (tyre.kmRun * 1.60934)) * 10000
               : 0,
           costEfficiency:
-            tyre.milesRun > 0 ? tyre.purchaseDetails?.cost / (tyre.milesRun * 1.60934) : 0,
+            tyre.kmRun > 0 ? tyre.purchaseDetails?.cost / (tyre.kmRun * 1.60934) : 0,
         },
       }));
 
@@ -108,10 +128,10 @@ const adaptTyreFormatIfNeeded = (tyres: Tyre[], targetComponent: string) => {
       return tyres.map((tyre) => ({
         ...tyre,
         metrics: {
-          costPerMile: tyre.milesRun > 0 ? tyre.purchaseDetails?.cost / tyre.milesRun : 0,
+          costPerMile: tyre.kmRun > 0 ? tyre.purchaseDetails?.cost / tyre.kmRun : 0,
           treadWearRate:
-            tyre.milesRun > 0 && tyre.condition?.treadDepth
-              ? ((10 - tyre.condition.treadDepth) / (tyre.milesRun * 1.60934)) * 10000
+            tyre.kmRun > 0 && tyre.condition?.treadDepth
+              ? ((10 - tyre.condition.treadDepth) / (tyre.kmRun * 1.60934)) * 10000
               : 0,
           expectedRemainingLife: tyre.condition?.treadDepth
             ? (tyre.condition.treadDepth / 10) * (tyre.kmRunLimit || 50000)
@@ -132,7 +152,7 @@ const TyreManagementPage: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [editTyre, setEditTyre] = useState<Tyre | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<TyreStatus | null>(null); // Changed type to TyreStatus
   const [activeTab, setActiveTab] = useState<TabType>("inventory");
 
   // Sub-tab states for Analytics and Reports sections
@@ -141,14 +161,67 @@ const TyreManagementPage: React.FC = () => {
     "summary"
   );
 
+  const { brands } = useTyreReferenceData(); // Corrected: Removed TYRE_BRANDS as it's not on the context type
+  const { currentUser } = useAuth();
+  const userId = currentUser?.uid;
+
+  // Define defaultNewTyre using Enum members and ensuring all required fields are present
+  // This is wrapped in useMemo to prevent re-creation on every render, which is good practice.
+  const defaultNewTyre: Partial<Tyre> = useMemo(() => ({
+    serialNumber: `TY-${Math.floor(1000 + Math.random() * 9000)}`,
+    dotCode: "",
+    manufacturingDate: new Date().toISOString().split("T")[0],
+    brand: "",
+    model: "",
+    pattern: "",
+    size: { width: 0, aspectRatio: 0, rimDiameter: 0 },
+    loadIndex: 0,
+    speedRating: "",
+    type: tyreTypes[0], // Using the first value from the tyreTypes array
+    purchaseDetails: {
+      date: new Date().toISOString().split("T")[0],
+      cost: 0,
+      supplier: "",
+      warranty: "",
+      invoiceNumber: "", // Added as it's optional but good to initialize
+    },
+    installation: {
+      vehicleId: "",
+      position: "",
+      mileageAtInstallation: 0,
+      installationDate: "",
+      installedBy: "",
+    },
+    condition: {
+      treadDepth: 20,
+      pressure: 0,
+      temperature: 0,
+      status: TyreConditionStatus.GOOD, // Corrected to use enum member
+      lastInspectionDate: new Date().toISOString().split("T")[0],
+      nextInspectionDue: "", // Corrected: Ensures this required field is present
+    },
+    status: TyreStatus.NEW, // Corrected to use enum member
+    mountStatus: TyreMountStatus.UNMOUNTED, // Corrected to use enum member
+    maintenanceHistory: {
+      rotations: [],
+      repairs: [],
+      inspections: [],
+    },
+    kmRun: 0,
+    kmRunLimit: 60000,
+    notes: "",
+    location: TyreStoreLocation.HOLDING_BAY, // Corrected to use enum member
+  }), []); // Empty dependency array means it's created once
+
   // Function to fetch tyres from Firestore
   const fetchTyres = async () => {
     try {
       setLoading(true);
 
       // Dynamically import Firebase modules
+      // Assuming 'db' is exported from '../../firebase'
       const { collection, query, getDocs, orderBy } = await import("firebase/firestore");
-      const { db } = await import("../../firebase");
+      const { db } = await import("../../firebase"); // Make sure this path is correct
 
       // Create a query against the 'tyres' collection
       const q = query(collection(db, "tyres"), orderBy("createdAt", "desc"));
@@ -196,6 +269,7 @@ const TyreManagementPage: React.FC = () => {
       .toLowerCase();
 
     const matchesSearch = !searchQuery || searchableText.includes(searchQuery.toLowerCase());
+    // Directly compare with filterStatus, which is now TyreStatus or null
     const matchesFilter = !filterStatus || tyre.status === filterStatus;
 
     return matchesSearch && matchesFilter;
@@ -235,11 +309,13 @@ const TyreManagementPage: React.FC = () => {
       // Close the form
       setShowAddForm(false);
 
-      // Show a success toast/notification
-      alert("Tyre added successfully!");
+      // Show a success toast/notification (assuming react-hot-toast is installed and used)
+      // toast.success("Tyre added successfully!");
+      alert("Tyre added successfully!"); // Fallback to alert
     } catch (err) {
       console.error("Error adding tyre:", err);
-      alert("Failed to add tyre. Please try again.");
+      // toast.error("Failed to add tyre. Please try again.");
+      alert("Failed to add tyre. Please try again."); // Fallback to alert
     }
   };
 
@@ -256,9 +332,7 @@ const TyreManagementPage: React.FC = () => {
       const tyreRef = doc(db, "tyres", data.id);
 
       // Create a copy of the data without the id
-      const updateData = { ...data };
-      // Using optional field to fix type error
-      const { id, ...dataWithoutId } = data;
+      const { id, ...dataWithoutId } = data; // Destructuring 'id' out
 
       // Update the document
       await updateDoc(tyreRef, {
@@ -273,24 +347,26 @@ const TyreManagementPage: React.FC = () => {
       setEditTyre(null);
 
       // Show success message
-      alert("Tyre updated successfully!");
+      // toast.success("Tyre updated successfully!");
+      alert("Tyre updated successfully!"); // Fallback to alert
     } catch (err) {
       console.error("Error updating tyre:", err);
-      alert("Failed to update tyre. Please try again.");
+      // toast.error("Failed to update tyre. Please try again.");
+      alert("Failed to update tyre. Please try again."); // Fallback to alert
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: TyreStatus) => { // Changed 'status: string' to 'status: TyreStatus'
     switch (status) {
-      case "in_service":
+      case TyreStatus.IN_SERVICE: // Use enum member
         return "text-green-600 bg-green-50";
-      case "new":
+      case TyreStatus.NEW: // Use enum member
         return "text-blue-600 bg-blue-50";
-      case "spare":
+      case TyreStatus.SPARE: // Use enum member
         return "text-blue-600 bg-blue-50";
-      case "retreaded":
+      case TyreStatus.RETREADED: // Use enum member
         return "text-amber-600 bg-amber-50";
-      case "scrapped":
+      case TyreStatus.SCRAPPED: // Use enum member
         return "text-red-600 bg-red-50";
       default:
         return "text-gray-600 bg-gray-50";
@@ -431,7 +507,7 @@ const TyreManagementPage: React.FC = () => {
                       <div>
                         <p className="text-sm text-gray-600">In Service</p>
                         <p className="text-xl font-bold text-gray-900">
-                          {tyres.filter((t) => t.status === "in_service").length}
+                          {tyres.filter((t) => t.status === TyreStatus.IN_SERVICE).length}
                         </p>
                       </div>
                     </div>
@@ -447,7 +523,7 @@ const TyreManagementPage: React.FC = () => {
                       <div>
                         <p className="text-sm text-gray-600">Available (New/Spare)</p>
                         <p className="text-xl font-bold text-gray-900">
-                          {tyres.filter((t) => ["new", "spare"].includes(t.status)).length}
+                          {tyres.filter((t) => [TyreStatus.NEW, TyreStatus.SPARE].includes(t.status)).length}
                         </p>
                       </div>
                     </div>
@@ -463,7 +539,7 @@ const TyreManagementPage: React.FC = () => {
                       <div>
                         <p className="text-sm text-gray-600">Retreaded/Scrapped</p>
                         <p className="text-xl font-bold text-gray-900">
-                          {tyres.filter((t) => ["retreaded", "scrapped"].includes(t.status)).length}
+                          {tyres.filter((t) => [TyreStatus.RETREADED, TyreStatus.SCRAPPED].includes(t.status)).length}
                         </p>
                       </div>
                     </div>
@@ -526,37 +602,37 @@ const TyreManagementPage: React.FC = () => {
                     All
                   </Button>
                   <Button
-                    variant={filterStatus === "in_service" ? "primary" : "outline"}
+                    variant={filterStatus === TyreStatus.IN_SERVICE ? "primary" : "outline"}
                     size="sm"
-                    onClick={() => setFilterStatus("in_service")}
+                    onClick={() => setFilterStatus(TyreStatus.IN_SERVICE)}
                   >
                     In Service
                   </Button>
                   <Button
-                    variant={filterStatus === "new" ? "primary" : "outline"}
+                    variant={filterStatus === TyreStatus.NEW ? "primary" : "outline"}
                     size="sm"
-                    onClick={() => setFilterStatus("new")}
+                    onClick={() => setFilterStatus(TyreStatus.NEW)}
                   >
                     New
                   </Button>
                   <Button
-                    variant={filterStatus === "spare" ? "primary" : "outline"}
+                    variant={filterStatus === TyreStatus.SPARE ? "primary" : "outline"}
                     size="sm"
-                    onClick={() => setFilterStatus("spare")}
+                    onClick={() => setFilterStatus(TyreStatus.SPARE)}
                   >
                     Spare
                   </Button>
                   <Button
-                    variant={filterStatus === "retreaded" ? "primary" : "outline"}
+                    variant={filterStatus === TyreStatus.RETREADED ? "primary" : "outline"}
                     size="sm"
-                    onClick={() => setFilterStatus("retreaded")}
+                    onClick={() => setFilterStatus(TyreStatus.RETREADED)}
                   >
                     Retreaded
                   </Button>
                   <Button
-                    variant={filterStatus === "scrapped" ? "primary" : "outline"}
+                    variant={filterStatus === TyreStatus.SCRAPPED ? "primary" : "outline"}
                     size="sm"
-                    onClick={() => setFilterStatus("scrapped")}
+                    onClick={() => setFilterStatus(TyreStatus.SCRAPPED)}
                   >
                     Scrapped
                   </Button>
@@ -815,45 +891,18 @@ const TyreManagementPage: React.FC = () => {
         <TyreFormModal
           isOpen={showAddForm}
           onClose={() => setShowAddForm(false)}
-          onSubmit={(tyreData: Partial<Tyre>) => handleAddTyre(tyreData as Omit<Tyre, "id">)}
-          editMode={false}
-          initialData={{
-            serialNumber: "TY-" + Math.floor(1000 + Math.random() * 9000),
-            dotCode: "",
-            manufacturingDate: new Date().toISOString().split("T")[0],
-            brand: "",
-            model: "",
-            pattern: "",
-            size: { width: 0, aspectRatio: 0, rimDiameter: 0, displayString: "" },
-            loadIndex: 0,
-            speedRating: "",
-            type: "spare",
-            purchaseDetails: {
-              date: new Date().toISOString().split("T")[0],
-              cost: 0,
-              supplier: "",
-              warranty: "",
-            },
-            condition: {
-              treadDepth: 0,
-              pressure: 0,
-              temperature: 0,
-              status: "good",
-              lastInspectionDate: new Date().toISOString().split("T")[0],
-              nextInspectionDue: new Date().toISOString().split("T")[0],
-            },
-            status: "new",
-            mountStatus: "unmounted",
-            maintenanceHistory: {
-              rotations: [],
-              repairs: [],
-              inspections: [],
-            },
-            kmRun: 0,
-            kmRunLimit: 0,
-            notes: "",
-            location: TyreStoreLocation.VICHELS_STORE,
+          onSubmit={(tyreData: Partial<Tyre>) => {
+            // Check if initialData.purchaseDetails.invoiceNumber is missing, set to empty string
+            if (!tyreData.purchaseDetails?.invoiceNumber) {
+              if (!tyreData.purchaseDetails) {
+                tyreData.purchaseDetails = {};
+              }
+              tyreData.purchaseDetails.invoiceNumber = "";
+            }
+            handleAddTyre(tyreData as Omit<Tyre, "id">);
           }}
+          editMode={false}
+          initialData={defaultNewTyre} // Pass the memoized default new tyre data
         />
       )}
 
@@ -864,7 +913,7 @@ const TyreManagementPage: React.FC = () => {
           onClose={() => setEditTyre(null)}
           onSubmit={(tyreData: Partial<Tyre>) => handleUpdateTyre(tyreData as Tyre)}
           editMode={true}
-          initialData={editTyre as any}
+          initialData={editTyre} // Pass the selected tyre directly
         />
       )}
     </div>
@@ -872,3 +921,7 @@ const TyreManagementPage: React.FC = () => {
 };
 
 export default TyreManagementPage;
+function useAuth(): { currentUser: any; } {
+  throw new Error("Function not implemented.");
+}
+

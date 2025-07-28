@@ -13,21 +13,23 @@ interface InputProps {
   min?: string;
   disabled?: boolean;
   className?: string;
+  name?: string; // <--- Added the 'name' prop here
 }
 
-export const Input: React.FC<InputProps> = ({ 
-  label, 
-  value, 
-  onChange, 
-  type = 'text', 
-  placeholder, 
-  required, 
-  error, 
+export const Input: React.FC<InputProps> = ({
+  label,
+  value,
+  onChange,
+  type = 'text',
+  placeholder,
+  required,
+  error,
   onBlur,
   step,
   min,
   disabled,
-  className = ''
+  className = '',
+  name // <--- Destructured the 'name' prop here
 }) => (
   <div className="mb-4">
     <label className="block font-medium mb-1">
@@ -43,6 +45,7 @@ export const Input: React.FC<InputProps> = ({
       step={step}
       min={min}
       disabled={disabled}
+      name={name} // <--- Passed the 'name' prop to the input element
       className={`w-full border rounded px-3 py-2 ${error ? 'border-red-500' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} ${className}`}
     />
     {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
@@ -64,18 +67,20 @@ interface SelectProps {
   onBlur?: () => void;
   disabled?: boolean;
   className?: string;
+  name?: string; // <--- Added the 'name' prop here
 }
 
-export const Select: React.FC<SelectProps> = ({ 
-  label, 
-  value, 
-  onChange, 
-  options = [], 
-  required, 
-  error, 
+export const Select: React.FC<SelectProps> = ({
+  label,
+  value,
+  onChange,
+  options = [],
+  required,
+  error,
   onBlur,
   disabled,
-  className = ''
+  className = '',
+  name // <--- Destructured the 'name' prop here
 }) => (
   <div className="mb-4">
     <label className="block font-medium mb-1">
@@ -87,6 +92,7 @@ export const Select: React.FC<SelectProps> = ({
       required={required}
       onBlur={onBlur}
       disabled={disabled}
+      name={name} // <--- Passed the 'name' prop to the select element
       className={`w-full border rounded px-3 py-2 ${error ? 'border-red-500' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} ${className}`}
     >
       {options.map((option, idx) => (
@@ -107,18 +113,20 @@ interface TextAreaProps {
   error?: string | false;
   disabled?: boolean;
   className?: string;
+  name?: string; // <--- Added the 'name' prop here
 }
 
-export const TextArea: React.FC<TextAreaProps> = ({ 
-  label, 
-  value, 
-  onChange, 
-  placeholder, 
-  rows = 3, 
-  required, 
-  error, 
+export const TextArea: React.FC<TextAreaProps> = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  rows = 3,
+  required,
+  error,
   disabled,
-  className = ''
+  className = '',
+  name // <--- Destructured the 'name' prop here
 }) => (
   <div className="flex flex-col">
     {label && (
@@ -132,6 +140,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
       placeholder={placeholder}
       rows={rows}
       disabled={disabled}
+      name={name} // <--- Passed the 'name' prop to the textarea element
       className={`border rounded p-2 focus:ring ${error ? 'border-red-500' : ''} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''} ${className}`}
     />
     {error && <div className="text-red-500 text-xs mt-1">{error}</div>}
@@ -147,15 +156,17 @@ interface FileUploadProps {
   onFileSelect: (files: FileList | null) => void;
   error?: string | false;
   className?: string;
+  name?: string; // <--- Added the 'name' prop here
 }
 
-export const FileUpload: React.FC<FileUploadProps> = ({ 
-  label, 
-  accept, 
-  multiple, 
+export const FileUpload: React.FC<FileUploadProps> = ({
+  label,
+  accept,
+  multiple,
   onFileSelect,
   error,
-  className = ''
+  className = '',
+  name // <--- Destructured the 'name' prop here
 }) => (
   <div className={`flex flex-col ${className}`}>
     {label && <label className="mb-1 font-medium">{label}</label>}
@@ -164,8 +175,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
       accept={accept}
       multiple={multiple}
       onChange={(e) => onFileSelect(e.target.files)}
-      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
-        file:rounded-md file:border-0 file:text-sm file:font-medium 
+      name={name} // <--- Passed the 'name' prop to the input element
+      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
+        file:rounded-md file:border-0 file:text-sm file:font-medium
         file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
         file:cursor-pointer cursor-pointer"
     />
