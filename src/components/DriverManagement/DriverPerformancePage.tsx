@@ -73,33 +73,33 @@ const DriverPerformancePage: React.FC = () => {
         <div className="flex items-center space-x-3">
           <SyncIndicator />
           <div className="flex space-x-1 bg-gray-100 p-1 rounded-md">
-            <button 
-              className={`px-3 py-1 text-sm rounded ${timeRange === 'week' ? 'bg-white shadow' : ''}`} 
-              onClick={onClick}
+            <button
+              className={`px-3 py-1 text-sm rounded ${timeRange === 'week' ? 'bg-white shadow' : ''}`}
+              onClick={() => setTimeRange('week')}
             >
               Week
             </button>
-            <button 
-              className={`px-3 py-1 text-sm rounded ${timeRange === 'month' ? 'bg-white shadow' : ''}`} 
-              onClick={onClick}
+            <button
+              className={`px-3 py-1 text-sm rounded ${timeRange === 'month' ? 'bg-white shadow' : ''}`}
+              onClick={() => setTimeRange('month')}
             >
               Month
             </button>
-            <button 
-              className={`px-3 py-1 text-sm rounded ${timeRange === 'quarter' ? 'bg-white shadow' : ''}`} 
-              onClick={onClick}
+            <button
+              className={`px-3 py-1 text-sm rounded ${timeRange === 'quarter' ? 'bg-white shadow' : ''}`}
+              onClick={() => setTimeRange('quarter')}
             >
               Quarter
             </button>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             icon={<Download className="w-4 h-4" />}
           >
             Export
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             icon={<RefreshCw className="w-4 h-4" />}
             disabled={isLoading?.fetchingPerformance}
           >
@@ -196,7 +196,7 @@ const DriverPerformancePage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          driver.onTimePercentage >= 95 ? 'bg-green-100 text-green-800' : 
+                          driver.onTimePercentage >= 95 ? 'bg-green-100 text-green-800' :
                           driver.onTimePercentage >= 90 ? 'bg-blue-100 text-blue-800' :
                           'bg-yellow-100 text-yellow-800'
                         }`}>
@@ -207,9 +207,9 @@ const DriverPerformancePage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{driver.fuelEfficiency}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div 
+                        <div
                           className={`h-2.5 rounded-full ${
-                            driver.safetyScore >= 92 ? 'bg-green-500' : 
+                            driver.safetyScore >= 92 ? 'bg-green-500' :
                             driver.safetyScore >= 85 ? 'bg-blue-500' :
                             'bg-yellow-500'
                           }`}

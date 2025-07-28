@@ -96,13 +96,13 @@ const mockSchedules = [
 ];
 
 // Function to format time from date string
-const formatTime = (dateString) => {
+const formatTime = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
 // Function to format date from date string
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 };
@@ -111,7 +111,7 @@ const DriverScheduling: React.FC = () => {
   const [schedules, setSchedules] = useState(mockSchedules);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('week');
-  
+
   // Function to navigate to previous period
   const goToPrevious = () => {
     const newDate = new Date(currentDate);
@@ -124,7 +124,7 @@ const DriverScheduling: React.FC = () => {
     }
     setCurrentDate(newDate);
   };
-  
+
   // Function to navigate to next period
   const goToNext = () => {
     const newDate = new Date(currentDate);
@@ -137,7 +137,7 @@ const DriverScheduling: React.FC = () => {
     }
     setCurrentDate(newDate);
   };
-  
+
   // Function to get period label
   const getPeriodLabel = () => {
     if (viewMode === 'day') {
@@ -147,20 +147,20 @@ const DriverScheduling: React.FC = () => {
       const endOfWeek = new Date(currentDate);
       startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
       endOfWeek.setDate(endOfWeek.getDate() + (6 - endOfWeek.getDay()));
-      
+
       return `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     } else if (viewMode === 'month') {
       return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     }
-    
+
     return '';
   };
-  
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Driver Scheduling</h1>
-        
+
         <div className="flex items-center space-x-2">
           <Button variant="outline" onClick={() => alert('Create new schedule')}>
             <UserPlus className="h-4 w-4 mr-2" />
@@ -168,57 +168,57 @@ const DriverScheduling: React.FC = () => {
           </Button>
         </div>
       </div>
-      
+
       <Card>
         <CardHeader title="Schedule Management" />
         <CardContent>
           <div className="flex justify-between items-center mb-6">
             <div className="flex space-x-2">
-              <Button 
-                variant={viewMode === 'day' ? 'default' : 'outline'} 
+              <Button
+                variant={viewMode === 'day' ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('day')}
               >
                 Day
               </Button>
-              <Button 
-                variant={viewMode === 'week' ? 'default' : 'outline'} 
+              <Button
+                variant={viewMode === 'week' ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('week')}
               >
                 Week
               </Button>
-              <Button 
-                variant={viewMode === 'month' ? 'default' : 'outline'} 
+              <Button
+                variant={viewMode === 'month' ? 'primary' : 'outline'}
                 size="sm"
                 onClick={() => setViewMode('month')}
               >
                 Month
               </Button>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Button variant="outline" size="sm" onClick={goToPrevious}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              
+
               <div className="text-md font-medium px-3">
                 {getPeriodLabel()}
               </div>
-              
+
               <Button variant="outline" size="sm" onClick={goToNext}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
+
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setCurrentDate(new Date())}
               >
                 Today
               </Button>
             </div>
-            
+
             <div className="flex space-x-2">
               <div className="relative">
                 <input
@@ -228,13 +228,13 @@ const DriverScheduling: React.FC = () => {
                 />
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
               </div>
-              
-              <Button variant="outline" size="icon">
+
+              <Button variant="outline" size="xs">
                 <Filter className="h-4 w-4" />
               </Button>
             </div>
           </div>
-          
+
           {/* Weekly Schedule View */}
           {viewMode === 'week' && (
             <div className="border rounded-md">
@@ -246,7 +246,7 @@ const DriverScheduling: React.FC = () => {
                   </div>
                 ))}
               </div>
-              
+
               {/* Schedules Grid */}
               <div className="grid grid-cols-7 divide-x h-[500px]">
                 {[0, 1, 2, 3, 4, 5, 6].map((dayOffset) => {
@@ -254,34 +254,34 @@ const DriverScheduling: React.FC = () => {
                   // Adjust to start of week (Sunday)
                   const startOfWeek = new Date(currentDayDate);
                   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-                  
+
                   // Get date for this column
                   const columnDate = new Date(startOfWeek);
                   columnDate.setDate(columnDate.getDate() + dayOffset);
-                  
+
                   // Format as YYYY-MM-DD for comparison
                   const columnDateStr = columnDate.toISOString().split('T')[0];
-                  
+
                   // Filter schedules for this day
                   const daySchedules = schedules.filter(schedule => {
                     const scheduleDate = new Date(schedule.startTime).toISOString().split('T')[0];
                     return scheduleDate === columnDateStr;
                   });
-                  
+
                   return (
                     <div key={dayOffset} className="p-2 relative overflow-y-auto">
                       <div className="text-xs text-gray-500 mb-1 text-center">
                         {columnDate.getDate()}
                       </div>
-                      
+
                       {daySchedules.length === 0 ? (
                         <div className="text-xs text-center text-gray-400 mt-4">No schedules</div>
                       ) : (
                         daySchedules.map(schedule => (
-                          <div 
+                          <div
                             key={schedule.id}
                             className={`mb-2 p-2 rounded text-xs border-l-4 ${
-                              schedule.status === 'in-progress' 
+                              schedule.status === 'in-progress'
                                 ? 'border-l-green-500 bg-green-50'
                                 : 'border-l-blue-500 bg-blue-50'
                             }`}
@@ -299,7 +299,7 @@ const DriverScheduling: React.FC = () => {
               </div>
             </div>
           )}
-          
+
           {/* Monthly View */}
           {viewMode === 'month' && (
             <div className="text-center p-6 text-gray-500">
@@ -309,7 +309,7 @@ const DriverScheduling: React.FC = () => {
               </div>
             </div>
           )}
-          
+
           {/* Daily View */}
           {viewMode === 'day' && (
             <div className="text-center p-6 text-gray-500">
@@ -321,7 +321,7 @@ const DriverScheduling: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      
+
       {/* Upcoming Schedules */}
       <Card>
         <CardHeader title="Upcoming Schedules" />
@@ -389,7 +389,7 @@ const DriverScheduling: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Schedule Conflicts Alert */}
       <Card>
         <CardContent className="p-4">
@@ -418,3 +418,4 @@ const DriverScheduling: React.FC = () => {
 };
 
 export default DriverScheduling;
+
