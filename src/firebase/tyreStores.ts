@@ -1,19 +1,18 @@
-import { 
-  collection, 
-  doc, 
-  getDoc, 
-  getDocs, 
-  onSnapshot, 
-  query, 
-  serverTimestamp, 
-  setDoc, 
-  updateDoc, 
-  where,
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
   orderBy,
-  deleteDoc
-} from 'firebase/firestore';
-import { firestore, handleFirestoreError } from '../utils/firebaseConnectionHandler';
-import { StockEntry, TyreStore } from '../types/tyre';
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
+import { StockEntry, TyreStore } from "../types/tyre";
+import { firestore, handleFirestoreError } from "../utils/firebaseConnectionHandler";
 
 /**
  * Add a new TyreStore document to Firestore
@@ -21,14 +20,14 @@ import { StockEntry, TyreStore } from '../types/tyre';
  */
 export async function addTyreStore(store: TyreStore): Promise<void> {
   try {
-    const storeRef = doc(firestore, 'tyreStores', store.id);
+    const storeRef = doc(firestore, "tyreStores", store.id);
     await setDoc(storeRef, {
       ...store,
       dateAdded: serverTimestamp(),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error adding tyre store:', error);
+    console.error("Error adding tyre store:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -40,14 +39,14 @@ export async function addTyreStore(store: TyreStore): Promise<void> {
  */
 export async function getTyreStoreById(storeId: string): Promise<TyreStore | null> {
   try {
-    const storeRef = doc(firestore, 'tyreStores', storeId);
+    const storeRef = doc(firestore, "tyreStores", storeId);
     const snap = await getDoc(storeRef);
-    
+
     if (!snap.exists()) return null;
-    
+
     return { id: snap.id, ...snap.data() } as TyreStore;
   } catch (error) {
-    console.error('Error getting tyre store:', error);
+    console.error("Error getting tyre store:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -58,15 +57,12 @@ export async function getTyreStoreById(storeId: string): Promise<TyreStore | nul
  */
 export async function getAllTyreStores(): Promise<TyreStore[]> {
   try {
-    const q = query(
-      collection(firestore, 'tyreStores'),
-      orderBy('dateAdded', 'desc')
-    );
-    
+    const q = query(collection(firestore, "tyreStores"), orderBy("dateAdded", "desc"));
+
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TyreStore));
+    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as TyreStore);
   } catch (error) {
-    console.error('Error getting tyre stores:', error);
+    console.error("Error getting tyre stores:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -77,15 +73,18 @@ export async function getAllTyreStores(): Promise<TyreStore[]> {
  * @param storeId The ID of the TyreStore to update
  * @param storeData The updated TyreStore data
  */
-export async function updateTyreStore(storeId: string, storeData: Partial<TyreStore>): Promise<void> {
+export async function updateTyreStore(
+  storeId: string,
+  storeData: Partial<TyreStore>
+): Promise<void> {
   try {
-    const storeRef = doc(firestore, 'tyreStores', storeId);
+    const storeRef = doc(firestore, "tyreStores", storeId);
     await updateDoc(storeRef, {
       ...storeData,
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error updating tyre store:', error);
+    console.error("Error updating tyre store:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -97,10 +96,10 @@ export async function updateTyreStore(storeId: string, storeData: Partial<TyreSt
  */
 export async function deleteTyreStore(storeId: string): Promise<void> {
   try {
-    const storeRef = doc(firestore, 'tyreStores', storeId);
+    const storeRef = doc(firestore, "tyreStores", storeId);
     await deleteDoc(storeRef);
   } catch (error) {
-    console.error('Error deleting tyre store:', error);
+    console.error("Error deleting tyre store:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -113,29 +112,29 @@ export async function deleteTyreStore(storeId: string): Promise<void> {
  */
 export async function updateTyreStoreEntry(storeId: string, entry: StockEntry): Promise<void> {
   try {
-    const storeRef = doc(firestore, 'tyreStores', storeId);
+    const storeRef = doc(firestore, "tyreStores", storeId);
     const snap = await getDoc(storeRef);
-    
+
     if (!snap.exists()) {
       throw new Error(`TyreStore ${storeId} does not exist`);
     }
-    
+
     const data = snap.data() as TyreStore;
     const entries = data.entries || [];
-    const idx = entries.findIndex(e => e.tyreId === entry.tyreId);
-    
+    const idx = entries.findIndex((e) => e.tyreId === entry.tyreId);
+
     if (idx >= 0) {
       entries[idx] = entry;
     } else {
       entries.push(entry);
     }
-    
-    await updateDoc(storeRef, { 
+
+    await updateDoc(storeRef, {
       entries,
-      updatedAt: serverTimestamp() 
+      updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error updating tyre store entry:', error);
+    console.error("Error updating tyre store entry:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -148,23 +147,47 @@ export async function updateTyreStoreEntry(storeId: string, entry: StockEntry): 
  */
 export async function removeTyreStoreEntry(storeId: string, tyreId: string): Promise<void> {
   try {
-    const storeRef = doc(firestore, 'tyreStores', storeId);
+    const storeRef = doc(firestore, "tyreStores", storeId);
     const snap = await getDoc(storeRef);
-    
+
     if (!snap.exists()) {
       throw new Error(`TyreStore ${storeId} does not exist`);
     }
-    
+
     const data = snap.data() as TyreStore;
     const entries = data.entries || [];
-    const updatedEntries = entries.filter(e => e.tyreId !== tyreId);
-    
-    await updateDoc(storeRef, { 
+    const updatedEntries = entries.filter((e) => e.tyreId !== tyreId);
+
+    await updateDoc(storeRef, {
       entries: updatedEntries,
-      updatedAt: serverTimestamp() 
+      updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    console.error('Error removing tyre store entry:', error);
+    console.error("Error removing tyre store entry:", error);
+    await handleFirestoreError(error);
+    throw error;
+  }
+}
+
+/**
+ * Move a stock entry between two TyreStores
+ * @param fromStoreId The ID of the source TyreStore
+ * @param toStoreId The ID of the destination TyreStore
+ * @param entry The StockEntry to move
+ */
+export async function moveTyreStoreEntry(
+  fromStoreId: string,
+  toStoreId: string,
+  entry: StockEntry
+): Promise<void> {
+  try {
+    // First remove the entry from the source store
+    await removeTyreStoreEntry(fromStoreId, entry.tyreId);
+
+    // Then add it to the destination store
+    await updateTyreStoreEntry(toStoreId, entry);
+  } catch (error) {
+    console.error("Error moving tyre store entry:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -174,24 +197,26 @@ export async function removeTyreStoreEntry(storeId: string, tyreId: string): Pro
  * Get stock entries for a specific tyre across all stores
  * @param tyreId The ID of the tyre to find
  */
-export async function getTyreStoreEntriesByTyreId(tyreId: string): Promise<{storeId: string, entry: StockEntry}[]> {
+export async function getTyreStoreEntriesByTyreId(
+  tyreId: string
+): Promise<{ storeId: string; entry: StockEntry }[]> {
   try {
     const stores = await getAllTyreStores();
-    const results: {storeId: string, entry: StockEntry}[] = [];
-    
+    const results: { storeId: string; entry: StockEntry }[] = [];
+
     for (const store of stores) {
-      const entry = store.entries?.find(e => e.tyreId === tyreId);
+      const entry = store.entries?.find((e) => e.tyreId === tyreId);
       if (entry) {
         results.push({
           storeId: store.id,
-          entry
+          entry,
         });
       }
     }
-    
+
     return results;
   } catch (error) {
-    console.error('Error getting tyre store entries by tyre ID:', error);
+    console.error("Error getting tyre store entries by tyre ID:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -203,28 +228,32 @@ export async function getTyreStoreEntriesByTyreId(tyreId: string): Promise<{stor
  */
 export function listenToTyreStores(onChange: (stores: TyreStore[]) => void) {
   try {
-    const collRef = collection(firestore, 'tyreStores');
-    const q = query(collRef, orderBy('dateAdded', 'desc'));
-    
-    return onSnapshot(q, snapshot => {
-      const stores: TyreStore[] = snapshot.docs.map(doc => {
-        const data = doc.data();
-        // Convert Firestore Timestamps to Date objects
-        if (data.dateAdded) {
-          data.dateAdded = data.dateAdded.toDate ? data.dateAdded.toDate() : data.dateAdded;
-        }
-        if (data.updatedAt) {
-          data.updatedAt = data.updatedAt.toDate ? data.updatedAt.toDate() : data.updatedAt;
-        }
-        return { id: doc.id, ...data } as TyreStore;
-      });
-      onChange(stores);
-    }, error => {
-      console.error('Error listening to tyre stores:', error);
-      handleFirestoreError(error);
-    });
+    const collRef = collection(firestore, "tyreStores");
+    const q = query(collRef, orderBy("dateAdded", "desc"));
+
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const stores: TyreStore[] = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          // Convert Firestore Timestamps to Date objects
+          if (data.dateAdded) {
+            data.dateAdded = data.dateAdded.toDate ? data.dateAdded.toDate() : data.dateAdded;
+          }
+          if (data.updatedAt) {
+            data.updatedAt = data.updatedAt.toDate ? data.updatedAt.toDate() : data.updatedAt;
+          }
+          return { id: doc.id, ...data } as TyreStore;
+        });
+        onChange(stores);
+      },
+      (error) => {
+        console.error("Error listening to tyre stores:", error);
+        handleFirestoreError(error);
+      }
+    );
   } catch (error) {
-    console.error('Error setting up tyre stores listener:', error);
+    console.error("Error setting up tyre stores listener:", error);
     handleFirestoreError(error);
     // Return a no-op function as unsubscribe
     return () => {};
@@ -242,34 +271,34 @@ export async function getTyreStoreStats(): Promise<{
 }> {
   try {
     const stores = await getAllTyreStores();
-    
+
     const storeTypeCounts: Record<string, number> = {};
     const tyresByStatus: Record<string, number> = {};
     let totalTyres = 0;
-    
-    stores.forEach(store => {
+
+    stores.forEach((store) => {
       // Count store types
-      const storeType = store.name || 'Unknown';
+      const storeType = store.name || "Unknown";
       storeTypeCounts[storeType] = (storeTypeCounts[storeType] || 0) + 1;
-      
+
       // Count tyres by status
       const entries = store.entries || [];
       totalTyres += entries.length;
-      
-      entries.forEach(entry => {
-        const status = entry.status || 'Unknown';
+
+      entries.forEach((entry) => {
+        const status = entry.status || "Unknown";
         tyresByStatus[status] = (tyresByStatus[status] || 0) + 1;
       });
     });
-    
+
     return {
       totalStores: stores.length,
       totalTyres,
       storeTypeCounts,
-      tyresByStatus
+      tyresByStatus,
     };
   } catch (error) {
-    console.error('Error getting tyre store stats:', error);
+    console.error("Error getting tyre store stats:", error);
     await handleFirestoreError(error);
     throw error;
   }
@@ -283,7 +312,8 @@ export default {
   deleteTyreStore,
   updateTyreStoreEntry,
   removeTyreStoreEntry,
+  moveTyreStoreEntry,
   getTyreStoreEntriesByTyreId,
   listenToTyreStores,
-  getTyreStoreStats
+  getTyreStoreStats,
 };

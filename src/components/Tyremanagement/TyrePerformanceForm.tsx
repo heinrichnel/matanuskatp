@@ -1,4 +1,3 @@
-// import './TyrePerformanceForm.css'; // CSS file doesn't exist
 import React, { useState } from 'react';
 import {
   Box,
@@ -20,7 +19,7 @@ interface TyrePerformanceData {
   noiseLevel: number;
 }
 
-const TyrePerformanceForm: React.FC = () => {
+const TyrePerformanceForm = () => {
   const [formData, setFormData] = useState<TyrePerformanceData>({
     brand: '',
     model: '',
@@ -39,12 +38,12 @@ const TyrePerformanceForm: React.FC = () => {
   };
 
   const handleSliderChange = (name: keyof TyrePerformanceData) => (
-    event: Event,
+    _event: Event,
     newValue: number | number[]
   ) => {
     setFormData({
       ...formData,
-      [name]: newValue,
+      [name]: newValue as number,
     });
   };
 
@@ -59,8 +58,8 @@ const TyrePerformanceForm: React.FC = () => {
       <Typography variant="h5" component="h2" gutterBottom>
         Tyre Performance Evaluation
       </Typography>
-      <Box component="form" onSubmit={handleSubmit}>
-        <Grid container spacing={3}>
+      <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
               fullWidth

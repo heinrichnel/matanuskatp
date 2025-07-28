@@ -72,7 +72,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
       repairs: [],
       inspections: []
     },
-    milesRun: initialData.milesRun || 0,
+    milesRun: initialData.mleisRun || 0,
     kmRunLimit: initialData.kmRunLimit || 60000,
     notes: initialData.notes || '',
     location: initialData.location || { storeId: '', position: '' }
@@ -133,7 +133,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
+
     // Handle nested properties
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
@@ -156,7 +156,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const numValue = parseFloat(value);
-    
+
     // Handle nested properties
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
@@ -186,7 +186,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
     if (!selectedSize) newErrors.size = 'Size is required';
     if (!formData.purchaseDetails?.date) newErrors['purchaseDetails.date'] = 'Purchase date is required';
     if (formData.purchaseDetails?.cost === 0) newErrors['purchaseDetails.cost'] = 'Cost is required';
-    
+
     // Additional validation for mounted tyres
     if (formData.mountStatus === 'mounted') {
       if (!formData.installation?.vehicleId) newErrors['installation.vehicleId'] = 'Vehicle ID is required for mounted tyres';
@@ -200,7 +200,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
   // Handle form submission
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
     try {
       // Prepare data for submission
@@ -421,9 +421,9 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Distance Run (km)"
-                name="milesRun"
+                name="kmRun"
                 type="number"
-                value={formData.milesRun}
+                value={formData.kmRun}
                 onChange={handleNumberChange}
               />
               <Input
@@ -518,8 +518,8 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
                 {/* Vehicle Position Diagram */}
                 <div className="mt-4 bg-gray-50 border border-gray-200 rounded-md p-4">
                   <h3 className="text-sm font-medium text-gray-700 mb-2">Vehicle Position Diagram</h3>
-                  <VehiclePositionDiagram 
-                    vehicleType={formData.type as 'standard' | 'reefer' | 'horse' | 'interlink'} 
+                  <VehiclePositionDiagram
+                    vehicleType={formData.type as 'standard' | 'reefer' | 'horse' | 'interlink'}
                     selectedPosition={formData.installation?.position as string}
                     onPositionSelect={(position) => {
                       setFormData(prev => ({
@@ -630,9 +630,9 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
             </Button>
 
             {activeSection !== 'condition' ? (
-              <Button 
+              <Button
                 onClick={() => {
-                  const sections: Array<'basic' | 'technical' | 'installation' | 'condition'> = 
+                  const sections: Array<'basic' | 'technical' | 'installation' | 'condition'> =
                     ['basic', 'technical', 'installation', 'condition'];
                   const currentIndex = sections.indexOf(activeSection);
                   setActiveSection(sections[currentIndex + 1]);

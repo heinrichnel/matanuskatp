@@ -190,7 +190,8 @@ export function listenToDriverBehaviorEvents(callback: (events: any[]) => void) 
   return unsubscribe;
 }
 
-// --- New TyreStores Helpers ---
+// --- Tyre Stores & Tyres Helpers ---
+// Import from dedicated modules for better organization
 import {
   addTyreStore,
   deleteTyreStore,
@@ -199,12 +200,15 @@ import {
   getTyreStoreEntriesByTyreId,
   getTyreStoreStats,
   listenToTyreStores,
+  moveTyreStoreEntry,
   removeTyreStoreEntry,
   updateTyreStore,
   updateTyreStoreEntry,
 } from "./firebase/tyreStores";
 
-// Re-export tyre store functions
+import { listenToTyres as _listenToTyres } from "./firebase/tyres";
+
+// Re-export tyre stores functions
 export {
   addTyreStore,
   deleteTyreStore,
@@ -213,12 +217,16 @@ export {
   getTyreStoreEntriesByTyreId,
   getTyreStoreStats,
   listenToTyreStores,
+  moveTyreStoreEntry,
   removeTyreStoreEntry,
   updateTyreStore,
   updateTyreStoreEntry,
 };
 
-// --- New Tyre Management Helpers ---
+// Re-export tyres functions
+export const listenToTyres = _listenToTyres;
+
+// --- Tyre Management Helpers ---
 
 /**
  * Add or update a tyre document in Firestore
@@ -435,41 +443,7 @@ export async function getTyresByVehicle(vehicleId: string): Promise<Tyre[]> {
   }
 }
 
-/**
- * Listen to tyres collection in real-time
- */
-export function listenToTyres(callback: (tyres: Tyre[]) => void) {
-  // Query with sorting for consistent ordering
-  const q = query(collection(firestore, "tyres"), orderBy("updatedAt", "desc"));
-
-  return onSnapshot(
-    q,
-    (snapshot) => {
-      const tyres = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        // Convert Firestore Timestamps to standard dates
-        if (data.createdAt) {
-          data.createdAt = data.createdAt.toDate
-            ? data.createdAt.toDate().toISOString()
-            : data.createdAt;
-        }
-        if (data.updatedAt) {
-          data.updatedAt = data.updatedAt.toDate
-            ? data.updatedAt.toDate().toISOString()
-            : data.updatedAt;
-        }
-        return { id: doc.id, ...data } as Tyre;
-      });
-      callback(tyres);
-    },
-    (error) => {
-      console.error("Error listening to tyres:", error);
-      handleFirestoreError(error);
-    }
-  );
-}
-
-// The tyre store functions are now imported from ./firebase/tyreStores
+// The tyre and tyre store functions are now imported from dedicated modules
 // Removing duplicate implementations
 
 /**
