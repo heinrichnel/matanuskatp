@@ -192,7 +192,10 @@ const WialonMapComponent: React.FC = () => {
             >
               <option value="">Select a unit...</option>
             </select>
-            <button onClick={onClick} className="px-3 py-2 border rounded-md bg-background">
+            <button
+              onClick={() => showUnit()}
+              className="px-3 py-2 border rounded-md bg-background"
+            >
               Show Unit
             </button>
           </div>
