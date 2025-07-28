@@ -6,6 +6,7 @@
 export interface Location {
   lat: number;
   lng: number;
+  id?: string;
   title?: string;
   info?: string;
   address?: string;
@@ -15,14 +16,21 @@ export interface Location {
 }
 
 // Icon types supported by the application
-export type MapIconType = 'default' | 'vehicle' | 'alert' | 'driver' | 'depot' | 'workshop' | 'custom';
+export type MapIconType =
+  | "default"
+  | "vehicle"
+  | "alert"
+  | "driver"
+  | "depot"
+  | "workshop"
+  | "custom";
 
 // Route options for drawing paths between locations
 export interface RouteOptions {
   strokeColor?: string;
   strokeOpacity?: number;
   strokeWeight?: number;
-  mode?: 'driving' | 'walking' | 'bicycling' | 'transit';
+  mode?: "driving" | "walking" | "bicycling" | "transit";
   optimizeWaypoints?: boolean;
   avoidHighways?: boolean;
   avoidTolls?: boolean;
@@ -42,7 +50,7 @@ export interface PlaceResult {
     location: {
       lat: () => number;
       lng: () => number;
-    }
+    };
   };
   place_id?: string;
   types?: string[];
