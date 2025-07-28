@@ -17,10 +17,11 @@ import { getStorage } from "firebase/storage";
 import { firebaseApp } from "./firebaseConfig";
 import { Trip } from "./types";
 import { DieselConsumptionRecord } from "./types/diesel";
-import { Tyre, TyreInspection } from "./types/tyre";
+import { Tyre, TyreStatus, TyreMountStatus, TyreStoreLocation, TyreConditionStatus } from "./data/tyreData";
 import { firestore, handleFirestoreError } from "./utils/firebaseConnectionHandler";
+import { TyreInspectionRecord } from "./types/tyre-inspection";
 
-// Gebruik Storage service
+// Use Storage service
 const storage = getStorage(firebaseApp);
 
 // Add audit log function
@@ -190,8 +191,6 @@ export function listenToDriverBehaviorEvents(callback: (events: any[]) => void) 
   return unsubscribe;
 }
 
-// --- Tyre Stores & Tyres Helpers ---
-// Import from dedicated modules for better organization
 import {
   addTyreStore,
   deleteTyreStore,
@@ -204,9 +203,9 @@ import {
   removeTyreStoreEntry,
   updateTyreStore,
   updateTyreStoreEntry,
-} from "./firebase/tyreStores";
+} from "./firebase/tyreStores"; // Ensure this path is correct
 
-import { listenToTyres as _listenToTyres } from "./firebase/tyres";
+import { listenToTyres as _listenToTyres } from "./firebase/tyres"; // Ensure this path is correct
 
 // Re-export tyre stores functions
 export {
@@ -226,7 +225,6 @@ export {
 // Re-export tyres functions
 export const listenToTyres = _listenToTyres;
 
-// --- Tyre Management Helpers ---
 
 /**
  * Add or update a tyre document in Firestore
@@ -249,7 +247,7 @@ export async function saveTyre(tyre: Tyre): Promise<string> {
       ...tyre,
       id: tyreId,
       updatedAt: serverTimestamp(),
-      createdAt: tyre.createdAt || serverTimestamp(),
+      createdAt: tyre.createdAt || serverTimestamp(), // Preserve existing createdAt if it's an update
     };
 
     await setDoc(tyreRef, tyreData);
@@ -271,7 +269,16 @@ export async function getTyreById(tyreId: string): Promise<Tyre | null> {
 
     if (!tyreSnap.exists()) return null;
 
-    return { id: tyreSnap.id, ...tyreSnap.data() } as Tyre;
+    // Cast data to Tyre, handling potential Timestamp conversion
+    const data = tyreSnap.data();
+    if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+      data.createdAt = data.createdAt.toDate().toISOString();
+    }
+    if (data.updatedAt && typeof data.updatedAt.toDate === 'function') {
+      data.updatedAt = data.updatedAt.toDate().toISOString();
+    }
+
+    return { id: tyreSnap.id, ...data } as Tyre;
   } catch (error) {
     console.error("Error getting tyre:", error);
     await handleFirestoreError(error);
@@ -283,12 +290,12 @@ export async function getTyreById(tyreId: string): Promise<Tyre | null> {
  * Get all tyres with optional filtering
  */
 export async function getTyres(filters?: {
-  status?: string;
-  mountStatus?: string;
+  status?: TyreStatus; // Changed to Enum
+  mountStatus?: TyreMountStatus; // Changed to Enum
   brand?: string;
-  location?: string;
+  location?: TyreStoreLocation; // Changed to Enum
   vehicleId?: string;
-  condition?: string;
+  condition?: TyreConditionStatus; // Changed to Enum
   minTreadDepth?: number;
   maxTreadDepth?: number;
 }): Promise<Tyre[]> {
@@ -327,15 +334,11 @@ export async function getTyres(filters?: {
     return querySnapshot.docs.map((doc) => {
       const data = doc.data();
       // Convert any Firestore Timestamps to ISO strings
-      if (data.createdAt) {
-        data.createdAt = data.createdAt.toDate
-          ? data.createdAt.toDate().toISOString()
-          : data.createdAt;
+      if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+        data.createdAt = data.createdAt.toDate().toISOString();
       }
-      if (data.updatedAt) {
-        data.updatedAt = data.updatedAt.toDate
-          ? data.updatedAt.toDate().toISOString()
-          : data.updatedAt;
+      if (data.updatedAt && typeof data.updatedAt.toDate === 'function') {
+        data.updatedAt = data.updatedAt.toDate().toISOString();
       }
       return { id: doc.id, ...data } as Tyre;
     });
@@ -365,7 +368,7 @@ export async function deleteTyre(tyreId: string): Promise<void> {
  */
 export async function addTyreInspection(
   tyreId: string,
-  inspection: TyreInspection
+  inspection: TyreInspectionRecord
 ): Promise<string> {
   try {
     if (!tyreId) {
@@ -373,7 +376,7 @@ export async function addTyreInspection(
     }
 
     // Validate inspection data
-    if (!inspection.date || !inspection.inspector || inspection.treadDepth === undefined) {
+    if (!inspection.inspectionDate || !inspection.inspectorName || inspection.treadDepth === undefined) {
       throw new Error("Inspection requires date, inspector and tread depth");
     }
 
@@ -394,7 +397,7 @@ export async function addTyreInspection(
     await updateDoc(tyreRef, {
       "condition.treadDepth": inspection.treadDepth,
       "condition.pressure": inspection.pressure,
-      "condition.lastInspectionDate": inspection.date,
+      "condition.lastInspectionDate": inspection.inspectionDate,
       updatedAt: serverTimestamp(),
     });
 
@@ -409,13 +412,19 @@ export async function addTyreInspection(
 /**
  * Get all inspections for a tyre
  */
-export async function getTyreInspections(tyreId: string): Promise<TyreInspection[]> {
+export async function getTyreInspections(tyreId: string): Promise<TyreInspectionRecord[]> {
   try {
     const inspectionsRef = collection(firestore, "tyres", tyreId, "inspections");
     const q = query(inspectionsRef, orderBy("date", "desc"));
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as TyreInspection);
+    return querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+            data.createdAt = data.createdAt.toDate().toISOString();
+        }
+        return { id: doc.id, ...data } as TyreInspectionRecord;
+    });
   } catch (error) {
     console.error("Error getting tyre inspections:", error);
     await handleFirestoreError(error);
@@ -430,21 +439,27 @@ export async function getTyresByVehicle(vehicleId: string): Promise<Tyre[]> {
   try {
     const q = query(
       collection(firestore, "tyres"),
-      where("mountStatus", "==", "mounted"),
+      where("mountStatus", "==", TyreMountStatus.MOUNTED), // Changed to enum
       where("installation.vehicleId", "==", vehicleId)
     );
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Tyre);
+    return querySnapshot.docs.map((doc) => {
+        const data = doc.data();
+        if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+            data.createdAt = data.createdAt.toDate().toISOString();
+        }
+        if (data.updatedAt && typeof data.updatedAt.toDate === 'function') {
+            data.updatedAt = data.updatedAt.toDate().toISOString();
+        }
+        return { id: doc.id, ...data } as Tyre;
+    });
   } catch (error) {
     console.error("Error getting tyres by vehicle:", error);
     await handleFirestoreError(error);
     throw error;
   }
 }
-
-// The tyre and tyre store functions are now imported from dedicated modules
-// Removing duplicate implementations
 
 /**
  * Get tyre statistics for dashboard
@@ -460,15 +475,15 @@ export async function getTyreStats(): Promise<{
   try {
     const totalSnapshot = await getDocs(collection(firestore, "tyres"));
     const mountedSnapshot = await getDocs(
-      query(collection(firestore, "tyres"), where("mountStatus", "==", "mounted"))
+      query(collection(firestore, "tyres"), where("mountStatus", "==", TyreMountStatus.MOUNTED)) // Changed to enum
     );
     const inStockSnapshot = await getDocs(
-      query(collection(firestore, "tyres"), where("mountStatus", "==", "in_storage"))
+      query(collection(firestore, "tyres"), where("mountStatus", "==", TyreMountStatus.IN_STORAGE)) // Changed to enum
     );
     const needsAttentionSnapshot = await getDocs(
       query(
         collection(firestore, "tyres"),
-        where("condition.status", "in", ["critical", "needs_replacement"])
+        where("condition.status", "in", [TyreConditionStatus.CRITICAL, TyreConditionStatus.NEEDS_REPLACEMENT]) // Changed to enum
       )
     );
 
@@ -501,7 +516,7 @@ export async function getTyreStats(): Promise<{
   }
 }
 
-// --- End TyreStores Helpers ---
+// --- End Tyre Management Functions ---
 
 export { firestore as db, firestore, storage };
 export default firebaseApp;
