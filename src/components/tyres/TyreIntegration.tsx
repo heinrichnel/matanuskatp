@@ -1,12 +1,12 @@
 // src/components/Tyres/TyreIntegration.tsx
 import React, { useState } from "react";
-import TyreDashboard from "./TyreDashboard";
-import TyreInventoryDashboard from "./TyreInventoryDashboard";
-import TyreManagementView from "./TyreManagementView";
-import TyreInspectionModal from "./TyreInspectionModal"; // jou bestaande
+import { TyreInspection, useTyreInspections } from "../../hooks/useTyreInspections";
 import { useTyres } from "../../hooks/useTyres";
-import { useTyreInspections } from "../../hooks/useTyreInspections";
+import TyreDashboard from "../Tyremanagement/TyreDashboard";
 import Button from "../ui/Button";
+import TyreInspectionModal from "./TyreInspectionModal"; // jou bestaande
+import TyreInventoryDashboard from "./TyreInventoryDashboard";
+import TyreManagementView from "./components/TyreManagementView";
 
 const TyreIntegration: React.FC = () => {
   const { tyres } = useTyres();
@@ -30,11 +30,11 @@ const TyreIntegration: React.FC = () => {
       {/* 2) Voorraad dashboard */}
       <TyreInventoryDashboard
         onAddTyre={() => console.log("Add from integration")}
-        onEditTyre={(id) => {
+        onEditTyre={(id: string) => {
           console.log("Edit", id);
           setSelectedTyreId(id);
         }}
-        onViewTyreDetail={(id) => setSelectedTyreId(id)}
+        onViewTyreDetail={(id: string) => setSelectedTyreId(id)}
       />
 
       {/* 3) Management View */}
@@ -47,7 +47,7 @@ const TyreIntegration: React.FC = () => {
           tyrePosition={"N/A"} // supply from DB if you want
           fleetNumber={"N/A"}
           onClose={() => setShowInspection(false)}
-          onSubmit={(data) => {
+          onSubmit={(data: TyreInspection) => {
             console.log("inspection submit", data);
             // call addInspection here or pass down from props
           }}
@@ -58,7 +58,7 @@ const TyreIntegration: React.FC = () => {
       {selectedTyreId && (
         <div className="bg-white p-4 rounded shadow">
           <h2 className="text-lg font-semibold mb-2">Inspections for {selectedTyreId}</h2>
-          {inspections.map((i) => (
+          {inspections.map((i: TyreInspection) => (
             <div key={i.id} className="border-b py-2">
               {i.date} – {i.treadDepth}mm – {i.status}
             </div>
