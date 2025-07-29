@@ -19,4 +19,13 @@ export default defineConfig({
     video: 'retain-on-failure',
     trace: 'on-first-retry',
   },
+  // ← Voeg hieronder die webServer config by:
+  webServer: {
+    command: 'npm run dev',
+    port: 5173,
+    timeout: 120_000, // (2 minute vir slow servers, pas aan soos nodig)
+    reuseExistingServer: !process.env.CI,
+    // stdout: 'pipe', // Uncomment as jy server logs wil sien in Playwright
+    // stderr: 'pipe',
+  },
 });

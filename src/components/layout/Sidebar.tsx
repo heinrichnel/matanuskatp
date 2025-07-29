@@ -722,7 +722,12 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
                                     ? "bg-blue-50 text-blue-600 font-medium"
                                     : "text-gray-700 hover:bg-gray-50"
                                 }`}
-                                onClick={() => onNavigate(child.route)}
+                                onClick={() => {
+                                  console.log(`Navigating to child route: ${child.route}`);
+                                  onNavigate(child.route);
+                                }}
+                                data-testid={`sidebar-${child.id}`}
+                                data-route={child.route}
                               >
                                 {child.icon && <child.icon className="w-5 h-5" />}
                                 <span>{child.label}</span>
@@ -743,7 +748,12 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
                           ? "bg-blue-50 text-blue-600 font-medium"
                           : "text-gray-700 hover:bg-gray-50"
                       }`}
-                      onClick={() => onNavigate(route)}
+                      onClick={() => {
+                        console.log(`Navigating to route: ${route}`);
+                        onNavigate(route);
+                      }}
+                      data-testid={`sidebar-${id}`}
+                      data-route={route}
                     >
                       {Icon && <Icon className="w-5 h-5" />}
                       <span>{label}</span>

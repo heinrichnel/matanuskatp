@@ -1,5 +1,5 @@
 // googlemaps/index.js - Standalone Google Maps implementation
-const API_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY";
+const API_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg";
 
 /**
  * Initialize the Google Maps API
@@ -24,7 +24,7 @@ async function initMap() {
  */
 function loadGoogleMapsScript() {
   const script = document.createElement("script");
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg&callback=initMap`;
   script.async = true;
   script.defer = true;
   document.head.appendChild(script);
