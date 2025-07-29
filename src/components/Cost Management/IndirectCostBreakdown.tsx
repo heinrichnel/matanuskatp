@@ -106,10 +106,10 @@ const IndirectCostBreakdown: React.FC = () => {
           ]
         },
       ];
-      
+
       setCostCategories(mockCostData);
       setTotalIndirectCost(mockCostData.reduce((sum, category) => sum + category.amount, 0));
-      
+
       const mockHistoricalData: MonthlyData[] = [
         { month: 'Jan', admin: 11200, facilities: 9500, it: 6800, utilities: 5600, other: 4100 },
         { month: 'Feb', admin: 11500, facilities: 9600, it: 6900, utilities: 5500, other: 4200 },
@@ -118,7 +118,7 @@ const IndirectCostBreakdown: React.FC = () => {
         { month: 'May', admin: 12200, facilities: 9800, it: 7200, utilities: 5400, other: 4300 },
         { month: 'Jun', admin: 12500, facilities: 9800, it: 7200, utilities: 5400, other: 4300 },
       ];
-      
+
       setHistoricalData(mockHistoricalData);
     }, 1000);
   }, []);
@@ -142,6 +142,27 @@ const IndirectCostBreakdown: React.FC = () => {
     return <span className="text-gray-500">→</span>;
   };
 
+  const onClick = (event: React.MouseEvent<SVGElement | HTMLButtonElement>, data?: any) => {
+    if (data && data.name) {
+      // For pie chart clicks
+      const category = costCategories.find(cat => cat.name === data.name);
+      if (category) {
+        setSelectedCategory(category);
+      }
+    } else if (event.currentTarget instanceof HTMLButtonElement) {
+      // For "View Details" button clicks
+      const categoryId = event.currentTarget.closest('tr')?.getAttribute('data-category-id');
+      if (categoryId) {
+        const category = costCategories.find(cat => cat.id === categoryId);
+        if (category) {
+          setSelectedCategory(category);
+        }
+      }
+    } else if (selectedCategory) {
+      // For "Close" button clicks
+      setSelectedCategory(null);
+    }
+  };
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -158,7 +179,7 @@ const IndirectCostBreakdown: React.FC = () => {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <span>Time Range:</span>
-              <select 
+              <select
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value as 'month' | 'quarter' | 'year')}
                 className="border rounded-md p-1"
@@ -195,9 +216,9 @@ const IndirectCostBreakdown: React.FC = () => {
                         label={({ name, percentage }) => `${name}: ${percentage}%`}
                       >
                         {costCategories.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={COLORS[index % COLORS.length]} 
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
                             onClick={onClick}
                             cursor="pointer"
                           />
@@ -209,7 +230,7 @@ const IndirectCostBreakdown: React.FC = () => {
                   </ResponsiveContainer>
                 </div>
               </div>
-              
+
               <div>
                 <h4 className="text-md font-medium mb-4">Cost Trends (6 Months)</h4>
                 <div className="h-[300px]">
@@ -250,8 +271,8 @@ const IndirectCostBreakdown: React.FC = () => {
                 </thead>
                 <tbody>
                   {costCategories.map((category) => (
-                    <tr 
-                      key={category.id} 
+                    <tr
+                      key={category.id}
                       className={`border-b hover:bg-gray-50 ${selectedCategory?.id === category.id ? 'bg-blue-50' : ''}`}
                     >
                       <td className="px-4 py-2">{category.name}</td>
@@ -259,9 +280,9 @@ const IndirectCostBreakdown: React.FC = () => {
                       <td className="px-4 py-2 text-center">{category.percentage}%</td>
                       <td className="px-4 py-2 text-center">{getTrendIcon(category.trend)}</td>
                       <td className="px-4 py-2 text-right">
-                        <Button 
-                          variant="outline" 
-                          className="text-sm" 
+                        <Button
+                          variant="outline"
+                          className="text-sm"
                           onClick={onClick}
                         >
                           View Details
@@ -284,7 +305,7 @@ const IndirectCostBreakdown: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-      
+
       {selectedCategory && (
         <Card>
           <CardHeader>
@@ -312,8 +333,8 @@ const IndirectCostBreakdown: React.FC = () => {
                         label={({ name, percentage }) => `${name}: ${percentage}%`}
                       >
                         {selectedCategory.subcategories.map((entry, index) => (
-                          <Cell 
-                            key={`subcell-${index}`} 
+                          <Cell
+                            key={`subcell-${index}`}
                             fill={COLORS[(index + 3) % COLORS.length]}
                           />
                         ))}
@@ -324,7 +345,7 @@ const IndirectCostBreakdown: React.FC = () => {
                   </ResponsiveContainer>
                 </div>
               </div>
-              
+
               <div>
                 <h4 className="mb-4 font-medium">Subcategory Details</h4>
                 <table className="min-w-full bg-white">
@@ -352,7 +373,7 @@ const IndirectCostBreakdown: React.FC = () => {
                     </tr>
                   </tfoot>
                 </table>
-                
+
                 <div className="mt-6">
                   <h5 className="font-medium mb-2">Cost Optimization Opportunities:</h5>
                   <ul className="list-disc pl-5 space-y-1">

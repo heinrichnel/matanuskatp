@@ -83,7 +83,7 @@ const InventoryDashboard: React.FC = () => {
     const fetchInventoryData = async () => {
       try {
         setLoading(true);
-        
+
         // In a real app, you'd fetch this data from Firestore
         // For this demo, we'll use mock data
         const mockData: InventoryDashboardData = {
@@ -147,7 +147,7 @@ const InventoryDashboard: React.FC = () => {
             { id: 'PO-6751', vendor: 'Premium Parts Co.', orderDate: '2025-07-01', expectedDelivery: '2025-07-09', items: 16, value: 6240, status: 'shipped' }
           ]
         };
-        
+
         setDashboardData(mockData);
         setError(null);
       } catch (err) {
@@ -167,12 +167,12 @@ const InventoryDashboard: React.FC = () => {
 
   // Filter top items based on search query and category filter
   const filteredTopItems = dashboardData?.topItems.filter(item => {
-    const matchesSearch = searchQuery === '' || 
+    const matchesSearch = searchQuery === '' ||
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.category.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
     const matchesCategory = categoryFilter === 'all' || item.category === categoryFilter;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -192,10 +192,52 @@ const InventoryDashboard: React.FC = () => {
   }
 
   if (error) {
+    const onClick = () => {
+      setError(null);
+      setLoading(true);
+
+      // Simulate refetching the data
+      setTimeout(() => {
+      const fetchInventoryData = async () => {
+        try {
+        // In a real app, you'd fetch this data from Firestore
+        // For this demo, we'll use mock data
+        const mockData: InventoryDashboardData = {
+          summary: {
+          totalItems: 1248,
+          totalValue: 357950,
+          lowStockItems: 42,
+          outOfStockItems: 18,
+          stockTurnover: 4.2,
+          averageOrderTime: 4.8
+          },
+          // Include the rest of the mock data structure here
+          stockMovements: [/* ... */],
+          categoryBreakdown: [/* ... */],
+          topItems: [/* ... */],
+          vendorPerformance: [/* ... */],
+          recentDeliveries: [/* ... */],
+          pendingOrders: [/* ... */]
+        };
+
+        setDashboardData(mockData);
+        setError(null);
+        } catch (err) {
+        console.error("Error fetching inventory dashboard data:", err);
+        setError('Failed to load inventory dashboard data. Please try again.');
+        } finally {
+        setLoading(false);
+        }
+      };
+
+      fetchInventoryData();
+      }, 1000);
+    };
+
     return (
       <div className="p-6 bg-red-100 border border-red-400 text-red-700 rounded-lg">
         <p>{error}</p>
-        <button 
+        <button
           onClick={onClick}
           className="mt-3 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
         >
@@ -216,7 +258,7 @@ const InventoryDashboard: React.FC = () => {
           <Package className="mr-2 text-primary-600" size={28} />
           Inventory Dashboard
         </h1>
-        
+
         <div className="flex items-center gap-2">
           <RefreshCw size={20} className="text-gray-500" />
           <select
@@ -230,7 +272,7 @@ const InventoryDashboard: React.FC = () => {
           </select>
         </div>
       </div>
-      
+
       {/* Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
         <div className="bg-white shadow-md rounded-lg p-4 border-l-4 border-blue-500">
@@ -241,7 +283,7 @@ const InventoryDashboard: React.FC = () => {
             <span>{dashboardData.categoryBreakdown.length} categories</span>
           </div>
         </div>
-        
+
         <div className="bg-white shadow-md rounded-lg p-4 border-l-4 border-green-500">
           <div className="text-sm text-gray-600 font-medium mb-1">Inventory Value</div>
           <div className="text-2xl font-bold">{formatCurrency(dashboardData.summary.totalValue)}</div>
@@ -250,7 +292,7 @@ const InventoryDashboard: React.FC = () => {
             <span>3.2% from last month</span>
           </div>
         </div>
-        
+
         <div className="bg-white shadow-md rounded-lg p-4 border-l-4 border-amber-500">
           <div className="text-sm text-gray-600 font-medium mb-1">Low Stock Items</div>
           <div className="text-2xl font-bold text-amber-600">{dashboardData.summary.lowStockItems}</div>
@@ -259,7 +301,7 @@ const InventoryDashboard: React.FC = () => {
             <span>Need attention</span>
           </div>
         </div>
-        
+
         <div className="bg-white shadow-md rounded-lg p-4 border-l-4 border-red-500">
           <div className="text-sm text-gray-600 font-medium mb-1">Out of Stock</div>
           <div className="text-2xl font-bold text-red-600">{dashboardData.summary.outOfStockItems}</div>
@@ -268,7 +310,7 @@ const InventoryDashboard: React.FC = () => {
             <span>Critical action needed</span>
           </div>
         </div>
-        
+
         <div className="bg-white shadow-md rounded-lg p-4 border-l-4 border-purple-500">
           <div className="text-sm text-gray-600 font-medium mb-1">Stock Turnover</div>
           <div className="text-2xl font-bold">{dashboardData.summary.stockTurnover.toFixed(1)}x</div>
@@ -277,7 +319,7 @@ const InventoryDashboard: React.FC = () => {
             <span>Annual rate</span>
           </div>
         </div>
-        
+
         <div className="bg-white shadow-md rounded-lg p-4 border-l-4 border-indigo-500">
           <div className="text-sm text-gray-600 font-medium mb-1">Avg. Order Time</div>
           <div className="text-2xl font-bold">{dashboardData.summary.averageOrderTime.toFixed(1)} days</div>
@@ -287,7 +329,7 @@ const InventoryDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Stock Movements */}
@@ -311,7 +353,7 @@ const InventoryDashboard: React.FC = () => {
             </ResponsiveContainer>
           </div>
         </div>
-        
+
         {/* Category Breakdown */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Inventory by Category</h2>
@@ -340,13 +382,13 @@ const InventoryDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Top Items */}
       <div className="bg-white shadow-md rounded-lg mb-8">
         <div className="p-6 border-b">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold">High Turnover Items</h2>
-            
+
             <div className="flex gap-3">
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -360,7 +402,7 @@ const InventoryDashboard: React.FC = () => {
                   className="pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
-              
+
               <div className="flex items-center gap-2">
                 <Filter size={16} className="text-gray-500" />
                 <select
@@ -376,7 +418,7 @@ const InventoryDashboard: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -434,7 +476,7 @@ const InventoryDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Recent Deliveries */}
@@ -473,9 +515,9 @@ const InventoryDashboard: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs rounded-full font-medium ${
-                        delivery.status === 'received' 
-                          ? 'bg-green-100 text-green-800' 
-                          : delivery.status === 'partial' 
+                        delivery.status === 'received'
+                          ? 'bg-green-100 text-green-800'
+                          : delivery.status === 'partial'
                             ? 'bg-amber-100 text-amber-800'
                             : 'bg-red-100 text-red-800'
                       }`}>
@@ -488,7 +530,7 @@ const InventoryDashboard: React.FC = () => {
             </table>
           </div>
         </div>
-        
+
         {/* Pending Orders */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Pending Orders</h2>
@@ -525,9 +567,9 @@ const InventoryDashboard: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex px-2 py-1 text-xs rounded-full font-medium ${
-                        order.status === 'processing' 
-                          ? 'bg-blue-100 text-blue-800' 
-                          : order.status === 'shipped' 
+                        order.status === 'processing'
+                          ? 'bg-blue-100 text-blue-800'
+                          : order.status === 'shipped'
                             ? 'bg-green-100 text-green-800'
                             : 'bg-red-100 text-red-800'
                       }`}>
@@ -541,7 +583,7 @@ const InventoryDashboard: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Vendor Performance */}
       <div className="bg-white shadow-md rounded-lg p-6 mb-8">
         <h2 className="text-lg font-semibold mb-4">Vendor Performance</h2>
@@ -575,12 +617,12 @@ const InventoryDashboard: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-24 bg-gray-200 rounded-full h-2.5 mr-2">
-                        <div 
+                        <div
                           className={`h-2.5 rounded-full ${
-                            vendor.onTimeDelivery >= 95 ? 'bg-green-600' : 
+                            vendor.onTimeDelivery >= 95 ? 'bg-green-600' :
                             vendor.onTimeDelivery >= 90 ? 'bg-green-500' :
                             vendor.onTimeDelivery >= 85 ? 'bg-amber-500' : 'bg-red-500'
-                          }`} 
+                          }`}
                           style={{ width: `${vendor.onTimeDelivery}%` }}
                         ></div>
                       </div>
@@ -617,11 +659,11 @@ const InventoryDashboard: React.FC = () => {
           </table>
         </div>
       </div>
-      
+
       {/* Action Items */}
       <div className="bg-white shadow-md rounded-lg p-6">
         <h2 className="text-lg font-semibold mb-4">Action Items</h2>
-        
+
         <div className="space-y-4">
           <div className="flex items-start p-3 bg-red-50 border border-red-200 rounded-md">
             <AlertTriangle className="text-red-500 mt-0.5 mr-3 flex-shrink-0" size={18} />
@@ -635,7 +677,7 @@ const InventoryDashboard: React.FC = () => {
               </button>
             </div>
           </div>
-          
+
           <div className="flex items-start p-3 bg-amber-50 border border-amber-200 rounded-md">
             <AlertTriangle className="text-amber-500 mt-0.5 mr-3 flex-shrink-0" size={18} />
             <div>
@@ -648,7 +690,7 @@ const InventoryDashboard: React.FC = () => {
               </button>
             </div>
           </div>
-          
+
           <div className="flex items-start p-3 bg-blue-50 border border-blue-200 rounded-md">
             <Truck className="text-blue-500 mt-0.5 mr-3 flex-shrink-0" size={18} />
             <div>
@@ -661,7 +703,7 @@ const InventoryDashboard: React.FC = () => {
               </button>
             </div>
           </div>
-          
+
           <div className="flex items-start p-3 bg-green-50 border border-green-200 rounded-md">
             <ShoppingBag className="text-green-500 mt-0.5 mr-3 flex-shrink-0" size={18} />
             <div>

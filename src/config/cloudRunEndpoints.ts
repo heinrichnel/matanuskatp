@@ -1,6 +1,6 @@
 /**
  * Cloud Run Endpoints Configuration
- * 
+ *
  * This file provides access to Cloud Run endpoints for the frontend.
  * It makes the endpoints available throughout the application in a centralized way.
  */
@@ -23,3 +23,11 @@ export const getBestCloudRunEndpoint = () => {
 export const getAllCloudRunEndpoints = () => {
   return Object.values(CLOUD_RUN_ENDPOINTS).filter(Boolean);
 };
+
+// Create a default export object with all functions and constants
+export default {
+  MAPS_SERVICE_URL,
+  CLOUD_RUN_ENDPOINTS,
+  getBestCloudRunEndpoint,
+  getAllCloudRunEndpoints
+}

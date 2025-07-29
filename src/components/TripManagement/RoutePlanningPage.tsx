@@ -29,61 +29,23 @@ const libraries: Libraries = ["places"];
 const RoutePlanningPage: React.FC = () => {
   const { tripId } = useParams<{ tripId: string }>();
   const navigate = useNavigate();
-  const { 
-    getTrip, 
-    updateTrip, 
-    planRoute, 
-    optimizeRoute, 
-    isLoading 
+  const {
+    getTrip,
+    updateTrip,
+    planRoute,
+    optimizeRoute,
+    isLoading
   } = useAppContext();
 
+  // All state declarations grouped together
   const [trip, setTrip] = useState<any>(null);
   const [origin, setOrigin] = useState<string>('');
-  
-  // Navigation handler for back button
-  const handleBackToTrip = useCallback(() => {
-    if (tripId) {
-      navigate(`/trips/${tripId}`);
-    }
-  }, [navigate, tripId]);
   const [destination, setDestination] = useState<string>('');
   const [waypoints, setWaypoints] = useState<string[]>(['']);
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
   const [optimized, setOptimized] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [waypointsOpen, setWaypointsOpen] = useState<boolean>(false);
-  
-  // Toggle waypoints visibility
-  const toggleWaypoints = useCallback(() => {
-    setWaypointsOpen(prev => !prev);
-  }, []);
-  
-  // Handler for removing a waypoint
-  const handleRemoveWaypoint = useCallback((index: number) => {
-    removeWaypoint(index);
-  }, []);
-  
-  // Handler for adding a waypoint
-  const handleAddWaypoint = useCallback(() => {
-    addWaypoint();
-  }, []);
-  
-  // Handler for calculating route
-  const handleCalculateRoute = useCallback(async () => {
-    await calculateRoute();
-  }, [calculateRoute]);
-  
-  // Handler for save route
-  const handleSaveRoute = useCallback(() => {
-    saveRoute();
-  }, [saveRoute]);
-  
-  // Handler for optimize route
-  const handleOptimizeClick = useCallback(() => {
-    handleOptimizeRoute();
-  }, [handleOptimizeRoute]);
-  
-  // Autocomplete references
   const [originRef, setOriginRef] = useState<google.maps.places.Autocomplete | null>(null);
   const [destinationRef, setDestinationRef] = useState<google.maps.places.Autocomplete | null>(null);
   const [waypointRefs, setWaypointRefs] = useState<(google.maps.places.Autocomplete | null)[]>([null]);
@@ -91,70 +53,44 @@ const RoutePlanningPage: React.FC = () => {
   // Use our improved Google Maps loader with fallback capabilities
   const { isLoaded: isApiLoaded, error: mapsLoadError } = useLoadGoogleMaps(libraries.join(','));
 
-  // Fetch trip data on component mount
-  useEffect(() => {
+  // Check if map is ready
+  const isMapReady = isGoogleMapsAPILoaded() && isApiLoaded;
+
+  // Navigation handler for back button
+  const handleBackToTrip = useCallback(() => {
     if (tripId) {
-      const tripData = getTrip(tripId);
-      if (tripData) {
-        setTrip(tripData);
-        
-        // Initialize form with trip route data if available
-        if (tripData.plannedRoute) {
-          setOrigin(tripData.plannedRoute.origin);
-          setDestination(tripData.plannedRoute.destination);
-          setWaypoints(tripData.plannedRoute.waypoints.length > 0 
-            ? tripData.plannedRoute.waypoints 
-            : ['']);
-          setOptimized(!!tripData.optimizedRoute);
-        }
-        
-        // If the trip has route data, calculate directions
-        if (tripData.plannedRoute?.origin && tripData.plannedRoute?.destination) {
-          calculateRoute(
-            tripData.plannedRoute.origin,
-            tripData.plannedRoute.destination,
-            tripData.plannedRoute.waypoints
-          );
-        }
-      }
+      navigate(`/trips/${tripId}`);
     }
-  }, [tripId, getTrip]);
+  }, [navigate, tripId]);
 
-  // Update error state if maps loader has an error
-  useEffect(() => {
-    if (mapsLoadError) {
-      setError(`Error loading Google Maps: ${mapsLoadError.message}`);
-    }
-  }, [mapsLoadError]);
-
-  // Map load callback
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    // Map initialization code could go here if needed
+  // Toggle waypoints visibility
+  const toggleWaypoints = useCallback(() => {
+    setWaypointsOpen(prev => !prev);
   }, []);
 
   // Add waypoint
-  const addWaypoint = () => {
+  const addWaypoint = useCallback(() => {
     setWaypoints([...waypoints, '']);
     setWaypointRefs([...waypointRefs, null]);
-  };
+  }, [waypoints, waypointRefs]);
 
   // Remove waypoint
-  const removeWaypoint = (index: number) => {
+  const removeWaypoint = useCallback((index: number) => {
     const newWaypoints = [...waypoints];
     newWaypoints.splice(index, 1);
     setWaypoints(newWaypoints);
-    
+
     const newRefs = [...waypointRefs];
     newRefs.splice(index, 1);
     setWaypointRefs(newRefs);
-  };
+  }, [waypoints, waypointRefs]);
 
   // Update waypoint
-  const updateWaypoint = (index: number, value: string) => {
+  const updateWaypoint = useCallback((index: number, value: string) => {
     const newWaypoints = [...waypoints];
     newWaypoints[index] = value;
     setWaypoints(newWaypoints);
-  };
+  }, [waypoints]);
 
   // Calculate route using Google Directions Service
   const calculateRoute = useCallback(async (
@@ -169,12 +105,12 @@ const RoutePlanningPage: React.FC = () => {
 
     try {
       setError(null);
-      
+
       // Filter out empty waypoints
       const filteredWaypoints = waypointsValue.filter(wp => wp.trim() !== '');
-      
+
       const directionsService = new google.maps.DirectionsService();
-      
+
       const result = await directionsService.route({
         origin: originValue,
         destination: destinationValue,
@@ -185,22 +121,22 @@ const RoutePlanningPage: React.FC = () => {
         optimizeWaypoints: optimized,
         travelMode: google.maps.TravelMode.DRIVING,
       });
-      
+
       setDirections(result);
-      
+
       // Extract route details for saving
       const route = result.routes[0];
       const distance = route.legs.reduce((total, leg) => total + (leg.distance?.value || 0), 0) / 1000; // Convert to km
       const duration = route.legs.reduce((total, leg) => total + (leg.duration?.value || 0), 0) / 60; // Convert to minutes
-      
+
       console.log("Route calculated:", { distance, duration });
-      
-      return { 
-        distance, 
-        duration, 
-        origin: originValue, 
-        destination: destinationValue, 
-        waypoints: filteredWaypoints 
+
+      return {
+        distance,
+        duration,
+        origin: originValue,
+        destination: destinationValue,
+        waypoints: filteredWaypoints
       };
     } catch (err: any) {
       console.error("Direction service error:", err);
@@ -210,34 +146,34 @@ const RoutePlanningPage: React.FC = () => {
   }, [origin, destination, waypoints, optimized]);
 
   // Save route to trip
-  const saveRoute = async () => {
+  const saveRoute = useCallback(async () => {
     if (!tripId) return;
-    
+
     try {
       const routeData = await calculateRoute();
       if (!routeData) return;
-      
+
       await planRoute(
         tripId,
         routeData.origin,
         routeData.destination,
         routeData.waypoints
       );
-      
+
       alert("Route saved successfully!");
     } catch (err: any) {
       setError(err.message || "Failed to save route");
     }
-  };
+  }, [tripId, calculateRoute, planRoute]);
 
   // Optimize route
-  const handleOptimizeRoute = async () => {
+  const handleOptimizeRoute = useCallback(async () => {
     if (!tripId) return;
-    
+
     try {
       await optimizeRoute(tripId);
       setOptimized(true);
-      
+
       // Refresh trip data to get the optimized route
       const tripData = getTrip(tripId);
       if (tripData && tripData.optimizedRoute) {
@@ -248,15 +184,53 @@ const RoutePlanningPage: React.FC = () => {
           tripData.optimizedRoute.waypoints
         );
       }
-      
+
       alert("Route optimized successfully!");
     } catch (err: any) {
       setError(err.message || "Failed to optimize route");
     }
-  };
+  }, [tripId, optimizeRoute, getTrip, calculateRoute]);
 
-  // Check if map is ready
-  const isMapReady = isGoogleMapsAPILoaded() && isApiLoaded;
+  // Map load callback
+  const onMapLoad = useCallback((map: google.maps.Map) => {
+    // Map initialization code could go here if needed
+  }, []);
+
+  // Fetch trip data on component mount
+  useEffect(() => {
+    if (tripId) {
+      const tripData = getTrip(tripId);
+      if (tripData) {
+        setTrip(tripData);
+
+        // Initialize form with trip route data if available
+        if (tripData.plannedRoute) {
+          setOrigin(tripData.plannedRoute.origin);
+          setDestination(tripData.plannedRoute.destination);
+          setWaypoints(tripData.plannedRoute.waypoints.length > 0
+            ? tripData.plannedRoute.waypoints
+            : ['']);
+          setOptimized(!!tripData.optimizedRoute);
+        }
+
+        // If the trip has route data, calculate directions
+        if (tripData.plannedRoute?.origin && tripData.plannedRoute?.destination) {
+          calculateRoute(
+            tripData.plannedRoute.origin,
+            tripData.plannedRoute.destination,
+            tripData.plannedRoute.waypoints
+          );
+        }
+      }
+    }
+  }, [tripId, getTrip, calculateRoute]);
+
+  // Update error state if maps loader has an error
+  useEffect(() => {
+    if (mapsLoadError) {
+      setError(`Error loading Google Maps: ${mapsLoadError.message}`);
+    }
+  }, [mapsLoadError]);
 
   return (
     <div className="space-y-6">
@@ -330,7 +304,7 @@ const RoutePlanningPage: React.FC = () => {
                       />
                     </Autocomplete>
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Destination
@@ -355,7 +329,7 @@ const RoutePlanningPage: React.FC = () => {
                       />
                     </Autocomplete>
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-sm font-medium text-gray-700">
@@ -373,7 +347,7 @@ const RoutePlanningPage: React.FC = () => {
                         )}
                       </button>
                     </div>
-                    
+
                     {waypointsOpen && (
                       <div className="space-y-2">
                         {waypoints.map((waypoint, index) => (
@@ -402,20 +376,20 @@ const RoutePlanningPage: React.FC = () => {
                                 placeholder={`Waypoint ${index + 1}`}
                               />
                             </Autocomplete>
-                            
+
                             <button
                               type="button"
-                              onClick={() => handleRemoveWaypoint(index)}
+                              onClick={() => removeWaypoint(index)}
                               className="px-2 py-2 bg-red-100 text-red-600 rounded-md hover:bg-red-200"
                             >
                               ✕
                             </button>
                           </div>
                         ))}
-                        
+
                         <button
                           type="button"
-                          onClick={handleAddWaypoint}
+                          onClick={addWaypoint}
                           className="w-full px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100"
                         >
                           + Add Waypoint
@@ -425,18 +399,18 @@ const RoutePlanningPage: React.FC = () => {
                   </div>
                 </>
               )}
-              
+
               <div className="flex space-x-2 pt-4 border-t">
                 <Button
-                  onClick={handleCalculateRoute}
+                  onClick={() => calculateRoute()}
                   disabled={!isMapReady || !origin || !destination}
                   icon={<Route className="w-4 h-4" />}
                 >
                   Calculate Route
                 </Button>
-                
+
                 <Button
-                  onClick={handleSaveRoute}
+                  onClick={() => saveRoute()}
                   disabled={!directions || !tripId}
                   variant="outline"
                   icon={<Save className="w-4 h-4" />}
@@ -446,7 +420,7 @@ const RoutePlanningPage: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          
+
           {directions && (
             <Card>
               <CardHeader title="Route Summary" />
@@ -462,7 +436,7 @@ const RoutePlanningPage: React.FC = () => {
                         (total, leg) => total + (leg.distance?.value || 0), 0) / 1000).toFixed(1)} km
                     </p>
                   </div>
-                  
+
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <div className="flex items-center text-blue-700 mb-1">
                       <Clock className="w-4 h-4 mr-1" />
@@ -475,7 +449,7 @@ const RoutePlanningPage: React.FC = () => {
                     </p>
                   </div>
                 </div>
-                
+
                 {optimized ? (
                   <div className="bg-green-50 p-3 rounded-lg border border-green-100">
                     <div className="flex items-center">
@@ -504,14 +478,14 @@ const RoutePlanningPage: React.FC = () => {
                   </div>
                 ) : (
                   <Button
-                    onClick={handleOptimizeClick}
+                    onClick={handleOptimizeRoute}
                     disabled={!directions || !tripId || !trip?.plannedRoute}
                     icon={<RotateCw className="w-4 h-4" />}
                   >
                     Optimize Route
                   </Button>
                 )}
-                
+
                 {trip?.plannedRoute && (
                   <div className="border-t pt-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-2">Route Points</h4>
@@ -527,7 +501,7 @@ const RoutePlanningPage: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      
+
                       {trip.plannedRoute.waypoints.map((waypoint: string, index: number) => (
                         <div key={index} className="bg-gray-50 p-2 rounded-md">
                           <div className="flex items-start">
@@ -541,7 +515,7 @@ const RoutePlanningPage: React.FC = () => {
                           </div>
                         </div>
                       ))}
-                      
+
                       <div className="bg-green-50 p-2 rounded-md">
                         <div className="flex items-start">
                           <div className="bg-green-100 rounded-full p-1 mr-2 mt-1">
@@ -560,7 +534,7 @@ const RoutePlanningPage: React.FC = () => {
             </Card>
           )}
         </div>
-        
+
         {/* Map Area */}
         <div className="lg:col-span-2">
           <Card>

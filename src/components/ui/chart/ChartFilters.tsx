@@ -1,6 +1,4 @@
-import React from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/checkbox';
+import { Checkbox, Label } from "@/components/ui/checkbox";
 
 interface ChartFilterProps {
   filters: Array<{
@@ -17,7 +15,7 @@ export function ChartFilters({ filters, selectedFilters, onChange }: ChartFilter
     if (checked) {
       onChange([...selectedFilters, id]);
     } else {
-      onChange(selectedFilters.filter(f => f !== id));
+      onChange(selectedFilters.filter((f) => f !== id));
     }
   };
 

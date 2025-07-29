@@ -14,11 +14,11 @@ import Card, { CardContent, CardHeader } from '../ui/Card';
 import { AlertTriangle, ArrowLeft, BarChart3, Calendar, Calculator, CheckCircle, Clock, Flag, Plus, Send } from 'lucide-react';
 
 // ─── Custom Modules ──────────────────────────────────────────────
-import CostForm from '../Cost Management/CostForm';
-import CostList from '../Cost Management/CostList';
-import { SystemCostGenerator } from '../Cost Management/IndirectCost';
-import TripPlanningForm from './TripPlanningForm';
-import InvoiceSubmissionModal from './InvoiceSubmissionModal';
+import CostForm from '../forms/CostForm';
+import CostList from '../lists/CostList';
+import SystemCostGenerator from '../Cost Management/SystemCostGenerator';
+import TripPlanningForm from '../forms/TripPlanningForm';
+import InvoiceSubmissionModal from '../Models/Invoice/InvoiceSubmissionModal';
 import TripReport from './TripReport';
 
 // ─── Helpers ─────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
 
   // Wialon integration
   const { units: wialonUnits, loading: unitsLoading, error: unitsError } = useWialonUnits(true);
-  
+
   // Match the trip to a live Wialon unit (by fleetUnitId or fleetNumber fallback)
   const matchedWialonUnit = React.useMemo(() => {
     if (!wialonUnits || !wialonUnits.length) return null;
@@ -65,7 +65,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
     try {
       addCostEntry(costData, files);
       setShowCostForm(false);
-      
+
       // Show success message with cost details
       alert(`Cost entry added successfully!\n\nCategory: ${costData.category}\nAmount: ${formatCurrency(costData.amount, costData.currency)}\nReference: ${costData.referenceNumber}`);
     } catch (error) {
@@ -99,7 +99,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
         updateCostEntry(updatedCost);
         setEditingCost(undefined);
         setShowCostForm(false);
-        
+
         alert('Cost entry updated successfully!');
       } catch (error) {
         console.error('Error updating cost entry:', error);
@@ -131,9 +131,9 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
       for (const costData of systemCosts) {
         addCostEntry(costData);
       }
-      
+
       setShowSystemCostGenerator(false);
-      
+
       // Show detailed success message
       alert(`System costs generated successfully!\n\n${systemCosts.length} cost entries have been added:\n\n${systemCosts.map(cost => `• ${cost.subCategory}: ${formatCurrency(cost.amount, cost.currency)}`).join('\n')}\n\nTotal system costs: ${formatCurrency(systemCosts.reduce((sum, cost) => sum + cost.amount, 0), trip.revenueCurrency)}`);
     } catch (error) {
@@ -144,7 +144,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
 
   const handleCompleteTrip = () => {
     const unresolvedFlags = getUnresolvedFlagsCount(trip.costs);
-    
+
     if (unresolvedFlags > 0) {
       alert(`Cannot complete trip: ${unresolvedFlags} unresolved flagged items must be resolved before completing the trip.\n\nPlease go to the Flags & Investigations section to resolve all outstanding issues.`);
       return;
@@ -165,7 +165,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
           completedAt: new Date().toISOString().split('T')[0],
           completedBy: 'Current User' // In a real app, this would be the logged-in user
         });
-        
+
         alert('Trip has been successfully completed and is now ready for invoicing.');
         onBack();
       } catch (error) {
@@ -236,7 +236,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
 
       updateTrip(updatedTrip);
       setShowInvoiceSubmission(false);
-      
+
       alert(`Trip successfully submitted for invoicing!\n\nInvoice Number: ${invoiceData.invoiceNumber}\nDue Date: ${invoiceData.invoiceDueDate}\n\nThe trip is now in the invoicing workflow and payment tracking has begun.`);
       onBack();
     } catch (error) {
@@ -273,7 +273,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
   const flaggedCount = getFlaggedCostsCount(trip.costs);
   const unresolvedFlags = getUnresolvedFlagsCount(trip.costs);
   const canComplete = canCompleteTrip(trip);
-  
+
   // Check if system costs have been generated
   const hasSystemCosts = trip.costs.some(cost => cost.isSystemGenerated);
   const systemCosts = trip.costs.filter(cost => cost.isSystemGenerated);
@@ -282,11 +282,11 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
   // Calculate timeline discrepancies for display
   const hasTimelineDiscrepancies = () => {
     if (!trip.plannedArrivalDateTime || !trip.actualArrivalDateTime) return false;
-    
+
     const planned = new Date(trip.plannedArrivalDateTime);
     const actual = new Date(trip.actualArrivalDateTime);
     const diffHours = Math.abs((actual.getTime() - planned.getTime()) / (1000 * 60 * 60));
-    
+
     return diffHours > 1; // More than 1 hour difference
   };
 
@@ -294,48 +294,48 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
     <div className="space-y-6">
       {/* Header with Navigation and Actions */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <Button variant="outline" onClick={onClick} icon={<ArrowLeft className="w-4 h-4" />}>
+        <Button variant="outline" onClick={onBack} icon={<ArrowLeft className="w-4 h-4" />}>
           Back to Trips
         </Button>
-        
+
         <div className="flex flex-wrap gap-3">
-          <Button 
-            variant="outline" 
-            onClick={onClick} 
+          <Button
+            variant="outline"
+            onClick={() => setShowReport(true)}
             icon={<BarChart3 className="w-4 h-4" />}
           >
             View Report
           </Button>
-          
+
           {trip.status === 'active' && (
             <>
-              <Button 
+              <Button
                 variant="outline"
-                onClick={onClick} 
+                onClick={() => setShowTripPlanning(true)}
                 icon={<Calendar className="w-4 h-4" />}
               >
                 Trip Planning
               </Button>
 
               {!hasSystemCosts && (
-                <Button 
+                <Button
                   variant="outline"
-                  onClick={onClick} 
+                  onClick={handleCompleteTrip}
                   icon={<Calculator className="w-4 h-4" />}
                 >
                   Generate System Costs
                 </Button>
               )}
-              
-              <Button 
-                onClick={onClick} 
+
+              <Button
+                onClick={() => setShowCostForm(true)}
                 icon={<Plus className="w-4 h-4" />}
               >
                 Add Cost Entry
               </Button>
-              
-              <Button 
-                onClick={onClick}
+
+              <Button
+                onClick={() => setShowSystemCostGenerator(true)}
                 disabled={!canComplete}
                 icon={<CheckCircle className="w-4 h-4" />}
                 className={!canComplete ? 'opacity-50 cursor-not-allowed' : ''}
@@ -347,8 +347,8 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
           )}
 
           {trip.status === 'completed' && (
-            <Button 
-              onClick={onClick}
+            <Button
+              onClick={() => setShowReport(true)}
               icon={<Send className="w-4 h-4" />}
             >
               Submit for Invoicing
@@ -367,7 +367,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
                 Trip Invoiced - Payment Tracking Active
               </h4>
               <p className="text-sm text-blue-700 mt-1">
-                Invoice #{trip.invoiceNumber} submitted on {formatDateTime(trip.invoiceSubmittedAt!)} by {trip.invoiceSubmittedBy}. 
+                Invoice #{trip.invoiceNumber} submitted on {formatDateTime(trip.invoiceSubmittedAt!)} by {trip.invoiceSubmittedBy}.
                 Due date: {trip.invoiceDueDate}. Payment status: {trip.paymentStatus.toUpperCase()}.
               </p>
               {trip.timelineValidated && (
@@ -407,7 +407,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
                 Trip Auto-Completed
               </h4>
               <p className="text-sm text-green-700 mt-1">
-                This trip was automatically completed on {new Date(trip.autoCompletedAt).toLocaleDateString()} 
+                This trip was automatically completed on {new Date(trip.autoCompletedAt).toLocaleDateString()}
                 because all investigations were resolved. Reason: {trip.autoCompletedReason}
               </p>
             </div>
@@ -425,13 +425,13 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
                 System Costs Not Generated
               </h4>
               <p className="text-sm text-blue-700 mt-1">
-                Automatic operational overhead costs have not been applied to this trip. 
+                Automatic operational overhead costs have not been applied to this trip.
                 Generate system costs to ensure accurate profitability assessment including per-kilometer and per-day fixed costs.
               </p>
               <div className="mt-2">
-                <Button 
+                <Button
                   size="sm"
-                  onClick={onClick} 
+                  onClick={() => setShowSystemCostGenerator(true)}
                   icon={<Calculator className="w-4 h-4" />}
                 >
                   Generate System Costs Now
@@ -469,7 +469,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
                 {unresolvedFlags} Unresolved Flag{unresolvedFlags !== 1 ? 's' : ''} - Trip Cannot Be Completed
               </h4>
               <p className="text-sm text-amber-700 mt-1">
-                All flagged cost entries must be investigated and resolved before this trip can be marked as completed. 
+                All flagged cost entries must be investigated and resolved before this trip can be marked as completed.
                 Visit the <strong>Flags & Investigations</strong> section to resolve outstanding issues.
               </p>
               <div className="mt-2">
@@ -489,7 +489,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
             <div>
               <h4 className="text-sm font-medium text-green-800">Trip Completed - Ready for Invoicing</h4>
               <p className="text-sm text-green-700">
-                This trip was completed on {trip.completedAt} by {trip.completedBy}. 
+                This trip was completed on {trip.completedAt} by {trip.completedBy}.
                 All cost entries are finalized and the trip is ready for invoice submission.
               </p>
             </div>
@@ -499,9 +499,9 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
 
       {/* Trip Summary with Enhanced KPIs */}
       <Card>
-        <CardHeader title={`Fleet ${trip.fleetNumber} - Trip Details`}> 
+        <CardHeader title={`Fleet ${trip.fleetNumber} - Trip Details`}>
           <p className="text-sm text-gray-500">
-            {trip.status === 'completed' ? `Completed ${trip.completedAt}` : 
+            {trip.status === 'completed' ? `Completed ${trip.completedAt}` :
              trip.status === 'invoiced' ? `Invoiced ${trip.invoiceDate}` :
              'Active Trip'}
           </p>
@@ -523,8 +523,8 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
                 <div>
                   <p className="text-sm text-gray-500">Client Type</p>
                   <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                    trip.clientType === 'internal' 
-                      ? 'bg-blue-100 text-blue-800' 
+                    trip.clientType === 'internal'
+                      ? 'bg-blue-100 text-blue-800'
                       : 'bg-purple-100 text-purple-800'
                   }`}>
                     {trip.clientType === 'internal' ? 'Internal Client' : 'External Client'}
@@ -547,11 +547,11 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
                 <div>
                   <p className="text-sm text-gray-500">Status</p>
                   <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                    trip.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                    trip.status === 'completed' ? 'bg-green-100 text-green-800' :
                     trip.status === 'invoiced' ? 'bg-blue-100 text-blue-800' :
                     'bg-yellow-100 text-yellow-800'
                   }`}>
-                    {trip.status === 'completed' ? 'Completed' : 
+                    {trip.status === 'completed' ? 'Completed' :
                      trip.status === 'invoiced' ? 'Invoiced' : 'Active'}
                   </span>
                 </div>
@@ -581,7 +581,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
                   <p className="font-medium text-red-600">{formatCurrency(kpis.totalExpenses, kpis.currency)}</p>
                   {hasSystemCosts && (
                     <div className="text-xs text-gray-500 mt-1">
-                      Manual: {formatCurrency(manualCosts.reduce((sum, cost) => sum + cost.amount, 0), kpis.currency)} • 
+                      Manual: {formatCurrency(manualCosts.reduce((sum, cost) => sum + cost.amount, 0), kpis.currency)} •
                       System: {formatCurrency(systemCosts.reduce((sum, cost) => sum + cost.amount, 0), kpis.currency)}
                     </div>
                   )}
@@ -678,15 +678,15 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
           title={`Cost Entries (${trip.costs.length})`}
           action={
             trip.status === 'active' && (
-              <Button size="sm" onClick={onClick} icon={<Plus className="w-4 h-4" />}>
+              <Button size="sm" onClick={() => setShowCostForm(true)} icon={<Plus className="w-4 h-4" />}>
                 Add Cost Entry
               </Button>
             )
           }
         />
         <CardContent>
-          <CostList 
-            costs={trip.costs} 
+          <CostList
+            costs={trip.costs}
             onEdit={trip.status === 'active' ? handleEditCost : undefined}
             onDelete={trip.status === 'active' ? handleDeleteCost : undefined}
           />

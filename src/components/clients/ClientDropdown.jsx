@@ -31,30 +31,30 @@ const ClientDropdown = forwardRef(({
   options = {},
 }, ref) => {
   const [query, setQuery] = React.useState('');
-  
+
   // Use appropriate hook based on searchable prop
-  const { 
-    clients = [], 
-    loading: clientsLoading, 
-    error: clientsError 
-  } = searchable ? 
-    useClientSearch(query, { ...options, includeContact }) : 
+  const {
+    clients = [],
+    loading: clientsLoading,
+    error: clientsError
+  } = searchable ?
+    useClientSearch(query, { ...options, includeContact }) :
     useClientDropdown({ ...options, includeContact });
-  
+
   // Find the currently selected client
   const selectedClient = React.useMemo(() => {
     return clients.find(client => client.id === value) || null;
   }, [clients, value]);
-  
+
   // Filter clients by query when not using search hook
   const filteredClients = React.useMemo(() => {
     if (searchable) return clients;
-    
+
     if (!query) return clients;
-    
-    return clients.filter(client => 
+
+    return clients.filter(client =>
       client.label.toLowerCase().includes(query.toLowerCase()) ||
-      (includeContact && client.contactPerson && 
+      (includeContact && client.contactPerson &&
        client.contactPerson.toLowerCase().includes(query.toLowerCase()))
     );
   }, [clients, query, searchable, includeContact]);
@@ -64,7 +64,7 @@ const ClientDropdown = forwardRef(({
       onChange(client ? client.id : '');
     }
   };
-  
+
   return (
     <div className={`w-full ${className}`}>
       {label && (
@@ -73,7 +73,7 @@ const ClientDropdown = forwardRef(({
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
-      
+
       <Combobox value={selectedClient} onChange={handleChange} disabled={disabled}>
         <div className="relative mt-1">
           <div className="relative w-full cursor-default overflow-hidden rounded-md bg-white text-left border border-gray-300 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
@@ -92,7 +92,7 @@ const ClientDropdown = forwardRef(({
               />
             </Combobox.Button>
           </div>
-          
+
           <Transition
             leave="transition ease-in duration-100"
             leaveFrom="opacity-100"
@@ -145,7 +145,7 @@ const ClientDropdown = forwardRef(({
               )}
             </Combobox.Options>
           </Transition>
-          
+
           {clientsError && (
             <p className="mt-1 text-sm text-red-600">{clientsError}</p>
           )}
@@ -154,7 +154,5 @@ const ClientDropdown = forwardRef(({
     </div>
   );
 });
-
-ClientDropdown.displayName = 'ClientDropdown';
 
 export default ClientDropdown;

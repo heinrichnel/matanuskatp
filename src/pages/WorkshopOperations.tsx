@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/Card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/Tabs";
-import { 
-  ClipboardList, 
-  Package, 
+import {
+  ClipboardList,
+  Package,
   ShoppingCart,
   CircleDot,
   FileText,
@@ -19,8 +19,7 @@ import TyreManagement from './tyres/TyreManagementPage';
 import PurchaseOrderTracker from './PurchaseOrderTracker';
 import InspectionManagement from './InspectionManagement';
 import InventoryDashboard from './InventoryDashboard';
-// TODO: Create this component
-// import FaultTracking from './FaultTracking';
+const FaultTracking = () => <div>Fault Tracking Component</div>;
 
 const WorkshopOperations: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');

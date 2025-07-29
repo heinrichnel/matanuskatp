@@ -1,4 +1,3 @@
-// Types for tyre store Firestore integration
 import { Timestamp } from 'firebase/firestore';
 
 // Define the comprehensive Tyre interface that will be the main model for all tyre data

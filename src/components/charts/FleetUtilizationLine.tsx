@@ -1,44 +1,42 @@
-import React from 'react';
+import { useFleetAnalytics } from "@/context/FleetAnalyticsContext";
 import {
-  Chart as ChartJS,
   CategoryScale,
+  Chart as ChartJS,
+  Legend,
   LinearScale,
-  PointElement,
   LineElement,
+  PointElement,
   Title,
   Tooltip,
-  Legend,
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
+} from "chart.js";
+import { Line } from "react-chartjs-2";
 
 // Register ChartJS components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
-const data = {
-  labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
-  datasets: [
-    {
-      label: "Utilization %",
-      data: [80, 81, 83, 84, 87, 86, 88],
-      fill: false,
-      borderColor: "#2563eb",
-      backgroundColor: "#2563eb",
-      tension: 0.4,
-      pointRadius: 5,
-      pointHoverRadius: 7,
-    },
-  ],
-};
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export function FleetUtilizationLine() {
+  const { fleetUtilization, isLoading } = useFleetAnalytics();
+
+  const data = {
+    labels: fleetUtilization.map((item) => item.month),
+    datasets: [
+      {
+        label: "Utilization %",
+        data: fleetUtilization.map((item) => item.utilization),
+        fill: false,
+        borderColor: "#2563eb",
+        backgroundColor: "#2563eb",
+        tension: 0.4,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      },
+    ],
+  };
+
+  if (isLoading) {
+    return <div className="w-full h-48 flex items-center justify-center">Loading...</div>;
+  }
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       <Line
@@ -49,7 +47,12 @@ export function FleetUtilizationLine() {
             legend: { display: false },
             title: {
               display: true,
-              text: 'Fleet Utilization Trend',
+              text: "Fleet Utilization Trend",
+            },
+            tooltip: {
+              callbacks: {
+                label: (context) => `Utilization: ${context.raw}%`,
+              },
             },
           },
           scales: {
@@ -57,10 +60,10 @@ export function FleetUtilizationLine() {
               beginAtZero: true,
               max: 100,
               ticks: {
-                callback: function(value) {
-                  return value + '%';
-                }
-              }
+                callback: function (value) {
+                  return value + "%";
+                },
+              },
             },
           },
         }}

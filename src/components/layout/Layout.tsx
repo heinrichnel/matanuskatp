@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import Sidebar from "./Sidebar";
-import { useAppContext } from "../../context/AppContext";
-import { Trip } from "../../types";
+import React, { useState } from 'react';
+import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import Sidebar from './Sidebar';
+import { useAppContext } from '../../context/AppContext';
+import { Trip } from '../../types';
 
 interface LayoutProps {
   setShowTripForm: (show: boolean) => void;
@@ -12,58 +12,64 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  useAppContext(); // Ensures AppContext is available
+  useAppContext(); // Keep this to ensure we're still using the AppContext
   const [searchParams] = useSearchParams();
 
-  // Context state for outlet
+  // State for outlet context
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
 
-  // Handlers for editing and showing forms
+  // Use the props for editingTrip and showTripForm
   const handleSetEditingTrip = (trip: Trip | undefined) => {
     setEditingTrip(trip);
   };
+
   const handleShowTripForm = (show: boolean) => {
     setShowTripForm(show);
   };
 
-  // Robust path detection: supports nested highlights (e.g. /trips/active)
+  // Get current path from location to determine active menu item
   const currentView = (() => {
-    const pathSegments = location.pathname.split("/").filter(Boolean);
-    if (pathSegments.length === 0) return "dashboard";
-    if (pathSegments.length > 1) return pathSegments.join("/");
-    if (pathSegments[0] === "workshop") {
-      const tab = searchParams.get("tab");
+    const path = location.pathname.split('/')[1] || 'dashboard';
+    // Special handling for workshop with tabs
+    if (path === 'workshop') {
+      const tab = searchParams.get('tab');
       if (tab) return `workshop-${tab}`;
+      return 'workshop';
     }
-    return pathSegments[0];
+    return path;
   })();
 
-  // Robust navigation
+  // Navigate to a new route
   const handleNavigate = (view: string) => {
-    if (view.includes("?")) {
-      const [path, query] = view.split("?");
+    // Handle special cases like workshop?tab=tyres
+    if (view.includes('?')) {
+      const [path, query] = view.split('?');
       navigate(`/${path}?${query}`);
     } else {
-      const formattedPath = view.startsWith("/") ? view : `/${view}`;
-      navigate(formattedPath);
+      navigate(`/${view}`);
     }
   };
 
-  // Context for child routes (outlet)
+  // Context object to pass to outlet
   const outletContext = {
     setSelectedTrip,
     setEditingTrip: handleSetEditingTrip,
-    setShowTripForm: handleShowTripForm,
+    setShowTripForm: handleShowTripForm
   };
 
   return (
     <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-      <Sidebar currentView={currentView} onNavigate={handleNavigate} />
+      <Sidebar
+        currentView={currentView}
+        onNavigate={handleNavigate}
+      />
       <main className="ml-64 p-6 pt-8 w-full max-w-screen-2xl mx-auto">
         <div className="flex justify-between items-center mb-4">
           {/* The title should be rendered by the page component instead of here */}
           <div></div>
         </div>
+
+        {/* Outlet renders the active route component */}
         <Outlet context={outletContext} />
       </main>
     </div>

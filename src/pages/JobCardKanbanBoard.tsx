@@ -79,7 +79,7 @@ const mockJobCards = [
 const JobCardKanbanBoard: React.FC = () => {
   const [jobCards, setJobCards] = useState(mockJobCards);
   const [showModal, setShowModal] = useState(false);
-  
+
   // Function to group job cards by status
   const groupedJobCards = {
     open: jobCards.filter(card => card.status === 'open'),
@@ -87,35 +87,41 @@ const JobCardKanbanBoard: React.FC = () => {
     completed: jobCards.filter(card => card.status === 'completed'),
     closed: jobCards.filter(card => card.status === 'closed')
   };
-  
+
   // Handle drag end (when a card is dropped)
   const handleDragEnd = (result: any) => {
     const { destination, source, draggableId } = result;
-    
+
     // If there's no destination or the card is dropped in the same place
-    if (!destination || 
-        (destination.droppableId === source.droppableId && 
+    if (!destination ||
+        (destination.droppableId === source.droppableId &&
          destination.index === source.index)) {
       return;
     }
-    
+
     // Update the job card status
     const newStatus = destination.droppableId;
-    
+
     // In a real application, this would update Firestore
-    setJobCards(prev => 
-      prev.map(card => 
+    setJobCards(prev =>
+      prev.map(card =>
         card.id === draggableId ? { ...card, status: newStatus } : card
       )
     );
   };
-  
+
   // Open the job card modal
   const handleCardClick = (jobCardId: string) => {
     console.log('Card clicked:', jobCardId);
     setShowModal(true);
   };
-  
+
+  // Handle click event on a job card
+  const onClick = (jobCardId: string) => (event: React.MouseEvent<HTMLDivElement, MouseEvent>): void => {
+    event.stopPropagation(); // Prevent event bubbling
+    handleCardClick(jobCardId);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -136,7 +142,7 @@ const JobCardKanbanBoard: React.FC = () => {
           </Button>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <DragDropContext onDragEnd={handleDragEnd}>
           {/* Open Column */}
@@ -150,7 +156,7 @@ const JobCardKanbanBoard: React.FC = () => {
             <Droppable droppableId="open">
               {(provided) => (
                 <CardContent className="p-2 min-h-[300px]">
-                  <div 
+                  <div
                     className="space-y-2"
                     ref={provided.innerRef}
                     {...provided.droppableProps}
@@ -181,7 +187,7 @@ const JobCardKanbanBoard: React.FC = () => {
               )}
             </Droppable>
           </Card>
-          
+
           {/* In Progress Column */}
           <Card>
             <CardHeader title={
@@ -193,7 +199,7 @@ const JobCardKanbanBoard: React.FC = () => {
             <Droppable droppableId="in_progress">
               {(provided) => (
                 <CardContent className="p-2 min-h-[300px]">
-                  <div 
+                  <div
                     className="space-y-2"
                     ref={provided.innerRef}
                     {...provided.droppableProps}
@@ -205,7 +211,7 @@ const JobCardKanbanBoard: React.FC = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            onClick={onClick}
+                            onClick={() => handleCardClick(card.id)}
                             className={snapshot.isDragging ? 'opacity-50' : ''}
                           >
                             <JobCardCard jobCard={card} />
@@ -224,7 +230,7 @@ const JobCardKanbanBoard: React.FC = () => {
               )}
             </Droppable>
           </Card>
-          
+
           {/* Completed Column */}
           <Card>
             <CardHeader title={
@@ -236,7 +242,7 @@ const JobCardKanbanBoard: React.FC = () => {
             <Droppable droppableId="completed">
               {(provided) => (
                 <CardContent className="p-2 min-h-[300px]">
-                  <div 
+                  <div
                     className="space-y-2"
                     ref={provided.innerRef}
                     {...provided.droppableProps}
@@ -248,7 +254,7 @@ const JobCardKanbanBoard: React.FC = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            onClick={onClick}
+                            onClick={() => handleCardClick(card.id)}
                             className={snapshot.isDragging ? 'opacity-50' : ''}
                           >
                             <JobCardCard jobCard={card} />
@@ -267,7 +273,7 @@ const JobCardKanbanBoard: React.FC = () => {
               )}
             </Droppable>
           </Card>
-          
+
           {/* Closed Column */}
           <Card>
             <CardHeader title={
@@ -279,7 +285,7 @@ const JobCardKanbanBoard: React.FC = () => {
             <Droppable droppableId="closed">
               {(provided) => (
                 <CardContent className="p-2 min-h-[300px]">
-                  <div 
+                  <div
                     className="space-y-2"
                     ref={provided.innerRef}
                     {...provided.droppableProps}
@@ -291,7 +297,7 @@ const JobCardKanbanBoard: React.FC = () => {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            onClick={onClick}
+                            onClick={() => handleCardClick(card.id)}
                             className={snapshot.isDragging ? 'opacity-50' : ''}
                           >
                             <JobCardCard jobCard={card} />
@@ -312,7 +318,7 @@ const JobCardKanbanBoard: React.FC = () => {
           </Card>
         </DragDropContext>
       </div>
-      
+
       {/* Job Card Modal */}
       <Modal
         isOpen={showModal}
@@ -324,7 +330,7 @@ const JobCardKanbanBoard: React.FC = () => {
       >
         <JobCard />
       </Modal>
-      
+
       <div className="mt-4 text-sm text-gray-500">
         <p className="font-medium">Note:</p>
         <ul className="list-disc pl-5 space-y-1 mt-1">

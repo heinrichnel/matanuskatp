@@ -219,18 +219,18 @@ export const TyreManagementSystem: React.FC = () => {
     const currentTread = tyre.condition.treadDepth;
     const minimumTread = 3; // Legal minimum
     const newTyreDepth = 20; // Assume new tyre starts at 20mm
-    
+
     const usedTread = newTyreDepth - currentTread;
     const remainingTread = currentTread - minimumTread;
-    
+
     if (usedTread <= 0 || tyre.milesRun === 0) return 100000;
-    
+
     const wearRate = usedTread / tyre.milesRun;
     return Math.max(remainingTread / wearRate, 0);
   };
 
   const filteredTyres = tyres.filter(tyre => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       tyre.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       tyre.brand.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesBrand = filterBrand === '' || tyre.brand === filterBrand;
@@ -274,7 +274,7 @@ export const TyreManagementSystem: React.FC = () => {
 
     setTyres(prev => [...prev, tyreToAdd]);
     setShowAddForm(false);
-    
+
     // Reset form
     setNewTyre({
       serialNumber: '',
@@ -363,11 +363,11 @@ export const TyreManagementSystem: React.FC = () => {
           <p className="text-gray-600">Complete tyre lifecycle management and analytics</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={onClick}>
+          <Button variant="outline" onClick={exportToCSV}>
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
-          <Button onClick={onClick}>
+          <Button onClick={() => setShowAddForm(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Tyre
           </Button>
@@ -430,8 +430,8 @@ export const TyreManagementSystem: React.FC = () => {
                           <div>
                             <p className="text-gray-600">Vehicle/Position</p>
                             <p className="font-medium">
-                              {tyre.installation.vehicleId ? 
-                                `${tyre.installation.vehicleId} - ${tyre.installation.position}` : 
+                              {tyre.installation.vehicleId ?
+                                `${tyre.installation.vehicleId} - ${tyre.installation.position}` :
                                 'In Store'
                               }
                             </p>
@@ -452,10 +452,10 @@ export const TyreManagementSystem: React.FC = () => {
                       </div>
 
                       <div className="flex space-x-2 ml-4">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => console.log("View tyre:", tyre.tyreId)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => console.log("Edit tyre:", tyre.tyreId)}>
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>
@@ -544,11 +544,11 @@ export const TyreManagementSystem: React.FC = () => {
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Add New Tyre</h2>
-              <Button variant="outline" onClick={onClick}>
+              <Button variant="outline" onClick={() => setShowAddForm(false)}>
                 Cancel
               </Button>
             </div>
-            
+
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Input
@@ -627,8 +627,8 @@ export const TyreManagementSystem: React.FC = () => {
                   label="Purchase Cost"
                   type="number"
                   value={String(newTyre.purchaseDetails?.cost || 0)}
-                  onChange={(e) => setNewTyre(prev => ({ 
-                    ...prev, 
+                  onChange={(e) => setNewTyre(prev => ({
+                    ...prev,
                     purchaseDetails: { ...prev.purchaseDetails!, cost: parseFloat(e.target.value) || 0 }
                   }))}
                 />
@@ -642,10 +642,10 @@ export const TyreManagementSystem: React.FC = () => {
               />
 
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={onClick}>
+                <Button variant="outline" onClick={() => setShowAddForm(false)}>
                   Cancel
                 </Button>
-                <Button onClick={onClick}>
+                <Button onClick={handleAddTyre}>
                   Add Tyre
                 </Button>
               </div>
@@ -656,3 +656,5 @@ export const TyreManagementSystem: React.FC = () => {
     </div>
   );
 };
+
+export default TyreManagementSystem
