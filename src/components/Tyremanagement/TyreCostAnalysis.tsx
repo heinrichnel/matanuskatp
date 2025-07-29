@@ -376,3 +376,5 @@ export const TyreCostAnalysis: React.FC<TyreCostAnalysisProps> = ({ tyreData }) 
     </div>
   );
 };
+
+export default TyreCostAnalysis

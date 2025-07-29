@@ -25,13 +25,13 @@ interface CargoItem {
 
 const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId }) => {
   const { getTrip, getLoadPlan, addLoadPlan, updateLoadPlan } = useAppContext();
-  
+
   const [trip, setTrip] = useState<Trip | undefined>(undefined);
   const [loadPlan, setLoadPlan] = useState<LoadPlan | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [expanded, setExpanded] = useState(true);
-  
+
   // New cargo item form
   const [newItem, setNewItem] = useState<CargoItem>({
     id: '',
@@ -44,7 +44,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
     category: 'general_cargo',
     priorityLevel: 'medium'
   });
-  
+
   // Vehicle capacity defaults (would ideally come from vehicle data)
   const [vehicleCapacity] = useState({
     weight: 34000, // kg
@@ -53,14 +53,14 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
     width: 2.5,    // meters
     height: 2.6    // meters
   });
-  
+
   // Fetch trip and load plan data
   useEffect(() => {
     if (tripId) {
       const tripData = getTrip(tripId);
       if (tripData) {
         setTrip(tripData);
-        
+
         // Check if trip has a load plan
         if (tripData.loadPlanId) {
           const loadPlanData = getLoadPlan(tripData.loadPlanId);
@@ -77,17 +77,17 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
   // Calculate total weight and volume
   const calculateTotals = () => {
     if (!loadPlan) return { totalWeight: 0, totalVolume: 0 };
-    
+
     const totalWeight = loadPlan.cargoItems.reduce(
       (sum, item) => sum + (item.weight * item.quantity),
       0
     );
-    
+
     const totalVolume = loadPlan.cargoItems.reduce(
       (sum, item) => sum + (item.volume * item.quantity),
       0
     );
-    
+
     return { totalWeight, totalVolume };
   };
 
@@ -97,12 +97,12 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
       setError("Please fill out all required fields for the cargo item");
       return;
     }
-    
+
     const itemToAdd = {
       ...newItem,
       id: `cargo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
     };
-    
+
     if (loadPlan) {
       // Update existing load plan
       const updatedPlan = {
@@ -110,7 +110,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
         cargoItems: [...loadPlan.cargoItems, itemToAdd],
         updatedAt: new Date().toISOString()
       };
-      
+
       updateLoadPlan(updatedPlan)
         .then(() => {
           setLoadPlan(updatedPlan);
@@ -130,7 +130,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
         createdBy: 'Current User', // In real app, use the logged-in user
         updatedAt: new Date().toISOString()
       };
-      
+
       addLoadPlan(newPlan)
         .then(planId => {
           const createdPlan = getLoadPlan(planId);
@@ -149,13 +149,13 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
   // Handle deleting a cargo item
   const handleDeleteItem = (itemId: string) => {
     if (!loadPlan) return;
-    
+
     const updatedPlan = {
       ...loadPlan,
       cargoItems: loadPlan.cargoItems.filter(item => item.id !== itemId),
       updatedAt: new Date().toISOString()
     };
-    
+
     updateLoadPlan(updatedPlan)
       .then(() => {
         setLoadPlan(updatedPlan);
@@ -193,13 +193,13 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
   // Calculate utilization percentages
   const calculateUtilization = () => {
     const { totalWeight, totalVolume } = calculateTotals();
-    
+
     const weightUtilization = (totalWeight / vehicleCapacity.weight) * 100;
     const volumeUtilization = (totalVolume / vehicleCapacity.volume) * 100;
-    
+
     // Overall utilization is the higher of the two, since whichever one maxes out first is the limiting factor
     const overallUtilization = Math.max(weightUtilization, volumeUtilization);
-    
+
     return {
       weightUtilization,
       volumeUtilization,
@@ -239,9 +239,9 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
 
   return (
     <Card>
-      <CardHeader 
+      <CardHeader
         title={
-          <div className="flex items-center cursor-pointer" onClick={onClick}>
+          <div className="flex items-center cursor-pointer" onClick={() => setExpanded(!expanded)}>
             <Package className="mr-2 h-5 w-5" />
             <span>Load Planning</span>
             {expanded ? (
@@ -267,7 +267,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
           )
         }
       />
-      
+
       {expanded && (
         <CardContent className="space-y-6">
           {error && (
@@ -282,7 +282,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
               </div>
             </div>
           )}
-          
+
           {/* Vehicle Capacity */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-3">Vehicle Capacity</h3>
@@ -293,82 +293,82 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                   <Scale className="w-5 h-5 text-gray-500 mr-2" />
                   <h4 className="text-sm font-medium text-gray-700">Weight Capacity</h4>
                 </div>
-                
+
                 <p className="text-lg font-bold text-gray-900 mb-1">
                   {formatNumber(totalWeight)} / {formatNumber(vehicleCapacity.weight)} kg
                 </p>
-                
+
                 <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
-                  <div 
+                  <div
                     className={`h-2.5 rounded-full ${getUtilizationClass(weightUtilization)}`}
                     style={{ width: `${Math.min(weightUtilization, 100)}%` }}
                   />
                 </div>
-                
+
                 <p className="text-sm text-gray-500">
                   {weightUtilization.toFixed(1)}% utilized
                 </p>
               </div>
-              
+
               {/* Volume Capacity */}
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <div className="flex items-center mb-2">
                   <Box className="w-5 h-5 text-gray-500 mr-2" />
                   <h4 className="text-sm font-medium text-gray-700">Volume Capacity</h4>
                 </div>
-                
+
                 <p className="text-lg font-bold text-gray-900 mb-1">
                   {totalVolume.toFixed(1)} / {vehicleCapacity.volume.toFixed(1)} m³
                 </p>
-                
+
                 <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
-                  <div 
+                  <div
                     className={`h-2.5 rounded-full ${getUtilizationClass(volumeUtilization)}`}
                     style={{ width: `${Math.min(volumeUtilization, 100)}%` }}
                   />
                 </div>
-                
+
                 <p className="text-sm text-gray-500">
                   {volumeUtilization.toFixed(1)}% utilized
                 </p>
               </div>
-              
+
               {/* Overall Utilization */}
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <div className="flex items-center mb-2">
                   <CheckCircle className="w-5 h-5 text-gray-500 mr-2" />
                   <h4 className="text-sm font-medium text-gray-700">Overall Utilization</h4>
                 </div>
-                
+
                 <p className="text-lg font-bold text-gray-900 mb-1">
                   {overallUtilization.toFixed(1)}%
                 </p>
-                
+
                 <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
-                  <div 
+                  <div
                     className={`h-2.5 rounded-full ${getUtilizationClass(overallUtilization)}`}
                     style={{ width: `${Math.min(overallUtilization, 100)}%` }}
                   />
                 </div>
-                
+
                 <p className="text-sm text-gray-500">
-                  {overallUtilization > 95 
-                    ? "Overloaded! Reduce cargo." 
-                    : overallUtilization > 85 
-                      ? "Near capacity. Check weight distribution." 
-                      : overallUtilization > 60 
-                        ? "Good utilization." 
+                  {overallUtilization > 95
+                    ? "Overloaded! Reduce cargo."
+                    : overallUtilization > 85
+                      ? "Near capacity. Check weight distribution."
+                      : overallUtilization > 60
+                        ? "Good utilization."
                         : "Underutilized capacity."}
                 </p>
               </div>
             </div>
           </div>
-          
+
           {/* Add New Cargo Item Form */}
           {isAddingItem && (
             <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
               <h3 className="text-md font-medium text-blue-800 mb-3">Add Cargo Item</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <Input
                   label="Description"
@@ -376,7 +376,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                   onChange={(value) => updateNewItemField('description', value)}
                   placeholder="e.g., Pallets of Product A"
                 />
-                
+
                 <Select
                   label="Category"
                   value={newItem.category}
@@ -385,7 +385,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                     ...LOAD_CATEGORIES.map(cat => ({ label: cat.label, value: cat.value }))
                   ]}
                 />
-                
+
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     label="Weight (kg)"
@@ -395,7 +395,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                     value={newItem.weight.toString()}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateNewItemField('weight', parseFloat(e.target.value) || 0)}
                   />
-                  
+
                   <Input
                     label="Volume (m³)"
                     type="number"
@@ -405,7 +405,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateNewItemField('volume', parseFloat(e.target.value) || 0)}
                   />
                 </div>
-                
+
                 <Input
                   label="Quantity"
                   type="number"
@@ -414,7 +414,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                   value={newItem.quantity.toString()}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateNewItemField('quantity', parseInt(e.target.value) || 1)}
                 />
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center">
                     <input
@@ -428,7 +428,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                       Stackable
                     </label>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <input
                       type="checkbox"
@@ -442,7 +442,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                     </label>
                   </div>
                 </div>
-                
+
                 <Select
                   label="Priority Level"
                   value={newItem.priorityLevel}
@@ -454,10 +454,10 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                   ]}
                 />
               </div>
-              
+
               <div className="flex justify-end">
-                <Button 
-                  onClick={onClick}
+                <Button
+                  onClick={handleAddItem}
                   disabled={!newItem.description || newItem.weight <= 0 || newItem.volume <= 0}
                   icon={<Plus className="w-4 h-4" />}
                 >
@@ -466,11 +466,11 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
               </div>
             </div>
           )}
-          
+
           {/* Cargo Items List */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-3">Cargo Items</h3>
-            
+
             {loadPlan && loadPlan.cargoItems.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -507,10 +507,10 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                             <div className="ml-4">
                               <div className="text-sm font-medium text-gray-900">{item.description}</div>
                               <div className="text-xs text-gray-500">
-                                {item.priorityLevel === 'high' 
-                                  ? 'High Priority' 
-                                  : item.priorityLevel === 'medium' 
-                                    ? 'Medium Priority' 
+                                {item.priorityLevel === 'high'
+                                  ? 'High Priority'
+                                  : item.priorityLevel === 'medium'
+                                    ? 'Medium Priority'
                                     : 'Low Priority'
                                 }
                               </div>
@@ -545,7 +545,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button
-                            onClick={onClick}
+                            onClick={() => handleDeleteItem(item.id)}
                             className="text-red-600 hover:text-red-900"
                           >
                             Delete
@@ -553,7 +553,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                         </td>
                       </tr>
                     ))}
-                    
+
                     {/* Totals row */}
                     <tr className="bg-gray-50">
                       <td colSpan={3} className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -577,11 +577,11 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                 <p className="mt-1 text-sm text-gray-500">
                   Add cargo items to plan the load for this trip.
                 </p>
-                
+
                 {!isAddingItem && (
                   <div className="mt-6">
                     <Button
-                      onClick={onClick}
+                      onClick={() => setIsAddingItem(true)}
                       icon={<Plus className="w-4 h-4" />}
                     >
                       Add First Cargo Item
@@ -591,7 +591,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
               </div>
             )}
           </div>
-          
+
           {/* Load Notes */}
           {loadPlan && (
             <div>
@@ -611,7 +611,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                       notes: notesValue,
                       updatedAt: new Date().toISOString()
                     };
-                    
+
                     updateLoadPlan(updatedPlan)
                       .then(() => {
                         setLoadPlan(updatedPlan);
@@ -626,36 +626,36 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
               />
             </div>
           )}
-          
+
           {/* Load Analysis and Recommendations */}
           {loadPlan && loadPlan.cargoItems.length > 0 && (
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
               <h3 className="text-lg font-medium text-blue-800 mb-3">Load Analysis</h3>
-              
+
               <div className="space-y-4">
                 {/* Utilization summary */}
                 <div>
                   <h4 className="text-sm font-medium text-blue-700 mb-2">Utilization Summary</h4>
                   <p className="text-sm text-blue-600">
                     This load utilizes {overallUtilization.toFixed(1)}% of the vehicle's capacity.
-                    {overallUtilization > 95 
+                    {overallUtilization > 95
                       ? " The vehicle is at maximum capacity. Consider reducing the load or using a larger vehicle."
-                      : overallUtilization < 60 
+                      : overallUtilization < 60
                         ? " The vehicle is significantly underutilized. Consider adding more cargo or using a smaller vehicle if available."
                         : " The vehicle is well utilized for this trip."}
                   </p>
                 </div>
-                
+
                 {/* Weight distribution (simplified) */}
                 <div>
                   <h4 className="text-sm font-medium text-blue-700 mb-2">Weight Distribution</h4>
                   <p className="text-sm text-blue-600">
-                    {totalWeight / vehicleCapacity.weight > 0.9 
+                    {totalWeight / vehicleCapacity.weight > 0.9
                       ? "⚠️ This load is approaching the maximum weight capacity. Ensure weight is distributed evenly across all axles."
                       : "Weight distribution appears to be within acceptable limits. Ensure cargo is secured properly."}
                   </p>
                 </div>
-                
+
                 {/* Hazardous materials warning */}
                 {loadPlan.cargoItems.some(item => item.hazardous) && (
                   <div className="bg-red-50 p-3 rounded border border-red-200 flex items-start">
@@ -668,7 +668,7 @@ const LoadPlanningComponent: React.FC<LoadPlanningComponentProps> = ({ tripId })
                     </div>
                   </div>
                 )}
-                
+
                 {/* Stackability note */}
                 {loadPlan.cargoItems.some(item => !item.stackable) && (
                   <div className="bg-yellow-50 p-3 rounded border border-yellow-200 flex items-start">

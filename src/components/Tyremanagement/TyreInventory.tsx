@@ -33,22 +33,22 @@ export const TyreInventory: React.FC = () => {
   const convertToTyreStock = (tyres: Tyre[]): TyreStock[] => {
     // Group tyres by brand, model, pattern, and size
     const groupedTyres: Record<string, Tyre[]> = {};
-    
+
     tyres.forEach(tyre => {
       // Create a unique key for grouping
       const key = `${tyre.brand}-${tyre.model}-${tyre.pattern}-${formatTyreSize(tyre.size)}`;
-      
+
       if (!groupedTyres[key]) {
         groupedTyres[key] = [];
       }
-      
+
       groupedTyres[key].push(tyre);
     });
-    
+
     // Convert grouped tyres to TyreStock
     return Object.entries(groupedTyres).map(([key, tyreGroup]) => {
       const firstTyre = tyreGroup[0];
-      
+
       return {
         id: key,
         brand: firstTyre.brand,
@@ -63,7 +63,7 @@ export const TyreInventory: React.FC = () => {
       };
     });
   };
-  
+
   const formatTyreSize = (size: any): string => {
     if (typeof size === 'string') return size;
     return `${size.width}/${size.aspectRatio}R${size.rimDiameter}`;
@@ -98,11 +98,11 @@ export const TyreInventory: React.FC = () => {
   // Extract unique locations and brands for filter options
   const locations = [...new Set(inventory.map(item => item.location))];
   const brands = [...new Set(inventory.map(item => item.brand))];
-  
+
   if (loading) {
     return <LoadingIndicator text="Loading tyre inventory..." />;
   }
-  
+
   if (error) {
     return <ErrorMessage message={`Error loading tyre inventory: ${error.message}`} />;
   }
@@ -160,7 +160,7 @@ export const TyreInventory: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="text-right space-y-2">
                       <Badge className={getStockStatusColor(status)}>
                         {item.quantity} in stock
@@ -173,7 +173,7 @@ export const TyreInventory: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {status === 'low' && (
                     <div className="mt-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
                       <AlertCircle className="w-4 h-4 inline mr-1" />
@@ -189,3 +189,5 @@ export const TyreInventory: React.FC = () => {
     </div>
   );
 };
+
+export default TyreInventory

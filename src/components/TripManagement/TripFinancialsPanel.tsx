@@ -14,13 +14,13 @@ interface TripFinancialsPanelProps {
 }
 
 const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => {
-  const { 
-    getTrip, 
-    getTripFinancialAnalysis, 
+  const {
+    getTrip,
+    getTripFinancialAnalysis,
     generateTripFinancialAnalysis,
-    isLoading 
+    isLoading
   } = useAppContext();
-  
+
   const [trip, setTrip] = useState<Trip | undefined>(undefined);
   const [financials, setFinancials] = useState<TripFinancialAnalysis | undefined>(undefined);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +31,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
       const tripData = getTrip(tripId);
       if (tripData) {
         setTrip(tripData);
-        
+
         // Check for existing financial analysis
         const financialsData = getTripFinancialAnalysis(tripId);
         if (financialsData) {
@@ -64,17 +64,17 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
      */
     generateData(type: 'costs' | 'comparison' = 'costs') {
       if (!financials) return null;
-      
+
       const { costBreakdown } = financials;
-      
+
       if (type === 'costs') {
         return {
           labels: [
-            'Fuel', 
-            'Border Costs', 
-            'Driver Allowance', 
-            'Maintenance', 
-            'Toll Fees', 
+            'Fuel',
+            'Border Costs',
+            'Driver Allowance',
+            'Maintenance',
+            'Toll Fees',
             'Miscellaneous'
           ],
           datasets: [
@@ -121,14 +121,14 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
         };
       }
     },
-    
+
     // Future method placeholders for chart rendering
     renderCostChart() {
       // Will be implemented when charts are added
       const data = this.generateData('costs');
       return data;
     },
-    
+
     renderComparisonChart() {
       // Will be implemented when charts are added
       const data = this.generateData('comparison');
@@ -157,7 +157,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
       // This ensures chartUtils is used and prevents unused variable warnings
       const costData = chartUtils.generateData('costs');
       const comparisonData = chartUtils.generateData('comparison');
-      
+
       // Future implementation will use these data objects with chart components
       console.debug('Chart data prepared:', { costData, comparisonData });
     }
@@ -165,14 +165,14 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
 
   return (
     <Card>
-      <CardHeader 
-        title="Trip Financial Analysis" 
+      <CardHeader
+        title="Trip Financial Analysis"
         action={
           <Button
             variant="outline"
             size="sm"
             icon={<RefreshCw className="w-4 h-4" />}
-            onClick={onClick}
+            onClick={handleGenerateAnalysis}
             isLoading={isLoading[`generateFinancials-${tripId}`]}
             disabled={isLoading[`generateFinancials-${tripId}`]}
           >
@@ -180,7 +180,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
           </Button>
         }
       />
-      
+
       {!financials ? (
         <CardContent className="p-8">
           <div className="text-center">
@@ -189,9 +189,9 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
             <p className="text-gray-500 mb-6">
               Generate a detailed financial analysis to see revenue, costs, and profitability metrics for this trip.
             </p>
-            
+
             <Button
-              onClick={onClick}
+              onClick={handleGenerateAnalysis}
               icon={<BarChart3 className="w-5 h-5 mr-1" />}
               isLoading={isLoading[`generateFinancials-${tripId}`]}
               disabled={isLoading[`generateFinancials-${tripId}`]}
@@ -215,7 +215,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                 <DollarSign className="w-8 h-8 text-green-500 p-1 bg-green-100 rounded-full" />
               </div>
             </div>
-            
+
             <div className="bg-red-50 p-4 rounded-lg border border-red-100">
               <div className="flex items-start justify-between">
                 <div>
@@ -227,18 +227,18 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                 <TrendingDown className="w-8 h-8 text-red-500 p-1 bg-red-100 rounded-full" />
               </div>
             </div>
-            
+
             <div className={`${
-              financials.profitAnalysis.netProfit >= 0 
-                ? 'bg-blue-50 border-blue-100' 
+              financials.profitAnalysis.netProfit >= 0
+                ? 'bg-blue-50 border-blue-100'
                 : 'bg-red-50 border-red-100'
               } p-4 rounded-lg border`}>
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-sm text-gray-500">Net Profit</p>
                   <p className={`text-xl font-bold ${
-                    financials.profitAnalysis.netProfit >= 0 
-                      ? 'text-blue-700' 
+                    financials.profitAnalysis.netProfit >= 0
+                      ? 'text-blue-700'
                       : 'text-red-700'
                     }`}>
                     {formatCurrency(financials.profitAnalysis.netProfit, financials.revenueSummary.currency)}
@@ -251,7 +251,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                 )}
               </div>
             </div>
-            
+
             <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
               <div className="flex items-start justify-between">
                 <div>
@@ -264,7 +264,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
               </div>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             {/* Cost Breakdown */}
             <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -272,16 +272,16 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
               <div className="space-y-3">
                 {Object.entries(financials.costBreakdown).map(([key, value]) => {
                   if (key === 'totalCosts') return null; // Skip total, displayed elsewhere
-                  
+
                   // Format the key for display
                   const formattedKey = key
                     .replace(/([A-Z])/g, ' $1')
                     .replace(/^./, (str) => str.toUpperCase())
                     .replace(/Costs$/, '');
-                  
+
                   // Calculate percentage of total costs
                   const percentage = (value / financials.costBreakdown.totalCosts * 100).toFixed(1);
-                  
+
                   return (
                     <div key={key} className="flex items-center">
                       <div className="w-full">
@@ -303,7 +303,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                 })}
               </div>
             </div>
-            
+
             {/* Per KM Metrics */}
             <div className="bg-white p-4 rounded-lg border border-gray-200">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Per Kilometer Metrics</h3>
@@ -314,14 +314,14 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                     {formatCurrency(financials.perKmMetrics.revenuePerKm, financials.revenueSummary.currency)}
                   </p>
                 </div>
-                
+
                 <div className="bg-red-50 p-3 rounded-lg">
                   <p className="text-sm text-red-700">Cost per KM</p>
                   <p className="text-lg font-bold text-red-900">
                     {formatCurrency(financials.perKmMetrics.costPerKm, financials.revenueSummary.currency)}
                   </p>
                 </div>
-                
+
                 <div className="bg-green-50 p-3 rounded-lg">
                   <p className="text-sm text-green-700">Profit per KM</p>
                   <p className="text-lg font-bold text-green-900">
@@ -329,7 +329,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                   </p>
                 </div>
               </div>
-              
+
               {/* Comparison to Averages */}
               <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
                 <h4 className="text-sm font-medium text-gray-800 mb-2">Performance vs. Averages</h4>
@@ -348,7 +348,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                       ></div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between mb-1">
                       <span className="text-xs text-gray-600">Company Average</span>
@@ -359,13 +359,13 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                     <div className="w-full bg-gray-200 rounded-full h-1.5">
                       <div
                         className="bg-green-600 h-1.5 rounded-full"
-                        style={{ 
-                          width: `${(financials.comparisonMetrics?.companyAvgCostPerKm || 0) / financials.perKmMetrics.costPerKm * 100}%` 
+                        style={{
+                          width: `${(financials.comparisonMetrics?.companyAvgCostPerKm || 0) / financials.perKmMetrics.costPerKm * 100}%`
                         }}
                       ></div>
                     </div>
                   </div>
-                  
+
                   <div>
                     <div className="flex justify-between mb-1">
                       <span className="text-xs text-gray-600">Industry Average</span>
@@ -376,8 +376,8 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                     <div className="w-full bg-gray-200 rounded-full h-1.5">
                       <div
                         className="bg-yellow-600 h-1.5 rounded-full"
-                        style={{ 
-                          width: `${(financials.comparisonMetrics?.industryAvgCostPerKm || 0) / financials.perKmMetrics.costPerKm * 100}%` 
+                        style={{
+                          width: `${(financials.comparisonMetrics?.industryAvgCostPerKm || 0) / financials.perKmMetrics.costPerKm * 100}%`
                         }}
                       ></div>
                     </div>
@@ -386,7 +386,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
               </div>
             </div>
           </div>
-          
+
           {/* Detailed Analysis and Recommendations */}
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
             <h3 className="text-lg font-medium text-blue-900 mb-3">Trip Analysis</h3>
@@ -404,7 +404,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
               <div>
                 <h4 className="text-sm font-medium text-blue-800 mb-2">Performance Analysis</h4>
                 <p className="text-sm text-blue-700 mb-2">
-                  {financials.profitAnalysis.netProfitMargin > 15 
+                  {financials.profitAnalysis.netProfitMargin > 15
                     ? "This trip is highly profitable, exceeding target margins."
                     : financials.profitAnalysis.netProfitMargin > 5
                       ? "This trip meets profitability targets."
@@ -420,7 +420,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
               </div>
             </div>
           </div>
-          
+
           {/* Recommendations */}
           <div className="bg-white p-4 rounded-lg border border-gray-200">
             <h3 className="text-lg font-medium text-gray-900 mb-3">Recommendations</h3>
@@ -435,7 +435,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                   </p>
                 </div>
               )}
-              
+
               {financials.comparisonMetrics?.variance && financials.comparisonMetrics.variance > 10 && (
                 <div className="flex items-start">
                   <div className="bg-red-100 rounded-full p-1 mr-2 mt-1">
@@ -446,7 +446,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                   </p>
                 </div>
               )}
-              
+
               {financials.profitAnalysis.netProfitMargin < 5 && (
                 <div className="flex items-start">
                   <div className="bg-red-100 rounded-full p-1 mr-2 mt-1">
@@ -457,7 +457,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                   </p>
                 </div>
               )}
-              
+
               {financials.profitAnalysis.netProfitMargin > 20 && (
                 <div className="flex items-start">
                   <div className="bg-green-100 rounded-full p-1 mr-2 mt-1">
@@ -468,7 +468,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
                   </p>
                 </div>
               )}
-              
+
               {financials.costBreakdown.borderCosts / financials.costBreakdown.totalCosts > 0.2 && (
                 <div className="flex items-start">
                   <div className="bg-yellow-100 rounded-full p-1 mr-2 mt-1">
@@ -481,7 +481,7 @@ const TripFinancialsPanel: React.FC<TripFinancialsPanelProps> = ({ tripId }) => 
               )}
             </div>
           </div>
-          
+
           <div className="flex justify-end mt-4">
             <Button
               variant="outline"

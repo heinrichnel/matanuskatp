@@ -67,9 +67,9 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
   if (!open) return null;
 
   return (
-    <Modal 
-      isOpen={open} 
-      onClose={onClose} 
+    <Modal
+      isOpen={open}
+      onClose={onClose}
       title={`Tyre Inspection - ${fleetNumber} (${tyrePosition})`}
     >
       <form onSubmit={handleSubmit}>
@@ -89,7 +89,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                   className="w-full p-2 border rounded-lg bg-gray-100"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="position" className="block text-sm font-medium text-gray-700 mb-1">
                   Tyre Position
@@ -103,7 +103,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                   className="w-full p-2 border rounded-lg bg-gray-100"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="tyreBrand" className="block text-sm font-medium text-gray-700 mb-1">
                   Tyre Brand
@@ -117,7 +117,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                   className="w-full p-2 border rounded-lg"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="tyreSize" className="block text-sm font-medium text-gray-700 mb-1">
                   Tyre Size
@@ -131,7 +131,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                   className="w-full p-2 border rounded-lg"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="treadDepth" className="block text-sm font-medium text-gray-700 mb-1">
                   Tread Depth (mm)
@@ -148,7 +148,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                   className="w-full p-2 border rounded-lg"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="pressure" className="block text-sm font-medium text-gray-700 mb-1">
                   Pressure (PSI)
@@ -165,7 +165,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                   className="w-full p-2 border rounded-lg"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="condition" className="block text-sm font-medium text-gray-700 mb-1">
                   Condition
@@ -184,7 +184,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                   <option value="critical">Critical</option>
                 </select>
               </div>
-              
+
               <div>
                 <label htmlFor="odometer" className="block text-sm font-medium text-gray-700 mb-1">
                   Odometer
@@ -198,7 +198,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                   className="w-full p-2 border rounded-lg"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="inspectorName" className="block text-sm font-medium text-gray-700 mb-1">
                   Inspector Name
@@ -212,7 +212,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                   className="w-full p-2 border rounded-lg"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="inspectionDate" className="block text-sm font-medium text-gray-700 mb-1">
                   Inspection Date
@@ -227,7 +227,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                 />
               </div>
             </div>
-            
+
             <div>
               <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
                 Notes
@@ -241,7 +241,7 @@ const TyreInspectionModal: React.FC<TyreInspectionModalProps> = ({
                 className="w-full p-2 border rounded-lg"
               />
             </div>
-            
+
             <div className="flex justify-end space-x-2">
               <Button
                 type="button"

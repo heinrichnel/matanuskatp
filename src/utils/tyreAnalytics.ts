@@ -44,7 +44,7 @@ export function getBestTyres(data: TyreStat[]): RankedTyre[] {
 
 export function getTyrePerformanceStats(data: TyreStat[]) {
   const validTyres = data.filter(tyre => tyre.totalDistance > 0);
-  
+
   if (validTyres.length === 0) {
     return {
       averageCostPerKm: 0,
@@ -71,7 +71,7 @@ export function getTyrePerformanceStats(data: TyreStat[]) {
 }
 
 export function filterTyresByPerformance(
-  data: TyreStat[], 
+  data: TyreStat[],
   performance: 'excellent' | 'good' | 'average' | 'poor'
 ): RankedTyre[] {
   const rankedTyres = getBestTyres(data);
@@ -79,20 +79,20 @@ export function filterTyresByPerformance(
 }
 
 export function getTyreBrandPerformance(data: TyreStat[]) {
-  const brandStats = new Map<string, { 
-    totalCost: number; 
-    totalDistance: number; 
-    count: number; 
+  const brandStats = new Map<string, {
+    totalCost: number;
+    totalDistance: number;
+    count: number;
   }>();
 
   data.forEach(tyre => {
     if (tyre.totalDistance > 0) {
-      const existing = brandStats.get(tyre.brand) || { 
-        totalCost: 0, 
-        totalDistance: 0, 
-        count: 0 
+      const existing = brandStats.get(tyre.brand) || {
+        totalCost: 0,
+        totalDistance: 0,
+        count: 0
       };
-      
+
       brandStats.set(tyre.brand, {
         totalCost: existing.totalCost + tyre.totalCost,
         totalDistance: existing.totalDistance + tyre.totalDistance,
@@ -108,4 +108,11 @@ export function getTyreBrandPerformance(data: TyreStat[]) {
     totalDistance: stats.totalDistance,
     totalCost: stats.totalCost,
   })).sort((a, b) => a.averageCostPerKm - b.averageCostPerKm);
+}
+
+export default {
+  getBestTyres,
+  getTyrePerformanceStats,
+  filterTyresByPerformance,
+  getTyreBrandPerformance
 }

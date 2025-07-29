@@ -1,3 +1,4 @@
+import { useFleetAnalytics } from "@/context/FleetAnalyticsContext";
 import {
   BarElement,
   CategoryScale,
@@ -12,18 +13,26 @@ import { Bar } from "react-chartjs-2";
 // Register ChartJS components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-const data = {
-  labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"],
-  datasets: [
-    {
-      label: "ROI %",
-      data: [75, 62, 85, 78, 91, 88, 94],
-      backgroundColor: "#2563eb",
-    },
-  ],
-};
-
 export function ROIBarChart() {
+  const { monthlyROI, isLoading } = useFleetAnalytics();
+
+  const data = {
+    labels: monthlyROI.map((item) => item.month),
+    datasets: [
+      {
+        label: "ROI %",
+        data: monthlyROI.map((item) => item.roi),
+        backgroundColor: "#2563eb",
+        borderRadius: 8,
+        maxBarThickness: 32,
+      },
+    ],
+  };
+
+  if (isLoading) {
+    return <div className="w-full h-48 flex items-center justify-center">Loading...</div>;
+  }
+
   return (
     <div className="w-full max-w-2xl mx-auto">
       <Bar
@@ -32,11 +41,19 @@ export function ROIBarChart() {
           responsive: true,
           plugins: {
             legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (context) => `ROI: ${context.raw}%`,
+              },
+            },
           },
           scales: {
             y: {
               beginAtZero: true,
               max: 100,
+              ticks: {
+                callback: (value) => `${value}%`,
+              },
             },
           },
         }}

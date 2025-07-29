@@ -19,10 +19,10 @@ const Calendar: React.FC = () => {
   const { isLoading } = useAppContext();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [view, setView] = useState<'month' | 'week' | 'day'>('month');
-  
+
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
-  
+
   // Sample trip events for the calendar
   const tripEvents: TripEvent[] = [
     {
@@ -71,37 +71,37 @@ const Calendar: React.FC = () => {
       vehicle: 'VEH-2005'
     }
   ];
-  
+
   // Move to previous month
   const previousMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
   };
-  
+
   // Move to next month
   const nextMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
   };
-  
+
   // Helper to get day of month for a given date
   const getDayOfMonth = (dateString: string): number => {
     return new Date(dateString).getDate();
   };
-  
+
   // Helper to check if a trip event is on a specific day
   const hasTripOnDay = (day: number): TripEvent[] => {
     const currentMonthStr = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
     const dayStr = String(day).padStart(2, '0');
     const dateToCheck = `${currentMonthStr}-${dayStr}`;
-    
+
     return tripEvents.filter(event => {
       const eventStartDay = event.start.substring(0, 10); // YYYY-MM-DD
       return eventStartDay === dateToCheck;
     });
   };
-  
+
   // Get month name
   const monthName = currentMonth.toLocaleString('default', { month: 'long' });
-  
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -111,13 +111,13 @@ const Calendar: React.FC = () => {
         </div>
         <div className="flex space-x-2 items-center">
           <SyncIndicator />
-          <Button 
+          <Button
             variant="outline"
             icon={<Search className="w-4 h-4" />}
           >
             Search Trips
           </Button>
-          <Button 
+          <Button
             icon={<CalendarIcon className="w-4 h-4" />}
             disabled={isLoading?.trips}
           >
@@ -125,14 +125,14 @@ const Calendar: React.FC = () => {
           </Button>
         </div>
       </div>
-      
+
       {/* Calendar Controls */}
       <Card>
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Button 
-                onClick={onClick}
+              <Button
+                onClick={previousMonth}
                 variant="outline"
                 size="sm"
                 icon={<ChevronLeft className="w-4 h-4" />}
@@ -142,8 +142,8 @@ const Calendar: React.FC = () => {
               <h3 className="text-lg font-medium">
                 {monthName} {currentMonth.getFullYear()}
               </h3>
-              <Button 
-                onClick={onClick}
+              <Button
+                onClick={nextMonth}
                 variant="outline"
                 size="sm"
                 icon={<ChevronRight className="w-4 h-4" />}
@@ -152,24 +152,24 @@ const Calendar: React.FC = () => {
               </Button>
             </div>
             <div className="flex space-x-1">
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 variant={view === 'month' ? 'primary' : 'outline'}
-                onClick={onClick}
+                onClick={() => setView('month')}
               >
                 Month
               </Button>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 variant={view === 'week' ? 'primary' : 'outline'}
-                onClick={onClick}
+                onClick={() => setView('week')}
               >
                 Week
               </Button>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 variant={view === 'day' ? 'primary' : 'outline'}
-                onClick={onClick}
+                onClick={() => setView('day')}
               >
                 Day
               </Button>
@@ -177,7 +177,7 @@ const Calendar: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Calendar Grid */}
       <Card>
         <CardContent className="p-4">
@@ -188,35 +188,35 @@ const Calendar: React.FC = () => {
                 {day}
               </div>
             ))}
-            
+
             {/* Calendar days */}
             {Array.from({ length: firstDayOfMonth }).map((_, index) => (
               <div key={`empty-${index}`} className="p-2 min-h-[120px] bg-gray-50"></div>
             ))}
-            
+
             {Array.from({ length: daysInMonth }).map((_, index) => {
               const day = index + 1;
               const tripsOnDay = hasTripOnDay(day);
-              const isToday = new Date().getDate() === day && 
-                              new Date().getMonth() === currentMonth.getMonth() && 
+              const isToday = new Date().getDate() === day &&
+                              new Date().getMonth() === currentMonth.getMonth() &&
                               new Date().getFullYear() === currentMonth.getFullYear();
-              
+
               return (
-                <div 
-                  key={`day-${day}`} 
+                <div
+                  key={`day-${day}`}
                   className={`p-2 min-h-[120px] border border-gray-200 ${isToday ? 'bg-blue-50 border-blue-300' : 'bg-white'}`}
                 >
                   <div className={`text-right ${isToday ? 'font-bold text-blue-600' : ''}`}>{day}</div>
-                  
+
                   {/* Trips for this day */}
                   <div className="mt-1">
                     {tripsOnDay.map(trip => (
-                      <div 
-                        key={trip.id} 
+                      <div
+                        key={trip.id}
                         className={`text-xs p-1 mb-1 rounded overflow-hidden whitespace-nowrap overflow-ellipsis
-                          ${trip.status === 'active' ? 'bg-blue-100 text-blue-800' : 
-                            trip.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                            trip.status === 'delayed' ? 'bg-red-100 text-red-800' : 
+                          ${trip.status === 'active' ? 'bg-blue-100 text-blue-800' :
+                            trip.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            trip.status === 'delayed' ? 'bg-red-100 text-red-800' :
                             'bg-gray-100 text-gray-800'}`}
                       >
                         {trip.title}
@@ -229,7 +229,7 @@ const Calendar: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Upcoming Trips */}
       <Card>
         <CardHeader title="Upcoming Trips" />
@@ -249,7 +249,7 @@ const Calendar: React.FC = () => {
               <tbody className="bg-white divide-y divide-gray-200">
                 {tripEvents.map((trip) => {
                   const startDate = new Date(trip.start);
-                  
+
                   return (
                     <tr key={trip.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm font-medium text-blue-600">{trip.id}</td>

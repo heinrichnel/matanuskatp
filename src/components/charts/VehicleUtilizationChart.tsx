@@ -1,13 +1,7 @@
 import * as React from "react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 import {
   ChartConfig,
@@ -52,6 +46,7 @@ const chartData = [
 const chartConfig = {
   utilization: {
     label: "Vehicle Utilization",
+    color: "#4299e1", // Added color property
   },
   idleTime: {
     label: "Idle Time (hours)",
@@ -79,9 +74,7 @@ export function VehicleUtilizationChart() {
       <CardHeader className="flex flex-col items-stretch border-b !p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 pb-3 sm:pb-0">
           <CardTitle>Vehicle Utilization Chart</CardTitle>
-          <CardDescription>
-            Showing idle vs. active time for the last 30 days
-          </CardDescription>
+          <CardDescription>Showing idle vs. active time for the last 30 days</CardDescription>
         </div>
         <div className="flex">
           {["idleTime", "activeTime"].map((key) => {
@@ -93,9 +86,7 @@ export function VehicleUtilizationChart() {
                 className="data-[active=true]:bg-blue-50 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
                 onClick={() => setActiveChart(chart)}
               >
-                <span className="text-gray-500 text-xs">
-                  {chartConfig[chart].label}
-                </span>
+                <span className="text-gray-500 text-xs">{chartConfig[chart].label}</span>
                 <span className="text-lg leading-none font-bold sm:text-3xl">
                   {total[key as keyof typeof total].toLocaleString()} hrs
                 </span>
@@ -105,10 +96,7 @@ export function VehicleUtilizationChart() {
         </div>
       </CardHeader>
       <CardContent className="px-2 sm:p-6">
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[250px] w-full"
-        >
+        <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
           <LineChart
             data={chartData}
             margin={{
