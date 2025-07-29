@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   Form,
@@ -14,7 +14,8 @@ import {
   Divider,
   Alert,
   Upload,
-  message
+  message,
+  Calendar
 } from 'antd';
 import {
   UploadOutlined,
@@ -23,10 +24,10 @@ import {
 } from '@ant-design/icons';
 import { Truck } from 'lucide-react';
 
-const { Text } = Typography;
+const { Title, Text } = Typography;
 const { Option } = Select;
 
-interface FuelEntry {
+export interface FuelEntry {
   vehicleId: string;
   driverId: string;
   date: string;
@@ -40,7 +41,7 @@ interface FuelEntry {
   receiptImage?: File | null;
 }
 
-interface AddFuelEntryModalProps {
+export interface AddFuelEntryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (values: FuelEntry) => Promise<void>;
@@ -58,7 +59,7 @@ const AddFuelEntryModal: React.FC<AddFuelEntryModalProps> = ({
   const [calculatedCost, setCalculatedCost] = useState<number | null>(null);
 
   // Reset form when modal opens/closes
-  React.useEffect(() => {
+  useEffect(() => {
     if (isOpen) {
       form.resetFields();
       if (initialValues) {
@@ -88,7 +89,7 @@ const AddFuelEntryModal: React.FC<AddFuelEntryModalProps> = ({
     { id: 'FC003', number: '**** **** **** 9012' }
   ];
 
-  const calculateTotalCost = (amount: number, costPerLiter: number) => {
+  const calculateTotalCost = (amount: number | null, costPerLiter: number | null) => {
     if (amount && costPerLiter) {
       const total = amount * costPerLiter;
       setCalculatedCost(total);
@@ -96,14 +97,18 @@ const AddFuelEntryModal: React.FC<AddFuelEntryModalProps> = ({
     }
   };
 
-  const handleFuelAmountChange = (value: number) => {
+  const handleFuelAmountChange = (value: number | null) => {
     const costPerLiter = form.getFieldValue('costPerLiter');
-    calculateTotalCost(value, costPerLiter);
+    if (value !== null) {
+      calculateTotalCost(value, costPerLiter);
+    }
   };
 
-  const handleCostPerLiterChange = (value: number) => {
+  const handleCostPerLiterChange = (value: number | null) => {
     const fuelAmount = form.getFieldValue('fuelAmount');
-    calculateTotalCost(fuelAmount, value);
+    if (value !== null) {
+      calculateTotalCost(fuelAmount, value);
+    }
   };
 
   const handleFinish = async (values: FuelEntry) => {
@@ -118,6 +123,15 @@ const AddFuelEntryModal: React.FC<AddFuelEntryModalProps> = ({
     } finally {
       setLoading(false);
     }
+  };
+
+  // Display a calendar view for reference
+  const renderCalendarView = () => {
+    return (
+      <div className="calendar-view-container" style={{ marginBottom: '20px', display: loading ? 'none' : 'block' }}>
+        <Calendar fullscreen={false} />
+      </div>
+    );
   };
 
   // Display a truck icon with vehicle information
@@ -338,6 +352,9 @@ const AddFuelEntryModal: React.FC<AddFuelEntryModalProps> = ({
         )}
 
         <Divider />
+
+        {/* Add Calendar component for date reference */}
+        {renderCalendarView()}
 
         <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
           <Space>

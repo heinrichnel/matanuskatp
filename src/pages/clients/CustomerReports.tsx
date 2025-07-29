@@ -1,544 +1,469 @@
-import {
-  BarChart,
-  Building,
-  Calendar,
-  Clock,
-  DollarSign,
-  Flag,
-  TrendingDown,
-  TrendingUp,
-  Users,
-} from "lucide-react";
-import React, { useMemo } from "react";
-import { Badge } from "../../components/ui/badge";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
-import { Trip } from "../../types";
-import { Client } from "../../types/client";
-import { formatCurrency, formatDate } from "../../utils/helpers";
+import React, { useState } from 'react';
+import { Card, CardContent } from '../components/ui/Card';
+import Button from '../components/ui/Button';
+import SyncIndicator from '../components/ui/SyncIndicator';
+import { Search, Download, Calendar, Filter, BarChart2, PieChart, TrendingUp, TrendingDown } from 'lucide-react';
 
-interface ClientAnalyticsProps {
-  clients: Client[];
-  trips: Trip[];
-  selectedClientId: string | null;
-  onSelectClient: (clientId: string) => void;
+interface ReportFilter {
+  dateRange: string;
+  customerType: string;
+  region: string;
 }
 
-interface ClientMetrics {
-  totalRevenue: number;
-  totalTrips: number;
-  activeTrips: number;
-  completedTrips: number;
-  flaggedTrips: number;
-  averageTripValue: number;
-  lastTripDate: string | null;
-  firstTripDate: string | null;
-  relationshipLength: number; // in days
-  revenueTrend: "increasing" | "decreasing" | "stable";
-  tripFrequency: number; // average days between trips
-  onTimeDeliveryRate: number; // percentage
-  mostRecentTrip?: Trip;
-}
-
-const ClientAnalytics: React.FC<ClientAnalyticsProps> = ({
-  clients,
-  trips,
-  selectedClientId,
-  onSelectClient,
-}) => {
-  // Get the selected client
-  const selectedClient = clients.find((client) => client.id === selectedClientId);
-
-  // Calculate metrics for the selected client
-  const clientMetrics: ClientMetrics | null = useMemo(() => {
-    if (!selectedClient) return null;
-
-    // Filter trips for this client
-    const clientTrips = trips.filter((trip) => trip.clientName === selectedClient.name);
-
-    if (clientTrips.length === 0) {
-      return {
-        totalRevenue: 0,
-        totalTrips: 0,
-        activeTrips: 0,
-        completedTrips: 0,
-        flaggedTrips: 0,
-        averageTripValue: 0,
-        lastTripDate: null,
-        firstTripDate: null,
-        relationshipLength: 0,
-        revenueTrend: "stable" as const,
-        tripFrequency: 0,
-        onTimeDeliveryRate: 0,
-      };
-    }
-
-    // Sort trips by date (oldest to newest by start date)
-    const sortedByStartDate = [...clientTrips].sort(
-      (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-    );
-
-    // Find the first trip (oldest) and most recent trip
-    const firstTrip = sortedByStartDate[0];
-    const mostRecentTrip = [...clientTrips].sort(
-      (a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
-    )[0];
-
-    // Calculate metrics
-    const totalRevenue = clientTrips.reduce((sum, trip) => sum + trip.baseRevenue, 0);
-    const activeTrips = clientTrips.filter((trip) => trip.status === "active").length;
-    const completedTrips = clientTrips.filter(
-      (trip) => trip.status === "completed" || trip.status === "invoiced" || trip.status === "paid"
-    ).length;
-
-    const flaggedTrips = clientTrips.filter(
-      (trip) => trip.costs && trip.costs.some((cost) => cost.isFlagged)
-    ).length;
-
-    const averageTripValue = clientTrips.length > 0 ? totalRevenue / clientTrips.length : 0;
-
-    // Calculate relationship length
-    const firstTripDate = new Date(firstTrip.startDate);
-    const lastTripDate = new Date(mostRecentTrip.endDate);
-    const relationshipLength = Math.floor(
-      (Date.now() - firstTripDate.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    // Determine revenue trend
-    let revenueTrend: "increasing" | "decreasing" | "stable" = "stable";
-
-    if (clientTrips.length >= 3) {
-      const recentTrips = [...clientTrips]
-        .sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime())
-        .slice(0, 3);
-
-      const oldestRecentTrip = recentTrips[2];
-      const middleRecentTrip = recentTrips[1];
-      const newestRecentTrip = recentTrips[0];
-
-      if (
-        newestRecentTrip.baseRevenue > middleRecentTrip.baseRevenue &&
-        middleRecentTrip.baseRevenue > oldestRecentTrip.baseRevenue
-      ) {
-        revenueTrend = "increasing";
-      } else if (
-        newestRecentTrip.baseRevenue < middleRecentTrip.baseRevenue &&
-        middleRecentTrip.baseRevenue < oldestRecentTrip.baseRevenue
-      ) {
-        revenueTrend = "decreasing";
-      }
-    }
-
-    // Calculate average days between trips
-    if (clientTrips.length >= 2) {
-      const totalDays = (lastTripDate.getTime() - firstTripDate.getTime()) / (1000 * 60 * 60 * 24);
-      const tripFrequency = totalDays / (clientTrips.length - 1);
-
-      return {
-        totalRevenue,
-        totalTrips: clientTrips.length,
-        activeTrips,
-        completedTrips,
-        flaggedTrips,
-        averageTripValue,
-        lastTripDate: mostRecentTrip.endDate,
-        firstTripDate: firstTrip.startDate,
-        relationshipLength,
-        revenueTrend,
-        tripFrequency,
-        onTimeDeliveryRate: 0.95, // Placeholder - would be calculated in a real implementation
-        mostRecentTrip: mostRecentTrip,
-      };
-    }
-
-    return {
-      totalRevenue,
-      totalTrips: clientTrips.length,
-      activeTrips,
-      completedTrips,
-      flaggedTrips,
-      averageTripValue,
-      lastTripDate: mostRecentTrip.endDate,
-      firstTripDate: firstTrip.startDate,
-      relationshipLength,
-      revenueTrend,
-      tripFrequency: 0,
-      onTimeDeliveryRate: 0, // Placeholder
-      mostRecentTrip: mostRecentTrip,
-    };
-  }, [selectedClient, trips]);
-
-  // Get top clients by revenue
-  const topClientsByRevenue = useMemo(() => {
-    // Group trips by client name
-    const clientRevenues: Record<string, { revenue: number; client?: Client }> = {};
-
-    trips.forEach((trip) => {
-      if (!clientRevenues[trip.clientName]) {
-        clientRevenues[trip.clientName] = {
-          revenue: 0,
-          client: clients.find((client) => client.name === trip.clientName),
-        };
-      }
-
-      clientRevenues[trip.clientName].revenue += trip.baseRevenue;
-    });
-
-    // Convert to array and sort
-    return Object.entries(clientRevenues)
-      .map(([name, data]) => ({
-        name,
-        revenue: data.revenue,
-        client: data.client,
-      }))
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 5);
-  }, [trips, clients]);
-
-  // Determine the retention status
-  const getRetentionStatus = (lastTripDate: string | null) => {
-    if (!lastTripDate) return { status: "inactive", class: "bg-red-100 text-red-800" };
-
-    const lastTripTime = new Date(lastTripDate).getTime();
-    const now = Date.now();
-    const daysSinceLastTrip = Math.floor((now - lastTripTime) / (1000 * 60 * 60 * 24));
-
-    if (daysSinceLastTrip <= 30) {
-      return { status: "active", class: "bg-green-100 text-green-800" };
-    } else if (daysSinceLastTrip <= 90) {
-      return { status: "at risk", class: "bg-yellow-100 text-yellow-800" };
-    } else {
-      return { status: "inactive", class: "bg-red-100 text-red-800" };
-    }
+const CustomerReports: React.FC = () => {
+  const [filter, setFilter] = useState<ReportFilter>({
+    dateRange: 'month',
+    customerType: 'all',
+    region: 'all'
+  });
+  
+  const [activeReport, setActiveReport] = useState('revenue');
+  
+  const handleFilterChange = (field: string, value: string) => {
+    setFilter(prev => ({ ...prev, [field]: value }));
   };
-
+  
   return (
-    <div className="space-y-6">
-      {/* Analytics Header */}
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-gray-900 flex items-center">
-          <BarChart className="w-6 h-6 mr-2 text-blue-500" />
-          Client Analytics & Insights
-        </h2>
+        <h2 className="text-xl font-semibold">Customer Reports</h2>
+        <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            icon={<Download className="w-4 h-4" />}
+          >
+            Export Report
+          </Button>
+          <SyncIndicator />
+        </div>
       </div>
-
-      {selectedClient && clientMetrics ? (
-        <div className="space-y-6">
-          {/* Key Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm text-gray-500">Total Revenue</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {formatCurrency(clientMetrics.totalRevenue, selectedClient.currency)}
-                    </p>
-                    <div className="flex items-center mt-1">
-                      {clientMetrics.revenueTrend === "increasing" ? (
-                        <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                      ) : clientMetrics.revenueTrend === "decreasing" ? (
-                        <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
-                      ) : (
-                        <TrendingUp className="w-4 h-4 text-gray-400 mr-1" />
-                      )}
-                      <p
-                        className={`text-xs ${
-                          clientMetrics.revenueTrend === "increasing"
-                            ? "text-green-500"
-                            : clientMetrics.revenueTrend === "decreasing"
-                              ? "text-red-500"
-                              : "text-gray-500"
-                        }`}
-                      >
-                        {clientMetrics.revenueTrend === "increasing"
-                          ? "Increasing"
-                          : clientMetrics.revenueTrend === "decreasing"
-                            ? "Decreasing"
-                            : "Stable"}
-                      </p>
-                    </div>
-                  </div>
-                  <DollarSign className="w-8 h-8 text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm text-gray-500">Total Trips</p>
-                    <p className="text-2xl font-bold text-gray-900">{clientMetrics.totalTrips}</p>
-                    <p className="text-xs text-gray-500">
-                      {clientMetrics.activeTrips} active • {clientMetrics.completedTrips} completed
-                    </p>
-                  </div>
-                  <Calendar className="w-8 h-8 text-green-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm text-gray-500">Relationship</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {clientMetrics.relationshipLength} days
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Since{" "}
-                      {clientMetrics.firstTripDate
-                        ? formatDate(clientMetrics.firstTripDate)
-                        : "N/A"}
-                    </p>
-                  </div>
-                  <Users className="w-8 h-8 text-purple-500" />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm text-gray-500">Retention Status</p>
-                    <div className="flex items-center mt-1">
-                      {clientMetrics.lastTripDate && (
-                        <Badge className={getRetentionStatus(clientMetrics.lastTripDate).class}>
-                          {getRetentionStatus(clientMetrics.lastTripDate).status.toUpperCase()}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Last trip:{" "}
-                      {clientMetrics.lastTripDate
-                        ? formatDate(clientMetrics.lastTripDate)
-                        : "Never"}
-                    </p>
-                  </div>
-                  <Clock className="w-8 h-8 text-orange-500" />
-                </div>
-              </CardContent>
-            </Card>
+      
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Calendar className="w-5 h-5 text-gray-400" />
           </div>
-
-          {/* Client Performance Insights */}
-          <Card>
-            <CardHeader title="Performance Insights" />
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Trip Metrics */}
+          <select
+            value={filter.dateRange}
+            onChange={(e) => handleFilterChange('dateRange', e.target.value)}
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="quarter">This Quarter</option>
+            <option value="year">This Year</option>
+            <option value="custom">Custom Range</option>
+          </select>
+        </div>
+        
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Filter className="w-5 h-5 text-gray-400" />
+          </div>
+          <select
+            value={filter.customerType}
+            onChange={(e) => handleFilterChange('customerType', e.target.value)}
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="all">All Customer Types</option>
+            <option value="enterprise">Enterprise</option>
+            <option value="sme">SME</option>
+            <option value="government">Government</option>
+            <option value="individual">Individual</option>
+          </select>
+        </div>
+        
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <Filter className="w-5 h-5 text-gray-400" />
+          </div>
+          <select
+            value={filter.region}
+            onChange={(e) => handleFilterChange('region', e.target.value)}
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="all">All Regions</option>
+            <option value="north">Northern Region</option>
+            <option value="south">Southern Region</option>
+            <option value="east">Eastern Region</option>
+            <option value="west">Western Region</option>
+            <option value="central">Central Region</option>
+          </select>
+        </div>
+      </div>
+      
+      {/* Report Type Selector */}
+      <div className="flex space-x-2 overflow-x-auto pb-2">
+        <Button
+          variant={activeReport === 'revenue' ? 'primary' : 'outline'}
+          onClick={onClick}
+          icon={<BarChart2 className="w-4 h-4" />}
+        >
+          Revenue
+        </Button>
+        <Button
+          variant={activeReport === 'trips' ? 'primary' : 'outline'}
+          onClick={onClick}
+          icon={<TrendingUp className="w-4 h-4" />}
+        >
+          Trip Volume
+        </Button>
+        <Button
+          variant={activeReport === 'services' ? 'primary' : 'outline'}
+          onClick={onClick}
+          icon={<PieChart className="w-4 h-4" />}
+        >
+          Service Mix
+        </Button>
+        <Button
+          variant={activeReport === 'satisfaction' ? 'primary' : 'outline'}
+          onClick={onClick}
+          icon={<TrendingDown className="w-4 h-4" />}
+        >
+          Satisfaction
+        </Button>
+        <Button
+          variant={activeReport === 'growth' ? 'primary' : 'outline'}
+          onClick={onClick}
+          icon={<TrendingUp className="w-4 h-4" />}
+        >
+          Growth
+        </Button>
+      </div>
+      
+      {/* Revenue Report */}
+      {activeReport === 'revenue' && (
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-medium mb-4">Revenue Report</h3>
+            
+            {/* Chart placeholder */}
+            <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-center justify-center h-64">
+              <BarChart2 className="h-8 w-8 text-gray-400 mb-2" />
+              <p className="text-gray-500">Revenue chart by customer would appear here</p>
+              <p className="text-sm text-gray-400 mt-2">Using real data from Firestore in the actual implementation</p>
+            </div>
+            
+            {/* Summary stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-blue-700">Total Revenue</h4>
+                <p className="text-2xl font-bold">$1,254,350</p>
+                <p className="text-sm flex items-center mt-1 text-green-600">
+                  <TrendingUp className="h-4 w-4 mr-1" /> +12% vs previous period
+                </p>
+              </div>
+              
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-green-700">Average Per Customer</h4>
+                <p className="text-2xl font-bold">$42,850</p>
+                <p className="text-sm flex items-center mt-1 text-green-600">
+                  <TrendingUp className="h-4 w-4 mr-1" /> +5% vs previous period
+                </p>
+              </div>
+              
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-purple-700">Top Customer Revenue</h4>
+                <p className="text-2xl font-bold">$215,420</p>
+                <p className="text-sm mt-1 text-purple-600">Matanuska Farms Ltd.</p>
+              </div>
+            </div>
+            
+            {/* Top customers table */}
+            <div className="mt-6">
+              <h4 className="text-md font-medium mb-2">Top Customers by Revenue</h4>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Revenue</th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">YoY Change</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Matanuska Farms Ltd.</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Enterprise</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Northern</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">$215,420</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">+18%</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Central Distribution Co.</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Enterprise</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Central</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">$185,740</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">+7%</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Government Logistics Dept.</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Government</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Southern</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">$142,530</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">+22%</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Eastern Supplies Inc.</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">SME</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Eastern</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">$98,450</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">-5%</td>
+                    </tr>
+                    <tr>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Coastal Freight Ltd.</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">SME</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Western</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">$87,620</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">+11%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Trip Volume Report */}
+      {activeReport === 'trips' && (
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-medium mb-4">Trip Volume Report</h3>
+            
+            <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-center justify-center h-64">
+              <TrendingUp className="h-8 w-8 text-gray-400 mb-2" />
+              <p className="text-gray-500">Trip volume chart would appear here</p>
+              <p className="text-sm text-gray-400 mt-2">Using real data from Firestore in the actual implementation</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-blue-700">Total Trips</h4>
+                <p className="text-2xl font-bold">1,845</p>
+                <p className="text-sm flex items-center mt-1 text-green-600">
+                  <TrendingUp className="h-4 w-4 mr-1" /> +8% vs previous period
+                </p>
+              </div>
+              
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-green-700">Avg. Load Factor</h4>
+                <p className="text-2xl font-bold">87%</p>
+                <p className="text-sm flex items-center mt-1 text-green-600">
+                  <TrendingUp className="h-4 w-4 mr-1" /> +3% vs previous period
+                </p>
+              </div>
+              
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-purple-700">On-time Delivery</h4>
+                <p className="text-2xl font-bold">94.3%</p>
+                <p className="text-sm flex items-center mt-1 text-green-600">
+                  <TrendingUp className="h-4 w-4 mr-1" /> +1.2% vs previous period
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Service Mix Report */}
+      {activeReport === 'services' && (
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-medium mb-4">Service Mix Report</h3>
+            
+            <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-center justify-center h-64">
+              <PieChart className="h-8 w-8 text-gray-400 mb-2" />
+              <p className="text-gray-500">Service mix pie chart would appear here</p>
+              <p className="text-sm text-gray-400 mt-2">Using real data from Firestore in the actual implementation</p>
+            </div>
+            
+            <div className="mt-6">
+              <h4 className="text-md font-medium mb-4">Service Breakdown</h4>
+              
+              <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Trip Metrics</h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm text-gray-600">Average Trip Value</p>
-                      <p className="text-sm font-medium text-gray-900">
-                        {formatCurrency(clientMetrics.averageTripValue, selectedClient.currency)}
-                      </p>
-                    </div>
-
-                    {clientMetrics.tripFrequency > 0 && (
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-600">Average Trip Frequency</p>
-                        <p className="text-sm font-medium text-gray-900">
-                          Every {Math.round(clientMetrics.tripFrequency)} days
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center">
-                        <Flag className="w-4 h-4 text-amber-500 mr-1" />
-                        <p className="text-sm font-medium text-gray-900">
-                          {clientMetrics.flaggedTrips} trips with flags
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm text-gray-600">On-Time Delivery Rate</p>
-                      <p className="text-sm font-medium text-gray-900">
-                        {Math.round(clientMetrics.onTimeDeliveryRate * 100)}%
-                      </p>
-                    </div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium">Full Truckload</span>
+                    <span className="text-sm font-medium">65%</span>
                   </div>
-
-                  {/* Most Recent Trip */}
-                  {clientMetrics.mostRecentTrip && (
-                    <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                      <h4 className="text-sm font-medium text-blue-800 mb-2">Most Recent Trip</h4>
-                      <div className="space-y-2 text-sm text-blue-700">
-                        <p>
-                          <strong>Fleet:</strong> {clientMetrics.mostRecentTrip.fleetNumber}
-                        </p>
-
-                        <p>
-                          <strong>Route:</strong> {clientMetrics.mostRecentTrip.route}
-                        </p>
-                        <p>
-                          <strong>Date:</strong> {formatDate(clientMetrics.mostRecentTrip.endDate)}
-                        </p>
-                        <p>
-                          <strong>Revenue:</strong>{" "}
-                          {formatCurrency(
-                            clientMetrics.mostRecentTrip.baseRevenue,
-                            selectedClient.currency
-                          )}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: '65%' }}></div>
+                  </div>
                 </div>
-
-                {/* Recommendations */}
+                
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Recommendations</h3>
-                  <div className="space-y-4">
-                    {getRetentionStatus(clientMetrics.lastTripDate).status === "active" ? (
-                      <div className="p-4 bg-green-50 rounded-lg border border-green-100">
-                        <h4 className="text-sm font-medium text-green-800 mb-2">Active Client</h4>
-                        <p className="text-sm text-green-700">
-                          This client is active with recent trips. Consider these actions:
-                        </p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1 text-sm text-green-700">
-                          <li>Schedule a quarterly business review</li>
-                          <li>Explore opportunities for additional routes</li>
-                          <li>Consider offering volume discounts for increased business</li>
-                        </ul>
-                      </div>
-                    ) : getRetentionStatus(clientMetrics.lastTripDate).status === "at risk" ? (
-                      <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
-                        <h4 className="text-sm font-medium text-yellow-800 mb-2">At-Risk Client</h4>
-                        <p className="text-sm text-yellow-700">
-                          This client's activity is declining. Consider these actions:
-                        </p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1 text-sm text-yellow-700">
-                          <li>Reach out to schedule a meeting to discuss needs</li>
-                          <li>Send a satisfaction survey to identify concerns</li>
-                          <li>Offer incentives for a return booking</li>
-                        </ul>
-                      </div>
-                    ) : (
-                      <div className="p-4 bg-red-50 rounded-lg border border-red-100">
-                        <h4 className="text-sm font-medium text-red-800 mb-2">Inactive Client</h4>
-                        <p className="text-sm text-red-700">
-                          This client hasn't booked in over 90 days. Consider these actions:
-                        </p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1 text-sm text-red-700">
-                          <li>Implement a win-back campaign</li>
-                          <li>Review previous issues to identify barriers</li>
-                          <li>Consider a special offer or discount</li>
-                          <li>Evaluate client profitability before intensive re-engagement</li>
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Revenue Trend Recommendation */}
-                    {clientMetrics.revenueTrend === "increasing" ? (
-                      <div className="p-4 bg-green-50 rounded-lg border border-green-100">
-                        <h4 className="text-sm font-medium text-green-800 mb-2">
-                          Increasing Revenue
-                        </h4>
-                        <p className="text-sm text-green-700">
-                          This client's spending is increasing. Consider these actions:
-                        </p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1 text-sm text-green-700">
-                          <li>Recognize and acknowledge their increased business</li>
-                          <li>Review for potential loyalty program tier upgrade</li>
-                          <li>Explore additional service offerings</li>
-                        </ul>
-                      </div>
-                    ) : clientMetrics.revenueTrend === "decreasing" ? (
-                      <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-100">
-                        <h4 className="text-sm font-medium text-yellow-800 mb-2">
-                          Decreasing Revenue
-                        </h4>
-                        <p className="text-sm text-yellow-700">
-                          This client's spending is decreasing. Consider these actions:
-                        </p>
-                        <ul className="list-disc pl-5 mt-2 space-y-1 text-sm text-yellow-700">
-                          <li>Schedule a call to discuss their changing needs</li>
-                          <li>Review pricing and service offerings</li>
-                          <li>Identify and address any service issues</li>
-                        </ul>
-                      </div>
-                    ) : null}
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium">Less than Truckload</span>
+                    <span className="text-sm font-medium">22%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-green-600 h-2.5 rounded-full" style={{ width: '22%' }}></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium">Express Delivery</span>
+                    <span className="text-sm font-medium">8%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: '8%' }}></div>
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium">Special Handling</span>
+                    <span className="text-sm font-medium">5%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="bg-purple-500 h-2.5 rounded-full" style={{ width: '5%' }}></div>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      ) : (
-        <div>
-          {/* Top Clients Overview when no client is selected */}
-          <Card>
-            <CardHeader title="Top Clients by Revenue" />
-            <CardContent>
-              <div className="space-y-6">
-                {topClientsByRevenue.map((clientData) => (
-                  <div
-                    key={clientData.name}
-                    className="p-4 bg-white rounded-lg shadow border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors cursor-pointer"
-                    onClick={() => clientData.client && onSelectClient(clientData.client.id)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center">
-                        <Building className="w-6 h-6 text-gray-400 mr-3" />
-                        <div>
-                          <h3 className="font-medium text-gray-900">{clientData.name}</h3>
-                          <p className="text-sm text-gray-500">
-                            {clientData.client?.type === "internal"
-                              ? "Internal Client"
-                              : "External Client"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-gray-900">
-                          {formatCurrency(clientData.revenue, clientData.client?.currency || "ZAR")}
-                        </p>
-                        <p className="text-xs text-gray-500">Total Revenue</p>
-                      </div>
-                    </div>
-
-                    {clientData.client && (
-                      <button
-                        className="mt-3 text-sm text-blue-600 hover:text-blue-800 transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onSelectClient(clientData.client!.id);
-                        }}
-                      >
-                        View Analysis →
-                      </button>
-                    )}
-                  </div>
-                ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Customer Satisfaction Report */}
+      {activeReport === 'satisfaction' && (
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-medium mb-4">Customer Satisfaction Report</h3>
+            
+            <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-center justify-center h-64">
+              <TrendingUp className="h-8 w-8 text-gray-400 mb-2" />
+              <p className="text-gray-500">Satisfaction trend chart would appear here</p>
+              <p className="text-sm text-gray-400 mt-2">Using real data from Firestore in the actual implementation</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-blue-700">Overall CSAT</h4>
+                <p className="text-2xl font-bold">4.7/5.0</p>
+                <p className="text-sm flex items-center mt-1 text-green-600">
+                  <TrendingUp className="h-4 w-4 mr-1" /> +0.2 vs previous period
+                </p>
               </div>
-            </CardContent>
-          </Card>
-
-          <div className="mt-6 p-6 bg-blue-50 border border-blue-100 rounded-lg">
-            <h3 className="text-lg font-medium text-blue-800 mb-4">Client Analytics Dashboard</h3>
-            <p className="text-blue-700">
-              Select a client from the client list or the top clients above to view detailed
-              analytics and insights. The analytics dashboard provides:
-            </p>
-            <ul className="list-disc pl-5 mt-3 space-y-2 text-blue-700">
-              <li>Revenue tracking and trend analysis</li>
-              <li>Trip history and frequency analysis</li>
-              <li>Retention status and recommendations</li>
-              <li>Performance insights and improvement suggestions</li>
-              <li>Client relationship visualizations</li>
-            </ul>
-          </div>
-        </div>
+              
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-green-700">Net Promoter Score</h4>
+                <p className="text-2xl font-bold">+72</p>
+                <p className="text-sm flex items-center mt-1 text-green-600">
+                  <TrendingUp className="h-4 w-4 mr-1" /> +4 vs previous period
+                </p>
+              </div>
+              
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-yellow-700">Service Issues</h4>
+                <p className="text-2xl font-bold">3.2%</p>
+                <p className="text-sm flex items-center mt-1 text-green-600">
+                  <TrendingDown className="h-4 w-4 mr-1" /> -0.5% vs previous period
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <h4 className="text-md font-medium mb-2">Customer Feedback Highlights</h4>
+              
+              <div className="space-y-3">
+                <div className="bg-green-50 p-3 rounded border-l-4 border-green-500">
+                  <p className="text-sm text-green-700">"Excellent service and always on time. The drivers are professional and courteous."</p>
+                  <p className="text-xs text-gray-500 mt-1">Matanuska Farms Ltd., July 5</p>
+                </div>
+                
+                <div className="bg-green-50 p-3 rounded border-l-4 border-green-500">
+                  <p className="text-sm text-green-700">"The online tracking system is incredibly useful. We can always see where our shipments are."</p>
+                  <p className="text-xs text-gray-500 mt-1">Central Distribution Co., July 3</p>
+                </div>
+                
+                <div className="bg-yellow-50 p-3 rounded border-l-4 border-yellow-500">
+                  <p className="text-sm text-yellow-700">"Good service overall but had some issues with delivery time windows. Would appreciate more precise ETAs."</p>
+                  <p className="text-xs text-gray-500 mt-1">Eastern Supplies Inc., July 2</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+      
+      {/* Growth Report */}
+      {activeReport === 'growth' && (
+        <Card>
+          <CardContent className="p-4">
+            <h3 className="text-lg font-medium mb-4">Customer Growth Report</h3>
+            
+            <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-center justify-center h-64">
+              <BarChart2 className="h-8 w-8 text-gray-400 mb-2" />
+              <p className="text-gray-500">Customer growth chart would appear here</p>
+              <p className="text-sm text-gray-400 mt-2">Using real data from Firestore in the actual implementation</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-blue-700">New Customers</h4>
+                <p className="text-2xl font-bold">14</p>
+                <p className="text-sm flex items-center mt-1 text-green-600">
+                  <TrendingUp className="h-4 w-4 mr-1" /> +40% vs previous period
+                </p>
+              </div>
+              
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-green-700">Customer Retention</h4>
+                <p className="text-2xl font-bold">95.8%</p>
+                <p className="text-sm flex items-center mt-1 text-green-600">
+                  <TrendingUp className="h-4 w-4 mr-1" /> +1.2% vs previous period
+                </p>
+              </div>
+              
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <h4 className="text-sm font-medium text-purple-700">Avg. Revenue Growth</h4>
+                <p className="text-2xl font-bold">+12.5%</p>
+                <p className="text-sm mt-1 text-purple-600">Per existing customer</p>
+              </div>
+            </div>
+            
+            <div className="mt-6">
+              <h4 className="text-md font-medium mb-2">Growth Opportunities</h4>
+              
+              <div className="space-y-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1 border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium mb-2">Service Expansion</h4>
+                    <p className="text-sm text-gray-600 mb-2">
+                      5 existing customers have shown interest in additional service offerings.
+                    </p>
+                    <Button size="sm">View Details</Button>
+                  </div>
+                  
+                  <div className="flex-1 border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium mb-2">New Market Segment</h4>
+                    <p className="text-sm text-gray-600 mb-2">
+                      Potential for 20% growth by expanding to the pharmaceutical transport segment.
+                    </p>
+                    <Button size="sm">View Analysis</Button>
+                  </div>
+                  
+                  <div className="flex-1 border border-gray-200 rounded-lg p-4">
+                    <h4 className="font-medium mb-2">Customer Upselling</h4>
+                    <p className="text-sm text-gray-600 mb-2">
+                      8 customers identified for potential service level upgrades.
+                    </p>
+                    <Button size="sm">View Customers</Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
 };
 
-export default ClientAnalytics;
+export default CustomerReports;

@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import { TyreInspection, useTyreInspections } from "../../hooks/useTyreInspections";
 import { useTyres } from "../../hooks/useTyres";
-import TyreDashboard from "../Tyremanagement/TyreDashboard";
+import TyreDashboard from "../../pages/tyres/TyreDashboard";
+import TyreManagementView from "../../pages/tyres/TyreManagementView";
 import Button from "../ui/Button";
 import TyreInspectionModal from "./TyreInspectionModal"; // jou bestaande
 import TyreInventoryDashboard from "./TyreInventoryDashboard";
-import TyreManagementView from "./components/TyreManagementView";
 
 const TyreIntegration: React.FC = () => {
   const { tyres } = useTyres();

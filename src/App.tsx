@@ -46,19 +46,19 @@ import DriverPerformancePage from "./components/DriverManagement/DriverPerforman
 import MapsView from "./components/Map/MapsView";
 import LoadConfirmation from "./components/TripManagement/LoadConfirmation";
 import TripTemplateManager from "./components/TripManagement/TripTemplateManager";
-import ActiveTripsPage from "./pages/ActiveTripsPageEnhanced";
-import AddTripPage from "./pages/AddTripPage";
-import FlagsInvestigations from "./pages/FlagsInvestigationsPage";
-import FleetManagementPage from "./pages/FleetManagementPage";
-import LoadPlanningPage from "./pages/LoadPlanningPage";
-import RouteOptimizationPage from "./pages/RouteOptimizationPage";
-import RoutePlanningPage from "./pages/RoutePlanningPage";
-import TripCalendarPage from "./pages/TripCalendarPage";
-import TripDashboard from "./pages/TripDashboard";
-import TripManagementPage from "./pages/TripManagementPage";
-import TripReportPage from "./pages/TripReportPage";
-import MainTripWorkflow from "./pages/trips/MainTripWorkflow";
+import FlagsInvestigations from "./pages/flags/FlagsInvestigationsPage";
+import ActiveTripsPage from "./pages/trips/ActiveTripsPageEnhanced";
+import FleetManagementPage from "./pages/trips/FleetManagementPage";
+import LoadPlanningPage from "./pages/trips/LoadPlanningPage";
+import RouteOptimizationPage from "./pages/trips/RouteOptimizationPage";
+import RoutePlanningPage from "./pages/trips/RoutePlanningPage";
+import TripCalendarPage from "./pages/trips/TripCalendarPage";
+import TripDashboard from "./pages/trips/TripDashboard";
 import TripDetailsPage from "./pages/trips/TripDetailsPage";
+import {
+  default as TripManagementPage,
+  default as TripReportPage,
+} from "./pages/trips/TripManagementPage";
 import TripTimelinePage from "./pages/trips/TripTimelinePage";
 
 // === INVOICES ===
@@ -114,14 +114,14 @@ import TrainingRecords from "./pages/drivers/TrainingRecords";
 
 // === COMPLIANCE ===
 import ComplianceDashboard from "./pages/ComplianceDashboard";
-import InspectionManagement from "./pages/InspectionManagement";
-import QAReviewPanel from "./pages/QAReviewPanel";
+import InspectionManagement from "./pages/workshop/InspectionManagement";
+import QAReviewPanel from "./pages/workshop/QAReviewPanel";
 
 // === ANALYTICS ===
 import PredictiveModels from "./components/Models/Driver/PredictiveModels";
-import IndirectCostBreakdown from "./pages/IndirectCostBreakdown";
-import MissedLoadsTracker from "./pages/MissedLoadsTracker";
-import YearToDateKPIs from "./pages/YearToDateKPIs";
+import YearToDateKPIs from "./pages/analytics/YearToDateKPIs";
+import IndirectCostBreakdown from "./pages/invoices/IndirectCostBreakdown";
+import MissedLoadsTracker from "./pages/trips/MissedLoadsTracker";
 
 // === WORKSHOP ===
 import FaultTracking from "./components/WorkshopManagement/FaultTracking";
@@ -129,31 +129,31 @@ import InspectionHistoryPage from "./components/WorkshopManagement/inspections";
 import VehicleInspectionPage from "./components/WorkshopManagement/vehicle-inspection";
 import WorkshopIntegration from "./components/workshop/WorkshopIntegration";
 import InventoryDashboard from "./pages/InventoryDashboard";
-import JobCardManagement from "./pages/JobCardManagement";
-import PartsOrderingPage from "./pages/PartsOrderingPage";
+import PartsOrderingPage from "./pages/inventory/PartsOrderingPage";
+import PurchaseOrderPage from "./pages/inventory/PurchaseOrderPage";
 import TyreManagementPage from "./pages/tyres/TyreManagementPage";
-import PurchaseOrderPage from "./pages/workshop/PurchaseOrderPage";
+import JobCardManagement from "./pages/workshop/JobCardManagement";
 import QRGenerator from "./pages/workshop/QRGenerator";
 import QRScannerPage from "./pages/workshop/QRScannerPage";
 import StockInventoryPage from "./pages/workshop/StockInventoryPage";
 import VendorPage from "./pages/workshop/VendorPage";
+import WorkshopOperations from "./pages/workshop/WorkshopOperations";
 import WorkshopPage from "./pages/workshop/WorkshopPage";
-import WorkshopOperations from "./pages/WorkshopOperations";
 
 // === TYRES ===
 import TyreIntegration from "./components/tyres/TyreIntegration";
-import TyreFleetMap from "./pages/TyreFleetMap";
-import TyreHistoryPage from "./pages/TyreHistoryPage";
-import TyrePerformanceDashboard from "./pages/TyrePerformanceDashboard";
 import TyreMobilePage from "./pages/mobile/TyreMobilePage";
 import AddNewTyrePage from "./pages/tyres/AddNewTyrePage";
+import TyreFleetMap from "./pages/tyres/TyreFleetMap";
+import TyreHistoryPage from "./pages/tyres/TyreHistoryPage";
+import TyrePerformanceDashboard from "./pages/tyres/TyrePerformanceDashboard";
 import TyreReferenceManagerPage from "./pages/tyres/TyreReferenceManagerPage";
 
 // === INVENTORY ===
-import InventoryPage from "./pages/InventoryPage";
 import InventoryReportsPage from "./pages/InventoryReportsPage";
 import PartsInventoryPage from "./pages/PartsInventoryPage";
 import ReceivePartsPage from "./pages/ReceivePartsPage";
+import InventoryPage from "./pages/inventory/InventoryPage";
 
 // === WIALON ===
 import WialonDashboard from "./pages/WialonDashboard";
@@ -261,8 +261,7 @@ const App: React.FC = () => {
                           <Route path="trips/optimization" element={<RouteOptimizationPage />} />
                           <Route path="trips/load-planning" element={<LoadPlanningPage />} />
                           <Route path="trips/calendar" element={<TripCalendarPage />} />
-                          <Route path="trips/add" element={<AddTripPage />} />
-                          <Route path="trips/workflow" element={<MainTripWorkflow />} />
+                          <Route path="trips/active/:id" element={<TripDetailsPage />} />
                           <Route path="trips/map" element={<MapsView />} />
                           <Route path="trips/dashboard" element={<TripDashboard />} />
                           <Route path="trips/reports" element={<TripReportPage />} />
@@ -503,17 +502,23 @@ const App: React.FC = () => {
                           <Route path="costs/indirect" element={<IndirectCostBreakdown />} />
 
                           {/* Missed Loads */}
-                          <Route path="missed-loads" element={
-                            <MissedLoadsTracker
-                              missedLoads={[]}
-                              onAddMissedLoad={() => {}}
-                              onUpdateMissedLoad={() => {}}
-                            />
-                          } />
+                          <Route
+                            path="missed-loads"
+                            element={
+                              <MissedLoadsTracker
+                                missedLoads={[]}
+                                onAddMissedLoad={() => {}}
+                                onUpdateMissedLoad={() => {}}
+                              />
+                            }
+                          />
 
                           {/* Customers redirects */}
                           <Route path="customers" element={<Navigate to="/clients" replace />} />
-                          <Route path="customers/dashboard" element={<Navigate to="/clients" replace />} />
+                          <Route
+                            path="customers/dashboard"
+                            element={<Navigate to="/clients" replace />}
+                          />
 
                           {/* Default */}
                           <Route path="*" element={<DashboardPage />} />
@@ -543,4 +548,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

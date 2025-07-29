@@ -43,12 +43,12 @@ import {
 
 // Import tyre components that need to be integrated
 import TyreAnalytics from "../../components/Tyremanagement/TyreAnalytics";
-import { TyreCostAnalysis } from "../../components/Tyremanagement/TyreCostAnalysis";
-import TyreDashboard from "../../components/Tyremanagement/TyreDashboard";
+import { TyreCostAnalysis } from "./TyreCostAnalysis";
+import TyreDashboard from "./TyreDashboard";
 import { TyreInventoryStats } from "../../components/Tyremanagement/TyreInventoryStats";
-import TyrePerformanceReport from "../../components/Tyremanagement/TyrePerformanceReport";
 import { TyreReportGenerator } from "../../components/Tyremanagement/TyreReportGenerator";
-import { TyreReports } from "../../components/Tyremanagement/TyreReports";
+import TyrePerformanceReport from "./TyrePerformanceReport";
+import { TyreReports } from "./TyreReports";
 
 // Define tabs for navigation
 type TabType = "inventory" | "dashboard" | "analytics" | "reports";
