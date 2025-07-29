@@ -10,31 +10,35 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
-  // Hooks and context
   const location = useLocation();
   const navigate = useNavigate();
-  useAppContext(); // Ensures AppContext is active (auth, etc)
+  useAppContext(); // Ensures AppContext is available
   const [searchParams] = useSearchParams();
 
-  // Local state for outlet context
+  // Context state for outlet
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
 
-  // Handler wrappers
-  const handleSetEditingTrip = (trip: Trip | undefined) => setEditingTrip(trip);
-  const handleShowTripForm = (show: boolean) => setShowTripForm(show);
+  // Handlers for editing and showing forms
+  const handleSetEditingTrip = (trip: Trip | undefined) => {
+    setEditingTrip(trip);
+  };
+  const handleShowTripForm = (show: boolean) => {
+    setShowTripForm(show);
+  };
 
-  // Robust route detection for menu highlighting (nested, tabs, etc)
-  const currentView = React.useMemo(() => {
+  // Robust path detection: supports nested highlights (e.g. /trips/active)
+  const currentView = (() => {
     const pathSegments = location.pathname.split("/").filter(Boolean);
     if (pathSegments.length === 0) return "dashboard";
+    if (pathSegments.length > 1) return pathSegments.join("/");
     if (pathSegments[0] === "workshop") {
       const tab = searchParams.get("tab");
       if (tab) return `workshop-${tab}`;
     }
-    return pathSegments.join("/") || "dashboard";
-  }, [location.pathname, searchParams]);
+    return pathSegments[0];
+  })();
 
-  // Navigation logic: always slash-prefixed, supports query params
+  // Robust navigation
   const handleNavigate = (view: string) => {
     if (view.includes("?")) {
       const [path, query] = view.split("?");
@@ -45,7 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
     }
   };
 
-  // Outlet context for downstream components
+  // Context for child routes (outlet)
   const outletContext = {
     setSelectedTrip,
     setEditingTrip: handleSetEditingTrip,
@@ -53,11 +57,11 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
   };
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen flex">
+    <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
       <Sidebar currentView={currentView} onNavigate={handleNavigate} />
-      <main className="ml-64 flex-1 p-6 pt-8 w-full max-w-screen-2xl mx-auto">
+      <main className="ml-64 p-6 pt-8 w-full max-w-screen-2xl mx-auto">
         <div className="flex justify-between items-center mb-4">
-          {/* Leave empty: Each page component should render its own title */}
+          {/* The title should be rendered by the page component instead of here */}
           <div></div>
         </div>
         <Outlet context={outletContext} />
