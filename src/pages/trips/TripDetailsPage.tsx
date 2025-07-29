@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
-import { Trip, CostEntry } from '../../types';
+import { Trip, CostEntry, Attachment } from '../../types';
 import { Card, CardHeader, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import {
@@ -21,6 +21,22 @@ import SystemCostsModal from '../../components/Models/Trips/SystemCostsModal';
 // Utility imports
 import { formatCurrency } from '../../utils/formatters';
 
+// Interface to match the CostEntry type used in TripCostEntryModal
+interface ModalCostEntry {
+  id?: string;
+  category: string;
+  subType: string;
+  currency: string;
+  amount: number;
+  referenceNumber: string;
+  date: string;
+  notes?: string;
+  attachments?: { name: string; url: string }[];
+  missingDocReason?: string;
+  isFlagged?: boolean;
+  manuallyFlagged?: boolean;
+}
+
 const TripDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -35,7 +51,7 @@ const TripDetailsPage: React.FC = () => {
 
   useEffect(() => {
     if (!id) return;
-    
+
     try {
       const tripData = getTrip(id);
       if (tripData) {
@@ -51,21 +67,33 @@ const TripDetailsPage: React.FC = () => {
     }
   }, [id, getTrip]);
 
-  const handleAddCost = async (costData: Omit<CostEntry, 'id' | 'attachments'>, files?: FileList) => {
+  // Convert from modal format to app format
+  const handleAddCost = async (costData: Omit<ModalCostEntry, 'id' | 'attachments'>, files?: FileList) => {
     if (!trip) return;
-    
+
     try {
-      await addCostEntry({
-        ...costData,
-        tripId: trip.id
-      }, files);
-      
+      // Convert from modal format to app format
+      const appCostData: Omit<CostEntry, 'id' | 'attachments'> = {
+        tripId: trip.id,
+        category: costData.category,
+        subCategory: costData.subType, // Map subType to subCategory
+        amount: costData.amount,
+        currency: costData.currency.startsWith('ZAR') ? 'ZAR' : 'USD', // Convert string to union type
+        referenceNumber: costData.referenceNumber,
+        date: costData.date,
+        notes: costData.notes,
+        isFlagged: costData.isFlagged || false,
+        noDocumentReason: costData.missingDocReason, // Map missingDocReason to noDocumentReason
+      };
+
+      await addCostEntry(appCostData, files);
+
       // Refresh trip data
       const updatedTrip = getTrip(trip.id);
       if (updatedTrip) {
         setTrip(updatedTrip);
       }
-      
+
       setShowAddCostModal(false);
     } catch (err) {
       console.error('Error adding cost:', err);
@@ -75,7 +103,7 @@ const TripDetailsPage: React.FC = () => {
   const handleUpdateCost = async (costData: CostEntry) => {
     try {
       await updateCostEntry(costData);
-      
+
       // Refresh trip data
       if (trip) {
         const updatedTrip = getTrip(trip.id);
@@ -83,7 +111,7 @@ const TripDetailsPage: React.FC = () => {
           setTrip(updatedTrip);
         }
       }
-      
+
       setEditingCost(null);
     } catch (err) {
       console.error('Error updating cost:', err);
@@ -93,7 +121,7 @@ const TripDetailsPage: React.FC = () => {
   const handleDeleteCost = async (costId: string) => {
     try {
       await deleteCostEntry(costId);
-      
+
       // Refresh trip data
       if (trip) {
         const updatedTrip = getTrip(trip.id);
@@ -108,7 +136,7 @@ const TripDetailsPage: React.FC = () => {
 
   const handleCompleteTrip = async () => {
     if (!trip) return;
-    
+
     try {
       await completeTrip(trip.id);
       navigate('/completed-trips');
@@ -152,6 +180,27 @@ const TripDetailsPage: React.FC = () => {
   const calculateProfitMargin = (revenue: number, costs: number) => {
     if (revenue === 0) return 0;
     return ((revenue - costs) / revenue) * 100;
+  };
+
+  // Convert from app format to modal format
+  const convertToModalCostEntry = (cost: CostEntry): ModalCostEntry => {
+    return {
+      id: cost.id,
+      category: cost.category,
+      subType: cost.subCategory,
+      currency: cost.currency === 'ZAR' ? 'ZAR (R)' : 'USD ($)',
+      amount: cost.amount,
+      referenceNumber: cost.referenceNumber,
+      date: cost.date,
+      notes: cost.notes,
+      attachments: cost.attachments?.map(att => ({
+        name: att.filename,
+        url: att.fileUrl
+      })),
+      missingDocReason: cost.noDocumentReason,
+      isFlagged: cost.isFlagged,
+      manuallyFlagged: false // Default value
+    };
   };
 
   if (loading) {
@@ -206,7 +255,7 @@ const TripDetailsPage: React.FC = () => {
               Deliver
             </Button>
           )}
-          <Button onClick={handleCompleteTrip} variant="default" icon={<CheckCircle className="h-4 w-4" />}>
+          <Button onClick={handleCompleteTrip} variant="primary" icon={<CheckCircle className="h-4 w-4" />}>
             Complete Trip
           </Button>
         </div>
@@ -222,7 +271,7 @@ const TripDetailsPage: React.FC = () => {
               </h1>
               <p className="text-sm text-gray-500">
                 {new Date(trip.startDate).toLocaleDateString()} to {new Date(trip.endDate).toLocaleDateString()}
-                {trip.distance && ` • ${trip.distance} km`}
+                {trip.distanceKm && ` • ${trip.distanceKm} km`}
               </p>
             </div>
             <div className="flex space-x-2">
@@ -267,7 +316,7 @@ const TripDetailsPage: React.FC = () => {
       </Card>
 
       {/* System costs banner */}
-      {(trip.costs?.length === 0 || !trip.systemCostsGenerated) && (
+      {(trip.costs?.length === 0 || !trip.costs.some(cost => cost.isSystemGenerated)) && (
         <Card className="border-yellow-300 bg-yellow-50">
           <CardContent className="p-4">
             <div className="flex items-start space-x-3">
@@ -277,9 +326,9 @@ const TripDetailsPage: React.FC = () => {
                 <p className="text-sm text-yellow-700 mt-1">
                   Generate system costs for accurate profitability assessment, including per-kilometer and per-day fixed costs.
                 </p>
-                <Button 
-                  className="mt-2" 
-                  variant="outline" 
+                <Button
+                  className="mt-2"
+                  variant="outline"
                   size="sm"
                   onClick={() => setShowSystemCostsModal(true)}
                 >
@@ -341,26 +390,26 @@ const TripDetailsPage: React.FC = () => {
                   <p className="mt-1 text-sm text-gray-900">
                     {trip.route || `${trip.plannedRoute?.origin || 'N/A'} to ${trip.plannedRoute?.destination || 'N/A'}`}
                   </p>
-                  
+
                   <h3 className="text-sm font-medium text-gray-500 mt-4">Distance</h3>
                   <p className="mt-1 text-sm text-gray-900">{trip.distanceKm || '0'} km</p>
-                  
+
                   <h3 className="text-sm font-medium text-gray-500 mt-4">Client</h3>
                   <p className="mt-1 text-sm text-gray-900">{trip.clientName || 'N/A'}</p>
                 </div>
-                
+
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Start Date</h3>
                   <p className="mt-1 text-sm text-gray-900">{new Date(trip.startDate).toLocaleDateString()}</p>
-                  
+
                   <h3 className="text-sm font-medium text-gray-500 mt-4">End Date</h3>
                   <p className="mt-1 text-sm text-gray-900">{new Date(trip.endDate).toLocaleDateString()}</p>
-                  
+
                   <h3 className="text-sm font-medium text-gray-500 mt-4">Description</h3>
                   <p className="mt-1 text-sm text-gray-900">{trip.description || 'No description provided'}</p>
                 </div>
               </div>
-              
+
               {trip.plannedRoute?.waypoints && trip.plannedRoute.waypoints.length > 0 && (
                 <div className="mt-6">
                   <h3 className="text-sm font-medium text-gray-500">Waypoints</h3>
@@ -379,19 +428,19 @@ const TripDetailsPage: React.FC = () => {
           <div className="space-y-6">
             <div className="flex justify-between">
               <h2 className="text-lg font-medium">Trip Costs</h2>
-              <Button 
+              <Button
                 onClick={() => setShowAddCostModal(true)}
                 icon={<Plus className="h-4 w-4" />}
               >
                 Add Cost Entry
               </Button>
             </div>
-            
+
             <Card>
               <CardContent className="p-0">
-                <CostList 
-                  costs={trip.costs || []} 
-                  onEdit={setEditingCost} 
+                <CostList
+                  costs={trip.costs || []}
+                  onEdit={setEditingCost}
                   onDelete={handleDeleteCost}
                 />
               </CardContent>
@@ -410,24 +459,27 @@ const TripDetailsPage: React.FC = () => {
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Trip Notes</h3>
                   <p className="mt-1 text-sm text-gray-900 p-4 bg-gray-50 rounded-md">
-                    {trip.notes || 'No notes added'}
+                    {trip.description || 'No notes added'}
                   </p>
                 </div>
-                
+
                 {/* Attachments */}
                 <div>
                   <h3 className="text-sm font-medium text-gray-500">Attachments</h3>
-                  {trip.attachments && trip.attachments.length > 0 ? (
+                  {trip.costs && trip.costs.some(cost => cost.attachments && cost.attachments.length > 0) ? (
                     <ul className="mt-2 divide-y divide-gray-200">
-                      {trip.attachments.map((attachment, index) => (
-                        <li key={index} className="py-3 flex items-center justify-between">
-                          <div className="flex items-center">
-                            <FileText className="h-5 w-5 text-gray-400" />
-                            <span className="ml-2 text-sm text-gray-900">{attachment.name}</span>
-                          </div>
-                          <Button size="sm" variant="ghost">View</Button>
-                        </li>
-                      ))}
+                      {trip.costs
+                        .filter(cost => cost.attachments && cost.attachments.length > 0)
+                        .flatMap(cost => cost.attachments || [])
+                        .map((attachment, index) => (
+                          <li key={index} className="py-3 flex items-center justify-between">
+                            <div className="flex items-center">
+                              <FileText className="h-5 w-5 text-gray-400" />
+                              <span className="ml-2 text-sm text-gray-900">{attachment.filename}</span>
+                            </div>
+                            <Button size="sm" variant="outline">View</Button>
+                          </li>
+                        ))}
                     </ul>
                   ) : (
                     <p className="mt-1 text-sm text-gray-500">No attachments added</p>
@@ -441,7 +493,7 @@ const TripDetailsPage: React.FC = () => {
 
       {/* Add Cost Modal */}
       {showAddCostModal && (
-        <TripCostEntryModal 
+        <TripCostEntryModal
           isOpen={showAddCostModal}
           onClose={() => setShowAddCostModal(false)}
           onSubmit={handleAddCost}
@@ -453,8 +505,22 @@ const TripDetailsPage: React.FC = () => {
         <TripCostEntryModal
           isOpen={!!editingCost}
           onClose={() => setEditingCost(null)}
-          onSubmit={(data) => handleUpdateCost({ ...editingCost, ...data })}
-          initialData={editingCost}
+          onSubmit={(data) => {
+            // Convert modal data back to app format and merge with existing cost entry
+            const updatedCost: CostEntry = {
+              ...editingCost,
+              category: data.category,
+              subCategory: data.subType,
+              amount: data.amount,
+              currency: data.currency.startsWith('ZAR') ? 'ZAR' : 'USD',
+              referenceNumber: data.referenceNumber,
+              date: data.date,
+              notes: data.notes,
+              noDocumentReason: data.missingDocReason,
+            };
+            handleUpdateCost(updatedCost);
+          }}
+          initialData={convertToModalCostEntry(editingCost)}
         />
       )}
 

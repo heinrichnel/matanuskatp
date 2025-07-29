@@ -3,19 +3,12 @@ import Timeline, { TimelineHeaders, SidebarHeader, DateHeader, TimelineMarkers }
 import 'react-calendar-timeline/dist/style.css';
 import { format, addWeeks, subWeeks, parseISO, isValid, startOfWeek, endOfWeek } from 'date-fns';
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
-import { db } from "../../firebase"; // Adjust to your path
+import { firestore as db } from "../../utils/firebaseConnectionHandler";
 import { Card, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Truck, 
-  Flag, 
-  AlertTriangle, 
-  CheckCircle, 
-  Search, 
-  Download, 
-  DollarSign 
+import {
+  ChevronLeft, ChevronRight, Truck, Flag, AlertTriangle,
+  CheckCircle, Search, Download, DollarSign
 } from 'lucide-react';
 
 interface Vehicle {
@@ -28,7 +21,7 @@ interface Vehicle {
 
 interface Trip {
   id: string;
-  group: string; // vehicleId or fleetNo
+  group: string;
   title: string;
   start_time: number;
   end_time: number;
@@ -66,7 +59,7 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 function getTripColor(type: string) {
-  return TYPE_COLORS[type] || "#64748b"; 
+  return TYPE_COLORS[type] || "#64748b";
 }
 
 const TripTimelinePage: React.FC = () => {
@@ -80,74 +73,60 @@ const TripTimelinePage: React.FC = () => {
   const [timelineMode, setTimelineMode] = useState<"week" | "month">("week");
   const [filterType, setFilterType] = useState<string>("all");
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
-  
-  // Computed time values for the timeline
+
   const visibleTimeStart = startDate.getTime();
   const visibleTimeEnd = endDate.getTime();
 
-  // Fetch data from Firestore
   useEffect(() => {
     async function fetchTrips() {
       try {
         setLoading(true);
-        
-        // Get trips from Firestore, with proper filtering and ordering
+
         const tripsQuery = query(
           collection(db, "trips"),
           orderBy("startDate", "desc"),
-          limit(100) // Limit for performance
+          limit(100)
         );
-        
+
         const snap = await getDocs(tripsQuery);
-        console.log(`Found ${snap.size} trips in Firestore`);
-        
-        // Process trip documents
+
         const tripDocs = snap.docs.map(doc => ({ id: doc.id, ...(doc.data() as any) }));
-        
-        // Extract unique vehicles from trips
+
         const vehicleMap: Record<string, Vehicle> = {};
-        
-        // Create timeline items from trips
+
         const tripItems: Trip[] = tripDocs.map(trip => {
-          // Use fleetNumber as the group identifier
           const groupId = trip.fleetNumber || trip.vehicleId || 'unknown';
-          
-          // Store vehicle info
+
           if (!vehicleMap[groupId]) {
-            vehicleMap[groupId] = { 
+            vehicleMap[groupId] = {
               id: groupId,
               title: trip.fleetNumber || trip.vehicleName || groupId,
               fleetNumber: trip.fleetNumber,
               registration: trip.registration
             };
           }
-          
-          // Parse dates, checking if they're valid
+
           let startTime: number, endTime: number;
-          
-          // Try to parse startDate or startTime
           if (trip.startDate && isValid(parseISO(trip.startDate))) {
             startTime = parseISO(trip.startDate).getTime();
           } else if (trip.startTime && isValid(parseISO(trip.startTime))) {
             startTime = parseISO(trip.startTime).getTime();
           } else {
-            startTime = Date.now(); // Fallback
+            startTime = Date.now();
           }
-          
-          // Try to parse endDate or endTime
+
           if (trip.endDate && isValid(parseISO(trip.endDate))) {
             endTime = parseISO(trip.endDate).getTime();
           } else if (trip.endTime && isValid(parseISO(trip.endTime))) {
             endTime = parseISO(trip.endTime).getTime();
           } else {
-            endTime = startTime + (24 * 60 * 60 * 1000); // Default to 1 day duration
+            endTime = startTime + (24 * 60 * 60 * 1000);
           }
-          
-          // Format title based on available data
-          const title = trip.route || 
-                       (trip.clientName ? `Trip to ${trip.clientName}` : 
-                       trip.label || 'Untitled Trip');
-                        
+
+          const title = trip.route ||
+                        (trip.clientName ? `Trip to ${trip.clientName}` :
+                        trip.label || 'Untitled Trip');
+
           return {
             id: trip.id,
             group: groupId,
@@ -161,8 +140,8 @@ const TripTimelinePage: React.FC = () => {
             clientName: trip.clientName,
             route: trip.route,
             driverName: trip.driverName || trip.driver,
-            background: trip.status === 'completed' ? '#dcfce7' : 
-                        trip.status === 'invoiced' ? '#fef3c7' : 
+            background: trip.status === 'completed' ? '#dcfce7' :
+                        trip.status === 'invoiced' ? '#fef3c7' :
                         trip.status === 'paid' ? '#e0e7ff' : '#dbeafe',
             fromFirestore: true,
             origin: trip.origin,
@@ -170,28 +149,22 @@ const TripTimelinePage: React.FC = () => {
             driver: trip.driver || trip.driverName
           };
         });
-        
-        // Convert vehicle map to array
+
         const vehiclesArray = Object.values(vehicleMap);
-        
-        console.log(`Processed ${tripItems.length} trips for timeline`);
-        console.log(`Found ${vehiclesArray.length} unique vehicles`);
-        
+
         setTrips(tripItems);
         setVehicles(vehiclesArray);
         setError(null);
       } catch (error) {
-        console.error('Error fetching trips for timeline:', error);
         setError("Failed to load timeline data. Please try again later.");
       } finally {
         setLoading(false);
       }
     }
-    
+
     fetchTrips();
   }, [timelineMode]);
 
-  // Navigation functions
   const goToNextPeriod = () => {
     if (timelineMode === 'week') {
       setStartDate(addWeeks(startDate, 1));
@@ -201,7 +174,7 @@ const TripTimelinePage: React.FC = () => {
       setEndDate(addWeeks(endDate, 4));
     }
   };
-  
+
   const goToPreviousPeriod = () => {
     if (timelineMode === 'week') {
       setStartDate(subWeeks(startDate, 1));
@@ -211,7 +184,7 @@ const TripTimelinePage: React.FC = () => {
       setEndDate(subWeeks(endDate, 4));
     }
   };
-  
+
   const goToToday = () => {
     if (timelineMode === 'week') {
       setStartDate(startOfWeek(new Date()));
@@ -221,52 +194,42 @@ const TripTimelinePage: React.FC = () => {
       setEndDate(endOfWeek(addWeeks(new Date(), 4)));
     }
   };
-  
+
   const toggleTimelineMode = () => {
     if (timelineMode === 'week') {
       setTimelineMode('month');
-      // Expand to a month view
       setEndDate(endOfWeek(addWeeks(startDate, 3)));
     } else {
       setTimelineMode('week');
-      // Contract to a week view
       setEndDate(endOfWeek(addWeeks(startDate, 1)));
     }
   };
 
-  // Handle item selection
   const handleItemSelect = (itemId: number) => {
     const selectedItem = trips.find(item => item.id === itemId.toString());
     setSelectedTrip(selectedItem || null);
   };
 
-  // Handle time change in timeline
   const handleTimeChange = (visibleTimeStart: number, visibleTimeEnd: number) => {
     setStartDate(new Date(visibleTimeStart));
     setEndDate(new Date(visibleTimeEnd));
   };
 
-  // Filter trips by type/status
   const filteredTrips = trips.filter(trip => {
     if (filterType === 'all') return true;
     return trip.status === filterType || trip.type === filterType;
   });
-  
-  // Filter vehicles for search and only show vehicles with trips
+
   const vehiclesWithTrips = new Set(filteredTrips.map(t => t.group));
   const filteredVehicles = vehicles
     .filter(v => vehiclesWithTrips.has(v.id))
-    .filter(v => search 
-      ? v.title.toLowerCase().includes(search.toLowerCase()) 
+    .filter(v => search
+      ? v.title.toLowerCase().includes(search.toLowerCase())
       : true
     );
 
-  // Custom item renderer for trip bars
   const itemRenderer = ({ item, getItemProps }: any) => {
-    // Background style for different trip statuses
     const backgroundColor = item.background || '#dbeafe';
-    
-    // Base style with background color
     const baseStyle = {
       ...getItemProps({}),
       background: backgroundColor,
@@ -275,12 +238,12 @@ const TripTimelinePage: React.FC = () => {
       borderRadius: '4px',
       boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
     };
-    
+
     return (
       <div {...baseStyle}>
-        <div style={{ 
-          height: '100%', 
-          paddingLeft: '8px', 
+        <div style={{
+          height: '100%',
+          paddingLeft: '8px',
           paddingRight: '8px',
           overflow: 'hidden',
           display: 'flex',
@@ -302,7 +265,7 @@ const TripTimelinePage: React.FC = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">Trip Timeline</h1>
         <div className="flex space-x-2">
-          <Button 
+          <Button
             variant="outline"
             onClick={() => console.log('Export feature to be implemented')}
           >
@@ -315,46 +278,23 @@ const TripTimelinePage: React.FC = () => {
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
-            {/* Left side: Timeline controls */}
             <div className="flex items-center space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={goToPreviousPeriod}
-              >
+              <Button variant="outline" size="sm" onClick={goToPreviousPeriod}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={goToToday}
-              >
+              <Button variant="outline" size="sm" onClick={goToToday}>
                 Today
               </Button>
-              
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={goToNextPeriod}
-              >
+              <Button variant="outline" size="sm" onClick={goToNextPeriod}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
-              
               <span className="text-sm font-medium px-2">
                 {format(startDate, 'MMM d, yyyy')} - {format(endDate, 'MMM d, yyyy')}
               </span>
-              
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={toggleTimelineMode}
-              >
+              <Button variant="outline" size="sm" onClick={toggleTimelineMode}>
                 {timelineMode === 'week' ? 'Month View' : 'Week View'}
               </Button>
             </div>
-            
-            {/* Right side: Search and filter */}
             <div className="flex items-center space-x-2">
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -368,9 +308,8 @@ const TripTimelinePage: React.FC = () => {
                   className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
-              
-              <select 
-                value={filterType} 
+              <select
+                value={filterType}
                 onChange={e => setFilterType(e.target.value)}
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               >
@@ -387,16 +326,12 @@ const TripTimelinePage: React.FC = () => {
               </select>
             </div>
           </div>
-          
-          {/* Error display */}
           {error && (
             <div className="p-4 bg-red-50 text-red-700 rounded flex items-center mb-4">
               <AlertTriangle size={20} className="mr-2" />
               {error}
             </div>
           )}
-          
-          {/* Timeline Component */}
           {loading ? (
             <div className="flex items-center justify-center h-96">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -434,7 +369,7 @@ const TripTimelinePage: React.FC = () => {
                     {(props: { getRootProps: () => React.HTMLAttributes<HTMLDivElement> }) => (
                       <div {...props.getRootProps()} className="bg-gray-100 p-2 text-sm font-medium text-gray-700 border-b">
                         <div className="flex items-center">
-                          <Truck size={16} className="mr-1" /> 
+                          <Truck size={16} className="mr-1" />
                           Fleet Vehicles
                         </div>
                       </div>
@@ -444,7 +379,6 @@ const TripTimelinePage: React.FC = () => {
                   <DateHeader unit="hour" height={15} labelFormat="HH:00" />
                 </TimelineHeaders>
                 <TimelineMarkers>
-                  {/* Current time marker */}
                   <div
                     className="current-time-marker"
                     style={{
@@ -461,8 +395,6 @@ const TripTimelinePage: React.FC = () => {
               </Timeline>
             </div>
           )}
-          
-          {/* Selected Trip Details */}
           {selectedTrip && (
             <div className="mt-4 p-3 border rounded-md bg-gray-50">
               <h3 className="font-medium mb-2">{selectedTrip.title}</h3>
@@ -484,8 +416,8 @@ const TripTimelinePage: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-gray-500">Status:</span>{' '}
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
-                    ${selectedTrip.status === 'completed' ? 'bg-green-100 text-green-800' : 
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                    ${selectedTrip.status === 'completed' ? 'bg-green-100 text-green-800' :
                       selectedTrip.status === 'in_progress' || selectedTrip.status === 'active' ? 'bg-blue-100 text-blue-800' :
                       selectedTrip.status === 'delayed' ? 'bg-yellow-100 text-yellow-800' :
                       selectedTrip.status === 'cancelled' ? 'bg-red-100 text-red-800' :
@@ -497,8 +429,8 @@ const TripTimelinePage: React.FC = () => {
                 </div>
               </div>
               <div className="mt-2 flex justify-end">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => setSelectedTrip(null)}
                 >
@@ -507,8 +439,6 @@ const TripTimelinePage: React.FC = () => {
               </div>
             </div>
           )}
-          
-          {/* Legend */}
           <div className="flex flex-wrap gap-3 mt-4 pt-4 border-t">
             <div className="text-sm font-medium">Trip Status Legend:</div>
             <div className="flex items-center">
