@@ -1,15 +1,22 @@
-import { BarChart, Download, Filter, PieChart, Plus, Search } from "lucide-react";
-import React, { useEffect, useState } from "react";
-import Button from "../../components/ui/Button";
-import { Card, CardContent } from "../../components/ui/Card";
-import SyncIndicator from "../../components/ui/SyncIndicator";
+import React, { useEffect, useMemo, useState } from "react";
+import { collection, getDocs, query } from "firebase/firestore";
+import { db } from "@/firebase"; // Pas aan as jou firebase config elders is
+
+import { BarChart2, PieChart, Download, Filter, Plus, Search, CheckCircle2, XCircle, Truck, Circle, CircleDot, Loader2 } from "lucide-react";
+import Button from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/ui/Card";
+import SyncIndicator from "@/components/ui/SyncIndicator";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Pie, PieChart as PieChartC, Cell, ResponsiveContainer, Legend } from "recharts";
+
+type TyreStatus = "In-Service" | "In-Stock" | "Repair" | "Scrap";
+type TyreCondition = "New" | "Good" | "Fair" | "Poor" | "Retreaded";
 
 interface TyreRecord {
   id: string;
   tyreNumber: string;
   manufacturer: string;
-  condition: "New" | "Good" | "Fair" | "Poor" | "Retreaded";
-  status: "In-Service" | "In-Stock" | "Repair" | "Scrap";
+  condition: TyreCondition;
+  status: TyreStatus;
   vehicleAssignment: string;
   km: number;
   kmLimit: number;
@@ -22,184 +29,128 @@ interface TyreRecord {
   pattern?: string;
 }
 
-interface TyreInventoryDashboardProps {
-  onAddTyre?: () => void;
-  onViewTyreDetail?: (id: string) => void;
-  onEditTyre?: (id: string) => void;
-}
+const STATUS_COLORS = {
+  "In-Service": "bg-green-100 text-green-800",
+  "In-Stock": "bg-blue-100 text-blue-800",
+  "Repair": "bg-yellow-100 text-yellow-800",
+  "Scrap": "bg-red-100 text-red-800",
+};
+const CONDITION_COLORS = {
+  "New": "bg-green-100 text-green-800",
+  "Good": "bg-blue-100 text-blue-800",
+  "Fair": "bg-yellow-100 text-yellow-800",
+  "Poor": "bg-red-100 text-red-800",
+  "Retreaded": "bg-purple-100 text-purple-800",
+};
 
-const TyreInventoryDashboard: React.FC<TyreInventoryDashboardProps> = ({
-  onAddTyre,
-  onViewTyreDetail,
-  onEditTyre,
-}) => {
+const PIE_COLORS = ["#22d3ee", "#4ade80", "#fde047", "#f87171", "#c084fc", "#60a5fa", "#fbbf24"];
+
+const TyreInventoryDashboard: React.FC = () => {
+  // Filter, sort, state
+  const [tyres, setTyres] = useState<TyreRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterManufacturer, setFilterManufacturer] = useState<string>("");
-  const [filterStatus, setFilterStatus] = useState<string>("");
-  const [filterCondition, setFilterCondition] = useState<string>("");
+  const [filterManufacturer, setFilterManufacturer] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterCondition, setFilterCondition] = useState("");
   const [sortBy, setSortBy] = useState<keyof TyreRecord>("tyreNumber");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [isLoading, setIsLoading] = useState(false);
-  const [tyres, setTyres] = useState<TyreRecord[]>([]);
 
-  // Mock data for initial load
-  const mockTyres: TyreRecord[] = [
-    {
-      id: "1",
-      tyreNumber: "T1001",
-      manufacturer: "Michelin",
-      condition: "Good",
-      status: "In-Service",
-      vehicleAssignment: "MAT001",
-      km: 15000,
-      kmLimit: 60000,
-      treadDepth: 8.5,
-      mountStatus: "Mounted",
-      axlePosition: "Front Left",
-      lastInspection: "2025-06-15",
-      datePurchased: "2025-01-10",
-      size: "295/80R22.5",
-      pattern: "X MultiWay 3D XZE",
-    },
-    {
-      id: "2",
-      tyreNumber: "T1002",
-      manufacturer: "Goodyear",
-      condition: "Fair",
-      status: "In-Service",
-      vehicleAssignment: "MAT001",
-      km: 25000,
-      kmLimit: 60000,
-      treadDepth: 6.2,
-      mountStatus: "Mounted",
-      axlePosition: "Front Right",
-      lastInspection: "2025-06-15",
-      datePurchased: "2025-01-10",
-      size: "295/80R22.5",
-      pattern: "KMAX S",
-    },
-    {
-      id: "3",
-      tyreNumber: "T1003",
-      manufacturer: "Bridgestone",
-      condition: "New",
-      status: "In-Stock",
-      vehicleAssignment: "",
-      km: 0,
-      kmLimit: 80000,
-      treadDepth: 14.0,
-      mountStatus: "Not Mounted",
-      datePurchased: "2025-06-01",
-      size: "315/80R22.5",
-      pattern: "R168",
-    },
-    {
-      id: "4",
-      tyreNumber: "T1004",
-      manufacturer: "Continental",
-      condition: "Poor",
-      status: "Repair",
-      vehicleAssignment: "MAT003",
-      km: 48000,
-      kmLimit: 60000,
-      treadDepth: 3.2,
-      mountStatus: "Removed",
-      axlePosition: "Rear Right Outer",
-      lastInspection: "2025-07-02",
-      datePurchased: "2024-10-15",
-      size: "315/80R22.5",
-      pattern: "HDR2+",
-    },
-    {
-      id: "5",
-      tyreNumber: "T1005",
-      manufacturer: "Pirelli",
-      condition: "Retreaded",
-      status: "In-Service",
-      vehicleAssignment: "MAT002",
-      km: 12000,
-      kmLimit: 40000,
-      treadDepth: 10.5,
-      mountStatus: "Mounted",
-      axlePosition: "Drive Axle Left Inner",
-      lastInspection: "2025-06-28",
-      datePurchased: "2024-12-05",
-      size: "315/80R22.5",
-      pattern: "FH:01",
-    },
-    {
-      id: "6",
-      tyreNumber: "T1006",
-      manufacturer: "Goodyear",
-      condition: "Good",
-      status: "In-Service",
-      vehicleAssignment: "MAT002",
-      km: 18500,
-      kmLimit: 60000,
-      treadDepth: 7.8,
-      mountStatus: "Mounted",
-      axlePosition: "Drive Axle Left Outer",
-      lastInspection: "2025-06-28",
-      datePurchased: "2024-12-05",
-      size: "315/80R22.5",
-      pattern: "KMAX D",
-    },
-    {
-      id: "7",
-      tyreNumber: "T1007",
-      manufacturer: "Michelin",
-      condition: "Retreaded",
-      status: "Scrap",
-      vehicleAssignment: "",
-      km: 75000,
-      kmLimit: 60000,
-      treadDepth: 1.8,
-      mountStatus: "Removed",
-      datePurchased: "2024-05-20",
-      size: "295/80R22.5",
-      pattern: "X MultiWay 3D XDE",
-    },
-  ];
-
-  // Load tyres on component mount
+  // LOAD FROM FIRESTORE
   useEffect(() => {
     setIsLoading(true);
-    // Simulate API fetch
-    setTimeout(() => {
-      setTyres(mockTyres);
-      setIsLoading(false);
-    }, 800);
+    setError(null);
+    const fetch = async () => {
+      try {
+        const tyresQ = query(collection(db, "tyres"));
+        const snap = await getDocs(tyresQ);
+        const result: TyreRecord[] = snap.docs.map((doc) => {
+          const d = doc.data();
+          return {
+            id: doc.id,
+            tyreNumber: d.tyreNumber || "",
+            manufacturer: d.manufacturer || "",
+            condition: d.condition || "Good",
+            status: d.status || "In-Stock",
+            vehicleAssignment: d.vehicleAssignment || "",
+            km: d.km ?? 0,
+            kmLimit: d.kmLimit ?? 0,
+            treadDepth: d.treadDepth ?? 0,
+            mountStatus: d.mountStatus || "",
+            axlePosition: d.axlePosition,
+            lastInspection: d.lastInspection,
+            datePurchased: d.datePurchased,
+            size: d.size,
+            pattern: d.pattern,
+          };
+        });
+        setTyres(result);
+      } catch (e: any) {
+        setError("Failed to load tyres.");
+        setTyres([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetch();
   }, []);
 
-  // Filter and sort tyres
-  const filteredTyres = tyres
-    .filter((tyre) => {
-      const matchesSearch =
-        searchTerm === "" ||
-        tyre.tyreNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        tyre.vehicleAssignment.toLowerCase().includes(searchTerm.toLowerCase());
+  // FILTER & SORT
+  const filteredTyres = useMemo(() => {
+    return tyres
+      .filter((tyre) => {
+        const matchesSearch =
+          !searchTerm ||
+          tyre.tyreNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          tyre.vehicleAssignment.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesManufacturer =
+          !filterManufacturer || tyre.manufacturer === filterManufacturer;
+        const matchesStatus = !filterStatus || tyre.status === filterStatus;
+        const matchesCondition = !filterCondition || tyre.condition === filterCondition;
+        return matchesSearch && matchesManufacturer && matchesStatus && matchesCondition;
+      })
+      .sort((a, b) => {
+        const av = a[sortBy];
+        const bv = b[sortBy];
+        if (av === undefined && bv === undefined) return 0;
+        if (av === undefined) return 1;
+        if (bv === undefined) return -1;
+        if (av < bv) return sortDirection === "asc" ? -1 : 1;
+        if (av > bv) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+  }, [tyres, searchTerm, filterManufacturer, filterStatus, filterCondition, sortBy, sortDirection]);
 
-      const matchesManufacturer =
-        filterManufacturer === "" || tyre.manufacturer === filterManufacturer;
+  // Unique dropdown values
+  const manufacturers = useMemo(() => [...new Set(tyres.map((t) => t.manufacturer).filter(Boolean))], [tyres]);
+  const conditions = ["New", "Good", "Fair", "Poor", "Retreaded"];
+  const statuses = ["In-Service", "In-Stock", "Repair", "Scrap"];
 
-      const matchesStatus = filterStatus === "" || tyre.status === filterStatus;
+  // Summary cards
+  const stats = useMemo(() => ({
+    total: tyres.length,
+    inService: tyres.filter((t) => t.status === "In-Service").length,
+    inStock: tyres.filter((t) => t.status === "In-Stock").length,
+    repair: tyres.filter((t) => t.status === "Repair").length,
+    scrap: tyres.filter((t) => t.status === "Scrap").length,
+  }), [tyres]);
 
-      const matchesCondition = filterCondition === "" || tyre.condition === filterCondition;
+  // Bar chart data (per status)
+  const chartData = statuses.map(status => ({
+    status,
+    count: tyres.filter((t) => t.status === status).length,
+  }));
 
-      return matchesSearch && matchesManufacturer && matchesStatus && matchesCondition;
-    })
-    .sort((a, b) => {
-      const aValue = a[sortBy];
-      const bValue = b[sortBy];
-      if (aValue === undefined && bValue === undefined) return 0;
-      if (aValue === undefined) return 1;
-      if (bValue === undefined) return -1;
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
+  // Pie chart: manufacturers
+  const pieData = manufacturers.map((man, i) => ({
+    name: man,
+    value: tyres.filter((t) => t.manufacturer === man).length,
+    color: PIE_COLORS[i % PIE_COLORS.length],
+  }));
 
-  // Toggle sort direction
+  // Sorting
   const handleSort = (field: keyof TyreRecord) => {
     if (sortBy === field) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -209,341 +160,268 @@ const TyreInventoryDashboard: React.FC<TyreInventoryDashboardProps> = ({
     }
   };
 
-  // Calculate summary statistics
-  const totalTyres = tyres.length;
-  const inServiceTyres = tyres.filter((t) => t.status === "In-Service").length;
-  const inStockTyres = tyres.filter((t) => t.status === "In-Stock").length;
-  const repairTyres = tyres.filter((t) => t.status === "Repair").length;
-  const scrapTyres = tyres.filter((t) => t.status === "Scrap").length;
-
-  // Get unique manufacturers for filter dropdown
-  const manufacturers = Array.from(new Set(tyres.map((t) => t.manufacturer)));
-
-  // Generate condition class
-  const getConditionClass = (condition: string) => {
-    switch (condition) {
-      case "New":
-        return "bg-green-100 text-green-800";
-      case "Good":
-        return "bg-blue-100 text-blue-800";
-      case "Fair":
-        return "bg-yellow-100 text-yellow-800";
-      case "Poor":
-        return "bg-red-100 text-red-800";
-      case "Retreaded":
-        return "bg-purple-100 text-purple-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  // Generate status class
-  const getStatusClass = (status: string) => {
-    switch (status) {
-      case "In-Service":
-        return "bg-green-100 text-green-800";
-      case "In-Stock":
-        return "bg-blue-100 text-blue-800";
-      case "Repair":
-        return "bg-yellow-100 text-yellow-800";
-      case "Scrap":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  // Calculate tread percentage
-  const calculateTreadPercentage = (current: number, original = 14) => {
-    return Math.round((current / original) * 100);
-  };
-
-  // Format numbers
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat().format(num);
-  };
+  // Helpers
+  const getBadge = (val: string, dict: any) =>
+    <span className={`px-2 py-1 rounded-full text-xs font-medium inline-block ${dict[val] || "bg-gray-100 text-gray-800"}`}>{val}</span>;
+  const calculateTreadPerc = (t: number, max = 14) => Math.round((t / max) * 100);
+  const formatNumber = (num: number) => new Intl.NumberFormat().format(num);
 
   return (
-    <div className="space-y-6">
-      {/* Header and Summary Stats */}
+    <div className="space-y-8">
+      {/* Header and Action */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h2 className="text-2xl font-bold">Tyre Inventory</h2>
+        <div className="flex items-center gap-2">
+          <Truck className="text-blue-500 w-8 h-8" />
+          <h2 className="text-2xl font-bold">Tyre Inventory Dashboard</h2>
+        </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" icon={<Download className="w-4 h-4" />}>
             Export
           </Button>
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />} onClick={onAddTyre}>
+          <Button variant="primary" icon={<Plus className="w-4 h-4" />}>
             Add Tyre
           </Button>
           <SyncIndicator />
         </div>
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-500">Total Tyres</h3>
-            <p className="text-2xl font-bold text-gray-900">{totalTyres}</p>
+          <CardContent className="p-4 flex items-center gap-3">
+            <CheckCircle2 className="w-7 h-7 text-blue-400" />
+            <div>
+              <div className="text-xs text-gray-500">Total Tyres</div>
+              <div className="text-xl font-bold">{stats.total}</div>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-500">In Service</h3>
-            <p className="text-2xl font-bold text-green-600">{inServiceTyres}</p>
+          <CardContent className="p-4 flex items-center gap-3">
+            <CircleDot className="w-7 h-7 text-green-400" />
+            <div>
+              <div className="text-xs text-gray-500">In Service</div>
+              <div className="text-xl font-bold text-green-700">{stats.inService}</div>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-500">In Stock</h3>
-            <p className="text-2xl font-bold text-blue-600">{inStockTyres}</p>
+          <CardContent className="p-4 flex items-center gap-3">
+            <Circle className="w-7 h-7 text-blue-400" />
+            <div>
+              <div className="text-xs text-gray-500">In Stock</div>
+              <div className="text-xl font-bold text-blue-700">{stats.inStock}</div>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-500">In Repair</h3>
-            <p className="text-2xl font-bold text-yellow-600">{repairTyres}</p>
+          <CardContent className="p-4 flex items-center gap-3">
+            <BarChart2 className="w-7 h-7 text-yellow-400" />
+            <div>
+              <div className="text-xs text-gray-500">Repair</div>
+              <div className="text-xl font-bold text-yellow-700">{stats.repair}</div>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <h3 className="text-sm font-medium text-gray-500">Scrapped</h3>
-            <p className="text-2xl font-bold text-red-600">{scrapTyres}</p>
+          <CardContent className="p-4 flex items-center gap-3">
+            <XCircle className="w-7 h-7 text-red-400" />
+            <div>
+              <div className="text-xs text-gray-500">Scrapped</div>
+              <div className="text-xl font-bold text-red-700">{stats.scrap}</div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters and Search */}
-      <div className="bg-white p-4 rounded-md shadow">
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="flex-1 min-w-[200px]">
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by tyre number or vehicle..."
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+      {/* Charts */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm font-semibold mb-2 flex items-center gap-2"><BarChart2 className="w-5 h-5" /> Tyres per Status</div>
+            <div style={{ width: "100%", height: 210 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <XAxis dataKey="status" fontSize={12} />
+                  <YAxis fontSize={12} allowDecimals={false} />
+                  <Tooltip />
+                  <Bar dataKey="count">
+                    {chartData.map((entry, i) => (
+                      <Cell key={entry.status} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-          </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm font-semibold mb-2 flex items-center gap-2"><PieChart className="w-5 h-5" /> Manufacturer Share</div>
+            <div style={{ width: "100%", height: 210 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChartC>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={70}
+                    label={({ name, value }) => `${name}: ${value}`}
+                  >
+                    {pieData.map((entry, idx) => (
+                      <Cell key={`cell-${idx}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Legend />
+                </PieChartC>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="text-sm font-semibold mb-2 flex items-center gap-2"><CircleDot className="w-5 h-5" /> Condition Breakdown</div>
+            <ul className="space-y-1">
+              {conditions.map(cond => (
+                <li key={cond} className="flex justify-between">
+                  <span>{getBadge(cond, CONDITION_COLORS)}</span>
+                  <span className="font-mono">{tyres.filter(t => t.condition === cond).length}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
 
-          <div className="flex items-center space-x-2">
+      {/* FILTERS */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-wrap gap-3 items-center mb-2">
+            <div className="flex-1 min-w-[200px]">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by tyre number or vehicle..."
+                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
             <Filter className="h-5 w-5 text-gray-500" />
             <span className="text-sm font-medium text-gray-500">Filters:</span>
-          </div>
-
-          <div>
-            <select
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-              value={filterManufacturer}
-              onChange={(e) => setFilterManufacturer(e.target.value)}
-            >
+            <select className="px-3 py-2 border rounded-md" value={filterManufacturer} onChange={e => setFilterManufacturer(e.target.value)}>
               <option value="">All Manufacturers</option>
-              {manufacturers.map((mfg) => (
-                <option key={mfg} value={mfg}>
-                  {mfg}
-                </option>
-              ))}
+              {manufacturers.map((m) => <option key={m} value={m}>{m}</option>)}
             </select>
-          </div>
-
-          <div>
-            <select
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="">All Status</option>
-              <option value="In-Service">In Service</option>
-              <option value="In-Stock">In Stock</option>
-              <option value="Repair">Repair</option>
-              <option value="Scrap">Scrap</option>
+            <select className="px-3 py-2 border rounded-md" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+              <option value="">All Statuses</option>
+              {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
-          </div>
-
-          <div>
-            <select
-              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-              value={filterCondition}
-              onChange={(e) => setFilterCondition(e.target.value)}
-            >
+            <select className="px-3 py-2 border rounded-md" value={filterCondition} onChange={e => setFilterCondition(e.target.value)}>
               <option value="">All Conditions</option>
-              <option value="New">New</option>
-              <option value="Good">Good</option>
-              <option value="Fair">Fair</option>
-              <option value="Poor">Poor</option>
-              <option value="Retreaded">Retreaded</option>
+              {conditions.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-          </div>
-
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" icon={<BarChart className="w-4 h-4" />}>
-              Analytics
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setSearchTerm("");
+                setFilterManufacturer("");
+                setFilterStatus("");
+                setFilterCondition("");
+              }}>
+              Clear
             </Button>
-            <Button variant="outline" size="sm" icon={<PieChart className="w-4 h-4" />}>
-              Reports
-            </Button>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Tyre Inventory Table */}
+      {/* TABLE */}
       <div className="bg-white rounded-md shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("tyreNumber")}
-                >
-                  Tyre Number {sortBy === "tyreNumber" && (sortDirection === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("manufacturer")}
-                >
-                  Manufacturer {sortBy === "manufacturer" && (sortDirection === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("condition")}
-                >
-                  Condition {sortBy === "condition" && (sortDirection === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("status")}
-                >
-                  Status {sortBy === "status" && (sortDirection === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("vehicleAssignment")}
-                >
-                  Vehicle {sortBy === "vehicleAssignment" && (sortDirection === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("km")}
-                >
-                  KM Run {sortBy === "km" && (sortDirection === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("treadDepth")}
-                >
-                  Tread {sortBy === "treadDepth" && (sortDirection === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort("mountStatus")}
-                >
-                  Mount Status {sortBy === "mountStatus" && (sortDirection === "asc" ? "↑" : "↓")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
+                {[
+                  { field: "tyreNumber", label: "Tyre Number" },
+                  { field: "manufacturer", label: "Manufacturer" },
+                  { field: "condition", label: "Condition" },
+                  { field: "status", label: "Status" },
+                  { field: "vehicleAssignment", label: "Vehicle" },
+                  { field: "km", label: "KM Run" },
+                  { field: "treadDepth", label: "Tread (mm)" },
+                  { field: "mountStatus", label: "Mount Status" },
+                ].map(col => (
+                  <th
+                    key={col.field}
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                    onClick={() => handleSort(col.field as keyof TyreRecord)}
+                  >
+                    {col.label} {sortBy === col.field ? (sortDirection === "asc" ? "↑" : "↓") : ""}
+                  </th>
+                ))}
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {isLoading ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-4 text-center">
-                    <div className="flex justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                    </div>
-                    <p className="mt-2 text-sm text-gray-500">Loading tyre inventory...</p>
+                  <td colSpan={10} className="py-10 text-center">
+                    <Loader2 className="animate-spin inline-block w-10 h-10 text-blue-400" />
+                    <div className="mt-2 text-gray-400">Loading tyre inventory...</div>
                   </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={10} className="py-8 text-center text-red-500">{error}</td>
                 </tr>
               ) : filteredTyres.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
-                    No tyres found matching your criteria
+                  <td colSpan={10} className="py-10 text-center text-gray-400">
+                    No tyres found matching your criteria.
                   </td>
                 </tr>
               ) : (
                 filteredTyres.map((tyre) => (
                   <tr key={tyre.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {tyre.tyreNumber}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {tyre.manufacturer}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getConditionClass(tyre.condition)}`}
-                      >
-                        {tyre.condition}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClass(tyre.status)}`}
-                      >
-                        {tyre.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {tyre.vehicleAssignment || "—"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatNumber(tyre.km)} / {formatNumber(tyre.kmLimit)} km
+                    <td className="px-6 py-4 font-semibold">{tyre.tyreNumber}</td>
+                    <td className="px-6 py-4">{tyre.manufacturer}</td>
+                    <td className="px-6 py-4">{getBadge(tyre.condition, CONDITION_COLORS)}</td>
+                    <td className="px-6 py-4">{getBadge(tyre.status, STATUS_COLORS)}</td>
+                    <td className="px-6 py-4">{tyre.vehicleAssignment || "—"}</td>
+                    <td className="px-6 py-4">{formatNumber(tyre.km)} / {formatNumber(tyre.kmLimit)} km
                       <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
                         <div
-                          className={`h-1.5 rounded-full ${tyre.km > tyre.kmLimit * 0.8 ? "bg-red-500" : "bg-blue-500"}`}
-                          style={{ width: `${Math.min(100, (tyre.km / tyre.kmLimit) * 100)}%` }}
+                          className={`h-1.5 rounded-full ${tyre.km > (tyre.kmLimit ?? 1) * 0.8 ? "bg-red-500" : "bg-blue-500"}`}
+                          style={{ width: `${Math.min(100, (tyre.km / (tyre.kmLimit || 1)) * 100)}%` }}
                         ></div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {tyre.treadDepth} mm
+                    <td className="px-6 py-4">{tyre.treadDepth} mm
                       <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
                         <div
                           className={`h-1.5 rounded-full ${
-                            calculateTreadPercentage(tyre.treadDepth) > 70
+                            calculateTreadPerc(tyre.treadDepth) > 70
                               ? "bg-green-500"
-                              : calculateTreadPercentage(tyre.treadDepth) > 30
-                                ? "bg-yellow-500"
-                                : "bg-red-500"
+                              : calculateTreadPerc(tyre.treadDepth) > 30
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
                           }`}
-                          style={{ width: `${calculateTreadPercentage(tyre.treadDepth)}%` }}
+                          style={{ width: `${calculateTreadPerc(tyre.treadDepth)}%` }}
                         ></div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {tyre.mountStatus}
-                      {tyre.axlePosition && (
-                        <div className="text-xs text-gray-400">{tyre.axlePosition}</div>
-                      )}
+                    <td className="px-6 py-4">{tyre.mountStatus}
+                      {tyre.axlePosition && <div className="text-xs text-gray-400">{tyre.axlePosition}</div>}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                        onClick={() => onViewTyreDetail && onViewTyreDetail(tyre.id)}
-                      >
-                        View
-                      </button>
-                      <button
-                        className="text-indigo-600 hover:text-indigo-900"
-                        onClick={() => onEditTyre && onEditTyre(tyre.id)}
-                      >
-                        Edit
-                      </button>
+                    <td className="px-6 py-4 text-right space-x-2">
+                      <Button size="xs" variant="outline" onClick={() => alert(tyre.tyreNumber)}>View</Button>
+                      <Button size="xs" variant="secondary" onClick={() => alert(`Edit ${tyre.tyreNumber}`)}>Edit</Button>
                     </td>
                   </tr>
                 ))
