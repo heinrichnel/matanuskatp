@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 // Context Providers
 import { AppProvider } from "./context/AppContext";
@@ -120,6 +120,7 @@ import QAReviewPanel from "./pages/QAReviewPanel";
 // === ANALYTICS ===
 import PredictiveModels from "./components/Models/Driver/PredictiveModels";
 import IndirectCostBreakdown from "./pages/IndirectCostBreakdown";
+import MissedLoadsTracker from "./pages/MissedLoadsTracker";
 import YearToDateKPIs from "./pages/YearToDateKPIs";
 
 // === WORKSHOP ===
@@ -137,6 +138,7 @@ import QRScannerPage from "./pages/workshop/QRScannerPage";
 import StockInventoryPage from "./pages/workshop/StockInventoryPage";
 import VendorPage from "./pages/workshop/VendorPage";
 import WorkshopPage from "./pages/workshop/WorkshopPage";
+import WorkshopOperations from "./pages/WorkshopOperations";
 
 // === TYRES ===
 import TyreIntegration from "./components/tyres/TyreIntegration";
@@ -251,6 +253,7 @@ const App: React.FC = () => {
 
                           {/* Trips */}
                           <Route path="trips" element={<TripManagementPage />} />
+                          <Route path="trips/dashboard" element={<TripDashboard />} />
                           <Route path="trips/active" element={<ActiveTripsPage />} />
                           <Route path="trips/:id" element={<TripDetailsPage />} />
                           <Route path="trips/timeline" element={<TripTimelinePage />} />
@@ -294,6 +297,7 @@ const App: React.FC = () => {
 
                           {/* Diesel */}
                           <Route path="diesel" element={<DieselManagementPage />} />
+                          <Route path="diesel/dashboard" element={<DieselDashboardComponent />} />
                           <Route path="diesel/add-fuel" element={<AddFuelEntryPage />} />
                           <Route path="diesel/dashboard" element={<DieselDashboardComponent />} />
                           <Route path="diesel/logs" element={<FuelLogs />} />
@@ -446,6 +450,7 @@ const App: React.FC = () => {
 
                           {/* Workshop */}
                           <Route path="workshop" element={<WorkshopPage />} />
+                          <Route path="workshop/operations" element={<WorkshopOperations />} />
                           <Route path="workshop/vendors" element={<VendorPage />} />
                           <Route path="workshop/purchase-orders" element={<PurchaseOrderPage />} />
                           <Route path="workshop/stock-inventory" element={<StockInventoryPage />} />
@@ -467,6 +472,7 @@ const App: React.FC = () => {
 
                           {/* Tyres */}
                           <Route path="tyres" element={<TyreManagementPage />} />
+                          <Route path="tyres/manage" element={<TyreManagementPage />} />
                           <Route path="tyres/mobile" element={<TyreMobilePage />} />
                           <Route path="tyres/add" element={<AddNewTyrePage />} />
                           <Route
@@ -478,6 +484,10 @@ const App: React.FC = () => {
                           <Route path="tyres/dashboard" element={<TyrePerformanceDashboard />} />
                           <Route path="integration-debug/tyres" element={<TyreIntegration />} />
 
+                          {/* Maps */}
+                          <Route path="maps" element={<WialonDashboard />} />
+                          <Route path="maps/wialon" element={<WialonDashboard />} />
+
                           {/* Inventory */}
                           <Route path="inventory" element={<InventoryPage />} />
                           <Route path="inventory/dashboard" element={<InventoryDashboard />} />
@@ -485,6 +495,25 @@ const App: React.FC = () => {
                           <Route path="inventory/ordering" element={<PartsOrderingPage />} />
                           <Route path="inventory/receive" element={<ReceivePartsPage />} />
                           <Route path="inventory/reports" element={<InventoryReportsPage />} />
+
+                          {/* Flags */}
+                          <Route path="flags" element={<FlagsInvestigations />} />
+
+                          {/* Costs */}
+                          <Route path="costs/indirect" element={<IndirectCostBreakdown />} />
+
+                          {/* Missed Loads */}
+                          <Route path="missed-loads" element={
+                            <MissedLoadsTracker
+                              missedLoads={[]}
+                              onAddMissedLoad={() => {}}
+                              onUpdateMissedLoad={() => {}}
+                            />
+                          } />
+
+                          {/* Customers redirects */}
+                          <Route path="customers" element={<Navigate to="/clients" replace />} />
+                          <Route path="customers/dashboard" element={<Navigate to="/clients" replace />} />
 
                           {/* Default */}
                           <Route path="*" element={<DashboardPage />} />
@@ -514,3 +543,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+
