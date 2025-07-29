@@ -86,7 +86,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         const values = [];
         let currentValue = '';
         let inQuotes = false;
-        
+
         for (const char of lines[i]) {
           if (char === '"') {
             inQuotes = !inQuotes;
@@ -98,7 +98,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
           }
         }
         values.push(currentValue.trim()); // Don't forget the last value
-        
+
         // Only add if we have enough values
         if (values.length >= 20) {
           data.push(values);
@@ -123,10 +123,10 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
     try {
       const text = await csvFile.text();
       const data = parseCSV(text);
-      
+
       // Create fleet master mapping
       const fleetMasterMapping = createFleetMasterMapping([]);
-      
+
       // Track mapping results
       let mappedCount = 0;
       let unmappedCount = 0;
@@ -135,14 +135,14 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         // Map fields according to the position-based mapping provided
         // Column 3 (index position) contains the registration number (AGZ1963)
         const registration = row[3] || '';
-        
+
         // Look up fleet number in the mapping
         let fleetNumber = '';
-        
+
         if (registration) {
           // Try to get the fleet number from the mapping
           fleetNumber = fleetMasterMapping[registration] || '';
-          
+
           if (fleetNumber) {
             mappedCount++;
           } else {
@@ -151,28 +151,28 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
             fleetNumber = registration;
           }
         }
-        
+
         // Build route from columns 12, 13, 14
         const routeParts = [row[12], row[13], row[14]].filter(part => part);
         const route = routeParts.join(' - ');
-        
+
         // Handle load description
         const descriptionParts = [row[21], row[22]].filter(part => part);
         const description = descriptionParts.join(' ');
-        
+
         // Format dates to YYYY-MM-DD if they're in DD/MM/YYYY format
         const formatDate = (dateStr: string) => {
           if (!dateStr) return '';
-          
+
           // Check if it's in DD/MM/YYYY format
           const dateParts = dateStr.split('/');
           if (dateParts.length === 3) {
             return `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
           }
-          
+
           return dateStr; // Return as is if not in expected format
         };
-        
+
         return {
           fleetNumber,
           route,
@@ -189,7 +189,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
           additionalCosts: [],
           followUpHistory: [],
           status: 'active' as const, // Ensure trips are set to active status
-          
+
           // Add metadata for tracking web-imported trips
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
@@ -197,7 +197,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
           loadRef: row[0] || '', // Load reference from web booking system
         };
       });
-      
+
       // Set mapping results
       setMappingResults({
         mapped: mappedCount,
@@ -287,7 +287,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
       '1350 crates 30 bins', // Description
       'Tanaka Mboto' // Field 23
     ];
-    
+
     // Create a header row (will be skipped during import, but useful for reference)
     const headerRow = [
       'Load Ref',
@@ -314,7 +314,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
       'Description',
       'Field 23'
     ];
-    
+
     const csv = `${headerRow.join(',')}\n${sampleRow.join(',')}`;
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -389,7 +389,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
                   <p>Successfully mapped: {mappingResults.mapped}</p>
                   {mappingResults.unmapped > 0 && (
                     <p className="text-amber-600">
-                      Unmapped registrations: {mappingResults.unmapped} 
+                      Unmapped registrations: {mappingResults.unmapped}
                       <span className="ml-1 text-xs">(Registration used as fallback)</span>
                     </p>
                   )}
@@ -406,7 +406,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
             <p>Import completed trips directly from your Google Apps Script webhook.</p>
             <p><strong>Requirements:</strong> Trips must have both SHIPPED and DELIVERED status to be imported.</p>
             <Button
-              onClick={onClick}
+              onClick={handleWebhookImport}
               disabled={isWebhookProcessing}
               isLoading={isWebhookProcessing}
               className="mt-2"
@@ -451,7 +451,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
               AGZ1963 → 31H, AGZ1286 → 4H, AFQ1324 → 23H, etc.
             </p>
             <Button
-              onClick={onClick}
+              onClick={handleDownloadTemplate}
               variant="outline"
               className="mt-3"
             >
@@ -468,8 +468,8 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
               type="file"
               accept=".csv"
               onChange={handleFileChange}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
-                file:rounded-md file:border-0 file:text-sm file:font-medium 
+              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
+                file:rounded-md file:border-0 file:text-sm file:font-medium
                 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100
                 file:cursor-pointer cursor-pointer"
             />
@@ -530,14 +530,14 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClick}
+            onClick={handleClose}
             disabled={isProcessing || isWebhookProcessing}
             icon={<X className="w-4 h-4" />}
           >
             Cancel
           </Button>
           <Button
-            onClick={onClick}
+            onClick={handleImport}
             disabled={!csvFile || isProcessing || isWebhookProcessing}
             isLoading={isProcessing}
             icon={<Upload className="w-4 h-4" />}

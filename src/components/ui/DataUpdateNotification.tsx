@@ -128,3 +128,5 @@ export function DataUpdateNotification({
     </Alert>
   );
 }
+
+export default DataUpdateNotification;

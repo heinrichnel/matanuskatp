@@ -2,7 +2,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { TyreInspectionEntry, TyreSize as TyreSizeData } from "../../data/tyreData";
 import VehicleTyreView from "../../pages/VehicleTyreView";
 import { Tyre } from "../../types/tyre";
-Import Tyre from types/tyre to match VehicleTyreView
+// Import already exists on line 4, this was a comment
 import { VehicleSelector } from "../common/VehicleSelector";
 
 // Import tyre reference data
@@ -15,7 +15,7 @@ import {
   ShoppingBag,
   Upload,
 } from "lucide-react";
-import { tyreBrands, tyrePatterns, tyreSizes } from "../../data/tyreData";
+import { TYRE_BRANDS, TYRE_PATTERNS, TYRE_SIZES } from "../../data/tyreData";
 import {
   getPositionsByFleet,
   getTyresByBrand,
@@ -120,8 +120,8 @@ const TyreInspection: React.FC = () => {
   const [selectedTyre, setSelectedTyre] = useState<Tyre | null>(null);
 
   // Filtered tyre options based on selections
-  const [brandOptions, setBrandOptions] = useState<string[]>(tyreBrands);
-  const [patternOptions, setPatternOptions] = useState<string[]>(tyrePatterns);
+  const [brandOptions, setBrandOptions] = useState<string[]>(TYRE_BRANDS);
+  const [patternOptions, setPatternOptions] = useState<string[]>(TYRE_PATTERNS);
   // Track available positions for the selected fleet
   const [_, setPositionOptions] = useState<string[]>([]);
 
@@ -705,7 +705,7 @@ const TyreInspection: React.FC = () => {
                           label="Size"
                           value={formData.size}
                           onChange={(value) => handleChange("size", value)}
-                          options={tyreSizes.map((size) => ({ label: size, value: size }))}
+                          options={TYRE_SIZES.map((size: string) => ({ label: size, value: size }))}
                         />
 
                         <div className="grid grid-cols-3 gap-2">

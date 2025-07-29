@@ -2,7 +2,7 @@ import { FleetAnalyticsDashboard } from "@/components/dashboard/FleetAnalyticsDa
 import { FleetAnalyticsProvider } from "@/context/FleetAnalyticsContext";
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import WialonMapComponent from "../../components/maps/WialonMapComponent";
+import WialonMapComponent from "../../components/Map/wialon/WialonMapComponent";
 import { SupportedCurrency } from "../../lib/currency";
 import ActiveTrips from "./ActiveTrips";
 import CompletedTrips from "./CompletedTrips";
