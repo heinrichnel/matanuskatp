@@ -1,6 +1,6 @@
 # Matanuska Fleet Platform – Standard Workflows
+---
 
-## Purpose
 Workflows automate repetitive codebase quality and file maintenance tasks, ensuring all contributors follow `rules.md` and `instructions.md`.
 
 ---
@@ -86,5 +86,3 @@ bash scripts/syncRoutes.sh
 - Failing to log merges or deletions
 
 ---
-
-*Updated July 2025 by Matanuska Fleet Platform Maintainers*

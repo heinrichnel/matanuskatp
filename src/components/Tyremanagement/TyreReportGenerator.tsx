@@ -55,11 +55,11 @@ export const TyreReportGenerator: React.FC<TyreReportGeneratorProps> = ({ onGene
 
   const handleGenerateReport = () => {
     setIsGenerating(true);
-    
+
     // Call the provided callback function
     onGenerateReport(
-      reportOptions.reportType, 
-      reportOptions.dateRange, 
+      reportOptions.reportType,
+      reportOptions.dateRange,
       'All Brands' // In a real implementation, this would be a selected brand
     );
 
@@ -79,78 +79,62 @@ export const TyreReportGenerator: React.FC<TyreReportGeneratorProps> = ({ onGene
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Report Type</label>
           <Select
-            id="reportType"
+            label="Report Type"
             value={reportOptions.reportType}
             onChange={(e) => handleOptionChange('reportType', e.target.value)}
             className="w-full"
-          >
-            {reportTypes.map((type) => (
-              <option key={type.value} value={type.value}>
-                {type.label}
-              </option>
-            ))}
-          </Select>
+            options={reportTypes}
+            name="reportType"
+          />
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
           <Select
-            id="dateRange"
+            label="Date Range"
             value={reportOptions.dateRange}
             onChange={(e) => handleOptionChange('dateRange', e.target.value)}
             className="w-full"
-          >
-            {dateRanges.map((range) => (
-              <option key={range.value} value={range.value}>
-                {range.label}
-              </option>
-            ))}
-          </Select>
+            options={dateRanges}
+            name="dateRange"
+          />
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Format</label>
           <Select
-            id="format"
+            label="Format"
             value={reportOptions.format}
             onChange={(e) => handleOptionChange('format', e.target.value)}
             className="w-full"
-          >
-            {reportFormats.map((format) => (
-              <option key={format.value} value={format.value}>
-                {format.label}
-              </option>
-            ))}
-          </Select>
+            options={reportFormats}
+            name="format"
+          />
         </div>
-        
-        <div className="flex items-center">
+
+        <div className="flex items-center mt-2">
           <input
-            id="includeScrapped"
             type="checkbox"
-            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+            id="includeScrapped"
             checked={reportOptions.includeScrapped}
             onChange={(e) => handleOptionChange('includeScrapped', e.target.checked)}
+            className="mr-2"
           />
-          <label htmlFor="includeScrapped" className="ml-2 text-sm text-gray-700">
+          <label htmlFor="includeScrapped" className="text-sm text-gray-700">
             Include scrapped tyres
           </label>
         </div>
-        
+
         <div className="flex justify-between mt-6">
-          <Button 
+          <Button
             variant="outline"
             onClick={() => alert('Preview not available in this version')}
-            icon={<FileText className="w-4 h-4" />}
             disabled={isGenerating}
           >
+            <FileText className="w-4 h-4 mr-2" />
             Preview
           </Button>
           <Button
             onClick={handleGenerateReport}
-            icon={<Download className="w-4 h-4" />}
             disabled={isGenerating}
           >
             {isGenerating ? (
@@ -159,7 +143,10 @@ export const TyreReportGenerator: React.FC<TyreReportGeneratorProps> = ({ onGene
                 Generating...
               </>
             ) : (
-              'Generate Report'
+              <>
+                <Download className="w-4 h-4 mr-2" />
+                Generate Report
+              </>
             )}
           </Button>
         </div>
@@ -167,3 +154,5 @@ export const TyreReportGenerator: React.FC<TyreReportGeneratorProps> = ({ onGene
     </Card>
   );
 };
+
+export default TyreReportGenerator;

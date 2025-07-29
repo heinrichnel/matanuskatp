@@ -64,9 +64,9 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
   };
 
   const styles = getSeverityStyles();
-  
+
   // Format timestamp if provided
-  const formattedTime = timestamp 
+  const formattedTime = timestamp
     ? new Intl.DateTimeFormat('default', {
         year: 'numeric',
         month: 'short',
@@ -78,7 +78,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
     : null;
 
   return (
-    <div 
+    <div
       className={`rounded-md border px-4 py-3 ${styles.containerClass} ${className}`}
       role="alert"
     >
@@ -89,16 +89,16 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-medium">
-              {title || (severity === 'fatal' 
-                ? 'Critical Error' 
-                : severity === 'error' 
-                  ? 'Error' 
-                  : severity === 'warning' 
-                    ? 'Warning' 
+              {title || (severity === 'fatal'
+                ? 'Critical Error'
+                : severity === 'error'
+                  ? 'Error'
+                  : severity === 'warning'
+                    ? 'Warning'
                     : 'Information')}
             </h3>
             {onClose && (
-              <button 
+              <button
                 onClick={onClose}
                 className="ml-2 inline-flex text-gray-400 hover:text-gray-500 focus:outline-none"
               >
@@ -107,10 +107,10 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
               </button>
             )}
           </div>
-          
+
           <div className="mt-1">
             <p className="text-sm">{message}</p>
-            
+
             {details && showDetails && (
               <div className="mt-2">
                 <details className="text-xs">
@@ -123,14 +123,14 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
                 </details>
               </div>
             )}
-            
+
             {formattedTime && (
               <p className="mt-1 text-xs opacity-75">
                 Occurred at {formattedTime}
               </p>
             )}
           </div>
-          
+
           {onRetry && (
             <div className="mt-3">
               <button
@@ -150,3 +150,4 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
 };
 
 export default ErrorMessage;
+
