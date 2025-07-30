@@ -95,7 +95,7 @@ const WialonIntegration: React.FC<WialonIntegrationProps> = ({
         </div>
       );
     }
-    
+
     return (
       <div className="wialon-iframe-container w-full">
         <iframe
