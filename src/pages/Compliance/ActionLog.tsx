@@ -181,8 +181,6 @@ const ActionLog: React.FC = () => {
     setShowAddModal(false);
 
     alert(
-      `Action item created successfully!\n\nTitle: ${actionItemData.title}\nResponsible: ${actionItemData.responsiblePerson}\nDue Date: ${formatDate(actionItemData.dueDate)}`
-    );
   };
 
   // Reset form
@@ -223,12 +221,12 @@ const ActionLog: React.FC = () => {
   };
 
   // Handle status change
-  const handleStatusChange = (
-    item: ActionItem,
-    newStatus: "initiated" | "in_progress" | "completed"
-  ) => {
+  const handleStatusChange = (item: ActionItem, newStatus: 'initiated' | 'in_progress' | 'completed') => {
     const updates: Partial<ActionItem> = {
       status: newStatus,
+    };
+    const updates: Partial<ActionItem> = {
+      status: newStatus
     };
 
     // If marking as completed, add completion date and user
@@ -270,8 +268,6 @@ const ActionLog: React.FC = () => {
         return "bg-yellow-100 text-yellow-800";
     }
   };
-
-  // ... (rest of your JSX stays the same)
 
   return (
     // --- Hier kom jou hele UI, geen verandering nodig nie ---
