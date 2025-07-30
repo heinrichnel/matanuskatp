@@ -404,3 +404,121 @@ export const parseTyreSize = (sizeString: string): TyreSize | null => {
   }
   return null;
 };
+
+// Utility function to get tyres for a specific vehicle (mock implementation)
+export const getTyresByVehicle = (vehicleId: string): Tyre[] => {
+  // For now, return sample tyres as a placeholder
+  // In a real implementation, this would filter tyres by vehicle ID
+  return SAMPLE_TYRES.filter((tyre) => tyre.installation.vehicleId === vehicleId);
+};
+
+// Helper function for tyre status badge colors
+export const getTyreStatusColor = (status: TyreStatus): string => {
+  switch (status) {
+    case TyreStatus.NEW:
+      return "bg-green-500 text-white";
+    case TyreStatus.IN_SERVICE:
+      return "bg-blue-500 text-white";
+    case TyreStatus.SPARE:
+      return "bg-yellow-500 text-white";
+    case TyreStatus.RETREADED:
+      return "bg-orange-500 text-white";
+    case TyreStatus.SCRAPPED:
+      return "bg-red-500 text-white";
+    default:
+      return "bg-gray-500 text-white";
+  }
+};
+
+// Helper function for tyre condition badge colors
+export const getTyreConditionColor = (status: TyreConditionStatus): string => {
+  switch (status) {
+    case TyreConditionStatus.GOOD:
+      return "bg-green-500 text-white";
+    case TyreConditionStatus.WARNING:
+      return "bg-yellow-500 text-white";
+    case TyreConditionStatus.CRITICAL:
+      return "bg-red-500 text-white";
+    case TyreConditionStatus.NEEDS_REPLACEMENT:
+      return "bg-purple-500 text-white";
+    default:
+      return "bg-gray-500 text-white";
+  }
+};
+
+// Type for tyre configuration mapping
+export interface FleetTyreMapping {
+  fleetNo: string;
+  vehicleType: "horse" | "interlink" | "reefer" | "lmv" | "special";
+  positions: TyreAllocation[];
+}
+
+export interface TyreAllocation {
+  position: string;
+  tyreCode?: string;
+  brand?: string;
+  pattern?: string;
+  size?: string;
+  treadDepth?: number;
+  odometerAtFitment?: number;
+}
+
+// Get tyre configuration for a vehicle
+export const getVehicleTyreConfiguration = (vehicleId: string): FleetTyreMapping | null => {
+  // Mock implementation
+  if (!vehicleId) return null;
+
+  // This would normally be determined by the vehicle type in a real implementation
+  const vehicleType = vehicleId.includes("H")
+    ? "horse"
+    : vehicleId.includes("T")
+      ? "interlink"
+      : vehicleId.includes("F")
+        ? "reefer"
+        : "lmv";
+
+  // Create sample positions based on vehicle type
+  let positions: TyreAllocation[] = [];
+
+  if (vehicleType === "horse") {
+    positions = Array.from({ length: 10 }, (_, i) => ({
+      position: `POS ${i + 1}`,
+      tyreCode: `TY-${vehicleId}-${i + 1}`,
+      brand: SAMPLE_TYRES[0]?.brand || "Unknown",
+      pattern: SAMPLE_TYRES[0]?.pattern || "Unknown",
+      size: SAMPLE_TYRES[0]?.size ? formatTyreSize(SAMPLE_TYRES[0].size) : "315/80R22.5",
+      treadDepth: Math.floor(Math.random() * 10) + 5,
+      odometerAtFitment: Math.floor(Math.random() * 50000),
+    }));
+    positions.push({ position: "SP", tyreCode: `TY-${vehicleId}-SP` });
+  } else if (vehicleType === "interlink") {
+    positions = Array.from({ length: 16 }, (_, i) => ({
+      position: `POS ${i + 1}`,
+      tyreCode: `TY-${vehicleId}-${i + 1}`,
+      brand: SAMPLE_TYRES[0]?.brand || "Unknown",
+      pattern: SAMPLE_TYRES[0]?.pattern || "Unknown",
+      size: SAMPLE_TYRES[0]?.size ? formatTyreSize(SAMPLE_TYRES[0].size) : "315/80R22.5",
+      treadDepth: Math.floor(Math.random() * 10) + 5,
+      odometerAtFitment: Math.floor(Math.random() * 50000),
+    }));
+    positions.push({ position: "SP", tyreCode: `TY-${vehicleId}-SP1` });
+    positions.push({ position: "SP", tyreCode: `TY-${vehicleId}-SP2` });
+  } else {
+    positions = Array.from({ length: 6 }, (_, i) => ({
+      position: `POS ${i + 1}`,
+      tyreCode: `TY-${vehicleId}-${i + 1}`,
+      brand: SAMPLE_TYRES[0]?.brand || "Unknown",
+      pattern: SAMPLE_TYRES[0]?.pattern || "Unknown",
+      size: SAMPLE_TYRES[0]?.size ? formatTyreSize(SAMPLE_TYRES[0].size) : "315/80R22.5",
+      treadDepth: Math.floor(Math.random() * 10) + 5,
+      odometerAtFitment: Math.floor(Math.random() * 50000),
+    }));
+    positions.push({ position: "SP", tyreCode: `TY-${vehicleId}-SP` });
+  }
+
+  return {
+    fleetNo: vehicleId,
+    vehicleType,
+    positions,
+  };
+};
