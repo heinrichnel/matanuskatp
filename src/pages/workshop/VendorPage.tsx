@@ -6,7 +6,7 @@ import Papa from 'papaparse';
 
 const VendorPage: React.FC = () => {
   const { vendors, addVendor, updateVendor, deleteVendor, isLoading, errors } = useWorkshop();
-  
+
   const [mode, setMode] = useState<'list' | 'create' | 'edit'>('list');
   const [editingVendor, setEditingVendor] = useState<Vendor | null>(null);
   const [formData, setFormData] = useState<Omit<Vendor, 'id'>>({
@@ -27,7 +27,7 @@ const VendorPage: React.FC = () => {
     failed: number;
     errors: string[];
   } | null>(null);
-  
+
   const resetForm = () => {
     setFormData({
       vendorId: '',
@@ -40,7 +40,7 @@ const VendorPage: React.FC = () => {
     });
     setEditingVendor(null);
   };
-  
+
   useEffect(() => {
     if (editingVendor) {
       setFormData({
@@ -54,12 +54,12 @@ const VendorPage: React.FC = () => {
       });
     }
   }, [editingVendor]);
-  
+
   const handleEditVendor = (vendor: Vendor) => {
     setEditingVendor(vendor);
     setMode('edit');
   };
-  
+
   const handleDeleteVendor = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this vendor?')) {
       try {
@@ -70,10 +70,10 @@ const VendorPage: React.FC = () => {
       }
     }
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (mode === 'edit' && editingVendor) {
         await updateVendor(editingVendor.id, formData);
@@ -96,14 +96,14 @@ const VendorPage: React.FC = () => {
       alert(`Failed to ${mode === 'edit' ? 'update' : 'create'} vendor: ${error}`);
     }
   };
-  
+
   const filteredVendors = vendors.filter(
-    vendor => 
+    vendor =>
       vendor.vendorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vendor.vendorId.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vendor.contactPerson.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   // Export vendors to CSV
   const handleExportCSV = () => {
     const csvData = vendors.map(vendor => ({
@@ -115,7 +115,7 @@ const VendorPage: React.FC = () => {
       address: vendor.address,
       city: vendor.city
     }));
-    
+
     const csv = Papa.unparse(csvData);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -149,7 +149,7 @@ const VendorPage: React.FC = () => {
         city: 'Sample City'
       }
     ];
-    
+
     const csv = Papa.unparse(templateData);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -162,17 +162,48 @@ const VendorPage: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  // Function to process CSV import
+  const importVendorsFromCSV = async (records: Partial<Vendor>[]) => {
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as string[]
+    };
+
+    for (const record of records) {
+      // Skip empty rows
+      if (!record.vendorId && !record.vendorName) continue;
+
+      // Validate required fields
+      if (!record.vendorId || !record.vendorName || !record.contactPerson) {
+        results.failed++;
+        results.errors.push(`Missing required fields for vendor: ${record.vendorName || record.vendorId || 'Unknown'}`);
+        continue;
+      }
+
+      try {
+        // Add vendor using the context function
+        await addVendor(record as Omit<Vendor, 'id'>);
+        results.success++;
+      } catch (error) {
+        results.failed++;
+        results.errors.push(`Failed to import ${record.vendorName}: ${error}`);
+      }
+    }
+
+    return results;
+  };
+
   // Handle CSV import
   const handleImportCSV = () => {
     if (!importFile) return;
-    
+
     Papa.parse(importFile, {
       header: true,
       complete: async (results) => {
         const records = results.data as Partial<Vendor>[];
-        
+
         try {
-          // Use the context function to import vendors
           const results = await importVendorsFromCSV(records);
           setImportResults(results);
         } catch (error) {
@@ -186,7 +217,7 @@ const VendorPage: React.FC = () => {
       }
     });
   };
-  
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* CSV Import Modal */}
@@ -194,7 +225,7 @@ const VendorPage: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-xl font-semibold mb-4">Import Vendors from CSV</h2>
-            
+
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 CSV File
@@ -206,13 +237,13 @@ const VendorPage: React.FC = () => {
                 className="w-full border border-gray-300 rounded px-3 py-2"
               />
             </div>
-            
+
             {importResults && (
               <div className="mb-4 p-3 bg-gray-50 rounded border">
                 <h3 className="font-medium text-gray-800">Import Results:</h3>
                 <p className="text-green-600">✓ {importResults.success} vendors imported successfully</p>
                 <p className="text-red-600">✗ {importResults.failed} vendors failed</p>
-                
+
                 {importResults.errors.length > 0 && (
                   <div className="mt-2">
                     <p className="font-medium text-gray-800">Errors:</p>
@@ -226,7 +257,7 @@ const VendorPage: React.FC = () => {
                 )}
               </div>
             )}
-            
+
             <div className="flex flex-col space-y-3">
               <button
                 onClick={downloadTemplate}
@@ -234,7 +265,7 @@ const VendorPage: React.FC = () => {
               >
                 <ArrowDownToLine size={16} className="mr-1" /> Download CSV Template
               </button>
-              
+
               <div className="flex justify-end space-x-3 pt-3 border-t">
                 <button
                   onClick={() => {
@@ -260,7 +291,7 @@ const VendorPage: React.FC = () => {
           </div>
         </div>
       )}
-      
+
       {mode === 'list' ? (
         <>
           <div className="flex justify-between items-center mb-6">
@@ -278,7 +309,7 @@ const VendorPage: React.FC = () => {
               >
                 <ArrowDownToLine size={18} className="mr-2" /> Export CSV
               </button>
-              <button 
+              <button
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center"
                 onClick={() => { resetForm(); setMode('create'); }}
               >
@@ -286,7 +317,7 @@ const VendorPage: React.FC = () => {
               </button>
             </div>
           </div>
-          
+
           <div className="mb-4 relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="text-gray-400" size={18} />
@@ -299,7 +330,7 @@ const VendorPage: React.FC = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           {isLoading.vendors ? (
             <div className="text-center py-4">Loading vendors...</div>
           ) : errors.vendors ? (
@@ -338,13 +369,13 @@ const VendorPage: React.FC = () => {
                         <td className="px-4 py-2 border-b">{vendor.city}</td>
                         <td className="px-4 py-2 border-b">
                           <div className="flex space-x-2">
-                            <button 
+                            <button
                               className="px-2 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                               onClick={() => handleEditVendor(vendor)}
                             >
                               Edit
                             </button>
-                            <button 
+                            <button
                               className="px-2 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
                               onClick={() => handleDeleteVendor(vendor.id)}
                             >
@@ -365,7 +396,7 @@ const VendorPage: React.FC = () => {
           <CardContent>
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center space-x-2">
-                <button 
+                <button
                   className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
                   onClick={() => setMode('list')}
                 >
@@ -375,7 +406,7 @@ const VendorPage: React.FC = () => {
                   {mode === 'edit' ? 'Edit Vendor' : 'Create Vendor'}
                 </h1>
               </div>
-              
+
               {formSubmitted && (
                 <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded-md flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -385,7 +416,7 @@ const VendorPage: React.FC = () => {
                 </div>
               )}
             </div>
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -399,7 +430,7 @@ const VendorPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, vendorId: e.target.value })}
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="vendorName" className="block text-sm font-medium text-gray-700">Vendor Name</label>
                   <input
@@ -411,7 +442,7 @@ const VendorPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, vendorName: e.target.value })}
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="contactPerson" className="block text-sm font-medium text-gray-700">Contact Person</label>
                   <input
@@ -423,7 +454,7 @@ const VendorPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="workEmail" className="block text-sm font-medium text-gray-700">Work Email</label>
                   <input
@@ -434,7 +465,7 @@ const VendorPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, workEmail: e.target.value })}
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="mobile" className="block text-sm font-medium text-gray-700">Mobile</label>
                   <input
@@ -445,7 +476,7 @@ const VendorPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="city" className="block text-sm font-medium text-gray-700">City</label>
                   <input
@@ -457,7 +488,7 @@ const VendorPage: React.FC = () => {
                   />
                 </div>
               </div>
-              
+
               <div>
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">Address</label>
                 <textarea
@@ -468,7 +499,7 @@ const VendorPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                 ></textarea>
               </div>
-              
+
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
