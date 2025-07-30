@@ -7,11 +7,11 @@ import Modal from "../../components/ui/Modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/Tabs";
 
 interface JobCardManagementProps {
-  activeTab?: "open" | "completed" | "kanban";
+  activeTab?: "open" | "completed" | "kanban" | "templates";
 }
 
 const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = "open" }) => {
-  const [currentTab, setCurrentTab] = useState(activeTab);
+  const [currentTab, setCurrentTab] = useState<"open" | "completed" | "kanban" | "templates">(activeTab);
   const [showJobCardModal, setShowJobCardModal] = useState(false);
 
   // Handler to open the Job Card modal
@@ -33,7 +33,7 @@ const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = "open
 
       <Tabs
         value={currentTab}
-        onValueChange={(value) => setCurrentTab(value as "open" | "templates" | "kanban")}
+        onValueChange={(value: string) => setCurrentTab(value as "open" | "completed" | "kanban" | "templates")}
       >
         <TabsList>
           <TabsTrigger value="open" className="flex items-center gap-2">
@@ -88,7 +88,16 @@ const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = "open
         </TabsContent>
 
         <TabsContent value="kanban" className="mt-6">
-          <JobCardKanbanBoard />
+          <Card>
+            <CardHeader title="Job Card Kanban Board" />
+            <CardContent>
+              <div className="text-center py-8">
+                <ClipboardCheck className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">Kanban Board Coming Soon</h3>
+                <p className="mt-1 text-sm text-gray-500">The Kanban board is under development</p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="templates" className="mt-6">
@@ -142,7 +151,7 @@ const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = "open
         isOpen={showJobCardModal}
         onClose={() => setShowJobCardModal(false)}
         title="Job Card"
-        maxWidth="2xl"
+        size="lg"
       >
         <JobCard />
       </Modal>
