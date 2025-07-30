@@ -1213,7 +1213,7 @@ const TyreManagementView: React.FC<TyreManagementViewProps> = ({ activeTab = "in
           isOpen={showTyreForm}
           onClose={() => setShowTyreForm(false)}
           title="Add New Tyre to Inventory"
-          size="2xl"
+          size="xl"
         >
           <TyreForm onSubmit={handleTyreSubmit} />
         </Modal>
