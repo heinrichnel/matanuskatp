@@ -593,7 +593,7 @@ const ActionLog: React.FC = () => {
           setShowAddModal(false);
         }}
         title="Add Action Item"
-        maxWidth="lg"
+        size="lg"
       >
         <div className="space-y-6">
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
