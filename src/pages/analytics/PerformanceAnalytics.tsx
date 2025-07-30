@@ -1,6 +1,6 @@
 import React from 'react';
-import Card, { CardHeader, CardContent } from '../components/ui/Card';
-import Button from '../components/ui/Button';
+import Card, { CardHeader, CardContent } from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 import { Calendar, Download, Filter } from 'lucide-react';
 
 const PerformanceAnalytics: React.FC = () => {
@@ -10,7 +10,7 @@ const PerformanceAnalytics: React.FC = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Driver Performance Analytics</h1>
-        
+
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-2">
             <Calendar className="h-4 w-4 text-gray-500" />
@@ -21,14 +21,14 @@ const PerformanceAnalytics: React.FC = () => {
               <option value="last365">Last Year</option>
             </select>
           </div>
-          
+
           <Button variant="outline" className="flex items-center space-x-2">
             <Download className="h-4 w-4" />
             <span>Export Report</span>
           </Button>
         </div>
       </div>
-      
+
       {/* Overall Performance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -40,7 +40,7 @@ const PerformanceAnalytics: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col">
@@ -50,7 +50,7 @@ const PerformanceAnalytics: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col">
@@ -60,7 +60,7 @@ const PerformanceAnalytics: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex flex-col">
@@ -71,7 +71,7 @@ const PerformanceAnalytics: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       {/* Driver Performance Comparison */}
       <Card>
         <CardHeader title="Driver Performance Comparison" />
@@ -90,7 +90,7 @@ const PerformanceAnalytics: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Simulated Bar Chart */}
           <div className="space-y-4">
             <div>
@@ -102,7 +102,7 @@ const PerformanceAnalytics: React.FC = () => {
                 <div className="h-full bg-green-500 rounded-full" style={{ width: '94.2%' }}></div>
               </div>
             </div>
-            
+
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Sarah Williams</span>
@@ -112,7 +112,7 @@ const PerformanceAnalytics: React.FC = () => {
                 <div className="h-full bg-green-500 rounded-full" style={{ width: '91.8%' }}></div>
               </div>
             </div>
-            
+
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Michael Johnson</span>
@@ -122,7 +122,7 @@ const PerformanceAnalytics: React.FC = () => {
                 <div className="h-full bg-green-500 rounded-full" style={{ width: '88.5%' }}></div>
               </div>
             </div>
-            
+
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Jane Smith</span>
@@ -132,7 +132,7 @@ const PerformanceAnalytics: React.FC = () => {
                 <div className="h-full bg-green-500 rounded-full" style={{ width: '86.3%' }}></div>
               </div>
             </div>
-            
+
             <div>
               <div className="flex justify-between mb-1">
                 <span className="text-sm font-medium">Robert Brown</span>
@@ -145,7 +145,7 @@ const PerformanceAnalytics: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Performance Trends */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Safety Score Trend */}
@@ -182,7 +182,7 @@ const PerformanceAnalytics: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         {/* On-Time Delivery Trend */}
         <Card>
           <CardHeader title="On-Time Delivery Trend" />
@@ -218,7 +218,7 @@ const PerformanceAnalytics: React.FC = () => {
           </CardContent>
         </Card>
       </div>
-      
+
       {/* Performance Metrics Breakdown */}
       <Card>
         <CardHeader title="Performance Metrics Breakdown" />

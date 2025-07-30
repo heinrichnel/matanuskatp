@@ -700,7 +700,6 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
             isOpen={showCostForm}
             onClose={closeCostForm}
             title={editingCost ? 'Edit Cost Entry' : 'Add Cost Entry'}
-            maxWidth="lg"
           >
             <CostForm
               tripId={trip.id}
@@ -711,12 +710,11 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
           </Modal>
 
           <Modal
+          <Modal
             isOpen={showSystemCostGenerator}
             onClose={() => setShowSystemCostGenerator(false)}
             title="Generate System Costs"
-            maxWidth="2xl"
           >
-            <SystemCostGenerator
               trip={trip}
               onGenerateSystemCosts={handleGenerateSystemCosts}
             />
@@ -724,12 +722,11 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
 
           <Modal
             isOpen={showTripPlanning}
+          <Modal
+            isOpen={showTripPlanning}
             onClose={() => setShowTripPlanning(false)}
             title="Trip Planning & Timeline"
-            maxWidth="2xl"
           >
-            <TripPlanningForm
-              trip={trip}
               onUpdate={updateTrip}
               onAddDelay={(delay: Omit<DelayReason, 'id'>) => addDelayReason(trip.id, delay)}
             />
@@ -749,12 +746,11 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, onBack }) => {
       <Modal
         isOpen={showReport}
         onClose={() => setShowReport(false)}
+      <Modal
+        isOpen={showReport}
+        onClose={() => setShowReport(false)}
         title="Trip Report"
-        maxWidth="2xl"
       >
-        <TripReport trip={trip} />
-      </Modal>
-    </div>
   );
 };
 
