@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { ArrowDownToLine, QrCode, Truck, Clipboard, Wrench, Tool } from "lucide-react";
+import { ArrowDownToLine, QrCode, Truck, Clipboard, Wrench, ToolCase } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 
 interface Vehicle {
@@ -266,7 +266,7 @@ const QRGenerator = () => {
                     : 'border-gray-200 hover:border-gray-300 text-gray-600'
                 }`}
               >
-                <Tool size={24} className={qrType === 'part' ? 'text-blue-500' : 'text-gray-500'} />
+                <ToolCase size={24} className={qrType === 'part' ? 'text-blue-500' : 'text-gray-500'} />
                 <span className="mt-1 text-sm">Part</span>
               </button>
               <button
