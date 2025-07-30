@@ -1,11 +1,24 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import SidebarTester from './SidebarTester';
+import React from "react";
+import "./index.css";
+import SidebarTester from "./SidebarTester";
 
 // For testing our routing and sidebar system
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <SidebarTester />
-  </React.StrictMode>
-);
+const TestRouting: React.FC = () => {
+  return <SidebarTester />;
+};
+
+export default TestRouting;
+
+// This code only runs when file is executed directly as entry point
+if (typeof document !== "undefined") {
+  import("react-dom/client").then(({ createRoot }) => {
+    const rootElement = document.getElementById("root");
+    if (rootElement) {
+      createRoot(rootElement).render(
+        <React.StrictMode>
+          <TestRouting />
+        </React.StrictMode>
+      );
+    }
+  });
+}

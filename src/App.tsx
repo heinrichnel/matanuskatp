@@ -71,7 +71,6 @@ const App: React.FC = () => {
       unregisterErrorHandler();
     };
   }, []);
-  const [connectionError, setConnectionError] = useState<Error | null>(null);
   const [editingTrip, setEditingTrip] = useState<any>();
   const [showTripForm, setShowTripForm] = useState(false);
 
