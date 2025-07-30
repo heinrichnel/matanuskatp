@@ -25,7 +25,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
     body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
     .app-container { display: flex; height: 100vh; }
     .content { flex-grow: 1; padding: 20px; background-color: #f9fafb; }
-    
+
     /* Sidebar Styles */
     .sidebar {
       width: 256px;
@@ -36,7 +36,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
       overflow-y: auto;
       flex-shrink: 0;
     }
-    
+
     .sidebar-header {
       display: flex;
       align-items: center;
@@ -45,13 +45,13 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
       border-bottom: 1px solid #e5e7eb;
       background-color: #fef3c7; /* yellow-100 */
     }
-    
+
     .sidebar-title {
       font-weight: bold;
       font-size: 1.125rem;
       color: black;
     }
-    
+
     .sidebar-category {
       padding: 0.5rem 1.5rem;
       margin-top: 1rem;
@@ -62,7 +62,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
       letter-spacing: 0.05em;
       color: #6b7280; /* gray-500 */
     }
-    
+
     .nav-item {
       padding: 0.5rem 1.5rem;
       display: flex;
@@ -74,40 +74,40 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
       color: #374151; /* gray-700 */
       margin-bottom: 2px;
     }
-    
+
     .nav-item:hover {
       background-color: #e5e7eb; /* gray-200 */
     }
-    
+
     .nav-item.active {
       background-color: #eff6ff; /* blue-50 */
       color: #2563eb; /* blue-600 */
       font-weight: 500;
     }
-    
+
     .nav-item i {
       width: 20px;
       text-align: center;
     }
-    
+
     .sub-nav {
       list-style: none;
       padding-left: 0;
       margin: 0;
     }
-    
+
     .sub-nav .nav-item {
       padding-left: 3rem;
     }
-    
+
     .nav-item.parent {
       justify-content: space-between;
     }
-    
+
     .chevron {
       transition: transform 0.2s;
     }
-    
+
     .chevron.down {
       transform: rotate(90deg);
     }
@@ -120,7 +120,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
       <div class="sidebar-header">
         <h1 class="sidebar-title">MATANUSKA TRANSPORT</h1>
       </div>
-      
+
       <nav>
         <!-- Main Navigation -->
         <h3 class="sidebar-category">Main Navigation</h3>
@@ -130,7 +130,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
             <span>Dashboard</span>
           </li>
         </ul>
-        
+
         <!-- Core Business Operations -->
         <h3 class="sidebar-category">Core Business Operations</h3>
         <ul class="sub-nav">
@@ -156,7 +156,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
               <span>Route Planning</span>
             </li>
           </ul>
-          
+
           <!-- Invoice Management -->
           <li class="nav-item parent" id="invoices-parent">
             <div onclick="handleNavigation('invoices')">
@@ -173,7 +173,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
               <span>Create Invoice</span>
             </li>
           </ul>
-          
+
           <!-- Diesel Management -->
           <li class="nav-item parent" id="diesel-parent">
             <div onclick="handleNavigation('diesel')">
@@ -185,14 +185,14 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
         </ul>
       </nav>
     </aside>
-    
+
     <!-- Content Area -->
     <div class="content">
       <h1 class="text-2xl font-bold mb-4">Matanuska Transport Platform</h1>
-      
+
       <div id="active-trips-container" class="mt-6 border rounded-lg shadow-sm p-6 bg-white">
         <h2 class="text-xl font-bold text-gray-900 mb-4">Active Trips</h2>
-        
+
         <div class="flex justify-between items-center mb-4">
           <div>
             <p class="text-gray-600">Manage ongoing trips and track their status</p>
@@ -216,7 +216,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
             </button>
           </div>
         </div>
-        
+
         <div class="mt-4">
           <div class="border rounded-lg overflow-hidden">
             <div class="p-4 bg-gray-50 border-b">
@@ -252,7 +252,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
                 </button>
               </div>
             </div>
-            
+
             <!-- Trip Cards -->
             <div class="divide-y">
               <!-- Trip 1 -->
@@ -316,7 +316,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
                   </div>
                 </div>
               </div>
-              
+
               <!-- Trip 2 -->
               <div class="hover:bg-gray-50 transition-colors">
                 <div class="flex flex-wrap items-center justify-between bg-blue-50 border-b border-blue-200 px-4 py-2">
@@ -382,7 +382,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
           </div>
         </div>
       </div>
-      
+
       <div class="bg-yellow-100 p-4 rounded shadow mt-6">
         <h2 class="text-lg font-semibold mb-2">About This Test:</h2>
         <p>This is a simplified version of the Matanuska Transport Platform.</p>
@@ -400,32 +400,32 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
         currentRoute.textContent = route;
       }
       console.log('Navigation to:', route);
-      
+
       // Update UI based on route
       if (route === 'trips/active') {
         document.getElementById('active-trips-container').style.display = 'block';
       }
-      
+
       // Highlight active item
       document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
       });
-      
+
       // Find the clicked item and add active class
       const items = document.querySelectorAll('.nav-item');
       items.forEach(item => {
-        if (item.getAttribute('onclick') && 
+        if (item.getAttribute('onclick') &&
             item.getAttribute('onclick').includes(`'${route}'`)) {
           item.classList.add('active');
         }
       });
     }
-    
+
     // Toggle subnav display
     function toggleSubnav(id) {
       const subnav = document.getElementById(`${id}-subnav`);
       const chevron = document.querySelector(`#${id}-parent .chevron i`);
-      
+
       if (subnav.style.display === 'none') {
         subnav.style.display = 'block';
         chevron.classList.add('down');
@@ -434,7 +434,7 @@ cat > deploy-preview/sidebar-test.html << 'EOL'
         chevron.classList.remove('down');
       }
     }
-    
+
     // Initialize by expanding trips section and selecting active trips
     document.addEventListener('DOMContentLoaded', () => {
       toggleSubnav('trips');
