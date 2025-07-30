@@ -171,7 +171,7 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
       console.log(`[Maps Loader] Loading Google Maps via proxy: ${url}`);
       script.src = url;
     } else if (GOOGLE_MAPS_API_KEY) {
-      const url = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=${libraries}`;
+      const url = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&loading=async&libraries=${libraries}`;
       console.log("[Maps Loader] Loading Google Maps directly with API key");
       script.src = url;
     } else {

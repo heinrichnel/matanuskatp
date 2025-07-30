@@ -9,10 +9,38 @@ const WIALON_API_URL = "https://hst-api.wialon.com";
 
 // Track initialization state
 let wialonInitialized = false;
+let sdkLoaded = false;
 let lastConnectionAttempt = 0;
 let connectionAttempts = 0;
 const CONNECTION_COOLDOWN = 30000; // 30 seconds between auto-retry attempts
 const MAX_AUTO_RETRIES = 3;
+
+// Listen for Wialon SDK loaded event
+if (typeof window !== "undefined") {
+  // Check if SDK is already loaded
+  if (window.wialon) {
+    console.log("Wialon SDK already loaded");
+    sdkLoaded = true;
+  } else {
+    // Set up listener for when SDK loads
+    window.addEventListener("wialonSdkLoaded", () => {
+      console.log("Wialon SDK loaded event received");
+      sdkLoaded = true;
+    });
+
+    // Fallback: Check periodically for SDK
+    const checkSdk = setInterval(() => {
+      if (window.wialon) {
+        sdkLoaded = true;
+        console.log("Wialon SDK detected in periodic check");
+        clearInterval(checkSdk);
+      }
+    }, 1000);
+
+    // Clean up after 30 seconds to avoid memory leaks
+    setTimeout(() => clearInterval(checkSdk), 30000);
+  }
+}
 
 // Create mock data for offline/fallback mode
 const MOCK_UNITS: WialonUnit[] = [
@@ -67,12 +95,12 @@ export async function initializeWialon(): Promise<boolean> {
     console.log("Auto-initializing Wialon connection...");
 
     // Check if Wialon SDK is available
-    if (typeof window !== 'undefined' && !window.wialon) {
+    if (typeof window !== "undefined" && !window.wialon) {
       console.warn("Wialon SDK not immediately available. Attempting to load SDK dynamically...");
-      
+
       // Try to load the Wialon SDK dynamically
       return new Promise((resolve) => {
-        const script = document.createElement('script');
+        const script = document.createElement("script");
         script.src = "https://sdk.wialon.com/js/latest/wialon.js";
         script.async = true;
         script.onload = async () => {

@@ -1,7 +1,8 @@
 # Netlify configuration file
 
 [build]
-  publish = "/"
+  command = "vite build"
+  publish = "dist"
 
 [[redirects]]
   from = "/*"
