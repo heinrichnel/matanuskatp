@@ -510,7 +510,7 @@ const InvoiceBuilder: React.FC = () => {
                       className="w-full justify-start"
                       icon={<Save className="w-4 h-4" />}
                       onClick={() => saveInvoice(true)}
-                      loading={isLoading}
+                      isLoading={isLoading}
                     >
                       Save Draft
                     </Button>
@@ -520,7 +520,7 @@ const InvoiceBuilder: React.FC = () => {
                       className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white"
                       icon={<FileCheck className="w-4 h-4" />}
                       onClick={() => handleButtonClick("createInvoice")}
-                      loading={isLoading}
+                      isLoading={isLoading}
                     >
                       Create Invoice
                     </Button>

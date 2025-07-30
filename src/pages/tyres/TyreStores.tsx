@@ -193,8 +193,8 @@ const TyreStores: React.FC = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Movement Note</label>
                 <Input
+                  label="Movement Note"
                   value={moveNote}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setMoveNote(e.target.value)}
                   placeholder="Reason for movement..."
