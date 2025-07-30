@@ -49,19 +49,7 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
     }));
   };
 
-  // Create navigation categories from sidebarConfig
-  const navCategories = [
-    {
-      id: "main",
-      label: "Main Navigation",
-      items: sidebarConfig.filter(item => !item.children || item.children.length === 0),
-    },
-    {
-      id: "core",
-      label: "Core Business Operations",
-      items: sidebarConfig.filter(item => item.children && item.children.length > 0),
-    }
-  ];
+  // No need for navCategories anymore as we're using sidebarConfig directly
 
   // Render sidebar items recursively
   const renderSidebarItems = (items: SidebarItem[], isChild: boolean = false) => {

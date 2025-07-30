@@ -173,10 +173,10 @@ const QRGenerator = React.lazy(() => import("../pages/workshop/QRGenerator"));
 const QRScannerPage = React.lazy(() => import("../pages/workshop/QRScannerPage"));
 
 // Testing & Demo Pages (Development Only)
-const SidebarTester = React.lazy(() => import("../SidebarTester"));
+const SidebarTester = PlaceholderComponent; // Use placeholder instead of missing file
 const UIComponentsDemo = React.lazy(() => import("../components/ui/UIComponentsDemo"));
 const GoogleMapsTest = React.lazy(() => import("../components/testing/GoogleMapsTest"));
-const TestRouting = React.lazy(() => import("../testRouting")); // Your testRouting.tsx
+const TestRouting = PlaceholderComponent; // Use placeholder instead of missing file
 
 // Define the structure of a sidebar item
 export interface SidebarItem {

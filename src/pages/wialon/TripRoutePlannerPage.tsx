@@ -1,5 +1,5 @@
 import React from "react";
-import TripRoutePlanner from "./TripRoutePlanner";
+import TripRoutePlanner from "@/../TripRoutePlanner";
 
 /**
  * TripRoutePlannerPage Component
