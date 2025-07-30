@@ -31,7 +31,7 @@ import { initOfflineCache } from "./utils/offlineCache";
 import { syncOfflineOperations } from "./utils/offlineOperations";
 
 // Auto-init Wialon
-import "./api/wialon";
+import "./pages/wialon/types/wialon";
 
 // === REPORTS & OTHER ===
 
@@ -119,16 +119,16 @@ const App: React.FC = () => {
                   <WorkshopProvider>
                     <FleetAnalyticsProvider>
                       <TyreReferenceDataProvider>
-                      <div className="fixed top-0 left-0 right-0 z-50 p-4">
-                        <FirestoreConnectionError />
-                        {connectionError && <FirestoreConnectionError error={connectionError} />}
-                      </div>
+                        <div className="fixed top-0 left-0 right-0 z-50 p-4">
+                          <FirestoreConnectionError />
+                          {connectionError && <FirestoreConnectionError error={connectionError} />}
+                        </div>
 
-                      <OfflineBanner />
-                      <ConnectionStatusIndicator
-                        showText={true}
-                        className="fixed bottom-4 right-4 z-40"
-                      />
+                        <OfflineBanner />
+                        <ConnectionStatusIndicator
+                          showText={true}
+                          className="fixed bottom-4 right-4 z-40"
+                        />
 
                         <AppRoutes />
                       </TyreReferenceDataProvider>

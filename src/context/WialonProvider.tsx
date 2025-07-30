@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getUnits, initializeWialon } from "../api/wialon";
+import { getUnits, initializeWialon } from "../pages/wialon/types/wialon";
 import { getEnvVar } from "../utils/envUtils";
 
 // Define Wialon context type
@@ -47,13 +47,21 @@ export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
       checkCount++;
 
       if (!window.wialon) {
-        console.log(`Wialon SDK not available yet, waiting... (attempt ${checkCount}/${MAX_CHECKS})`);
+        console.log(
+          `Wialon SDK not available yet, waiting... (attempt ${checkCount}/${MAX_CHECKS})`
+        );
 
         // If we've exceeded max checks, show a more helpful error
         if (checkCount >= MAX_CHECKS) {
-          console.error("Failed to load Wialon SDK after multiple attempts. Check network connection and script URL.");
+          console.error(
+            "Failed to load Wialon SDK after multiple attempts. Check network connection and script URL."
+          );
           if (mounted) {
-            setError(new Error("Failed to load Wialon SDK. Please check your internet connection and try refreshing the page."));
+            setError(
+              new Error(
+                "Failed to load Wialon SDK. Please check your internet connection and try refreshing the page."
+              )
+            );
             setInitializing(false);
           }
           return;
