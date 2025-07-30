@@ -468,7 +468,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
           setErrors({});
         }}
         title="Add New Relationship"
-        maxWidth="md"
+        size="md"
       >
         <div className="space-y-6">
           <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
@@ -563,7 +563,7 @@ const ClientRelationships: React.FC<ClientRelationshipsProps> = ({
   // If this component is being used as a modal
   if (isModal) {
     return (
-      <Modal isOpen={isOpen} onClose={onClose} title="Client Relationships" maxWidth="2xl">
+      <Modal isOpen={isOpen} onClose={onClose} title="Client Relationships" size="xl">
         {content}
       </Modal>
     );

@@ -22,12 +22,12 @@ type Props = {
   fleetNumber: string;
 };
 
-const TyreInspectionModal: React.FC<Props> = ({ 
-  open, 
-  onClose, 
-  onSubmit, 
-  tyrePosition, 
-  fleetNumber 
+const TyreInspectionModal: React.FC<Props> = ({
+  open,
+  onClose,
+  onSubmit,
+  tyrePosition,
+  fleetNumber
 }) => {
   const [treadDepth, setTreadDepth] = useState('');
   const [pressure, setPressure] = useState('');
@@ -52,7 +52,7 @@ const TyreInspectionModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal isOpen={open} onClose={onClose} title={`Inspect Tyre: ${tyrePosition} on ${fleetNumber}`} maxWidth="md">
+    <Modal isOpen={open} onClose={onClose} title={`Inspect Tyre: ${tyrePosition} on ${fleetNumber}`} size="md">
       <div className="space-y-6">
         <Input
           label="Tread Depth (mm)"
@@ -61,7 +61,7 @@ const TyreInspectionModal: React.FC<Props> = ({
           type="number"
           placeholder="e.g. 8.5"
         />
-        
+
         <Input
           label="Pressure (kPa)"
           value={pressure}
@@ -69,26 +69,26 @@ const TyreInspectionModal: React.FC<Props> = ({
           type="number"
           placeholder="e.g. 850"
         />
-        
+
         <Input
           label="Visual Condition"
           value={visualCondition}
           onChange={(e) => setVisualCondition(e.target.value)}
           placeholder="e.g. Good, Worn, Cracked"
         />
-        
+
         <Input
           label="Comments"
           value={comments}
           onChange={(e) => setComments(e.target.value)}
           placeholder="Optional notes"
         />
-        
+
         <div className="flex justify-end space-x-3 pt-4">
           <Button variant="outline" onClick={onClose} icon={<X className="w-4 h-4" />}>
             Cancel
           </Button>
-          
+
           <Button onClick={handleSubmit} icon={<CheckCircle className="w-4 h-4" />}>
             Submit Inspection
           </Button>

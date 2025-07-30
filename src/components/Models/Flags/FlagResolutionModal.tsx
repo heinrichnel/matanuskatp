@@ -83,7 +83,7 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
 
   const handleResolve = async () => {
     if (!cost || !validateForm()) return;
-    
+
     try {
       setIsSubmitting(true);
 
@@ -135,7 +135,7 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
   const hasFileUpload = selectedFiles && selectedFiles.length > 0;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Resolve Flagged Cost Entry" maxWidth="lg">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Resolve Flagged Cost Entry" size="lg">
       <div className="space-y-6">
         {/* Flagged Cost Summary */}
         <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
@@ -289,9 +289,9 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
 
         {/* Actions */}
         <div className="flex justify-end space-x-3 pt-4 border-t">
-          <Button 
-            variant="outline" 
-            onClick={handleClose} 
+          <Button
+            variant="outline"
+            onClick={handleClose}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
           >

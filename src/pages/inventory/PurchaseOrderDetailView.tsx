@@ -107,24 +107,24 @@ const PurchaseOrderDetailView: React.FC<PurchaseOrderDetailViewProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={onClick}
+                onClick={onPrint}
                 icon={<Download className="h-4 w-4" />}
               >
                 Print
               </Button>
             )}
             {onEdit && status === "pending" && (
-              <Button variant="outline" size="sm" onClick={onClick}>
+              <Button variant="outline" size="sm" onClick={onCancel}>
                 Edit
               </Button>
             )}
             {onApprove && status === "pending" && (
-              <Button variant="primary" size="sm" onClick={onClick}>
+              <Button variant="primary" size="sm" onClick={onApprove}>
                 Approve
               </Button>
             )}
             {onCancel && status === "pending" && (
-              <Button variant="outline" size="sm" onClick={onClick}>
+              <Button variant="outline" size="sm" onClick={onEdit}>
                 Cancel
               </Button>
             )}

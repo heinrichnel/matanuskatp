@@ -56,7 +56,7 @@ export const MoveTyreModal: React.FC<MoveTyreModalProps> = ({ isOpen, onClose, f
   const storeOptions = stores.map((s: TyreStore) => ({ label: s.name, value: s.id }));
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Move Tyre ${entry?.tyreId}`} maxWidth="sm">
+    <Modal isOpen={isOpen} onClose={onClose} title={`Move Tyre ${entry?.tyreId}`} size="sm">
       <div className="space-y-4">
         <Select
           label="From Store"

@@ -1,11 +1,18 @@
+import { FileWarning, Search } from "lucide-react";
 import React, { useState } from "react";
-import { Button } from "../../components/ui/Button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
-import { Input } from "../../components/ui/FormElements";
-import { Badge } from "../../components/ui/badge";
-import { Search, FileWarning } from "lucide-react";
 import { DefectItemModal } from "../../components/Models/Workshop/DefectItemModal";
 import InspectionDetailsModal from "../../components/Models/Workshop/InspectionDetailsModal";
+import { Button } from "../../components/ui/Button";
+import { Input } from "../../components/ui/FormElements";
+import { Badge } from "../../components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../components/ui/table";
 import { parseInspectionDefects } from "../../utils/inspectionUtils";
 
 // Define the inspection data type
@@ -98,10 +105,12 @@ const InspectionHistory = () => {
 
   // Filter inspections based on search term
   const filteredInspections = searchTerm
-    ? inspections.filter(inspection =>
-        inspection.report.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        inspection.vehicle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        inspection.notes.toLowerCase().includes(searchTerm.toLowerCase()))
+    ? inspections.filter(
+        (inspection) =>
+          inspection.report.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          inspection.vehicle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          inspection.notes.toLowerCase().includes(searchTerm.toLowerCase())
+      )
     : inspections;
 
   return (
@@ -116,7 +125,7 @@ const InspectionHistory = () => {
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Search className="w-4 h-4 text-gray-400" />
           </div>
-                    <Input
+          <Input
             label="Search"
             placeholder="Search"
             className="pl-10"
@@ -159,10 +168,12 @@ const InspectionHistory = () => {
                 <TableCell>
                   <div className="font-medium">{inspection.report}</div>
                   <div className="text-xs text-gray-500">
-                    Inspection Form: {inspection.form} <FileWarning className="inline w-3 h-3 ml-1" />
+                    Inspection Form: {inspection.form}{" "}
+                    <FileWarning className="inline w-3 h-3 ml-1" />
                     <br />
-                    <span className="font-medium text-gray-600">Note:</span> {inspection.notes.substring(0, 100)}
-                    {inspection.notes.length > 100 && '...'}
+                    <span className="font-medium text-gray-600">Note:</span>{" "}
+                    {inspection.notes.substring(0, 100)}
+                    {inspection.notes.length > 100 && "..."}
                   </div>
                 </TableCell>
                 <TableCell>{inspection.date}</TableCell>
@@ -178,16 +189,16 @@ const InspectionHistory = () => {
                       setIsDefectModalOpen(true);
                     }}
                   >
-                    <Badge className="bg-red-100 text-red-800">
-                      ⚠ {inspection.faultCount}
-                    </Badge>
+                    <Badge className="bg-red-100 text-red-800">⚠ {inspection.faultCount}</Badge>
                   </button>
                 </TableCell>
                 <TableCell>
                   <Badge
-                    className={inspection.correctiveAction === "TAKEN"
-                      ? "bg-green-100 text-green-800"
-                      : "border border-gray-300 bg-white text-gray-800"}
+                    className={
+                      inspection.correctiveAction === "TAKEN"
+                        ? "bg-green-100 text-green-800"
+                        : "border border-gray-300 bg-white text-gray-800"
+                    }
                   >
                     {inspection.correctiveAction}
                   </Badge>
@@ -222,17 +233,17 @@ const InspectionHistory = () => {
             ...selectedInspection,
             defects: {
               repair: parseInspectionDefects(selectedInspection.notes)
-                .filter(item => item.type === 'repair')
-                .map(item => item.name),
+                .filter((item) => item.type === "repair")
+                .map((item) => item.name),
               replace: parseInspectionDefects(selectedInspection.notes)
-                .filter(item => item.type === 'replace')
-                .map(item => item.name)
+                .filter((item) => item.type === "replace")
+                .map((item) => item.name),
             },
             status: {
               inspection: "COMPLETED",
               workOrder: selectedInspection.workOrder || null,
-              completion: selectedInspection.correctiveAction === "TAKEN" ? "COMPLETED" : null
-            }
+              completion: selectedInspection.correctiveAction === "TAKEN" ? "COMPLETED" : null,
+            },
           }}
           onClose={() => setIsDetailsModalOpen(false)}
         />
