@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import { Input } from '../ui/FormElements';
+import Modal from '../../ui/Modal';
+import Button from '../../ui/Button';
+import { Input } from '../../ui/FormElements';
 import { CheckCircle, X } from 'lucide-react';
 
 type TyreInspection = {

@@ -164,7 +164,7 @@ const IndirectCostBreakdown: React.FC = () => {
     if (buttonText === "View Details") {
       // Find the category from the row that was clicked
       const row = event.currentTarget.closest('tr');
-      const categoryId = row?.key || '';
+      const categoryId = row?.getAttribute('data-category-id') || '';
       const category = costCategories.find(c => c.id === categoryId);
 
       if (category) {
@@ -287,6 +287,7 @@ const IndirectCostBreakdown: React.FC = () => {
                   {costCategories.map((category) => (
                     <tr
                       key={category.id}
+                      data-category-id={category.id}
                       className={`border-b hover:bg-gray-50 ${selectedCategory?.id === category.id ? "bg-blue-50" : ""}`}
                     >
                       <td className="px-4 py-2">{category.name}</td>

@@ -75,6 +75,12 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
   const [debriefDates, setDebriefDates] = useState<Record<string, string>>({});
   const [driverSignatures, setDriverSignatures] = useState<Record<string, boolean>>({});
 
+  const handleCompleteDebrief = () => {
+    // Implement the debrief completion logic here
+    console.log('Completing debrief with notes:', debriefNotes);
+    onClose();
+  };
+
   const handleNoteChange = (id: string, value: string) => {
     setDebriefNotes(prev => ({ ...prev, [id]: value }));
   };
@@ -382,14 +388,14 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
             {records.length} record{records.length !== 1 ? 's' : ''} needing review
           </p>
           <div className="flex space-x-2">
-            <Button variant="outline" onClick={generateCSV} icon={<FileText className="w-4 h-4" />}>
-              Export CSV
+            <Button onClick={handleCompleteDebrief} icon={<CheckCircle className="w-4 h-4" />}>
+              Complete Debrief
             </Button>
             <Button variant="outline" onClick={generatePDF} icon={<Printer className="w-4 h-4" />}>
               Export PDF
             </Button>
-            <Button onClick={onClick} icon={<CheckCircle className="w-4 h-4" />}>
-              Complete Debrief
+            <Button onClick={generateCSV} icon={<FileText className="w-4 h-4" />}>
+              Export CSV
             </Button>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Button from "../../components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
-import Input from "../../components/ui/Input";
+import { Input } from "../../components/ui/FormElements";
 // Remove Label import as we'll use a simple label element
 import { ArrowRightLeft } from "lucide-react";
 import { Badge } from "../../components/ui/badge";
