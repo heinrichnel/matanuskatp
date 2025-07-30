@@ -128,9 +128,7 @@ const App: React.FC = () => {
                         className="fixed bottom-4 right-4 z-40"
                       />
 
-                      <Router>
-                        <AppRoutes />
-                      </Router>
+                      <AppRoutes />
                     </TyreReferenceDataProvider>
                   </WorkshopProvider>
                 </DriverBehaviorProvider>
