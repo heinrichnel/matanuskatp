@@ -12,9 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Ca
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/Tabs";
 
 // Import all workshop components
-import InventoryDashboard from "../InventoryDashboard";
-import JobCardManagement from "../JobCardManagement";
-import PurchaseOrderTracker from "../PurchaseOrderTracker";
+import InventoryDashboard from "../inventory/InventoryDashboard";
+import JobCardManagement from "./JobCardManagement";
+import PurchaseOrderTracker from "../inventory/PurchaseOrderTracker";
 import TyreManagement from "../tyres/TyreManagementPage";
 import InspectionManagement from "./InspectionManagement";
 

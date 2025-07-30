@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { useNavigate } from "react-router-dom";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { ArrowDownToLine, QrCode, Truck, Clipboard, Wrench } from "lucide-react";
+import { ArrowDownToLine, QrCode, Truck, Clipboard, Wrench, Tool } from "lucide-react";
 import { useAppContext } from "../../context/AppContext";
 
 interface Vehicle {
@@ -27,7 +27,7 @@ const QRGenerator = () => {
   const [description, setDescription] = useState<string>('');
   const [fleetNumbers, setFleetNumbers] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  
+
   // Positions for parts/tyres
   const positions = [
     'Front Left', 'Front Right', 'Rear Left', 'Rear Right',
@@ -42,13 +42,13 @@ const QRGenerator = () => {
         const db = getFirestore();
         const vehiclesCollection = collection(db, 'vehicles');
         const vehicleSnapshot = await getDocs(vehiclesCollection);
-        
+
         if (!vehicleSnapshot.empty) {
           const vehicles: Vehicle[] = vehicleSnapshot.docs.map(doc => {
             const data = doc.data() as Vehicle;
             return { ...data, id: doc.id };
           });
-          
+
           const fleetNums = vehicles.map(v => v.fleetNumber);
           setFleetNumbers(fleetNums);
         } else {
@@ -69,15 +69,15 @@ const QRGenerator = () => {
         setLoading(false);
       }
     };
-    
+
     fetchFleetNumbers();
   }, []);
-  
+
   // Generate QR code
   const generateQR = () => {
     let value = '';
     const baseUrl = window.location.origin;
-    
+
     switch(qrType) {
       case 'fleet':
         value = `${baseUrl}/workshop/vehicle/${fleetNumber}`;
@@ -97,11 +97,11 @@ const QRGenerator = () => {
       default:
         value = `${baseUrl}/workshop`;
     }
-    
+
     setQrValue(value);
     setQrGenerated(true);
   };
-  
+
   // Reset form
   const resetForm = () => {
     setFleetNumber('');
@@ -111,13 +111,13 @@ const QRGenerator = () => {
     setQrValue('');
     setQrGenerated(false);
   };
-  
+
   // Handle QR type change
   const handleTypeChange = (type: string) => {
     setQrType(type);
     resetForm();
   };
-  
+
   // Validate form before generation
   const isFormValid = () => {
     switch(qrType) {
@@ -134,36 +134,36 @@ const QRGenerator = () => {
         return false;
     }
   };
-  
+
   // Download QR code as image
   const downloadQR = () => {
     // Create a temporary canvas to generate the PNG
     const canvas = document.createElement('canvas');
     const qrSvg = document.querySelector('.qr-container svg');
     if (!qrSvg) return;
-    
+
     const svgData = new XMLSerializer().serializeToString(qrSvg);
     const img = new Image();
-    
+
     // Create a Blob from SVG data
     const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
     const url = URL.createObjectURL(svgBlob);
-    
+
     img.onload = () => {
       // Set canvas dimensions to match the QR code
       canvas.width = img.width;
       canvas.height = img.height;
-      
+
       // Draw the image on the canvas
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.fillStyle = 'white';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
-        
+
         // Create download link
         const downloadLink = document.createElement('a');
-        
+
         let filename = '';
         switch(qrType) {
           case 'fleet':
@@ -184,16 +184,16 @@ const QRGenerator = () => {
           default:
             filename = 'qrcode';
         }
-        
+
         downloadLink.download = `${filename}-qrcode.png`;
         downloadLink.href = canvas.toDataURL('image/png');
         downloadLink.click();
-        
+
         // Clean up
         URL.revokeObjectURL(url);
       }
     };
-    
+
     img.src = url;
   };
 
@@ -203,11 +203,11 @@ const QRGenerator = () => {
         <h1 className="text-2xl font-bold text-gray-800 mb-2">QR Code Generator</h1>
         <p className="text-gray-600">Generate QR codes for workshop operations, vehicles, and parts.</p>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="col-span-1 md:col-span-2 bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">Generate QR Code</h2>
-          
+
           {/* QR Type Selector */}
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">QR Code Type</label>
@@ -216,8 +216,8 @@ const QRGenerator = () => {
                 type="button"
                 onClick={() => handleTypeChange('fleet')}
                 className={`flex flex-col items-center justify-center p-3 rounded-md border ${
-                  qrType === 'fleet' 
-                    ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                  qrType === 'fleet'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-gray-200 hover:border-gray-300 text-gray-600'
                 }`}
               >
@@ -228,20 +228,20 @@ const QRGenerator = () => {
                 type="button"
                 onClick={() => handleTypeChange('tyre')}
                 className={`flex flex-col items-center justify-center p-3 rounded-md border ${
-                  qrType === 'tyre' 
-                    ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                  qrType === 'tyre'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-gray-200 hover:border-gray-300 text-gray-600'
                 }`}
               >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="24" 
-                  height="24" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke={qrType === 'tyre' ? 'currentColor' : '#6b7280'} 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={qrType === 'tyre' ? 'currentColor' : '#6b7280'}
+                  strokeWidth="2"
+                  strokeLinecap="round"
                   strokeLinejoin="round"
                 >
                   <circle cx="12" cy="12" r="10" />
@@ -261,8 +261,8 @@ const QRGenerator = () => {
                 type="button"
                 onClick={() => handleTypeChange('part')}
                 className={`flex flex-col items-center justify-center p-3 rounded-md border ${
-                  qrType === 'part' 
-                    ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                  qrType === 'part'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-gray-200 hover:border-gray-300 text-gray-600'
                 }`}
               >
@@ -273,8 +273,8 @@ const QRGenerator = () => {
                 type="button"
                 onClick={() => handleTypeChange('inspection')}
                 className={`flex flex-col items-center justify-center p-3 rounded-md border ${
-                  qrType === 'inspection' 
-                    ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                  qrType === 'inspection'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-gray-200 hover:border-gray-300 text-gray-600'
                 }`}
               >
@@ -285,8 +285,8 @@ const QRGenerator = () => {
                 type="button"
                 onClick={() => handleTypeChange('jobcard')}
                 className={`flex flex-col items-center justify-center p-3 rounded-md border ${
-                  qrType === 'jobcard' 
-                    ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                  qrType === 'jobcard'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-gray-200 hover:border-gray-300 text-gray-600'
                 }`}
               >
@@ -295,7 +295,7 @@ const QRGenerator = () => {
               </button>
             </div>
           </div>
-          
+
           {/* Dynamic form based on QR type */}
           <div className="space-y-4">
             {/* Fleet number field for vehicle, tyre, inspection and job cards */}
@@ -320,7 +320,7 @@ const QRGenerator = () => {
                 </select>
               </div>
             )}
-            
+
             {/* Position field for tyre */}
             {qrType === 'tyre' && (
               <div>
@@ -342,7 +342,7 @@ const QRGenerator = () => {
                 </select>
               </div>
             )}
-            
+
             {/* Part fields */}
             {qrType === 'part' && (
               <>
@@ -374,7 +374,7 @@ const QRGenerator = () => {
                 </div>
               </>
             )}
-            
+
             {/* Generate Button */}
             <div className="pt-4">
               <button
@@ -393,18 +393,18 @@ const QRGenerator = () => {
             </div>
           </div>
         </div>
-        
+
         {/* QR Code Preview */}
         <div className="col-span-1 bg-white rounded-lg shadow-md p-6 flex flex-col">
           <h2 className="text-xl font-semibold mb-4">QR Code Preview</h2>
-          
+
           {qrGenerated ? (
             <div className="flex-1 flex flex-col items-center justify-center space-y-6">
               <div className="qr-container bg-white p-4 rounded-lg shadow-sm">
-                <QRCodeSVG 
-                  value={qrValue} 
-                  size={200} 
-                  level="M" 
+                <QRCodeSVG
+                  value={qrValue}
+                  size={200}
+                  level="M"
                   marginSize={4}
                 />
               </div>
