@@ -1,5 +1,5 @@
-import React from 'react';
-import CashManagerRequestForm from '../components/forms/CashManagerRequestForm';
+import React from "react";
+import CashManagerRequestForm from "../../components/forms/CashManagerRequestForm";
 
 const CashManagerRequestPage: React.FC = () => {
   return (

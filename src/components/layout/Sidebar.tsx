@@ -644,126 +644,79 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
     },
   ];
 
+    return (
+      <ul className={`space-y-1 ${isChild ? 'mt-1 pl-4' : ''}`}>
+        {items.map((item) => {
+          // Determine if the item is active
+          const isActive = item.path
+            ? currentPath === item.path || (item.path.includes(':') && currentPath.startsWith(item.path.split(':')[0]))
+            : false; // Parent items without direct path are not 'active' themselves
+
+          // Determine if a parent category is active (for styling expanded parents)
+          const isParentActive = item.children && item.path && currentPath.startsWith(item.path);
+
+          if (item.children) {
+            return (
+              <li key={item.id} className="mb-2">
+                <div
+                  className={`w-full flex items-center justify-between gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
+                    expandedItems[item.id] || isParentActive // Expand if active or explicitly expanded
+                      ? "bg-blue-50 text-blue-600 font-medium"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                  onClick={() => toggleExpand(item.id)} // Toggle on click
+                  style={{ cursor: "pointer" }}
+                  aria-expanded={!!expandedItems[item.id]}
+                >
+                  <div className="flex items-center gap-3 flex-grow text-left">
+                    {item.icon && <item.icon className="w-5 h-5" />}
+                    <span>{item.label}</span>
+                  </div>
+                  <button
+                    className="p-1 rounded-md hover:bg-gray-200 focus:outline-none"
+                    onClick={(e) => toggleExpand(item.id, e)} // Use button to toggle explicitly
+                    aria-label={expandedItems[item.id] ? "Collapse menu" : "Expand menu"}
+                  >
+                    {expandedItems[item.id] ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronRight className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                {expandedItems[item.id] && renderSidebarItems(item.children, true)}
+              </li>
+            );
+          }
+
+          // Render leaf item (no children)
+          return (
+            <li key={item.id}>
+              <button
+                className={`w-full flex items-center gap-3 ${isChild ? 'px-8' : 'px-6'} py-2 rounded-lg transition-colors text-left ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600 font-medium"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+                onClick={() => item.path && handleNavigate(item.path)} // Only navigate if path exists
+              >
+                {item.icon && <item.icon className="w-5 h-5" />}
+                <span>{item.label}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    );
+  };
+
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-100 border-r shadow flex flex-col z-30">
       <div className="flex items-center justify-center px-6 py-4 border-b bg-gray-100">
         <h1 className="font-bold text-black text-lg">MATANUSKA TRANSPORT</h1>
       </div>
       <nav className="flex-1 overflow-y-auto py-2 max-h-[calc(100vh-160px)]">
-        {navCategories.map((category) => (
-          <div key={category.id} className="mb-4">
-            {category.label && (
-              <h3 className="px-6 mb-1 text-xs font-medium uppercase tracking-wider text-gray-500">
-                {category.label}
-              </h3>
-            )}
-            <ul className="space-y-1">
-              {category.items.map(({ id, label, icon: Icon, route, children }) => {
-                const normalizedRoute = route
-                  ? route.startsWith("/")
-                    ? route.substring(1)
-                    : route
-                  : "";
-                const normalizedCurrentView = currentView.startsWith("/")
-                  ? currentView.substring(1)
-                  : currentView;
-
-                const isActive = children
-                  ? normalizedCurrentView === normalizedRoute ||
-                    normalizedCurrentView.startsWith(`${normalizedRoute}/`)
-                  : normalizedCurrentView === normalizedRoute;
-
-                if (children) {
-                  return (
-                    <li key={id} className="mb-2">
-                      <div
-                        className={`w-full flex items-center justify-between gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
-                          isActive
-                            ? "bg-blue-50 text-blue-600 font-medium"
-                            : "text-gray-700 hover:bg-gray-50"
-                        }`}
-                      >
-                        <div
-                          className="flex items-center gap-3 flex-grow text-left cursor-pointer"
-                          onClick={(e) => {
-                            toggleExpand(id, e);
-                            if (route) {
-                              onNavigate(route);
-                            }
-                          }}
-                        >
-                          {Icon && <Icon className="w-5 h-5" />}
-                          <span>{label}</span>
-                        </div>
-
-                        <button
-                          className="p-1 rounded-md hover:bg-gray-200 focus:outline-none"
-                          onClick={(e) => toggleExpand(id, e)}
-                          aria-label={expandedItems[id] ? "Collapse menu" : "Expand menu"}
-                        >
-                          {expandedItems[id] ? (
-                            <ChevronDown className="w-4 h-4" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4" />
-                          )}
-                        </button>
-                      </div>
-
-                      {expandedItems[id] && (
-                        <ul className="space-y-1 mt-1">
-                          {children.map((child: NavItem) => (
-                            <li key={child.id}>
-                              <button
-                                className={`w-full flex items-center gap-3 px-12 py-2 rounded-lg transition-colors text-left ${
-                                  currentView === child.route ||
-                                  currentView === "/" + child.route ||
-                                  currentView.startsWith(child.route + "/") ||
-                                  currentView.startsWith("/" + child.route + "/")
-                                    ? "bg-blue-50 text-blue-600 font-medium"
-                                    : "text-gray-700 hover:bg-gray-50"
-                                }`}
-                                onClick={() => {
-                                  console.log(`Navigating to child route: ${child.route}`);
-                                  onNavigate(child.route);
-                                }}
-                                data-testid={`sidebar-${child.id}`}
-                                data-route={child.route}
-                              >
-                                {child.icon && <child.icon className="w-5 h-5" />}
-                                <span>{child.label}</span>
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  );
-                }
-
-                return (
-                  <li key={id}>
-                    <button
-                      className={`w-full flex items-center gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
-                        isActive
-                          ? "bg-blue-50 text-blue-600 font-medium"
-                          : "text-gray-700 hover:bg-gray-50"
-                      }`}
-                      onClick={() => {
-                        console.log(`Navigating to route: ${route}`);
-                        onNavigate(route);
-                      }}
-                      data-testid={`sidebar-${id}`}
-                      data-route={route}
-                    >
-                      {Icon && <Icon className="w-5 h-5" />}
-                      <span>{label}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        ))}
+        {renderSidebarItems(sidebarConfig)} {/* Render top-level items from sidebarConfig */}
       </nav>
       <div className="px-6 py-4 border-t">
         <div className="flex flex-col space-y-2 mb-3">
@@ -772,7 +725,7 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
         </div>
         <div className="flex items-center gap-3 mt-2">
           <Users className="w-5 h-5 text-gray-400" />
-          <span className="text-sm text-gray-700">User</span>
+          <span className="text-sm text-gray-700">User</span> {/* Replace with actual user name */}
         </div>
       </div>
     </aside>
@@ -780,6 +733,3 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
 };
 
 export default Sidebar;
-function openWialonDashboard(event: React.MouseEvent<HTMLButtonElement>): void {
-  throw new Error("Function not implemented.");
-}

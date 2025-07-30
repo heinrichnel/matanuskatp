@@ -38,16 +38,9 @@
     "index.js",
     "route-component-map.cjs",
     "sidebar-validator.cjs",
-    "find-form-usage.js"
+    "find-form-usage.js",
+    ".github/examples"
   ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    ".netlify"
-  ],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
-  ]
+  "exclude": ["node_modules", "dist", "build", ".netlify"],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
 }
