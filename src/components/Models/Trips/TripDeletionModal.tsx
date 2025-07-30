@@ -35,7 +35,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const totalCosts = calculateTotalCosts(trip.costs);
-  const flaggedItems = trip.costs.filter(c => c.isFlagged).length;
+  const flaggedItems = trip.costs.filter((c: CostEntry) => c.isFlagged).length;
   const confirmationText = `DELETE ${trip.fleetNumber}`;
 
   const validateForm = () => {
@@ -81,7 +81,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
   // Check if user has permission to delete
   if (userRole !== 'admin') {
     return (
-      <Modal isOpen={isOpen} onClose={onClose} title="Access Denied" maxWidth="md">
+      <Modal isOpen={isOpen} onClose={onClose} title="Access Denied" size="md">
         <div className="text-center space-y-4">
           <Shield className="w-16 h-16 text-red-500 mx-auto" />
           <h3 className="text-lg font-medium text-gray-900">Insufficient Permissions</h3>
@@ -99,7 +99,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Delete Completed Trip"
-      maxWidth="lg"
+      size="lg"
     >
       <div className="space-y-6">
         {/* Critical Warning */}
@@ -138,7 +138,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
             <div className="flex justify-between text-sm">
               <span>Cost Entries: <strong>{trip.costs.length}</strong></span>
               <span>Flagged Items: <strong className="text-red-600">{flaggedItems}</strong></span>
-              <span>Attachments: <strong>{trip.costs.reduce((sum, cost) => sum + cost.attachments.length, 0)}</strong></span>
+              <span>Attachments: <strong>{trip.costs.reduce((sum: number, cost: CostEntry) => sum + cost.attachments.length, 0)}</strong></span>
             </div>
           </div>
         </div>
@@ -153,7 +153,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
             onChange={(e) => setDeletionReason(e.target.value)}
             options={[
               { label: 'Select reason for deletion...', value: '' },
-              ...TRIP_DELETION_REASONS.map(reason => ({ label: reason, value: reason }))
+              ...TRIP_DELETION_REASONS.map((reason: string) => ({ label: reason, value: reason }))
             ]}
             error={errors.deletionReason}
           />
