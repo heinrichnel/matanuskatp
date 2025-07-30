@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { loadGoogleMapsScript } from '../utils/googleMapsLoader';
-import { 
+import {
   getFirestore, collection, doc,
   deleteDoc, addDoc
 } from 'firebase/firestore';
@@ -39,8 +39,8 @@ import { generateTripId } from '../utils/helpers';
 import { sendTripEvent, sendDriverBehaviorEvent } from '../utils/webhookSenders';
 import { v4 as uuidv4 } from 'uuid';
 import syncService from '../utils/syncService';
-import { 
-  addConnectionListener, 
+import {
+  addConnectionListener,
   removeConnectionListener,
   enableFirestoreNetwork,
   disableFirestoreNetwork
@@ -51,7 +51,7 @@ interface AppContextType {
   isGoogleMapsLoaded: boolean;
   googleMapsError: string | null;
   loadGoogleMaps: () => Promise<void>;
-  
+
   // Constants
   FLEETS_WITH_PROBES: string[];
   trips: Trip[];
@@ -78,7 +78,7 @@ interface AppContextType {
   // Route Planning & Optimization
   planRoute: (tripId: string, origin: string, destination: string, waypoints?: string[]) => Promise<void>;
   optimizeRoute: (tripId: string) => Promise<void>;
-  
+
   // Trip Progress & Delivery
   updateTripProgress: (tripId: string, status: Trip['tripProgressStatus']) => Promise<void>;
   confirmDelivery: (tripId: string, confirmationData: {
@@ -95,16 +95,16 @@ interface AppContextType {
   // PDF Generation
   generateQuoteConfirmationPdf: (tripId: string) => Promise<string>;
   generateLoadConfirmationPdf: (tripId: string) => Promise<string>;
-  
+
   // Fleet Utilization
   calculateFleetUtilization: (tripId: string) => Promise<void>;
-  getFleetUtilizationMetrics: (fleetNumber: string, startDate?: string, endDate?: string) => 
+  getFleetUtilizationMetrics: (fleetNumber: string, startDate?: string, endDate?: string) =>
     {fleetNumber: string; utilizationRate: number; revenuePerKm: number; costPerKm: number}[];
-  
+
   addCostEntry: (costEntry: Omit<CostEntry, 'id' | 'attachments'>, files?: FileList) => Promise<string>;
   updateCostEntry: (costEntry: CostEntry) => Promise<void>;
   deleteCostEntry: (id: string) => Promise<void>;
-  
+
   addAttachment: (attachment: Omit<Attachment, 'id'>) => Promise<string>;
   deleteAttachment: (id: string) => Promise<void>;
 
@@ -162,7 +162,7 @@ interface AppContextType {
   addCARReport: (report: Omit<CARReport, 'id' | 'createdAt' | 'updatedAt'>, files?: FileList) => Promise<string>;
   updateCARReport: (report: CARReport, files?: FileList) => Promise<void>;
   deleteCARReport: (id: string) => Promise<void>;
-  
+
   workshopInventory: TyreInventoryItem[];
   addWorkshopInventoryItem: (item: Omit<TyreInventoryItem, 'id'>, currentUser?: string) => Promise<string>;
   updateWorkshopInventoryItem: (item: TyreInventoryItem) => Promise<void>;
@@ -178,7 +178,7 @@ interface AppContextType {
   setTrips: React.Dispatch<React.SetStateAction<Trip[]>>;
   completeTrip: (tripId: string) => Promise<void>;
   auditLogs: AuditLogType[];
-  
+
   // Client Management
   clients: Client[];
   addClient: (client: Omit<Client, 'id'>) => Promise<string>;
@@ -231,7 +231,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [jobCards, setJobCards] = useState<JobCardType[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected');
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
-  
+
   // Google Maps state
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState<boolean>(false);
   const [googleMapsError, setGoogleMapsError] = useState<string | null>(null);
@@ -318,14 +318,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsLoading(prev => ({ ...prev, loadGoogleMaps: false }));
     }
   }, [isGoogleMapsLoaded]);
-  
+
   // Load Google Maps on initial app load
   useEffect(() => {
     loadGoogleMaps().catch(err => {
       console.error("AppContext: Initial Google Maps load failed.", err.message);
     });
   }, [loadGoogleMaps]);
-  
+
   // Monitor online/offline status and Firestore connection
   useEffect(() => {
     const handleOnline = async () => {
@@ -340,7 +340,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setConnectionStatus('disconnected');
       }
     };
-    
+
     const handleOffline = async () => {
       console.log("⚠️ App is now offline");
       setConnectionStatus('disconnected');
@@ -351,22 +351,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         console.error("Failed to properly disconnect Firestore:", error);
       }
     };
-    
+
     // Handle Firestore connection status changes
     const handleFirestoreConnectionChange = (status: 'connected' | 'disconnected' | 'reconnecting' | 'error') => {
       setConnectionStatus(status === 'error' ? 'disconnected' : status);
     };
-    
+
     // Add connection listener
     addConnectionListener(handleFirestoreConnectionChange);
-    
+
     // Set initial status
     setConnectionStatus(navigator.onLine ? 'connected' : 'disconnected');
-    
+
     // Add browser online/offline event listeners
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-    
+
     // Clean up
     return () => {
       window.removeEventListener('online', handleOnline);
@@ -415,29 +415,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addWorkshopInventoryItem = async (item: Omit<TyreInventoryItem, 'id'>, currentUser?: string): Promise<string> => {
     try {
       setIsLoading(prev => ({ ...prev, addWorkshopInventoryItem: true }));
-      
+
       // 1. Add to Firestore
       const db = getFirestore();
       const docRef = await addDoc(collection(db, "workshopInventory"), item);
-      
+
       // 2. Create item with the Firestore-generated ID
       const newItem = {
         ...item,
         id: docRef.id
       };
-      
+
       // 3. Update local state
       setWorkshopInventory(prev => [...prev, newItem as TyreInventoryItem]);
-      
+
       // 4. Log the action for audit/compliance
       await addAuditLogToFirebase({
         user: currentUser || 'unknown',
         action: 'ADD_WORKSHOP_INVENTORY',
         details: { id: docRef.id, ...item }
       });
-      
+
       console.log(`✅ Workshop inventory item added: ${newItem.id}`);
-      
+
       return newItem.id;
     } catch (error) {
       console.error("Error adding workshop inventory item:", error);
@@ -451,15 +451,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateWorkshopInventoryItem = async (item: TyreInventoryItem): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, updateWorkshopInventoryItem: true }));
-      
+
       // Update item in Firestore using syncService
       await syncService.updateWorkshopInventoryItem(item.id, item);
-      
+
       // Optimistically update local state
-      setWorkshopInventory(prev => 
+      setWorkshopInventory(prev =>
         prev.map(i => i.id === item.id ? item : i)
       );
-      
+
       console.log(`✅ Workshop inventory item updated: ${item.id}`);
     } catch (error) {
       console.error("Error updating workshop inventory item:", error);
@@ -473,21 +473,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteWorkshopInventoryItem = async (id: string, currentUser?: string): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, deleteWorkshopInventoryItem: true }));
-      
+
       // Delete from Firestore
       const db = getFirestore();
       await deleteDoc(doc(db, "workshopInventory", id));
-      
+
       // Update local state
       setWorkshopInventory(prev => prev.filter(item => item.id !== id));
-      
+
       // Audit log the action
       await addAuditLogToFirebase({
         user: currentUser || 'unknown',
         action: 'DELETE_WORKSHOP_INVENTORY',
         details: { id }
       });
-      
+
       console.log(`✅ Workshop inventory item deleted: ${id}`);
     } catch (error) {
       console.error("Error deleting workshop inventory item:", error);
@@ -505,10 +505,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         ...clientData,
         id: uuidv4()
       };
-      
+
       // In a real implementation, this would add to Firestore
       setClients(prev => [...prev, newClient]);
-      
+
       // Log client creation for audit trail
       await addAuditLogToFirebase({
         id: uuidv4(),
@@ -520,7 +520,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         details: `Client ${newClient.name} created`,
         changes: newClient
       });
-      
+
       return newClient.id;
     } catch (error) {
       console.error("Error adding client:", error);
@@ -533,13 +533,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateClient = async (client: Client): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, updateClient: true }));
-      
+
       // Get the original client for audit logging
       const originalClient = clients.find(c => c.id === client.id);
-      
+
       // In a real implementation, this would update Firestore
       setClients(prev => prev.map(c => c.id === client.id ? {...client, updatedAt: new Date().toISOString()} : c));
-      
+
       // Log client update for audit trail
       if (originalClient) {
         await addAuditLogToFirebase({
@@ -567,17 +567,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteClient = async (id: string): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, [`deleteClient-${id}`]: true }));
-      
+
       const clientToDelete = clients.find(c => c.id === id);
-      
+
       if (clientToDelete) {
         // Check if client is referenced in trips
         const clientTrips = trips.filter(t => t.clientName === clientToDelete.name);
-        
+
         if (clientTrips.length > 0) {
           throw new Error(`Cannot delete client: ${clientToDelete.name} is referenced in ${clientTrips.length} trips`);
         }
-        
+
         // Log client deletion for audit trail
         await addAuditLogToFirebase({
           id: uuidv4(),
@@ -590,7 +590,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           changes: clientToDelete
         });
       }
-      
+
       // In a real implementation, this would delete from Firestore
       setClients(prev => prev.filter(c => c.id !== id));
     } catch (error) {
@@ -611,20 +611,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addClientRelationship = async (
     clientId: string,
-    relatedClientId: string, 
+    relatedClientId: string,
     relationType: string,
     notes?: string
   ): Promise<void> => {
     try {
       const client = clients.find(c => c.id === clientId);
       if (!client) throw new Error(`Client with ID ${clientId} not found`);
-      
+
       // Check if relationship already exists
       const existingRelationship = client.relationships.find(r => r.relatedClientId === relatedClientId);
       if (existingRelationship) {
         throw new Error('Relationship already exists between these clients');
       }
-      
+
       // Create the new relationship
       const relationship = {
         id: uuidv4(),
@@ -633,14 +633,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         notes,
         createdAt: new Date().toISOString()
       };
-      
+
       // Update the client with the new relationship
       const updatedClient = {
         ...client,
         relationships: [...client.relationships, relationship],
         updatedAt: new Date().toISOString()
       };
-      
+
       // Update the client in state
       await updateClient(updatedClient);
     } catch (error) {
@@ -653,14 +653,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const client = clients.find(c => c.id === clientId);
       if (!client) throw new Error(`Client with ID ${clientId} not found`);
-      
+
       // Filter out the relationship
       const updatedClient = {
         ...client,
         relationships: client.relationships.filter(r => r.id !== relationshipId),
         updatedAt: new Date().toISOString()
       };
-      
+
       // Update the client in state
       await updateClient(updatedClient);
     } catch (error) {
@@ -782,17 +782,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // This is a placeholder for future audit logging implementation
   // We're keeping this as a reference for when we implement proper audit logging
-  /* 
+  /*
   const addAuditLog = async (logData: any) => {
     try {
       setIsLoading(prev => ({ ...prev, [`addAuditLog-${logData.id || 'unknown'}`]: true }));
-      
+
       // Use the proper audit log utility
       const docId = await addAuditLogToFirebase({
         ...logData,
         details: logData.details,
       });
-      
+
       console.log("✅ Audit log added:", docId);
       return docId;
     } catch (error) {
@@ -901,7 +901,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const getDriverPerformance = (driverName: string) => {
     // Filter events for this driver
     const driverEvents = driverBehaviorEvents.filter(event => event.driverName === driverName);
-    
+
     if (driverEvents.length === 0) {
       return {
         driverName,
@@ -919,15 +919,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const highPoints = driverEvents.filter(e => e.severity === 'high').length * 10;
     const mediumPoints = driverEvents.filter(e => e.severity === 'medium').length * 5;
     const lowPoints = driverEvents.filter(e => e.severity === 'low').length * 2;
-    
+
     // Don't go below zero
     const behaviorScore = Math.max(0, baseScore - criticalPoints - highPoints - mediumPoints - lowPoints);
-    
+
     // Sort events by date, most recent first
-    const sortedEvents = [...driverEvents].sort((a, b) => 
+    const sortedEvents = [...driverEvents].sort((a, b) =>
       new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()
     );
-    
+
     return {
       driverName,
       totalEvents: driverEvents.length,
@@ -941,27 +941,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const getAllDriversPerformance = () => {
     // Get unique driver names
     const driverNames = Array.from(new Set(driverBehaviorEvents.map(event => event.driverName)));
-    
+
     // For each driver, calculate their performance
     return driverNames.map(driverName => {
       // Filter events for this driver
       const driverEvents = driverBehaviorEvents.filter(event => event.driverName === driverName);
-      
+
       // Calculate behavior score (100 is perfect, deduct points for events based on severity)
       const baseScore = 100;
       const criticalPoints = driverEvents.filter(e => e.severity === 'critical').length * 15;
       const highPoints = driverEvents.filter(e => e.severity === 'high').length * 10;
       const mediumPoints = driverEvents.filter(e => e.severity === 'medium').length * 5;
       const lowPoints = driverEvents.filter(e => e.severity === 'low').length * 2;
-      
+
       // Don't go below zero
       const behaviorScore = Math.max(0, baseScore - criticalPoints - highPoints - mediumPoints - lowPoints);
-      
+
       // Sort events by date, most recent first
-      const sortedEvents = [...driverEvents].sort((a, b) => 
+      const sortedEvents = [...driverEvents].sort((a, b) =>
         new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime()
       );
-      
+
       return {
         driverName,
         totalEvents: driverEvents.length,
@@ -977,17 +977,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addTripTemplate = async (template: Omit<TripTemplate, 'id' | 'createdAt'>): Promise<string> => {
     try {
       setIsLoading(prev => ({ ...prev, addTripTemplate: true }));
-      
+
       const newTemplate = {
         ...template,
         id: `template-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
-      
+
       // In a real implementation, this would save to Firestore
       setTripTemplates(prev => [...prev, newTemplate]);
-      
+
       return newTemplate.id;
     } catch (error) {
       console.error("Error adding trip template:", error);
@@ -1000,9 +1000,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateTripTemplate = async (template: TripTemplate): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, updateTripTemplate: true }));
-      
+
       // In a real implementation, this would update Firestore
-      setTripTemplates(prev => 
+      setTripTemplates(prev =>
         prev.map(t => t.id === template.id ? {...template, updatedAt: new Date().toISOString()} : t)
       );
     } catch (error) {
@@ -1016,7 +1016,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteTripTemplate = async (id: string): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, [`deleteTripTemplate-${id}`]: true }));
-      
+
       // In a real implementation, this would delete from Firestore
       setTripTemplates(prev => prev.filter(t => t.id !== id));
     } catch (error) {
@@ -1039,17 +1039,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const addLoadPlan = async (plan: Omit<LoadPlan, 'id' | 'createdAt'>): Promise<string> => {
     try {
       setIsLoading(prev => ({ ...prev, addLoadPlan: true }));
-      
+
       const newPlan = {
         ...plan,
         id: `load-plan-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
-      
+
       // In a real implementation, this would save to Firestore
       setLoadPlans(prev => [...prev, newPlan]);
-      
+
       // Update the associated trip with the load plan ID
       const trip = trips.find(t => t.id === plan.tripId);
       if (trip) {
@@ -1058,7 +1058,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           loadPlanId: newPlan.id
         });
       }
-      
+
       return newPlan.id;
     } catch (error) {
       console.error("Error adding load plan:", error);
@@ -1071,9 +1071,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateLoadPlan = async (plan: LoadPlan): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, updateLoadPlan: true }));
-      
+
       // In a real implementation, this would update Firestore
-      setLoadPlans(prev => 
+      setLoadPlans(prev =>
         prev.map(p => p.id === plan.id ? {...plan, updatedAt: new Date().toISOString()} : p)
       );
     } catch (error) {
@@ -1087,7 +1087,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteLoadPlan = async (id: string): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, [`deleteLoadPlan-${id}`]: true }));
-      
+
       // Get the load plan to find its associated trip
       const loadPlan = loadPlans.find(p => p.id === id);
       if (loadPlan) {
@@ -1100,7 +1100,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           });
         }
       }
-      
+
       // In a real implementation, this would delete from Firestore
       setLoadPlans(prev => prev.filter(p => p.id !== id));
     } catch (error) {
@@ -1121,24 +1121,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Route Planning & Optimization functions
   const planRoute = async (
-    tripId: string, 
-    origin: string, 
-    destination: string, 
+    tripId: string,
+    origin: string,
+    destination: string,
     waypoints?: string[]
   ): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, [`planRoute-${tripId}`]: true }));
-      
+
       const trip = trips.find(t => t.id === tripId);
       if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
-      
+
       // In a real implementation, this would call Google Maps API or similar
       // For now, we'll simulate route planning with dummy data
       const simulatedCoordinates = [
         {lat: 40.7128, lng: -74.0060}, // Example: NYC coordinates
         {lat: 41.8781, lng: -87.6298}, // Example: Chicago coordinates
       ];
-      
+
       const plannedRoute = {
         origin,
         destination,
@@ -1147,13 +1147,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         estimatedDistance: 1200, // km
         estimatedDuration: 720, // minutes
       };
-      
+
       await updateTrip({
         ...trip,
         plannedRoute,
         distanceKm: plannedRoute.estimatedDistance // Update trip distance based on route
       });
-      
+
       console.log(`Route planned for trip ${tripId}`);
     } catch (error) {
       console.error("Error planning route:", error);
@@ -1170,14 +1170,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const optimizeRoute = async (tripId: string): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, [`optimizeRoute-${tripId}`]: true }));
-      
+
       const trip = trips.find(t => t.id === tripId);
       if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
       if (!trip.plannedRoute) throw new Error(`Trip ${tripId} has no planned route to optimize`);
-      
+
       // In a real implementation, this would call a route optimization API
       // For now, we'll simulate optimization with improved metrics
-      
+
       // Copy planned route and add optimization improvements
       const optimizedRoute = {
         ...trip.plannedRoute,
@@ -1189,13 +1189,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         timeSavings: Math.round((trip.plannedRoute.estimatedDuration ?? 0) * 0.1), // 10% time savings
         optimizationDate: new Date().toISOString()
       };
-      
+
       await updateTrip({
         ...trip,
         optimizedRoute,
         distanceKm: optimizedRoute.estimatedDistance // Update trip distance to optimized value
       });
-      
+
       console.log(`Route optimized for trip ${tripId}`);
     } catch (error) {
       console.error("Error optimizing route:", error);
@@ -1211,20 +1211,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Trip Progress & Delivery functions
   const updateTripProgress = async (
-    tripId: string, 
+    tripId: string,
     status: Trip['tripProgressStatus']
   ): Promise<void> => {
     try {
       const trip = trips.find(t => t.id === tripId);
       if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
-      
+
       await updateTrip({
         ...trip,
         tripProgressStatus: status,
         // If the status is 'completed', also update the main trip status
         status: status === 'completed' ? 'completed' : trip.status
       });
-      
+
       console.log(`Trip ${tripId} progress updated to ${status}`);
     } catch (error) {
       console.error("Error updating trip progress:", error);
@@ -1233,7 +1233,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const confirmDelivery = async (
-    tripId: string, 
+    tripId: string,
     confirmationData: {
       status: 'confirmed' | 'disputed';
       notes?: string;
@@ -1243,13 +1243,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   ): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, [`confirmDelivery-${tripId}`]: true }));
-      
+
       const trip = trips.find(t => t.id === tripId);
       if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
-      
+
       // In a real implementation, we would upload the attachments to storage
       // and get back URLs to store in the trip record
-      const proofOfDeliveryAttachments: Attachment[] = confirmationData.attachments ? 
+      const proofOfDeliveryAttachments: Attachment[] = confirmationData.attachments ?
         confirmationData.attachments.map(file => ({
           id: `pod-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
           tripId: tripId,
@@ -1259,7 +1259,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           fileSize: file.size,
           uploadedAt: new Date().toISOString()
         })) : [];
-      
+
       await updateTrip({
         ...trip,
         deliveryConfirmationStatus: confirmationData.status,
@@ -1273,7 +1273,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         // If confirmed, mark the trip as completed
         status: confirmationData.status === 'confirmed' ? 'completed' : trip.status
       });
-      
+
       console.log(`Delivery confirmed for trip ${tripId}`);
     } catch (error) {
       console.error("Error confirming delivery:", error);
@@ -1291,51 +1291,51 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const generateTripFinancialAnalysis = async (tripId: string): Promise<TripFinancialAnalysis> => {
     try {
       setIsLoading(prev => ({ ...prev, [`generateFinancials-${tripId}`]: true }));
-      
+
       const trip = trips.find(t => t.id === tripId);
       if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
-      
+
       // Calculate costs
       const totalCosts = calculateTotalCosts(trip.costs);
       const additionalCostsTotal = trip.additionalCosts?.reduce((sum, cost) => sum + cost.amount, 0) || 0;
-      
+
       // Calculate fuel costs specifically - assume fuel is 30% of total costs for simplified analysis
       const fuelCosts = totalCosts * 0.3;
-      
+
       // Calculate border costs - filter costs with 'Border Costs' category
       const borderCosts = trip.costs
         .filter(cost => cost.category === 'Border Costs')
         .reduce((sum, cost) => sum + cost.amount, 0);
-      
+
       // Calculate driver allowance - filter costs with 'Trip Allowances' category
       const driverAllowance = trip.costs
         .filter(cost => cost.category === 'Trip Allowances')
         .reduce((sum, cost) => sum + cost.amount, 0);
-      
+
       // Calculate toll fees - filter costs with 'Tolls' category
       const tollFees = trip.costs
         .filter(cost => cost.category === 'Tolls')
         .reduce((sum, cost) => sum + cost.amount, 0);
-      
+
       // Remaining costs are classified as maintenance and miscellaneous
       const maintenanceCosts = totalCosts * 0.2; // Assume 20% of total costs
       const miscellaneousCosts = totalCosts - fuelCosts - borderCosts - driverAllowance - tollFees - maintenanceCosts;
-      
+
       // Financial calculations
       const totalRevenue = trip.baseRevenue;
       const grossProfit = totalRevenue - totalCosts - additionalCostsTotal;
       const grossProfitMargin = (grossProfit / totalRevenue) * 100;
-      
+
       // Assume net profit is 90% of gross (after taxes, overhead, etc.)
       const netProfit = grossProfit * 0.9;
       const netProfitMargin = (netProfit / totalRevenue) * 100;
-      
+
       // Calculate per km metrics
       const distanceKm = trip.distanceKm || 1; // Avoid division by zero
       const revenuePerKm = totalRevenue / distanceKm;
       const costPerKm = (totalCosts + additionalCostsTotal) / distanceKm;
       const profitPerKm = netProfit / distanceKm;
-      
+
       // Create the financial analysis object
       const analysis: TripFinancialAnalysis = {
         tripId,
@@ -1373,7 +1373,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         },
         calculatedAt: new Date().toISOString()
       };
-      
+
       // Store the analysis in state
       setTripFinancials(prev => {
         const existing = prev.findIndex(a => a.tripId === tripId);
@@ -1384,7 +1384,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return [...prev, analysis];
       });
-      
+
       return analysis;
     } catch (error) {
       console.error("Error generating financial analysis:", error);
@@ -1406,23 +1406,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const generateQuoteConfirmationPdf = async (tripId: string): Promise<string> => {
     try {
       setIsLoading(prev => ({ ...prev, [`generateQuotePdf-${tripId}`]: true }));
-      
+
       const trip = trips.find(t => t.id === tripId);
       if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
-      
+
       // In a real implementation, this would generate a PDF using jspdf
       // For now, we'll simulate PDF generation with a delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Simulate a PDF URL
       const pdfUrl = `https://example.com/quote_${tripId}.pdf`;
-      
+
       // Update the trip with the PDF URL
       await updateTrip({
         ...trip,
         quoteConfirmationPdfUrl: pdfUrl
       });
-      
+
       return pdfUrl;
     } catch (error) {
       console.error("Error generating quote confirmation PDF:", error);
@@ -1439,23 +1439,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const generateLoadConfirmationPdf = async (tripId: string): Promise<string> => {
     try {
       setIsLoading(prev => ({ ...prev, [`generateLoadPdf-${tripId}`]: true }));
-      
+
       const trip = trips.find(t => t.id === tripId);
       if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
-      
+
       // In a real implementation, this would generate a PDF using jspdf
       // For now, we'll simulate PDF generation with a delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Simulate a PDF URL
       const pdfUrl = `https://example.com/load_${tripId}.pdf`;
-      
+
       // Update the trip with the PDF URL
       await updateTrip({
         ...trip,
         loadConfirmationPdfUrl: pdfUrl
       });
-      
+
       return pdfUrl;
     } catch (error) {
       console.error("Error generating load confirmation PDF:", error);
@@ -1473,30 +1473,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const calculateFleetUtilization = async (tripId: string): Promise<void> => {
     try {
       setIsLoading(prev => ({ ...prev, [`calculateUtilization-${tripId}`]: true }));
-      
+
       const trip = trips.find(t => t.id === tripId);
       if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
-      
+
       // Calculate metrics
       // 1. Calculate capacity utilization
       // Assume 70% capacity utilization for demo purposes
       // In a real implementation, this would be calculated based on the load plan
       const capacityUtilization = 70;
-      
+
       // 2. Calculate fuel efficiency
       // Get diesel records for this trip
       const tripDieselRecords = dieselRecords.filter(r => r.tripId === tripId);
       const totalLitres = tripDieselRecords.reduce((sum, r) => sum + r.litresFilled, 0);
       const fuelEfficiency = trip.distanceKm && totalLitres ? trip.distanceKm / totalLitres : 3.0; // Default to 3.0 km/L
-      
+
       // 3. Calculate revenue and cost per km
       const revenuePerKm = trip.distanceKm ? trip.baseRevenue / trip.distanceKm : 0;
       const totalCosts = calculateTotalCosts(trip.costs);
       const costPerKm = trip.distanceKm ? totalCosts / trip.distanceKm : 0;
-      
+
       // 4. Calculate idle time (stub - in real implementation would be based on GPS data)
       const idleTime = 2.5; // hours
-      
+
       // Update the trip with the utilization metrics
       await updateTrip({
         ...trip,
@@ -1508,7 +1508,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           idleTime
         }
       });
-      
+
       console.log(`Fleet utilization calculated for trip ${tripId}`);
     } catch (error) {
       console.error("Error calculating fleet utilization:", error);
@@ -1523,8 +1523,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const getFleetUtilizationMetrics = (
-    fleetNumber: string, 
-    startDate?: string, 
+    fleetNumber: string,
+    startDate?: string,
     endDate?: string
   ): {fleetNumber: string; utilizationRate: number; revenuePerKm: number; costPerKm: number}[] => {
     // Filter trips by fleet number and date range
@@ -1535,7 +1535,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (!trip.fleetUtilizationMetrics) return false;
       return true;
     });
-    
+
     if (filteredTrips.length === 0) {
       return [{
         fleetNumber,
@@ -1544,21 +1544,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         costPerKm: 0
       }];
     }
-    
+
     // Calculate average metrics
     const totalUtilizationRate = filteredTrips.reduce(
-      (sum, trip) => sum + (trip.fleetUtilizationMetrics?.capacityUtilization || 0), 
+      (sum, trip) => sum + (trip.fleetUtilizationMetrics?.capacityUtilization || 0),
       0
     );
     const totalRevenuePerKm = filteredTrips.reduce(
-      (sum, trip) => sum + (trip.fleetUtilizationMetrics?.revenuePerKm || 0), 
+      (sum, trip) => sum + (trip.fleetUtilizationMetrics?.revenuePerKm || 0),
       0
     );
     const totalCostPerKm = filteredTrips.reduce(
-      (sum, trip) => sum + (trip.fleetUtilizationMetrics?.costPerKm || 0), 
+      (sum, trip) => sum + (trip.fleetUtilizationMetrics?.costPerKm || 0),
       0
     );
-    
+
     return [{
       fleetNumber,
       utilizationRate: totalUtilizationRate / filteredTrips.length,
@@ -1684,10 +1684,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }): Promise<void> => {
       try {
         setIsLoading(prev => ({ ...prev, [`updatePayment-${tripId}`]: true }));
-        
+
         const trip = trips.find(t => t.id === tripId);
         if (!trip) throw new Error(`Trip with ID ${tripId} not found`);
-        
+
         const updatedTrip = {
           ...trip,
           paymentStatus: paymentData.paymentStatus,
@@ -1699,14 +1699,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           status: paymentData.paymentStatus === 'paid' ? 'paid' : trip.status,
           lastUpdated: new Date().toISOString()
         };
-        
+
         await updateTripInFirebase(tripId, updatedTrip);
-        
+
         // Update local state
-        setTrips(prev => 
+        setTrips(prev =>
           prev.map(t => (t.id === tripId ? updatedTrip : t))
         );
-        
+
         // Add audit log entry
         await addAuditLogToFirebase({
           id: uuidv4(),
@@ -1727,7 +1727,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             }
           }
         });
-        
+
         console.log(`✅ Payment updated for trip ${tripId}`);
       } catch (error) {
         console.error('❌ Error updating payment:', error);
@@ -2229,7 +2229,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     clients,
     addClient,
     updateClient,
-    deleteClient, 
+    deleteClient,
     getClient,
     addClientRelationship,
     removeClientRelationship,
@@ -2266,36 +2266,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateTripTemplate,
     deleteTripTemplate,
     getTripTemplate,
-    
+
     // Load Plans
     loadPlans,
     addLoadPlan,
     updateLoadPlan,
     deleteLoadPlan,
     getLoadPlan,
-    
+
     // Route Planning & Optimization
     planRoute,
     optimizeRoute,
-    
+
     // Trip Progress & Delivery
     updateTripProgress,
     confirmDelivery,
-    
+
     // Trip Financials
     generateTripFinancialAnalysis,
     getTripFinancialAnalysis,
-    
+
     // PDF Generation
     generateQuoteConfirmationPdf,
     generateLoadConfirmationPdf,
-    
+
     // Fleet Utilization
     calculateFleetUtilization,
     getFleetUtilizationMetrics,
-    
+
     getJobCard: (id: string) => jobCards.find(jobCard => jobCard.id === id),
-    
+
     FLEETS_WITH_PROBES,
   };
 
@@ -2315,3 +2315,4 @@ function calculateTotalCosts(costs: CostEntry[]) {
     .filter(cost => !cost.isFlagged && !cost.isSystemGenerated)
     .reduce((sum, cost) => sum + (typeof cost.amount === 'number' ? cost.amount : 0), 0);
 }
+

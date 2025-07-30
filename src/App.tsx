@@ -4,6 +4,7 @@ import AppRoutes from "./AppRoutes";
 // Context Providers
 import { AppProvider } from "./context/AppContext";
 import { DriverBehaviorProvider } from "./context/DriverBehaviorContext";
+import { FleetAnalyticsProvider } from "./context/FleetAnalyticsContext";
 import { SyncProvider } from "./context/SyncContext";
 import { TripProvider } from "./context/TripContext";
 import { TyreReferenceDataProvider } from "./context/TyreReferenceDataContext";
@@ -116,7 +117,8 @@ const App: React.FC = () => {
               <TripProvider>
                 <DriverBehaviorProvider>
                   <WorkshopProvider>
-                    <TyreReferenceDataProvider>
+                    <FleetAnalyticsProvider>
+                      <TyreReferenceDataProvider>
                       <div className="fixed top-0 left-0 right-0 z-50 p-4">
                         <FirestoreConnectionError />
                         {connectionError && <FirestoreConnectionError error={connectionError} />}
@@ -128,8 +130,9 @@ const App: React.FC = () => {
                         className="fixed bottom-4 right-4 z-40"
                       />
 
-                      <AppRoutes />
-                    </TyreReferenceDataProvider>
+                        <AppRoutes />
+                      </TyreReferenceDataProvider>
+                    </FleetAnalyticsProvider>
                   </WorkshopProvider>
                 </DriverBehaviorProvider>
               </TripProvider>
