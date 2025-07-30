@@ -72,7 +72,7 @@ const ReceivePartsPage: React.FC = () => {
           const orderData = orderDoc.data();
 
           // Update parts status
-          const updatedParts = orderData.parts.map((orderPart) => {
+          const updatedParts = orderData.parts.map((orderPart: any) => {
             const receivedPart = receivedParts.find((rp) => rp.sku === orderPart.sku);
 
             if (receivedPart) {
@@ -90,9 +90,9 @@ const ReceivePartsPage: React.FC = () => {
           });
 
           // Determine overall order status
-          const allReceived = updatedParts.every((part) => part.status === "RECEIVED");
+          const allReceived = updatedParts.every((part: any) => part.status === "RECEIVED");
           const anyReceived = updatedParts.some(
-            (part) => part.status === "RECEIVED" || part.status === "PARTIALLY_RECEIVED"
+            (part: any) => part.status === "RECEIVED" || part.status === "PARTIALLY_RECEIVED"
           );
 
           let orderStatus = orderData.status;

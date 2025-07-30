@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Button, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, Input } from "@/components/ui";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "../../components/ui/Button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
+import { Input } from "../../components/ui/FormElements";
+import { Badge } from "../../components/ui/badge";
 import { Search, FileWarning } from "lucide-react";
-import { DefectItemModal } from "../components/Models/Workshop/DefectItemModal";
-import InspectionDetailsModal from "../components/Models/Workshop/InspectionDetailsModal";
-import { parseInspectionDefects } from "@/utils/inspectionUtils";
+import { DefectItemModal } from "../../components/Models/Workshop/DefectItemModal";
+import InspectionDetailsModal from "../../components/Models/Workshop/InspectionDetailsModal";
+import { parseInspectionDefects } from "../../utils/inspectionUtils";
 
 // Define the inspection data type
 interface Inspection {
@@ -114,11 +116,12 @@ const InspectionHistory = () => {
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Search className="w-4 h-4 text-gray-400" />
           </div>
-          <Input
+                    <Input
+            label="Search"
             placeholder="Search"
             className="pl-10"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
