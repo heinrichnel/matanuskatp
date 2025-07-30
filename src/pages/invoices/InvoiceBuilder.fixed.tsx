@@ -506,7 +506,7 @@ const InvoiceBuilder: React.FC = () => {
 
                   <div className="space-y-2">
                     <Button
-                      variant="default"
+                      variant="primary"
                       className="w-full justify-start"
                       icon={<Save className="w-4 h-4" />}
                       onClick={() => saveInvoice(true)}
@@ -516,7 +516,7 @@ const InvoiceBuilder: React.FC = () => {
                     </Button>
 
                     <Button
-                      variant="default"
+                      variant="primary"
                       className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white"
                       icon={<FileCheck className="w-4 h-4" />}
                       onClick={() => handleButtonClick("createInvoice")}
@@ -720,7 +720,7 @@ const InvoiceBuilder: React.FC = () => {
               Download PDF
             </Button>
             <Button
-              variant="default"
+              variant="primary"
               className="bg-blue-600 hover:bg-blue-700 text-white"
               icon={<Send className="w-4 h-4" />}
             >
