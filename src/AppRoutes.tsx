@@ -143,6 +143,7 @@ const TyreStores = lazy(() => import("./pages/tyres/TyreStores"));
 const VehicleTyreView = lazy(() => import("./pages/tyres/VehicleTyreView"));
 const VehicleTyreViewA = lazy(() => import("./pages/tyres/VehicleTyreViewA"));
 const TyreMobilePage = lazy(() => import("./pages/mobile/TyreMobilePage"));
+const TyreDashboard = lazy(() => import("./pages/tyres/TyreDashboard"));
 
 /* -----------------------------
  * Clients
@@ -169,6 +170,7 @@ const FleetAnalyticsPage = lazy(() => import("./pages/analytics/FleetAnalyticsPa
 const WialonConfigPage = lazy(() => import("./pages/wialon/wilonconfig/WialonConfigPage"));
 const WialonUnitsPage = lazy(() => import("./pages/wialon/WialonUnitsPage"));
 const WialonDashboard = lazy(() => import("./pages/wialon/WialonDashboard"));
+const TripRoutePlannerPage = lazy(() => import("./pages/wialon/TripRoutePlannerPage"));
 const FleetLocationMapPage = lazy(() => import("./components/Map/pages/FleetLocationMapPage"));
 
 /* -----------------------------
@@ -321,6 +323,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="vehicle-view/:vehicleId" element={withSuspense(VehicleTyreView)} />
           <Route path="vehicle-view-a/:vehicleId" element={withSuspense(VehicleTyreViewA)} />
           <Route path="mobile" element={withSuspense(TyreMobilePage)} />
+          <Route path="dashboard" element={withSuspense(TyreDashboard)} />
         </Route>
 
         {/* Customers / Analytics */}
@@ -343,6 +346,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="wialon" element={withSuspense(WialonDashboard)} />
           <Route path="wialon/config" element={withSuspense(WialonConfigPage)} />
           <Route path="wialon/units" element={withSuspense(WialonUnitsPage)} />
+          <Route path="wialon/routes" element={withSuspense(TripRoutePlannerPage)} />
           <Route path="fleet" element={withSuspense(FleetManagementPage)} />
           <Route path="fleet-map" element={withSuspense(FleetLocationMapPage)} />
         </Route>

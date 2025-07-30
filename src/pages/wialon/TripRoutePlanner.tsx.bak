@@ -1,0 +1,648 @@
+import * as MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+import      const geocoder = new MapboxGeocoder({
+        accessToken: MAPBOX_ACCESS_TOKEN,
+        mapboxgl: mapboxgl as any,
+        marker: false,
+        placeholder: 'Search for locations'
+      });xgl from "mapbox-gl";
+import "mapbox-gl/dist/mapbox-gl.css";
+import React, { useEffect, useRef, useState } from "react";
+import { Button } from "../../components/ui";
+
+// Type definitions
+interface Location {
+  name: string;
+  coordinates: [number, number]; // [longitude, latitude]
+  isDepot?: boolean;
+}
+
+interface Vehicle {
+  name: string;
+  routing_profile: string;
+  start_location: string;
+  end_location: string;
+  capacities: {
+    volume: number;
+    weight: number;
+  };
+}
+
+interface MarkerInfo {
+  name: string;
+  marker: mapboxgl.Marker;
+}
+
+interface OptimizedRoute {
+  vehicle: string;
+  stops: Array<{
+    location: string;
+    eta: string;
+    type: string;
+    odometer: number;
+    wait?: number;
+    duration?: number;
+  }>;
+}
+
+interface OptimizationResult {
+  routes: OptimizedRoute[];
+  dropped?: {
+    services: string[];
+    shipments: string[];
+  };
+}
+
+interface Shipment {
+  name: string;
+  from: string;
+  to: string;
+  size: {
+    weight: number;
+    volume: number;
+  };
+  pickup_duration: number;
+  dropoff_duration: number;
+}
+
+interface ProblemDocument {
+  version: number;
+  locations: Location[];
+  vehicles: Vehicle[];
+  shipments: Shipment[];
+  options: {
+    objectives: string[];
+  };
+}
+
+interface GeoJSONFeature {
+  type: string;
+  properties: Record<string, any>;
+  geometry: {
+    type: string;
+    coordinates: number[][];
+  };
+}
+
+// Mapbox access token
+const MAPBOX_ACCESS_TOKEN =
+  "pk.eyJ1IjoidGFibGVyIiwiYSI6ImNscHh3dnhndjB2M3QycW85bGd0NXRmZ3YifQ.9LfHPsNoEXQH-xzz-81Ffw";
+
+// Initialize mapbox
+mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
+
+/**
+ * TripRoutePlanner Component
+ *
+ * A component for planning and optimizing vehicle routes using Mapbox Optimization API v2
+ */
+const TripRoutePlanner: React.FC = () => {
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const [lng, setLng] = useState<number>(18.4241);
+  const [lat, setLat] = useState<number>(-33.9249);
+  const [zoom, setZoom] = useState<number>(12);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([
+    {
+      name: "truck-1",
+      routing_profile: "mapbox/driving",
+      start_location: "depot",
+      end_location: "depot",
+      capacities: { volume: 3000, weight: 1000 },
+    },
+  ]);
+  const [optimizationId, setOptimizationId] = useState<string | null>(null);
+  const [optimizationStatus, setOptimizationStatus] = useState<string | null>(null);
+  const [optimizedRoutes, setOptimizedRoutes] = useState<OptimizationResult | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const markers = useRef<MarkerInfo[]>([]);
+  const routeLines = useRef<string[]>([]);
+
+  // Initialize map
+  useEffect(() => {
+    if (map.current) return;
+
+    if (mapContainer.current) {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/mapbox/streets-v11",
+        center: [lng, lat],
+        zoom: zoom,
+      });
+
+      // Add navigation controls
+      map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+      // Add geocoder (search box) for locations
+      const geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl: mapboxgl,
+        marker: false,
+        placeholder: "Search for locations",
+      });
+
+      map.current.addControl(geocoder, "top-left");
+
+      // When a location is selected from search
+      geocoder.on(
+        "result",
+        (e: { result: { geometry: { coordinates: [number, number] }; place_name: string } }) => {
+          const coordinates = e.result.geometry.coordinates;
+          const name = e.result.place_name.split(",")[0];
+
+          // Add to locations
+          addLocation(name, coordinates);
+        }
+      );
+
+      // Allow clicking on the map to add stops
+      map.current.on("click", (e: mapboxgl.MapMouseEvent) => {
+        const coordinates: [number, number] = [e.lngLat.lng, e.lngLat.lat];
+        const name = `Stop ${locations.length + 1}`;
+
+        addLocation(name, coordinates);
+      });
+
+      // Update state when map moves
+      map.current.on("move", () => {
+        if (!map.current) return;
+
+        const center = map.current.getCenter();
+        setLng(parseFloat(center.lng.toFixed(4)));
+        setLat(parseFloat(center.lat.toFixed(4)));
+        setZoom(parseFloat(map.current.getZoom().toFixed(2)));
+      });
+
+      // Add depot marker
+      setTimeout(() => {
+        addLocation("depot", [lng, lat], true);
+      }, 1000);
+    }
+
+    return () => {
+      if (map.current) {
+        map.current.remove();
+      }
+    };
+  }, []);
+
+  // Function to add a location
+  const addLocation = (name: string, coordinates: [number, number], isDepot = false): void => {
+    const newLocation: Location = {
+      name,
+      coordinates,
+      isDepot,
+    };
+
+    if (!map.current) return;
+
+    // Create marker for the location
+    const marker = new mapboxgl.Marker({
+      color: isDepot ? "#ff0000" : "#0066ff",
+      draggable: true,
+    })
+      .setLngLat(coordinates)
+      .setPopup(
+        new mapboxgl.Popup().setHTML(`
+      <h3>${name}</h3>
+      <p>${coordinates[0].toFixed(4)}, ${coordinates[1].toFixed(4)}</p>
+      ${isDepot ? "<p><strong>Depot</strong></p>" : ""}
+    `)
+      )
+      .addTo(map.current);
+
+    // Handle marker drag events
+    marker.on("dragend", () => {
+      const lngLat = marker.getLngLat();
+      updateLocationCoordinates(name, [lngLat.lng, lngLat.lat]);
+    });
+
+    markers.current.push({ name, marker });
+    setLocations((prev) => [...prev, newLocation]);
+  };
+
+  // Update location coordinates after dragging
+  const updateLocationCoordinates = (name: string, newCoords: [number, number]): void => {
+    setLocations((prev) =>
+      prev.map((loc) => (loc.name === name ? { ...loc, coordinates: newCoords } : loc))
+    );
+
+    // Update popup content
+    const markerObj = markers.current.find((m) => m.name === name);
+    if (markerObj && markerObj.marker.getPopup()) {
+      markerObj.marker.getPopup().setHTML(`
+        <h3>${name}</h3>
+        <p>${newCoords[0].toFixed(4)}, ${newCoords[1].toFixed(4)}</p>
+        ${name === "depot" ? "<p><strong>Depot</strong></p>" : ""}
+      `);
+    }
+
+    // If routes are already displayed, clear them (they're now outdated)
+    if (optimizedRoutes) {
+      clearRoutes();
+      setOptimizedRoutes(null);
+    }
+  };
+
+  // Clear all routes from the map
+  const clearRoutes = (): void => {
+    if (!map.current) return;
+
+    routeLines.current.forEach((id) => {
+      if (map.current?.getLayer(id)) {
+        map.current.removeLayer(id);
+      }
+      if (map.current?.getSource(id)) {
+        map.current.removeSource(id);
+      }
+    });
+    routeLines.current = [];
+  };
+
+  // Remove a location
+  const removeLocation = (name: string): void => {
+    setLocations((prev) => prev.filter((loc) => loc.name !== name));
+
+    const markerIndex = markers.current.findIndex((m) => m.name === name);
+    if (markerIndex >= 0) {
+      markers.current[markerIndex].marker.remove();
+      markers.current.splice(markerIndex, 1);
+    }
+
+    // If routes are displayed, clear them
+    if (optimizedRoutes) {
+      clearRoutes();
+      setOptimizedRoutes(null);
+    }
+  };
+
+  // Generate optimization problem document
+  const generateProblemDoc = () => {
+    if (locations.length < 3) {
+      alert("Please add at least 3 locations (including the depot).");
+      return null;
+    }
+
+    // Find the depot location
+    const depot = locations.find((loc) => loc.name === "depot");
+    if (!depot) {
+      alert("Depot location is required.");
+      return null;
+    }
+
+    // Create shipments for all non-depot locations
+    const shipments = locations
+      .filter((loc) => loc.name !== "depot")
+      .map((loc, index) => ({
+        name: `shipment-${index + 1}`,
+        from: "depot",
+        to: loc.name,
+        size: {
+          weight: 10,
+          volume: 10,
+        },
+        pickup_duration: 60,
+        dropoff_duration: 300,
+      }));
+
+    // Create problem document
+    return {
+      version: 1,
+      locations: locations,
+      vehicles: vehicles,
+      shipments: shipments,
+      options: {
+        objectives: ["min-total-travel-duration"],
+      },
+    };
+  };
+
+  // Submit optimization request
+  const submitOptimizationRequest = async (): Promise<void> => {
+    const problemDoc = generateProblemDoc();
+    if (!problemDoc) return;
+
+    setLoading(true);
+    setOptimizationStatus("submitting");
+
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/optimized-trips/v2?access_token=${MAPBOX_ACCESS_TOKEN}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(problemDoc),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to submit optimization request");
+      }
+
+      setOptimizationId(data.id);
+      setOptimizationStatus("submitted");
+
+      // Start polling for results
+      pollOptimizationResults(data.id);
+    } catch (error) {
+      console.error("Error submitting optimization request:", error);
+      setOptimizationStatus("error");
+      alert(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+      setLoading(false);
+    }
+  };
+
+  // Poll for optimization results
+  const pollOptimizationResults = async (id: string): Promise<void> => {
+    try {
+      setOptimizationStatus("polling");
+
+      // Poll until we get a result or an error
+      let complete = false;
+      while (!complete) {
+        await new Promise((r) => setTimeout(r, 2000)); // Wait 2 seconds between polls
+
+        const response = await fetch(
+          `https://api.mapbox.com/optimized-trips/v2/${id}?access_token=${MAPBOX_ACCESS_TOKEN}`
+        );
+
+        if (response.status === 202) {
+          // Still processing
+          setOptimizationStatus("processing");
+          continue;
+        }
+
+        if (response.status === 200) {
+          // Complete
+          const result = await response.json();
+          setOptimizedRoutes(result as OptimizationResult);
+          setOptimizationStatus("complete");
+          displayOptimizedRoutes(result as OptimizationResult);
+          complete = true;
+        } else {
+          // Error
+          const error = await response.json();
+          throw new Error(error.message || "Failed to retrieve optimization results");
+        }
+      }
+    } catch (error) {
+      console.error("Error polling optimization results:", error);
+      setOptimizationStatus("error");
+      alert(`Error: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Display optimized routes on the map
+  const displayOptimizedRoutes = async (solution: OptimizationResult): Promise<void> => {
+    if (!map.current) return;
+
+    clearRoutes(); // Clear any existing routes
+
+    // For each route in the solution
+    solution.routes.forEach((route: OptimizedRoute, routeIndex: number) => {
+      const routeStops = route.stops;
+
+      // Get coordinate pairs for each stop
+      for (let i = 0; i < routeStops.length - 1; i++) {
+        const fromStop = routeStops[i];
+        const toStop = routeStops[i + 1];
+
+        // Find location coordinates
+        const fromLocation = locations.find((loc) => loc.name === fromStop.location);
+        const toLocation = locations.find((loc) => loc.name === toStop.location);
+
+        if (fromLocation && toLocation) {
+          // Get directions between these points
+          getDirections(fromLocation.coordinates, toLocation.coordinates, routeIndex, i).then(
+            (routeGeoJSON) => {
+              if (routeGeoJSON && map.current) {
+                // Create a unique ID for this route segment
+                const routeId = `route-${routeIndex}-segment-${i}`;
+
+                // Add the route to the map
+                map.current.addSource(routeId, {
+                  type: "geojson",
+                  data: routeGeoJSON as mapboxgl.GeoJSONSourceOptions["data"],
+                });
+
+                map.current.addLayer({
+                  id: routeId,
+                  type: "line",
+                  source: routeId,
+                  layout: {
+                    "line-join": "round",
+                    "line-cap": "round",
+                  },
+                  paint: {
+                    "line-color": getRouteColor(routeIndex),
+                    "line-width": 5,
+                    "line-opacity": 0.75,
+                  },
+                });
+
+                routeLines.current.push(routeId);
+              }
+            }
+          );
+        }
+      }
+    });
+  };
+
+  // Get directions between two points
+  const getDirections = async (
+    start: [number, number],
+    end: [number, number],
+    routeIndex: number,
+    segmentIndex: number
+  ): Promise<GeoJSONFeature | null> => {
+    try {
+      const profile = vehicles[0].routing_profile || "mapbox/driving";
+      const response = await fetch(
+        `https://api.mapbox.com/directions/v5/${profile}/` +
+          `${start[0]},${start[1]};${end[0]},${end[1]}` +
+          `?steps=true&geometries=geojson&access_token=${MAPBOX_ACCESS_TOKEN}`
+      );
+
+      const data = await response.json();
+
+      if (data.routes && data.routes.length > 0) {
+        return {
+          type: "Feature",
+          properties: {},
+          geometry: data.routes[0].geometry,
+        };
+      }
+    } catch (error) {
+      console.error("Error fetching directions:", error);
+    }
+
+    return null;
+  };
+
+  // Get a color for a route based on its index
+  const getRouteColor = (index: number): string => {
+    const colors = [
+      "#3388ff", // Blue
+      "#33cc33", // Green
+      "#ff9900", // Orange
+      "#9933cc", // Purple
+      "#ff3366", // Pink
+      "#00cccc", // Teal
+      "#ff6600", // Dark Orange
+      "#6666ff", // Indigo
+    ];
+
+    return colors[index % colors.length];
+  };
+
+  // Reset everything
+  const resetPlanner = () => {
+    // Clear markers
+    markers.current.forEach((m) => m.marker.remove());
+    markers.current = [];
+
+    // Clear routes
+    clearRoutes();
+
+    // Reset state
+    setLocations([]);
+    setOptimizationId(null);
+    setOptimizationStatus(null);
+    setOptimizedRoutes(null);
+
+    // Add depot marker
+    setTimeout(() => {
+      addLocation("depot", [lng, lat], true);
+    }, 100);
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className="p-4 bg-white shadow-md z-10">
+        <h1 className="text-2xl font-bold mb-2">Trip Route Planner</h1>
+        <div className="flex flex-wrap gap-2 items-center">
+          <Button onClick={submitOptimizationRequest} disabled={loading || locations.length < 3}>
+            {loading ? "Optimizing..." : "Optimize Routes"}
+          </Button>
+          <Button onClick={resetPlanner} variant="outline">
+            Reset
+          </Button>
+          <div className="ml-4 text-sm">
+            {optimizationStatus === "processing" && (
+              <span className="text-blue-500">Processing optimization...</span>
+            )}
+            {optimizationStatus === "complete" && (
+              <span className="text-green-500">Optimization complete!</span>
+            )}
+            {optimizationStatus === "error" && (
+              <span className="text-red-500">Optimization failed</span>
+            )}
+          </div>
+        </div>
+
+        <div className="mt-4 text-sm text-gray-600">
+          <p>
+            Click on the map to add stops or use the search box. The red marker is your depot. Drag
+            markers to adjust locations.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-1 min-h-0">
+        {/* Map container */}
+        <div ref={mapContainer} className="flex-1" />
+
+        {/* Sidebar */}
+        <div className="w-80 bg-white border-l border-gray-200 p-4 overflow-y-auto">
+          <h2 className="font-bold mb-2">Locations ({locations.length})</h2>
+          <ul className="space-y-2">
+            {locations.map((loc) => (
+              <li key={loc.name} className="flex justify-between items-center p-2 border rounded">
+                <div>
+                  <div className="font-semibold flex items-center">
+                    {loc.name === "depot" && (
+                      <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-2"></span>
+                    )}
+                    {loc.name}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {loc.coordinates[0].toFixed(4)}, {loc.coordinates[1].toFixed(4)}
+                  </div>
+                </div>
+                {loc.name !== "depot" && (
+                  <button
+                    onClick={() => removeLocation(loc.name)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    &times;
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+
+          {optimizedRoutes && (
+            <div className="mt-6">
+              <h2 className="font-bold mb-2">Optimized Routes</h2>
+              {optimizedRoutes.routes.map((route, index) => (
+                <div key={index} className="border rounded p-2 mb-2">
+                  <div className="font-semibold flex items-center">
+                    <span
+                      className="inline-block w-3 h-3 rounded-full mr-2"
+                      style={{ backgroundColor: getRouteColor(index) }}
+                    ></span>
+                    {route.vehicle}
+                  </div>
+                  <div className="text-xs">
+                    <div>{route.stops.length} stops</div>
+                    <div>
+                      Distance: {(route.stops[route.stops.length - 1]?.odometer / 1000).toFixed(2)}{" "}
+                      km
+                    </div>
+                  </div>
+                  <ul className="mt-2 text-xs">
+                    {route.stops.map((stop, stopIndex) => (
+                      <li key={stopIndex} className="py-1 border-t first:border-t-0">
+                        <div className="font-semibold">{stop.location}</div>
+                        <div className="text-gray-500">
+                          {new Date(stop.eta).toLocaleTimeString()}
+                          {stop.type !== "start" && stop.type !== "end" && (
+                            <span> ({stop.type})</span>
+                          )}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+
+              {optimizedRoutes.dropped?.services && optimizedRoutes.dropped.services.length > 0 && (
+                <div className="mt-2 text-red-500 text-sm">
+                  Warning: {optimizedRoutes.dropped.services.length} services could not be
+                  scheduled.
+                </div>
+              )}
+              {optimizedRoutes.dropped?.shipments && optimizedRoutes.dropped.shipments.length > 0 && (
+                <div className="mt-2 text-red-500 text-sm">
+                  Warning: {optimizedRoutes.dropped.shipments.length} shipments could not be
+                  scheduled.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TripRoutePlanner;

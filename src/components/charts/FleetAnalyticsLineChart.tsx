@@ -44,7 +44,7 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
         </p>
         {payload.map((entry: any, index: number) => (
           <p key={`item-${index}`} style={{ color: entry.color }}>
-            {chartConfig[entry.dataKey as ChartType].label}:{" "}
+            {chartConfig[entry.dataKey as ChartType]?.label || entry.dataKey}:{" "}
             {entry.dataKey === "roi" ? `${entry.value}%` : `$${entry.value}K`}
           </p>
         ))}
@@ -86,9 +86,11 @@ export function FleetAnalyticsLineChart() {
                 className="text-lg leading-none font-bold sm:text-xl"
                 style={{ color: chartConfig[key].color }}
               >
-                {key === "roi"
-                  ? `${fleetAnalytics[fleetAnalytics.length - 1][key]}%`
-                  : `$${fleetAnalytics[fleetAnalytics.length - 1][key]}K`}
+                {fleetAnalytics.length > 0 && fleetAnalytics[fleetAnalytics.length - 1] && fleetAnalytics[fleetAnalytics.length - 1][key] !== undefined
+                  ? key === "roi"
+                    ? `${fleetAnalytics[fleetAnalytics.length - 1][key]}%`
+                    : `$${fleetAnalytics[fleetAnalytics.length - 1][key]}K`
+                  : key === "roi" ? "0%" : "$0K"}
               </span>
             </button>
           ))}

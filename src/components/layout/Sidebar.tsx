@@ -1,24 +1,8 @@
-import {
-  Activity,
-  BarChart3,
-  ChevronDown,
-  ChevronRight,
-  CircleDot,
-  FileText,
-  Globe,
-  Users,
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Users } from "lucide-react";
 import React, { FC, useState } from "react";
+import { sidebarConfig, SidebarItem } from "../../config/sidebarConfig";
 import ConnectionStatusIndicator from "../ui/ConnectionStatusIndicator";
 import SyncIndicator from "../ui/SyncIndicator";
-
-interface NavItem {
-  id: string;
-  label: string;
-  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  route: string;
-  children?: NavItem[];
-}
 
 const Truck = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -65,43 +49,32 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
     }));
   };
 
-  // Simplified navigation categories for brevity
+  // Create navigation categories from sidebarConfig
   const navCategories = [
     {
       id: "main",
       label: "Main Navigation",
-      items: [{ id: "dashboard", label: "Dashboard", icon: Activity, route: "dashboard" }],
+      items: sidebarConfig.filter(item => !item.children || item.children.length === 0),
     },
     {
       id: "core",
       label: "Core Business Operations",
-      items: [
-        {
-          id: "trips",
-          label: "Trip Management",
-          icon: Truck,
-          route: "trips",
-          children: [
-            { id: "trips-dashboard", label: "Trip Dashboard", route: "trips/dashboard" },
-            { id: "trips-main", label: "Trip Management Home", route: "trips" },
-          ],
-        },
-      ],
-    },
+      items: sidebarConfig.filter(item => item.children && item.children.length > 0),
+    }
   ];
 
   // Render sidebar items recursively
-  const renderSidebarItems = (items: NavItem[], isChild: boolean = false) => {
+  const renderSidebarItems = (items: SidebarItem[], isChild: boolean = false) => {
     return (
       <ul className={`space-y-1 ${isChild ? 'mt-1 pl-4' : ''}`}>
         {items.map((item) => {
           // Determine if the item is active
-          const isActive = item.route
-            ? currentPath === item.route || (item.route.includes(':') && currentPath.startsWith(item.route.split(':')[0]))
+          const isActive = item.path
+            ? currentPath === item.path || (item.path.includes(':') && currentPath.startsWith(item.path.split(':')[0]))
             : false; // Parent items without direct path are not 'active' themselves
 
           // Determine if a parent category is active (for styling expanded parents)
-          const isParentActive = item.children && item.route && currentPath.startsWith(item.route);
+          const isParentActive = item.children && item.path && currentPath.startsWith(item.path);
 
           if (item.children) {
             return (
@@ -146,7 +119,7 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
                     ? "bg-blue-50 text-blue-600 font-medium"
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
-                onClick={() => item.route && handleNavigate(item.route)} // Only navigate if route exists
+                onClick={() => item.path && handleNavigate(item.path)} // Only navigate if path exists
               >
                 {item.icon && <item.icon className="w-5 h-5" />}
                 <span>{item.label}</span>
@@ -164,14 +137,8 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
         <h1 className="font-bold text-black text-lg">MATANUSKA TRANSPORT</h1>
       </div>
       <nav className="flex-1 overflow-y-auto py-2 max-h-[calc(100vh-160px)]">
-        {navCategories.map((category) => (
-          <div key={category.id} className="mb-6">
-            <h2 className="px-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              {category.label}
-            </h2>
-            {renderSidebarItems(category.items)}
-          </div>
-        ))}
+        {/* Render all sidebar items directly from sidebarConfig */}
+        {renderSidebarItems(sidebarConfig)}
       </nav>
       <div className="px-6 py-4 border-t">
         <div className="flex flex-col space-y-2 mb-3">

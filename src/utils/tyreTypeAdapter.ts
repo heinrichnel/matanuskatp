@@ -18,6 +18,52 @@ import { TyreInspectionRecord } from "../types/tyre-inspection";
  * Convert a TyreData (from Firebase/data module) to the app's Tyre type
  */
 export function convertTyreDataToTyre(tyreData: TyreData): Tyre {
+  // Handle installation separately to avoid TypeScript errors
+  let installation: Tyre['installation'] = undefined;
+
+  // Safely access installation properties only if it exists
+  if (tyreData.installation && typeof tyreData.installation === 'object') {
+    const inst = tyreData.installation;
+    installation = {
+      vehicleId: inst.vehicleId,
+      // Cast the position string to the TyrePosition type
+      position: inst.position as any,
+      mileageAtInstallation: inst.mileageAtInstallation,
+      installationDate: inst.installationDate,
+      installedBy: inst.installedBy,
+    };
+  }
+
+  // Process rotations with proper ID handling
+  const rotations = tyreData.maintenanceHistory.rotations.map((r) => {
+    // Use type assertion to handle missing id property
+    const rotation = {
+      id: (r as any).id || crypto.randomUUID(),
+      date: r.date,
+      fromPosition: r.fromPosition as unknown as Tyre["maintenanceHistory"]["rotations"][0]["fromPosition"],
+      toPosition: r.toPosition as unknown as Tyre["maintenanceHistory"]["rotations"][0]["toPosition"],
+      mileage: r.mileage,
+      technician: r.technician,
+      notes: r.technician, // Note: This seems to be using technician as notes
+    };
+    return rotation;
+  });
+
+  // Process repairs with proper ID handling
+  const repairs = tyreData.maintenanceHistory.repairs.map((r) => {
+    // Use type assertion to handle missing id property
+    const repair = {
+      id: (r as any).id || crypto.randomUUID(),
+      date: r.date,
+      type: r.type,
+      description: r.description,
+      cost: r.cost,
+      technician: r.technician,
+      notes: r.technician, // Note: This seems to be using technician as notes
+    };
+    return repair;
+  });
+
   return {
     id: tyreData.id,
     serialNumber: tyreData.serialNumber,
@@ -34,7 +80,7 @@ export function convertTyreDataToTyre(tyreData: TyreData): Tyre {
     },
     loadIndex: tyreData.loadIndex,
     speedRating: tyreData.speedRating,
-    type: tyreData.type as unknown as Tyre["type"], // Type assertion for compatibility
+    type: tyreData.type as unknown as Tyre["type"],
     purchaseDetails: {
       date: tyreData.purchaseDetails.date,
       cost: tyreData.purchaseDetails.cost,
@@ -42,15 +88,7 @@ export function convertTyreDataToTyre(tyreData: TyreData): Tyre {
       warranty: tyreData.purchaseDetails.warranty,
       invoiceNumber: tyreData.purchaseDetails.invoiceNumber,
     },
-    installation: tyreData.installation
-      ? {
-          vehicleId: tyreData.installation.vehicleId,
-          position: tyreData.installation.position as unknown as Tyre["installation"]["position"],
-          mileageAtInstallation: tyreData.installation.mileageAtInstallation,
-          installationDate: tyreData.installation.installationDate,
-          installedBy: tyreData.installation.installedBy,
-        }
-      : undefined,
+    installation: installation,
     condition: {
       treadDepth: tyreData.condition.treadDepth,
       pressure: tyreData.condition.pressure,
@@ -62,26 +100,8 @@ export function convertTyreDataToTyre(tyreData: TyreData): Tyre {
     status: tyreData.status as unknown as Tyre["status"],
     mountStatus: tyreData.mountStatus as unknown as Tyre["mountStatus"],
     maintenanceHistory: {
-      rotations: tyreData.maintenanceHistory.rotations.map((r) => ({
-        id: r.id || crypto.randomUUID(),
-        date: r.date,
-        fromPosition:
-          r.fromPosition as unknown as Tyre["maintenanceHistory"]["rotations"][0]["fromPosition"],
-        toPosition:
-          r.toPosition as unknown as Tyre["maintenanceHistory"]["rotations"][0]["toPosition"],
-        mileage: r.mileage,
-        technician: r.technician,
-        notes: r.technician,
-      })),
-      repairs: tyreData.maintenanceHistory.repairs.map((r) => ({
-        id: r.id || crypto.randomUUID(),
-        date: r.date,
-        type: r.type,
-        description: r.description,
-        cost: r.cost,
-        technician: r.technician,
-        notes: r.technician,
-      })),
+      rotations: rotations,
+      repairs: repairs,
       inspections: tyreData.maintenanceHistory.inspections.map((i) => ({
         id: i.id || crypto.randomUUID(),
         date: i.date,

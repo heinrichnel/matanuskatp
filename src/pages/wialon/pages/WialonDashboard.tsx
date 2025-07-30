@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import WialonIntegration from "../../../components/wialon/config/WialonIntegration";
-import WialonStatus from "../../components/wialon/WialonStatus";
+import WialonIntegration from "../wialon/WialonIntegration";
+import WialonStatus from "../wialon/WialonStatus";
 
 /**
  * WialonDashboard Component
