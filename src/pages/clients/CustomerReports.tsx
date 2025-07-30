@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import SyncIndicator from '../components/ui/SyncIndicator';
+import { Card } from 'antd';
 import { Search, Download, Calendar, Filter, BarChart2, PieChart, TrendingUp, TrendingDown } from 'lucide-react';
+import { Button } from 'antd';
 
 interface ReportFilter {
   dateRange: string;
@@ -16,28 +15,29 @@ const CustomerReports: React.FC = () => {
     customerType: 'all',
     region: 'all'
   });
-  
+
   const [activeReport, setActiveReport] = useState('revenue');
-  
+
   const handleFilterChange = (field: string, value: string) => {
     setFilter(prev => ({ ...prev, [field]: value }));
   };
-  
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Customer Reports</h2>
         <div className="flex space-x-2">
+        <div className="flex space-x-2">
           <Button
-            variant="outline"
             icon={<Download className="w-4 h-4" />}
           >
             Export Report
           </Button>
-          <SyncIndicator />
+          <div className="flex items-center text-gray-500">
+            <TrendingUp className="w-4 h-4 mr-1" /> Synced
+          </div>
         </div>
-      </div>
-      
+
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="relative">
@@ -56,7 +56,7 @@ const CustomerReports: React.FC = () => {
             <option value="custom">Custom Range</option>
           </select>
         </div>
-        
+
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Filter className="w-5 h-5 text-gray-400" />
@@ -73,7 +73,7 @@ const CustomerReports: React.FC = () => {
             <option value="individual">Individual</option>
           </select>
         </div>
-        
+
         <div className="relative">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
             <Filter className="w-5 h-5 text-gray-400" />
@@ -92,59 +92,59 @@ const CustomerReports: React.FC = () => {
           </select>
         </div>
       </div>
-      
+
       {/* Report Type Selector */}
       <div className="flex space-x-2 overflow-x-auto pb-2">
         <Button
-          variant={activeReport === 'revenue' ? 'primary' : 'outline'}
-          onClick={onClick}
+          type={activeReport === 'revenue' ? 'primary' : 'default'}
+          onClick={() => setActiveReport('revenue')}
           icon={<BarChart2 className="w-4 h-4" />}
         >
           Revenue
         </Button>
         <Button
-          variant={activeReport === 'trips' ? 'primary' : 'outline'}
-          onClick={onClick}
+          type={activeReport === 'trips' ? 'primary' : 'default'}
+          onClick={() => setActiveReport('trips')}
           icon={<TrendingUp className="w-4 h-4" />}
         >
           Trip Volume
         </Button>
         <Button
-          variant={activeReport === 'services' ? 'primary' : 'outline'}
-          onClick={onClick}
+          type={activeReport === 'services' ? 'primary' : 'default'}
+          onClick={() => setActiveReport('services')}
           icon={<PieChart className="w-4 h-4" />}
         >
           Service Mix
         </Button>
         <Button
-          variant={activeReport === 'satisfaction' ? 'primary' : 'outline'}
-          onClick={onClick}
+          type={activeReport === 'satisfaction' ? 'primary' : 'default'}
+          onClick={() => setActiveReport('satisfaction')}
           icon={<TrendingDown className="w-4 h-4" />}
         >
           Satisfaction
         </Button>
         <Button
-          variant={activeReport === 'growth' ? 'primary' : 'outline'}
-          onClick={onClick}
+          type={activeReport === 'growth' ? 'primary' : 'default'}
+          onClick={() => setActiveReport('growth')}
           icon={<TrendingUp className="w-4 h-4" />}
         >
           Growth
         </Button>
       </div>
-      
+
       {/* Revenue Report */}
       {activeReport === 'revenue' && (
         <Card>
-          <CardContent className="p-4">
+          <div className="p-4">
             <h3 className="text-lg font-medium mb-4">Revenue Report</h3>
-            
+
             {/* Chart placeholder */}
             <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-center justify-center h-64">
               <BarChart2 className="h-8 w-8 text-gray-400 mb-2" />
               <p className="text-gray-500">Revenue chart by customer would appear here</p>
               <p className="text-sm text-gray-400 mt-2">Using real data from Firestore in the actual implementation</p>
             </div>
-            
+
             {/* Summary stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
               <div className="bg-blue-50 p-4 rounded-lg">
@@ -154,7 +154,7 @@ const CustomerReports: React.FC = () => {
                   <TrendingUp className="h-4 w-4 mr-1" /> +12% vs previous period
                 </p>
               </div>
-              
+
               <div className="bg-green-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-green-700">Average Per Customer</h4>
                 <p className="text-2xl font-bold">$42,850</p>
@@ -162,14 +162,14 @@ const CustomerReports: React.FC = () => {
                   <TrendingUp className="h-4 w-4 mr-1" /> +5% vs previous period
                 </p>
               </div>
-              
+
               <div className="bg-purple-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-purple-700">Top Customer Revenue</h4>
                 <p className="text-2xl font-bold">$215,420</p>
                 <p className="text-sm mt-1 text-purple-600">Matanuska Farms Ltd.</p>
               </div>
             </div>
-            
+
             {/* Top customers table */}
             <div className="mt-6">
               <h4 className="text-md font-medium mb-2">Top Customers by Revenue</h4>
@@ -224,22 +224,22 @@ const CustomerReports: React.FC = () => {
                 </table>
               </div>
             </div>
-          </CardContent>
+          </div>
         </Card>
       )}
-      
+
       {/* Trip Volume Report */}
       {activeReport === 'trips' && (
         <Card>
           <CardContent className="p-4">
             <h3 className="text-lg font-medium mb-4">Trip Volume Report</h3>
-            
+
             <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-center justify-center h-64">
               <TrendingUp className="h-8 w-8 text-gray-400 mb-2" />
               <p className="text-gray-500">Trip volume chart would appear here</p>
               <p className="text-sm text-gray-400 mt-2">Using real data from Firestore in the actual implementation</p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-blue-700">Total Trips</h4>
@@ -248,7 +248,7 @@ const CustomerReports: React.FC = () => {
                   <TrendingUp className="h-4 w-4 mr-1" /> +8% vs previous period
                 </p>
               </div>
-              
+
               <div className="bg-green-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-green-700">Avg. Load Factor</h4>
                 <p className="text-2xl font-bold">87%</p>
@@ -256,7 +256,7 @@ const CustomerReports: React.FC = () => {
                   <TrendingUp className="h-4 w-4 mr-1" /> +3% vs previous period
                 </p>
               </div>
-              
+
               <div className="bg-purple-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-purple-700">On-time Delivery</h4>
                 <p className="text-2xl font-bold">94.3%</p>
@@ -268,22 +268,22 @@ const CustomerReports: React.FC = () => {
           </CardContent>
         </Card>
       )}
-      
+
       {/* Service Mix Report */}
       {activeReport === 'services' && (
         <Card>
           <CardContent className="p-4">
             <h3 className="text-lg font-medium mb-4">Service Mix Report</h3>
-            
+
             <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-center justify-center h-64">
               <PieChart className="h-8 w-8 text-gray-400 mb-2" />
               <p className="text-gray-500">Service mix pie chart would appear here</p>
               <p className="text-sm text-gray-400 mt-2">Using real data from Firestore in the actual implementation</p>
             </div>
-            
+
             <div className="mt-6">
               <h4 className="text-md font-medium mb-4">Service Breakdown</h4>
-              
+
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between mb-1">
@@ -294,7 +294,7 @@ const CustomerReports: React.FC = () => {
                     <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: '65%' }}></div>
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium">Less than Truckload</span>
@@ -304,7 +304,7 @@ const CustomerReports: React.FC = () => {
                     <div className="bg-green-600 h-2.5 rounded-full" style={{ width: '22%' }}></div>
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium">Express Delivery</span>
@@ -314,7 +314,7 @@ const CustomerReports: React.FC = () => {
                     <div className="bg-yellow-500 h-2.5 rounded-full" style={{ width: '8%' }}></div>
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium">Special Handling</span>
@@ -329,19 +329,19 @@ const CustomerReports: React.FC = () => {
           </CardContent>
         </Card>
       )}
-      
+
       {/* Customer Satisfaction Report */}
       {activeReport === 'satisfaction' && (
         <Card>
           <CardContent className="p-4">
             <h3 className="text-lg font-medium mb-4">Customer Satisfaction Report</h3>
-            
+
             <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-center justify-center h-64">
               <TrendingUp className="h-8 w-8 text-gray-400 mb-2" />
               <p className="text-gray-500">Satisfaction trend chart would appear here</p>
               <p className="text-sm text-gray-400 mt-2">Using real data from Firestore in the actual implementation</p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-blue-700">Overall CSAT</h4>
@@ -350,7 +350,7 @@ const CustomerReports: React.FC = () => {
                   <TrendingUp className="h-4 w-4 mr-1" /> +0.2 vs previous period
                 </p>
               </div>
-              
+
               <div className="bg-green-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-green-700">Net Promoter Score</h4>
                 <p className="text-2xl font-bold">+72</p>
@@ -358,7 +358,7 @@ const CustomerReports: React.FC = () => {
                   <TrendingUp className="h-4 w-4 mr-1" /> +4 vs previous period
                 </p>
               </div>
-              
+
               <div className="bg-yellow-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-yellow-700">Service Issues</h4>
                 <p className="text-2xl font-bold">3.2%</p>
@@ -367,21 +367,21 @@ const CustomerReports: React.FC = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="mt-6">
               <h4 className="text-md font-medium mb-2">Customer Feedback Highlights</h4>
-              
+
               <div className="space-y-3">
                 <div className="bg-green-50 p-3 rounded border-l-4 border-green-500">
                   <p className="text-sm text-green-700">"Excellent service and always on time. The drivers are professional and courteous."</p>
                   <p className="text-xs text-gray-500 mt-1">Matanuska Farms Ltd., July 5</p>
                 </div>
-                
+
                 <div className="bg-green-50 p-3 rounded border-l-4 border-green-500">
                   <p className="text-sm text-green-700">"The online tracking system is incredibly useful. We can always see where our shipments are."</p>
                   <p className="text-xs text-gray-500 mt-1">Central Distribution Co., July 3</p>
                 </div>
-                
+
                 <div className="bg-yellow-50 p-3 rounded border-l-4 border-yellow-500">
                   <p className="text-sm text-yellow-700">"Good service overall but had some issues with delivery time windows. Would appreciate more precise ETAs."</p>
                   <p className="text-xs text-gray-500 mt-1">Eastern Supplies Inc., July 2</p>
@@ -391,19 +391,19 @@ const CustomerReports: React.FC = () => {
           </CardContent>
         </Card>
       )}
-      
+
       {/* Growth Report */}
       {activeReport === 'growth' && (
         <Card>
           <CardContent className="p-4">
             <h3 className="text-lg font-medium mb-4">Customer Growth Report</h3>
-            
+
             <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-center justify-center h-64">
               <BarChart2 className="h-8 w-8 text-gray-400 mb-2" />
               <p className="text-gray-500">Customer growth chart would appear here</p>
               <p className="text-sm text-gray-400 mt-2">Using real data from Firestore in the actual implementation</p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
               <div className="bg-blue-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-blue-700">New Customers</h4>
@@ -412,7 +412,7 @@ const CustomerReports: React.FC = () => {
                   <TrendingUp className="h-4 w-4 mr-1" /> +40% vs previous period
                 </p>
               </div>
-              
+
               <div className="bg-green-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-green-700">Customer Retention</h4>
                 <p className="text-2xl font-bold">95.8%</p>
@@ -420,17 +420,17 @@ const CustomerReports: React.FC = () => {
                   <TrendingUp className="h-4 w-4 mr-1" /> +1.2% vs previous period
                 </p>
               </div>
-              
+
               <div className="bg-purple-50 p-4 rounded-lg">
                 <h4 className="text-sm font-medium text-purple-700">Avg. Revenue Growth</h4>
                 <p className="text-2xl font-bold">+12.5%</p>
                 <p className="text-sm mt-1 text-purple-600">Per existing customer</p>
               </div>
             </div>
-            
+
             <div className="mt-6">
               <h4 className="text-md font-medium mb-2">Growth Opportunities</h4>
-              
+
               <div className="space-y-4">
                 <div className="flex flex-col md:flex-row gap-4">
                   <div className="flex-1 border border-gray-200 rounded-lg p-4">
@@ -438,23 +438,23 @@ const CustomerReports: React.FC = () => {
                     <p className="text-sm text-gray-600 mb-2">
                       5 existing customers have shown interest in additional service offerings.
                     </p>
-                    <Button size="sm">View Details</Button>
+                    <Button size="small">View Details</Button>
                   </div>
-                  
+
                   <div className="flex-1 border border-gray-200 rounded-lg p-4">
                     <h4 className="font-medium mb-2">New Market Segment</h4>
                     <p className="text-sm text-gray-600 mb-2">
                       Potential for 20% growth by expanding to the pharmaceutical transport segment.
                     </p>
-                    <Button size="sm">View Analysis</Button>
+                    <Button size="small">View Analysis</Button>
                   </div>
-                  
+
                   <div className="flex-1 border border-gray-200 rounded-lg p-4">
                     <h4 className="font-medium mb-2">Customer Upselling</h4>
                     <p className="text-sm text-gray-600 mb-2">
                       8 customers identified for potential service level upgrades.
                     </p>
-                    <Button size="sm">View Customers</Button>
+                    <Button size="small">View Customers</Button>
                   </div>
                 </div>
               </div>
