@@ -329,7 +329,7 @@ const LoadImportModal: React.FC<LoadImportModalProps> = ({ isOpen, onClose }) =>
       isOpen={isOpen}
       onClose={handleClose}
       title="Import Trips"
-      maxWidth="md"
+      size="lg"
     >
       <div className="space-y-6">
         {/* Connection Status Warning */}

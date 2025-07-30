@@ -6,7 +6,7 @@ import { MissedLoad, MISSED_LOAD_REASONS } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import { Select } from '../../components/ui/FormElements';
@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 // ─── Firestore Client Hook ───────────────────────────────────────
-import { useClientDropdown } from '../hooks/useClientDropdown'; // <== JOU HOOK
+import { useClientDropdown } from '../../hooks/useClientDropdown'; // <== JOU HOOK
 
 interface MissedLoadsTrackerProps {
   missedLoads: MissedLoad[];
@@ -263,7 +263,7 @@ const MissedLoadsTracker: React.FC<MissedLoadsTrackerProps> = ({
         isOpen={showModal}
         onClose={handleClose}
         title={editingLoad ? 'Edit Missed Load' : 'Record Missed Load'}
-        maxWidth="lg"
+        size="lg"
       >
         <div className="space-y-6">
           <div className="bg-amber-50 border border-amber-200 rounded-md p-4">

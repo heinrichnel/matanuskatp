@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import Button from "../../components/ui/Button";
 import Card, { CardContent, CardHeader } from "../../components/ui/Card";
-import LoadingIndicator from "../../components/TripManagemet/LoadingIndicator"; // Jy kan dalk /ui/ weglaat of bysit
+import LoadingIndicator from "../../components/ui/LoadingIndicator";
 import { useAppContext } from "../../context/AppContext";
 import { isGoogleMapsAPILoaded, useLoadGoogleMaps } from "../../utils/googleMapsLoader";
 

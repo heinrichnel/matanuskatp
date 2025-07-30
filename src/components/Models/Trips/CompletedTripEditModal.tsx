@@ -1,156 +1,160 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { Trip, TripEditRecord, TRIP_EDIT_REASONS } from '../../../types';
 import Modal from '../../ui/Modal';
 import Button from '../../ui/Button';
-import { Trip, CostEntry } from '../../../types';
+import { Input, Select, TextArea } from '../../ui/FormElements';
+import { Save, X } from 'lucide-react';
 
 interface CompletedTripEditModalProps {
   isOpen: boolean;
   trip: Trip;
   onClose: () => void;
-  onSave: (trip: Trip) => void;
+  onSave: (updatedTrip: Trip, editRecord: Omit<TripEditRecord, 'id'>) => void;
 }
 
 const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
   isOpen,
   trip,
   onClose,
-  onSave,
+  onSave
 }) => {
-  const [editedTrip, setEditedTrip] = useState<Trip>(trip);
-  const [additionalCost, setAdditionalCost] = useState({
-    description: "",
-    amount: 0,
-    currency: "ZAR"
+  const [formData, setFormData] = useState({
+    fleetNumber: trip.fleetNumber,
+    driverName: trip.driverName,
+    clientName: trip.clientName,
+    startDate: trip.startDate,
+    endDate: trip.endDate,
+    route: trip.route,
+    description: trip.description || '',
+    baseRevenue: trip.baseRevenue.toString(),
+    revenueCurrency: trip.revenueCurrency,
+    distanceKm: trip.distanceKm?.toString() || '',
   });
 
-  const handleAddCost = () => {
-    if (!additionalCost.description || additionalCost.amount <= 0) {
-      return;
+  const [editReason, setEditReason] = useState('');
+  const [customReason, setCustomReason] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Declare finalReason before use
+  const finalReason = customReason || editReason;
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
     }
-
-    setEditedTrip({
-      ...editedTrip,
-      additionalCosts: [
-        ,
-        {
-          ...additionalCost,
-          id: `cost-${Date.now()}`,
-          date: new Date().toISOString()
-        }...editedTrip.additionalCosts
-      ]
-    });
-
-    setAdditionalCost({
-      description: "",
-      amount: 0,
-      currency: "ZAR"
-    });
   };
 
-  const handleRemoveCost = (costId: string) => {
-    setEditedTrip({
-      ...editedTrip,
-      additionalCosts: editedTrip.additionalCosts.filter(cost => cost.id !== costId)
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    if (!editReason && !customReason) {
+      newErrors['editReason'] = 'Please select or enter a reason for editing.';
+    }
+    if (editReason === 'Other (specify in comments)' && !customReason.trim()) {
+      newErrors.customReason = 'Please specify the reason for editing';
+    }
+    // Check if any changes were made
+    const hasChanges = Object.keys(formData).some(key => {
+      const originalValue = trip[key as keyof Trip]?.toString() || '';
+      const newValue = formData[key as keyof typeof formData] || '';
+      return originalValue !== newValue;
     });
+    if (!hasChanges) {
+      newErrors.general = 'No changes detected. Please make changes before saving.';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = () => {
-    onSave(editedTrip);
+    if (!validateForm()) return;
+    const updatedTrip: Trip = {
+      ...trip,
+      ...formData,
+      baseRevenue: parseFloat(formData.baseRevenue),
+      distanceKm: parseFloat(formData.distanceKm),
+    };
+    // Identify changed fields
+    const changes: Array<{field: string, oldValue: string, newValue: string}> = [];
+    Object.keys(formData).forEach(key => {
+      const originalValue = trip[key as keyof Trip]?.toString() || '';
+      const newValue = formData[key as keyof typeof formData] || '';
+      if (originalValue !== newValue) {
+        changes.push({
+          field: key,
+          oldValue: originalValue,
+          newValue: newValue
+        });
+      }
+    });
+    const editRecord: Omit<TripEditRecord, 'id'> = {
+      tripId: trip.id,
+      editedBy: 'Current User', // Replace with actual user
+      editedAt: new Date().toISOString(),
+      reason: finalReason,
+      fieldChanged: 'manual update',
+      oldValue: '',
+      newValue: '',
+      changeType: 'update',
+    };
+    onSave(updatedTrip, editRecord);
+    // Create edit records for each change
+    changes.forEach(change => {
+      const editRecord: Omit<TripEditRecord, 'id'> = {
+        tripId: trip.id,
+        editedBy: 'Current User', // In real app, use actual user
+        editedAt: new Date().toISOString(),
+        reason: finalReason,
+        fieldChanged: change.field,
+        oldValue: change.oldValue,
+        newValue: change.newValue,
+        changeType: 'update'
+      };
+      const updatedTrip: Trip = {
+        ...trip,
+        ...formData,
+        baseRevenue: Number(formData.baseRevenue),
+        distanceKm: formData.distanceKm ? Number(formData.distanceKm) : undefined,
+        editHistory: [...(trip.editHistory || []), editRecord]
+      };
+      onSave(updatedTrip, editRecord);
+    });
+    onClose();
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={`Edit Trip: ${trip.loadRef || trip.fleetNumber}`}
-    >
-      <div className="space-y-6">
-        <div className="border rounded-md p-4 bg-gray-50">
-          <h3 className="text-md font-medium mb-2">Trip Details</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-gray-600">Customer</p>
-              <p className="font-medium">{trip.clientName || trip.customer}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Route</p>
-              <p className="font-medium">{trip.route}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Start Date</p>
-              <p className="font-medium">{new Date(trip.startDate).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">End Date</p>
-              <p className="font-medium">{new Date(trip.endDate).toLocaleDateString()}</p>
-            </div>
-          </div>
+    <Modal isOpen={isOpen} onClose={onClose} title="Edit Completed Trip">
+      <div className="p-4 space-y-4">
+        <h2 className="text-xl font-semibold">Edit Completed Trip</h2>
+        <Input label="Fleet Number" value={formData.fleetNumber} onChange={val => handleChange('fleetNumber', val)} />
+        <Input label="Driver Name" value={formData.driverName} onChange={val => handleChange('driverName', val)} />
+        <Input label="Client Name" value={formData.clientName} onChange={val => handleChange('clientName', val)} />
+        <Input label="Start Date" value={formData.startDate} onChange={val => handleChange('startDate', val)} />
+        <Input label="End Date" value={formData.endDate} onChange={val => handleChange('endDate', val)} />
+        <Input label="Route" value={formData.route} onChange={val => handleChange('route', val)} />
+        <TextArea label="Description" value={formData.description} onChange={val => handleChange('description', val)} />
+        <Input label="Base Revenue" value={formData.baseRevenue} onChange={val => handleChange('baseRevenue', val)} />
+        <Input label="Revenue Currency" value={formData.revenueCurrency} onChange={val => handleChange('revenueCurrency', val)} />
+        <Input label="Distance (km)" value={formData.distanceKm} onChange={val => handleChange('distanceKm', val)} />
+        {/* Edit Reason - Required */}
+        <div className="space-y-4 border-t pt-4">
+          <h3 className="text-lg font-medium text-gray-900">Edit Justification (Required)</h3>
+          <Select
+            label="Reason for Edit *"
+            value={editReason}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setEditReason(e.target.value)}
+            options={[
+              { label: 'Select reason for editing...', value: '' },
+              ...TRIP_EDIT_REASONS.map(reason => ({ label: reason, value: reason }))
+            ]}
+            error={errors.editReason}
+          />
+          <Input label="Custom Reason" value={customReason} onChange={val => setCustomReason(val)} />
+          {errors.editReason && <div className="text-red-500">{errors.editReason}</div>}
         </div>
-
-        <div>
-          <h3 className="text-md font-medium mb-2">Additional Costs</h3>
-
-          <div className="mb-4">
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                placeholder="Cost description"
-                className="flex-1 p-2 border rounded"
-                value={additionalCost.description}
-                onChange={(e) => setAdditionalCost({...additionalCost, description: e.target.value})}
-              />
-              <input
-                type="number"
-                placeholder="Amount"
-                className="w-24 p-2 border rounded"
-                value={additionalCost.amount || ""}
-                onChange={(e) => setAdditionalCost({...additionalCost, amount: parseFloat(e.target.value) || 0})}
-              />
-              <Button onClick={handleAddCost}>Add</Button>
-            </div>
-          </div>
-
-          {editedTrip.additionalCosts.length > 0 ? (
-            <div className="border rounded-md overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {editedTrip.additionalCosts.map((cost) => (
-                    <tr key={cost.id}>
-                      <td className="px-4 py-2">{cost.description}</td>
-                      <td className="px-4 py-2">{cost.amount} {cost.currency}</td>
-                      <td className="px-4 py-2">
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() => handleRemoveCost(cost.id)}
-                        >
-                          Remove
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="text-gray-500 text-center py-4 border rounded-md">No additional costs added yet</p>
-          )}
-        </div>
-
-        <div className="flex justify-end space-x-3">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleSave}>
-            Save Changes
-          </Button>
+        <div className="flex justify-end space-x-2">
+          <Button icon={<X />} variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button icon={<Save />} onClick={handleSave}>Save</Button>
         </div>
       </div>
     </Modal>

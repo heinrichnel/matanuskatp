@@ -50,7 +50,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-  
+
   // Get status class
   const getStatusClass = (status: string) => {
     switch (status) {
@@ -60,13 +60,13 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
       default: return 'bg-yellow-100 text-yellow-800';
     }
   };
-  
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Driver Behavior Event Details"
-      maxWidth="lg"
+      size="lg"
     >
       <div className="space-y-6">
         {/* Event Header */}
@@ -96,7 +96,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
             </div>
           </div>
         </div>
-        
+
         {/* Event Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
@@ -106,7 +106,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
                 {DRIVER_BEHAVIOR_EVENT_TYPES.find(t => t.value === event.eventType)?.label || event.eventType}
               </p>
             </div>
-            
+
             <div>
               <h4 className="text-sm font-medium text-gray-500">Date & Time</h4>
               <div className="flex items-center gap-2 text-gray-700 text-sm mb-2">
@@ -114,7 +114,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
                 <Clock className="w-4 h-4 ml-4" /> {event.eventTime}
               </div>
             </div>
-            
+
             {event.location && (
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Location</h4>
@@ -124,20 +124,20 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
                 </div>
               </div>
             )}
-            
+
             <div>
               <h4 className="text-sm font-medium text-gray-500">Demerit Points</h4>
               <p className="font-medium text-red-600">{event.points} points</p>
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <div>
               <h4 className="text-sm font-medium text-gray-500">Reported By</h4>
               <p className="font-medium text-gray-900">{event.reportedBy}</p>
               <p className="text-xs text-gray-500">{formatDateTime(event.reportedAt)}</p>
             </div>
-            
+
             {event.resolvedAt && (
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Resolved By</h4>
@@ -145,7 +145,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
                 <p className="text-xs text-gray-500">{formatDateTime(event.resolvedAt)}</p>
               </div>
             )}
-            
+
             {event.status === 'resolved' && !event.resolvedAt && (
               <div className="p-2 bg-yellow-50 border border-yellow-200 rounded">
                 <p className="text-sm text-yellow-700">
@@ -153,7 +153,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
                 </p>
               </div>
             )}
-            
+
             {/* CAR Report Link */}
             {event.carReportId ? (
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
@@ -192,7 +192,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
             )}
           </div>
         </div>
-        
+
         {/* Description */}
         <div>
           <h4 className="text-sm font-medium text-gray-500 mb-2">Description</h4>
@@ -200,7 +200,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
             <p className="text-gray-900">{event.description}</p>
           </div>
         </div>
-        
+
         {/* Action Taken */}
         {event.actionTaken && (
           <div>
@@ -210,7 +210,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
             </div>
           </div>
         )}
-        
+
         {/* Attachments */}
         {event.attachments && event.attachments.length > 0 && (
           <div>
@@ -225,7 +225,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => window.open(attachment.url, '_blank')}
+                    onClick={() => window.open(attachment.fileUrl, '_blank')}
                   >
                     View
                   </Button>
@@ -234,7 +234,7 @@ const DriverBehaviorEventDetails: React.FC<DriverBehaviorEventDetailsProps> = ({
             </div>
           </div>
         )}
-        
+
         {/* Actions */}
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button

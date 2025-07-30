@@ -2,13 +2,13 @@
 import React, { useState } from 'react';
 
 // ─── Types & Constants ───────────────────────────────────────────
-import { Trip, TripDeletionRecord, TRIP_DELETION_REASONS } from '../../../types';
+import { Trip, TripDeletionRecord, TRIP_DELETION_REASONS, CostEntry } from '../../../types/index';
 import { formatCurrency, calculateTotalCosts } from '../../../utils/helpers';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from '../../ui/Modal';
-import Button from '../../ui/Button';
-import { Select, Textarea } from '../../ui/FormElements';
+import Modal from '../../../components/ui/Modal';
+import Button from '../../../components/ui/Button';
+import { Input, Select, TextArea } from '../../../components/ui/FormElements';
 
 // ─── Icons ───────────────────────────────────────────────────────
 import { Trash2, X, AlertTriangle, Shield } from 'lucide-react';
@@ -40,11 +40,11 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!deletionReason) {
       newErrors.deletionReason = 'Deletion reason is required';
     }
-    
+
     if (deletionReason === 'Other (specify in comments)' && !customReason.trim()) {
       newErrors.customReason = 'Please specify the reason for deletion';
     }
@@ -109,7 +109,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
             <div>
               <h4 className="text-sm font-medium text-red-800">CRITICAL: Permanent Deletion</h4>
               <p className="text-sm text-red-700 mt-1">
-                This action will permanently delete the completed trip and all associated data. 
+                This action will permanently delete the completed trip and all associated data.
                 This operation cannot be undone. All deletion details will be logged for governance and audit purposes.
               </p>
             </div>
@@ -133,7 +133,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
               <p><strong>Status:</strong> {trip.status.toUpperCase()}</p>
             </div>
           </div>
-          
+
           <div className="mt-3 pt-3 border-t border-gray-200">
             <div className="flex justify-between text-sm">
               <span>Cost Entries: <strong>{trip.costs.length}</strong></span>
@@ -146,7 +146,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
         {/* Deletion Reason */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900">Deletion Justification (Required)</h3>
-          
+
           <Select
             label="Reason for Deletion *"
             value={deletionReason}
@@ -159,7 +159,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
           />
 
           {deletionReason === 'Other (specify in comments)' && (
-            <Textarea
+            <TextArea
               label="Specify Reason *"
               value={customReason}
               onChange={(e) => setCustomReason(e.target.value)}
@@ -176,7 +176,7 @@ const TripDeletionModal: React.FC<TripDeletionModalProps> = ({
           <p className="text-sm text-gray-600">
             To confirm deletion, please type <strong>{confirmationText}</strong> in the field below:
           </p>
-          
+
           <input
             type="text"
             value={confirmText}
