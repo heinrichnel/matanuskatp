@@ -66,13 +66,18 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
     onAddOverdueReason(actionItem, overdueReason);
     setOverdueReason("");
   };
+  
+  // Handle viewing attachment
+  const handleViewAttachment = (attachmentUrl: string) => {
+    window.open(attachmentUrl, '_blank');
+  };
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Action Item Details"
-      maxWidth="lg"
+      size="lg"
     >
       <div className="space-y-6">
         {/* Header */}
@@ -237,7 +242,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
               <div className="flex justify-end">
                 <Button
                   size="sm"
-                  onClick={onClick}
+                  onClick={handleSubmitOverdueReason}
                   disabled={
                     !overdueReason.trim() || connectionStatus !== "connected"
                   }
@@ -270,7 +275,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={onClick}
+                    onClick={() => handleViewAttachment(attachment.url)}
                   >
                     View
                   </Button>
@@ -317,7 +322,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
               className="flex-1"
             />
             <Button
-              onClick={onClick}
+              onClick={handleAddComment}
               disabled={!comment.trim() || connectionStatus !== "connected"}
               icon={<Send className="w-4 h-4" />}
               className="self-end"
@@ -331,7 +336,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClick}
+            onClick={onClose}
             icon={<X className="w-4 h-4" />}
           >
             Close
