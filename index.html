@@ -21,12 +21,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
 
     <!-- Wialon SDK (globally available as window.wialon) -->
-    <script src="https://sdk.wialon.com/js/latest/wialon.js"></script>
+    <script
+      src="https://sdk.wialon.com/js/latest/wialon.js"
+      async
+      onerror="console.error('Failed to load Wialon SDK')"
+    ></script>
     <script>
       // Initialize Wialon when SDK is loaded
       window.onWialonSdkLoaded = function () {
         console.log("Wialon SDK loaded successfully");
         // The SDK is now available as window.wialon
+
+        // Dispatch an event that our application can listen for
+        window.dispatchEvent(new CustomEvent("wialonSdkLoaded"));
       };
     </script>
 
