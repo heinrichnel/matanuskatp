@@ -397,9 +397,51 @@
       }
       console.log('Navigation to:', route);
 
-      // Update UI based on route
-      if (route === 'trips/active') {
+      // Hide all content containers first
+      const contentContainers = document.querySelectorAll('[id$="-container"]');
+      contentContainers.forEach(container => {
+        container.style.display = 'none';
+      });
+
+      // Show the appropriate content based on route
+      if (route === 'dashboard') {
+        // Show dashboard content
         document.getElementById('active-trips-container').style.display = 'block';
+      } else if (route.startsWith('trips')) {
+        // Show trips content
+        document.getElementById('active-trips-container').style.display = 'block';
+      } else if (route.startsWith('invoices')) {
+        // Create invoice container if it doesn't exist
+        if (!document.getElementById('invoice-container')) {
+          const invoiceContainer = document.createElement('div');
+          invoiceContainer.id = 'invoice-container';
+          invoiceContainer.className = 'mt-6 border rounded-lg shadow-sm p-6 bg-white';
+          invoiceContainer.innerHTML = `
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Invoice Management</h2>
+            <p class="text-gray-600">Manage invoices and billing information</p>
+            <div class="mt-4 p-4 bg-blue-50 rounded">
+              <p>Invoice content will be displayed here</p>
+            </div>
+          `;
+          document.querySelector('.content').appendChild(invoiceContainer);
+        }
+        document.getElementById('invoice-container').style.display = 'block';
+      } else if (route.startsWith('diesel')) {
+        // Create diesel container if it doesn't exist
+        if (!document.getElementById('diesel-container')) {
+          const dieselContainer = document.createElement('div');
+          dieselContainer.id = 'diesel-container';
+          dieselContainer.className = 'mt-6 border rounded-lg shadow-sm p-6 bg-white';
+          dieselContainer.innerHTML = `
+            <h2 class="text-xl font-bold text-gray-900 mb-4">Diesel Management</h2>
+            <p class="text-gray-600">Track and manage diesel consumption</p>
+            <div class="mt-4 p-4 bg-blue-50 rounded">
+              <p>Diesel management content will be displayed here</p>
+            </div>
+          `;
+          document.querySelector('.content').appendChild(dieselContainer);
+        }
+        document.getElementById('diesel-container').style.display = 'block';
       }
 
       // Highlight active item
@@ -433,9 +475,22 @@
 
     // Initialize by expanding trips section and selecting active trips
     document.addEventListener('DOMContentLoaded', () => {
+      // Make sure all subnavs are properly initialized
+      const subnavs = ['trips', 'invoices', 'diesel'];
+
+      // Initialize all subnavs to be closed
+      subnavs.forEach(nav => {
+        const subnav = document.getElementById(`${nav}-subnav`);
+        if (subnav) {
+          subnav.style.display = 'none';
+        }
+      });
+
+      // Expand trips section and select active trips
       toggleSubnav('trips');
       handleNavigation('trips/active');
     });
   </script>
 </body>
 </html>
+
