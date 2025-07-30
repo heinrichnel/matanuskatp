@@ -67,12 +67,44 @@ export async function initializeWialon(): Promise<boolean> {
     console.log("Auto-initializing Wialon connection...");
 
     // Check if Wialon SDK is available
-    if (!window.wialon) {
-      console.error("Wialon SDK not available. Make sure the SDK script is loaded properly.");
-      return false;
+    if (typeof window !== 'undefined' && !window.wialon) {
+      console.warn("Wialon SDK not immediately available. Attempting to load SDK dynamically...");
+      
+      // Try to load the Wialon SDK dynamically
+      return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = "https://sdk.wialon.com/js/latest/wialon.js";
+        script.async = true;
+        script.onload = async () => {
+          console.log("Wialon SDK loaded dynamically");
+          // Wait a moment for the SDK to initialize
+          setTimeout(async () => {
+            try {
+              if (window.wialon) {
+                // Attempt to get units as a connectivity test
+                const units = await getUnits();
+                console.log(`Wialon initialized successfully with ${units.length} units`);
+                wialonInitialized = true;
+                resolve(true);
+              } else {
+                console.error("Wialon SDK failed to initialize after dynamic loading");
+                resolve(false);
+              }
+            } catch (err) {
+              console.error("Error after dynamic SDK load:", err);
+              resolve(false);
+            }
+          }, 500);
+        };
+        script.onerror = () => {
+          console.error("Failed to load Wialon SDK dynamically");
+          resolve(false);
+        };
+        document.head.appendChild(script);
+      });
     }
 
-    // Attempt to get units as a connectivity test
+    // If SDK is already available, proceed normally
     const units = await getUnits();
     console.log(`Wialon initialized successfully with ${units.length} units`);
     wialonInitialized = true;
