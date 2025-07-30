@@ -143,7 +143,7 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
                     <div className="text-sm space-y-1">
                       <p><span className="text-gray-500">Installed:</span> {selectedTyre.installation.installationDate}</p>
                       <p><span className="text-gray-500">Mileage at Install:</span> {selectedTyre.installation.mileageAtInstallation.toLocaleString()} km</p>
-                      <p><span className="text-gray-500">Miles Run:</span> {selectedTyre.milesRun.toLocaleString()}</p>
+                      <p><span className="text-gray-500">Miles Run:</span> {selectedTyre.kmRun.toLocaleString()}</p>
                       <p><span className="text-gray-500">Serial Number:</span> {selectedTyre.serialNumber}</p>
                       <p><span className="text-gray-500">DOT Code:</span> {selectedTyre.dotCode}</p>
                     </div>
