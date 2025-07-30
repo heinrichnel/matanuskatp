@@ -3,6 +3,14 @@ import { Card } from 'antd';
 import { Search, Download, Calendar, Filter, BarChart2, PieChart, TrendingUp, TrendingDown } from 'lucide-react';
 import { Button } from 'antd';
 
+// Define a simple CardContent component
+const CardContent: React.FC<React.PropsWithChildren<{ className?: string }>> = ({
+  children,
+  className
+}) => {
+  return <div className={className}>{children}</div>;
+};
+
 interface ReportFilter {
   dateRange: string;
   customerType: string;
