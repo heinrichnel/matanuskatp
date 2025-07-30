@@ -13,7 +13,7 @@ const withSuspense = (Comp: React.LazyExoticComponent<any>) => (
 /* -----------------------------
  * Top-level / dashboard pages
  * ----------------------------- */
-const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const DashboardPage = lazy(() => import("./components/dashboard/FleetAnalyticsDashboard"));
 const YearToDateKPIs = lazy(() => import("./pages/analytics/YearToDateKPIs"));
 const ComplianceDashboard = lazy(() => import("./pages/Compliance/ComplianceDashboard"));
 
@@ -23,11 +23,11 @@ const ComplianceDashboard = lazy(() => import("./pages/Compliance/ComplianceDash
 const TripDashboardPage = lazy(() => import("./pages/trips/TripDashboardPage"));
 const TripManagementPage = lazy(() => import("./pages/trips/TripManagementPage"));
 const TripCalendarPage = lazy(() => import("./pages/trips/TripCalendarPage"));
-const TripTimelinePage = lazy(() => import("./pages/TripTimelinePage"));
+const TripTimelinePage = lazy(() => import("./pages/trips/TripTimelinePage"));
 const TripReportPage = lazy(() => import("./pages/trips/TripReportPage"));
 const ActiveTripsPage = lazy(() => import("./pages/trips/ActiveTripsPageEnhanced"));
 const CompletedTrips = lazy(() => import("./pages/trips/CompletedTrips"));
-const AddTripPage = lazy(() => import("./pages/AddTripPage"));
+const AddTripPage = lazy(() => import("./components/Models/Trips/AddTripModal"));
 const TripDetailsPage = lazy(() => import("./pages/trips/TripDetailsPage"));
 const TripInvoicingPanel = lazy(() => import("./pages/trips/TripInvoicingPanel"));
 const TripCompletionPanel = lazy(() => import("./pages/trips/TripCompletionPanel"));
@@ -36,11 +36,15 @@ const SystemCostGenerator = lazy(() => import("./pages/trips/SystemCostGenerator
 const PaymentTrackingPanel = lazy(() => import("./pages/trips/PaymentTrackingPanel"));
 const ReportingPanel = lazy(() => import("./pages/trips/ReportingPanel"));
 const LoadPlanningPage = lazy(() => import("./pages/trips/LoadPlanningPage"));
-const LoadPlanningComponentPage = lazy(() => import("./pages/LoadPlanningComponentPage"));
-const RoutePlanningPage = lazy(() => import("./pages/RoutePlanningPage"));
+const LoadPlanningComponentPage = lazy(
+  () => import("./components/TripManagement/LoadPlanningComponent")
+);
+const RoutePlanningPage = lazy(() => import("./pages/trips/RoutePlanningPage"));
 const RouteOptimizationPage = lazy(() => import("./pages/trips/RouteOptimizationPage"));
 const TripCalendarTop = lazy(() => import("./pages/trips/TripCalendarPage"));
 const MissedLoadsTracker = lazy(() => import("./pages/trips/MissedLoadsTracker"));
+const FleetManagementPage = lazy(() => import("./pages/trips/FleetManagementPage"));
+const CostEntryForm = lazy(() => import("./pages/trips/CostEntryForm"));
 
 /* -----------------------------
  * Diesel
@@ -48,7 +52,7 @@ const MissedLoadsTracker = lazy(() => import("./pages/trips/MissedLoadsTracker")
 const DieselDashboard = lazy(() => import("./pages/diesel/DieselDashboard"));
 const DieselAnalysis = lazy(() => import("./pages/diesel/DieselAnalysis"));
 const DieselDashboardComponent = lazy(() => import("./pages/diesel/DieselDashboardComponent"));
-const AddFuelEntryPage = lazy(() => import("./pages/diesel/AddFuelEntryPage"));
+const AddFuelEntryPage = lazy(() => import("./components/forms/AddFuelEntry"));
 const FuelLogs = lazy(() => import("./pages/diesel/FuelLogs"));
 const FuelTheftDetection = lazy(() => import("./pages/diesel/FuelTheftDetection"));
 const DriverFuelBehavior = lazy(() => import("./pages/diesel/DriverFuelBehavior"));
@@ -88,30 +92,43 @@ const CreateInvoicePage = lazy(() => import("./pages/invoices/CreateInvoicePage"
 const CreateQuotePage = lazy(() => import("./pages/invoices/CreateQuotePage"));
 const PendingInvoicesPage = lazy(() => import("./pages/invoices/PendingInvoicesPage"));
 const PaidInvoicesPage = lazy(() => import("./pages/invoices/PaidInvoicesPage"));
+const PaidInvoices = lazy(() => import("./pages/invoices/PaidInvoices"));
 const InvoiceTemplatesPage = lazy(() => import("./pages/invoices/InvoiceTemplatesPage"));
 const TaxReportExport = lazy(() => import("./pages/invoices/TaxReportExport"));
+const IndirectCostBreakdown = lazy(() => import("./pages/invoices/IndirectCostBreakdown"));
+const InvoiceApprovalFlow = lazy(() => import("./pages/invoices/InvoiceApprovalFlow"));
 
 /* -----------------------------
- * Workshop
+ * Workshop & Inventory
  * ----------------------------- */
 const WorkshopOperations = lazy(() => import("./pages/workshop/WorkshopOperations"));
 const WorkshopAnalytics = lazy(() => import("./pages/workshop/WorkshopAnalytics"));
-const WorkOrderManagement = lazy(() => import("./pages/WorkOrderManagement"));
-const PurchaseOrderPage = lazy(() => import("./pages/inventory/PurchaseOrderPage"));
+const WorkOrderManagement = lazy(() => import("./pages/workshop/WorkOrderManagement"));
 const QRGenerator = lazy(() => import("./pages/workshop/QRGenerator"));
 const QRScannerPage = lazy(() => import("./pages/workshop/QRScannerPage"));
 const StockInventoryPage = lazy(() => import("./pages/workshop/StockInventoryPage"));
 const VendorPage = lazy(() => import("./pages/workshop/VendorPage"));
 const WorkshopPage = lazy(() => import("./pages/workshop/WorkshopPage"));
-const InventoryDashboard = lazy(() => import("./pages/InventoryDashboard"));
-const InventoryPage = lazy(() => import("./pages/inventory/InventoryPage"));
-const InventoryReportsPage = lazy(() => import("./pages/InventoryReportsPage"));
-const PartsInventoryPage = lazy(() => import("./pages/PartsInventoryPage"));
-const PartsOrderingPage = lazy(() => import("./pages/inventory/PartsOrderingPage"));
-const ReceivePartsPage = lazy(() => import("./pages/inventory/ReceivePartsPage"));
-const JobCardManagement = lazy(() => import("./pages/JobCardManagement"));
+const JobCardManagement = lazy(() => import("./pages/workshop/JobCardManagement"));
 const JobCardKanbanBoard = lazy(() => import("./pages/workshop/JobCardKanbanBoard"));
 const InspectionManagement = lazy(() => import("./pages/workshop/InspectionManagement"));
+const QAReviewPanel = lazy(() => import("./pages/workshop/QAReviewPanel"));
+
+/* -----------------------------
+ * Inventory
+ * ----------------------------- */
+const InventoryDashboard = lazy(() => import("./pages/inventory/InventoryDashboard"));
+const InventoryPage = lazy(() => import("./pages/inventory/InventoryPage"));
+const InventoryReportsPage = lazy(() => import("./pages/inventory/InventoryReportsPage"));
+const PartsInventoryPage = lazy(() => import("./pages/inventory/PartsInventoryPage"));
+const PartsOrderingPage = lazy(() => import("./pages/inventory/PartsOrderingPage"));
+const PurchaseOrderPage = lazy(() => import("./pages/inventory/PurchaseOrderPage"));
+const ReceivePartsPage = lazy(() => import("./pages/inventory/ReceivePartsPage"));
+const POApprovalSummary = lazy(() => import("./pages/inventory/POApprovalSummary"));
+const PurchaseOrderTracker = lazy(() => import("./pages/inventory/PurchaseOrderTracker"));
+const PurchaseOrderDetailView = lazy(() => import("./pages/inventory/PurchaseOrderDetailView"));
+const VendorScorecard = lazy(() => import("./pages/inventory/VendorScorecard"));
+const CashManagerRequestPage = lazy(() => import("./pages/inventory/CashManagerRequestPage"));
 
 /* -----------------------------
  * Tyres
@@ -119,48 +136,52 @@ const InspectionManagement = lazy(() => import("./pages/workshop/InspectionManag
 const TyreManagementPage = lazy(() => import("./pages/tyres/TyreManagementPage"));
 const TyreReferenceManagerPage = lazy(() => import("./pages/tyres/TyreReferenceManagerPage"));
 const AddNewTyrePage = lazy(() => import("./pages/tyres/AddNewTyrePage"));
-const TyrePerformanceDashboard = lazy(() => import("./pages/TyrePerformanceDashboard"));
+const TyrePerformanceDashboard = lazy(() => import("./pages/tyres/TyrePerformanceDashboard"));
 const TyreHistoryPage = lazy(() => import("./pages/tyres/TyreHistoryPage"));
 const TyreFleetMap = lazy(() => import("./pages/tyres/TyreFleetMap"));
 const TyreStores = lazy(() => import("./pages/tyres/TyreStores"));
-const VehicleTyreView = lazy(() => import("./pages/VehicleTyreView"));
+const VehicleTyreView = lazy(() => import("./pages/tyres/VehicleTyreView"));
 const VehicleTyreViewA = lazy(() => import("./pages/tyres/VehicleTyreViewA"));
 const TyreMobilePage = lazy(() => import("./pages/mobile/TyreMobilePage"));
 
 /* -----------------------------
- * Customers / Analytics
+ * Clients
  * ----------------------------- */
-const CustomerDashboard = lazy(() => import("./pages/CustomerDashboard"));
-const CustomerReports = lazy(() => import("./pages/CustomerReports"));
-const ActiveCustomers = lazy(() => import("./pages/ActiveCustomers"));
+const CustomerDashboard = lazy(() => import("./pages/clients/CustomerDashboard"));
+const CustomerReports = lazy(() => import("./pages/clients/CustomerReports"));
+const ActiveCustomers = lazy(() => import("./pages/clients/ActiveCustomers"));
 const ClientDetail = lazy(() => import("./pages/clients/ClientDetail"));
-const VendorScorecard = lazy(() => import("./pages/inventory/VendorScorecard"));
-const RetentionMetrics = lazy(() => import("./pages/RetentionMetrics"));
-const PerformanceAnalyticsPage = lazy(() => import("./pages/PerformanceAnalytics"));
+const RetentionMetrics = lazy(() => import("./pages/clients/RetentionMetrics"));
+const ClientManagementPage = lazy(() => import("./pages/clients/ClientManagementPage"));
+const ClientNetworkMap = lazy(() => import("./pages/clients/ClientNetworkMap"));
 
 /* -----------------------------
- * Maps / Wialon
+ * Analytics
  * ----------------------------- */
-const WialonDashboard = lazy(() => import("./pages/WialonDashboard"));
-const WialonConfigPage = lazy(() => import("./pages/WialonConfigPage"));
-const WialonUnitsPage = lazy(() => import("./pages/WialonUnitsPage"));
-const FleetManagementPage = lazy(() => import("./pages/trips/FleetManagementPage"));
+const AnalyticsDashboard = lazy(() => import("./pages/analytics/AnalyticsDashboard"));
+const AnalyticsDashboardPage = lazy(() => import("./pages/analytics/DashboardPage"));
+const AnalyticsPerformanceAnalytics = lazy(() => import("./pages/analytics/PerformanceAnalytics"));
+const FleetAnalyticsPage = lazy(() => import("./pages/analytics/FleetAnalyticsPage"));
+
+/* -----------------------------
+ * Wialon
+ * ----------------------------- */
+const WialonConfigPage = lazy(() => import("./pages/wialon/WialonConfigPage"));
+const WialonUnitsPage = lazy(() => import("./pages/wialon/WialonUnitsPage"));
+const WialonDashboard = lazy(() => import("./pages/wialon/WialonDashboard"));
 const FleetLocationMapPage = lazy(() => import("./components/Map/pages/FleetLocationMapPage"));
 
 /* -----------------------------
  * Flags / Investigations
  * ----------------------------- */
-const FlagsInvestigationsPage = lazy(() => import("./pages/FlagsInvestigationsPage"));
+const FlagsInvestigationsPage = lazy(() => import("./pages/trips/FlagsInvestigationsPage"));
 
 /* -----------------------------
- * Cost / Indirect costs
+ * Compliance
  * ----------------------------- */
-const IndirectCostBreakdown = lazy(() => import("./pages/invoices/IndirectCostBreakdown"));
-
-const QAReviewPanel = lazy(() => import("./pages/workshop/QAReviewPanel"));
-const POApprovalSummary = lazy(() => import("./pages/inventory/POApprovalSummary"));
-const PurchaseOrderTracker = lazy(() => import("./pages/PurchaseOrderTracker"));
-const PurchaseOrderDetailView = lazy(() => import("./pages/inventory/PurchaseOrderDetailView"));
+const ActionLog = lazy(() => import("./pages/Compliance/ActionLog"));
+const CARReportDetails = lazy(() => import("./pages/Compliance/CARReportDetails"));
+const ActionItemDetails = lazy(() => import("./pages/Compliance/ActionItemDetails"));
 const ReportNewIncidentPage = lazy(() => import("./pages/Compliance/ReportNewIncidentPage"));
 
 /* -----------------------------
@@ -243,7 +264,8 @@ export const AppRoutes: React.FC = () => {
           <Route path="hos" element={withSuspense(HoursOfService)} />
           <Route path="training" element={withSuspense(TrainingRecords)} />
           <Route path="licenses" element={withSuspense(LicenseManagement)} />
-          <Route path="new" element={withSuspense(AddNewDriver)} />
+          {/* Redirect to main page with modal instead of standalone page */}
+          <Route path="new" element={<Navigate to="/drivers" replace />} />
           <Route path="edit/:driverId" element={withSuspense(EditDriver)} />
         </Route>
 
@@ -311,7 +333,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="retention" element={withSuspense(RetentionMetrics)} />
         </Route>
         <Route path="analytics">
-          <Route index element={withSuspense(PerformanceAnalyticsPage)} />
+          <Route index element={withSuspense(AnalyticsPerformanceAnalytics)} />
           <Route path="vendor-scorecard" element={withSuspense(VendorScorecard)} />
         </Route>
 

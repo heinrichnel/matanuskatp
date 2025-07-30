@@ -1,1136 +1,411 @@
-// Sidebar menu configuration for mapping menu options to routes and components
-// Matanuska Transport Platform (2025) - Unified Routing & Sidebar Mapping
+import React from 'react';
+// Import icons from your chosen icon library (e.g., Heroicons, as per your package.json)
+import {
+  HomeIcon,
+  TruckIcon,
+  WrenchScrewdriverIcon,
+  CurrencyDollarIcon,
+  DocumentTextIcon,
+  MapPinIcon,
+  UsersIcon,
+  SparklesIcon,
+  BuildingOfficeIcon,
+  ClipboardDocumentCheckIcon,
+  FuelIcon,
+  UserGroupIcon,
+  BellAlertIcon,
+  ChartBarIcon,
+  InboxStackIcon,
+  TagIcon,
+  ClipboardDocumentListIcon,
+  ArrowPathIcon,
+  Cog6ToothIcon,
+  ShieldCheckIcon,
+  CircleStackIcon,
+  DocumentMagnifyingGlassIcon,
+  CalculatorIcon,
+  ClipboardDocumentIcon,
+  GlobeAltIcon,
+  Square3Stack3DIcon,
+  ScaleIcon,
+  ClockIcon, // For Hours of Service
+  ListBulletIcon, // For general lists/management
+  FactoryIcon, // For Workshop
+  ReceiptPercentIcon, // For Invoices
+  UserCircleIcon, // For Drivers
+  HandRaisedIcon, // For Incidents/Flags
+  SmartphoneIcon // For Mobile
+} from '@heroicons/react/24/outline'; // Adjust path if needed
+
+// --- Lazy-loaded Page Component Imports ---
+// All page components are imported using React.lazy for code splitting.
+// This ensures their code is only loaded when the user navigates to that route.
+
+// Core Dashboard
+const DashboardPage = React.lazy(() => import('../pages/DashboardPage'));
+
+// Compliance Module Pages
+const ComplianceDashboard = React.lazy(() => import('../pages/ComplianceDashboard')); // Main page
+const InspectionManagement = React.lazy(() => import('../pages/InspectionManagement'));
+const ReportNewIncidentPage = React.lazy(() => import('../pages/ReportNewIncidentPage'));
+const FlagsInvestigationsPage = React.lazy(() => import('../pages/FlagsInvestigationsPage'));
+const QAReviewPanel = React.lazy(() => import('../pages/QAReviewPanel')); // Assuming this is a page
+const ActionLog = React.lazy(() => import('../pages/Compliance/ActionLog')); // From pages/Compliance
+const CARReportDetails = React.lazy(() => import('../pages/Compliance/CARReportDetails')); // From pages/Compliance
+const ActionItemDetails = React.lazy(() => import('../pages/Compliance/ActionItemDetails')); // From pages/Compliance
+
+// Clients Module Pages
+const ClientManagementPage = React.lazy(() => import('../pages/clients/ClientManagementPage'));
+const AddNewCustomer = React.lazy(() => import('../pages/clients/AddNewCustomer'));
+const ActiveCustomers = React.lazy(() => import('../pages/clients/ActiveCustomers'));
+const CustomerReports = React.lazy(() => import('../pages/clients/CustomerReports'));
+const RetentionMetrics = React.lazy(() => import('../pages/clients/RetentionMetrics'));
+const ClientNetworkMap = React.lazy(() => import('../pages/clients/ClientNetworkMap'));
+const ClientDetail = React.lazy(() => import('../pages/ClientDetail')); // From pages/ClientDetail.tsx
+
+// Invoices Module Pages
+const InvoiceManagementPage = React.lazy(() => import('../pages/invoices/InvoiceManagementPage')); // Main page
+const CreateInvoicePage = React.lazy(() => import('../pages/invoices/CreateInvoicePage'));
+const CreateQuotePage = React.lazy(() => import('../pages/invoices/CreateQuotePage'));
+const InvoiceApprovalFlow = React.lazy(() => import('../pages/invoices/InvoiceApprovalFlow'));
+const InvoiceBuilder = React.lazy(() => import('../pages/invoices/InvoiceBuilder'));
+const InvoiceDashboard = React.lazy(() => import('../pages/invoices/InvoiceDashboard'));
+const InvoiceTemplatesPage = React.lazy(() => import('../pages/invoices/InvoiceTemplatesPage'));
+const PaidInvoicesPage = React.lazy(() => import('../pages/invoices/PaidInvoicesPage')); // From pages/invoices
+const PendingInvoicesPage = React.lazy(() => import('../pages/invoices/PendingInvoicesPage')); // From pages/invoices
+const TaxReportExport = React.lazy(() => import('../pages/invoices/TaxReportExport'));
+const POApprovalSummary = React.lazy(() => import('../pages/POApprovalSummary')); // From pages/POApprovalSummary.tsx
+const PurchaseOrderDetailView = React.lazy(() => import('../pages/PurchaseOrderDetailView')); // From pages/PurchaseOrderDetailView.tsx
+const PurchaseOrderTracker = React.lazy(() => import('../pages/PurchaseOrderTracker')); // From pages/PurchaseOrderTracker.tsx
+const IndirectCostBreakdown = React.lazy(() => import('../pages/IndirectCostBreakdown')); // From pages/IndirectCostBreakdown.tsx
+const CashManagerRequestPage = React.lazy(() => import('../pages/CashManagerRequestPage')); // From pages/CashManagerRequestPage.tsx
+
+// Diesel Module Pages
+const DieselManagementPage = React.lazy(() => import('../pages/diesel/DieselManagementPage')); // Main page
+const AddFuelEntryPage = React.lazy(() => import('../pages/diesel/AddFuelEntryPage'));
+const BudgetPlanning = React.lazy(() => import('../pages/diesel/BudgetPlanning'));
+const CarbonFootprintCalc = React.lazy(() => import('../pages/diesel/CarbonFootprintCalc'));
+const DieselDashboardComponent = React.lazy(() => import('../pages/diesel/DieselDashboardComponent')); // From pages/diesel
+const DriverFuelBehaviorDiesel = React.lazy(() => import('../pages/diesel/DriverFuelBehavior')); // Renamed to avoid conflict
+const FuelCardManager = React.lazy(() => import('../pages/diesel/FuelCardManager'));
+const FuelEfficiencyReport = React.lazy(() => import('../pages/diesel/FuelEfficiencyReport'));
+const FuelLogs = React.lazy(() => import('../pages/diesel/FuelLogs'));
+const FuelStations = React.lazy(() => import('../pages/diesel/FuelStations'));
+const FuelTheftDetection = React.lazy(() => import('../pages/diesel/FuelTheftDetection'));
+const DieselAnalysis = React.lazy(() => import('../pages/diesel/DieselAnalysis')); // From pages/diesel
+const DieselDashboard = React.lazy(() => import('../pages/DieselDashboard')); // From pages/DieselDashboard.tsx
+
+// Inventory Module Pages
+const InventoryDashboard = React.lazy(() => import('../pages/InventoryDashboard')); // Main page
+const InventoryPage = React.lazy(() => import('../pages/InventoryPage'));
+const InventoryReportsPage = React.lazy(() => import('../pages/InventoryReportsPage'));
+const PartsInventoryPage = React.lazy(() => import('../pages/PartsInventoryPage'));
+const PartsOrderingPage = React.lazy(() => import('../pages/PartsOrderingPage'));
+const ReceivePartsPage = React.lazy(() => import('../pages/ReceivePartsPage'));
+const VendorScorecard = React.lazy(() => import('../pages/VendorScorecard')); // From pages/VendorScorecard.tsx
+const VendorPage = React.lazy(() => import('../pages/workshop/VendorPage')); // Re-used from workshop
+
+// Mobile Module Pages
+const TyreMobilePage = React.lazy(() => import('../pages/mobile/TyreMobilePage'));
+
+// Drivers Module Pages
+const DriverManagementPage = React.lazy(() => import('../pages/drivers/DriverManagementPage')); // Main page
+const AddNewDriver = React.lazy(() => import('../pages/drivers/AddNewDriver'));
+const DriverDashboard = React.lazy(() => import('../pages/drivers/DriverDashboard')); // From pages/drivers
+const DriverBehaviorPage = React.lazy(() => import('../pages/drivers/DriverBehaviorPage'));
+const DriverProfiles = React.lazy(() => import('../pages/drivers/DriverProfiles'));
+const DriverRewards = React.lazy(() => import('../pages/drivers/DriverRewards'));
+const DriverScheduling = React.lazy(() => import('../pages/drivers/DriverScheduling'));
+const DriverViolations = React.lazy(() => import('../pages/drivers/DriverViolations'));
+const EditDriver = React.lazy(() => import('../pages/drivers/EditDriver'));
+const HoursOfService = React.lazy(() => import('../pages/drivers/HoursOfService'));
+const LicenseManagement = React.lazy(() => import('../pages/drivers/LicenseManagement'));
+const PerformanceAnalytics = React.lazy(() => import('../pages/drivers/PerformanceAnalytics'));
+const SafetyScores = React.lazy(() => import('../pages/drivers/SafetyScores'));
+const TrainingRecords = React.lazy(() => import('../pages/drivers/TrainingRecords'));
+const DriverDetailsPage = React.lazy(() => import('../pages/drivers/DriverDetailsPage'));
+
+// Wialon Module Pages
+const WialonDashboard = React.lazy(() => import('../pages/WialonDashboard')); // Main page
+const WialonUnitsPage = React.lazy(() => import('../pages/WialonUnitsPage'));
+const WialonConfigPage = React.lazy(() => import('../pages/WialonConfigPage'));
+const WialonMapComponent = React.lazy(() => import('../components/Map/WialonMapComponent')); // Component, but can be a route target
+
+// Tyres Module Pages
+const TyreManagementPage = React.lazy(() => import('../pages/tyres/TyreManagementPage')); // Main page
+const TyreFleetMap = React.lazy(() => import('../pages/TyreFleetMap'));
+const TyreHistoryPage = React.lazy(() => import('../pages/TyreHistoryPage'));
+const TyrePerformanceDashboard = React.lazy(() => import('../pages/TyrePerformanceDashboard'));
+const TyreReferenceManagerPage = React.lazy(() => import('../pages/tyres/TyreReferenceManagerPage'));
+const TyreStores = React.lazy(() => import('../pages/TyreStores')); // From pages/TyreStores.tsx
+const VehicleTyreView = React.lazy(() => import('../pages/VehicleTyreView')); // From pages/VehicleTyreView.tsx
+const AddNewTyrePage = React.lazy(() => import('../pages/tyres/AddNewTyrePage'));
+
+// Analytics Module Pages
+const YearToDateKPIs = React.lazy(() => import('../pages/YearToDateKPIs'));
+const WorkshopAnalytics = React.lazy(() => import('../pages/WorkshopAnalytics'));
+const PredictiveModels = React.lazy(() => import('../components/Models/Driver/PredictiveModels')); // Component, not a page. If it needs a route, wrap it.
+const AnalyticsPerformanceAnalytics = React.lazy(() => import('../pages/PerformanceAnalytics')); // Re-used from Drivers
+const FleetAnalyticsPage = React.lazy(() => import('../pages/FleetManagementPage')); // Re-used from Fleet
+const AnalyticsDashboardPage = React.lazy(() => import('../pages/DashboardPage')); // Re-used from Dashboard
+const AnalyticsDashboard = React.lazy(() => import('../pages/DashboardPage')); // Re-used from Dashboard
+
+// Trips Module Pages (already imported above)
+// MissedLoadsTracker already imported above
+
+// Workshop Module Pages
+const WorkshopPage = React.lazy(() => import('../pages/workshop/WorkshopPage')); // Main page
+const JobCardManagement = React.lazy(() => import('../pages/JobCardManagement')); // From pages/JobCardManagement.tsx
+const WorkOrderManagement = React.lazy(() => import('../pages/WorkOrderManagement')); // From pages/WorkOrderManagement.tsx
+const StockInventoryPage = React.lazy(() => import('../pages/workshop/StockInventoryPage'));
+const QRGenerator = React.lazy(() => import('../pages/workshop/QRGenerator'));
+const QRScannerPage = React.lazy(() => import('../pages/workshop/QRScannerPage'));
+
+// Testing & Demo Pages (Development Only)
+const SidebarTester = React.lazy(() => import('../SidebarTester'));
+const UIComponentsDemo = React.lazy(() => import('../components/ui/UIComponentsDemo'));
+const GoogleMapsTest = React.lazy(() => import('../components/testing/GoogleMapsTest'));
+const TestRouting = React.lazy(() => import('../testRouting')); // Your testRouting.tsx
+
+// Define the structure of a sidebar item
 export interface SidebarItem {
   id: string;
   label: string;
-  path: string;
-  component: string; // import path
-  icon?: string;
-  children?: SidebarItem[]; // For hierarchical navigation
-  subComponents?: string[]; // Additional components that might be needed by this menu item
+  path?: string; // Optional path for parent items without direct route
+  icon?: React.ElementType; // Icon component
+  component?: React.ComponentType<any>; // React component for the route (lazy-loaded)
+  roles?: string[]; // Optional roles for access control
+  children?: SidebarItem[]; // Nested items for submenus
 }
 
 export const sidebarConfig: SidebarItem[] = [
-  // Dashboard
   {
-    id: "dashboard",
-    label: "Dashboard",
-    path: "/dashboard",
-    component: "pages/DashboardPage",
-    icon: "chart-bar",
+    id: 'dashboard',
+    label: 'Dashboard',
+    path: '/',
+    icon: HomeIcon,
+    component: DashboardPage,
+    roles: ['Admin', 'Sub Admin', 'Operator', 'Technician']
   },
-
-  // Trip Management Section
   {
-    id: "trip-management",
-    label: "Trip Management",
-    path: "/trips",
-    component: "pages/TripManagementPage",
-    icon: "truck",
+    id: 'compliance',
+    label: 'COMPLIANCE',
+    icon: ScaleIcon,
+    roles: ['Admin', 'Sub Admin', 'Technician', 'Operator'],
     children: [
-      {
-        id: "trip-dashboard",
-        label: "Trip Dashboard",
-        path: "/trips/dashboard",
-        component: "pages/TripDashboardPage",
-      },
-      {
-        id: "active-trips",
-        label: "Active Trips",
-        path: "/trips/active",
-        component: "pages/ActiveTripsPageEnhanced",
-      },
-      {
-        id: "completed-trips",
-        label: "Completed Trips",
-        path: "/trips/completed",
-        component: "pages/CompletedTrips",
-      },
-      {
-        id: "route-planning",
-        label: "Route Planning",
-        path: "/trips/route-planning",
-        component: "pages/RoutePlanningPage",
-      },
-      {
-        id: "route-optimization",
-        label: "Route Optimization",
-        path: "/trips/optimization",
-        component: "pages/RouteOptimizationPage",
-        subComponents: ["components/TripManagement/OptimizedRouteSuggestion"],
-      },
-      {
-        id: "load-planning",
-        label: "Load Planning",
-        path: "/trips/load-planning",
-        component: "pages/LoadPlanningPage",
-        subComponents: ["components/TripManagement/LoadPlanningComponent"],
-      },
-      {
-        id: "load-planning-component",
-        label: "Load Planning Component",
-        path: "/trips/load-planning/component",
-        component: "pages/LoadPlanningComponentPage",
-      },
-      {
-        id: "trip-calendar",
-        label: "Trip Calendar",
-        path: "/trips/calendar",
-        component: "pages/TripCalendarPage",
-      },
-      {
-        id: "trip-timeline",
-        label: "Trip Timeline",
-        path: "/trips/timeline",
-        component: "pages/TripTimelinePage",
-      },
-      {
-        id: "add-trip",
-        label: "Add New Trip",
-        path: "/trips/new",
-        component: "pages/AddTripPage",
-        subComponents: ["components/TripManagement/TripForm"],
-      },
-      {
-        id: "trip-workflow",
-        label: "Trip Workflow",
-        path: "/trips/workflow",
-        component: "pages/trips/MainTripWorkflow",
-        subComponents: [
-          "pages/trips/TripForm",
-          "pages/trips/CostEntryForm",
-          "pages/trips/SystemCostGenerator",
-          "pages/trips/FlagInvestigationPanel",
-          "pages/trips/TripCompletionPanel",
-          "pages/trips/TripInvoicingPanel",
-          "pages/trips/PaymentTrackingPanel",
-          "pages/trips/ReportingPanel",
-        ],
-      },
-      {
-        id: "create-load-confirmation",
-        label: "Create Load Confirmation",
-        path: "/trips/new-load-confirmation",
-        component: "pages/trips/CreateLoadConfirmationPage",
-      },
-      {
-        id: "trip-reports",
-        label: "Trip Reports",
-        path: "/trips/reports",
-        component: "pages/TripReportPage",
-        subComponents: ["components/TripManagement/TripReport"],
-      },
-      {
-        id: "missed-loads",
-        label: "Missed Loads Tracker",
-        path: "/trips/missed-loads",
-        component: "pages/MissedLoadsTracker",
-      },
-    ],
+      { id: 'compliance-dashboard', label: 'Compliance Dashboard', path: '/compliance/dashboard', icon: HomeIcon, component: ComplianceDashboard },
+      { id: 'inspection-management', label: 'Inspection Management', path: '/compliance/inspections', icon: ClipboardDocumentCheckIcon, component: InspectionManagement },
+      { id: 'report-incident', label: 'Report New Incident', path: '/compliance/report-incident', icon: BellAlertIcon, component: ReportNewIncidentPage },
+      { id: 'flags-investigations', label: 'Flags & Investigations', path: '/compliance/flags-investigations', icon: HandRaisedIcon, component: FlagsInvestigationsPage },
+      { id: 'qa-review', label: 'QA Review', path: '/compliance/qa-review', icon: ClipboardDocumentCheckIcon, component: QAReviewPanel },
+      { id: 'action-log', label: 'Action Log', path: '/compliance/action-log', icon: ClipboardDocumentListIcon, component: ActionLog },
+      { id: 'car-report-details', label: 'CAR Report Details', path: '/compliance/car-report-details', icon: DocumentTextIcon, component: CARReportDetails },
+      { id: 'action-item-details', label: 'Action Item Details', path: '/compliance/action-item-details', icon: DocumentTextIcon, component: ActionItemDetails },
+      { id: 'training-records', label: 'Training Records', path: '/compliance/training', icon: ClipboardDocumentCheckIcon, component: TrainingRecords }, // Re-used
+      { id: 'driver-violations', label: 'Driver Violations', path: '/compliance/violations', icon: BellAlertIcon, component: DriverViolations }, // Re-used
+    ]
   },
-
-  // Invoice Management Section
   {
-    id: "invoices",
-    label: "Invoices",
-    path: "/invoices",
-    component: "pages/invoices/InvoiceManagementPage",
-    icon: "file-invoice",
+    id: 'clients',
+    label: 'CLIENTS',
+    icon: BuildingOfficeIcon,
+    roles: ['Admin', 'Sub Admin'],
     children: [
-      {
-        id: "invoice-dashboard",
-        label: "Dashboard",
-        path: "/invoices/dashboard",
-        component: "pages/invoices/InvoiceDashboard",
-      },
-      {
-        id: "create-invoice",
-        label: "Create New Invoice",
-        path: "/invoices/new",
-        component: "pages/invoices/CreateInvoicePage",
-      },
-      {
-        id: "create-quote",
-        label: "Create New Quote",
-        path: "/invoices/new-quote",
-        component: "pages/invoices/CreateQuotePage",
-      },
-      {
-        id: "pending-invoices",
-        label: "Pending Invoices",
-        path: "/invoices/pending",
-        component: "pages/invoices/PendingInvoicesPage",
-      },
-      {
-        id: "paid-invoices",
-        label: "Paid Invoices",
-        path: "/invoices/paid",
-        component: "pages/invoices/PaidInvoicesPage",
-      },
-      {
-        id: "invoice-approval",
-        label: "Invoice Approval",
-        path: "/invoices/approval",
-        component: "pages/invoices/InvoiceApprovalFlow",
-      },
-      {
-        id: "invoice-builder",
-        label: "Invoice Builder",
-        path: "/invoices/builder",
-        component: "pages/invoices/InvoiceBuilder",
-      },
-      {
-        id: "invoice-templates",
-        label: "Invoice Templates",
-        path: "/invoices/templates",
-        component: "pages/invoices/InvoiceTemplatesPage",
-      },
-      {
-        id: "tax-reports",
-        label: "Tax Reports",
-        path: "/invoices/tax-reports",
-        component: "pages/invoices/TaxReportExport",
-      },
-    ],
+      { id: 'client-dashboard', label: 'Client Dashboard', path: '/clients/dashboard', icon: HomeIcon, component: ClientManagementPage },
+      { id: 'client-management', label: 'Client Management', path: '/clients/management', icon: ListBulletIcon, component: ClientManagementPage }, // Re-used, or use a specific list page
+      { id: 'add-new-customer', label: 'Add New Customer', path: '/clients/add', icon: Plus, component: AddNewCustomer },
+      { id: 'active-customers', label: 'Active Customers', path: '/clients/active', icon: UsersIcon, component: ActiveCustomers },
+      { id: 'client-details', label: 'Client Details', path: '/clients/:id', icon: DocumentTextIcon, component: ClientDetail }, // Dynamic route
+      { id: 'client-reports', label: 'Client Reports', path: '/clients/reports', icon: ChartBarIcon, component: CustomerReports },
+      { id: 'retention-metrics', label: 'Retention Metrics', path: '/clients/retention', icon: SparklesIcon, component: RetentionMetrics },
+      { id: 'client-network-map', label: 'Client Network Map', path: '/clients/network-map', icon: MapPinIcon, component: ClientNetworkMap }
+    ]
   },
-
-  // Diesel Management Section
   {
-    id: "diesel",
-    label: "Diesel Management",
-    path: "/diesel",
-    component: "pages/diesel/DieselManagementPage",
-    icon: "gas-pump",
+    id: 'invoices',
+    label: 'INVOICES',
+    icon: ReceiptPercentIcon,
+    roles: ['Admin', 'Sub Admin'],
     children: [
-      {
-        id: "diesel-dashboard",
-        label: "Dashboard",
-        path: "/diesel/dashboard",
-        component: "pages/DieselDashboard",
-        subComponents: ["pages/diesel/DieselDashboardComponent"],
-      },
-      {
-        id: "diesel-analysis",
-        label: "Diesel Analysis",
-        path: "/diesel/analysis",
-        component: "pages/DieselAnalysis",
-      },
-      {
-        id: "fuel-logs",
-        label: "Fuel Logs",
-        path: "/diesel/fuel-logs",
-        component: "pages/diesel/FuelLogs",
-      },
-      {
-        id: "add-fuel-entry",
-        label: "Add New Entry",
-        path: "/diesel/add-entry",
-        component: "pages/diesel/AddFuelEntryPage",
-      },
-      {
-        id: "fuel-card-management",
-        label: "Fuel Card Management",
-        path: "/diesel/fuel-cards",
-        component: "pages/diesel/FuelCardManager",
-      },
-      {
-        id: "fuel-analytics",
-        label: "Fuel Analytics",
-        path: "/diesel/efficiency",
-        component: "pages/diesel/FuelEfficiencyReport",
-      },
-      {
-        id: "fuel-stations",
-        label: "Fuel Stations",
-        path: "/diesel/stations",
-        component: "pages/diesel/FuelStations",
-      },
-      {
-        id: "diesel-cost-analysis",
-        label: "Cost Analysis",
-        path: "/diesel/cost-analysis",
-        component: "pages/diesel/CostAnalysis",
-      },
-      {
-        id: "fuel-theft-detection",
-        label: "Theft Detection",
-        path: "/diesel/fuel-theft",
-        component: "pages/diesel/FuelTheftDetection",
-      },
-      {
-        id: "carbon-footprint",
-        label: "Carbon Footprint",
-        path: "/diesel/carbon",
-        component: "pages/diesel/CarbonFootprintCalc",
-      },
-      {
-        id: "driver-fuel-behavior",
-        label: "Driver Behavior",
-        path: "/diesel/driver-fuel",
-        component: "pages/diesel/DriverFuelBehavior",
-      },
-      {
-        id: "budget-planning",
-        label: "Budget Planning",
-        path: "/diesel/budget",
-        component: "pages/diesel/BudgetPlanning",
-      },
-    ],
+      { id: 'invoice-dashboard', label: 'Invoice Dashboard', path: '/invoices/dashboard', icon: HomeIcon, component: InvoiceDashboard },
+      { id: 'invoice-management', label: 'Invoice Management', path: '/invoices/management', icon: ListBulletIcon, component: InvoiceManagementPage },
+      { id: 'create-invoice', label: 'Create Invoice', path: '/invoices/create', icon: Plus, component: CreateInvoicePage },
+      { id: 'create-quote', label: 'Create Quote', path: '/invoices/create-quote', icon: Plus, component: CreateQuotePage },
+      { id: 'pending-invoices', label: 'Pending Invoices', path: '/invoices/pending', icon: DocumentTextIcon, component: PendingInvoicesPage },
+      { id: 'paid-invoices', label: 'Paid Invoices', path: '/invoices/paid', icon: CheckCircle, component: PaidInvoicesPage },
+      { id: 'invoice-approval', label: 'Invoice Approval Flow', path: '/invoices/approval', icon: ClipboardDocumentCheckIcon, component: InvoiceApprovalFlow },
+      { id: 'invoice-builder', label: 'Invoice Builder', path: '/invoices/builder', icon: DocumentTextIcon, component: InvoiceBuilder },
+      { id: 'invoice-templates', label: 'Invoice Templates', path: '/invoices/templates', icon: DocumentTextIcon, component: InvoiceTemplatesPage },
+      { id: 'tax-report-export', label: 'Tax Report Export', path: '/invoices/tax-report', icon: CalculatorIcon, component: TaxReportExport },
+      { id: 'po-approval-summary', label: 'PO Approval Summary', path: '/invoices/po-approval', icon: ClipboardDocumentCheckIcon, component: POApprovalSummary },
+      { id: 'purchase-order-tracker', label: 'Purchase Order Tracker', path: '/invoices/po-tracker', icon: DocumentTextIcon, component: PurchaseOrderTracker },
+      { id: 'purchase-order-detail', label: 'PO Detail View', path: '/invoices/po/:id', icon: DocumentTextIcon, component: PurchaseOrderDetailView }, // Dynamic route
+      { id: 'indirect-cost-breakdown', label: 'Indirect Cost Breakdown', path: '/invoices/indirect-costs', icon: CurrencyDollarIcon, component: IndirectCostBreakdown },
+      { id: 'cash-manager-request', label: 'Cash Manager Request', path: '/invoices/cash-manager-request', icon: CurrencyDollarIcon, component: CashManagerRequestPage }
+    ]
   },
-  // Clients Section
   {
-    id: "clients",
-    label: "Clients",
-    path: "/clients",
-    component: "pages/clients/ClientManagementPage",
-    icon: "users",
+    id: 'diesel',
+    label: 'DIESEL',
+    icon: FuelIcon,
+    roles: ['Admin', 'Sub Admin', 'Operator'],
     children: [
-      {
-        id: "customer-dashboard",
-        label: "Client Dashboard",
-        path: "/clients/dashboard",
-        component: "components/CustomerManagement/CustomerDashboard",
-      },
-      {
-        id: "add-new-customer",
-        label: "Add New Client",
-        path: "/clients/new",
-        component: "pages/clients/AddNewCustomer",
-      },
-      {
-        id: "active-customers",
-        label: "Active Clients",
-        path: "/clients/active",
-        component: "pages/clients/ActiveCustomers",
-      },
-      {
-        id: "customer-reports",
-        label: "Client Reports",
-        path: "/clients/reports",
-        component: "pages/clients/CustomerReports",
-        subComponents: ["components/CustomerManagement/CustomerReports"],
-      },
-      {
-        id: "customer-retention",
-        label: "Retention Metrics",
-        path: "/customers/retention",
-        component: "components/CustomerManagement/RetentionMetrics",
-        subComponents: ["components/Performance/CustomerRetentionDashboard"],
-      },
-      {
-        id: "client-relationships",
-        label: "Client Network",
-        path: "/clients/network",
-        component: "pages/clients/ClientNetworkMap",
-      },
-    ],
+      { id: 'diesel-dashboard', label: 'Diesel Dashboard', path: '/diesel/dashboard', icon: HomeIcon, component: DieselDashboard },
+      { id: 'diesel-management', label: 'Diesel Management', path: '/diesel/management', icon: ListBulletIcon, component: DieselManagementPage },
+      { id: 'add-fuel-entry', label: 'Add Fuel Entry', path: '/diesel/add-entry', icon: Plus, component: AddFuelEntryPage },
+      { id: 'fuel-logs', label: 'Fuel Logs', path: '/diesel/logs', icon: DocumentTextIcon, component: FuelLogs },
+      { id: 'driver-fuel-behavior', label: 'Driver Fuel Behavior', path: '/diesel/driver-behavior', icon: UserGroupIcon, component: DriverFuelBehaviorDiesel },
+      { id: 'fuel-theft-detection', label: 'Fuel Theft Detection', path: '/diesel/theft-detection', icon: AlertTriangle, component: FuelTheftDetection },
+      { id: 'fuel-efficiency-report', label: 'Fuel Efficiency Report', path: '/diesel/efficiency-report', icon: ChartBarIcon, component: FuelEfficiencyReport },
+      { id: 'carbon-footprint', label: 'Carbon Footprint', path: '/diesel/carbon-footprint', icon: ScaleIcon, component: CarbonFootprintCalc },
+      { id: 'budget-planning', label: 'Budget Planning', path: '/diesel/budget', icon: CalculatorIcon, component: BudgetPlanning },
+      { id: 'fuel-card-manager', label: 'Fuel Card Manager', path: '/diesel/card-manager', icon: DocumentTextIcon, component: FuelCardManager },
+      { id: 'fuel-stations', label: 'Fuel Stations', path: '/diesel/stations', icon: MapPinIcon, component: FuelStations },
+      { id: 'diesel-analysis', label: 'Diesel Analysis', path: '/diesel/analysis', icon: ChartBarIcon, component: DieselAnalysis }
+    ]
   },
-
-  // Drivers Section
   {
-    id: "drivers",
-    label: "Drivers",
-    path: "/drivers",
-    component: "pages/drivers/DriverManagementPage",
-    icon: "id-badge",
+    id: 'inventory',
+    label: 'INVENTORY',
+    icon: InboxStackIcon,
+    roles: ['Admin', 'Sub Admin', 'Workshop/Employee'],
     children: [
-      {
-        id: "driver-dashboard",
-        label: "Driver Dashboard",
-        path: "/drivers/dashboard",
-        component: "pages/drivers/DriverDashboard",
-      },
-      {
-        id: "add-new-driver",
-        label: "Add New Driver",
-        path: "/drivers/new",
-        component: "pages/drivers/AddNewDriver",
-      },
-      {
-        id: "driver-profiles",
-        label: "Driver Profiles",
-        path: "/drivers/profiles",
-        component: "pages/drivers/DriverProfiles",
-      },
-      {
-        id: "license-management",
-        label: "License Management",
-        path: "/drivers/licenses",
-        component: "pages/drivers/LicenseManagement",
-      },
-      {
-        id: "training-records",
-        label: "Training Records",
-        path: "/drivers/training",
-        component: "pages/drivers/TrainingRecords",
-      },
-      {
-        id: "driver-performance-analytics",
-        label: "Performance Analytics",
-        path: "/drivers/performance",
-        component: "pages/drivers/PerformanceAnalytics",
-      },
-      {
-        id: "driver-scheduling",
-        label: "Scheduling",
-        path: "/drivers/scheduling",
-        component: "pages/drivers/DriverScheduling",
-      },
-      {
-        id: "hours-of-service",
-        label: "Hours of Service",
-        path: "/drivers/hours",
-        component: "pages/drivers/HoursOfService",
-      },
-      {
-        id: "driver-violations",
-        label: "Violations",
-        path: "/drivers/violations",
-        component: "pages/drivers/DriverViolations",
-      },
-      {
-        id: "driver-rewards",
-        label: "Rewards Program",
-        path: "/drivers/rewards",
-        component: "pages/drivers/DriverRewards",
-      },
-      {
-        id: "driver-behavior",
-        label: "Behavior Monitoring",
-        path: "/drivers/behavior",
-        component: "pages/drivers/DriverBehaviorPage",
-      },
-      {
-        id: "safety-scores",
-        label: "Safety Scores",
-        path: "/drivers/safety-scores",
-        component: "pages/drivers/SafetyScores",
-      },
-    ],
+      { id: 'inventory-dashboard', label: 'Inventory Dashboard', path: '/inventory/dashboard', icon: HomeIcon, component: InventoryDashboard },
+      { id: 'inventory-management', label: 'Inventory Management', path: '/inventory/management', icon: ListBulletIcon, component: InventoryPage },
+      { id: 'parts-inventory', label: 'Parts Inventory', path: '/inventory/parts', icon: CircleStackIcon, component: PartsInventoryPage },
+      { id: 'parts-ordering', label: 'Parts Ordering', path: '/inventory/ordering', icon: DocumentTextIcon, component: PartsOrderingPage },
+      { id: 'receive-parts', label: 'Receive Parts', path: '/inventory/receive', icon: Plus, component: ReceivePartsPage },
+      { id: 'inventory-reports', label: 'Inventory Reports', path: '/inventory/reports', icon: ChartBarIcon, component: InventoryReportsPage },
+      { id: 'vendor-scorecard', label: 'Vendor Scorecard', path: '/inventory/vendor-scorecard', icon: ChartBarIcon, component: VendorScorecard },
+      { id: 'po-approval-summary', label: 'PO Approval Summary', path: '/inventory/po-approval', icon: ClipboardDocumentCheckIcon, component: POApprovalSummary }, // Re-used
+      { id: 'purchase-order-page', label: 'Purchase Order Page', path: '/inventory/purchase-orders', icon: DocumentTextIcon, component: PurchaseOrderPage }, // Re-used
+      { id: 'purchase-order-tracker', label: 'Purchase Order Tracker', path: '/inventory/po-tracker', icon: DocumentTextIcon, component: PurchaseOrderTracker }, // Re-used
+      { id: 'purchase-order-detail', label: 'PO Detail View', path: '/inventory/po/:id', icon: DocumentTextIcon, component: PurchaseOrderDetailView }, // Re-used dynamic
+      { id: 'vendor-page', label: 'Vendor Management', path: '/inventory/vendors', icon: UsersIcon, component: VendorPage } // Re-used
+    ]
   },
-
-  // Compliance Management Section
   {
-    id: "compliance",
-    label: "Compliance Management",
-    path: "/compliance",
-    component: "pages/compliance/ComplianceManagementPage",
-    icon: "clipboard-check",
+    id: 'mobile',
+    label: 'MOBILE',
+    icon: SmartphoneIcon,
+    roles: ['Admin', 'Sub Admin', 'Operator', 'Technician', 'Workshop/Employee'],
     children: [
-      {
-        id: "compliance-dashboard",
-        label: "Dashboard",
-        path: "/compliance/dashboard",
-        component: "pages/compliance/ComplianceDashboard",
-      },
-      {
-        id: "dot-compliance",
-        label: "DOT Compliance",
-        path: "/compliance/dot",
-        component: "pages/compliance/DOTCompliancePage",
-      },
-      {
-        id: "safety-inspections",
-        label: "Safety Inspections",
-        path: "/compliance/safety-inspections",
-        component: "pages/compliance/SafetyInspectionsPage",
-        subComponents: [
-          "components/workshop/InspectionList",
-          "components/workshop/InspectionReportForm",
-        ],
-      },
-      {
-        id: "incident-reports",
-        label: "Incident Management",
-        path: "/compliance/incidents",
-        component: "pages/compliance/IncidentManagement",
-      },
-      {
-        id: "training-compliance",
-        label: "Training Records",
-        path: "/compliance/training",
-        component: "pages/compliance/TrainingCompliancePage",
-      },
-      {
-        id: "audit-management",
-        label: "Audit Management",
-        path: "/compliance/audits",
-        component: "pages/compliance/AuditManagement",
-      },
-      {
-        id: "violation-tracking",
-        label: "Violations",
-        path: "/compliance/violations",
-        component: "pages/compliance/ViolationTracking",
-      },
-      {
-        id: "insurance-management",
-        label: "Insurance",
-        path: "/compliance/insurance",
-        component: "pages/compliance/InsuranceManagement",
-      },
-    ],
+      { id: 'tyre-mobile-app', label: 'Tyre Mobile App', path: '/mobile/tyres', icon: CircleStackIcon, component: TyreMobilePage }
+    ]
   },
-
-  // Fleet Analytics Section
   {
-    id: "analytics",
-    label: "Fleet Analytics",
-    path: "/analytics",
-    component: "pages/analytics/FleetAnalyticsPage",
-    icon: "chart-line",
+    id: 'drivers',
+    label: 'DRIVERS',
+    icon: UserCircleIcon,
+    roles: ['Admin', 'Sub Admin', 'Technician'],
     children: [
-      {
-        id: "analytics-dashboard",
-        label: "Dashboard",
-        path: "/analytics/dashboard",
-        component: "pages/analytics/AnalyticsDashboard",
-      },
-      {
-        id: "kpi-monitoring",
-        label: "KPI Monitoring",
-        path: "/analytics/kpi",
-        component: "pages/analytics/AnalyticsInsights",
-      },
-      {
-        id: "predictive-analysis",
-        label: "Predictive Analysis",
-        path: "/analytics/predictive",
-        component: "pages/analytics/PredictiveAnalysisPage",
-      },
-      {
-        id: "costs-analytics",
-        label: "Cost Analytics",
-        path: "/analytics/costs",
-        component: "pages/analytics/CostsAnalyticsPage",
-      },
-      {
-        id: "roi-calculator",
-        label: "ROI Calculator",
-        path: "/analytics/roi",
-        component: "pages/analytics/ROICalculatorPage",
-      },
-      {
-        id: "benchmarks",
-        label: "Benchmarking",
-        path: "/analytics/benchmarks",
-        component: "pages/analytics/VehiclePerformance",
-      },
-      {
-        id: "custom-reports",
-        label: "Custom Reports",
-        path: "/analytics/custom-reports",
-        component: "pages/analytics/CreateCustomReport",
-      },
-    ],
+      { id: 'driver-dashboard', label: 'Driver Dashboard', path: '/drivers/dashboard', icon: HomeIcon, component: DriverDashboard },
+      { id: 'driver-management', label: 'Driver Management', path: '/drivers/management', icon: ListBulletIcon, component: DriverManagementPage },
+      { id: 'add-new-driver', label: 'Add New Driver', path: '/drivers/add', icon: Plus, component: AddNewDriver },
+      { id: 'driver-profiles', label: 'Driver Profiles', path: '/drivers/profiles', icon: UsersIcon, component: DriverProfiles },
+      { id: 'driver-details', label: 'Driver Details', path: '/drivers/profiles/:id', icon: DocumentTextIcon, component: DriverDetailsPage }, // Dynamic route
+      { id: 'edit-driver', label: 'Edit Driver', path: '/drivers/profiles/:id/edit', icon: Edit, component: EditDriver }, // Dynamic route
+      { id: 'license-management', label: 'License Management', path: '/drivers/licenses', icon: DocumentTextIcon, component: LicenseManagement },
+      { id: 'hours-of-service', label: 'Hours of Service', path: '/drivers/hours', icon: ClockIcon, component: HoursOfService },
+      { id: 'safety-scores', label: 'Safety Scores', path: '/drivers/safety-scores', icon: ShieldCheckIcon, component: SafetyScores },
+      { id: 'training-records', label: 'Training Records', path: '/drivers/training', icon: ClipboardDocumentCheckIcon, component: TrainingRecords },
+      { id: 'driver-rewards', label: 'Driver Rewards', path: '/drivers/rewards', icon: CurrencyDollarIcon, component: DriverRewards },
+      { id: 'driver-scheduling', label: 'Driver Scheduling', path: '/drivers/scheduling', icon: CalendarIcon, component: DriverScheduling },
+      { id: 'driver-violations', label: 'Driver Violations', path: '/drivers/violations', icon: BellAlertIcon, component: DriverViolations },
+      { id: 'driver-behavior-analytics', label: 'Behavior Analytics', path: '/drivers/behavior', icon: SparklesIcon, component: DriverBehaviorPage }
+    ]
   },
-
-  // Workshop Section
   {
-    id: "workshop",
-    label: "Workshop Management",
-    path: "/workshop",
-    component: "pages/workshop/WorkshopPage",
-    icon: "wrench",
+    id: 'wialon',
+    label: 'WIALON',
+    icon: MapPinIcon,
+    roles: ['Admin', 'Sub Admin'],
     children: [
-      {
-        id: "fleet-setup",
-        label: "Fleet Setup",
-        path: "/workshop/fleet-setup",
-        component: "pages/workshop/FleetTable",
-        subComponents: ["components/workshop/FleetSelector", "components/workshop/FleetFormModal"],
-      },
-      {
-        id: "maintenance-scheduler",
-        label: "Maintenance Scheduler",
-        path: "/workshop/maintenance-scheduler",
-        component: "pages/workshop/MaintenanceSchedulerPage",
-        children: [
-          {
-            id: "upcoming-maintenance",
-            label: "Upcoming Maintenance",
-            path: "/workshop/maintenance-scheduler/upcoming",
-            component: "pages/workshop/UpcomingMaintenancePage",
-          },
-          {
-            id: "maintenance-history",
-            label: "Maintenance History",
-            path: "/workshop/maintenance-scheduler/history",
-            component: "pages/workshop/MaintenanceHistoryPage",
-          },
-          {
-            id: "maintenance-templates",
-            label: "Maintenance Templates",
-            path: "/workshop/maintenance-scheduler/templates",
-            component: "pages/workshop/MaintenanceTemplatePage",
-          },
-        ],
-      },
-      {
-        id: "vehicle-inspection",
-        label: "Vehicle Inspection",
-        path: "/workshop/vehicle-inspection",
-        component: "pages/vehicle-inspection/VehicleInspectionPage",
-        children: [
-          {
-            id: "inspection-checklist",
-            label: "Inspection Checklists",
-            path: "/workshop/vehicle-inspection/checklists",
-            component: "pages/vehicle-inspection/ChecklistPage",
-          },
-          {
-            id: "inspection-reports",
-            label: "Inspection Reports",
-            path: "/workshop/vehicle-inspection/reports",
-            component: "pages/vehicle-inspection/InspectionReportsPage",
-          },
-          {
-            id: "defect-management",
-            label: "Defect Management",
-            path: "/workshop/vehicle-inspection/defects",
-            component: "pages/vehicle-inspection/DefectManagementPage",
-          },
-        ],
-      },
-      {
-        id: "parts-inventory",
-        label: "Parts Inventory",
-        path: "/workshop/parts-inventory",
-        component: "pages/workshop/PartsInventoryPage",
-        children: [
-          {
-            id: "inventory-management",
-            label: "Inventory Management",
-            path: "/workshop/parts-inventory/management",
-            component: "pages/workshop/InventoryManagementPage",
-          },
-          {
-            id: "orders-and-suppliers",
-            label: "Orders & Suppliers",
-            path: "/workshop/parts-inventory/orders",
-            component: "pages/workshop/OrdersAndSuppliersPage",
-          },
-        ],
-      },
-      {
-        id: "service-requests",
-        label: "Service Requests",
-        path: "/workshop/service-requests",
-        component: "pages/workshop/ServiceRequestsPage",
-      },
-      {
-        id: "workshop-planning",
-        label: "Workshop Planning",
-        path: "/workshop/planning",
-        component: "pages/workshop/WorkshopPlanningPage",
-      },
-    ],
+      { id: 'wialon-dashboard', label: 'Wialon Dashboard', path: '/wialon/dashboard', icon: HomeIcon, component: WialonDashboard },
+      { id: 'wialon-units', label: 'Wialon Units', path: '/wialon/units', icon: TruckIcon, component: WialonUnitsPage },
+      { id: 'wialon-config', label: 'Wialon Configuration', path: '/wialon/config', icon: Cog6ToothIcon, component: WialonConfigPage },
+      { id: 'wialon-live-map', label: 'Live Wialon Map', path: '/wialon/map', icon: MapPinIcon, component: WialonMapComponent }
+    ]
   },
-
-  // Reports Section
   {
-    id: "reports",
-    label: "Reports",
-    path: "/reports",
-    component: "pages/reports/ReportsPage",
-    icon: "file-alt",
+    id: 'tyres',
+    label: 'TYRES',
+    icon: CircleStackIcon,
+    roles: ['Admin', 'Sub Admin', 'Technician', 'Workshop/Employee'],
     children: [
-      {
-        id: "financial-reports",
-        label: "Financial Reports",
-        path: "/reports/financial",
-        component: "pages/reports/FinancialReportsPage",
-      },
-      {
-        id: "operations-reports",
-        label: "Operations Reports",
-        path: "/reports/operations",
-        component: "pages/reports/OperationsReportsPage",
-      },
-      {
-        id: "compliance-reports",
-        label: "Compliance Reports",
-        path: "/reports/compliance",
-        component: "pages/reports/ComplianceReportsPage",
-      },
-      {
-        id: "environmental-reports",
-        label: "Environmental Reports",
-        path: "/reports/environmental",
-        component: "pages/reports/EnvironmentalReportsPage",
-      },
-      {
-        id: "custom-report-builder",
-        label: "Custom Report Builder",
-        path: "/reports/custom-builder",
-        component: "pages/reports/CustomReportBuilder",
-      },
-      {
-        id: "scheduled-reports",
-        label: "Scheduled Reports",
-        path: "/reports/scheduled",
-        component: "pages/reports/ScheduledReportsPage",
-      },
-    ],
+      { id: 'tyre-management', label: 'Tyre Management', path: '/tyres/management', icon: ListBulletIcon, component: TyreManagementPage },
+      { id: 'add-new-tyre', label: 'Add New Tyre', path: '/tyres/add', icon: Plus, component: AddNewTyrePage },
+      { id: 'tyre-reference-data', label: 'Tyre Reference Data', path: '/tyres/reference', icon: ClipboardDocumentListIcon, component: TyreReferenceManagerPage },
+      { id: 'tyre-history', label: 'Tyre History', path: '/tyres/history', icon: ArrowPathIcon, component: TyreHistoryPage },
+      { id: 'tyre-performance', label: 'Tyre Performance Dashboard', path: '/tyres/performance', icon: ChartBarIcon, component: TyrePerformanceDashboard },
+      { id: 'tyre-performance-report', label: 'Tyre Performance Report', path: '/tyres/performance-report', icon: DocumentTextIcon, component: React.lazy(() => import('../pages/tyres/TyrePerformanceReport')) },
+      { id: 'tyre-cost-analysis', label: 'Tyre Cost Analysis', path: '/tyres/cost-analysis', icon: CurrencyDollarIcon, component: React.lazy(() => import('../pages/tyres/TyreCostAnalysis')) },
+      { id: 'tyre-dashboard', label: 'Tyre Dashboard', path: '/tyres/dashboard', icon: HomeIcon, component: React.lazy(() => import('../pages/tyres/TyreDashboard')) },
+      { id: 'tyre-management-view', label: 'Tyre Management View', path: '/tyres/view', icon: DocumentMagnifyingGlassIcon, component: React.lazy(() => import('../pages/tyres/TyreManagementView')) },
+      { id: 'tyre-reports', label: 'Tyre Reports', path: '/tyres/reports', icon: ChartBarIcon, component: React.lazy(() => import('../pages/tyres/TyreReports')) },
+      { id: 'vehicle-tyre-view', label: 'Vehicle Tyre View', path: '/tyres/vehicle-view', icon: DocumentMagnifyingGlassIcon, component: VehicleTyreView },
+      { id: 'tyre-fleet-map', label: 'Tyre Fleet Map', path: '/tyres/map', icon: MapPinIcon, component: TyreFleetMap },
+      { id: 'tyre-stores', label: 'Tyre Stores', path: '/tyres/stores', icon: BuildingOfficeIcon, component: TyreStores }
+    ]
   },
-
-  // Notifications Section
   {
-    id: "notifications",
-    label: "Notifications",
-    path: "/notifications",
-    component: "pages/notifications/NotificationsPage",
-    icon: "bell",
+    id: 'analytics',
+    label: 'ANALYTICS',
+    icon: ChartBarIcon,
+    roles: ['Admin', 'Sub Admin'],
     children: [
-      {
-        id: "notifications-center",
-        label: "Notification Center",
-        path: "/notifications/center",
-        component: "pages/notifications/NotificationCenterPage",
-      },
-      {
-        id: "notification-settings",
-        label: "Notification Settings",
-        path: "/notifications/settings",
-        component: "pages/notifications/NotificationSettingsPage",
-      },
-      {
-        id: "alerts-config",
-        label: "Alerts Configuration",
-        path: "/notifications/alerts",
-        component: "pages/notifications/AlertsConfigurationPage",
-      },
-    ],
+      { id: 'analytics-dashboard', label: 'Analytics Dashboard', path: '/analytics/dashboard', icon: HomeIcon, component: AnalyticsDashboard },
+      { id: 'ytd-kpis', label: 'YTD KPIs', path: '/analytics/kpis', icon: ChartBarIcon, component: YearToDateKPIs },
+      { id: 'indirect-costs', label: 'Indirect Costs', path: '/analytics/indirect-costs', icon: CurrencyDollarIcon, component: IndirectCostBreakdown },
+      { id: 'workshop-analytics', label: 'Workshop Analytics', path: '/analytics/workshop', icon: ChartBarIcon, component: WorkshopAnalytics },
+      { id: 'predictive-models', label: 'Predictive Models', path: '/analytics/predictive', icon: SparklesIcon, component: PredictiveModels },
+      { id: 'performance-analytics', label: 'Performance Analytics', path: '/analytics/performance', icon: ChartBarIcon, component: AnalyticsPerformanceAnalytics },
+      { id: 'fleet-analytics', label: 'Fleet Analytics', path: '/analytics/fleet', icon: TruckIcon, component: FleetAnalyticsPage },
+      { id: 'trip-reports-analytics', label: 'Trip Reports', path: '/analytics/trip-reports', icon: DocumentTextIcon, component: TripReportPage },
+      { id: 'tyre-analytics', label: 'Tyre Analytics', path: '/analytics/tyres', icon: CircleStackIcon, component: TyrePerformanceDashboard },
+      { id: 'diesel-analytics', label: 'Diesel Analytics', path: '/analytics/diesel', icon: FuelIcon, component: DieselManagementPage },
+      { id: 'client-analytics', label: 'Client Analytics', path: '/analytics/clients', icon: BuildingOfficeIcon, component: ClientManagementPage }
+    ]
   },
-
-  // Settings Section
   {
-    id: "settings",
-    label: "Settings",
-    path: "/settings",
-    component: "pages/settings/SettingsPage",
-    icon: "cog",
+    id: 'admin',
+    label: 'ADMIN & SYSTEM',
+    icon: Cog6ToothIcon,
+    roles: ['Admin'],
     children: [
-      {
-        id: "user-management",
-        label: "User Management",
-        path: "/settings/users",
-        component: "pages/settings/UserManagementPage",
-        children: [
-          {
-            id: "user-list",
-            label: "User List",
-            path: "/settings/users/list",
-            component: "pages/settings/UserListPage",
-          },
-          {
-            id: "roles-permissions",
-            label: "Roles & Permissions",
-            path: "/settings/users/roles",
-            component: "pages/settings/RolesPermissionsPage",
-          },
-          {
-            id: "user-activity",
-            label: "User Activity",
-            path: "/settings/users/activity",
-            component: "pages/settings/UserActivityPage",
-          },
-        ],
-      },
-      {
-        id: "company-profile",
-        label: "Company Profile",
-        path: "/settings/company",
-        component: "pages/settings/CompanyProfilePage",
-      },
-      {
-        id: "integration-settings",
-        label: "Integrations",
-        path: "/settings/integrations",
-        component: "pages/settings/IntegrationsPage",
-        children: [
-          {
-            id: "api-settings",
-            label: "API Settings",
-            path: "/settings/integrations/api",
-            component: "pages/settings/APISettingsPage",
-          },
-          {
-            id: "wialon-integration",
-            label: "Wialon Integration",
-            path: "/settings/integrations/wialon",
-            component: "pages/settings/WialonIntegrationPage",
-          },
-          {
-            id: "sage-integration",
-            label: "Sage Integration",
-            path: "/settings/integrations/sage",
-            component: "pages/settings/SageIntegrationPage",
-          },
-          {
-            id: "external-systems",
-            label: "External Systems",
-            path: "/settings/integrations/external",
-            component: "pages/settings/ExternalSystemsPage",
-          },
-        ],
-      },
-      {
-        id: "preferences",
-        label: "Preferences",
-        path: "/settings/preferences",
-        component: "pages/settings/PreferencesPage",
-      },
-      {
-        id: "backup-restore",
-        label: "Backup & Restore",
-        path: "/settings/backup",
-        component: "pages/settings/BackupRestorePage",
-      },
-      {
-        id: "system-logs",
-        label: "System Logs",
-        path: "/settings/logs",
-        component: "pages/settings/SystemLogsPage",
-      },
-    ],
+      { id: 'admin-dashboard', label: 'Admin Dashboard', path: '/admin/dashboard', icon: HomeIcon, component: DashboardPage }, // Re-using DashboardPage
+      { id: 'user-management', label: 'User Management', path: '/admin/users', icon: UsersIcon, component: DriverManagementPage }, // Re-using DriverManagementPage for user list
+      { id: 'system-settings', label: 'System Settings', path: '/admin/settings', icon: Cog6ToothIcon, component: WialonConfigPage },
+      { id: 'audit-logs', label: 'Audit Logs', path: '/admin/audit-logs', icon: ClipboardDocumentListIcon, component: ActionLog },
+      { id: 'car-reports', label: 'CAR Reports', path: '/admin/car-reports', icon: FileText, component: CARReportDetails },
+      { id: 'action-item-details', label: 'Action Item Details', path: '/admin/action-item-details', icon: DocumentTextIcon, component: ActionItemDetails },
+      { id: 'overall-inventory', label: 'Overall Inventory', path: '/admin/inventory', icon: InboxStackIcon, component: InventoryDashboard }
+    ]
   },
-  // Maps & Wialon Section
   {
-    id: "maps",
-    label: "Maps & Tracking",
-    path: "/maps",
-    component: "pages/WialonDashboard",
-    icon: "map-marked-alt",
+    id: 'test-routes',
+    label: 'TEST ROUTES (DEV ONLY)',
+    icon: TagIcon,
+    roles: ['Admin'], // Restrict to admins or dev environment
     children: [
-      {
-        id: "wialon-dashboard",
-        label: "Wialon Dashboard",
-        path: "/maps/wialon",
-        component: "pages/WialonDashboard",
-      },
-      {
-        id: "wialon-config",
-        label: "Wialon Configuration",
-        path: "/maps/wialon/config",
-        component: "pages/WialonConfigPage",
-      },
-      {
-        id: "wialon-units",
-        label: "Wialon Units",
-        path: "/maps/wialon/units",
-        component: "pages/WialonUnitsPage",
-      },
-      {
-        id: "fleet-management",
-        label: "Fleet Management",
-        path: "/maps/fleet",
-        component: "pages/FleetManagementPage",
-      },
-      {
-        id: "fleet-location",
-        label: "Fleet Location",
-        path: "/maps/fleet-map",
-        component: "components/Map/pages/FleetLocationMapPage",
-      },
-    ],
-  },
-
-  // Flags & Investigations
-  {
-    id: "flags",
-    label: "Flags & Investigations",
-    path: "/flags",
-    component: "pages/FlagsInvestigationsPage",
-    icon: "flag",
-  },
-
-  // Costs & Financial
-  {
-    id: "costs",
-    label: "Cost Management",
-    path: "/costs",
-    component: "pages/IndirectCostBreakdown",
-    icon: "money-bill",
-    children: [
-      {
-        id: "indirect-costs",
-        label: "Indirect Cost Breakdown",
-        path: "/costs/indirect",
-        component: "pages/IndirectCostBreakdown",
-      },
-      {
-        id: "ytd-kpis",
-        label: "Year to Date KPIs",
-        path: "/ytd-kpis",
-        component: "pages/YearToDateKPIs",
-      },
-    ],
-  },
-
-  // Quality Assurance
-  {
-    id: "qa",
-    label: "Quality Assurance",
-    path: "/qa",
-    component: "pages/QAReviewPanel",
-    icon: "check-double",
-    children: [
-      {
-        id: "qa-review",
-        label: "QA Review Panel",
-        path: "/qa/review",
-        component: "pages/QAReviewPanel",
-      },
-      {
-        id: "po-approval",
-        label: "PO Approval Summary",
-        path: "/qa/po-approval",
-        component: "pages/POApprovalSummary",
-      },
-    ],
-  },
-
-  // Procurement
-  {
-    id: "procurement",
-    label: "Procurement",
-    path: "/procurement",
-    component: "pages/PurchaseOrderTracker",
-    icon: "shopping-cart",
-    children: [
-      {
-        id: "purchase-order-tracker",
-        label: "Purchase Order Tracker",
-        path: "/procurement/po-tracker",
-        component: "pages/PurchaseOrderTracker",
-      },
-      {
-        id: "purchase-order-detail",
-        label: "Purchase Order Detail",
-        path: "/procurement/po/:id",
-        component: "pages/PurchaseOrderDetailView",
-      },
-      {
-        id: "report-incident",
-        label: "Report New Incident",
-        path: "/procurement/incident/new",
-        component: "pages/ReportNewIncidentPage",
-      },
-    ],
-  },
-
-  // Mobile Pages
-  {
-    id: "mobile",
-    label: "Mobile Access",
-    path: "/mobile",
-    component: "pages/mobile/TyreMobilePage",
-    icon: "mobile-alt",
-    children: [
-      {
-        id: "tyre-mobile",
-        label: "Tyre Mobile",
-        path: "/mobile/tyres",
-        component: "pages/mobile/TyreMobilePage",
-      },
-    ],
-  },
-
-  // Vehicle Views
-  {
-    id: "vehicle-views",
-    label: "Vehicle Views",
-    path: "/vehicles",
-    component: "pages/VehicleTyreView",
-    icon: "truck-monster",
-    children: [
-      {
-        id: "vehicle-tyre-view",
-        label: "Vehicle Tyre View",
-        path: "/vehicles/tyre-view/:vehicleId",
-        component: "pages/VehicleTyreView",
-      },
-      {
-        id: "vehicle-tyre-view-a",
-        label: "Vehicle Tyre View Alternate",
-        path: "/vehicles/tyre-view-a/:vehicleId",
-        component: "pages/VehicleTyreViewA",
-      },
-    ],
-  },
-
-  // Workshop Operations
-  {
-    id: "workshop-ops",
-    label: "Workshop Operations",
-    path: "/workshop-ops",
-    component: "pages/WorkshopOperations",
-    icon: "tools",
-    children: [
-      {
-        id: "workshop-operations",
-        label: "Operations Dashboard",
-        path: "/workshop-ops/dashboard",
-        component: "pages/WorkshopOperations",
-      },
-      {
-        id: "workshop-analytics-page",
-        label: "Workshop Analytics",
-        path: "/workshop-ops/analytics",
-        component: "pages/WorkshopAnalytics",
-      },
-      {
-        id: "work-order-management",
-        label: "Work Order Management",
-        path: "/workshop-ops/work-orders",
-        component: "pages/WorkOrderManagement",
-      },
-      {
-        id: "job-card-management",
-        label: "Job Card Management",
-        path: "/workshop-ops/job-cards",
-        component: "pages/JobCardManagement",
-      },
-      {
-        id: "job-card-kanban",
-        label: "Job Card Kanban Board",
-        path: "/workshop-ops/job-cards/board",
-        component: "pages/JobCardKanbanBoard",
-      },
-      {
-        id: "inspection-management",
-        label: "Inspection Management",
-        path: "/workshop-ops/inspections",
-        component: "pages/InspectionManagement",
-      },
-    ],
-  },
-
-  // Tyre Management Section
-  {
-    id: "tyres",
-    label: "Tyre Management",
-    path: "/tyres",
-    component: "pages/tyres/TyreManagementPage",
-    icon: "circle-stack",
-    children: [
-      {
-        id: "tyre-dashboard",
-        label: "Dashboard",
-        path: "/tyres/dashboard",
-        component: "pages/tyres/TyrePerformanceDashboard",
-      },
-      {
-        id: "tyre-inspection",
-        label: "Tyre Inspection",
-        path: "/tyres/inspection",
-        component: "pages/tyres/inspection",
-      },
-      {
-        id: "tyre-inventory",
-        label: "Tyre Inventory",
-        path: "/tyres/inventory",
-        component: "pages/tyres/inventory",
-      },
-      {
-        id: "tyre-reference-data",
-        label: "Reference Data",
-        path: "/tyres/reference-data",
-        component: "pages/tyres/TyreReferenceManagerPage",
-      },
-      {
-        id: "tyre-add",
-        label: "Add New Tyre",
-        path: "/tyres/add",
-        component: "pages/tyres/AddNewTyre",
-      },
-      {
-        id: "tyre-reports",
-        label: "Tyre Reports",
-        path: "/tyres/reports",
-        component: "pages/tyres/reports",
-      },
-      {
-        id: "tyre-stores",
-        label: "Tyre Stores",
-        path: "/tyres/stores",
-        component: "pages/tyres/TyreStoresPage",
-      },
-      {
-        id: "tyre-fleet-map",
-        label: "Tyre Fleet Map",
-        path: "/tyres/fleet-map",
-        component: "pages/tyres/TyreFleetMap",
-      },
-      {
-        id: "tyre-history",
-        label: "Tyre History",
-        path: "/tyres/history",
-        component: "pages/tyres/TyreHistoryPage",
-      },
-    ],
-  },
-
-  // Inventory Management Section
-  {
-    id: "inventory",
-    label: "Inventory Management",
-    path: "/inventory",
-    component: "pages/inventory/InventoryPage",
-    icon: "box",
-    children: [
-      {
-        id: "inventory-dashboard",
-        label: "Dashboard",
-        path: "/inventory/dashboard",
-        component: "pages/inventory/InventoryDashboard",
-      },
-      {
-        id: "stock-management",
-        label: "Stock Management",
-        path: "/inventory/stock",
-        component: "pages/inventory/PartsInventoryPage",
-      },
-      {
-        id: "parts-ordering",
-        label: "Parts Ordering",
-        path: "/inventory/ordering",
-        component: "pages/inventory/PartsOrderingPage",
-      },
-      {
-        id: "receive-parts",
-        label: "Receive Parts",
-        path: "/inventory/receive",
-        component: "pages/inventory/ReceivePartsPage",
-      },
-      {
-        id: "purchase-orders",
-        label: "Purchase Orders",
-        path: "/inventory/purchase-orders",
-        component: "pages/inventory/PurchaseOrderTracker",
-      },
-      {
-        id: "vendor-management",
-        label: "Vendor Management",
-        path: "/inventory/vendors",
-        component: "pages/inventory/VendorScorecard",
-      },
-      {
-        id: "stock-alerts",
-        label: "Stock Alerts",
-        path: "/inventory/alerts",
-        component: "pages/inventory/StockAlertsPage",
-      },
-      {
-        id: "inventory-reports",
-        label: "Reports",
-        path: "/inventory/reports",
-        component: "pages/inventory/InventoryReportsPage",
-      },
-    ],
-  },
+      { id: 'sidebar-tester', label: 'Sidebar Tester', path: '/test/sidebar', icon: TagIcon, component: SidebarTester },
+      { id: 'ui-components-demo', label: 'UI Components Demo', path: '/test/ui-components', icon: TagIcon, component: UIComponentsDemo },
+      { id: 'google-maps-test', label: 'Google Maps Test', path: '/test/google-maps', icon: TagIcon, component: GoogleMapsTest },
+      { id: 'routing-test', label: 'Routing Test', path: '/test/routing', icon: TagIcon, component: TestRouting }
+    ]
+  }
 ];
 
-// For CommonJS compatibility with scripts
-module.exports = { sidebarConfig };
+// Helper to get all flat routes for AppRoutes.tsx
+export function getFlatRoutes(items: SidebarItem[]): SidebarItem[] {
+  let routes: SidebarItem[] = [];
+  items.forEach(item => {
+    if (item.path && item.component) {
+      routes.push(item);
+    }
+    if (item.children) {
+      routes = routes.concat(getFlatRoutes(item.children));
+    }
+  });
+  return routes;
+}

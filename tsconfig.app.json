@@ -38,7 +38,8 @@
     "route-component-map.cjs",
     "sidebar-validator.cjs",
     "find-form-usage.js",
-    "index.js"
+    "index.js",
+    ".github/examples"
   ],
   "exclude": []
 }

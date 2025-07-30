@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   Form,
@@ -14,8 +14,7 @@ import {
   Divider,
   Alert,
   Upload,
-  message,
-  Calendar
+  message
 } from 'antd';
 import {
   UploadOutlined,
@@ -24,10 +23,10 @@ import {
 } from '@ant-design/icons';
 import { Truck } from 'lucide-react';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 const { Option } = Select;
 
-export interface FuelEntry {
+interface FuelEntry {
   vehicleId: string;
   driverId: string;
   date: string;
@@ -41,7 +40,7 @@ export interface FuelEntry {
   receiptImage?: File | null;
 }
 
-export interface AddFuelEntryModalProps {
+interface AddFuelEntryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (values: FuelEntry) => Promise<void>;
@@ -59,7 +58,7 @@ const AddFuelEntryModal: React.FC<AddFuelEntryModalProps> = ({
   const [calculatedCost, setCalculatedCost] = useState<number | null>(null);
 
   // Reset form when modal opens/closes
-  useEffect(() => {
+  React.useEffect(() => {
     if (isOpen) {
       form.resetFields();
       if (initialValues) {
@@ -98,17 +97,15 @@ const AddFuelEntryModal: React.FC<AddFuelEntryModalProps> = ({
   };
 
   const handleFuelAmountChange = (value: number | null) => {
+    if (value === null) return;
     const costPerLiter = form.getFieldValue('costPerLiter');
-    if (value !== null) {
-      calculateTotalCost(value, costPerLiter);
-    }
+    calculateTotalCost(value, costPerLiter);
   };
 
   const handleCostPerLiterChange = (value: number | null) => {
+    if (value === null) return;
     const fuelAmount = form.getFieldValue('fuelAmount');
-    if (value !== null) {
-      calculateTotalCost(fuelAmount, value);
-    }
+    calculateTotalCost(fuelAmount, value);
   };
 
   const handleFinish = async (values: FuelEntry) => {
@@ -123,15 +120,6 @@ const AddFuelEntryModal: React.FC<AddFuelEntryModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  // Display a calendar view for reference
-  const renderCalendarView = () => {
-    return (
-      <div className="calendar-view-container" style={{ marginBottom: '20px', display: loading ? 'none' : 'block' }}>
-        <Calendar fullscreen={false} />
-      </div>
-    );
   };
 
   // Display a truck icon with vehicle information
@@ -352,9 +340,6 @@ const AddFuelEntryModal: React.FC<AddFuelEntryModalProps> = ({
         )}
 
         <Divider />
-
-        {/* Add Calendar component for date reference */}
-        {renderCalendarView()}
 
         <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
           <Space>

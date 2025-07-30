@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import WialonConfig from "../components/Map/wialon/WialonConfig";
+import WialonConfig from "../../components/Map/wialon/WialonConfig";
 
 interface Company {
   id: string;
@@ -24,7 +24,7 @@ const WialonConfigPage: React.FC = () => {
 
         // Dynamically import Firebase modules
         const { collection, query, orderBy, getDocs } = await import("firebase/firestore");
-        const { db } = await import("../firebase");
+        const { db } = await import("../../firebase");
 
         const companiesQuery = query(collection(db, "companies"), orderBy("name", "asc"));
 

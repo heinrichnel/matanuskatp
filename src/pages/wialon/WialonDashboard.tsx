@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import WialonIntegration from '../components/Map/wialon/WialonIntegration';
-import WialonStatus from '../components/Map/wialon/WialonStatus';
+import WialonIntegration from '../../components/Map/wialon/WialonIntegration';
+import WialonStatus from '../../components/Map/wialon/WialonStatus';
 
 /**
  * WialonDashboard Component
- * 
+ *
  * This page provides direct access to the Wialon platform through either
  * an embedded iframe or a button to open Wialon in a new tab.
  */
@@ -21,7 +21,7 @@ const WialonDashboard: React.FC = () => {
 
       <div className="mb-4 bg-white dark:bg-gray-800 p-4 rounded shadow">
         <h3 className="font-medium text-gray-900 dark:text-white mb-2">Display Options</h3>
-        
+
         <div className="flex flex-col sm:flex-row gap-4 mb-4">
           <div className="flex items-center">
             <input
@@ -35,7 +35,7 @@ const WialonDashboard: React.FC = () => {
             />
             <label htmlFor="button-mode">Open in new tab</label>
           </div>
-          
+
           <div className="flex items-center">
             <input
               type="radio"
@@ -49,7 +49,7 @@ const WialonDashboard: React.FC = () => {
             <label htmlFor="iframe-mode">Embed in page (iframe)</label>
           </div>
         </div>
-        
+
         {displayMode === 'iframe' && (
           <div className="mb-4">
             <label htmlFor="iframe-height" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -70,10 +70,10 @@ const WialonDashboard: React.FC = () => {
           </div>
         )}
       </div>
-      
+
       <div className={`mt-4 ${displayMode === 'iframe' ? 'bg-white dark:bg-gray-800 p-4 rounded shadow' : ''}`}>
-        <WialonIntegration 
-          displayMode={displayMode} 
+        <WialonIntegration
+          displayMode={displayMode}
           height={height}
           buttonLabel="Launch Wialon Dashboard"
         />
@@ -86,7 +86,7 @@ const WialonDashboard: React.FC = () => {
           If you experience any issues with the connection, please contact your system administrator.
         </p>
       </div>
-      
+
       <div className="mt-6">
         <h3 className="font-medium text-gray-900 dark:text-white mb-2">Connection Status</h3>
         <WialonStatus />
