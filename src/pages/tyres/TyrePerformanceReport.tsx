@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
          PieChart, Pie, Cell, ScatterChart, Scatter } from 'recharts';
 import { BarChart3, Calendar, Download, Filter, RefreshCw, CircleDot, TrendingUp, AlertTriangle, Info } from 'lucide-react';
 
@@ -67,7 +67,7 @@ const TyrePerformanceReport: React.FC = () => {
     const fetchPerformanceData = async () => {
       try {
         setLoading(true);
-        
+
         // Mock data for demonstration
         // In a real app, you'd fetch this data from Firestore
         const mockData: TyrePerformanceData = {
@@ -139,7 +139,7 @@ const TyrePerformanceReport: React.FC = () => {
             { season: 'Autumn', wearRate: 0.86, failureRate: 0.11, costPerKm: 0.025 }
           ]
         };
-        
+
         setPerformanceData(mockData);
         setError(null);
       } catch (err) {
@@ -173,8 +173,8 @@ const TyrePerformanceReport: React.FC = () => {
     return (
       <div className="p-6 bg-red-100 border border-red-400 text-red-700 rounded-lg">
         <p>{error}</p>
-        <button 
-          onClick={onClick}
+        <button
+          onClick={() => window.location.reload()}
           className="mt-3 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700"
         >
           Retry
@@ -194,7 +194,7 @@ const TyrePerformanceReport: React.FC = () => {
           <BarChart3 className="mr-2 text-primary-600" size={28} />
           Tyre Performance Report
         </h1>
-        
+
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <Calendar className="text-gray-500" size={20} />
@@ -209,9 +209,9 @@ const TyrePerformanceReport: React.FC = () => {
               <option value="3years">Last 3 Years</option>
             </select>
           </div>
-          
+
           <button
-            onClick={onClick}
+            onClick={handleExportReport}
             className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md flex items-center"
           >
             <Download size={18} className="mr-1" />
@@ -219,14 +219,14 @@ const TyrePerformanceReport: React.FC = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Key Performance Indicators */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-blue-500">
           <div className="text-sm text-gray-600 font-medium mb-1">Average Tyre Lifespan</div>
           <div className="text-3xl font-bold">
             {Math.round(
-              performanceData.brandComparison.reduce((sum, brand) => sum + brand.averageMileage, 0) / 
+              performanceData.brandComparison.reduce((sum, brand) => sum + brand.averageMileage, 0) /
               performanceData.brandComparison.length
             ).toLocaleString()}
             <span className="text-lg ml-1">km</span>
@@ -236,11 +236,11 @@ const TyrePerformanceReport: React.FC = () => {
             <span>5.2% increase from last period</span>
           </div>
         </div>
-        
+
         <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-green-500">
           <div className="text-sm text-gray-600 font-medium mb-1">Average Cost per KM</div>
           <div className="text-3xl font-bold">
-            ${(performanceData.brandComparison.reduce((sum, brand) => sum + brand.averageCostPerKm, 0) / 
+            ${(performanceData.brandComparison.reduce((sum, brand) => sum + brand.averageCostPerKm, 0) /
               performanceData.brandComparison.length).toFixed(3)}
           </div>
           <div className="mt-2 flex items-center text-sm text-green-600">
@@ -248,7 +248,7 @@ const TyrePerformanceReport: React.FC = () => {
             <span>3.8% decrease from last period</span>
           </div>
         </div>
-        
+
         <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-amber-500">
           <div className="text-sm text-gray-600 font-medium mb-1">Annual Tyre Cost</div>
           <div className="text-3xl font-bold">
@@ -259,11 +259,11 @@ const TyrePerformanceReport: React.FC = () => {
             <span>2.1% increase from last period</span>
           </div>
         </div>
-        
+
         <div className="bg-white shadow-md rounded-lg p-6 border-l-4 border-purple-500">
           <div className="text-sm text-gray-600 font-medium mb-1">Failure Rate</div>
           <div className="text-3xl font-bold">
-            {(performanceData.failureReasons.reduce((sum, reason) => sum + reason.count, 0) / 
+            {(performanceData.failureReasons.reduce((sum, reason) => sum + reason.count, 0) /
               performanceData.brandComparison.reduce((sum, brand) => sum + brand.count, 0) * 100).toFixed(1)}%
           </div>
           <div className="mt-2 flex items-center text-sm text-green-600">
@@ -272,7 +272,7 @@ const TyrePerformanceReport: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Brand Comparison */}
@@ -303,7 +303,7 @@ const TyrePerformanceReport: React.FC = () => {
             <p>Analysis: Michelin tyres show the highest average lifespan, while Continental provides the lowest cost per kilometer.</p>
           </div>
         </div>
-        
+
         {/* Wear Patterns */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Tyre Wear Pattern Distribution</h2>
@@ -335,7 +335,7 @@ const TyrePerformanceReport: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Cost Analysis */}
@@ -361,7 +361,7 @@ const TyrePerformanceReport: React.FC = () => {
             <p>Analysis: September shows the highest total tyre costs at $10,900, while April had the lowest at $6,320. Seasonal peaks appear in May and September.</p>
           </div>
         </div>
-        
+
         {/* Position Analysis */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Tyre Position Performance</h2>
@@ -388,7 +388,7 @@ const TyrePerformanceReport: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Charts Row 3 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Vehicle Comparison */}
@@ -403,8 +403,8 @@ const TyrePerformanceReport: React.FC = () => {
                 <XAxis type="number" dataKey="replacementFrequency" name="Replacements per Year" />
                 <YAxis type="number" dataKey="tyreLifespan" name="Tyre Lifespan (km)" />
                 <Tooltip cursor={{ strokeDasharray: '3 3' }} formatter={(value, name, props) => {
-                  const vehicle = performanceData.vehicleComparison.find(v => 
-                    v.replacementFrequency === props.payload.replacementFrequency && 
+                  const vehicle = performanceData.vehicleComparison.find(v =>
+                    v.replacementFrequency === props.payload.replacementFrequency &&
                     v.tyreLifespan === props.payload.tyreLifespan
                   );
                   return [value, name === 'tyreLifespan' ? 'Lifespan (km)' : 'Replacements/Year', vehicle?.vehicleReg];
@@ -418,7 +418,7 @@ const TyrePerformanceReport: React.FC = () => {
             <p>Analysis: TRK-005 shows the best tyre performance with highest lifespan and lowest replacement frequency, while TRK-007 shows the poorest performance.</p>
           </div>
         </div>
-        
+
         {/* Failure Reasons */}
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-lg font-semibold mb-4">Tyre Failure Analysis</h2>
@@ -450,11 +450,11 @@ const TyrePerformanceReport: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Recommendations */}
       <div className="mt-8 bg-white shadow-md rounded-lg p-6">
         <h2 className="text-lg font-semibold mb-4">Key Insights & Recommendations</h2>
-        
+
         <div className="space-y-4">
           <div className="flex items-start">
             <CircleDot className="text-blue-500 mt-0.5 mr-3 flex-shrink-0" size={18} />
@@ -463,7 +463,7 @@ const TyrePerformanceReport: React.FC = () => {
               <p className="text-gray-600">Michelin tyres demonstrate the best overall value with highest lifespan despite slightly higher cost per km. Consider standardizing on Michelin for key routes and Continental for secondary routes.</p>
             </div>
           </div>
-          
+
           <div className="flex items-start">
             <CircleDot className="text-green-500 mt-0.5 mr-3 flex-shrink-0" size={18} />
             <div>
@@ -471,7 +471,7 @@ const TyrePerformanceReport: React.FC = () => {
               <p className="text-gray-600">The high rate of center wear (22%) indicates systemic over-inflation issues. Implement weekly pressure checks and adjust inflation standards based on seasonal temperature variations.</p>
             </div>
           </div>
-          
+
           <div className="flex items-start">
             <CircleDot className="text-amber-500 mt-0.5 mr-3 flex-shrink-0" size={18} />
             <div>
@@ -479,7 +479,7 @@ const TyrePerformanceReport: React.FC = () => {
               <p className="text-gray-600">Vehicles TRK-002 and TRK-007 show significantly higher tyre wear rates. Schedule alignment checks and driver behavior analysis for these vehicles to identify root causes.</p>
             </div>
           </div>
-          
+
           <div className="flex items-start">
             <CircleDot className="text-purple-500 mt-0.5 mr-3 flex-shrink-0" size={18} />
             <div>
@@ -487,7 +487,7 @@ const TyrePerformanceReport: React.FC = () => {
               <p className="text-gray-600">Implement a more aggressive rotation schedule to balance the 10% lifespan difference between front and rear positions. Consider moving from 25,000 km rotation intervals to 15,000 km intervals.</p>
             </div>
           </div>
-          
+
           <div className="flex items-start">
             <CircleDot className="text-red-500 mt-0.5 mr-3 flex-shrink-0" size={18} />
             <div>
@@ -496,14 +496,14 @@ const TyrePerformanceReport: React.FC = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-6 flex items-center justify-between">
           <div className="flex items-center text-amber-600">
             <AlertTriangle size={20} className="mr-2" />
             <span className="font-medium">Key Action Required</span>
           </div>
           <button
-            onClick={onClick}
+            onClick={handleExportReport}
             className="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-md flex items-center"
           >
             <Download size={18} className="mr-1" />
@@ -511,7 +511,7 @@ const TyrePerformanceReport: React.FC = () => {
           </button>
         </div>
       </div>
-      
+
       <div className="mt-8 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-md">
         <div className="flex">
           <div className="flex-shrink-0">
