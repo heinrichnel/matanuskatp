@@ -1,15 +1,31 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import {
-  saveTyre,
-  getTyres,
-  getTyreById,
-  deleteTyre,
   addTyreInspection,
+  deleteTyre,
+  getTyreById,
   getTyreInspections,
+  getTyres,
   getTyresByVehicle,
-  listenToTyres
-} from '../firebase';
-import { Tyre, TyreInspection, TyreStoreLocation } from '../types/tyre';
+  listenToTyres,
+  saveTyre,
+} from "../firebase";
+import { Tyre, TyreInspection } from "../types/tyre";
+import { TyreInspectionRecord } from "../types/tyre-inspection";
+
+// Import types from data/tyreData for Firebase compatibility
+import {
+  TyreMountStatus,
+  TyreStatus,
+  TyreStoreLocation as TyreStoreLocationData,
+} from "../data/tyreData";
+
+// Import type adapters for converting between different tyre types
+import {
+  convertInspectionRecordsToInspections,
+  convertTyreDataArrayToTyreArray,
+  convertTyreDataToTyre,
+  convertTyreToTyreData,
+} from "../utils/tyreTypeAdapter";
 
 // Define the context interface
 interface TyreContextType {
@@ -19,7 +35,7 @@ interface TyreContextType {
   saveTyre: (tyre: Tyre) => Promise<string>;
   getTyreById: (id: string) => Promise<Tyre | null>;
   deleteTyre: (id: string) => Promise<void>;
-  addInspection: (tyreId: string, inspection: TyreInspection) => Promise<string>;
+  addInspection: (tyreId: string, inspection: TyreInspectionRecord) => Promise<string>;
   getInspections: (tyreId: string) => Promise<TyreInspection[]>;
   getTyresByVehicle: (vehicleId: string) => Promise<Tyre[]>;
   filterTyres: (filters: {
@@ -57,9 +73,11 @@ export const TyreProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Wrapper for saveTyre function
   const handleSaveTyre = async (tyre: Tyre): Promise<string> => {
     try {
-      return await saveTyre(tyre);
+      // Convert from app Tyre type to Firebase TyreData type
+      const tyreDataToSave = convertTyreToTyreData(tyre);
+      return await saveTyre(tyreDataToSave);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error saving tyre'));
+      setError(err instanceof Error ? err : new Error("Unknown error saving tyre"));
       throw err;
     }
   };
@@ -67,9 +85,11 @@ export const TyreProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Wrapper for getTyreById function
   const handleGetTyreById = async (id: string): Promise<Tyre | null> => {
     try {
-      return await getTyreById(id);
+      const tyreData = await getTyreById(id);
+      // Convert from Firebase TyreData type to app Tyre type
+      return tyreData ? convertTyreDataToTyre(tyreData) : null;
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error getting tyre'));
+      setError(err instanceof Error ? err : new Error("Unknown error getting tyre"));
       throw err;
     }
   };
@@ -79,17 +99,21 @@ export const TyreProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       await deleteTyre(id);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error deleting tyre'));
+      setError(err instanceof Error ? err : new Error("Unknown error deleting tyre"));
       throw err;
     }
   };
 
   // Wrapper for addTyreInspection function
-  const handleAddInspection = async (tyreId: string, inspection: TyreInspection): Promise<string> => {
+  const handleAddInspection = async (
+    tyreId: string,
+    inspection: TyreInspectionRecord
+  ): Promise<string> => {
     try {
+      // TyreInspectionRecord can be used directly with Firebase
       return await addTyreInspection(tyreId, inspection);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error adding inspection'));
+      setError(err instanceof Error ? err : new Error("Unknown error adding inspection"));
       throw err;
     }
   };
@@ -97,9 +121,11 @@ export const TyreProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Wrapper for getTyreInspections function
   const handleGetInspections = async (tyreId: string): Promise<TyreInspection[]> => {
     try {
-      return await getTyreInspections(tyreId);
+      const inspectionRecords = await getTyreInspections(tyreId);
+      // Convert from Firebase TyreInspectionRecord type to app TyreInspection type
+      return convertInspectionRecordsToInspections(inspectionRecords);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error getting inspections'));
+      setError(err instanceof Error ? err : new Error("Unknown error getting inspections"));
       throw err;
     }
   };
@@ -107,9 +133,11 @@ export const TyreProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Wrapper for getTyresByVehicle function
   const handleGetTyresByVehicle = async (vehicleId: string): Promise<Tyre[]> => {
     try {
-      return await getTyresByVehicle(vehicleId);
+      const tyreDataArray = await getTyresByVehicle(vehicleId);
+      // Convert from Firebase TyreData array to app Tyre array
+      return convertTyreDataArrayToTyreArray(tyreDataArray);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error getting vehicle tyres'));
+      setError(err instanceof Error ? err : new Error("Unknown error getting vehicle tyres"));
       throw err;
     }
   };
@@ -123,9 +151,17 @@ export const TyreProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     vehicleId?: string;
   }): Promise<Tyre[]> => {
     try {
-      return await getTyres(filters);
+      // Convert string filters to TyreData enum types
+      const tyreDataFilters: any = { ...filters };
+      if (filters.status) tyreDataFilters.status = filters.status as TyreStatus;
+      if (filters.mountStatus) tyreDataFilters.mountStatus = filters.mountStatus as TyreMountStatus;
+      if (filters.location) tyreDataFilters.location = filters.location as TyreStoreLocationData;
+
+      const tyreDataArray = await getTyres(tyreDataFilters);
+      // Convert from Firebase TyreData array to app Tyre array
+      return convertTyreDataArrayToTyreArray(tyreDataArray);
     } catch (err) {
-      setError(err instanceof Error ? err : new Error('Unknown error filtering tyres'));
+      setError(err instanceof Error ? err : new Error("Unknown error filtering tyres"));
       throw err;
     }
   };
@@ -141,21 +177,17 @@ export const TyreProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     addInspection: handleAddInspection,
     getInspections: handleGetInspections,
     getTyresByVehicle: handleGetTyresByVehicle,
-    filterTyres: handleFilterTyres
+    filterTyres: handleFilterTyres,
   };
 
-  return (
-    <TyreContext.Provider value={value}>
-      {children}
-    </TyreContext.Provider>
-  );
+  return <TyreContext.Provider value={value}>{children}</TyreContext.Provider>;
 };
 
 // Custom hook to use the context
 export function useTyres(): TyreContextType {
   const context = useContext(TyreContext);
   if (!context) {
-    throw new Error('useTyres must be used within a TyreProvider');
+    throw new Error("useTyres must be used within a TyreProvider");
   }
   return context;
 }

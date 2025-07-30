@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import WialonUnitsList from "../../components/Map/wialon/WialonUnitsList";
+import WialonUnitsList from "./wialon/WialonUnitsList";
 
 /**
  * WialonUnitsPage Component
@@ -36,7 +36,10 @@ const WialonUnitsPage: React.FC = () => {
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium text-gray-900">Unit Details</h3>
-              <button onClick={handleCloseDetails} className="text-sm text-gray-500 hover:text-gray-700">
+              <button
+                onClick={handleCloseDetails}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
                 Close
               </button>
             </div>
