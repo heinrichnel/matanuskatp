@@ -93,14 +93,14 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
     ];
 
     records.forEach(r => {
-      const efficiencyMetric = r.isReeferUnit 
-        ? `${r.litresPerHour?.toFixed(2) || 'N/A'} L/hr` 
+      const efficiencyMetric = r.isReeferUnit
+        ? `${r.litresPerHour?.toFixed(2) || 'N/A'} L/hr`
         : `${r.kmPerLitre?.toFixed(2) || 'N/A'} KM/L`;
-      
+
       const expectedMetric = r.isReeferUnit
         ? `${r.expectedLitresPerHour?.toFixed(2) || '3.5'} L/hr`
         : `${r.expectedKmPerLitre.toString()} KM/L`;
-      
+
       rows.push([
         r.fleetNumber,
         r.date,
@@ -134,21 +134,21 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
     // Create a new PDF document
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    
+
     // Add title
     doc.setFontSize(18);
     doc.setTextColor(0, 0, 128);
     doc.text('Diesel Efficiency Debrief Report', pageWidth / 2, 15, { align: 'center' });
-    
+
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 22, { align: 'center' });
-    
+
     // Add summary
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     doc.text('Summary:', 14, 30);
-    
+
     const summary = records.reduce(
       (acc, r) => {
         acc.total++;
@@ -168,31 +168,31 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
         litres: 0,
       }
     );
-    
+
     const avgVariance = summary.total ? (summary.variance / summary.total).toFixed(1) : '0.0';
-    
+
     doc.setFontSize(10);
     doc.text(`Total Records: ${summary.total}`, 20, 38);
     doc.text(`Poor Performance: ${summary.poor}`, 20, 44);
     doc.text(`Critical Variance: ${summary.critical}`, 20, 50);
     doc.text(`Average Variance: ${avgVariance}%`, 20, 56);
-    
+
     // Individual record pages
     let yPos = 70;
-    
+
     records.forEach((record, index) => {
       // Check if we need a new page
       if (yPos > 250) {
         doc.addPage();
         yPos = 20;
       }
-      
+
       // Record header
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 128);
       doc.text(`Record #${index + 1}: Fleet ${record.fleetNumber}${record.isReeferUnit ? ' (Reefer)' : ''}`, 14, yPos);
       yPos += 8;
-      
+
       // Record details
       doc.setFontSize(10);
       doc.setTextColor(0, 0, 0);
@@ -202,32 +202,32 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
       yPos += 6;
       doc.text(`Fuel Station: ${record.fuelStation}`, 20, yPos);
       yPos += 6;
-      
+
       if (record.isReeferUnit) {
         doc.text(`Hours Operated: ${record.hoursOperated?.toFixed(1) || 'N/A'} hours`, 20, yPos);
         yPos += 6;
       } else {
         doc.text(`KM Reading: ${record.kmReading.toLocaleString()}`, 20, yPos);
         yPos += 6;
-        
+
         if (record.previousKmReading) {
           doc.text(`Previous KM: ${record.previousKmReading.toLocaleString()}`, 20, yPos);
           yPos += 6;
         }
-        
+
         if (record.distanceTravelled) {
           doc.text(`Distance: ${record.distanceTravelled.toLocaleString()} km`, 20, yPos);
           yPos += 6;
         }
       }
-      
+
       doc.text(`Litres Filled: ${record.litresFilled}`, 20, yPos);
       yPos += 6;
-      
+
       const currencySymbol = record.currency === 'USD' ? '$' : 'R';
       doc.text(`Total Cost: ${currencySymbol}${record.totalCost.toFixed(2)}`, 20, yPos);
       yPos += 6;
-      
+
       // Efficiency metrics
       doc.setTextColor(255, 0, 0);
       if (record.isReeferUnit) {
@@ -236,25 +236,25 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
         doc.text(`KM/L: ${record.kmPerLitre?.toFixed(2) || 'N/A'} (Expected: ${record.expectedKmPerLitre})`, 20, yPos);
       }
       yPos += 6;
-      
+
       doc.text(`Variance: ${record.efficiencyVariance.toFixed(1)}%`, 20, yPos);
       yPos += 6;
-      
+
       doc.text(`Performance: ${record.performanceStatus.toUpperCase()}`, 20, yPos);
       yPos += 6;
-      
+
       // Debrief information
       doc.setTextColor(0, 100, 0);
       doc.text(`Debrief Notes: ${debriefNotes[record.id] || 'None provided'}`, 20, yPos);
       yPos += 6;
-      
+
       doc.text(`Debrief Date: ${debriefDates[record.id] || 'Not set'}`, 20, yPos);
       yPos += 6;
-      
+
       doc.text(`Driver Signed: ${driverSignatures[record.id] ? 'Yes' : 'No'}`, 20, yPos);
       yPos += 15;
     });
-    
+
     // Save the PDF
     doc.save(`diesel-debrief-report-${new Date().toISOString().split('T')[0]}.pdf`);
   };
@@ -282,7 +282,7 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
   const avgVariance = summary.total ? (summary.variance / summary.total).toFixed(1) : '0.0';
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Diesel Efficiency Debrief" maxWidth="2xl">
+    <Modal isOpen={isOpen} onClose={onClose} title="Diesel Efficiency Debrief" size="xl">
       <div className="space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

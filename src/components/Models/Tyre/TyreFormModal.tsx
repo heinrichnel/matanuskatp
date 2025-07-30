@@ -251,7 +251,7 @@ const TyreFormModal: React.FC<TyreFormModalProps> = ({
   const modalTitle = editMode ? `Edit Tyre: ${formData.serialNumber}` : "Add New Tyre";
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} maxWidth="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={modalTitle} size="lg">
       <div className="space-y-6">
         {/* Section Navigation */}
         <div className="flex space-x-1 border-b">

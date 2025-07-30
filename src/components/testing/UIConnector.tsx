@@ -101,21 +101,21 @@ export const UIConnector: React.FC = () => {
   const analyzeUI = () => {
     // Find buttons
     const buttons = document.querySelectorAll('button, input[type="submit"], input[type="button"], .btn, [role="button"]');
-    
+
     // Find forms
     const forms = document.querySelectorAll('form');
-    
+
     // Find links
     const links = document.querySelectorAll('a:not(.btn)');
-    
+
     // Analyze buttons
     const buttonElements: UIElement[] = [];
     buttons.forEach((button) => {
       // Check if button has click handler
-      const hasHandler = (button as any)?.onclick !== null || 
+      const hasHandler = (button as any)?.onclick !== null ||
                          button.getAttribute('onClick') !== null ||
                          button.getAttribute('on-click') !== null;
-      
+
       buttonElements.push({
         type: button.tagName.toLowerCase(),
         count: 1,
@@ -123,15 +123,15 @@ export const UIConnector: React.FC = () => {
         examples: [button.textContent || button.getAttribute('value') || 'Unnamed button']
       });
     });
-    
+
     // Analyze forms
     const formElements: UIElement[] = [];
     forms.forEach((form) => {
       // Check if form has submit handler
-      const hasHandler = (form as any)?.onsubmit !== null || 
+      const hasHandler = (form as any)?.onsubmit !== null ||
                         form.getAttribute('onSubmit') !== null ||
                         form.getAttribute('on-submit') !== null;
-      
+
       formElements.push({
         type: 'form',
         count: 1,
@@ -139,7 +139,7 @@ export const UIConnector: React.FC = () => {
         examples: [form.getAttribute('id') || form.getAttribute('name') || 'Unnamed form']
       });
     });
-    
+
     // Analyze links
     const linkElements: UIElement[] = [];
     links.forEach((link) => {
@@ -150,27 +150,27 @@ export const UIConnector: React.FC = () => {
         examples: [link.textContent || link.getAttribute('title') || 'Unnamed link']
       });
     });
-    
+
     setUiReport({
       buttons: buttonElements,
       forms: formElements,
       links: linkElements
     });
   };
-  
+
   const highlightElements = (type: 'buttons' | 'forms' | 'links', connected: boolean) => {
     // Remove previous highlights
     document.querySelectorAll('[data-ui-highlighted]').forEach((el) => {
       (el as HTMLElement).style.outline = '';
       el.removeAttribute('data-ui-highlighted');
     });
-    
+
     setHighlightActive(true);
-    
+
     // Add highlights based on type
     let selector = '';
     let color = '';
-    
+
     if (type === 'buttons') {
       selector = 'button, input[type="submit"], input[type="button"], .btn, [role="button"]';
       color = connected ? '3px solid green' : '3px solid red';
@@ -181,14 +181,14 @@ export const UIConnector: React.FC = () => {
       selector = 'a:not(.btn)';
       color = connected ? '3px dotted blue' : '3px dotted orange';
     }
-    
+
     document.querySelectorAll(selector).forEach((el) => {
       // For buttons, check connection status
       if (type === 'buttons') {
-        const isConnected = (el as any)?.onclick !== null || 
+        const isConnected = (el as any)?.onclick !== null ||
                            el.getAttribute('onClick') !== null ||
                            el.getAttribute('on-click') !== null;
-        
+
         if (connected === isConnected) {
           (el as HTMLElement).style.outline = color;
           el.setAttribute('data-ui-highlighted', 'true');
@@ -196,10 +196,10 @@ export const UIConnector: React.FC = () => {
       }
       // For forms, check connection status
       else if (type === 'forms') {
-        const isConnected = (el as any)?.onsubmit !== null || 
+        const isConnected = (el as any)?.onsubmit !== null ||
                           el.getAttribute('onSubmit') !== null ||
                           el.getAttribute('on-submit') !== null;
-        
+
         if (connected === isConnected) {
           (el as HTMLElement).style.outline = color;
           el.setAttribute('data-ui-highlighted', 'true');
@@ -208,7 +208,7 @@ export const UIConnector: React.FC = () => {
       // For links, check if href is valid
       else if (type === 'links') {
         const isConnected = el.hasAttribute('href') && el.getAttribute('href') !== '#';
-        
+
         if (connected === isConnected) {
           (el as HTMLElement).style.outline = color;
           el.setAttribute('data-ui-highlighted', 'true');
@@ -216,7 +216,7 @@ export const UIConnector: React.FC = () => {
       }
     });
   };
-  
+
   const removeHighlights = () => {
     document.querySelectorAll('[data-ui-highlighted]').forEach((el) => {
       (el as HTMLElement).style.outline = '';
@@ -224,10 +224,54 @@ export const UIConnector: React.FC = () => {
     });
     setHighlightActive(false);
   };
-  
-  if (!isOpen) {
+
+  const onClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // Handle different button actions based on button text
+    const buttonText = (event.target as HTMLButtonElement).textContent?.trim();
+
+    if (buttonText === '✕' || buttonText === 'UI Tester') {
+      setIsOpen(!isOpen);
+      if (highlightActive) {
+        removeHighlights();
+      }
+    } else if (buttonText === 'Highlight Connected') {
+      const sectionType = getSectionType(event.target as HTMLButtonElement);
+      if (sectionType) {
+        highlightElements(sectionType, true);
+      }
+    } else if (buttonText === 'Highlight Disconnected') {
+      const sectionType = getSectionType(event.target as HTMLButtonElement);
+      if (sectionType) {
+        highlightElements(sectionType, false);
+      }
+    } else if (buttonText === 'Remove Highlights') {
+      removeHighlights();
+    } else if (buttonText === 'Re-analyze Page') {
+      analyzeUI();
+      if (highlightActive) {
+        removeHighlights();
+      }
+    }
+  };
+
+  // Helper function to determine which section a button belongs to
+  const getSectionType = (button: HTMLButtonElement): 'buttons' | 'forms' | 'links' | null => {
+      const section = button.closest('[style*="margin-bottom: 10px"]');
+      if (!section) return null;
+
+      const titleElement = section.querySelector('[style*="font-weight: bold"]');
+      if (!titleElement) return null;
+
+      const title = titleElement.textContent?.toLowerCase();
+      if (title?.includes('button')) return 'buttons';
+      if (title?.includes('form')) return 'forms';
+      if (title?.includes('link')) return 'links';
+
+      return null;
+    }
+
     return (
-      <button 
+      <button
         style={{
           position: 'fixed',
           bottom: '20px',
@@ -246,29 +290,29 @@ export const UIConnector: React.FC = () => {
       </button>
     );
   }
-  
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <h3 style={{ margin: 0 }}>UI Connection Tester</h3>
-        <button 
+        <button
           style={{ ...styles.button, ...styles.buttonRed }}
           onClick={onClick}
         >
           ✕
         </button>
       </div>
-      
+
       <div style={styles.section}>
         <div style={styles.title}>Buttons ({uiReport.buttons.length})</div>
         <div>
-          <button 
+          <button
             style={{ ...styles.button, marginBottom: '5px' }}
             onClick={onClick}
           >
             Highlight Connected
           </button>
-          <button 
+          <button
             style={{ ...styles.button, marginBottom: '5px' }}
             onClick={onClick}
           >
@@ -278,7 +322,7 @@ export const UIConnector: React.FC = () => {
         <ul style={styles.list}>
           {uiReport.buttons.slice(0, 5).map((button, i) => (
             <li key={`button-${i}`} style={styles.item}>
-              <span 
+              <span
                 style={{
                   ...styles.status,
                   ...(button.connected ? styles.statusGood : styles.statusBad)
@@ -292,17 +336,17 @@ export const UIConnector: React.FC = () => {
           )}
         </ul>
       </div>
-      
+
       <div style={styles.section}>
         <div style={styles.title}>Forms ({uiReport.forms.length})</div>
         <div>
-          <button 
+          <button
             style={{ ...styles.button, marginBottom: '5px' }}
             onClick={onClick}
           >
             Highlight Connected
           </button>
-          <button 
+          <button
             style={{ ...styles.button, marginBottom: '5px' }}
             onClick={onClick}
           >
@@ -312,7 +356,7 @@ export const UIConnector: React.FC = () => {
         <ul style={styles.list}>
           {uiReport.forms.map((form, i) => (
             <li key={`form-${i}`} style={styles.item}>
-              <span 
+              <span
                 style={{
                   ...styles.status,
                   ...(form.connected ? styles.statusGood : styles.statusBad)
@@ -323,17 +367,17 @@ export const UIConnector: React.FC = () => {
           ))}
         </ul>
       </div>
-      
+
       <div style={styles.section}>
         <div style={styles.title}>Links ({uiReport.links.length})</div>
         <div>
-          <button 
+          <button
             style={{ ...styles.button, marginBottom: '5px' }}
             onClick={onClick}
           >
             Highlight Connected
           </button>
-          <button 
+          <button
             style={{ ...styles.button, marginBottom: '5px' }}
             onClick={onClick}
           >
@@ -343,7 +387,7 @@ export const UIConnector: React.FC = () => {
         <ul style={styles.list}>
           {uiReport.links.slice(0, 5).map((link, i) => (
             <li key={`link-${i}`} style={styles.item}>
-              <span 
+              <span
                 style={{
                   ...styles.status,
                   ...(link.connected ? styles.statusGood : styles.statusBad)
@@ -357,17 +401,17 @@ export const UIConnector: React.FC = () => {
           )}
         </ul>
       </div>
-      
+
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '10px' }}>
         {highlightActive && (
-          <button 
+          <button
             style={{ ...styles.button, ...styles.buttonRed }}
             onClick={onClick}
           >
             Remove Highlights
           </button>
         )}
-        <button 
+        <button
           style={{ ...styles.button, ...styles.buttonGreen }}
           onClick={onClick}
         >

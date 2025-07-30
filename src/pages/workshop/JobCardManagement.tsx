@@ -11,7 +11,9 @@ interface JobCardManagementProps {
 }
 
 const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = "open" }) => {
-  const [currentTab, setCurrentTab] = useState<"open" | "completed" | "kanban" | "templates">(activeTab);
+  const [currentTab, setCurrentTab] = useState<"open" | "completed" | "kanban" | "templates">(
+    activeTab
+  );
   const [showJobCardModal, setShowJobCardModal] = useState(false);
 
   // Handler to open the Job Card modal
@@ -33,7 +35,9 @@ const JobCardManagement: React.FC<JobCardManagementProps> = ({ activeTab = "open
 
       <Tabs
         value={currentTab}
-        onValueChange={(value: string) => setCurrentTab(value as "open" | "completed" | "kanban" | "templates")}
+        onValueChange={(value: string) =>
+          setCurrentTab(value as "open" | "completed" | "kanban" | "templates")
+        }
       >
         <TabsList>
           <TabsTrigger value="open" className="flex items-center gap-2">

@@ -148,12 +148,33 @@ const IndirectCostBreakdown: React.FC = () => {
     setSelectedCategory(category);
   };
 
+  const handleViewDetails = (category: CostCategory) => {
+    setSelectedCategory(category);
+  };
+
   const getTrendIcon = (trend: "up" | "down" | "stable") => {
     if (trend === "up") return <span className="text-red-500">↑</span>;
     if (trend === "down") return <span className="text-green-500">↓</span>;
     return <span className="text-gray-500">→</span>;
   };
 
+  const handleButtonClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const buttonText = event.currentTarget.textContent?.trim();
+
+    if (buttonText === "View Details") {
+      // Find the category from the row that was clicked
+      const row = event.currentTarget.closest('tr');
+      const categoryId = row?.key || '';
+      const category = costCategories.find(c => c.id === categoryId);
+
+      if (category) {
+        setSelectedCategory(category);
+      }
+    } else if (buttonText === "Close") {
+      // Close the details view
+      setSelectedCategory(null);
+    }
+  };
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -275,7 +296,7 @@ const IndirectCostBreakdown: React.FC = () => {
                       <td className="px-4 py-2 text-center">{category.percentage}%</td>
                       <td className="px-4 py-2 text-center">{getTrendIcon(category.trend)}</td>
                       <td className="px-4 py-2 text-right">
-                        <Button variant="outline" className="text-sm" onClick={onClick}>
+                        <Button variant="outline" className="text-sm" onClick={() => handleViewDetails(category)}>
                           View Details
                         </Button>
                       </td>
@@ -304,7 +325,7 @@ const IndirectCostBreakdown: React.FC = () => {
               <h3 className="text-lg font-medium">
                 {selectedCategory.name} - {formatCurrency(selectedCategory.amount)}
               </h3>
-              <Button variant="outline" onClick={onClick}>
+              <Button variant="outline" onClick={() => setSelectedCategory(null)}>
                 Close
               </Button>
             </div>

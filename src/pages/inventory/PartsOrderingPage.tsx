@@ -52,7 +52,7 @@ interface OrderPart {
   quantityOrdered: number;
   quantityReceived: number;
   unitPrice: number;
-  status: "PENDING" | "ORDERED" | "RECEIVED" | "CANCELLED";
+  status: "PENDING" | "ORDERED" | "PARTIALLY_RECEIVED" | "RECEIVED" | "CANCELLED";
 }
 
 const PartsOrderingPage: React.FC = () => {
@@ -493,6 +493,7 @@ const PartsOrderingPage: React.FC = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
+                  label=""
                   placeholder="Search orders..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -503,7 +504,7 @@ const PartsOrderingPage: React.FC = () => {
               <Select
                 label=""
                 value={statusFilter}
-                onChange={(value) => setStatusFilter(value)}
+                onChange={(e) => setStatusFilter(e.target.value)}
                 options={[
                   { label: "All Statuses", value: "ALL" },
                   { label: "Pending", value: "PENDING" },
@@ -517,7 +518,7 @@ const PartsOrderingPage: React.FC = () => {
               <Select
                 label=""
                 value={urgencyFilter}
-                onChange={(value) => setUrgencyFilter(value)}
+                onChange={(e) => setUrgencyFilter(e.target.value)}
                 options={[
                   { label: "All Urgencies", value: "ALL" },
                   { label: "Low", value: "LOW" },
@@ -678,7 +679,7 @@ const PartsOrderingPage: React.FC = () => {
                           {order.status !== "CANCELLED" && order.status !== "RECEIVED" && (
                             <Button
                               size="sm"
-                              variant="destructive"
+                              variant="danger"
                               onClick={() => handleCancelOrder(order.id)}
                               icon={<Trash2 className="w-4 h-4" />}
                             ></Button>
