@@ -233,7 +233,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleViewAttachment(attachment.url)}
+                    onClick={() => handleViewAttachment(attachment.fileUrl)}
                   >
                     View
                   </Button>
