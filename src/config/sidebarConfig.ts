@@ -12,6 +12,7 @@ import {
   ClockIcon,
   Cog6ToothIcon,
   CurrencyDollarIcon,
+  DevicePhoneMobileIcon,
   DocumentMagnifyingGlassIcon,
   DocumentTextIcon,
   FunnelIcon, // For Drivers
@@ -27,7 +28,7 @@ import {
   TagIcon,
   TruckIcon, // For Invoices
   UserCircleIcon, // Changed from FuelIcon
-  UserGroupIcon,
+  UserGroupIcon, // For Mobile
   UsersIcon,
 } from "@heroicons/react/24/outline"; // Adjust path if needed
 
@@ -158,15 +159,15 @@ const PredictiveModels = React.lazy(() => import("../components/Models/Driver/Pr
 const AnalyticsPerformanceAnalytics = PlaceholderComponent; // Re-used from Drivers
 const FleetAnalyticsPage = PlaceholderComponent; // Re-used from Fleet
 const AnalyticsDashboardPage = PlaceholderComponent; // Re-used from Dashboard
-const AnalyticsDashboard = React.lazy(() => import("../pages/DashboardPage")); // Re-used from Dashboard
+const AnalyticsDashboard = PlaceholderComponent; // Re-used from Dashboard
 
 // Trips Module Pages (already imported above)
 // MissedLoadsTracker already imported above
 
 // Workshop Module Pages
 const WorkshopPage = React.lazy(() => import("../pages/workshop/WorkshopPage")); // Main page
-const JobCardManagement = React.lazy(() => import("../pages/JobCardManagement")); // From pages/JobCardManagement.tsx
-const WorkOrderManagement = React.lazy(() => import("../pages/WorkOrderManagement")); // From pages/WorkOrderManagement.tsx
+const JobCardManagement = PlaceholderComponent; // From pages/JobCardManagement.tsx
+const WorkOrderManagement = PlaceholderComponent; // From pages/WorkOrderManagement.tsx
 const StockInventoryPage = React.lazy(() => import("../pages/workshop/StockInventoryPage"));
 const QRGenerator = React.lazy(() => import("../pages/workshop/QRGenerator"));
 const QRScannerPage = React.lazy(() => import("../pages/workshop/QRScannerPage"));
@@ -611,7 +612,7 @@ export const sidebarConfig: SidebarItem[] = [
         label: "Purchase Order Page",
         path: "/inventory/purchase-orders",
         icon: DocumentTextIcon,
-        component: PurchaseOrderPage,
+        component: PlaceholderComponent, // Placeholder for PurchaseOrderPage
       }, // Re-used
       {
         id: "purchase-order-tracker",
@@ -639,7 +640,7 @@ export const sidebarConfig: SidebarItem[] = [
   {
     id: "mobile",
     label: "MOBILE",
-    icon: SmartphoneIcon,
+    icon: DevicePhoneMobileIcon, // Changed from SmartphoneIcon
     roles: ["Admin", "Sub Admin", "Operator", "Technician", "Workshop/Employee"],
     children: [
       {
@@ -952,7 +953,7 @@ export const sidebarConfig: SidebarItem[] = [
         label: "Trip Reports",
         path: "/analytics/trip-reports",
         icon: DocumentTextIcon,
-        component: TripReportPage,
+        component: PlaceholderComponent, // Placeholder for TripReportPage
       },
       {
         id: "tyre-analytics",

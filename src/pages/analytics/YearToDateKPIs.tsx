@@ -9,9 +9,10 @@ import { useAppContext } from "../../context/AppContext";
 
 // ─── UI Components ───────────────────────────────────────────────
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import { Card } from "../../components/ui/card";
+import { CardHeader, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/FormElements";
-import Modal from "../../components/ui/Modal";
+import { Modal } from "../../components/ui/modal";
 import { Tooltip } from "../../components/ui/Tooltip";
 
 // ─── Icons ───────────────────────────────────────────────────────
@@ -367,17 +368,15 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
 
     return (
       <Card className="flex flex-col justify-between">
-        <CardHeader
-          title={
-            <span className="flex flex-col">
-              <span className="flex items-center gap-2">
-                <Icon className={`w-5 h-5 ${colorClass}`} />
-                {title}
-              </span>
-              <span className="text-xs text-gray-500">2025 YTD</span>
+        <CardHeader>
+          <div className="flex flex-col">
+            <span className="flex items-center gap-2">
+              <Icon className={`w-5 h-5 ${colorClass}`} />
+              {title}
             </span>
-          }
-        />
+            <span className="text-xs text-gray-500">2025 YTD</span>
+          </div>
+        </CardHeader>
         <CardContent>
           <div className="text-3xl font-bold text-gray-900">
             {formatValue(current)}
@@ -571,9 +570,9 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
 
       {/* Weekly Revenue Reporting */}
       <Card>
-        <CardHeader
-          title="Automated Weekly Revenue Reporting"
-          action={
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Automated Weekly Revenue Reporting</h3>
             <Button
               size="sm"
               variant="outline"
@@ -582,8 +581,8 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
             >
               Export Weekly Report
             </Button>
-          }
-        />
+          </div>
+        </CardHeader>
         <CardContent>
           <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-6">
             <h4 className="text-sm font-medium text-green-800 mb-2">Automated Calculation Logic</h4>
@@ -843,7 +842,9 @@ const YearToDateKPIs: React.FC<YearToDateKPIsProps> = (props) => {
 
       {/* Performance Summary */}
       <Card>
-        <CardHeader title="Year-over-Year Performance Summary" />
+        <CardHeader>
+          <h3 className="text-lg font-medium">Year-over-Year Performance Summary</h3>
+        </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Operational Efficiency */}

@@ -46,10 +46,13 @@ export function useClients(options: UseClientsOptions = {}) {
       }
 
       const querySnapshot = await getDocs(q);
-      const fetchedClients: Client[] = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data() as Client
-      }));
+      const fetchedClients: Client[] = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          ...data,
+          id: doc.id
+        } as Client;
+      });
       setClients(fetchedClients);
     } catch (err) {
       console.error("Error fetching clients:", err);
