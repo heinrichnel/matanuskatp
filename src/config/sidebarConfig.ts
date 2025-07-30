@@ -40,9 +40,9 @@ import { AlertTriangle, CalendarIcon, CheckCircle, Edit, FileText, Plus } from "
 // This ensures their code is only loaded when the user navigates to that route.
 
 // Create a placeholder component for missing pages
-const PlaceholderComponent = React.lazy(() => 
+const PlaceholderComponent = React.lazy(() =>
   Promise.resolve({
-    default: () => React.createElement('div', {}, 'Page component is being developed')
+    default: () => React.createElement("div", {}, "Page component is being developed"),
   })
 );
 
@@ -51,7 +51,7 @@ const PlaceholderComponent = React.lazy(() =>
 const DashboardPage = PlaceholderComponent;
 
 // Compliance Module Pages
-const ComplianceDashboard = PlaceholderComponent; // Main page 
+const ComplianceDashboard = PlaceholderComponent; // Main page
 const InspectionManagement = PlaceholderComponent;
 const ReportNewIncidentPage = PlaceholderComponent;
 const FlagsInvestigationsPage = PlaceholderComponent;
