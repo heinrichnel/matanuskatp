@@ -1,8 +1,14 @@
 // src/types/trip.ts (or part of src/types/index.ts)
 
 // Assuming a basic structure based on your mock data and common trip fields
-export type TripStatus = 'active' | 'scheduled' | 'completed' | 'cancelled' | 'in_progress' | 'pending';
-export type Currency = 'ZAR' | 'USD'; // Assuming these are the currencies
+export type TripStatus =
+  | "active"
+  | "scheduled"
+  | "completed"
+  | "cancelled"
+  | "in_progress"
+  | "pending";
+export type Currency = "ZAR" | "USD"; // Assuming these are the currencies
 
 export interface Trip {
   id: string; // Firestore document ID
@@ -20,4 +26,19 @@ export interface Trip {
   // e.g., clientName, origin, destination, actualPickupDate, actualDeliveryDate, etc.
   createdAt?: string; // ISO datetime string
   updatedAt?: string; // ISO datetime string
+  costs?: CostEntry[]; // Trip costs/expenses
+}
+
+// Cost entry definition for trip expenses
+export interface CostEntry {
+  id: string;
+  description: string;
+  amount: number;
+  category: "fuel" | "maintenance" | "tolls" | "parking" | "accommodation" | "meals" | "other";
+  date: string;
+  receipt?: File;
+  isFlagged?: boolean;
+  notes?: string;
+  createdBy?: string;
+  updatedAt?: string;
 }

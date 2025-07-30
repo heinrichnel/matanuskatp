@@ -10,13 +10,13 @@ import {
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
-import LoadingIndicator from "../../components/ui/LoadingIndicator"; // Assuming you have this
+import { Card, CardContent, CardHeader } from "../../components/ui/card";
+import LoadingIndicator from "../../components/ui/LoadingIndicator";
 import ErrorMessage from "../../components/ui/ErrorMessage"; // Assuming you have this
-// import { useAppContext } from "../../context/AppContext"; // Keep if isLoading is needed for global app state
+import { useAppContext } from "../../context/AppContext"; // Keep if isLoading is needed for global app state
 import { useTrips } from "../../hooks/useTrips"; // Import the new useTrips hook
-import { Trip } from "../types/trip"; // Import Trip interface
-import { formatDate } from "../utils/helpers"; // Assuming formatDate is available
+import { Trip } from "../../types/trip"; // Import Trip interface
+import { formatDate } from "../../utils/helpers"; // Import formatDate function
 
 const TripCalendarPage: React.FC = () => {
   // const { isLoading: appIsLoading } = useAppContext(); // If you need global app loading status
@@ -192,13 +192,13 @@ const TripCalendarPage: React.FC = () => {
                               className={`text-xs p-1 rounded truncate ${
                                 trip.status === "active"
                                   ? "bg-blue-100 text-blue-800"
-                                  : trip.status === "scheduled"
+                                  : trip.status === "completed"
                                     ? "bg-yellow-100 text-yellow-800"
                                     : "bg-gray-100 text-gray-800"
                               }`}
-                              title={trip.title} // Show full title on hover
+                              title={trip.route} // Show full title on hover
                             >
-                              {trip.title}
+                              {trip.route}
                             </div>
                           ))}
                           {tripsOnDay.length > 3 && ( // Indicate more trips if space is limited
@@ -228,7 +228,7 @@ const TripCalendarPage: React.FC = () => {
                     className="flex justify-between items-center p-3 border rounded-lg"
                   >
                     <div>
-                      <h3 className="font-medium">{trip.title}</h3>
+                      <h3 className="font-medium">{trip.route}</h3>
                       <p className="text-sm text-gray-500">Status: {trip.status.replace('_', ' ').toUpperCase()}</p>
                       <p className="text-sm text-gray-500">Vehicle: {trip.vehicleId}</p> {/* Assuming vehicleId exists */}
                       <p className="text-sm text-gray-500">Driver: {trip.driverId}</p> {/* Assuming driverId exists */}

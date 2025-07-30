@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
+import { Input } from '../../components/ui/input';
 
 interface TripCompletionPanelProps {
   canComplete: boolean;
   onComplete: () => void;
 }
 
-const TripCompletionPanel: React.FC<TripCompletionPanelProps> = ({ 
-  canComplete, 
-  onComplete 
+const TripCompletionPanel: React.FC<TripCompletionPanelProps> = ({
+  canComplete,
+  onComplete
 }) => {
   const [proofOfDelivery, setProofOfDelivery] = useState<File | null>(null);
   const [completionNotes, setCompletionNotes] = useState('');
@@ -68,7 +68,7 @@ const TripCompletionPanel: React.FC<TripCompletionPanelProps> = ({
     <div className="space-y-6">
       <Card className="p-6">
         <h3 className="text-xl font-semibold mb-4">Complete Trip</h3>
-        
+
         {!canComplete && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
             <h4 className="font-medium text-red-800 mb-2">
@@ -124,17 +124,17 @@ const TripCompletionPanel: React.FC<TripCompletionPanelProps> = ({
           </div>
 
           {/* End Odometer Reading */}
-          <div>
+            <div>
             <label className="block text-sm font-medium mb-1">
               End Odometer Reading (km)
             </label>
             <Input
               type="number"
               value={odometerEnd}
-              onChange={(e) => setOdometerEnd(parseInt(e.target.value) || 0)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOdometerEnd(parseInt(e.target.value) || 0)}
               placeholder="Enter end odometer reading"
             />
-          </div>
+            </div>
 
           {/* Completion Notes */}
           <div>

@@ -16,11 +16,48 @@ interface UseClientsOptions {
  * Custom hook for managing client data with Firestore integration.
  * Provides real-time data (via onSnapshot if implemented) and CRUD operations.
  */
+import { useMemo } from "react";
+import { toUIClient } from "../utils/clientMapper"; // Import the client mapper utility
+
+export interface ClientOption {
+  label: string;
+  value: string;
+}
+
+export interface UseClientDropdownOptions {
+  activeOnly?: boolean;
+  sortBy?: "client" | "createdAt";
+  descending?: boolean;
+}
+
+/**
+ * Custom hook to fetch and format client data specifically for dropdowns.
+ * Uses the useClients hook for data fetching and clientMapper for type conversion.
+ */
+export function useClientDropdown(options: UseClientDropdownOptions = {}) {
+  // Use the useClients hook to get the raw client data, loading, and error states
+  const { clients: rawClients, loading, error } = useClients(options);
+
+  // Memoize the transformation to dropdown options
+  const clients = useMemo(() => {
+    // Convert API Client objects to UIClient objects, then map to ClientOption format
+    return rawClients.map((client) => {
+      const uiClient = toUIClient(client);
+      return {
+        label: uiClient.client, // Use the client name from UIClient
+        value: uiClient.id, // Use the ID for the value
+      };
+    });
+  }, [rawClients]); // Re-calculate only when rawClients change
+
+  return { clients, loading, error };
+}
+
 export function useClients(options: UseClientsOptions = {}) {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const showToast = useToast();
+  const { showToast } = useToast();
 
   const clientsCollectionRef = collection(db, 'clients');
 
@@ -58,10 +95,13 @@ export function useClients(options: UseClientsOptions = {}) {
       console.error("Error fetching clients:", err);
       const errorMessage = 'Failed to load client data. Please try again.';
       setError(errorMessage);
-      handleError(err as Error, {
+      handleError(() => Promise.reject(err), {
         category: ErrorCategory.DATABASE,
-        context: { component: 'useClients', operation: 'fetchClients' },
-        message: errorMessage
+        context: {
+          component: 'useClients',
+          operation: 'fetchClients',
+          errorMessage: errorMessage
+        }
       });
       showToast(errorMessage, 'error');
     } finally {
@@ -91,10 +131,13 @@ export function useClients(options: UseClientsOptions = {}) {
       console.error("Error adding client:", err);
       const errorMessage = 'Failed to add client. Please try again.';
       showToast(errorMessage, 'error');
-      handleError(err as Error, {
+      handleError(() => Promise.reject(err), {
         category: ErrorCategory.DATABASE,
-        context: { component: 'useClients', operation: 'addClient' },
-        message: errorMessage
+        context: {
+          component: 'useClients',
+          operation: 'addClient',
+          errorMessage: errorMessage
+        }
       });
       throw err; // Re-throw to allow component to handle loading/error state
     }
@@ -117,10 +160,13 @@ export function useClients(options: UseClientsOptions = {}) {
       console.error("Error updating client:", err);
       const errorMessage = 'Failed to update client. Please try again.';
       showToast(errorMessage, 'error');
-      handleError(err as Error, {
+      handleError(() => Promise.reject(err), {
         category: ErrorCategory.DATABASE,
-        context: { component: 'useClients', operation: 'updateClient' },
-        message: errorMessage
+        context: {
+          component: 'useClients',
+          operation: 'updateClient',
+          errorMessage: errorMessage
+        }
       });
       throw err;
     }
@@ -136,10 +182,13 @@ export function useClients(options: UseClientsOptions = {}) {
       console.error("Error deleting client:", err);
       const errorMessage = 'Failed to delete client. Please try again.';
       showToast(errorMessage, 'error');
-      handleError(err as Error, {
+      handleError(() => Promise.reject(err), {
         category: ErrorCategory.DATABASE,
-        context: { component: 'useClients', operation: 'deleteClient' },
-        message: errorMessage
+        context: {
+          component: 'useClients',
+          operation: 'deleteClient',
+          errorMessage: errorMessage
+        }
       });
       throw err;
     }

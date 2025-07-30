@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, ChangeEvent } from 'react';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
+import { Input } from '../../components/ui/input';
 
 interface TripInvoicingPanelProps {
   onSubmit: (invoice: any) => void;
   onCancel: () => void;
 }
 
-const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({ 
-  onSubmit, 
-  onCancel 
+const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({
+  onSubmit,
+  onCancel
 }) => {
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
@@ -43,7 +43,7 @@ const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!invoiceNumber || !invoiceDate || !dueDate) {
       alert('Please fill in all required fields');
       return;
@@ -68,7 +68,7 @@ const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({
     <div className="space-y-6">
       <Card className="p-6">
         <h3 className="text-xl font-semibold mb-4">Generate Invoice</h3>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -78,7 +78,7 @@ const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({
               <Input
                 type="text"
                 value={invoiceNumber}
-                onChange={(e) => setInvoiceNumber(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setInvoiceNumber(e.target.value)}
                 placeholder="INV-2025XX-XXX"
                 required
               />
@@ -91,7 +91,7 @@ const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({
               <Input
                 type="text"
                 value={clientReference}
-                onChange={(e) => setClientReference(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setClientReference(e.target.value)}
                 placeholder="Client PO number or reference"
               />
             </div>
@@ -105,7 +105,7 @@ const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({
               <Input
                 type="date"
                 value={invoiceDate}
-                onChange={(e) => setInvoiceDate(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setInvoiceDate(e.target.value)}
                 required
               />
             </div>
@@ -117,7 +117,7 @@ const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({
               <Input
                 type="date"
                 value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setDueDate(e.target.value)}
                 required
               />
             </div>
@@ -133,7 +133,7 @@ const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({
                 step="0.01"
                 min="0"
                 value={additionalCharges}
-                onChange={(e) => setAdditionalCharges(parseFloat(e.target.value) || 0)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setAdditionalCharges(parseFloat(e.target.value) || 0)}
                 placeholder="0.00"
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -150,7 +150,7 @@ const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({
                 step="0.01"
                 min="0"
                 value={discount}
-                onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setDiscount(parseFloat(e.target.value) || 0)}
                 placeholder="0.00"
               />
               <p className="text-xs text-gray-500 mt-1">
@@ -165,7 +165,7 @@ const TripInvoicingPanel: React.FC<TripInvoicingPanelProps> = ({
             </label>
             <textarea
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setNotes(e.target.value)}
               placeholder="Payment terms, special instructions, etc."
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={3}

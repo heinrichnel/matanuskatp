@@ -3,28 +3,28 @@ import { DriverBehaviorEvent } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import { useDriverBehavior } from '../../context/DriverBehaviorContext';
 import Button from '../../components/ui/Button';
-import DriverPerformanceOverview from '../../components/DriverManagement/PerformanceAnalytics';
+import DriverPerformanceOverview from '../../components/DriverManagement/PerformanceOverview';
 import DriverBehaviorEventForm from '../../components/forms/DriverBehaviorEventForm';
 import DriverBehaviorEventDetails from '../../components/DriverManagement/DriverBehaviorEventDetails';
 import CARReportForm from '../../components/forms/CARReportForm';
 import CARReportList from '../../components/lists/CARReportList';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
-import { 
-  User, 
-  FileText, 
-  Plus, 
-  RefreshCw, 
-  AlertTriangle, 
-  Filter, 
-  Search, 
-  Download, 
-  BookOpen 
+import {
+  User,
+  FileText,
+  Plus,
+  RefreshCw,
+  AlertTriangle,
+  Filter,
+  Search,
+  Download,
+  BookOpen
 } from 'lucide-react';
 import SyncIndicator from '../../components/ui/SyncIndicator';
 
 /**
  * Driver Behavior Events Page Component
- * 
+ *
  * This component displays driver behavior events with filtering capabilities
  * and allows users to:
  * - View detailed driver performance metrics
@@ -42,7 +42,7 @@ const DriverBehaviorPage: React.FC = () => {
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [showCARForm, setShowCARForm] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<DriverBehaviorEvent | null>(null);
-  
+
   // Search and filtering state
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSeverity, setFilterSeverity] = useState('all');
@@ -52,39 +52,39 @@ const DriverBehaviorPage: React.FC = () => {
     start: null,
     end: null
   });
-  
+
   // Get application context for data and operations
-  const { 
+  const {
     importDriverBehaviorEventsFromWebhook,
-    isLoading, 
-    driverBehaviorEvents 
+    isLoading,
+    driverBehaviorEvents
   } = useAppContext();
-  
+
   // Get driver behavior specific context with real-time updates from Firestore
   const { events, webBookEvents, loading, error } = useDriverBehavior();
-  
+
   // Subscribe to driver behavior events when the component mounts
   useEffect(() => {
     console.log("Subscribing to driver behavior events");
-    
+
     // Real-time updates are now handled by the DriverBehaviorContext provider
     // The useDriverBehavior hook already provides real-time data from Firestore
-    
+
     // Check if we have any events, if not and we're online, trigger a sync
     if ((driverBehaviorEvents.length === 0 && events.length === 0) && navigator.onLine) {
       handleSyncNow();
     }
-    
+
     // Log the number of events coming from the context
     console.log(`Real-time driver behavior events loaded: ${events.length}`);
     console.log(`Web book events loaded: ${webBookEvents.length}`);
-    
+
     // Cleanup function is not needed as the subscription is managed by the DriverBehaviorContext
   }, [driverBehaviorEvents.length, events.length, webBookEvents.length]);
 
   // Handle initiating CAR from event
   const handleInitiateCAR = (event: DriverBehaviorEvent) => {
-    setSelectedEvent(event);
+    setSelectedEvent(event as DriverBehaviorEvent);
     setShowCARForm(true);
   };
 
@@ -108,16 +108,16 @@ const DriverBehaviorPage: React.FC = () => {
 
   // View event details
   const handleViewEvent = (event: DriverBehaviorEvent) => {
-    setSelectedEvent(event);
+    setSelectedEvent(event as DriverBehaviorEvent);
     setShowEventDetails(true);
   };
-  
+
   // Export data handler
   const handleExportData = () => {
     try {
       // Get the data to export (filtered or all)
       const dataToExport = getFilteredEvents();
-      
+
       // Convert to CSV
       const headers = ['Date', 'Driver', 'Event Type', 'Severity', 'Fleet No', 'Location', 'Description'];
       const csvContent = [
@@ -132,7 +132,7 @@ const DriverBehaviorPage: React.FC = () => {
           `"${(event.description || '').replace(/"/g, '""')}"`
         ].join(','))
       ].join('\n');
-      
+
       // Create download link
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -158,7 +158,7 @@ const DriverBehaviorPage: React.FC = () => {
   // Filter events based on search term and filters
   const getFilteredEvents = () => {
     const displayEvents = showWebBookOnly ? webBookEvents : driverBehaviorEvents;
-    
+
     return displayEvents.filter(event => {
       // Search term filter
       const matchesSearch =
@@ -167,31 +167,31 @@ const DriverBehaviorPage: React.FC = () => {
         (event.eventType?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
         (event.driverName?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
         (event.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
-      
+
       // Severity filter
-      const matchesSeverity = 
-        filterSeverity === 'all' || 
+      const matchesSeverity =
+        filterSeverity === 'all' ||
         event.severity === filterSeverity;
-      
+
       // Event type filter
-      const matchesEventType = 
-        filterEventType === 'all' || 
+      const matchesEventType =
+        filterEventType === 'all' ||
         event.eventType === filterEventType;
-      
+
       // Date range filter
-      const matchesDateRange = 
+      const matchesDateRange =
         !dateRange.start || !dateRange.end ||
-        (event.eventDate && 
+        (event.eventDate &&
           new Date(event.eventDate) >= dateRange.start &&
           new Date(event.eventDate) <= dateRange.end);
-      
+
       return matchesSearch && matchesSeverity && matchesEventType && matchesDateRange;
     });
   };
 
   // Get filtered events
   const filteredEvents = getFilteredEvents();
-  
+
   // Get unique event types
   const eventTypes = getUniqueEventTypes();
 
@@ -263,9 +263,9 @@ const DriverBehaviorPage: React.FC = () => {
               setSelectedEvent(null);
               setShowEventForm(true);
             }}
-            onViewEvent={handleViewEvent}
-            onEditEvent={(event: DriverBehaviorEvent) => {
-              setSelectedEvent(event);
+            onViewEvent={(event) => handleViewEvent(event as DriverBehaviorEvent)}
+            onEditEvent={(event) => {
+              setSelectedEvent(event as DriverBehaviorEvent);
               setShowEventForm(true);
             }}
             onSyncNow={handleSyncNow}
@@ -293,7 +293,7 @@ const DriverBehaviorPage: React.FC = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
                   <div className="relative">
@@ -314,7 +314,7 @@ const DriverBehaviorPage: React.FC = () => {
                     </select>
                   </div>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Severity</label>
                   <div className="relative">
@@ -335,7 +335,7 @@ const DriverBehaviorPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex flex-wrap items-center justify-between mt-4 gap-4">
                 <div className="flex items-center">
                   <input
@@ -349,7 +349,7 @@ const DriverBehaviorPage: React.FC = () => {
                     Show Web-Book Events Only
                   </label>
                 </div>
-                
+
                 <Button
                   variant="outline"
                   size="sm"
@@ -360,7 +360,7 @@ const DriverBehaviorPage: React.FC = () => {
                 </Button>
               </div>
             </div>
-            
+
             {/* Events Table */}
             <div className="bg-white shadow overflow-hidden border-b border-gray-200 rounded-md">
               <table className="min-w-full divide-y divide-gray-200">
@@ -409,14 +409,14 @@ const DriverBehaviorPage: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           <button
-                            onClick={() => handleViewEvent(event)}
+                            onClick={() => handleViewEvent(event as DriverBehaviorEvent)}
                             className="text-blue-600 hover:text-blue-900 mr-3"
                           >
                             View
                           </button>
                           <button
                             onClick={() => {
-                              setSelectedEvent(event);
+                              setSelectedEvent(event as DriverBehaviorEvent);
                               setShowEventForm(true);
                             }}
                             className="text-green-600 hover:text-green-900 mr-3"
@@ -424,7 +424,7 @@ const DriverBehaviorPage: React.FC = () => {
                             Edit
                           </button>
                           <button
-                            onClick={() => handleInitiateCAR(event)}
+                            onClick={() => handleInitiateCAR(event as DriverBehaviorEvent)}
                             className="text-purple-600 hover:text-purple-900"
                           >
                             CAR

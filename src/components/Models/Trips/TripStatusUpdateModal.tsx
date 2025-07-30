@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
-import Modal from '../../ui/Modal';
-import Button from '../../ui/Button';
-import { TextArea } from '../../ui/FormElements';
-import { formatDate } from '../../../utils/helpers';
-import { Truck, Calendar, MapPin, User, Send, X, Clock, CheckCircle } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, MapPin, Send, Truck, User, X } from "lucide-react";
+import React, { useState } from "react";
+import { Trip } from "../../../types";
+import { formatDate } from "../../../utils/helpers";
+import { Button } from "../../ui/Button";
+import { TextArea } from "../../ui/FormElements";
+import Modal from "../../ui/Modal";
 
 interface TripStatusUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;
   trip: Trip;
-  status: 'shipped' | 'delivered';
-  onUpdateStatus: (tripId: string, status: 'shipped' | 'delivered', notes: string) => Promise<void>;
+  status: "shipped" | "delivered";
+  onUpdateStatus: (tripId: string, status: "shipped" | "delivered", notes: string) => Promise<void>;
 }
 
 const TripStatusUpdateModal: React.FC<TripStatusUpdateModalProps> = ({
@@ -18,9 +19,9 @@ const TripStatusUpdateModal: React.FC<TripStatusUpdateModalProps> = ({
   onClose,
   trip,
   status,
-  onUpdateStatus
+  onUpdateStatus,
 }) => {
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,24 +32,20 @@ const TripStatusUpdateModal: React.FC<TripStatusUpdateModalProps> = ({
       await onUpdateStatus(trip.id, status, notes);
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to update trip status');
+      setError(err.message || "Failed to update trip status");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const statusTitle = status === 'shipped' ? 'Mark as Shipped' : 'Mark as Delivered';
-  const statusDescription = status === 'shipped' 
-    ? 'This will mark the trip as shipped and record the current time as the shipping timestamp.'
-    : 'This will mark the trip as delivered and record the current time as the delivery timestamp.';
+  const statusTitle = status === "shipped" ? "Mark as Shipped" : "Mark as Delivered";
+  const statusDescription =
+    status === "shipped"
+      ? "This will mark the trip as shipped and record the current time as the shipping timestamp."
+      : "This will mark the trip as delivered and record the current time as the delivery timestamp.";
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title={statusTitle}
-      maxWidth="md"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title={statusTitle} size="md">
       <div className="space-y-6">
         {/* Trip Summary */}
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
@@ -58,28 +55,30 @@ const TripStatusUpdateModal: React.FC<TripStatusUpdateModalProps> = ({
               <Truck className="w-4 h-4 text-blue-600" />
               <div>
                 <p className="text-blue-600 font-medium">Fleet</p>
-                <p className="text-blue-800">{trip.fleetNumber}</p>
+                <p className="text-blue-800">{trip.fleetNumber || "N/A"}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <User className="w-4 h-4 text-blue-600" />
               <div>
                 <p className="text-blue-600 font-medium">Driver</p>
-                <p className="text-blue-800">{trip.driverName}</p>
+                <p className="text-blue-800">{trip.driverName || "N/A"}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <MapPin className="w-4 h-4 text-blue-600" />
               <div>
                 <p className="text-blue-600 font-medium">Route</p>
-                <p className="text-blue-800">{trip.route}</p>
+                <p className="text-blue-800">{trip.route || "N/A"}</p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
               <Calendar className="w-4 h-4 text-blue-600" />
               <div>
                 <p className="text-blue-600 font-medium">Dates</p>
-                <p className="text-blue-800">{formatDate(trip.startDate)} - {formatDate(trip.endDate)}</p>
+                <p className="text-blue-800">
+                  {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
+                </p>
               </div>
             </div>
           </div>
@@ -88,26 +87,26 @@ const TripStatusUpdateModal: React.FC<TripStatusUpdateModalProps> = ({
         {/* Status Update Info */}
         <div className="bg-green-50 border border-green-200 rounded-md p-4">
           <div className="flex items-start space-x-3">
-            {status === 'shipped' ? (
+            {status === "shipped" ? (
               <Truck className="w-5 h-5 text-green-600 mt-0.5" />
             ) : (
               <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
             )}
             <div>
-              <h4 className="text-sm font-medium text-green-800">Status Update: {status.toUpperCase()}</h4>
-              <p className="text-sm text-green-700 mt-1">
-                {statusDescription}
-              </p>
-              {status === 'shipped' && (
+              <h4 className="text-sm font-medium text-green-800">
+                Status Update: {status.toUpperCase()}
+              </h4>
+              <p className="text-sm text-green-700 mt-1">{statusDescription}</p>
+              {status === "shipped" && (
                 <p className="text-sm text-green-700 mt-1">
                   After shipping, you'll be able to mark this trip as delivered when completed.
                 </p>
               )}
-              {status === 'delivered' && trip.shippedAt && (
+              {status === "delivered" && trip.actualDepartureDateTime && (
                 <div className="mt-2 flex items-center space-x-2">
                   <Clock className="w-4 h-4 text-green-600" />
                   <p className="text-sm font-medium text-green-700">
-                    Shipped at: {formatDate(trip.shippedAt)}
+                    Shipped at: {formatDate(trip.actualDepartureDateTime)}
                   </p>
                 </div>
               )}
@@ -135,14 +134,14 @@ const TripStatusUpdateModal: React.FC<TripStatusUpdateModalProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClick}
+            onClick={onClose}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button
-            onClick={onClick}
+            onClick={handleSubmit}
             icon={<Send className="w-4 h-4" />}
             disabled={isSubmitting}
             isLoading={isSubmitting}
@@ -156,14 +155,3 @@ const TripStatusUpdateModal: React.FC<TripStatusUpdateModalProps> = ({
 };
 
 export default TripStatusUpdateModal;
-
-export interface Trip {
-  id: string;
-  fleetNumber: string;
-  driverName: string;
-  route: string;
-  startDate: string;
-  endDate: string;
-  shippedAt?: string; // ISO date string or undefined if not shipped yet
-  // add other properties as needed
-}

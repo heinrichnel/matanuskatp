@@ -96,17 +96,17 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
-  
+
   // Event handler for select elements
   const handleSelectChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLSelectElement>) => {
     handleChange(field, e.target.value);
   };
-  
+
   // Event handler for input elements
   const handleInputChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     handleChange(field, e.target.value);
   };
-  
+
   // Event handler for checkbox elements
   const handleCheckboxChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     handleChange(field, e.target.checked);
@@ -193,7 +193,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
             <div>
               <h4 className="text-sm font-medium text-amber-800">High-Risk Category</h4>
               <p className="text-sm text-amber-700 mt-1">
-                {formData.category} costs are automatically flagged for investigation due to their risk profile. 
+                {formData.category} costs are automatically flagged for investigation due to their risk profile.
                 Ensure all documentation is complete and accurate.
               </p>
             </div>
@@ -296,14 +296,14 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
           <Upload className="w-5 h-5 text-blue-600" />
           <h3 className="text-lg font-medium text-gray-900">Document Attachment (Required)</h3>
         </div>
-        
+
         <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
           <div className="flex items-start space-x-3">
             <AlertTriangle className="w-5 h-5 text-blue-600 mt-0.5" />
             <div>
               <h4 className="text-sm font-medium text-blue-800">Documentation Requirement</h4>
               <p className="text-sm text-blue-700 mt-1">
-                Every cost entry must include either a receipt/document upload OR a valid explanation for missing documentation. 
+                Every cost entry must include either a receipt/document upload OR a valid explanation for missing documentation.
                 Items without proper documentation will be automatically flagged for investigation.
               </p>
             </div>
@@ -412,7 +412,7 @@ const CostForm: React.FC<CostFormProps> = ({ tripId, cost, onSubmit, onCancel })
         <Button
           type="button"
           variant="outline"
-          onClick={onClick}
+          onClick={onCancel}
           icon={<X className="w-4 h-4" />}
         >
           Cancel
