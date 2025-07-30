@@ -1,22 +1,6 @@
 import React, { useState } from 'react';
 import QAReviewPanel from './QAReviewPanel';
-
-interface TaskHistoryEntry {
-  id: string;
-  taskId: string;
-  action: string;
-  timestamp: string;
-  userId: string;
-  notes?: string;
-}
-
-interface JobCardTask {
-  id: string;
-  title: string;
-  description?: string;
-  status: string;
-  notes?: string;
-}
+import { TaskHistoryEntry, JobCardTask } from '../../types';
 
 const QAReviewPanelContainer: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
