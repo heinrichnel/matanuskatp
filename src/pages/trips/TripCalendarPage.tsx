@@ -13,7 +13,7 @@ import Button from "../../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../../components/ui/card";
 import LoadingIndicator from "../../components/ui/LoadingIndicator";
 import ErrorMessage from "../../components/ui/ErrorMessage"; // Assuming you have this
-import { useAppContext } from "../../context/AppContext"; // Keep if isLoading is needed for global app state
+import { useAppContext } from "../../context/AppContext";
 import { useTrips } from "../../hooks/useTrips"; // Import the new useTrips hook
 import { Trip } from "../../types/trip"; // Import Trip interface
 import { formatDate } from "../../utils/helpers"; // Import formatDate function
