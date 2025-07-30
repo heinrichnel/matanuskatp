@@ -256,20 +256,22 @@ export const UIConnector: React.FC = () => {
 
   // Helper function to determine which section a button belongs to
   const getSectionType = (button: HTMLButtonElement): 'buttons' | 'forms' | 'links' | null => {
-      const section = button.closest('[style*="margin-bottom: 10px"]');
-      if (!section) return null;
+    const section = button.closest('[style*="margin-bottom: 10px"]');
+    if (!section) return null;
 
-      const titleElement = section.querySelector('[style*="font-weight: bold"]');
-      if (!titleElement) return null;
+    const titleElement = section.querySelector('[style*="font-weight: bold"]');
+    if (!titleElement) return null;
 
-      const title = titleElement.textContent?.toLowerCase();
-      if (title?.includes('button')) return 'buttons';
-      if (title?.includes('form')) return 'forms';
-      if (title?.includes('link')) return 'links';
+    const title = titleElement.textContent?.toLowerCase();
+    if (title?.includes('button')) return 'buttons';
+    if (title?.includes('form')) return 'forms';
+    if (title?.includes('link')) return 'links';
 
-      return null;
-    }
+    return null;
+  }
 
+  // If collapsed view, only show button
+  if (!isOpen) {
     return (
       <button
         style={{
