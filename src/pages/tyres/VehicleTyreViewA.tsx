@@ -204,7 +204,7 @@ export const VehicleTyreView: React.FC<VehicleTyreViewProps> = ({
                       <p className="text-sm text-gray-600">Position: {tyre.installation.position} | Pattern: {tyre.pattern}</p>
                       <p className="text-xs text-gray-500">
                         Tread: {tyre.condition.treadDepth}mm | Pressure: {tyre.condition.pressure} PSI |
-                        Miles: {tyre.milesRun.toLocaleString()}
+                        Miles: {tyre.kmRun.toLocaleString()}
                       </p>
                     </div>
                     <div className="text-right space-y-1">

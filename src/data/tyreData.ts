@@ -446,22 +446,8 @@ export const getTyreConditionColor = (status: TyreConditionStatus): string => {
   }
 };
 
-// Type for tyre configuration mapping
-export interface FleetTyreMapping {
-  fleetNo: string;
-  vehicleType: "horse" | "interlink" | "reefer" | "lmv" | "special";
-  positions: TyreAllocation[];
-}
-
-export interface TyreAllocation {
-  position: string;
-  tyreCode?: string;
-  brand?: string;
-  pattern?: string;
-  size?: string;
-  treadDepth?: number;
-  odometerAtFitment?: number;
-}
+// Use the FleetTyreMapping and TyreAllocation from types/tyre.ts
+import type { FleetTyreMapping, TyreAllocation, TyrePosition } from "@/types/tyre";
 
 // Get tyre configuration for a vehicle
 export const getVehicleTyreConfiguration = (vehicleId: string): FleetTyreMapping | null => {
@@ -480,44 +466,79 @@ export const getVehicleTyreConfiguration = (vehicleId: string): FleetTyreMapping
   // Create sample positions based on vehicle type
   let positions: TyreAllocation[] = [];
 
+  // Helper function to convert position string to TyrePosition
+  const toTyrePosition = (index: number): TyrePosition => {
+    if (vehicleType === "horse") {
+      // V1-V10 for horse
+      return `V${Math.min(index, 10) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}` as TyrePosition;
+    } else if (vehicleType === "interlink") {
+      // T1-T16 for interlink
+      return `T${Math.min(index, 16) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16}` as TyrePosition;
+    } else {
+      // P1-P6 for LMV or others
+      return `P${Math.min(index, 6) as 1 | 2 | 3 | 4 | 5 | 6}` as TyrePosition;
+    }
+  };
+
   if (vehicleType === "horse") {
     positions = Array.from({ length: 10 }, (_, i) => ({
-      position: `POS ${i + 1}`,
+      position: toTyrePosition(i + 1),
       tyreCode: `TY-${vehicleId}-${i + 1}`,
       brand: SAMPLE_TYRES[0]?.brand || "Unknown",
       pattern: SAMPLE_TYRES[0]?.pattern || "Unknown",
       size: SAMPLE_TYRES[0]?.size ? formatTyreSize(SAMPLE_TYRES[0].size) : "315/80R22.5",
       treadDepth: Math.floor(Math.random() * 10) + 5,
+      pressure: 800 + Math.floor(Math.random() * 50),
+      lastInspectionDate: new Date().toISOString().split("T")[0],
       odometerAtFitment: Math.floor(Math.random() * 50000),
+      kmSinceFitment: Math.floor(Math.random() * 10000),
     }));
-    positions.push({ position: "SP", tyreCode: `TY-${vehicleId}-SP` });
+    positions.push({
+      position: "SP" as TyrePosition,
+      tyreCode: `TY-${vehicleId}-SP`,
+    });
   } else if (vehicleType === "interlink") {
     positions = Array.from({ length: 16 }, (_, i) => ({
-      position: `POS ${i + 1}`,
+      position: toTyrePosition(i + 1),
       tyreCode: `TY-${vehicleId}-${i + 1}`,
       brand: SAMPLE_TYRES[0]?.brand || "Unknown",
       pattern: SAMPLE_TYRES[0]?.pattern || "Unknown",
       size: SAMPLE_TYRES[0]?.size ? formatTyreSize(SAMPLE_TYRES[0].size) : "315/80R22.5",
       treadDepth: Math.floor(Math.random() * 10) + 5,
+      pressure: 800 + Math.floor(Math.random() * 50),
+      lastInspectionDate: new Date().toISOString().split("T")[0],
       odometerAtFitment: Math.floor(Math.random() * 50000),
+      kmSinceFitment: Math.floor(Math.random() * 10000),
     }));
-    positions.push({ position: "SP", tyreCode: `TY-${vehicleId}-SP1` });
-    positions.push({ position: "SP", tyreCode: `TY-${vehicleId}-SP2` });
+    positions.push({
+      position: "SP" as TyrePosition,
+      tyreCode: `TY-${vehicleId}-SP1`,
+    });
+    positions.push({
+      position: "SP" as TyrePosition,
+      tyreCode: `TY-${vehicleId}-SP2`,
+    });
   } else {
     positions = Array.from({ length: 6 }, (_, i) => ({
-      position: `POS ${i + 1}`,
+      position: toTyrePosition(i + 1),
       tyreCode: `TY-${vehicleId}-${i + 1}`,
       brand: SAMPLE_TYRES[0]?.brand || "Unknown",
       pattern: SAMPLE_TYRES[0]?.pattern || "Unknown",
       size: SAMPLE_TYRES[0]?.size ? formatTyreSize(SAMPLE_TYRES[0].size) : "315/80R22.5",
       treadDepth: Math.floor(Math.random() * 10) + 5,
+      pressure: 800 + Math.floor(Math.random() * 50),
+      lastInspectionDate: new Date().toISOString().split("T")[0],
       odometerAtFitment: Math.floor(Math.random() * 50000),
+      kmSinceFitment: Math.floor(Math.random() * 10000),
     }));
-    positions.push({ position: "SP", tyreCode: `TY-${vehicleId}-SP` });
+    positions.push({
+      position: "SP" as TyrePosition,
+      tyreCode: `TY-${vehicleId}-SP`,
+    });
   }
 
   return {
-    fleetNo: vehicleId,
+    fleetNumber: vehicleId,
     vehicleType,
     positions,
   };
