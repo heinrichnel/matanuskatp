@@ -66,20 +66,20 @@ export interface WialonCounters {
 
 /**
  * Comprehensive type for Wialon unit data
- * 
+ *
  * This interface supports two access patterns:
  * 1. Property-based access: unit.id, unit.name, unit.lastPosition, etc.
  * 2. Method-based access: unit.getId(), unit.getName(), unit.getPosition(), etc.
- * 
+ *
  * Both patterns are supported to ensure compatibility with different versions of the Wialon SDK
  * and different coding styles. Your code should check for the existence of properties or methods
  * before using them.
- * 
+ *
  * @example
  * // Safe property access with fallback to method
  * const id = unit.id ?? (unit.getId ? unit.getId() : undefined);
  * const name = unit.name ?? (unit.getName ? unit.getName() : undefined);
- * 
+ *
  * // Safe position access
  * const position = unit.lastPosition ?? (unit.getPosition ? unit.getPosition() : undefined);
  */
@@ -102,7 +102,7 @@ export interface WialonUnit {
 
   // Position data
   lastPosition?: WialonPosition;
-  getPosition?: () => WialonPosition;
+  getPosition?: () => WialonPosition | undefined;
 
   // Vehicle profile information
   profile: {

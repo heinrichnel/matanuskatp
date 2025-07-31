@@ -1,6 +1,6 @@
 // src/pages/wialon/hooks/useWialonUnits.ts
 import { useCallback, useEffect, useState } from "react";
-import { WialonUnit } from "../../../types/wialon";
+import { WialonUnit, WialonPosition } from "../../../types/wialon";
 
 // --- MOCK DATA FOR DEMONSTRATION ---
 // In a real implementation, this would be replaced with actual API calls
@@ -114,7 +114,7 @@ interface UseWialonUnitsResult {
   refreshUnits: () => void;
   getUnitByUID: (uid: string) => WialonUnit | undefined;
   unitUIDs: string[]; // Explicitly exposing UIDs for the front-end
-  
+
   // Helper functions for safe property access
   safeGetUnitId: (unit: WialonUnit) => number | undefined;
   safeGetUnitName: (unit: WialonUnit) => string | undefined;
@@ -237,7 +237,15 @@ export function useWialonUnits(): UseWialonUnitsResult {
    */
   const getUnitByUID = useCallback(
     (uid: string): WialonUnit | undefined => {
-      return units.find((unit) => unit.uid === uid);
+      return units.find((unit) => {
+        // Check property-based access first
+        if (unit.uid === uid) return true;
+
+        // Check method-based access if available
+        if (typeof unit.getUID === 'function' && unit.getUID() === uid) return true;
+
+        return false;
+      });
     },
     [units]
   );
@@ -247,7 +255,10 @@ export function useWialonUnits(): UseWialonUnitsResult {
    * @returns Array of all unit UIDs
    */
   const getAllUnitUIDs = useCallback((): string[] => {
-    return units.map((unit) => unit.uid);
+    return units.map((unit) => {
+      // Get UID using property first, then method, then fallback to empty string
+      return unit.uid || (unit.getUID ? unit.getUID() : '') || '';
+    });
   }, [units]);
 
   /**
@@ -265,6 +276,19 @@ export function useWialonUnits(): UseWialonUnitsResult {
   // Calculate the UIDs array for direct access
   const unitUIDs = getAllUnitUIDs();
 
+  // Helper functions for safe property access regardless of API style
+  const safeGetUnitId = useCallback((unit: WialonUnit): number | undefined => {
+    return unit.id !== undefined ? unit.id : (unit.getId ? unit.getId() : undefined);
+  }, []);
+
+  const safeGetUnitName = useCallback((unit: WialonUnit): string | undefined => {
+    return unit.name !== undefined ? unit.name : (unit.getName ? unit.getName() : undefined);
+  }, []);
+
+  const safeGetUnitPosition = useCallback((unit: WialonUnit): WialonPosition | undefined => {
+    return unit.lastPosition !== undefined ? unit.lastPosition : (unit.getPosition ? unit.getPosition() : undefined);
+  }, []);
+
   // Exposing the functions and data needed for the front-end interface
   return {
     units,
@@ -273,5 +297,8 @@ export function useWialonUnits(): UseWialonUnitsResult {
     refreshUnits,
     getUnitByUID,
     unitUIDs,
+    safeGetUnitId,
+    safeGetUnitName,
+    safeGetUnitPosition
   };
 }
