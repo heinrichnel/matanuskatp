@@ -1,176 +1,81 @@
 // src/pages/wialon/hooks/useWialonUnits.ts
-import { useState, useEffect, useCallback } from 'react';
-import { getUnits } from '../../../api/wialon';
-import { WialonUnit } from '../../../types/wialon';
-import { ErrorCategory, ErrorSeverity, logError } from '../../../utils/errorHandling';
+import { useCallback, useEffect, useState } from "react";
+import { WialonUnit } from "../../../types/wialon";
 
 // --- MOCK DATA FOR DEMONSTRATION ---
 // In a real implementation, this would be replaced with actual API calls
-const createMockWialonUnit = (): WialonUnit => {
+
+/**
+ * Creates a mock Wialon unit with a specific UID and customizable properties
+ * @param uid The unique identifier for the vehicle
+ * @param name The display name of the vehicle
+ * @param brand The vehicle brand
+ * @param model The vehicle model
+ * @param lat Latitude position
+ * @param lng Longitude position
+ * @returns A mock Wialon unit
+ */
+const createMockUnitWithUID = (
+  uid: string,
+  name: string,
+  brand: string,
+  model: string,
+  lat: number,
+  lng: number
+): WialonUnit => {
   const now = Math.floor(Date.now() / 1000);
 
   return {
-    id: 352625693727222, // Fictional ID
-    name: "24H - AFQ 1325 (Int Sim)",
-    uid: "352625693727222",
-    phone: "+893141335236302",
+    id: parseInt(uid),
+    name: name,
+    uid: uid,
+    phone: `+${Math.floor(Math.random() * 9000000000) + 1000000000}`,
     hardwareType: "Teltonika FMB920",
     iconUrl: "A_39.png",
 
-    // Using the new lastPosition structure
     lastPosition: {
-      latitude: -25.8504, // Centurion, SA
-      longitude: 28.1882,
-      speed: 60,
+      latitude: lat,
+      longitude: lng,
+      speed: Math.floor(Math.random() * 100),
       timestamp: now,
-      course: 90,
-      satellites: 12
+      course: Math.floor(Math.random() * 360),
+      satellites: Math.floor(Math.random() * 15) + 5,
     },
 
-    // Profile with snake_case properties to match the interface
     profile: {
       vehicle_class: "heavy_truck",
-      registration_plate: "AFQ 1325",
-      brand: "Shacman",
-      model: "X3000",
-      year: "2020",
-      engine_model: "420HP",
+      registration_plate: name.split(" - ")[1],
+      brand: brand,
+      model: model,
+      year: `${2018 + Math.floor(Math.random() * 5)}`,
+      engine_model: `${300 + Math.floor(Math.random() * 300)}HP`,
       primary_fuel_type: "Diesel",
-      cargo_type: "32 Ton",
-      effective_capacity: "600",
-      axles: "2"
+      cargo_type: `${20 + Math.floor(Math.random() * 20)} Ton`,
+      effective_capacity: `${500 + Math.floor(Math.random() * 300)}`,
+      axles: `${Math.floor(Math.random() * 3) + 2}`,
     },
 
-    // For backward compatibility
     general: {
-      n: "24H - AFQ 1325 (Int Sim)",
-      uid: "352625693727222",
-      ph: "+893141335236302",
-      hw: "Teltonika FMB920"
-    }
-    {
-    "n": "21H - ADS 4865",
-    "uid": "352592576757652",
-    "ph": "+263773717259",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "22H - AGZ 3812 (ADS 4866)",
-    "uid": "864454077916934",
-    "ph": "+263781163420",
-    "hw": "Teltonika FMC920"
-  },
-  {
-    "n": "23H - AFQ 1324",
-    "uid": "864454077685642",
-    "ph": "N/A",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "24H - AFQ 1325 (Int Sim)",
-    "uid": "352625693727222",
-    "ph": "+893141335236302",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "26H - AFQ 1327 (Int Sim)",
-    "uid": "357544376232183",
-    "ph": "+89314183306",
-    "hw": "Teltonika FMB140"
-  },
-  {
-    "n": "28H - AFQ 1329 (Int Sim)",
-    "uid": "352592576816946",
-    "ph": "+8931182829",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "30H - AGL 4216",
-    "uid": "352592576336838",
-    "ph": "+263786347542",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "31H - AGZ 1963",
-    "uid": "864454077755831",
-    "ph": "+263781163420",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "32H - JF964 FS (Int sim)",
-    "uid": "867747072816653",
-    "ph": "+893141338056160",
-    "hw": "Teltonika FMC920"
-  },
-  {
-    "n": "33H - JFK 963 FS (Int sim)",
-    "uid": "864454079845115",
-    "ph": "+8931338056764",
-    "hw": "Teltonika FMC920"
-
-  }
-{
-    "n": "21H - ADS 4865",
-    "uid": "352592576757652",
-    "ph": "+263773717259",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "22H - AGZ 3812 (ADS 4866)",
-    "uid": "864454077916934",
-    "ph": "+263781163420",
-    "hw": "Teltonika FMC920"
-  },
-  {
-    "n": "23H - AFQ 1324",
-    "uid": "864454077685642",
-    "ph": "N/A",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "24H - AFQ 1325 (Int Sim)",
-    "uid": "352625693727222",
-    "ph": "+893141335236302",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "26H - AFQ 1327 (Int Sim)",
-    "uid": "357544376232183",
-    "ph": "+89314183306",
-    "hw": "Teltonika FMB140"
-  },
-  {
-    "n": "28H - AFQ 1329 (Int Sim)",
-    "uid": "352592576816946",
-    "ph": "+8931182829",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "30H - AGL 4216",
-    "uid": "352592576336838",
-    "ph": "+263786347542",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "31H - AGZ 1963",
-    "uid": "864454077755831",
-    "ph": "+263781163420",
-    "hw": "Teltonika FMB920"
-  },
-  {
-    "n": "32H - JF964 FS (Int sim)",
-    "uid": "867747072816653",
-    "ph": "+893141338056160",
-    "hw": "Teltonika FMC920"
-  },
-  {
-    "n": "33H - JFK 963 FS (Int sim)",
-    "uid": "864454079845115",
-    "ph": "+8931338056764",
-    "hw": "Teltonika FMC920"
-  }
-]
+      n: name,
+      uid: uid,
+      ph: `+${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+      hw: "Teltonika FMB920",
+    },
   };
+};
+/**
+ * Legacy function to create a default mock Wialon unit
+ * @deprecated Use createMockUnitWithUID instead
+ */
+const createMockWialonUnit = (): WialonUnit => {
+  return createMockUnitWithUID(
+    "352625693727222",
+    "24H - AFQ 1325 (Int Sim)",
+    "Shacman",
+    "X3000",
+    -25.8504,
+    28.1882
+  );
 };
 
 interface UseWialonUnitsResult {
@@ -178,11 +83,40 @@ interface UseWialonUnitsResult {
   loading: boolean;
   error: string | null;
   refreshUnits: () => void;
+  getUnitByUID: (uid: string) => WialonUnit | undefined;
+  unitUIDs: string[]; // Explicitly exposing UIDs for the front-end
 }
 
 /**
  * Custom hook to fetch and manage Wialon units data.
  * This version uses mock data for demonstration.
+ *
+ * @example
+ * // In a React component:
+ * const { units, unitUIDs, loading, error, getUnitByUID } = useWialonUnits();
+ *
+ * // Access all unit UIDs directly:
+ * console.log("Available unit UIDs:", unitUIDs);
+ *
+ * // Get a specific unit by UID:
+ * const specificUnit = getUnitByUID("352625693727223");
+ * if (specificUnit) {
+ *   console.log(`Found unit: ${specificUnit.name}`);
+ *   // Do something with the unit data
+ * }
+ *
+ * // Render a list of units with their UIDs:
+ * return (
+ *   <div>
+ *     {units.map(unit => (
+ *       <div key={unit.uid}>
+ *         <h3>{unit.name}</h3>
+ *         <p>UID: {unit.uid}</p>
+ *         <p>Brand: {unit.profile?.brand} {unit.profile?.model}</p>
+ *       </div>
+ *     ))}
+ *   </div>
+ * );
  */
 export function useWialonUnits(): UseWialonUnitsResult {
   const [units, setUnits] = useState<WialonUnit[]>([]);
@@ -195,15 +129,53 @@ export function useWialonUnits(): UseWialonUnitsResult {
     setError(null);
     try {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // In a real implementation, this would call the Wialon API
       // const fetchedUnits = await getUnits();
-      const mockUnit = createMockWialonUnit();
-      setUnits([mockUnit]);
+
+      // Create multiple mock units with different UIDs
+      const mockUnits = [
+        createMockUnitWithUID(
+          "352625693727222",
+          "24H - AFQ 1325",
+          "Shacman",
+          "X3000",
+          -25.8504,
+          28.1882
+        ),
+        createMockUnitWithUID(
+          "352625693727223",
+          "26H - BDC 4517",
+          "Mercedes",
+          "Actros",
+          -26.1037,
+          28.0473
+        ),
+        createMockUnitWithUID(
+          "352625693727224",
+          "31H - CFR 2198",
+          "Volvo",
+          "FH16",
+          -25.7461,
+          28.2292
+        ),
+        createMockUnitWithUID("352625693727225", "33H - DGT 8756", "MAN", "TGX", -26.2708, 28.1123),
+        createMockUnitWithUID(
+          "352625693727226",
+          "37H - EHW 3421",
+          "Scania",
+          "R500",
+          -25.9991,
+          27.9549
+        ),
+      ];
+
+      setUnits(mockUnits);
     } catch (err) {
       console.error("Failed to fetch Wialon units:", err);
-      const errorMessage = "Failed to load Wialon units. Please check your connection or Wialon token.";
+      const errorMessage =
+        "Failed to load Wialon units. Please check your connection or Wialon token.";
       setError(errorMessage);
       setUnits([]); // Clear units on error
     } finally {
@@ -216,8 +188,56 @@ export function useWialonUnits(): UseWialonUnitsResult {
   }, [fetchWialonUnits, refreshCounter]);
 
   const refreshUnits = () => {
-    setRefreshCounter(prev => prev + 1);
+    setRefreshCounter((prev) => prev + 1);
   };
 
-  return { units, loading, error, refreshUnits };
+  /**
+   * Get a specific unit by its UID
+   * @param uid The UID of the unit to find
+   * @returns The unit with the matching UID or undefined if not found
+   */
+  /**
+   * Get a specific unit by its UID
+   * @param uid The UID of the unit to find
+   * @returns The unit with the matching UID or undefined if not found
+   */
+  const getUnitByUID = useCallback(
+    (uid: string): WialonUnit | undefined => {
+      return units.find((unit) => unit.uid === uid);
+    },
+    [units]
+  );
+
+  /**
+   * Get all unit UIDs for easy access in the frontend
+   * @returns Array of all unit UIDs
+   */
+  const getAllUnitUIDs = useCallback((): string[] => {
+    return units.map((unit) => unit.uid);
+  }, [units]);
+
+  /**
+   * Get all units by a specific brand
+   * @param brand The brand to filter by
+   * @returns Array of units matching the brand
+   */
+  const getUnitsByBrand = useCallback(
+    (brand: string): WialonUnit[] => {
+      return units.filter((unit) => unit.profile?.brand?.toLowerCase() === brand.toLowerCase());
+    },
+    [units]
+  );
+
+  // Calculate the UIDs array for direct access
+  const unitUIDs = getAllUnitUIDs();
+
+  // Exposing the functions and data needed for the front-end interface
+  return {
+    units,
+    loading,
+    error,
+    refreshUnits,
+    getUnitByUID,
+    unitUIDs,
+  };
 }
