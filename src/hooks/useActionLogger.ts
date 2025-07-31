@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import ActionLogger from '@/utils/actionLogger';
-import { ActionType, EntityType, ActionCategory } from '@/types/action-log';
+import { ActionType, EntityType, ActionCategory } from '@/../types/actionlog';
 import { DriverBehaviorEvent } from '@/types/trip';
 
 export const useActionLogger = () => {

@@ -1,10 +1,10 @@
 import { AlertTriangle, Calendar, CheckCircle, Clock, FileUp, Send, User, X } from "lucide-react";
 import React, { useState } from "react";
+import Button from "../../components/ui/Button";
 import { TextArea } from "../../components/ui/FormElements";
+import Modal from "../../components/ui/Modal_TEMP";
 import { useAppContext } from "../../context/AppContext";
 import { ActionItem } from "../../types/index";
-import Button from "../../components/ui/Button";
-import Modal from "../../components/ui/Modal";
 
 // ─── Utilities ───────────────────────────────────────────────────
 import { formatDate, formatDateTime } from "../../utils/helpers";
@@ -193,7 +193,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
               <TextArea
                 label="Reason for Delay *"
                 value={overdueReason}
-                onChange={(value) => setOverdueReason(value)}
+                onChange={(e) => setOverdueReason(e.target.value)}
                 placeholder="Explain why this action item is overdue..."
                 rows={2}
               />
@@ -268,7 +268,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
           <div className="flex space-x-2">
             <TextArea
               value={comment}
-              onChange={(value) => setComment(value)}
+              onChange={(e) => setComment(e.target.value)}
               placeholder="Add a comment..."
               rows={2}
               className="flex-1"
