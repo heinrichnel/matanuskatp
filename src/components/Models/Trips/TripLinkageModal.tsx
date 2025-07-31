@@ -1,3 +1,18 @@
+
+
+[{
+	"resource": "/workspaces/matanuskatp/src/pages/Compliance/ActionLog.tsx",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ children: Element; isOpen: boolean; onClose: () => void; title: string; maxWidth: string; }' is not assignable to type 'IntrinsicAttributes & ModalProps'.\n  Property 'maxWidth' does not exist on type 'IntrinsicAttributes & ModalProps'.",
+	"source": "ts",
+	"startLineNumber": 590,
+	"startColumn": 9,
+	"endLineNumber": 590,
+	"endColumn": 17,
+	"origin": "extHost2"
+}]
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../../context/AppContext';
 import Modal from '../../../components/ui/Modal';

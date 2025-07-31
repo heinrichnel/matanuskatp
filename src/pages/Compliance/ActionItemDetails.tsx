@@ -54,7 +54,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Action Item Details" maxWidth="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="Action Item Details" size="lg">
       <div className="space-y-6">
         {/* Header */}
         <div
