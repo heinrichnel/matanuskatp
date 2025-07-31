@@ -1,10 +1,10 @@
-// src/pages/WialonUnitsPage.tsx
+// src/pages/wialon/pages/WialonUnitsPage.tsx
 import React from "react";
 import { useWialonUnits } from "../hooks/useWialonUnits";
-import Card, { CardContent, CardHeader } from "../components/ui/Card";
-import Button from "../components/ui/Button";
-import LoadingIndicator from "../components/ui/LoadingIndicator";
-import ErrorMessage from "../components/ui/ErrorMessage";
+import Card, { CardContent, CardHeader } from "../../../components/ui/Card";
+import Button from "../../../components/ui/Button";
+import LoadingIndicator from "../../../components/ui/LoadingIndicator";
+import ErrorMessage from "../../../components/ui/ErrorMessage";
 import { Truck, RefreshCw, XCircle } from "lucide-react";
 
 const WialonUnitsPage: React.FC = () => {
@@ -79,9 +79,9 @@ const WialonUnitsPage: React.FC = () => {
                             {unit.profile?.brand} {unit.profile?.model}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {unit.lastPosition
-                              ? `${unit.lastPosition.y.toFixed(4)}, ${unit.lastPosition.x.toFixed(4)}`
-                              : "No data"}
+                            {unit.lastPosition && unit.lastPosition.y && unit.lastPosition.x
+                               ? `${unit.lastPosition.y.toFixed(4)}, ${unit.lastPosition.x.toFixed(4)}`
+                               : "No data"}
                           </td>
                         </tr>
                       ))

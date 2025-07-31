@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import PlaceSearch from '../../components/PlaceSearch';
-import { Location } from '../../types/mapTypes';
-import { MapPin, Search } from 'lucide-react';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader } from "../../components/ui/Card";
+import Button from "../../components/ui/Button";
+import PlaceSearch from "../../components/PlaceSearch";
+import { Location } from "../../types/mapTypes";
+import { MapPin, Search } from "lucide-react";
 
 const PlacesApiDemo: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-  
+
   const handlePlaceSelect = (location: Location) => {
     setSelectedLocation(location);
   };
@@ -15,17 +15,14 @@ const PlacesApiDemo: React.FC = () => {
   const openInGoogleMaps = () => {
     if (selectedLocation) {
       const { lat, lng } = selectedLocation;
-      window.open(
-        `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
-        '_blank'
-      );
+      window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, "_blank");
     }
   };
 
   return (
     <div className="container mx-auto py-6">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Google Places API Demo</h1>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card>
@@ -40,7 +37,7 @@ const PlacesApiDemo: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-        
+
         <div>
           <Card>
             <CardHeader>
@@ -59,11 +56,7 @@ const PlacesApiDemo: React.FC = () => {
                     <p>Longitude: {selectedLocation.lng.toFixed(6)}</p>
                     {selectedLocation.info && <p>Type: {selectedLocation.info}</p>}
                   </div>
-                  <Button 
-                    onClick={openInGoogleMaps}
-                    variant="primary"
-                    className="w-full"
-                  >
+                  <Button onClick={openInGoogleMaps} variant="primary" className="w-full">
                     Open in Google Maps
                   </Button>
                 </div>
@@ -77,7 +70,7 @@ const PlacesApiDemo: React.FC = () => {
           </Card>
         </div>
       </div>
-      
+
       <div className="mt-8">
         <Card>
           <CardHeader>
@@ -85,32 +78,34 @@ const PlacesApiDemo: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="prose max-w-none">
-              <p>This demo showcases the Google Places API integration in the application. You can:</p>
+              <p>
+                This demo showcases the Google Places API integration in the application. You can:
+              </p>
               <ul>
                 <li>Search for locations, businesses, and points of interest</li>
                 <li>Select from search results to get detailed location information</li>
                 <li>Use the selected location in your application logic</li>
               </ul>
-              
+
               <h3>Developer Notes</h3>
               <p>To use this functionality in your own components:</p>
               <pre className="bg-gray-100 p-4 rounded">
                 {`import { useGooglePlaces } from '../hooks/useGooglePlaces';
 
 const YourComponent = () => {
-  const { 
-    findPlaceFromText, 
-    places, 
-    loading, 
-    error 
+  const {
+    findPlaceFromText,
+    places,
+    loading,
+    error
   } = useGooglePlaces();
-  
+
   // Search for places
   await findPlaceFromText({
     input: "Airport",
     fields: ["name", "formatted_address", "geometry"]
   });
-  
+
   // Access the results
   console.log(places);
 };`}

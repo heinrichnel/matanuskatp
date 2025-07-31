@@ -1089,23 +1089,3 @@ export function getFlatRoutes(items: SidebarItem[]): SidebarItem[] {
   return routes;
 }
 
-{
-
-id: 'wialon',
-
-label: 'WIALON',
-
-icon: MapPinIcon,
-
-roles: ['Admin', 'Sub Admin'],
-
-children: [
-
-// ... existing Wialon items
-
-{ id: 'wialon-live-map', label: 'Live Wialon Map', path: '/wialon/live-map', icon: MapPinIcon, component: WialonLiveMapPage }
-
-]
-
-},
-

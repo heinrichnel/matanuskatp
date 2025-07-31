@@ -45,7 +45,7 @@ if (typeof window !== "undefined") {
 // Create mock data for offline/fallback mode
 const MOCK_UNITS: WialonUnit[] = [
   {
-    getId: () => 1,
+    getid: () => 1,
     getName: () => "Offline Vehicle 1",
     getPosition: () => ({ x: 28.2, y: -25.7, z: 0, s: 0, t: Date.now() / 1000 }),
     getIconUrl: () => "",
