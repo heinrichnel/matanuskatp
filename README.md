@@ -8,6 +8,8 @@ APppp is a comprehensive fleet management platform built with React, TypeScript,
 - Trip monitoring and optimization
 - Invoice management
 - Google Maps integration
+  - Places API for location search
+  - Maps visualization
 - Wialon integration (optional)
 
 ## Quick Start
@@ -64,11 +66,13 @@ For detailed information about these capabilities, see the [Resilience Improveme
 ## Mobile QR Integration Setup
 
 1. Install dependencies:
+
    ```
    npm install
    ```
 
 2. Add Capacitor to your project:
+
    ```
    npx cap init
    npx cap add android
@@ -76,6 +80,7 @@ For detailed information about these capabilities, see the [Resilience Improveme
    ```
 
 3. Build your app:
+
    ```
    npm run build
    npx cap sync
@@ -85,6 +90,12 @@ For detailed information about these capabilities, see the [Resilience Improveme
 4. In the mobile app, use the "Scan QR" button to scan codes and open in-app routes.
 
 5. Ensure QR codes generated point to valid in-app URLs.
+
+## Additional Documentation
+
+- [Google Places API Implementation](README.places-api.md)
+- [Environment Setup Guide](ENV_SETUP_GUIDE.md)
+- [Fleet Analytics Implementation](FLEET_ANALYTICS_README.md)
 
 ## License
 

@@ -188,6 +188,11 @@ const ActionItemDetails = lazy(() => import("./pages/Compliance/ActionItemDetail
 const ReportNewIncidentPage = lazy(() => import("./pages/Compliance/ReportNewIncidentPage"));
 
 /* -----------------------------
+ * Demo Pages
+ * ----------------------------- */
+const PlacesApiDemo = lazy(() => import("./pages/demos/PlacesApiDemo"));
+
+/* -----------------------------
  * 404
  * ----------------------------- */
 const NotFound = () => <div className="p-6">404 – Page not found</div>;
@@ -367,6 +372,9 @@ export const AppRoutes: React.FC = () => {
         <Route path="trip-calendar" element={withSuspense(TripCalendarTop)} />
         <Route path="incident/new" element={withSuspense(ReportNewIncidentPage)} />
         <Route path="missed-loads" element={withSuspense(MissedLoadsTracker)} />
+        
+        {/* Demo Pages */}
+        <Route path="demos/places-api" element={withSuspense(PlacesApiDemo)} />
 
         {/* 404 */}
         <Route path="*" element={<NotFound />} />
