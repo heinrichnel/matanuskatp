@@ -45,10 +45,15 @@ if (typeof window !== "undefined") {
 // Create mock data for offline/fallback mode
 const MOCK_UNITS: WialonUnit[] = [
   {
-    getid: () => 1,
-    getName: () => "Offline Vehicle 1",
-    getPosition: () => ({ x: 28.2, y: -25.7, z: 0, s: 0, t: Date.now() / 1000 }),
-    getIconUrl: () => "",
+    id: 1,
+    name: "Offline Vehicle 1",
+    uid: "offline-1",
+    lastPosition: { x: 28.2, y: -25.7, z: 0, s: 0, t: Date.now() / 1000 },
+    profile: {
+      registration_plate: "ABC123",
+      brand: "Toyota",
+      model: "Hilux"
+    }
   },
   {
     getId: () => 2,
@@ -217,11 +222,16 @@ export async function getUnits(): Promise<WialonUnit[]> {
 
         // Map and return the units
         return (json.items || []).map((item) => ({
-          getId: () => item.id,
-          getName: () => item.nm,
-          getPosition: () => item.pos,
-          getIconUrl: (size?: number) =>
-            item.ic ? `${item.ic}${size ? `?size=${size}` : ""}` : "",
+          id: item.id,
+          name: item.nm,
+          uid: `wialon-${item.id}`,
+          lastPosition: item.pos,
+          iconUrl: item.ic ? item.ic : "",
+          profile: {
+            registration_plate: `WL-${item.id}`,
+            brand: "Unknown",
+            model: "Unknown"
+          }
         }));
       } catch (error) {
         // Clear the timeout if there was an error

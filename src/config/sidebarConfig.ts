@@ -139,7 +139,8 @@ const WialonDashboard = PlaceholderComponent; // Main page
 const WialonUnitsPage = PlaceholderComponent;
 const WialonConfigPage = PlaceholderComponent;
 const WialonMapComponent = React.lazy(() => import("../components/Map/WialonMapComponent")); // Component, but can be a route target
-const WialonLiveMapPage = React.lazy(() => import('../../pages/WialonLiveMapPage'));
+// Import TripRoutePlannerPage for Wialon routes
+const TripRoutePlannerPage = React.lazy(() => import('../pages/wialon/TripRoutePlannerPage'));
 // ...
 
 // Tyres Module Pages
@@ -769,30 +770,30 @@ export const sidebarConfig: SidebarItem[] = [
       {
         id: "wialon-dashboard",
         label: "Wialon Dashboard",
-        path: "/wialon/dashboard",
+        path: "/maps/wialon",
         icon: HomeIcon,
         component: WialonDashboard,
       },
       {
         id: "wialon-units",
         label: "Wialon Units",
-        path: "/wialon/units",
+        path: "/maps/wialon/units",
         icon: TruckIcon,
         component: WialonUnitsPage,
       },
       {
         id: "wialon-config",
         label: "Wialon Configuration",
-        path: "/wialon/config",
+        path: "/maps/wialon/config",
         icon: Cog6ToothIcon,
         component: WialonConfigPage,
       },
       {
-        id: "wialon-live-map",
-        label: "Live Wialon Map",
-        path: "/wialon/map",
+        id: "wialon-routes",
+        label: "Wialon Routes",
+        path: "/maps/wialon/routes",
         icon: MapPinIcon,
-        component: WialonMapComponent,
+        component: TripRoutePlannerPage,
       },
     ],
   },
