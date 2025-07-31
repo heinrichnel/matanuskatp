@@ -109,10 +109,12 @@
     "dinero.js": "^1.9.1",
     "dotenv": "^17.2.0",
     "draft-js": "^0.11.7",
+    "exceljs": "^4.4.0",
     "express": "^4.21.2",
     "file-saver": "^2.0.5",
     "firebase": "^12.0.0",
     "firebase-admin": "^13.4.0",
+    "form-data": "^2.5.4",
     "googleapis": "^154.1.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
@@ -158,7 +160,7 @@
     "victory": "^37.3.6",
     "vite-plugin-ssr": "^0.4.142",
     "wialon": "^2.0.2",
-    "xlsx": "^0.18.5",
+    "xlsx": "0.18.5",
     "yup": "^1.6.1",
     "zod": "^3.25.76"
   },
@@ -207,6 +209,7 @@
     "autoprefixer": "^10.4.21",
     "axe-playwright": "^2.1.0",
     "bolt": "^0.24.10",
+    "cross-spawn": "^6.0.6",
     "cssnano": "^7.1.0",
     "cypress": "^14.5.1",
     "eslint": "^9.31.0",
@@ -226,6 +229,7 @@
     "madge": "^5.0.0",
     "nodemon": "^3.1.10",
     "postcss": "^8.5.6",
+    "postcss-import": "^16.1.1",
     "postcss-nesting": "^12.1.5",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.6.14",
@@ -240,7 +244,7 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.37.0",
     "unimport": "^5.2.0",
-    "vercel": "^44.4.1",
+    "vercel": "^44.6.5",
     "vite": "^7.0.6",
     "vitest": "^3.2.4"
   },
@@ -265,5 +269,11 @@
     "url": "https://github.com/heinrichnel/matanuskatp/issues"
   },
   "homepage": "https://github.com/heinrichnel/matanuskatp#readme",
-  "keywords": []
+  "keywords": [],
+  "resolutions": {
+    "cross-spawn": "6.0.6",
+    "form-data": "2.5.4",
+    "path-to-regexp": "6.2.2",
+    "tough-cookie": "4.1.3"
+  }
 }

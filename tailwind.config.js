@@ -18,68 +18,6 @@ module.exports = {
           "sans-serif",
         ],
       },
-      colors: {
-        primary: {
-          50: "#f0f9ff",
-          100: "#e0f2fe",
-          200: "#bae6fd",
-          300: "#7dd3fc",
-          400: "#38bdf8",
-          500: "#0ea5e9",
-          600: "#0284c7",
-          700: "#0369a1",
-          800: "#075985",
-          900: "#0c4a6e",
-          950: "#082f49",
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-        },
-        secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
-        },
-        warning: {
-          DEFAULT: "#ffb703",
-        },
-        error: {
-          DEFAULT: "#d90429",
-        },
-        success: {
-          DEFAULT: "#2a9d8f",
-        },
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
-        popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
-        },
-        muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
-        },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        chart: {
-          1: "hsl(var(--chart-1))",
-          2: "hsl(var(--chart-2))",
-          3: "hsl(var(--chart-3))",
-          4: "hsl(var(--chart-4))",
-          5: "hsl(var(--chart-5))",
-        },
-      },
       boxShadow: {
         card: "0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)",
         dropdown: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
@@ -109,37 +47,10 @@ module.exports = {
         "2xl": "1rem",
         full: "9999px",
       },
-      ringOpacity: {
-        0: "0",
-        5: "0.05",
-        10: "0.10",
-        20: "0.20",
-        25: "0.25",
-        30: "0.30",
-        40: "0.40",
-        50: "0.50",
-        60: "0.60",
-        70: "0.70",
-        75: "0.75",
-        80: "0.80",
-        90: "0.90",
-        95: "0.95",
-        100: "1",
-      },
-      ringWidth: {
-        DEFAULT: "3px",
-        0: "0px",
-        1: "1px",
-        2: "2px",
-        4: "4px",
-        8: "8px",
-      },
+      // You do not need to redefine colors here if using CSS variables!
     },
   },
-  plugins: [require("tailwindcss-animate")],
-  // Disable ring-opacity utility to avoid build errors
-  corePlugins: {
-    ringOpacity: false,
-  },
-  // darkMode: 'class' // Voeg by indien jy dark mode wil gebruik
+  plugins: [
+    require("tailwindcss-animate"),
+  ],
 };
