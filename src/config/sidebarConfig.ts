@@ -141,6 +141,7 @@ const WialonConfigPage = PlaceholderComponent;
 const WialonMapComponent = React.lazy(() => import("../components/Map/WialonMapComponent")); // Component, but can be a route target
 // Import TripRoutePlannerPage for Wialon routes
 const TripRoutePlannerPage = React.lazy(() => import('../pages/wialon/TripRoutePlannerPage'));
+const WialonLiveMapPage = React.lazy(() => import('../pages/wialon/pages/WialonLiveMapPage'));
 // ...
 
 // Tyres Module Pages
@@ -794,6 +795,13 @@ export const sidebarConfig: SidebarItem[] = [
         path: "/maps/wialon/routes",
         icon: MapPinIcon,
         component: TripRoutePlannerPage,
+      },
+      {
+        id: "wialon-live-map",
+        label: "Live Map",
+        path: "/maps/wialon/live-map",
+        icon: MapPinIcon,
+        component: WialonLiveMapPage,
       },
     ],
   },

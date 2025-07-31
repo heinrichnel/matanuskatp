@@ -68,18 +68,25 @@ export interface WialonCounters {
  * Comprehensive type for Wialon unit data
  */
 export interface WialonUnit {
-  // Core identification
-  id: number; // Unique ID (from Wialon)
-  name: string; // Unit name (e.g., "21H - ADS 4865")
-  uid: string; // Wialon unique ID
+  // Core identification - can be properties or functions
+  id?: number; // Unique ID (from Wialon)
+  getId?: () => number; // Function to get ID
+
+  name?: string; // Unit name (e.g., "21H - ADS 4865")
+  getName?: () => string; // Function to get name
+
+  uid?: string; // Wialon unique ID
+  getUID?: () => string; // Function to get UID
 
   // Contact and hardware details
   phone?: string; // e.g., "+263773717259"
   hardwareType?: string; // e.g., "Teltonika FMB920"
   iconUrl?: string; // URL for the unit's icon (e.g., "A_39.png")
+  getIconUrl?: () => string; // Function to get icon URL
 
   // Position data
   lastPosition?: WialonPosition;
+  getPosition?: () => WialonPosition;
 
   // Vehicle profile information
   profile: {

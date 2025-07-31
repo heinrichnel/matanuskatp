@@ -46,20 +46,37 @@ if (typeof window !== "undefined") {
 const MOCK_UNITS: WialonUnit[] = [
   {
     id: 1,
+    getId: () => 1,
     name: "Offline Vehicle 1",
+    getName: () => "Offline Vehicle 1",
     uid: "offline-1",
+    getUID: () => "offline-1",
     lastPosition: { x: 28.2, y: -25.7, z: 0, s: 0, t: Date.now() / 1000 },
+    getPosition: () => ({ x: 28.2, y: -25.7, z: 0, s: 0, t: Date.now() / 1000 }),
+    iconUrl: "",
+    getIconUrl: () => "",
     profile: {
       registration_plate: "ABC123",
       brand: "Toyota",
-      model: "Hilux"
-    }
+      model: "Hilux",
+    },
   },
   {
+    id: 2,
     getId: () => 2,
+    name: "Offline Vehicle 2",
     getName: () => "Offline Vehicle 2",
+    uid: "offline-2",
+    getUID: () => "offline-2",
+    lastPosition: { x: 28.3, y: -25.8, z: 0, s: 0, t: Date.now() / 1000 },
     getPosition: () => ({ x: 28.3, y: -25.8, z: 0, s: 0, t: Date.now() / 1000 }),
+    iconUrl: "",
     getIconUrl: () => "",
+    profile: {
+      registration_plate: "XYZ789",
+      brand: "Ford",
+      model: "Ranger",
+    },
   },
 ];
 
@@ -222,16 +239,27 @@ export async function getUnits(): Promise<WialonUnit[]> {
 
         // Map and return the units
         return (json.items || []).map((item) => ({
+          // Support both property access and method access
           id: item.id,
+          getId: () => item.id,
+
           name: item.nm,
+          getName: () => item.nm,
+
           uid: `wialon-${item.id}`,
+          getUID: () => `wialon-${item.id}`,
+
           lastPosition: item.pos,
+          getPosition: () => item.pos,
+
           iconUrl: item.ic ? item.ic : "",
+          getIconUrl: () => (item.ic ? item.ic : ""),
+
           profile: {
             registration_plate: `WL-${item.id}`,
             brand: "Unknown",
-            model: "Unknown"
-          }
+            model: "Unknown",
+          },
         }));
       } catch (error) {
         // Clear the timeout if there was an error

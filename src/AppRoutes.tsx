@@ -171,6 +171,7 @@ const WialonConfigPage = lazy(() => import("./pages/wialon/wilonconfig/WialonCon
 const WialonUnitsPage = lazy(() => import("./pages/wialon/WialonUnitsPage"));
 const WialonDashboard = lazy(() => import("./pages/wialon/WialonDashboard"));
 const TripRoutePlannerPage = lazy(() => import("./pages/wialon/TripRoutePlannerPage"));
+const WialonLiveMapPage = lazy(() => import("./pages/wialon/pages/WialonLiveMapPage"));
 const FleetLocationMapPage = lazy(() => import("./components/Map/pages/FleetLocationMapPage"));
 const WialonUnitExample = lazy(() => import("./pages/wialon/examples/WialonUnitExample"));
 
@@ -353,6 +354,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="wialon/config" element={withSuspense(WialonConfigPage)} />
           <Route path="wialon/units" element={withSuspense(WialonUnitsPage)} />
           <Route path="wialon/routes" element={withSuspense(TripRoutePlannerPage)} />
+          <Route path="wialon/live-map" element={withSuspense(WialonLiveMapPage)} />
           <Route path="wialon/example" element={withSuspense(WialonUnitExample)} />
           <Route path="fleet" element={withSuspense(FleetManagementPage)} />
           <Route path="fleet-map" element={withSuspense(FleetLocationMapPage)} />
@@ -372,7 +374,7 @@ export const AppRoutes: React.FC = () => {
         <Route path="trip-calendar" element={withSuspense(TripCalendarTop)} />
         <Route path="incident/new" element={withSuspense(ReportNewIncidentPage)} />
         <Route path="missed-loads" element={withSuspense(MissedLoadsTracker)} />
-        
+
         {/* Demo Pages */}
         <Route path="demos/places-api" element={withSuspense(PlacesApiDemo)} />
 
