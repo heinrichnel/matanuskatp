@@ -1,17 +1,8 @@
-// ─── React ───────────────────────────────────────────────────────
 import React from "react";
-
-// ─── Types ───────────────────────────────────────────────────────
 import { CARReport } from "../../types";
-
-// ─── UI Components ───────────────────────────────────────────────
 import Button from "../../components/ui/Button";
-import Modal from "../../components/ui/Modal";
-
-// ─── Icons ───────────────────────────────────────────────────────
+import Modal from "../../components/ui/modal";
 import { AlertTriangle, CheckCircle, Download, Edit, FileText, FileUp, X } from "lucide-react";
-
-// ─── Utilities ───────────────────────────────────────────────────
 import { formatDate, formatDateTime } from "../../utils/helpers";
 
 interface CARReportDetailsProps {
