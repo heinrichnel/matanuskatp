@@ -74,4 +74,6 @@ const Button: React.FC<ButtonProps> = ({
   </button>
 );
 
+// Export both as default and named export for backward compatibility
+export { Button };
 export default Button;

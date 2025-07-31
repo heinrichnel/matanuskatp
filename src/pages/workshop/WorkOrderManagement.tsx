@@ -307,7 +307,7 @@ export const WorkOrderManagement: React.FC = () => {
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50"
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring"
                   >
                     <option value="all">All Status</option>
                     <option value="initiated">Initiated</option>
@@ -320,7 +320,7 @@ export const WorkOrderManagement: React.FC = () => {
                   <select
                     value={filterPriority}
                     onChange={(e) => setFilterPriority(e.target.value)}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring focus:ring-opacity-50"
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring"
                   >
                     <option value="all">All Priorities</option>
                     <option value="critical">Critical</option>

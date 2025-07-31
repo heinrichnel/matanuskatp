@@ -1,74 +1,101 @@
-import { useEffect, useState } from "react";
-import { WIALON_API_URL, WIALON_SESSION_TOKEN } from "../utils/wialonConfig";
+// src/pages/wialon/hooks/useWialonUnits.ts
+import { useState, useEffect, useCallback } from 'react';
+import { getUnits } from '../../../api/wialon';
+import { WialonUnit } from '../../../types/wialon';
+import { ErrorCategory, ErrorSeverity, logError } from '../../../utils/errorHandling';
 
-export interface WialonUnitData {
-  id: number;
-  name: string;
-  pos?: { x: number; y: number; s: number; t: number };
+// --- MOCK DATA FOR DEMONSTRATION ---
+// In a real implementation, this would be replaced with actual API calls
+const createMockWialonUnit = (): WialonUnit => {
+  const now = Math.floor(Date.now() / 1000);
+
+  return {
+    id: 352625693727222, // Fictional ID
+    name: "24H - AFQ 1325 (Int Sim)",
+    uid: "352625693727222",
+    phone: "+893141335236302",
+    hardwareType: "Teltonika FMB920",
+    iconUrl: "A_39.png",
+
+    // Using the new lastPosition structure
+    lastPosition: {
+      latitude: -25.8504, // Centurion, SA
+      longitude: 28.1882,
+      speed: 60,
+      timestamp: now,
+      course: 90,
+      satellites: 12
+    },
+
+    // Profile with snake_case properties to match the interface
+    profile: {
+      vehicle_class: "heavy_truck",
+      registration_plate: "AFQ 1325",
+      brand: "Shacman",
+      model: "X3000",
+      year: "2020",
+      engine_model: "420HP",
+      primary_fuel_type: "Diesel",
+      cargo_type: "32 Ton",
+      effective_capacity: "600",
+      axles: "2"
+    },
+
+    // For backward compatibility
+    general: {
+      n: "24H - AFQ 1325 (Int Sim)",
+      uid: "352625693727222",
+      ph: "+893141335236302",
+      hw: "Teltonika FMB920"
+    }
+  };
+};
+
+interface UseWialonUnitsResult {
+  units: WialonUnit[];
+  loading: boolean;
+  error: string | null;
+  refreshUnits: () => void;
 }
 
-// Use the token from the centralized config
-const TOKEN = WIALON_SESSION_TOKEN;
-
-export function useWialonUnits(sdkReady: boolean = true) {
-  const [units, setUnits] = useState<WialonUnitData[]>([]);
-  const [loading, setLoading] = useState(false);
+/**
+ * Custom hook to fetch and manage Wialon units data.
+ * This version uses mock data for demonstration.
+ */
+export function useWialonUnits(): UseWialonUnitsResult {
+  const [units, setUnits] = useState<WialonUnit[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
-  useEffect(() => {
-    if (!sdkReady) return;
-
+  const fetchWialonUnits = useCallback(async () => {
     setLoading(true);
     setError(null);
+    try {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // @ts-ignore
-    const sess = window.wialon?.core?.Session.getInstance();
-    if (!sess) {
-      setError("Wialon SDK not loaded");
+      // In a real implementation, this would call the Wialon API
+      // const fetchedUnits = await getUnits();
+      const mockUnit = createMockWialonUnit();
+      setUnits([mockUnit]);
+    } catch (err) {
+      console.error("Failed to fetch Wialon units:", err);
+      const errorMessage = "Failed to load Wialon units. Please check your connection or Wialon token.";
+      setError(errorMessage);
+      setUnits([]); // Clear units on error
+    } finally {
       setLoading(false);
-      return;
     }
+  }, []);
 
-    function fetchUnits() {
-      const flags =
-        window.wialon.item.Item.dataFlag.base | window.wialon.item.Unit.dataFlag.lastMessage;
+  useEffect(() => {
+    fetchWialonUnits();
+  }, [fetchWialonUnits, refreshCounter]);
 
-      sess.loadLibrary("itemIcon");
-      sess.updateDataFlags(
-        [{ type: "type", data: "avl_unit", flags, mode: 0 }],
-        (code2: number) => {
-          if (code2) {
-            setError(window.wialon.core.Errors.getErrorText(code2));
-            setLoading(false);
-            return;
-          }
-          const arr = sess.getItems("avl_unit") as any[];
-          setUnits(
-            (arr || []).map((u) => ({
-              id: u.getId(),
-              name: u.getName(),
-              pos: u.getPosition ? u.getPosition() : undefined,
-            }))
-          );
-          setLoading(false);
-        }
-      );
-    }
+  const refreshUnits = () => {
+    setRefreshCounter(prev => prev + 1);
+  };
 
-    if (!sess.getCurrUser?.()) {
-      sess.initSession(WIALON_API_URL);
-      sess.loginToken(TOKEN, "", (code: number) => {
-        if (code) {
-          setError(window.wialon.core.Errors.getErrorText(code));
-          setLoading(false);
-          return;
-        }
-        fetchUnits();
-      });
-    } else {
-      fetchUnits();
-    }
-  }, [sdkReady]);
-
-  return { units, loading, error };
+  return { units, loading, error, refreshUnits };
 }

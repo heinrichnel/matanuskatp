@@ -1,26 +1,8 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    ringOpacity: {
-      0: "0",
-      5: "0.05",
-      10: "0.1",
-      20: "0.2",
-      25: "0.25",
-      30: "0.3",
-      40: "0.4",
-      50: "0.5",
-      60: "0.6",
-      70: "0.7",
-      75: "0.75",
-      80: "0.8",
-      90: "0.9",
-      95: "0.95",
-      100: "1",
-      DEFAULT: "0.5",
-    },
     extend: {
       fontFamily: {
         sans: [
@@ -104,54 +86,14 @@ export default {
         modal: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
       },
       fontSize: {
-        xs: [
-          "0.75rem",
-          {
-            lineHeight: "1rem",
-          },
-        ],
-        sm: [
-          "0.875rem",
-          {
-            lineHeight: "1.25rem",
-          },
-        ],
-        base: [
-          "1rem",
-          {
-            lineHeight: "1.5rem",
-          },
-        ],
-        lg: [
-          "1.125rem",
-          {
-            lineHeight: "1.75rem",
-          },
-        ],
-        xl: [
-          "1.25rem",
-          {
-            lineHeight: "1.75rem",
-          },
-        ],
-        "2xl": [
-          "1.5rem",
-          {
-            lineHeight: "2rem",
-          },
-        ],
-        "3xl": [
-          "1.875rem",
-          {
-            lineHeight: "2.25rem",
-          },
-        ],
-        "4xl": [
-          "2.25rem",
-          {
-            lineHeight: "2.5rem",
-          },
-        ],
+        xs: ["0.75rem", { lineHeight: "1rem" }],
+        sm: ["0.875rem", { lineHeight: "1.25rem" }],
+        base: ["1rem", { lineHeight: "1.5rem" }],
+        lg: ["1.125rem", { lineHeight: "1.75rem" }],
+        xl: ["1.25rem", { lineHeight: "1.75rem" }],
+        "2xl": ["1.5rem", { lineHeight: "2rem" }],
+        "3xl": ["1.875rem", { lineHeight: "2.25rem" }],
+        "4xl": ["2.25rem", { lineHeight: "2.5rem" }],
       },
       spacing: {
         72: "18rem",
@@ -167,8 +109,37 @@ export default {
         "2xl": "1rem",
         full: "9999px",
       },
+      ringOpacity: {
+        0: "0",
+        5: "0.05",
+        10: "0.10",
+        20: "0.20",
+        25: "0.25",
+        30: "0.30",
+        40: "0.40",
+        50: "0.50",
+        60: "0.60",
+        70: "0.70",
+        75: "0.75",
+        80: "0.80",
+        90: "0.90",
+        95: "0.95",
+        100: "1",
+      },
+      ringWidth: {
+        DEFAULT: "3px",
+        0: "0px",
+        1: "1px",
+        2: "2px",
+        4: "4px",
+        8: "8px",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
+  // Disable ring-opacity utility to avoid build errors
+  corePlugins: {
+    ringOpacity: false,
+  },
   // darkMode: 'class' // Voeg by indien jy dark mode wil gebruik
 };

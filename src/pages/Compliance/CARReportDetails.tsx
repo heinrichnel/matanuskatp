@@ -1,18 +1,58 @@
 import React from "react";
-import { CARReport } from "../../types";
-import Button from "../../components/ui/Button";
-import Modal from "../../components/ui/modal";
-import { AlertTriangle, CheckCircle, Download, Edit, FileText, FileUp, X } from "lucide-react";
+import Modals from "@/components/ui/Modals";
+import { Button } from "@/components/ui/Button";
+import { FileUp, CheckCircle, AlertTriangle, X, Download, FileText, Edit } from "lucide-react";
+
+// Helpers (assume you have these in your utils)
 import { formatDate, formatDateTime } from "../../utils/helpers";
+
+interface Attachment {
+  id: string;
+  filename: string;
+}
+
+interface CARReport {
+  reportNumber: string;
+  status: string;
+  severity: string;
+  dateDue: string;
+  responsibleReporter: string;
+  responsiblePerson: string;
+  referenceEventId?: string;
+  dateOfIncident: string;
+  createdAt: string;
+  clientReport: string;
+  problemIdentification: string;
+  causeAnalysisPeople?: string;
+  causeAnalysisMaterials?: string;
+  causeAnalysisEquipment?: string;
+  causeAnalysisMethods?: string;
+  causeAnalysisMetrics?: string;
+  causeAnalysisEnvironment?: string;
+  rootCauseAnalysis?: string;
+  correctiveActions?: string;
+  preventativeActionsImmediate?: string;
+  preventativeActionsLongTerm?: string;
+  financialImpact?: string;
+  generalComments?: string;
+  attachments?: Attachment[];
+  completedAt?: string;
+  completedBy?: string;
+}
 
 interface CARReportDetailsProps {
   isOpen: boolean;
   onClose: () => void;
-  report: CARReport;
   onEdit: () => void;
+  report: CARReport;
 }
 
-const CARReportDetails: React.FC<CARReportDetailsProps> = ({ isOpen, onClose, report, onEdit }) => {
+const CARReportDetails: React.FC<CARReportDetailsProps> = ({
+  isOpen,
+  onClose,
+  report,
+  onEdit,
+}) => {
   // Check if report is overdue
   const isOverdue = new Date(report.dateDue) < new Date() && report.status !== "completed";
 
@@ -59,11 +99,11 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({ isOpen, onClose, re
   };
 
   return (
-    <Modal
+    <Modals
       isOpen={isOpen}
       onClose={onClose}
       title={`CAR Report: ${report.reportNumber}`}
-      maxWidth="2xl"
+      size="xl"
     >
       <div className="space-y-6">
         {/* Report Header */}
@@ -72,10 +112,10 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({ isOpen, onClose, re
             report.status === "completed"
               ? "bg-green-50 border border-green-200"
               : isOverdue
-                ? "bg-red-50 border border-red-200"
-                : report.severity === "high"
-                  ? "bg-amber-50 border border-amber-200"
-                  : "bg-blue-50 border border-blue-200"
+              ? "bg-red-50 border border-red-200"
+              : report.severity === "high"
+              ? "bg-amber-50 border border-amber-200"
+              : "bg-blue-50 border border-blue-200"
           }`}
         >
           <div className="flex justify-between items-start">
@@ -83,14 +123,19 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({ isOpen, onClose, re
               <h3 className="text-lg font-medium text-gray-900">Corrective Action Report</h3>
               <div className="flex items-center space-x-2 mt-1">
                 <span
-                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(report.status)}`}
+                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusClass(
+                    report.status
+                  )}`}
                 >
                   {report.status === "in_progress"
                     ? "In Progress"
-                    : report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                    : report.status.charAt(0).toUpperCase() +
+                      report.status.slice(1).replace("_", " ")}
                 </span>
                 <span
-                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getSeverityClass(report.severity)}`}
+                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getSeverityClass(
+                    report.severity
+                  )}`}
                 >
                   {report.severity.toUpperCase()} Severity
                 </span>
@@ -114,31 +159,26 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({ isOpen, onClose, re
             <p className="text-sm text-gray-500">Responsible Reporter</p>
             <p className="font-medium">{report.responsibleReporter}</p>
           </div>
-
           <div className="space-y-2">
             <p className="text-sm text-gray-500">Responsible Person</p>
             <p className="font-medium">{report.responsiblePerson}</p>
           </div>
-
           {report.referenceEventId && (
             <div className="space-y-2">
               <p className="text-sm text-gray-500">Reference</p>
               <p className="font-medium">Driver Event #{report.referenceEventId.substring(0, 8)}</p>
             </div>
           )}
-
           <div className="space-y-2">
             <p className="text-sm text-gray-500">Date of Incident</p>
             <p className="font-medium">{formatDate(report.dateOfIncident)}</p>
           </div>
-
           <div className="space-y-2">
             <p className="text-sm text-gray-500">Date Due</p>
             <p className={`font-medium ${isOverdue ? "text-red-600" : ""}`}>
               {formatDate(report.dateDue)}
             </p>
           </div>
-
           <div className="space-y-2">
             <p className="text-sm text-gray-500">Created</p>
             <p className="font-medium">{formatDateTime(report.createdAt)}</p>
@@ -168,44 +208,32 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({ isOpen, onClose, re
           <h3 className="text-lg font-medium text-gray-900 mb-3">
             PRIMARY CAUSE ANALYSIS (FISHBONE FRAMEWORK)
           </h3>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">1. People (Manpower)</h4>
               <p className="whitespace-pre-line">{report.causeAnalysisPeople || "Not provided"}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">2. Materials</h4>
-              <p className="whitespace-pre-line">
-                {report.causeAnalysisMaterials || "Not provided"}
-              </p>
+              <p className="whitespace-pre-line">{report.causeAnalysisMaterials || "Not provided"}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">3. Equipment</h4>
-              <p className="whitespace-pre-line">
-                {report.causeAnalysisEquipment || "Not provided"}
-              </p>
+              <p className="whitespace-pre-line">{report.causeAnalysisEquipment || "Not provided"}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">
                 4. Methods/Systems/Processes
               </h4>
               <p className="whitespace-pre-line">{report.causeAnalysisMethods || "Not provided"}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">5. Metrics/Measurement</h4>
               <p className="whitespace-pre-line">{report.causeAnalysisMetrics || "Not provided"}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">6. Operating Environment</h4>
-              <p className="whitespace-pre-line">
-                {report.causeAnalysisEnvironment || "Not provided"}
-              </p>
+              <p className="whitespace-pre-line">{report.causeAnalysisEnvironment || "Not provided"}</p>
             </div>
           </div>
         </div>
@@ -221,29 +249,22 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({ isOpen, onClose, re
         {/* Actions */}
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-3">ACTIONS</h3>
-
           <div className="space-y-4">
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Corrective Actions</h4>
               <p className="whitespace-pre-line">{report.correctiveActions || "Not provided"}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">
                 Preventative Actions (Immediate)
               </h4>
-              <p className="whitespace-pre-line">
-                {report.preventativeActionsImmediate || "Not provided"}
-              </p>
+              <p className="whitespace-pre-line">{report.preventativeActionsImmediate || "Not provided"}</p>
             </div>
-
             <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
               <h4 className="text-sm font-medium text-gray-700 mb-2">
                 Preventative Actions (Medium/Long Term)
               </h4>
-              <p className="whitespace-pre-line">
-                {report.preventativeActionsLongTerm || "Not provided"}
-              </p>
+              <p className="whitespace-pre-line">{report.preventativeActionsLongTerm || "Not provided"}</p>
             </div>
           </div>
         </div>
@@ -254,7 +275,6 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({ isOpen, onClose, re
             <h4 className="text-sm font-medium text-gray-700 mb-2">Financial Impact</h4>
             <p className="whitespace-pre-line">{report.financialImpact || "Not provided"}</p>
           </div>
-
           <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
             <h4 className="text-sm font-medium text-gray-700 mb-2">General Comments</h4>
             <p className="whitespace-pre-line">{report.generalComments || "Not provided"}</p>
@@ -275,7 +295,13 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({ isOpen, onClose, re
                     <FileUp className="w-4 h-4 text-gray-500" />
                     <span className="text-sm font-medium">{attachment.filename}</span>
                   </div>
-                  <Button size="sm" variant="outline" onClick={onClick}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      alert(`Viewing attachment: ${attachment.filename}`)
+                    }
+                  >
                     View
                   </Button>
                 </div>
@@ -318,24 +344,29 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({ isOpen, onClose, re
 
         {/* Actions */}
         <div className="flex justify-end space-x-3 pt-4 border-t">
-          <Button variant="outline" onClick={onClick} icon={<X className="w-4 h-4" />}>
+          <Button variant="outline" onClick={onClose} icon={<X className="w-4 h-4" />}>
             Close
           </Button>
-
-          <Button variant="outline" onClick={onClick} icon={<Download className="w-4 h-4" />}>
+          <Button
+            variant="outline"
+            onClick={handleDownloadPDF}
+            icon={<Download className="w-4 h-4" />}
+          >
             Download PDF
           </Button>
-
-          <Button variant="outline" onClick={onClick} icon={<FileText className="w-4 h-4" />}>
+          <Button
+            variant="outline"
+            onClick={handleDownloadExcel}
+            icon={<FileText className="w-4 h-4" />}
+          >
             Download Excel
           </Button>
-
-          <Button onClick={onClick} icon={<Edit className="w-4 h-4" />}>
+          <Button onClick={onEdit} icon={<Edit className="w-4 h-4" />}>
             Edit Report
           </Button>
         </div>
       </div>
-    </Modal>
+    </Modals>
   );
 };
 

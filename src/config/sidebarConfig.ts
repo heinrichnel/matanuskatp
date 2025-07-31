@@ -139,6 +139,8 @@ const WialonDashboard = PlaceholderComponent; // Main page
 const WialonUnitsPage = PlaceholderComponent;
 const WialonConfigPage = PlaceholderComponent;
 const WialonMapComponent = React.lazy(() => import("../components/Map/WialonMapComponent")); // Component, but can be a route target
+const WialonLiveMapPage = React.lazy(() => import('../../pages/WialonLiveMapPage'));
+// ...
 
 // Tyres Module Pages
 const TyreManagementPage = React.lazy(() => import("../pages/tyres/TyreManagementPage")); // Main page
@@ -1086,3 +1088,24 @@ export function getFlatRoutes(items: SidebarItem[]): SidebarItem[] {
   });
   return routes;
 }
+
+{
+
+id: 'wialon',
+
+label: 'WIALON',
+
+icon: MapPinIcon,
+
+roles: ['Admin', 'Sub Admin'],
+
+children: [
+
+// ... existing Wialon items
+
+{ id: 'wialon-live-map', label: 'Live Wialon Map', path: '/wialon/live-map', icon: MapPinIcon, component: WialonLiveMapPage }
+
+]
+
+},
+

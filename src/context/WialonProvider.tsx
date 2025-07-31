@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getUnits, initializeWialon } from "../pages/wialon/types/wialon";
+import { getUnits, initializeWialon, isWialonInitialized } from "../api/wialon";
 import { getEnvVar } from "../utils/envUtils";
 
 // Define Wialon context type
@@ -10,9 +10,11 @@ interface WialonContextType {
   initialized: boolean;
   units: any[];
   error: Error | null;
+  token: string | null;
   login: () => void;
   logout: () => void;
   refreshUnits: () => Promise<any[]>;
+  setToken: (token: string) => void;
 }
 
 export const WialonContext = createContext<WialonContextType>({
@@ -22,9 +24,11 @@ export const WialonContext = createContext<WialonContextType>({
   initialized: false,
   units: [],
   error: null,
+  token: null,
   login: () => {},
   logout: () => {},
   refreshUnits: async () => [],
+  setToken: () => {},
 });
 
 export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
@@ -34,7 +38,11 @@ export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
   const [initialized, setInitialized] = useState(false);
   const [units, setUnits] = useState<any[]>([]);
   const [error, setError] = useState<Error | null>(null);
-  const TOKEN = getEnvVar("VITE_WIALON_SESSION_TOKEN", "");
+  const [token, setTokenState] = useState<string | null>(() => {
+    // Initialize from localStorage if available
+    const storedToken = localStorage.getItem('wialonToken');
+    return storedToken || getEnvVar("VITE_WIALON_SESSION_TOKEN", "");
+  });
 
   // Auto-initialize Wialon when component mounts
   useEffect(() => {
@@ -123,21 +131,49 @@ export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const login = async () => {
+  // Method to set token from external components (like WialonIntegration)
+  const setToken = (newToken: string) => {
+    // Store in state
+    setTokenState(newToken);
+
+    // Store in localStorage for persistence
+    localStorage.setItem('wialonToken', newToken);
+
+    // If we have a session, try to login with the new token
+    if (session) {
+      // Attempt to login with the new token
+      login(newToken);
+    }
+  };
+
+  const login = async (customToken?: string) => {
     if (!session) return;
 
     try {
       setInitializing(true);
-      session.initSession(
-        "https://hosting.wialon.com/?token=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053&lang=en"
-      );
-      session.loginToken(TOKEN, "", async (code: number) => {
+
+      // Use the provided token, or fall back to the state token
+      const tokenToUse = customToken || token;
+
+      if (!tokenToUse) {
+        setError(new Error("No token available for login"));
+        setInitializing(false);
+        return;
+      }
+
+      // Initialize the session
+      session.initSession("https://hosting.wialon.com");
+
+      // Login with the token
+      session.loginToken(tokenToUse, "", async (code: number) => {
         const success = code === 0;
         setLoggedIn(success);
 
         if (success) {
           setInitialized(true);
           await refreshUnits();
+        } else {
+          setError(new Error(`Login failed with code: ${code}`));
         }
         setInitializing(false);
       });
@@ -167,9 +203,11 @@ export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
         initialized,
         units,
         error,
+        token,
         login,
         logout,
         refreshUnits,
+        setToken,
       }}
     >
       {children}
