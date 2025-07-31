@@ -24,14 +24,23 @@ const createMockUnitWithUID = (
   lng: number
 ): WialonUnit => {
   const now = Math.floor(Date.now() / 1000);
+  const idNumber = parseInt(uid);
 
   return {
-    id: parseInt(uid),
+    // Support both property access and method access
+    id: idNumber,
+    getId: () => idNumber,
+
     name: name,
+    getName: () => name,
+
     uid: uid,
+    getUID: () => uid,
+
     phone: `+${Math.floor(Math.random() * 9000000000) + 1000000000}`,
     hardwareType: "Teltonika FMB920",
     iconUrl: "A_39.png",
+    getIconUrl: () => "A_39.png",
 
     lastPosition: {
       latitude: lat,
@@ -40,7 +49,27 @@ const createMockUnitWithUID = (
       timestamp: now,
       course: Math.floor(Math.random() * 360),
       satellites: Math.floor(Math.random() * 15) + 5,
+
+      // Wialon SDK format compatibility
+      x: lng,
+      y: lat,
+      s: Math.floor(Math.random() * 100),
+      t: now,
     },
+
+    // Method-based position access
+    getPosition: () => ({
+      latitude: lat,
+      longitude: lng,
+      speed: Math.floor(Math.random() * 100),
+      timestamp: now,
+      course: Math.floor(Math.random() * 360),
+      satellites: Math.floor(Math.random() * 15) + 5,
+      x: lng,
+      y: lat,
+      s: Math.floor(Math.random() * 100),
+      t: now,
+    }),
 
     profile: {
       vehicle_class: "heavy_truck",
@@ -85,6 +114,11 @@ interface UseWialonUnitsResult {
   refreshUnits: () => void;
   getUnitByUID: (uid: string) => WialonUnit | undefined;
   unitUIDs: string[]; // Explicitly exposing UIDs for the front-end
+  
+  // Helper functions for safe property access
+  safeGetUnitId: (unit: WialonUnit) => number | undefined;
+  safeGetUnitName: (unit: WialonUnit) => string | undefined;
+  safeGetUnitPosition: (unit: WialonUnit) => WialonPosition | undefined;
 }
 
 /**
