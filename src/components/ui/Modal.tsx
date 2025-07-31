@@ -18,7 +18,8 @@ const Modal: React.FC<ModalProps> = ({
   title,
   children,
   maxWidth = 'md',
-  size
+  size,
+  className = ''
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -98,7 +99,7 @@ const Modal: React.FC<ModalProps> = ({
           ref={modalRef}
           className={`inline-block w-full ${maxWidthClasses[finalMaxWidth as keyof typeof maxWidthClasses]} p-6 my-8
             overflow-hidden text-left align-middle transition-all transform bg-white
-            shadow-xl rounded-lg max-h-[90vh] flex flex-col`}
+            shadow-xl rounded-lg max-h-[90vh] flex flex-col ${className}`}
         >
           {/* Header */}
           <div className="flex items-center justify-between mb-4 border-b pb-4">

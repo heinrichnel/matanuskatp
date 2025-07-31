@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Trip, CustomerPerformance } from '../../types';
 import Card, { CardContent, CardHeader } from '../../components/ui/Card';
@@ -16,8 +15,6 @@ import {
   TrendingUp,
   Users
 } from 'lucide-react';
-
-// ─── Helper Functions ────────────────────────────────────────────
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
 

@@ -20,19 +20,19 @@ const ClientForm: React.FC<ClientFormProps> = ({
   isEditing = false
 }) => {
   const { addClient, updateClient } = useAppContext();
-  
+
   const [client, setClient] = useState<any>(initialValues);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sameAsBusiness, setSameAsBusiness] = useState(!initialValues.billingAddress);
-  
+
   useEffect(() => {
     // Initialize the form when it opens
     setClient(initialValues);
     setSameAsBusiness(!initialValues.billingAddress);
     setErrors({});
   }, [initialValues, isOpen]);
-  
+
   // Handle text input change
   const handleChange = (field: string, value: any) => {
     // Handle nested address fields
@@ -48,7 +48,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
     } else {
       setClient({ ...client, [field]: value });
     }
-    
+
     // Clear any error for this field
     if (errors[field]) {
       setErrors(prev => {
@@ -58,21 +58,21 @@ const ClientForm: React.FC<ClientFormProps> = ({
       });
     }
   };
-  
+
   // Handle tag changes
   const handleTagChange = (tagString: string) => {
     // Split the string by commas and filter out empty tags
     const tagArray = tagString.split(',')
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0);
-    
+
     setClient({ ...client, tags: tagArray });
   };
-  
+
   // Handle same as business address checkbox
   const handleSameAddressChange = (checked: boolean) => {
     setSameAsBusiness(checked);
-    
+
     if (checked) {
       // Copy business address to billing address
       setClient({
@@ -81,79 +81,79 @@ const ClientForm: React.FC<ClientFormProps> = ({
       });
     }
   };
-  
+
   // Validate form
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     // Required fields validation
     if (!client.name) newErrors.name = 'Client name is required';
     if (!client.type) newErrors.type = 'Client type is required';
     if (!client.contactPerson) newErrors.contactPerson = 'Contact person is required';
     if (!client.email) newErrors.email = 'Email is required';
     if (!client.phone) newErrors.phone = 'Phone is required';
-    
+
     // Address validation
     if (!client.address?.street) newErrors['address.street'] = 'Street is required';
     if (!client.address?.city) newErrors['address.city'] = 'City is required';
     if (!client.address?.country) newErrors['address.country'] = 'Country is required';
-    
+
     // Email format validation
     if (client.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     // Phone format validation - simple check for now
     if (client.phone && client.phone.length < 7) {
       newErrors.phone = 'Please enter a valid phone number';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
+
   // Handle form submission
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     try {
       setIsSubmitting(true);
-      
+
       // Prepare client data for saving
       const clientData: Client = {
         ...client,
         updatedAt: new Date().toISOString()
       };
-      
+
       // If not editing (creating new), set createdAt
       if (!isEditing) {
         clientData.createdAt = new Date().toISOString();
       }
-      
+
       // If same as business address is checked, copy the address
       if (sameAsBusiness) {
         clientData.billingAddress = { ...client.address };
       }
-      
+
       // Handle empty arrays or objects that should be undefined
       if (clientData.tags && clientData.tags.length === 0) {
         delete clientData.tags;
       }
-      
-      if (!clientData.billingAddress || 
-          (!clientData.billingAddress.street && 
-           !clientData.billingAddress.city && 
+
+      if (!clientData.billingAddress ||
+          (!clientData.billingAddress.street &&
+           !clientData.billingAddress.city &&
            !clientData.billingAddress.country)) {
         delete clientData.billingAddress;
       }
-      
+
       // Save the client
       if (isEditing) {
         await updateClient(clientData as Client);
       } else {
         await addClient(clientData as any);
       }
-      
+
       // Close the modal on success
       onClose();
     } catch (error) {
@@ -165,7 +165,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <Modal
       isOpen={isOpen}
@@ -182,14 +182,14 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 {isEditing ? 'Update Client Information' : 'Add a New Client to Your System'}
               </h4>
               <p className="text-sm text-blue-700 mt-1">
-                {isEditing 
+                {isEditing
                   ? 'Update the client details below to keep your client information up-to-date.'
                   : 'Fill in the details below to add a new client to your system.'}
               </p>
             </div>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Basic Information */}
           <div>
@@ -202,7 +202,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 placeholder="Enter client name"
                 error={errors.name}
               />
-              
+
               <Select
                 label="Client Type *"
                 value={client.type || ''}
@@ -213,7 +213,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 ]}
                 error={errors.type}
               />
-              
+
               <Select
                 label="Status *"
                 value={client.status || ''}
@@ -224,7 +224,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 ]}
                 error={errors.status}
               />
-              
+
               <Select
                 label="Industry"
                 value={client.industry || ''}
@@ -234,7 +234,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                   ...CLIENT_INDUSTRIES.map(industry => ({ label: industry, value: industry }))
                 ]}
               />
-              
+
               <Input
                 label="Tags (comma separated)"
                 value={client.tags ? client.tags.join(', ') : ''}
@@ -243,7 +243,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
               />
             </div>
           </div>
-          
+
           {/* Contact Information */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
@@ -255,7 +255,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 placeholder="Full name of primary contact"
                 error={errors.contactPerson}
               />
-              
+
               <Input
                 label="Email Address *"
                 value={client.email || ''}
@@ -264,7 +264,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 error={errors.email}
                 type="email"
               />
-              
+
               <Input
                 label="Phone Number *"
                 value={client.phone || ''}
@@ -272,7 +272,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 placeholder="Phone number"
                 error={errors.phone}
               />
-              
+
               <Input
                 label="Website"
                 value={client.website || ''}
@@ -282,7 +282,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
             </div>
           </div>
         </div>
-        
+
         {/* Business Address */}
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">Business Address</h3>
@@ -294,7 +294,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
               placeholder="Street address"
               error={errors['address.street']}
             />
-            
+
             <Input
               label="City *"
               value={client.address?.city || ''}
@@ -302,21 +302,21 @@ const ClientForm: React.FC<ClientFormProps> = ({
               placeholder="City"
               error={errors['address.city']}
             />
-            
+
             <Input
               label="State/Province"
               value={client.address?.state || ''}
               onChange={(value) => handleChange('address.state', value)}
               placeholder="State or province"
             />
-            
+
             <Input
               label="Postal Code"
               value={client.address?.postalCode || ''}
               onChange={(value) => handleChange('address.postalCode', value)}
               placeholder="Postal code"
             />
-            
+
             <Input
               label="Country *"
               value={client.address?.country || ''}
@@ -326,7 +326,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
             />
           </div>
         </div>
-        
+
         {/* Billing Address */}
         <div>
           <div className="flex justify-between items-center mb-4">
@@ -344,7 +344,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
               </label>
             </div>
           </div>
-          
+
           {!sameAsBusiness && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
@@ -354,7 +354,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 placeholder="Billing street address"
                 disabled={sameAsBusiness}
               />
-              
+
               <Input
                 label="City"
                 value={client.billingAddress?.city || ''}
@@ -362,7 +362,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 placeholder="Billing city"
                 disabled={sameAsBusiness}
               />
-              
+
               <Input
                 label="State/Province"
                 value={client.billingAddress?.state || ''}
@@ -370,7 +370,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 placeholder="Billing state or province"
                 disabled={sameAsBusiness}
               />
-              
+
               <Input
                 label="Postal Code"
                 value={client.billingAddress?.postalCode || ''}
@@ -378,7 +378,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 placeholder="Billing postal code"
                 disabled={sameAsBusiness}
               />
-              
+
               <Input
                 label="Country"
                 value={client.billingAddress?.country || ''}
@@ -389,7 +389,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
             </div>
           )}
         </div>
-        
+
         {/* Financial Details */}
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">Financial Details</h3>
@@ -403,21 +403,21 @@ const ClientForm: React.FC<ClientFormProps> = ({
                 { label: 'US Dollar (USD)', value: 'USD' }
               ]}
             />
-            
+
             <Input
               label="VAT Number"
               value={client.vatNumber || ''}
               onChange={(value) => handleChange('vatNumber', value)}
               placeholder="VAT or tax identification number"
             />
-            
+
             <Input
               label="Registration Number"
               value={client.registrationNumber || ''}
               onChange={(value) => handleChange('registrationNumber', value)}
               placeholder="Business registration number"
             />
-            
+
             <Input
               label="Payment Terms (Days)"
               type="number"
@@ -426,7 +426,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
               onChange={(e) => handleChange('paymentTerms', parseInt(e.target.value) || undefined)}
               placeholder="e.g., 30, 45, 60"
             />
-            
+
             <Input
               label="Credit Limit"
               type="number"
@@ -438,7 +438,7 @@ const ClientForm: React.FC<ClientFormProps> = ({
             />
           </div>
         </div>
-        
+
         {/* Notes */}
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">Notes</h3>
@@ -450,26 +450,26 @@ const ClientForm: React.FC<ClientFormProps> = ({
             rows={4}
           />
         </div>
-        
+
         {/* Error Message */}
         {errors.submit && (
           <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
             {errors.submit}
           </div>
         )}
-        
+
         {/* Form Actions */}
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClick}
+            onClick={onClose}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button
-            onClick={onClick}
+            onClick={handleSubmit}
             icon={<Save className="w-4 h-4" />}
             isLoading={isSubmitting}
             disabled={isSubmitting}
