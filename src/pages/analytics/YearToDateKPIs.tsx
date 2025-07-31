@@ -1,21 +1,12 @@
-// ─── React & State ───────────────────────────────────────────────
 import React, { useEffect, useMemo, useState } from "react";
-
-// ─── Types ───────────────────────────────────────────────────────
 import { Trip } from "../../types";
-
-// ─── Context ─────────────────────────────────────────────────────
 import { useAppContext } from "../../context/AppContext";
-
-// ─── UI Components ───────────────────────────────────────────────
 import Button from "../../components/ui/Button";
 import { Card } from "../../components/ui/card";
 import { CardHeader, CardContent } from "../../components/ui/card";
 import { Input } from "../../components/ui/FormElements";
-import { Modal } from "../../components/ui/modal";
+import { Modal } from "../../components/ui/Modal";
 import { Tooltip } from "../../components/ui/Tooltip";
-
-// ─── Icons ───────────────────────────────────────────────────────
 import {
   Activity,
   AlertTriangle,

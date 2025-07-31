@@ -1,15 +1,31 @@
 import React, { useEffect, useRef } from "react";
+import { X } from 'lucide-react';
+import Button from './Button';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title?: string;
+  title: string;
   children: React.ReactNode;
-  size?: "sm" | "md" | "lg" | "xl";
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl'; // For backward compatibility
+  className?: string; // Added className prop
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = "md" }) => {
+const Modal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  maxWidth = 'md',
+  size
+}) => {
   const modalRef = useRef<HTMLDivElement>(null);
+
+  // Use size prop for backward compatibility if provided
+  const finalMaxWidth = size ?
+    (size === 'xl' ? '2xl' : size) :
+    maxWidth;
 
   // Close modal when clicking outside
   useEffect(() => {
@@ -60,39 +76,50 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
 
   if (!isOpen) return null;
 
-  const sizeClasses = {
-    sm: "max-w-md",
-    md: "max-w-lg",
-    lg: "max-w-2xl",
-    xl: "max-w-4xl",
+  const maxWidthClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl'
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-      <div
-        ref={modalRef}
-        className={`bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col`}
-      >
-        {/* Modal Header */}
-        <div className="flex justify-between items-center px-6 py-4 border-b">
-          <h3 className="text-lg font-medium">{title}</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-500 focus:outline-none"
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        {/* Background overlay */}
+        <div
+          className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+          onClick={onClose}
+        />
 
-        {/* Modal Content */}
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        {/* Modal panel */}
+        <div
+          ref={modalRef}
+          className={`inline-block w-full ${maxWidthClasses[finalMaxWidth as keyof typeof maxWidthClasses]} p-6 my-8
+            overflow-hidden text-left align-middle transition-all transform bg-white
+            shadow-xl rounded-lg max-h-[90vh] flex flex-col`}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4 border-b pb-4">
+            <h3 className="text-lg font-medium text-gray-900">
+              {title}
+            </h3>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onClose}
+              className="p-1"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto">
+            {children}
+          </div>
+        </div>
       </div>
     </div>
   );

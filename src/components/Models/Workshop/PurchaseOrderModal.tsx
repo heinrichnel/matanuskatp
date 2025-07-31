@@ -99,16 +99,45 @@ export const PurchaseOrderModal: React.FC<POProps> = ({ po, onSave, onClose, onD
               <span className="ml-4 text-blue-500 underline">WO: {draft.linkedWorkOrderId}</span>
             )}
           </div>
-          <div>
-            <button onClick={onClose}>Close</button>
-            <button onClick={() => onDownloadPDF(draft.id)} className="ml-2">Download PDF</button>
-            {editMode
-              ? <>
-                  <button onClick={handleSave} className="ml-2">Save</button>
-                  <button onClick={handleCancel} className="ml-2">Cancel</button>
-                </>
-              : po.canEdit && <button onClick={() => setEditMode(true)} className="ml-2">Edit</button>
-            }
+          <div className="mt-6 flex items-center justify-end gap-x-6">
+            <button type="button" className="text-sm/6 font-semibold text-gray-900" onClick={onClose}>
+              Close
+            </button>
+            <button
+              type="button"
+              onClick={() => onDownloadPDF(draft.id)}
+              className="text-sm/6 font-semibold text-gray-900"
+            >
+              Download PDF
+            </button>
+            {editMode ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="text-sm/6 font-semibold text-gray-900"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Save
+                </button>
+              </>
+            ) : (
+              po.canEdit && (
+                <button
+                  type="button"
+                  onClick={() => setEditMode(true)}
+                  className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                  Edit
+                </button>
+              )
+            )}
           </div>
         </div>
         <div className="p-4 space-y-4">

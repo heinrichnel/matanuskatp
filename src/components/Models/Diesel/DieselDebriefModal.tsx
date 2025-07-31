@@ -1,27 +1,22 @@
-// ─── React ───────────────────────────────────────────────────────
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────
-
-// ─── UI Components ───────────────────────────────────────────────
-import Modal from '../../ui/Modal';
-import Button from '../../ui/Button';
-import Card, { CardContent } from '../../ui/Card';
-
-// ─── Icons ───────────────────────────────────────────────────────
 import {
   AlertTriangle,
-  TrendingDown,
+  CheckCircle,
   FileText,
   Flag,
-  CheckCircle,
   Fuel,
-  Printer} from 'lucide-react';
+  Printer,
+  TrendingDown,
+} from "lucide-react";
+import Button from "../../ui/Button";
+import Card, { CardContent } from "../../ui/Card";
+import Modal from "../../ui/Modal";
 
 // ─── Utilities ───────────────────────────────────────────────────
-import { formatDate } from '../../../utils/helpers';
-import jsPDF from 'jspdf';
-
+import jsPDF from "jspdf";
+import { formatDate } from "../../../utils/helpers";
 
 interface DieselRecord {
   id: string;
@@ -37,11 +32,11 @@ interface DieselRecord {
   kmPerLitre?: number;
   expectedKmPerLitre: number;
   efficiencyVariance: number;
-  performanceStatus: 'poor' | 'normal' | 'excellent';
+  performanceStatus: "poor" | "normal" | "excellent";
   requiresDebrief: boolean;
   toleranceRange: number;
   tripId?: string;
-  currency?: 'USD' | 'ZAR';
+  currency?: "USD" | "ZAR";
   isReeferUnit?: boolean;
   litresPerHour?: number;
   expectedLitresPerHour?: number;
@@ -58,7 +53,6 @@ interface DieselNorms {
   litresPerHour?: number;
 }
 
-
 interface DieselDebriefModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -70,41 +64,51 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
   isOpen,
   onClose,
   records,
+  norms,
 }) => {
   const [debriefNotes, setDebriefNotes] = useState<Record<string, string>>({});
   const [debriefDates, setDebriefDates] = useState<Record<string, string>>({});
   const [driverSignatures, setDriverSignatures] = useState<Record<string, boolean>>({});
 
-  const handleCompleteDebrief = () => {
-    // Implement the debrief completion logic here
-    console.log('Completing debrief with notes:', debriefNotes);
-    onClose();
-  };
-
   const handleNoteChange = (id: string, value: string) => {
-    setDebriefNotes(prev => ({ ...prev, [id]: value }));
+    setDebriefNotes((prev) => ({ ...prev, [id]: value }));
   };
 
   const handleDateChange = (id: string, value: string) => {
-    setDebriefDates(prev => ({ ...prev, [id]: value }));
+    setDebriefDates((prev) => ({ ...prev, [id]: value }));
   };
 
   const toggleSignature = (id: string) => {
-    setDriverSignatures(prev => ({ ...prev, [id]: !prev[id] }));
+    setDriverSignatures((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const generateCSV = () => {
     const rows = [
-      ['Fleet Number', 'Date', 'Driver', 'KM Reading', 'Litres', 'KM/L or L/hr', 'Expected', 'Variance (%)', 'Performance', 'Fuel Station', 'Total Cost', 'Debrief Notes', 'Debrief Date', 'Signed']
+      [
+        "Fleet Number",
+        "Date",
+        "Driver",
+        "KM Reading",
+        "Litres",
+        "KM/L or L/hr",
+        "Expected",
+        "Variance (%)",
+        "Performance",
+        "Fuel Station",
+        "Total Cost",
+        "Debrief Notes",
+        "Debrief Date",
+        "Signed",
+      ],
     ];
 
-    records.forEach(r => {
+    records.forEach((r) => {
       const efficiencyMetric = r.isReeferUnit
-        ? `${r.litresPerHour?.toFixed(2) || 'N/A'} L/hr`
-        : `${r.kmPerLitre?.toFixed(2) || 'N/A'} KM/L`;
+        ? `${r.litresPerHour?.toFixed(2) || "N/A"} L/hr`
+        : `${r.kmPerLitre?.toFixed(2) || "N/A"} KM/L`;
 
       const expectedMetric = r.isReeferUnit
-        ? `${r.expectedLitresPerHour?.toFixed(2) || '3.5'} L/hr`
+        ? `${r.expectedLitresPerHour?.toFixed(2) || "3.5"} L/hr`
         : `${r.expectedKmPerLitre.toString()} KM/L`;
 
       rows.push([
@@ -119,18 +123,18 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
         r.performanceStatus,
         r.fuelStation,
         r.totalCost.toFixed(2),
-        debriefNotes[r.id] || '',
-        debriefDates[r.id] || '',
-        driverSignatures[r.id] ? 'Yes' : 'No',
+        debriefNotes[r.id] || "",
+        debriefDates[r.id] || "",
+        driverSignatures[r.id] ? "Yes" : "No",
       ]);
     });
 
-    const csv = rows.map(row => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const csv = rows.map((row) => row.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute('download', `diesel-debrief-${formatDate(new Date())}.csv`);
+    link.setAttribute("download", `diesel-debrief-${formatDate(new Date())}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -144,22 +148,24 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
     // Add title
     doc.setFontSize(18);
     doc.setTextColor(0, 0, 128);
-    doc.text('Diesel Efficiency Debrief Report', pageWidth / 2, 15, { align: 'center' });
+    doc.text("Diesel Efficiency Debrief Report", pageWidth / 2, 15, { align: "center" });
 
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 22, { align: 'center' });
+    doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, 22, {
+      align: "center",
+    });
 
     // Add summary
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
-    doc.text('Summary:', 14, 30);
+    doc.text("Summary:", 14, 30);
 
     const summary = records.reduce(
       (acc, r) => {
         acc.total++;
         acc.variance += Math.abs(r.efficiencyVariance);
-        if (r.performanceStatus === 'poor') acc.poor++;
+        if (r.performanceStatus === "poor") acc.poor++;
         if (r.efficiencyVariance < -20) acc.critical++;
         acc.cost += r.totalCost;
         acc.litres += r.litresFilled;
@@ -175,7 +181,7 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
       }
     );
 
-    const avgVariance = summary.total ? (summary.variance / summary.total).toFixed(1) : '0.0';
+    const avgVariance = summary.total ? (summary.variance / summary.total).toFixed(1) : "0.0";
 
     doc.setFontSize(10);
     doc.text(`Total Records: ${summary.total}`, 20, 38);
@@ -185,18 +191,24 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
 
     // Individual record pages
     let yPos = 70;
+    let pageNum = 1;
 
     records.forEach((record, index) => {
       // Check if we need a new page
       if (yPos > 250) {
         doc.addPage();
         yPos = 20;
+        pageNum++;
       }
 
       // Record header
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 128);
-      doc.text(`Record #${index + 1}: Fleet ${record.fleetNumber}${record.isReeferUnit ? ' (Reefer)' : ''}`, 14, yPos);
+      doc.text(
+        `Record #${index + 1}: Fleet ${record.fleetNumber}${record.isReeferUnit ? " (Reefer)" : ""}`,
+        14,
+        yPos
+      );
       yPos += 8;
 
       // Record details
@@ -210,7 +222,7 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
       yPos += 6;
 
       if (record.isReeferUnit) {
-        doc.text(`Hours Operated: ${record.hoursOperated?.toFixed(1) || 'N/A'} hours`, 20, yPos);
+        doc.text(`Hours Operated: ${record.hoursOperated?.toFixed(1) || "N/A"} hours`, 20, yPos);
         yPos += 6;
       } else {
         doc.text(`KM Reading: ${record.kmReading.toLocaleString()}`, 20, yPos);
@@ -230,16 +242,24 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
       doc.text(`Litres Filled: ${record.litresFilled}`, 20, yPos);
       yPos += 6;
 
-      const currencySymbol = record.currency === 'USD' ? '$' : 'R';
+      const currencySymbol = record.currency === "USD" ? "$" : "R";
       doc.text(`Total Cost: ${currencySymbol}${record.totalCost.toFixed(2)}`, 20, yPos);
       yPos += 6;
 
       // Efficiency metrics
       doc.setTextColor(255, 0, 0);
       if (record.isReeferUnit) {
-        doc.text(`L/hr: ${record.litresPerHour?.toFixed(2) || 'N/A'} (Expected: ${record.expectedLitresPerHour?.toFixed(1) || '3.5'})`, 20, yPos);
+        doc.text(
+          `L/hr: ${record.litresPerHour?.toFixed(2) || "N/A"} (Expected: ${record.expectedLitresPerHour?.toFixed(1) || "3.5"})`,
+          20,
+          yPos
+        );
       } else {
-        doc.text(`KM/L: ${record.kmPerLitre?.toFixed(2) || 'N/A'} (Expected: ${record.expectedKmPerLitre})`, 20, yPos);
+        doc.text(
+          `KM/L: ${record.kmPerLitre?.toFixed(2) || "N/A"} (Expected: ${record.expectedKmPerLitre})`,
+          20,
+          yPos
+        );
       }
       yPos += 6;
 
@@ -251,25 +271,25 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
 
       // Debrief information
       doc.setTextColor(0, 100, 0);
-      doc.text(`Debrief Notes: ${debriefNotes[record.id] || 'None provided'}`, 20, yPos);
+      doc.text(`Debrief Notes: ${debriefNotes[record.id] || "None provided"}`, 20, yPos);
       yPos += 6;
 
-      doc.text(`Debrief Date: ${debriefDates[record.id] || 'Not set'}`, 20, yPos);
+      doc.text(`Debrief Date: ${debriefDates[record.id] || "Not set"}`, 20, yPos);
       yPos += 6;
 
-      doc.text(`Driver Signed: ${driverSignatures[record.id] ? 'Yes' : 'No'}`, 20, yPos);
+      doc.text(`Driver Signed: ${driverSignatures[record.id] ? "Yes" : "No"}`, 20, yPos);
       yPos += 15;
     });
 
     // Save the PDF
-    doc.save(`diesel-debrief-report-${new Date().toISOString().split('T')[0]}.pdf`);
+    doc.save(`diesel-debrief-report-${new Date().toISOString().split("T")[0]}.pdf`);
   };
 
   const summary = records.reduce(
     (acc, r) => {
       acc.total++;
       acc.variance += Math.abs(r.efficiencyVariance);
-      if (r.performanceStatus === 'poor') acc.poor++;
+      if (r.performanceStatus === "poor") acc.poor++;
       if (r.efficiencyVariance < -20) acc.critical++;
       acc.cost += r.totalCost;
       acc.litres += r.litresFilled;
@@ -285,7 +305,7 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
     }
   );
 
-  const avgVariance = summary.total ? (summary.variance / summary.total).toFixed(1) : '0.0';
+  const avgVariance = summary.total ? (summary.variance / summary.total).toFixed(1) : "0.0";
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Diesel Efficiency Debrief" size="xl">
@@ -324,48 +344,65 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
 
         {/* Records */}
         <div className="space-y-4 max-h-[50vh] overflow-y-auto">
-          {records.map(r => (
+          {records.map((r) => (
             <div key={r.id} className="border p-4 rounded-lg space-y-2 bg-gray-50">
               <div className="flex justify-between items-center">
                 <p className="text-sm font-medium text-gray-700">
-                  {r.fleetNumber}{r.isReeferUnit ? ' (Reefer)' : ''} - {r.driverName} ({r.date})
+                  {r.fleetNumber}
+                  {r.isReeferUnit ? " (Reefer)" : ""} - {r.driverName} ({r.date})
                 </p>
-                <span className={`text-xs px-2 py-1 rounded ${
-                  r.performanceStatus === 'poor'
-                    ? 'bg-red-100 text-red-700'
-                    : r.performanceStatus === 'normal'
-                    ? 'bg-yellow-100 text-yellow-700'
-                    : 'bg-green-100 text-green-700'
-                }`}>
+                <span
+                  className={`text-xs px-2 py-1 rounded ${
+                    r.performanceStatus === "poor"
+                      ? "bg-red-100 text-red-700"
+                      : r.performanceStatus === "normal"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-green-100 text-green-700"
+                  }`}
+                >
                   {r.performanceStatus.toUpperCase()}
                 </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs text-gray-600">
                 {r.isReeferUnit ? (
                   <>
-                    <div><strong>Hours:</strong> {r.hoursOperated?.toFixed(1) || 'N/A'}</div>
-                    <div><strong>L/Hour:</strong> {r.litresPerHour?.toFixed(2) || 'N/A'}</div>
-                    <div><strong>Expected:</strong> {r.expectedLitresPerHour?.toFixed(1) || '3.5'}</div>
+                    <div>
+                      <strong>Hours:</strong> {r.hoursOperated?.toFixed(1) || "N/A"}
+                    </div>
+                    <div>
+                      <strong>L/Hour:</strong> {r.litresPerHour?.toFixed(2) || "N/A"}
+                    </div>
+                    <div>
+                      <strong>Expected:</strong> {r.expectedLitresPerHour?.toFixed(1) || "3.5"}
+                    </div>
                   </>
                 ) : (
                   <>
-                    <div><strong>KM/L:</strong> {r.kmPerLitre?.toFixed(2) || 'N/A'}</div>
-                    <div><strong>Expected:</strong> {r.expectedKmPerLitre}</div>
+                    <div>
+                      <strong>KM/L:</strong> {r.kmPerLitre?.toFixed(2) || "N/A"}
+                    </div>
+                    <div>
+                      <strong>Expected:</strong> {r.expectedKmPerLitre}
+                    </div>
                   </>
                 )}
-                <div><strong>Variance:</strong> {r.efficiencyVariance.toFixed(1)}%</div>
-                <div><strong>Fuel Station:</strong> {r.fuelStation}</div>
+                <div>
+                  <strong>Variance:</strong> {r.efficiencyVariance.toFixed(1)}%
+                </div>
+                <div>
+                  <strong>Fuel Station:</strong> {r.fuelStation}
+                </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <textarea
                   placeholder="Debrief Notes"
-                  value={debriefNotes[r.id] || ''}
+                  value={debriefNotes[r.id] || ""}
                   onChange={(e) => handleNoteChange(r.id, e.target.value)}
                   className="w-full p-2 text-sm border rounded"
                 />
                 <input
                   type="date"
-                  value={debriefDates[r.id] || ''}
+                  value={debriefDates[r.id] || ""}
                   onChange={(e) => handleDateChange(r.id, e.target.value)}
                   className="border p-2 text-sm rounded"
                 />
@@ -385,17 +422,17 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
         {/* Footer */}
         <div className="flex justify-between items-center border-t pt-4">
           <p className="text-sm text-gray-600">
-            {records.length} record{records.length !== 1 ? 's' : ''} needing review
+            {records.length} record{records.length !== 1 ? "s" : ""} needing review
           </p>
           <div className="flex space-x-2">
-            <Button onClick={handleCompleteDebrief} icon={<CheckCircle className="w-4 h-4" />}>
-              Complete Debrief
+            <Button variant="outline" onClick={generateCSV} icon={<FileText className="w-4 h-4" />}>
+              Export CSV
             </Button>
             <Button variant="outline" onClick={generatePDF} icon={<Printer className="w-4 h-4" />}>
               Export PDF
             </Button>
-            <Button onClick={generateCSV} icon={<FileText className="w-4 h-4" />}>
-              Export CSV
+            <Button onClick={onClose} icon={<CheckCircle className="w-4 h-4" />}>
+              Complete Debrief
             </Button>
           </div>
         </div>
@@ -405,4 +442,3 @@ const DieselDebriefModal: React.FC<DieselDebriefModalProps> = ({
 };
 
 export default DieselDebriefModal;
-

@@ -1,10 +1,12 @@
 import { AlertTriangle, Calendar, CheckCircle, Clock, FileUp, Send, User, X } from "lucide-react";
 import React, { useState } from "react";
-import Button from "../../components/ui/Button";
 import { TextArea } from "../../components/ui/FormElements";
-import Modal from "../../components/ui/Modal";
 import { useAppContext } from "../../context/AppContext";
 import { ActionItem } from "../../types/index";
+import Button from "../../components/ui/Button";
+import Modal from "../../components/ui/Modal";
+
+// ─── Utilities ───────────────────────────────────────────────────
 import { formatDate, formatDateTime } from "../../utils/helpers";
 
 interface ActionItemDetailsProps {
@@ -51,13 +53,8 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
     setOverdueReason("");
   };
 
-  // Handle viewing attachment
-  const handleViewAttachment = (attachmentUrl: string) => {
-    window.open(attachmentUrl, "_blank");
-  };
-
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Action Item Details" size="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="Action Item Details" maxWidth="lg">
       <div className="space-y-6">
         {/* Header */}
         <div
@@ -196,7 +193,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
               <TextArea
                 label="Reason for Delay *"
                 value={overdueReason}
-                onChange={(e) => setOverdueReason(e.target.value)}
+                onChange={(value) => setOverdueReason(value)}
                 placeholder="Explain why this action item is overdue..."
                 rows={2}
               />
@@ -233,7 +230,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => handleViewAttachment(attachment.fileUrl)}
+                    onClick={() => window.open(attachment.fileUrl, "_blank")}
                   >
                     View
                   </Button>
@@ -271,7 +268,7 @@ const ActionItemDetails: React.FC<ActionItemDetailsProps> = ({
           <div className="flex space-x-2">
             <TextArea
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={(value) => setComment(value)}
               placeholder="Add a comment..."
               rows={2}
               className="flex-1"

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { ActionItem, RESPONSIBLE_PERSONS } from '../../types/index';
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import { Input, Select, TextArea } from '../../components/ui/FormElements';
-import Modal from '../../components/ui/Modal';
+import Card, { CardContent, CardHeader } from '../../ui/Card';
+import Button from '../ui/button';
+import { Input, Select, TextArea } from '../../ui/FormElements';
+import Modal from '../ui/Modal';
 import {
   AlertTriangle,
   ClipboardList,
@@ -26,9 +26,8 @@ import {
 
 // ─── Utilities ───────────────────────────────────────────────────
 import { formatDate, formatDateTime } from '../../utils/helpers';
-import SyncIndicator from '../../components/ui/SyncIndicator';
+import SyncIndicator from '../ui/SyncIndicator';
 import ActionItemDetails from './ActionItemDetails';
-
 
 const ActionLog: React.FC = () => {
   const { actionItems, addActionItem, updateActionItem, deleteActionItem, connectionStatus } = useAppContext();
@@ -333,7 +332,7 @@ const ActionLog: React.FC = () => {
             <Select
               label="Status"
               value={filters.status}
-              onChange={(value) => setFilters(prev => ({ ...prev, status: value.toString() }))}
+              onChange={(value) => setFilters(prev => ({ ...prev, status: value }))}
               options={[
                 { label: 'All Statuses', value: '' },
                 { label: 'Initiated', value: 'initiated' },
@@ -345,7 +344,7 @@ const ActionLog: React.FC = () => {
             <Select
               label="Responsible Person"
               value={filters.responsiblePerson}
-              onChange={(value) => setFilters(prev => ({ ...prev, responsiblePerson: value.toString() }))}
+              onChange={(value) => setFilters(prev => ({ ...prev, responsiblePerson: value }))}
               options={[
                 { label: 'All Persons', value: '' },
                 ...RESPONSIBLE_PERSONS.map(person => ({ label: person, value: person }))
@@ -607,7 +606,7 @@ const ActionLog: React.FC = () => {
             <Input
               label="Title *"
               value={formData.title}
-              onChange={(value) => handleFormChange('title', value.toString())}
+              onChange={(value) => handleFormChange('title', value)}
               placeholder="Enter action item title..."
               error={errors.title}
             />
@@ -615,7 +614,7 @@ const ActionLog: React.FC = () => {
             <TextArea
               label="Description *"
               value={formData.description}
-              onChange={(value) => handleFormChange('description', value.toString())}
+              onChange={(value) => handleFormChange('description', value)}
               placeholder="Provide details about the action item..."
               rows={3}
               error={errors.description}
@@ -625,7 +624,7 @@ const ActionLog: React.FC = () => {
               <Select
                 label="Responsible Person *"
                 value={formData.responsiblePerson}
-                onChange={(value) => handleFormChange('responsiblePerson', value.toString())}
+                onChange={(value) => handleFormChange('responsiblePerson', value)}
                 options={[
                   { label: 'Select responsible person...', value: '' },
                   ...RESPONSIBLE_PERSONS.map(person => ({ label: person, value: person }))
@@ -637,7 +636,7 @@ const ActionLog: React.FC = () => {
                 label="Due Date *"
                 type="date"
                 value={formData.dueDate}
-                onChange={(value) => handleFormChange('dueDate', value.toString())}
+                onChange={(value) => handleFormChange('dueDate', value)}
                 min={new Date().toISOString().split('T')[0]}
                 error={errors.dueDate}
               />
@@ -646,7 +645,7 @@ const ActionLog: React.FC = () => {
             <Select
               label="Initial Status"
               value={formData.status}
-              onChange={(value) => handleFormChange('status', value.toString() as any)}
+              onChange={(value) => handleFormChange('status', value as any)}
               options={[
                 { label: 'Initiated', value: 'initiated' },
                 { label: 'In Progress', value: 'in_progress' }
@@ -715,3 +714,5 @@ const ActionLog: React.FC = () => {
 };
 
 export default ActionLog;
+
+
