@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Card, CardContent } from "./Card";
-import { Button } from "./Button";
+import Button from "./Button";
 
 interface Step {
   title: string;

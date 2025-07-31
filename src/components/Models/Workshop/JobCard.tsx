@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 import { db } from "../../../firebase";
 import { JobCardTask, TaskHistoryEntry } from "../../../types";
 import Button from "../../ui/Button";
+import SignaturePad from "../../ui/SignaturePad";
 
 // Mock data for a job card
 const mockJobCard = {
@@ -146,6 +147,11 @@ const JobCard: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [taskHistoryState, setTaskHistoryState] = useState<TaskHistoryEntry[]>(mockTaskHistory);
+
+  // Signature states
+  const [technicianSignature, setTechnicianSignature] = useState<string>("");
+  const [supervisorSignature, setSupervisorSignature] = useState<string>("");
+  const [customerSignature, setCustomerSignature] = useState<string>("");
 
   // This function is no longer needed since we're using setTaskHistoryState directly
 
@@ -456,6 +462,41 @@ const JobCard: React.FC = () => {
             />
           )}
           */}
+        </div>
+      </div>
+
+      {/* Signature Section */}
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold mb-4">Signatures</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Technician Signature */}
+          <SignaturePad
+            title="Technician Signature"
+            onChange={setTechnicianSignature}
+            value={technicianSignature}
+            id="technician-signature"
+            required
+          />
+
+          {/* Supervisor Signature - Only visible for supervisor role */}
+          {userRole === "supervisor" && (
+            <SignaturePad
+              title="Supervisor Signature"
+              onChange={setSupervisorSignature}
+              value={supervisorSignature}
+              id="supervisor-signature"
+              required
+            />
+          )}
+
+          {/* Customer Signature */}
+          <SignaturePad
+            title="Customer Signature"
+            onChange={setCustomerSignature}
+            value={customerSignature}
+            id="customer-signature"
+            required
+          />
         </div>
       </div>
 

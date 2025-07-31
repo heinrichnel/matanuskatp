@@ -172,6 +172,7 @@ const WialonUnitsPage = lazy(() => import("./pages/wialon/WialonUnitsPage"));
 const WialonDashboard = lazy(() => import("./pages/wialon/WialonDashboard"));
 const TripRoutePlannerPage = lazy(() => import("./pages/wialon/TripRoutePlannerPage"));
 const FleetLocationMapPage = lazy(() => import("./components/Map/pages/FleetLocationMapPage"));
+const WialonUnitExample = lazy(() => import("./pages/wialon/examples/WialonUnitExample"));
 
 /* -----------------------------
  * Flags / Investigations
@@ -347,6 +348,7 @@ export const AppRoutes: React.FC = () => {
           <Route path="wialon/config" element={withSuspense(WialonConfigPage)} />
           <Route path="wialon/units" element={withSuspense(WialonUnitsPage)} />
           <Route path="wialon/routes" element={withSuspense(TripRoutePlannerPage)} />
+          <Route path="wialon/example" element={withSuspense(WialonUnitExample)} />
           <Route path="fleet" element={withSuspense(FleetManagementPage)} />
           <Route path="fleet-map" element={withSuspense(FleetLocationMapPage)} />
         </Route>
