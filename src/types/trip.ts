@@ -10,6 +10,37 @@ export type TripStatus =
   | "pending";
 export type Currency = "ZAR" | "USD"; // Assuming these are the currencies
 
+// Driver behavior event types
+export enum DriverBehaviorEventType {
+  HARSH_ACCELERATION = "HARSH_ACCELERATION",
+  HARSH_BRAKING = "HARSH_BRAKING",
+  HARSH_CORNERING = "HARSH_CORNERING",
+  SPEEDING = "SPEEDING",
+  IDLING = "IDLING",
+  FATIGUE = "FATIGUE",
+}
+
+export interface DriverBehaviorEvent {
+  id: string;
+  tripId: string;
+  driverId: string;
+  driverName?: string;
+  vehicleId: string;
+  vehicleReg?: string;
+  eventType: DriverBehaviorEventType;
+  timestamp: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    description?: string;
+  };
+  severity: "low" | "medium" | "high";
+  details?: Record<string, any>;
+  acknowledged: boolean;
+  acknowledgedBy?: string;
+  acknowledgedAt?: string;
+}
+
 export interface Trip {
   id: string; // Firestore document ID
   title: string; // e.g., "Windhoek to Walvis Bay"

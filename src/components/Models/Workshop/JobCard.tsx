@@ -144,9 +144,10 @@ const JobCard: React.FC = () => {
   // Adding isLoading state that's used in the functions
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState(false);
-  const [setTaskHistory] = useState(() => (newEntries: TaskHistoryEntry[]) => {
+  const [setTaskHistory] = useState(() => (newEntries: TaskHistoryEntry[]): TaskHistoryEntry[] => {
     // This will be replaced with actual function when components are implemented
     console.log('Task history updated:', newEntries);
+    return newEntries;
   });
 
   // Handler functions for tasks
