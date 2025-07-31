@@ -13,10 +13,17 @@ if [ ! -d "deploy-preview" ]; then
     exit 1
 fi
 
+# Build the CSS for production
+echo "🔨 Building CSS for production..."
+npm run build
+
 # Create deployment package
 echo "📦 Creating deployment package..."
-mkdir -p netlify-deploy
+mkdir -p netlify-deploy/assets
 cp -r deploy-preview/* netlify-deploy/
+# Copy built CSS files
+mkdir -p netlify-deploy/assets
+cp -r dist/assets/* netlify-deploy/assets/
 
 # Check if netlify-cli is installed
 if ! command -v netlify &> /dev/null; then

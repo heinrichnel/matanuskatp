@@ -114,9 +114,17 @@ export const RCAModal: React.FC<RCAModalProps> = ({ open, initial, onSubmit, onC
           </div>
           {error && <div className="text-red-500 text-sm">{error}</div>}
         </div>
-        <div className="flex justify-end mt-6 space-x-2">
-          <Button onClick={onClick} size="sm" variant="secondary">Cancel</Button>
-          <Button onClick={onClick} size="sm" variant="primary">Submit RCA</Button>
+        <div className="mt-6 flex items-center justify-end gap-x-6">
+          <button type="button" className="text-sm/6 font-semibold text-gray-900" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          >
+            Submit RCA
+          </button>
         </div>
       </div>
     </div>

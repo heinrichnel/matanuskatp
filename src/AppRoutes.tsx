@@ -155,7 +155,7 @@ const ClientDetail = lazy(() => import("./pages/clients/ClientDetail"));
 const RetentionMetrics = lazy(() => import("./pages/clients/RetentionMetrics"));
 const ClientManagementPage = lazy(() => import("./pages/clients/ClientManagementPage"));
 const ClientNetworkMap = lazy(() => import("./pages/clients/ClientNetworkMap"));
-
+const CustomerRetentionDashboard = lazy(() => import("./pages/clients/CustomerRetentionDashboard"));
 /* -----------------------------
  * Analytics
  * ----------------------------- */

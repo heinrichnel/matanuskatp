@@ -4,7 +4,7 @@ import JobCardHeader from './JobCardHeader';
 // import InventoryPanel from './InventoryPanel'; // Component commented out - missing file
 import JobCardNotes from './JobCardNotes';
 // import QAReviewPanel from './QAReviewPanel'; // Component commented out - missing file
-// import CompletionPanel from './CompletionPanel'; // Component commented out - missing file 
+// import CompletionPanel from './CompletionPanel'; // Component commented out - missing file
 import { v4 as uuidv4 } from 'uuid';
 import { JobCardTask, TaskHistoryEntry } from '../../../types';
 import Button from '../../ui/Button';
@@ -148,17 +148,17 @@ const JobCard: React.FC = () => {
     // This will be replaced with actual function when components are implemented
     console.log('Task history updated:', newEntries);
   });
-  
+
   // Handler functions for tasks
   // These handlers will be used once the TaskManager component is implemented
   const handleTaskUpdate = (taskId: string, updates: Partial<JobCardTask>) => {
-    setTasks(prevTasks => 
-      prevTasks.map(task => 
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
         task.id === taskId ? { ...task, ...updates } : task
       )
     );
   };
-  
+
   // Will be used once the TaskManager component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleTaskAdd = (task: Omit<JobCardTask, 'id'>) => {
@@ -168,13 +168,13 @@ const JobCard: React.FC = () => {
     };
     setTasks(prevTasks => [...prevTasks, newTask]);
   };
-  
+
   // Will be used once the TaskManager component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleTaskDelete = (taskId: string) => {
     setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
   };
-  
+
   // Log task history entry
   const handleLogTaskHistory = (entry: Omit<TaskHistoryEntry, 'id'>) => {
     const newEntry: TaskHistoryEntry = {
@@ -190,13 +190,13 @@ const JobCard: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleVerifyTask = async (taskId: string) => {
     if (userRole !== 'supervisor') return;
-    
+
     try {
       // setIsLoading(true); // isLoading state removed
-      
+
       const task = tasks.find(t => t.id === taskId);
       if (!task) throw new Error('Task not found');
-      
+
       // Update task in Firestore
       const taskRef = doc(db, 'tasks', taskId);
       await updateDoc(taskRef, {
@@ -210,7 +210,7 @@ const JobCard: React.FC = () => {
         verifiedBy: 'Current Supervisor',
         verifiedAt: new Date().toISOString()
       });
-      
+
       handleLogTaskHistory({
         taskId,
         event: 'verified',
@@ -231,15 +231,15 @@ const JobCard: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleVerifyAllTasks = async () => {
     if (userRole !== 'supervisor') return;
-    
+
     try {
       // setIsLoading(true); // isLoading state removed
-      
+
       // Get all completed tasks that haven't been verified
       const tasksToVerify = tasks.filter(
         task => task.status === 'completed' && !task.verifiedBy
       );
-      
+
       // Update each task
       for (const task of tasksToVerify) {
         const updates: Partial<JobCardTask> = {
@@ -247,9 +247,9 @@ const JobCard: React.FC = () => {
           verifiedBy: 'Current Supervisor',
           verifiedAt: new Date().toISOString()
         };
-        
+
         handleTaskUpdate(task.id, updates);
-        
+
         // Log the verification action
         handleLogTaskHistory({
           taskId: task.id,
@@ -259,7 +259,7 @@ const JobCard: React.FC = () => {
           notes: 'Task verified in batch by supervisor'
         });
       }
-      
+
       return Promise.resolve();
     } catch (error) {
       console.error('Error verifying all tasks:', error);
@@ -268,7 +268,7 @@ const JobCard: React.FC = () => {
       // setIsLoading(false); // isLoading state removed
     }
   };
-  
+
   // Handler functions for parts
   // Will be used when InventoryPanel component is implemented
   // Will be used when InventoryPanel component is implemented
@@ -277,21 +277,21 @@ const JobCard: React.FC = () => {
     // Implementation will be used when component is ready
     console.log(`Would assign part ${partId} with quantity ${quantity}`);
   };
-  
+
   // Will be used when InventoryPanel component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleRemovePart = (assignmentId: string) => {
     // Implementation will be used when component is ready
     console.log(`Would remove part assignment ${assignmentId}`);
   };
-  
+
   // Will be used when InventoryPanel component is implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleUpdatePart = (assignmentId: string, updates: { quantity?: number; status?: string }) => {
     // Implementation will be used when component is ready
     console.log(`Would update part assignment ${assignmentId} with`, updates);
   };
-  
+
   // Handler functions for notes
   const handleAddNote = (text: string, type: 'general' | 'technician' | 'customer' | 'internal') => {
     const newNote = {
@@ -303,19 +303,19 @@ const JobCard: React.FC = () => {
     };
     setNotes(prevNotes => [...prevNotes, newNote]);
   };
-  
+
   const handleEditNote = (id: string, text: string) => {
-    setNotes(prevNotes => 
-      prevNotes.map(note => 
+    setNotes(prevNotes =>
+      prevNotes.map(note =>
         note.id === id ? { ...note, text } : note
       )
     );
   };
-  
+
   const handleDeleteNote = (id: string) => {
     setNotes(prevNotes => prevNotes.filter(note => note.id !== id));
   };
-  
+
   // Handler for job completion - Will be used by CompletionPanel when it's implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleCompleteJob = async () => {
@@ -338,7 +338,7 @@ const JobCard: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
+
   // Handler for invoice generation - Will be used by CompletionPanel when it's implemented
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleGenerateInvoice = async () => {
@@ -363,31 +363,31 @@ const JobCard: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
+
   // Toggle user role for demo purposes
   const toggleUserRole = () => {
     setUserRole(prev => prev === 'technician' ? 'supervisor' : 'technician');
   };
-  
+
   return (
-    <div className="space-y-6">
+    <form className="space-y-6">
       {/* Role toggle for demo */}
       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 flex justify-between items-center">
         <span className="text-blue-700">Current Role: <strong>{userRole === 'technician' ? 'Technician' : 'Supervisor'}</strong></span>
-        <Button 
-          size="sm" 
-          onClick={toggleUserRole} 
+        <Button
+          size="sm"
+          onClick={toggleUserRole}
           variant="outline"
         >
           Switch to {userRole === 'technician' ? 'Supervisor' : 'Technician'} View
         </Button>
       </div>
-      
-      <JobCardHeader 
+
+      <JobCardHeader
         jobCard={jobCard}
         onBack={() => {}} // No-op for demo
       />
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {/* TaskManager component temporarily commented out - missing file
@@ -404,7 +404,7 @@ const JobCard: React.FC = () => {
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-md">
             <p className="text-gray-500">Task management functionality is temporarily unavailable.</p>
           </div>
-          
+
           <JobCardNotes
             notes={notes}
             onAddNote={handleAddNote}
@@ -412,7 +412,7 @@ const JobCard: React.FC = () => {
             onDeleteNote={handleDeleteNote}
           />
         </div>
-        
+
         <div className="space-y-6">
           {/* QAReviewPanel component temporarily commented out - missing file
           {userRole === 'supervisor' && (
@@ -427,7 +427,7 @@ const JobCard: React.FC = () => {
             />
           )}
           */}
-          
+
           {/* InventoryPanel component temporarily commented out - missing file
           <InventoryPanel
             jobCardId={jobCard.id}
@@ -437,11 +437,11 @@ const JobCard: React.FC = () => {
             onUpdatePart={handleUpdatePart}
           />
           */}
-          
+
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-md mb-4">
             <p className="text-gray-500">Inventory management functionality is temporarily unavailable.</p>
           </div>
-          
+
           {/* CompletionPanel component temporarily commented out - missing file
           {userRole === 'supervisor' && (
             <CompletionPanel
@@ -455,7 +455,19 @@ const JobCard: React.FC = () => {
           */}
         </div>
       </div>
-    </div>
+
+      <div className="mt-6 flex items-center justify-end gap-x-6">
+        <button type="button" className="text-sm/6 font-semibold text-gray-900">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          Save
+        </button>
+      </div>
+    </form>
   );
 };
 

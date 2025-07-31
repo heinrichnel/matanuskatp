@@ -12,7 +12,10 @@ import {
   Truck,
   Calendar
 } from 'lucide-react';
-import { formatCurrency, formatDate } from '../../../utils/helpers';
+
+// ─── Utilities ───────────────────────────────────────────────────
+import { formatCurrency, formatDate } from '../../utils/helpers';
+
 
 interface TripLinkageModalProps {
   isOpen: boolean;
@@ -39,19 +42,19 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
   const isReeferUnit = dieselRecord.isReeferUnit || ['4F', '5F', '6F', '7F', '8F'].includes(dieselRecord.fleetNumber);
 
   // Get available trips for the selected fleet (for non-reefer units)
-  const availableTrips = !isReeferUnit ? trips.filter(trip => 
-    trip.fleetNumber === dieselRecord.fleetNumber && 
+  const availableTrips = !isReeferUnit ? trips.filter(trip =>
+    trip.fleetNumber === dieselRecord.fleetNumber &&
     trip.status === 'active'
   ) : [];
 
   // Get available horse diesel records (for reefer units)
-  const availableHorses = isReeferUnit ? dieselRecords.filter(record => 
-    !record.isReeferUnit && 
+  const availableHorses = isReeferUnit ? dieselRecords.filter(record =>
+    !record.isReeferUnit &&
     ['4H', '6H', '21H', '22H', '23H', '24H', '26H', '28H', '29H', '30H', '31H', '32H', '33H', 'UD'].includes(record.fleetNumber)
   ) : [];
 
   // Check if already linked
-  const currentLinkedTrip = !isReeferUnit && dieselRecord.tripId ? 
+  const currentLinkedTrip = !isReeferUnit && dieselRecord.tripId ?
     trips.find(t => t.id === dieselRecord.tripId) : undefined;
 
   const currentLinkedHorse = isReeferUnit && dieselRecord.linkedHorseId ?
@@ -78,7 +81,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
   const handleSave = async () => {
     try {
       setIsSubmitting(true);
-      
+
       if (!isReeferUnit) {
         // Regular diesel record - link to trip
         if (!selectedTripId) {
@@ -88,7 +91,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
         }
 
         await allocateDieselToTrip(dieselRecordId, selectedTripId);
-        
+
         const trip = trips.find(t => t.id === selectedTripId);
         alert(`Diesel record successfully linked to trip!\n\nTrip: ${trip?.route}\nDates: ${trip?.startDate} to ${trip?.endDate}\n\nA cost entry has been automatically created in the trip's expenses.`);
       } else {
@@ -105,20 +108,20 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
           linkedHorseId: selectedHorseId,
           updatedAt: new Date().toISOString()
         };
-        
+
         await updateDieselRecord(updatedRecord);
-        
+
         // If the horse is linked to a trip, create a cost entry
         const horseRecord = dieselRecords.find(r => r.id === selectedHorseId);
         if (horseRecord?.tripId) {
           const trip = trips.find(t => t.id === horseRecord.tripId);
-          
+
           alert(`Reefer diesel record successfully linked to horse ${horseRecord.fleetNumber}!\n\n${trip ? `Trip: ${trip.route}\nDates: ${trip.startDate} to ${trip.endDate}\n\nA cost entry has been automatically created in the trip's expenses.` : 'No active trip found for this horse.'}`);
         } else {
           alert(`Reefer diesel record successfully linked to horse ${horseRecord?.fleetNumber || selectedHorseId}!\n\nNo active trip found for this horse. When the horse is linked to a trip, the reefer diesel cost will be automatically added.`);
         }
       }
-      
+
       onClose();
     } catch (error) {
       console.error("Error linking diesel record:", error);
@@ -131,40 +134,40 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
   const handleRemoveLinkage = async () => {
     try {
       setIsSubmitting(true);
-      
+
       if (!isReeferUnit && dieselRecord.tripId) {
         // Remove trip linkage
         await removeDieselFromTrip(dieselRecordId);
         alert('Diesel record has been unlinked from the trip and the cost entry has been removed.');
       } else if (isReeferUnit && dieselRecord.linkedHorseId) {
         const horseRecord = dieselRecords.find(r => r.id === dieselRecord.linkedHorseId);
-        
+
         // Update the diesel record to remove the linked horse ID
         const updatedRecord = {
           ...dieselRecord,
           linkedHorseId: undefined,
           updatedAt: new Date().toISOString()
         };
-        
+
         await updateDieselRecord(updatedRecord);
-        
+
         // If the horse is linked to a trip, remove the cost entry
         if (horseRecord?.tripId) {
           const trip = trips.find(t => t.id === horseRecord.tripId);
           if (trip) {
-            const costEntry = trip.costs.find(c => 
+            const costEntry = trip.costs.find(c =>
               c.referenceNumber === `REEFER-DIESEL-${dieselRecordId}`
             );
-            
+
             if (costEntry) {
               await deleteCostEntry(costEntry.id);
             }
           }
         }
-        
+
         alert('Reefer diesel record has been unlinked from the horse and any associated cost entries have been removed.');
       }
-      
+
       onClose();
     } catch (error) {
       console.error("Error removing linkage:", error);
@@ -263,12 +266,12 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
                 <Select
                   label="Select Trip to Link *"
                   value={selectedTripId}
-                  onChange={(e) => handleChange('tripId', e.target.value)}
+                  onChange={value => handleChange('tripId', value)}
                   options={[
                     { label: 'Select a trip...', value: '' },
-                    ...availableTrips.map(trip => ({ 
-                      label: `${trip.route} (${formatDate(trip.startDate)} - ${formatDate(trip.endDate)})`, 
-                      value: trip.id 
+                    ...availableTrips.map(trip => ({
+                      label: `${trip.route} (${formatDate(trip.startDate)} - ${formatDate(trip.endDate)})`,
+                      value: trip.id
                     }))
                   ]}
                   error={errors.tripId}
@@ -281,7 +284,7 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
                       {(() => {
                         const trip = trips.find(t => t.id === selectedTripId);
                         if (!trip) return null;
-                        
+
                         return (
                           <>
                             <div className="flex items-center space-x-2">
@@ -349,16 +352,16 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
                 <Select
                   label="Select Horse to Link *"
                   value={selectedHorseId}
-                  onChange={(e) => handleChange('horseId', e.target.value)}
+                  onChange={value => handleChange('horseId', value)}
                   options={[
                     { label: 'Select a horse...', value: '' },
                     ...availableHorses.map(horse => {
-                      const tripInfo = horse.tripId ? 
-                        ` - ${trips.find(t => t.id === horse.tripId)?.route || 'Unknown Trip'}` : 
+                      const tripInfo = horse.tripId ?
+                        ` - ${trips.find(t => t.id === horse.tripId)?.route || 'Unknown Trip'}` :
                         ' - No active trip';
-                      return { 
-                        label: `${horse.fleetNumber} (${horse.driverName})${tripInfo}`, 
-                        value: horse.id 
+                      return {
+                        label: `${horse.fleetNumber} (${horse.driverName})${tripInfo}`,
+                        value: horse.id
                       };
                     })
                   ]}
@@ -372,9 +375,9 @@ const TripLinkageModal: React.FC<TripLinkageModalProps> = ({
                       {(() => {
                         const horse = dieselRecords.find(r => r.id === selectedHorseId);
                         if (!horse) return null;
-                        
+
                         const trip = horse.tripId ? trips.find(t => t.id === horse.tripId) : null;
-                        
+
                         return (
                           <>
                             <div className="flex items-center space-x-2">
