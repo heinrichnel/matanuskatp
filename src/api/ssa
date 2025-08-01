@@ -1,0 +1,283 @@
+import { ErrorCategory, ErrorSeverity, logError } from "../utils/errorHandling";
+import type {
+  WialonSession,
+  WialonUnit,
+  WialonSensor,
+  WialonPosition,
+} from "../types/wialon-types";
+
+// Wialon SDK is blootgestel op window objek
+declare global {
+  interface Window {
+    wialon: any;
+  }
+}
+
+// *** BELANGRIK ***
+// Jou Wialon API token - moet veilig bestuur word, NIE hardcoded in produksie nie
+const TOKEN = "c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053";
+
+// Wialon API basiese URL
+const WIALON_API_URL = "https://hst-api.wialon.com";
+
+// --- State ---
+let wialonInitialized = false;
+let session: WialonSession | null = null;
+let units: WialonUnit[] = [];
+
+// Laai Wialon SDK dinamies as dit nog nie bestaan nie
+const wialonSdkLoadedPromise = new Promise<void>((resolve, reject) => {
+  if (typeof window === "undefined") {
+    resolve();
+    return;
+  }
+
+  if (window.wialon) {
+    console.log("Wialon SDK already loaded.");
+    resolve();
+    return;
+  }
+
+  console.log("Attempting to dynamically load Wialon SDK...");
+  const script = document.createElement("script");
+  script.src = "https://hst-api.wialon.com/wsdk/script/wialon.js";
+  script.async = true;
+
+  script.onload = () => {
+    const checkInterval = setInterval(() => {
+      if (window.wialon) {
+        console.log("Wialon SDK loaded successfully.");
+        clearInterval(checkInterval);
+        resolve();
+      }
+    }, 100);
+
+    setTimeout(() => {
+      if (!window.wialon) {
+        clearInterval(checkInterval);
+        reject(new Error("Wialon SDK initialization timeout"));
+        console.error("Failed to initialize Wialon SDK after loading script");
+      }
+    }, 5000);
+  };
+
+  script.onerror = () => {
+    console.error("Failed to load Wialon SDK");
+    reject(new Error("Failed to load Wialon SDK"));
+  };
+
+  document.head.appendChild(script);
+});
+
+// --- Utility logger ---
+function log(message: string, isError: boolean = false): void {
+  if (isError) {
+    console.error(message);
+  } else {
+    console.log(message);
+  }
+}
+
+// --- Initialize Wialon session and laai units ---
+export async function initializeWialon(): Promise<boolean> {
+  if (wialonInitialized) {
+    log("Wialon is already initialized.");
+    return true;
+  }
+
+  log("Initializing Wialon session...");
+
+  try {
+    await wialonSdkLoadedPromise;
+
+    if (!window.wialon) {
+      log("Wialon SDK is not available.", true);
+      return false;
+    }
+
+    session = window.wialon.core.Session.getInstance();
+    if (!session) {
+      log("Failed to create Wialon session.", true);
+      return false;
+    }
+    session.initSession(WIALON_API_URL);
+
+    const loginSuccess = await new Promise<boolean>((resolve) => {
+      session?.loginToken(TOKEN, "", (code: number) => {
+        if (code) {
+          const errorText = window.wialon.core.Errors.getErrorText(code);
+          log(`Login failed: ${errorText}`, true);
+
+          logError(`Wialon login failed: ${errorText}`, {
+            category: ErrorCategory.API,
+            severity: ErrorSeverity.ERROR,
+            context: { code },
+          });
+
+          resolve(false);
+        } else {
+          log("Logged in successfully.");
+          resolve(true);
+        }
+      });
+    });
+
+    if (!loginSuccess || !session) return false;
+
+    session.loadLibrary("itemIcon");
+
+    const dataFlags =
+      window.wialon.item.Item.dataFlag.base |
+      window.wialon.item.Unit.dataFlag.sensors |
+      window.wialon.item.Unit.dataFlag.lastMessage |
+      window.wialon.item.Unit.dataFlag.lastPosition;
+
+    const updateSuccess = await new Promise<boolean>((resolve) => {
+      session?.updateDataFlags(
+        [{ type: "type", data: "avl_unit", flags: dataFlags, mode: 0 }],
+        (code: number) => {
+          if (code) {
+            const errorText = window.wialon.core.Errors.getErrorText(code);
+            log(`Failed to load units: ${errorText}`, true);
+
+            logError(`Failed to load Wialon units: ${errorText}`, {
+              category: ErrorCategory.API,
+              severity: ErrorSeverity.ERROR,
+              context: { code },
+            });
+
+            resolve(false);
+          } else {
+            log("Unit data loaded successfully.");
+            units = session.getItems("avl_unit") || [];
+
+            if (units.length === 0) {
+              log("No units found.", true);
+            }
+
+            // Setup listeners for position changes (optioneel)
+            units.forEach((unit) => {
+              unit.addListener("changePosition", (event: any) => {
+                const unitId = unit.getId();
+                log(`Unit ${unitId} position updated.`);
+              });
+            });
+
+            resolve(true);
+          }
+        }
+      );
+    });
+
+    if (updateSuccess) wialonInitialized = true;
+
+    return updateSuccess;
+  } catch (error) {
+    log(`Unexpected error during Wialon initialization: ${error}`, true);
+    logError(`Wialon initialization error: ${error}`, {
+      category: ErrorCategory.API,
+      severity: ErrorSeverity.ERROR,
+      context: { error: String(error) },
+    });
+    return false;
+  }
+}
+
+// --- Getters for units and sensors ---
+
+export function getWialonUnits(): WialonUnit[] {
+  if (!wialonInitialized) {
+    log("Wialon is not initialized. Cannot get units.", true);
+    return [];
+  }
+  return units;
+}
+
+export function getUnitById(unitId: number): WialonUnit | null {
+  if (!wialonInitialized || !session) {
+    log("Wialon is not initialized.", true);
+    return null;
+  }
+  const unit = session.getItem(unitId);
+  if (!unit) {
+    log(`Unit with ID ${unitId} not found.`, true);
+    return null;
+  }
+  return unit;
+}
+
+export function getUnitSensors(unitId: number): WialonSensor[] {
+  const unit = getUnitById(unitId);
+  if (!unit) return [];
+  const sensors = unit.getSensors();
+  return Object.values(sensors);
+}
+
+export function getSensorValue(unitId: number, sensorId: number): number | string | null {
+  const unit = getUnitById(unitId);
+  if (!unit) return null;
+  const sensor = unit.getSensor(sensorId);
+  if (!sensor) {
+    log(`Sensor with ID ${sensorId} not found on unit ${unitId}.`, true);
+    return null;
+  }
+  const lastMessage = unit.getLastMessage();
+  if (!lastMessage) {
+    log(`No last message found for unit ${unitId}.`, true);
+    return "N/A";
+  }
+  const result = unit.calculateSensorValue(sensor, lastMessage);
+  return result === -348201.3876 ? "N/A" : result;
+}
+
+export function getUnitDetails(unitId: number) {
+  const unit = getUnitById(unitId);
+  if (!unit) return null;
+
+  const pos: WialonPosition | null = unit.getPosition();
+  if (!pos) {
+    log(`No position data for unit ${unitId}`, true);
+    return {
+      id: unitId,
+      name: unit.getName(),
+      position: null,
+    };
+  }
+
+  return {
+    id: unitId,
+    name: unit.getName(),
+    position: {
+      latitude: pos.y,
+      longitude: pos.x,
+      speed: pos.s,
+      course: pos.c,
+      timestamp: pos.t,
+      satellites: pos.sc,
+    },
+    iconUrl: unit.getIconUrl(32),
+  };
+}
+
+// --- Event listeners for units ---
+
+export function registerUnitMessageListener(
+  unitId: number,
+  callback: (data: any) => void
+): number | null {
+  const unit = getUnitById(unitId);
+  if (!unit) return null;
+
+  const eventId = unit.addListener("messageRegistered", (event: any) => {
+    const data = event.getData();
+    callback(data);
+  });
+
+  return eventId;
+}
+
+export function unregisterUnitMessageListener(unitId: number, eventId: number): void {
+  const unit = getUnitById(unitId);
+  if (!unit) return;
+  unit.removeListenerById(eventId);
+}
