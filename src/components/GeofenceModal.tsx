@@ -38,9 +38,9 @@ export const GeofenceModal: React.FC<Props> = ({ open, onClose, onSubmit, loadin
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClick} disabled={loading}>Cancel</Button>
+        <Button onClick={onClose} disabled={loading}>Cancel</Button>
         <Button
-          onClick={onClick}
+          onClick={() => onSubmit(name, radius)}
           disabled={!name || !radius || loading}
           variant="contained"
         >
