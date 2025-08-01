@@ -78,7 +78,7 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
                   aria-expanded={!!expandedItems[item.id]}
                 >
                   <div className="flex items-center gap-3 flex-grow text-left">
-                    {item.icon && <item.icon className="w-5 h-5" />}
+                    {item.icon && <item.icon className="w-5 h-5 flex-shrink-0" style={{ width: '20px', height: '20px' }} />}
                     <span>{item.label}</span>
                   </div>
                   <button
@@ -109,7 +109,7 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
                 }`}
                 onClick={() => item.path && handleNavigate(item.path)} // Only navigate if path exists
               >
-                {item.icon && <item.icon className="w-5 h-5" />}
+                {item.icon && <item.icon className="w-5 h-5 flex-shrink-0" style={{ width: '20px', height: '20px' }} />}
                 <span>{item.label}</span>
               </button>
             </li>
@@ -120,7 +120,7 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 bg-gray-100 border-r shadow flex flex-col z-30">
+    <aside className="fixed left-0 top-0 h-screen w-64 !w-64 bg-gray-100 border-r shadow flex flex-col z-30" style={{ width: '16rem' }}>
       <div className="flex items-center justify-center px-6 py-4 border-b bg-gray-100">
         <h1 className="font-bold text-black text-lg">MATANUSKA TRANSPORT</h1>
       </div>

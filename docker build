@@ -1,0 +1,19 @@
+# Node modules en geboude lêers
+node_modules
+dist
+
+# Git en IDE lêers
+.git
+.gitignore
+.vscode
+
+# Logs en dokumentasie
+*.log
+*.md
+
+# Omgewingslêers (geheimenisse)
+.env
+
+# Docker configs self
+docker-compose*.yml
+Dockerfile

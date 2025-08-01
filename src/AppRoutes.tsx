@@ -2,12 +2,15 @@
 import React, { Suspense, lazy } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/layout/Layout"; // adjust alias/path if needed
+import ErrorBoundary from "./components/ErrorBoundary";
 
-// A tiny helper to keep JSX clean
+// A tiny helper to keep JSX clean with error handling
 const withSuspense = (Comp: React.LazyExoticComponent<any>) => (
-  <Suspense fallback={<div className="p-6">Loading…</div>}>
-    <Comp />
-  </Suspense>
+  <ErrorBoundary fallback={<div className="p-6 text-red-500 bg-red-50 border border-red-200 rounded-lg">Error loading component. Please try refreshing the page.</div>}>
+    <Suspense fallback={<div className="p-6">Loading…</div>}>
+      <Comp />
+    </Suspense>
+  </ErrorBoundary>
 );
 
 /* -----------------------------

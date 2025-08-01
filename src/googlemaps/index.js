@@ -1,42 +1,29 @@
-// googlemaps/index.js - Standalone Google Maps implementation
-const API_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY || "AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg";
+// index.js of app.js - Basiese Express backend met health endpoint
 
-/**
- * Initialize the Google Maps API
- * This matches the signature in the requirements
- */
-async function initMap() {
-  console.log("Maps JavaScript API loaded.");
-  const center = { lat: -25.7479, lng: 28.2293 };
-  const map = new google.maps.Map(document.getElementById("map"), {
-    zoom: 12,
-    center: center,
-  });
-  new google.maps.Marker({
-    position: center,
-    map: map,
-    title: "Pretoria",
-  });
-}
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const PORT = process.env.PORT || 8080;
 
-/**
- * Load the Google Maps API script dynamically
- */
-function loadGoogleMapsScript() {
-  const script = document.createElement("script");
-  script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg&callback=initMap`;
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
+// CORS middleware (opsioneel, maar help vir frontend toegang)
+app.use(cors());
 
-  // Add error handling for script loading
-  script.onerror = () => {
-    console.error("Failed to load Google Maps API script");
-    console.warn("This may be due to network issues or an invalid API key");
-  };
-}
+// Root endpoint vir basiese toets
+app.get('/', (req, res) => {
+  res.send('Hello from Node.js and Express!');
+});
 
-// Make initMap globally accessible for Google Maps callback
-window.initMap = initMap;
+// Health check endpoint vir jou Maps proxy frontend
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: Date.now() });
+});
 
-window.onload = loadGoogleMapsScript;
+// (Opsioneel) Status endpoint, as jy wil konsistent wees
+app.get('/status', (req, res) => {
+  res.json({ status: 'ok', timestamp: Date.now() });
+});
+
+// Start die server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

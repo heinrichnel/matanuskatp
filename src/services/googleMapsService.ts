@@ -4,11 +4,12 @@
  */
 
 import axios from "axios";
+import type { Location } from "../types/mapTypes";
 
 // API configuration
 const BASE_URL = "https://maps.googleapis.com/maps/api/place";
 
-// Type definitions for the Places API
+// --- Type definitions for the Places API (unchanged) ---
 export interface PlaceSearchParams {
   input: string;
   inputtype?: "textquery" | "phonenumber";
@@ -18,19 +19,10 @@ export interface PlaceSearchParams {
 }
 
 export interface PlaceGeometry {
-  location: {
-    lat: number;
-    lng: number;
-  };
+  location: { lat: number; lng: number };
   viewport?: {
-    northeast: {
-      lat: number;
-      lng: number;
-    };
-    southwest: {
-      lat: number;
-      lng: number;
-    };
+    northeast: { lat: number; lng: number };
+    southwest: { lat: number; lng: number };
   };
 }
 
@@ -42,14 +34,8 @@ export interface PlaceDetails {
   opening_hours?: {
     open_now?: boolean;
     periods?: Array<{
-      open: {
-        day: number;
-        time: string;
-      };
-      close: {
-        day: number;
-        time: string;
-      };
+      open: { day: number; time: string };
+      close: { day: number; time: string };
     }>;
     weekday_text?: string[];
   };
@@ -88,7 +74,7 @@ class GoogleMapsService {
 
     if (!this.apiKey) {
       console.warn(
-        "Google Maps API key is not set. Set VITE_GOOGLE_MAPS_API_KEY in your environment variables."
+        "[GoogleMapsService] Google Maps API key is not set. Set VITE_GOOGLE_MAPS_API_KEY in your environment variables."
       );
     }
   }
@@ -108,40 +94,27 @@ class GoogleMapsService {
         inputtype,
       });
 
-      if (fields.length > 0) {
-        queryParams.append("fields", fields.join(","));
-      }
+      if (fields.length > 0) queryParams.append("fields", fields.join(","));
+      if (locationbias) queryParams.append("locationbias", locationbias);
+      if (language) queryParams.append("language", language);
 
-      if (locationbias) {
-        queryParams.append("locationbias", locationbias);
-      }
-
-      if (language) {
-        queryParams.append("language", language);
-      }
-
-      const response = await axios.get<FindPlaceResponse>(
-        `${BASE_URL}/findplacefromtext/json?${queryParams.toString()}`
-      );
+      const url = `${BASE_URL}/findplacefromtext/json?${queryParams.toString()}`;
+      const response = await axios.get<FindPlaceResponse>(url);
 
       return response.data;
-    } catch (error) {
-      console.error("Error finding place from text:", error);
+    } catch (error: any) {
+      console.error("[GoogleMapsService] Error finding place from text:", error);
       const placesError = new Error("Failed to find place from text") as PlacesServiceError;
-
       if (axios.isAxiosError(error) && error.response) {
         placesError.status = String(error.response.status);
         placesError.code = error.code;
       }
-
       throw placesError;
     }
   }
 
   /**
-   * Helper method to create a location bias string
-   * @param options Location bias options
-   * @returns Location bias string for the API
+   * Helper to create a location bias string
    */
   createLocationBias(options: {
     type: "point" | "circle" | "rectangle";
@@ -151,13 +124,10 @@ class GoogleMapsService {
 
     switch (type) {
       case "point":
-        // params should be [latitude, longitude]
         return `point:${params[0]},${params[1]}`;
       case "circle":
-        // params should be [latitude, longitude, radius]
         return `circle:${params[2]}@${params[0]},${params[1]}`;
       case "rectangle":
-        // params should be [south, west, north, east]
         return `rectangle:${params[0]},${params[1]}|${params[2]},${params[3]}`;
       default:
         throw new Error("Invalid location bias type");
@@ -165,15 +135,12 @@ class GoogleMapsService {
   }
 
   /**
-   * Convert PlaceDetails to the application's Location format
-   * @param place The place details from the API
-   * @returns A Location object compatible with the app
+   * Convert PlaceDetails to app Location
    */
-  placeToLocation(place: PlaceDetails): import("../types/mapTypes").Location {
+  placeToLocation(place: PlaceDetails): Location {
     if (!place.geometry?.location) {
       throw new Error("Place has no location geometry");
     }
-
     return {
       lat: place.geometry.location.lat,
       lng: place.geometry.location.lng,
@@ -184,6 +151,6 @@ class GoogleMapsService {
   }
 }
 
-// Create singleton instance
+// --- Export singleton ---
 const googleMapsService = new GoogleMapsService();
 export default googleMapsService;

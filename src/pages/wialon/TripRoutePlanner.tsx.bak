@@ -1,12 +1,6 @@
-import * as MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-import      const geocoder = new MapboxGeocoder({
-        accessToken: MAPBOX_ACCESS_TOKEN,
-        mapboxgl: mapboxgl as any,
-        marker: false,
-        placeholder: 'Search for locations'
-      });xgl from "mapbox-gl";
-import "mapbox-gl/dist/mapbox-gl.css";
+// NOTE: This is a backup file that has been updated to use Leaflet instead of Mapbox
+// import LeafletMap from "./components/LeafletMap";
+// The LeafletMap component includes built-in geocoding functionality
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/ui";
 

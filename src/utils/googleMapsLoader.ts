@@ -3,17 +3,13 @@ import { ErrorCategory, ErrorSeverity, logError } from "./errorHandling";
 import { checkMapsServiceHealth } from "./mapsService";
 import { getNetworkState } from "./networkDetection";
 
-// Define the Google object in window
 declare global {
   interface Window {
-    google?: {
-      maps: any;
-    };
-    gm_authFailure?: () => void; // Google Maps auth failure handler
+    google?: { maps: any };
+    gm_authFailure?: () => void;
   }
 }
 
-// Loading state management
 let promise: Promise<void> | null = null;
 let useDirectApi = false;
 let serviceCheckAttempted = false;
@@ -22,25 +18,14 @@ let lastErrorMessage: string | null = null;
 let scriptElement: HTMLScriptElement | null = null;
 let scriptLoaded = false;
 
-// Environment configuration
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 const MAPS_SERVICE_URL = import.meta.env.VITE_MAPS_SERVICE_URL;
 const CURRENT_DOMAIN = typeof window !== "undefined" ? window.location.hostname : "";
-
-// This flag correctly checks if you have an API key to use as a fallback.
 const hasFallbackOption = !!GOOGLE_MAPS_API_KEY;
 
-/**
- * Check if Google Maps API is already loaded
- */
-export const isGoogleMapsAPILoaded = (): boolean => {
-  return !!(window.google && window.google.maps);
-};
+export const isGoogleMapsAPILoaded = (): boolean =>
+  !!(window.google && window.google.maps);
 
-/**
- * Set up the auth failure handler for Google Maps
- * This catches the RefererNotAllowedMapError
- */
 const setupAuthFailureHandler = (): void => {
   if (typeof window !== "undefined" && !window.gm_authFailure) {
     window.gm_authFailure = () => {
@@ -64,9 +49,6 @@ const setupAuthFailureHandler = (): void => {
   }
 };
 
-/**
- * Check if the Maps service proxy is available
- */
 export const checkMapsServiceAvailability = async (): Promise<boolean> => {
   if (!MAPS_SERVICE_URL) return false;
 
@@ -111,25 +93,15 @@ export const checkMapsServiceAvailability = async (): Promise<boolean> => {
   }
 };
 
-/**
- * Validate API key format to catch common mistakes
- */
 export const isValidApiKeyFormat = (apiKey: string | undefined): boolean => {
   if (!apiKey) return false;
   return apiKey.length >= 30 && !apiKey.includes(" ");
 };
 
-/**
- * Main function to load Google Maps script
- */
 export const loadGoogleMapsScript = async (libraries: string = "places"): Promise<void> => {
-  // Only load once
   if (promise) return promise;
-
-  // Set up auth failure handler
   setupAuthFailureHandler();
 
-  // Validate API key format
   if (GOOGLE_MAPS_API_KEY && !isValidApiKeyFormat(GOOGLE_MAPS_API_KEY)) {
     const error = new Error("Invalid Google Maps API key format");
     logError(error, {
@@ -140,7 +112,6 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
     throw error;
   }
 
-  // Check network status first
   const networkState = getNetworkState();
   if (networkState.status === "offline") {
     const error = new Error("Cannot load Google Maps while offline");
@@ -152,38 +123,29 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
     throw error;
   }
 
-  // Check service availability if we haven't yet
   if (!serviceCheckAttempted && MAPS_SERVICE_URL) {
     await checkMapsServiceAvailability();
   }
 
   promise = new Promise((resolve, reject) => {
-    // If already loaded, resolve immediately
     if (window.google && window.google.maps) {
       console.log("[Maps Loader] Google Maps already loaded");
       resolve();
       return;
     }
 
-    // Check if we already have a script element in the DOM
     if (scriptElement) {
       console.log("[Maps Loader] Script element already exists, waiting for it to load");
-      // If script is already loaded but Google Maps is not available, there might be an issue
       if (scriptLoaded && !window.google?.maps) {
         console.warn("[Maps Loader] Script loaded but Google Maps not available, possible initialization issue");
       }
-      return; // The existing promise will resolve/reject when the script loads/errors
+      return;
     }
 
-    // Create a new script element
     scriptElement = document.createElement("script");
-
-    // Check for existing script tags to prevent duplicates
     const existingScripts = document.querySelectorAll('script[src*="maps.googleapis.com"], script[src*="maps/api/js"]');
     if (existingScripts.length > 0) {
       console.warn(`[Maps Loader] Found ${existingScripts.length} existing Google Maps script tags. Using existing scripts.`);
-
-      // Wait for existing scripts to load
       const checkExisting = setInterval(() => {
         if (window.google?.maps) {
           clearInterval(checkExisting);
@@ -191,8 +153,6 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
           resolve();
         }
       }, 200);
-
-      // Set a timeout to avoid infinite waiting
       setTimeout(() => {
         clearInterval(checkExisting);
         if (!window.google?.maps) {
@@ -200,12 +160,10 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
           promise = null;
           reject(error);
         }
-      }, 10000); // 10 second timeout
-
+      }, 10000);
       return;
     }
 
-    // Determine which API source to use
     if (MAPS_SERVICE_URL && !useDirectApi) {
       const url = `${MAPS_SERVICE_URL}/maps/api/js?libraries=${libraries}`;
       console.log(`[Maps Loader] Loading Google Maps via proxy: ${url}`);
@@ -219,28 +177,20 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
       logError(error, {
         category: ErrorCategory.API,
         severity: ErrorSeverity.ERROR,
-        message:
-          "[Maps Loader] Neither VITE_GOOGLE_MAPS_API_KEY nor VITE_MAPS_SERVICE_URL is properly set or available",
+        message: "[Maps Loader] Neither VITE_GOOGLE_MAPS_API_KEY nor VITE_MAPS_SERVICE_URL is properly set or available",
       });
-
       scriptElement = null;
       promise = null;
       reject(error);
       return;
     }
 
-    // Use async and defer for better performance
     scriptElement.async = true;
     scriptElement.defer = true;
-
-    // Add a unique ID to help identify this script
     scriptElement.id = 'google-maps-script';
 
-    // Handle successful load
     scriptElement.onload = () => {
       scriptLoaded = true;
-      // Even if script loads, we need to check for auth errors that might happen after loading
-      // We use a small delay to allow the auth check to complete
       setTimeout(() => {
         if (authErrorDetected) {
           scriptElement = null;
@@ -252,7 +202,6 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
       }, 200);
     };
 
-    // Handle script loading errors
     scriptElement.onerror = (error) => {
       const errorMsg = "Failed to load Google Maps API script";
       lastErrorMessage = errorMsg;
@@ -273,12 +222,11 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
         );
       }
 
-      // Try fallback if available
       if (!useDirectApi && hasFallbackOption && MAPS_SERVICE_URL) {
         console.log("[Maps Loader] Proxy service failed, attempting fallback to direct API");
         useDirectApi = true;
         scriptElement = null;
-        promise = null; // Reset promise to allow a new attempt
+        promise = null;
         loadGoogleMapsScript(libraries).then(resolve).catch(reject);
       } else {
         scriptElement = null;
@@ -287,16 +235,12 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
       }
     };
 
-    // Add script to document
     document.head.appendChild(scriptElement);
   });
 
   return promise;
 };
 
-/**
- * React hook for using Google Maps in components
- */
 export const useLoadGoogleMaps = (libraries: string = "places") => {
   const [isLoaded, setIsLoaded] = useState(isGoogleMapsAPILoaded());
   const [error, setError] = useState<Error | null>(null);
@@ -320,7 +264,6 @@ export const useLoadGoogleMaps = (libraries: string = "places") => {
 
         await loadGoogleMapsScript(libraries);
 
-        // Final check for auth errors before confirming load
         if (authErrorDetected) {
           throw new Error(lastErrorMessage || "Google Maps authentication failed");
         }
@@ -329,8 +272,6 @@ export const useLoadGoogleMaps = (libraries: string = "places") => {
         setIsLoading(false);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to load Google Maps";
-
-        // Check for specific error types
         const isAuthError =
           authErrorDetected || errorMessage.includes("auth") || errorMessage.includes("key");
         const isDomainError =
@@ -360,4 +301,3 @@ export const useLoadGoogleMaps = (libraries: string = "places") => {
 
   return { isLoaded, isLoading, error, errorDetails };
 };
-

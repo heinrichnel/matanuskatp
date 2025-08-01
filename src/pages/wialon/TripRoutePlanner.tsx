@@ -1,4 +1,5 @@
 import React from "react";
+import LeafletMap from "./components/LeafletMap";
 
 /**
  * TripRoutePlanner Component
@@ -10,8 +11,10 @@ const TripRoutePlanner: React.FC = () => {
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-6">Trip Route Planner</h1>
       <div className="bg-white dark:bg-gray-800 p-4 rounded shadow">
-        {/* Trip planner content will go here */}
-        <p>Trip planning interface coming soon</p>
+        <LeafletMap />
+        <div className="mt-4">
+          <p>Use the map above to search for locations and plan routes</p>
+        </div>
       </div>
     </div>
   );
