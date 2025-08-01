@@ -19,6 +19,8 @@ let useDirectApi = false;
 let serviceCheckAttempted = false;
 let authErrorDetected = false;
 let lastErrorMessage: string | null = null;
+let scriptElement: HTMLScriptElement | null = null;
+let scriptLoaded = false;
 
 // Environment configuration
 const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -163,17 +165,55 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
       return;
     }
 
-    const script = document.createElement("script");
+    // Check if we already have a script element in the DOM
+    if (scriptElement) {
+      console.log("[Maps Loader] Script element already exists, waiting for it to load");
+      // If script is already loaded but Google Maps is not available, there might be an issue
+      if (scriptLoaded && !window.google?.maps) {
+        console.warn("[Maps Loader] Script loaded but Google Maps not available, possible initialization issue");
+      }
+      return; // The existing promise will resolve/reject when the script loads/errors
+    }
+
+    // Create a new script element
+    scriptElement = document.createElement("script");
+
+    // Check for existing script tags to prevent duplicates
+    const existingScripts = document.querySelectorAll('script[src*="maps.googleapis.com"], script[src*="maps/api/js"]');
+    if (existingScripts.length > 0) {
+      console.warn(`[Maps Loader] Found ${existingScripts.length} existing Google Maps script tags. Using existing scripts.`);
+
+      // Wait for existing scripts to load
+      const checkExisting = setInterval(() => {
+        if (window.google?.maps) {
+          clearInterval(checkExisting);
+          scriptLoaded = true;
+          resolve();
+        }
+      }, 200);
+
+      // Set a timeout to avoid infinite waiting
+      setTimeout(() => {
+        clearInterval(checkExisting);
+        if (!window.google?.maps) {
+          const error = new Error("Existing Google Maps scripts failed to initialize properly");
+          promise = null;
+          reject(error);
+        }
+      }, 10000); // 10 second timeout
+
+      return;
+    }
 
     // Determine which API source to use
     if (MAPS_SERVICE_URL && !useDirectApi) {
       const url = `${MAPS_SERVICE_URL}/maps/api/js?libraries=${libraries}`;
       console.log(`[Maps Loader] Loading Google Maps via proxy: ${url}`);
-      script.src = url;
+      scriptElement.src = url;
     } else if (GOOGLE_MAPS_API_KEY) {
       const url = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&loading=async&libraries=${libraries}`;
       console.log("[Maps Loader] Loading Google Maps directly with API key");
-      script.src = url;
+      scriptElement.src = url;
     } else {
       const error = new Error("Maps configuration error: No valid API source available");
       logError(error, {
@@ -183,21 +223,27 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
           "[Maps Loader] Neither VITE_GOOGLE_MAPS_API_KEY nor VITE_MAPS_SERVICE_URL is properly set or available",
       });
 
+      scriptElement = null;
       promise = null;
       reject(error);
       return;
     }
 
     // Use async and defer for better performance
-    script.async = true;
-    script.defer = true;
+    scriptElement.async = true;
+    scriptElement.defer = true;
+
+    // Add a unique ID to help identify this script
+    scriptElement.id = 'google-maps-script';
 
     // Handle successful load
-    script.onload = () => {
+    scriptElement.onload = () => {
+      scriptLoaded = true;
       // Even if script loads, we need to check for auth errors that might happen after loading
       // We use a small delay to allow the auth check to complete
       setTimeout(() => {
         if (authErrorDetected) {
+          scriptElement = null;
           promise = null;
           reject(new Error(lastErrorMessage || "Google Maps authentication failed"));
         } else {
@@ -207,9 +253,10 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
     };
 
     // Handle script loading errors
-    script.onerror = (error) => {
+    scriptElement.onerror = (error) => {
       const errorMsg = "Failed to load Google Maps API script";
       lastErrorMessage = errorMsg;
+      scriptLoaded = false;
 
       logError(error instanceof Error ? error : new Error(errorMsg), {
         category: ErrorCategory.NETWORK,
@@ -230,16 +277,18 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
       if (!useDirectApi && hasFallbackOption && MAPS_SERVICE_URL) {
         console.log("[Maps Loader] Proxy service failed, attempting fallback to direct API");
         useDirectApi = true;
+        scriptElement = null;
         promise = null; // Reset promise to allow a new attempt
         loadGoogleMapsScript(libraries).then(resolve).catch(reject);
       } else {
+        scriptElement = null;
         promise = null;
         reject(error);
       }
     };
 
     // Add script to document
-    document.head.appendChild(script);
+    document.head.appendChild(scriptElement);
   });
 
   return promise;
@@ -311,3 +360,4 @@ export const useLoadGoogleMaps = (libraries: string = "places") => {
 
   return { isLoaded, isLoading, error, errorDetails };
 };
+
