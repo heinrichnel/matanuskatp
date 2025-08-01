@@ -1,6 +1,7 @@
 # APppp - Application Structure and Architecture
 
 ## Table of Contents
+
 - [1. Overview](#1-overview)
 - [2. Application Structure](#2-application-structure)
 - [3. Routing System](#3-routing-system)
@@ -16,6 +17,7 @@
 APppp is a comprehensive fleet management application built with React, TypeScript, Tailwind CSS, and Firebase. The application provides functionality for managing trips, tyres, invoices, diesel consumption, drivers, compliance, and workshop operations.
 
 ### Technology Stack
+
 - **Frontend**: React 18+, TypeScript, Tailwind CSS
 - **Backend**: Firebase (Firestore, Authentication, Storage, Functions)
 - **State Management**: React Context API
@@ -28,6 +30,7 @@ APppp is a comprehensive fleet management application built with React, TypeScri
 The application is structured into several key sections:
 
 ### Core Directories
+
 - `/src/pages/`: Page components that represent different routes
 - `/src/components/`: Reusable UI components organized by feature
 - `/src/context/`: React context providers for state management
@@ -38,6 +41,7 @@ The application is structured into several key sections:
 - `/functions/`: Firebase cloud functions
 
 ### Main Sections
+
 1. Trip Management
 2. Invoice Management
 3. Diesel Management
@@ -55,12 +59,13 @@ The application uses React Router v6 with a nested routing structure. Routes are
 ### Routing Configuration
 
 The routing system is directly connected to the sidebar configuration defined in `/src/config/sidebarConfig.ts`. This file maps each menu item to its corresponding:
+
 - Route path
 - Component import path
 - Label
 - Icon (if applicable)
 
-### Example Routing Structure:
+### Example Routing Structure
 
 ```tsx
 <Route path="trips" element={<TripManagementPage />}>
@@ -79,6 +84,7 @@ The sidebar configuration in `sidebarConfig.ts` serves as a single source of tru
 ## 4. Components
 
 ### Layout Components
+
 - `Layout`: Main layout component that includes sidebar, header, and content area
 - `Sidebar`: Navigation sidebar that renders menu items based on sidebarConfig
 - `ErrorBoundary`: Catches and displays errors in components
@@ -86,24 +92,28 @@ The sidebar configuration in `sidebarConfig.ts` serves as a single source of tru
 ### Feature-Specific Components
 
 #### Trip Management
+
 - `ActiveTrips`: Displays real-time active trips from Firestore
 - `CompletedTrips`: Shows historical trip data
 - `TripTimelineLive`: Gantt chart visualization of trips using react-calendar-timeline
 - `TripDashboard`: Overview of trip metrics and KPIs
 
 #### Tyre Management
+
 - `TyreDashboard`: Main dashboard for tyre inventory
 - `AddTyreForm`: Form for adding new tyres to the system
 - `TyreInventory`: Table view of all tyres with filtering and sorting
 - `TyreManagement`: Parent component with tabs for different tyre management functions
 
 #### Invoice Management
+
 - `InvoiceDashboard`: Overview of invoice metrics
 - `InvoiceBuilder`: Form to create new invoices
 - `InvoiceApprovalFlow`: Workflow for approving invoices
 - `InvoiceAgingDashboard`: Analysis of overdue invoices
 
 #### Workshop Management
+
 - `JobCardManagement`: Manages repair and maintenance job cards
 - `JobCardKanbanBoard`: Kanban view of job card workflow
 - `InspectionManagement`: Vehicle inspection forms and records
@@ -114,6 +124,7 @@ The sidebar configuration in `sidebarConfig.ts` serves as a single source of tru
 ### Firebase Configuration
 
 The application uses Firebase as its backend, with configuration in:
+
 - `firebase.ts`: Main Firebase initialization
 - `firebaseConfig.ts`: Firebase project settings
 - `firebaseEmulators.ts`: Local emulator configuration
@@ -121,6 +132,7 @@ The application uses Firebase as its backend, with configuration in:
 ### Firestore Structure
 
 Data in Firestore is organized into collections:
+
 - `trips`: Trip data including route, schedule, and status
 - `vehicles`: Fleet vehicle information
 - `tyres`: Tyre inventory and history
@@ -138,23 +150,27 @@ Several components use Firestore's `onSnapshot` listeners for real-time updates:
 // Example from useRealtimeTrips hook
 useEffect(() => {
   const q = query(
-    collection(db, 'trips'),
-    where('status', '==', 'active'),
-    orderBy('startTime', 'desc')
+    collection(db, "trips"),
+    where("status", "==", "active"),
+    orderBy("startTime", "desc")
   );
-  
-  const unsubscribe = onSnapshot(q, (snapshot) => {
-    const tripData = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    setTrips(tripData);
-    setLoading(false);
-  }, (error) => {
-    setError(error);
-    setLoading(false);
-  });
-  
+
+  const unsubscribe = onSnapshot(
+    q,
+    (snapshot) => {
+      const tripData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setTrips(tripData);
+      setLoading(false);
+    },
+    (error) => {
+      setError(error);
+      setLoading(false);
+    }
+  );
+
   return () => unsubscribe();
 }, []);
 ```
@@ -162,6 +178,7 @@ useEffect(() => {
 ### Firebase Cloud Functions
 
 The application uses Firebase Cloud Functions for server-side operations:
+
 - Trip data processing from external sources
 - Webhook integration with Wialon telematics
 - Enhanced driver behavior analysis
@@ -179,7 +196,7 @@ const [form, setForm] = useState<TyreFormValues>(defaultForm);
 
 function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
   const { name, value } = e.target;
-  setForm(prev => ({ ...prev, [name]: value }));
+  setForm((prev) => ({ ...prev, [name]: value }));
 }
 
 function handleSubmit(e: React.FormEvent) {
@@ -191,6 +208,7 @@ function handleSubmit(e: React.FormEvent) {
 ### UI Component Library
 
 Custom UI components styled with Tailwind CSS:
+
 - `Button`: Reusable button component with variants
 - `Card`: Container for content with consistent styling
 - `Table`: Data table with sorting and filtering capabilities
@@ -201,6 +219,7 @@ Custom UI components styled with Tailwind CSS:
 ### Form Validation
 
 Form validation is handled through a combination of:
+
 - HTML5 form validation (`required`, etc.)
 - Custom TypeScript validation logic
 - Error messaging with user feedback
@@ -229,8 +248,8 @@ The `TripTimelinePage` component implements a Gantt chart using react-calendar-t
           borderRadius: 4,
           padding: "2px 4px",
           fontSize: "0.85rem",
-          border: "none"
-        }
+          border: "none",
+        },
       })}
     >
       {item.title}
@@ -242,6 +261,7 @@ The `TripTimelinePage` component implements a Gantt chart using react-calendar-t
 ### Dashboard Analytics
 
 Dashboard components use various chart types:
+
 - Bar charts for comparative metrics
 - Line charts for trend analysis
 - Pie charts for distribution visualization
@@ -253,6 +273,7 @@ Dashboard components use various chart types:
 ### Context Providers
 
 The application uses React Context for state management:
+
 - `AppContext`: Global application state and settings
 - `TripContext`: Trip-related state and functions
 - `TyreStoresContext`: Tyre inventory management
@@ -269,6 +290,7 @@ The application uses React Context for state management:
 ### Real-time Updates
 
 The application maintains real-time connections to Firestore for critical data:
+
 - Active trips status and location
 - Driver behavior events
 - Vehicle telemetry data
@@ -293,29 +315,27 @@ The application implements advanced network detection beyond the standard `navig
 // Example from networkDetection.ts
 export const checkNetworkConnectivity = async (): Promise<ConnectionStatus> => {
   // Basic check
-  if (!navigator.onLine) return { isOnline: false, quality: 'offline' };
-  
+  if (!navigator.onLine) return { isOnline: false, quality: "offline" };
+
   try {
     // Active endpoint test with timeout
     const start = performance.now();
     const response = await Promise.race([
-      fetch('/api/health', { method: 'HEAD' }),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Timeout')), 5000)
-      )
+      fetch("/api/health", { method: "HEAD" }),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 5000)),
     ]);
-    
+
     const time = performance.now() - start;
-    
+
     // Determine connection quality based on response time
     if (response && (response as Response).ok) {
-      if (time < 300) return { isOnline: true, quality: 'good', latency: time };
-      if (time < 1000) return { isOnline: true, quality: 'fair', latency: time };
-      return { isOnline: true, quality: 'poor', latency: time };
+      if (time < 300) return { isOnline: true, quality: "good", latency: time };
+      if (time < 1000) return { isOnline: true, quality: "fair", latency: time };
+      return { isOnline: true, quality: "poor", latency: time };
     }
-    return { isOnline: false, quality: 'unknown' };
+    return { isOnline: false, quality: "unknown" };
   } catch (error) {
-    return { isOnline: false, quality: 'limited' };
+    return { isOnline: false, quality: "limited" };
   }
 };
 ```
@@ -363,7 +383,7 @@ function useOfflineQuery<T>(path: string, options?: QueryOptions): QueryResult<T
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { isOnline } = useNetworkStatus();
-  
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -373,7 +393,7 @@ function useOfflineQuery<T>(path: string, options?: QueryOptions): QueryResult<T
           setData(cachedData);
           setLoading(false);
         }
-        
+
         // If online, fetch fresh data
         if (isOnline) {
           const freshData = await fetchFromFirestore<T>(path, options);
@@ -387,10 +407,10 @@ function useOfflineQuery<T>(path: string, options?: QueryOptions): QueryResult<T
         setLoading(false);
       }
     }
-    
+
     fetchData();
   }, [path, isOnline]);
-  
+
   return { data, loading, error, isOfflineData: !isOnline };
 }
 ```
