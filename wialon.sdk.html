@@ -1,0 +1,177 @@
+// Token for login
+const TOKEN = "c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053";
+
+// Map and markers
+let map, marker, unitMarkers = {}, markerByUnit = {};
+let areUnitsLoaded = false;
+let currentPos = null, currentUnit = null;
+let isUIActive = true;
+
+// Utility: show message
+function msg(text) {
+  const logDiv = document.getElementById('log');
+  if (logDiv) {
+    logDiv.innerHTML = text + '<br/>' + logDiv.innerHTML;
+  } else {
+    console.log(text);
+  }
+}
+
+// Initialize map
+function initMap() {
+  map = L.map('map', { doubleClickZoom: false }).setView([52.33745, 9.81056], 12);
+  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+
+  map.on('dblclick', (e) => {
+    if (!isUIActive) return;
+    document.getElementById('usage-hint').style.display = 'none';
+    findAndShowNearestUnitsByPos({ lat: e.latlng.lat, lon: e.latlng.lng });
+  });
+}
+
+// Start session, login, load units
+function start() {
+  const sess = wialon.core.Session.getInstance();
+  sess.initSession("https://hst-api.wialon.com");
+  sess.loginToken(TOKEN, "", (code) => {
+    if (code) {
+      msg(wialon.core.Errors.getErrorText(code));
+      return;
+    }
+    msg("Logged successfully");
+    initMap();
+    init();
+  });
+}
+
+// Load units and setup UI
+function init() {
+  const sess = wialon.core.Session.getInstance();
+  const flags = wialon.item.Item.dataFlag.base | wialon.item.Unit.dataFlag.sensors | wialon.item.Unit.dataFlag.lastMessage;
+  sess.loadLibrary("itemIcon");
+  sess.updateDataFlags(
+    [{ type: "type", data: "avl_unit", flags, mode: 0 }],
+    (error) => {
+      if (error) {
+        msg(wialon.core.Errors.getErrorText(error));
+        return;
+      }
+      areUnitsLoaded = true;
+      const units = sess.getItems("avl_unit");
+      if (!units || units.length === 0) {
+        msg("No units found");
+        return;
+      }
+      // populate units select
+      const unitsSelect = document.getElementById("units");
+      units.forEach(unit => {
+        const option = document.createElement("option");
+        option.value = unit.getId();
+        option.textContent = unit.getName();
+        unitsSelect.appendChild(option);
+      });
+      // Setup change handler
+      document.getElementById("units").addEventListener("change", getSensors);
+      // Optionally, load sensors for first unit
+      // if (units.length > 0) { getSensors(); }
+    }
+  );
+}
+
+// Get sensors for selected unit
+function getSensors() {
+  const unitId = document.getElementById('units').value;
+  const sensorSelect = document.getElementById('sensors');
+  sensorSelect.innerHTML = '<option></option>';
+
+  if (!unitId) {
+    msg("Select unit");
+    return;
+  }
+
+  const session = wialon.core.Session.getInstance();
+  const unit = session.getItem(unitId);
+  if (!unit) {
+    msg("Unit not found");
+    return;
+  }
+
+  const sens = unit.getSensors();
+  for (const key in sens) {
+    if (sens.hasOwnProperty(key)) {
+      const option = document.createElement('option');
+      option.value = sens[key].id;
+      option.textContent = sens[key].n;
+      sensorSelect.appendChild(option);
+    }
+  }
+}
+
+// Get sensor value
+function getSensorInfo() {
+  const unitId = document.getElementById('units').value;
+  const sensId = document.getElementById('sensors').value;
+
+  if (!unitId) {
+    msg("Select unit");
+    return;
+  }
+  if (!sensId) {
+    return;
+  }
+
+  const session = wialon.core.Session.getInstance();
+  const unit = session.getItem(unitId);
+  if (!unit) {
+    msg("Unit not found");
+    return;
+  }
+
+  const sens = unit.getSensor(sensId);
+  if (!sens) {
+    msg("Sensor not found");
+    return;
+  }
+
+  const result = unit.calculateSensorValue(sens, unit.getLastMessage());
+  const displayResult = (result === -348201.3876) ? "N/A" : result;
+
+  msg(`Value of ${unit.getName()} <b>'${sens.n}'</b> sensor (${sens.t}): ${displayResult} (${sens.m})`);
+}
+
+// Find and show nearest units by position
+function findAndShowNearestUnitsByPos(pos) {
+  // store position
+  currentPos = pos;
+  // update marker
+  if (marker) {
+    marker.setLatLng([pos.lat, pos.lon]);
+  } else {
+    marker = L.marker([pos.lat, pos.lon]).addTo(map);
+  }
+  map.setView([pos.lat, pos.lon], 12);
+  // TODO: your logic to find nearest units
+  msg(`Searching nearest units to (${pos.lat}, ${pos.lon})`);
+}
+
+// Utility: display position
+function displayPosition(lat, lon) {
+  const latStr = Math.round(lat * 100000) / 100000;
+  const lonStr = Math.round(lon * 100000) / 100000;
+  document.getElementById('latlng').value = latStr + ', ' + lonStr;
+  document.getElementById('latlng').classList.remove('invalid');
+}
+
+// Toggle UI buttons
+function toggleActiveUI(toggle) {
+  isUIActive = toggle;
+  document.getElementById('find-by-location-button').disabled = !toggle;
+  document.getElementById('find-by-unit-button').disabled = !toggle;
+}
+
+// DOM ready
+document.addEventListener("DOMContentLoaded", () => {
+  start();
+});

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import { useFleetAnalytics } from "@/context/FleetAnalyticsContext";
 import React from "react";
 import {
@@ -86,11 +86,15 @@ export function FleetAnalyticsLineChart() {
                 className="text-lg leading-none font-bold sm:text-xl"
                 style={{ color: chartConfig[key].color }}
               >
-                {fleetAnalytics.length > 0 && fleetAnalytics[fleetAnalytics.length - 1] && fleetAnalytics[fleetAnalytics.length - 1][key] !== undefined
+                {fleetAnalytics.length > 0 &&
+                fleetAnalytics[fleetAnalytics.length - 1] &&
+                fleetAnalytics[fleetAnalytics.length - 1][key] !== undefined
                   ? key === "roi"
                     ? `${fleetAnalytics[fleetAnalytics.length - 1][key]}%`
                     : `$${fleetAnalytics[fleetAnalytics.length - 1][key]}K`
-                  : key === "roi" ? "0%" : "$0K"}
+                  : key === "roi"
+                    ? "0%"
+                    : "$0K"}
               </span>
             </button>
           ))}

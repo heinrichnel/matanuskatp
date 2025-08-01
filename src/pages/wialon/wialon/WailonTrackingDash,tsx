@@ -1,0 +1,420 @@
+import React, { useState, useEffect, useRef } from 'react';
+// Imports for react-leaflet, leaflet, etc. are removed to fix compilation errors.
+// These dependencies will be loaded dynamically via script tags.
+
+// --- Type Definitions ---
+export interface WialonSession {
+  initSession(apiUrl: string): void;
+  loginToken(token: string, flags: string, callback: (code: number) => void): void;
+  updateDataFlags(specs: any[], callback: (code: number) => void): void;
+  getItems(itemType: string): WialonUnit[];
+  getItem(itemId: number): WialonUnit;
+  loadLibrary(libraryName: string): void;
+}
+
+export interface WialonPosition {
+  x: number; // longitude
+  y: number; // latitude
+  s: number; // speed
+  c: number; // course
+  t: number; // timestamp
+  sc: number; // satellites
+}
+
+export interface WialonSensor {
+  id: number;
+  n: string; // name
+  t: string; // type
+  m: string; // unit of measure
+}
+
+export interface WialonUnit {
+  getId(): number;
+  getName(): string;
+  getSensors(): { [key: string]: WialonSensor };
+  getSensor(sensorId: number): WialonSensor | undefined;
+  calculateSensorValue(sensor: WialonSensor, message: any): number | string;
+  getLastMessage(): any;
+  getPosition(): WialonPosition | null;
+  getIconUrl(size?: number): string;
+  addListener(eventName: string, callback: (event: any) => void): number;
+  removeListenerById(eventId: number): void;
+}
+
+// Wialon SDK is exposed on the window object
+declare global {
+  interface Window {
+    wialon: any;
+    L: any;
+    ReactLeaflet: any;
+  }
+}
+
+// --- Wialon Configuration ---
+const TOKEN = "c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053";
+const WIALON_API_URL = "https://hst-api.wialon.com";
+
+const App = () => {
+  const [logMessages, setLogMessages] = useState<string[]>([]);
+  const [units, setUnits] = useState<WialonUnit[]>([]);
+  const [selectedUnitId, setSelectedUnitId] = useState<string>('');
+  const [sensors, setSensors] = useState<WialonSensor[]>([]);
+  const [selectedSensorId, setSelectedSensorId] = useState<string>('');
+  const [isUIActive, setIsUIActive] = useState<boolean>(true);
+  const [userLocation, setUserLocation] = useState<L.LatLngExpression | null>(null);
+  const [isDependenciesLoaded, setIsDependenciesLoaded] = useState(false);
+
+  // New state for dashboard
+  const [selectedUnitDetails, setSelectedUnitDetails] = useState<{
+    name: string;
+    position: { lat: number; lng: number; speed: number; } | null;
+    sensorValue: { name: string; value: string | number | null; unit: string } | null;
+  } | null>(null);
+
+  const mapRef = useRef<any | null>(null);
+  const sessionRef = useRef<any>(null);
+
+  const log = (text: string, isError: boolean = false) => {
+    setLogMessages(prev => [text, ...prev].slice(0, 50));
+    if (isError) {
+      console.error(text);
+    } else {
+      console.log(text);
+    }
+  };
+
+  const startWialonSession = () => {
+    if (typeof window === "undefined" || !window.wialon) {
+      log("Wialon SDK not available", true);
+      return;
+    }
+
+    const sess = window.wialon.core.Session.getInstance();
+    sess.initSession(WIALON_API_URL);
+    sessionRef.current = sess;
+
+    sess.loginToken(TOKEN, "", (code: number) => {
+      if (code) {
+        log(`Login failed: ${window.wialon.core.Errors.getErrorText(code)}`, true);
+        return;
+      }
+      log("Logged in successfully.");
+      loadWialonUnits();
+    });
+  };
+
+  const loadWialonUnits = () => {
+    if (!sessionRef.current) return;
+
+    const sess = sessionRef.current;
+    const flags = window.wialon.item.Item.dataFlag.base | window.wialon.item.Unit.dataFlag.sensors | window.wialon.item.Unit.dataFlag.lastMessage;
+    sess.loadLibrary("itemIcon");
+
+    sess.updateDataFlags(
+      [{ type: "type", data: "avl_unit", flags, mode: 0 }],
+      (error: number) => {
+        if (error) {
+          log(`Failed to load units: ${window.wialon.core.Errors.getErrorText(error)}`, true);
+          return;
+        }
+        const loadedUnits = sess.getItems("avl_unit");
+        if (!loadedUnits || loadedUnits.length === 0) {
+          log("No units found.", true);
+          return;
+        }
+        setUnits(loadedUnits);
+        log(`Loaded ${loadedUnits.length} units.`);
+      }
+    );
+  };
+
+  const MapEventsHandler = () => {
+    const { useMapEvents } = window.ReactLeaflet;
+    const map = useMapEvents({
+      dblclick: (e: any) => {
+        if (!isUIActive) return;
+        findAndShowNearestUnitsByPos({ lat: e.latlng.lat, lon: e.latlng.lng });
+      },
+      load: () => {
+        mapRef.current = map;
+      }
+    });
+    return null;
+  };
+
+  const findAndShowNearestUnitsByPos = (pos: { lat: number; lon: number }) => {
+    setUserLocation([pos.lat, pos.lon]);
+    mapRef.current?.setView([pos.lat, pos.lon], 12);
+    log(`Searching for nearest units to (${pos.lat.toFixed(5)}, ${pos.lon.toFixed(5)})`);
+  };
+
+  const getSensors = () => {
+    const unit = units.find(u => u.getId().toString() === selectedUnitId);
+    if (!unit) {
+      log("Unit not found.", true);
+      return;
+    }
+    const sens = unit.getSensors();
+    setSensors(Object.values(sens));
+    log(`Loaded ${Object.keys(sens).length} sensors for unit: ${unit.getName()}`);
+
+    // Update dashboard with unit details
+    const pos = unit.getPosition();
+    setSelectedUnitDetails({
+        name: unit.getName(),
+        position: pos ? { lat: pos.y, lng: pos.x, speed: pos.s } : null,
+        sensorValue: null,
+    });
+  };
+
+  const getSensorInfo = () => {
+    const unit = units.find(u => u.getId().toString() === selectedUnitId);
+    const sensor = sensors.find(s => s.id.toString() === selectedSensorId);
+
+    if (!unit || !sensor) {
+      log("Please select both a unit and a sensor.", true);
+      return;
+    }
+
+    const lastMessage = unit.getLastMessage();
+    if (!lastMessage) {
+      log(`No last message found for unit: ${unit.getName()}`, true);
+      return;
+    }
+
+    const result = unit.calculateSensorValue(sensor, lastMessage);
+    const displayResult = (result === -348201.3876) ? "N/A" : result;
+    log(`Value of '${unit.getName()}'s sensor '${sensor.n}': ${displayResult} (${sensor.m})`);
+
+    // Update dashboard with sensor value
+    setSelectedUnitDetails(prev => {
+        if (!prev) return null;
+        return {
+            ...prev,
+            sensorValue: {
+                name: sensor.n,
+                value: displayResult,
+                unit: sensor.m,
+            },
+        };
+    });
+  };
+
+  const toggleActiveUI = () => {
+    setIsUIActive(prev => !prev);
+    log(`UI is now ${isUIActive ? 'inactive' : 'active'}.`);
+  };
+
+  const clearDashboard = () => {
+      setSelectedUnitDetails(null);
+      setSelectedUnitId('');
+      setSensors([]);
+      setSelectedSensorId('');
+      log('Dashboard cleared.');
+  }
+
+  // --- Lifecycle Hook to start Wialon Session and load dependencies ---
+  useEffect(() => {
+    const loadScript = (src: string) => {
+      return new Promise<void>((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+        document.head.appendChild(script);
+      });
+    };
+
+    const loadCss = (href: string) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href;
+      document.head.appendChild(link);
+    };
+
+    const loadDependencies = async () => {
+      try {
+        log('Loading external dependencies...');
+        // Load CSS first
+        loadCss('https://unpkg.com/leaflet@1.7.1/dist/leaflet.css');
+
+        // Load JS libraries in order
+        await loadScript('https://unpkg.com/leaflet@1.7.1/dist/leaflet.js');
+        await loadScript('https://unpkg.com/react@17/umd/react.production.min.js');
+        await loadScript('https://unpkg.com/react-dom@17/umd/react-dom.production.min.js');
+        await loadScript('https://unpkg.com/react-leaflet@3/dist/react-leaflet.min.js');
+        await loadScript('https://sdk.wialon.com/js/latest/wialon.js');
+
+        // Ensure all are available
+        if (window.L && window.ReactLeaflet && window.wialon) {
+          // Fix for default marker icons now that we're using CDN
+          const { L } = window;
+          const DefaultIcon = L.icon({
+            iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            tooltipAnchor: [16, -28],
+            shadowSize: [41, 41],
+          });
+          L.Marker.prototype.options.icon = DefaultIcon;
+
+          setIsDependenciesLoaded(true);
+          log('All dependencies loaded successfully.');
+          startWialonSession();
+        } else {
+          log('Failed to load one or more dependencies.', true);
+        }
+      } catch (error) {
+        log(`Error loading dependencies: ${error}`, true);
+      }
+    };
+
+    loadDependencies();
+  }, []);
+
+  const { MapContainer, TileLayer, Marker } = window.ReactLeaflet || {};
+  const { L } = window || {};
+
+  if (!isDependenciesLoaded || !MapContainer || !L) {
+    return (
+      <div style={{ padding: '16px', fontFamily: 'sans-serif' }}>
+        <h1 style={{ fontSize: '1.5rem', marginBottom: '16px' }}>Wialon Map Integration</h1>
+        <p>Loading application dependencies... This may take a moment.</p>
+        <div id="log" style={{ marginTop: '16px', maxHeight: '200px', overflowY: 'scroll', backgroundColor: '#f4f4f4', padding: '8px' }}>
+          {logMessages.map((msg, index) => (
+            <div key={index} style={{ marginBottom: '4px', borderBottom: '1px solid #eee' }}>
+              {msg}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ padding: '16px', fontFamily: 'sans-serif' }}>
+      <h1 style={{ fontSize: '1.5rem', marginBottom: '16px' }}>Wialon Map Integration</h1>
+
+      {/* --- New Dashboard Section --- */}
+      <div style={{
+          backgroundColor: '#eef2f6',
+          border: '1px solid #d1d5db',
+          borderRadius: '8px',
+          padding: '16px',
+          marginBottom: '16px',
+          fontFamily: 'monospace'
+      }}>
+          <h3 style={{ marginTop: '0', marginBottom: '8px' }}>Dashboard</h3>
+          {selectedUnitDetails ? (
+              <div>
+                  <p><strong>Unit Name:</strong> {selectedUnitDetails.name}</p>
+                  {selectedUnitDetails.position && (
+                      <>
+                          <p><strong>Position:</strong> {selectedUnitDetails.position.lat.toFixed(5)}, {selectedUnitDetails.position.lng.toFixed(5)}</p>
+                          <p><strong>Speed:</strong> {selectedUnitDetails.position.speed} km/h</p>
+                      </>
+                  )}
+                  {selectedUnitDetails.sensorValue && (
+                      <p><strong>{selectedUnitDetails.sensorValue.name}:</strong> {selectedUnitDetails.sensorValue.value} {selectedUnitDetails.sensorValue.unit}</p>
+                  )}
+                  <button
+                    onClick={clearDashboard}
+                    style={{ padding: '4px 8px', fontSize: '0.9rem', marginTop: '8px' }}
+                  >
+                    Clear Dashboard
+                  </button>
+              </div>
+          ) : (
+              <p>Select a unit to view details.</p>
+          )}
+      </div>
+
+      <div id="map" style={{ height: '500px', width: '100%', border: '1px solid #ccc' }}>
+        <MapContainer
+          center={L.latLng(52.33745, 9.81056)}
+          zoom={12}
+          style={{ height: '100%', width: '100%' }}
+        >
+          <TileLayer
+            url="http://{s}.tile.osm.org/{z}/{x}/{y}.png"
+            attribution="&copy; OpenStreetMap contributors"
+          />
+          <MapEventsHandler />
+          {userLocation && <Marker position={userLocation} />}
+        </MapContainer>
+      </div>
+
+      <div style={{ marginTop: '16px' }}>
+        <h2>Units and Sensors</h2>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+          <select
+            id="units"
+            value={selectedUnitId}
+            onChange={(e) => setSelectedUnitId(e.target.value)}
+            style={{ padding: '8px', flexGrow: 1 }}
+            disabled={!isUIActive}
+          >
+            <option value="">Select a unit</option>
+            {units.map(unit => (
+              <option key={unit.getId()} value={unit.getId()}>
+                {unit.getName()}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={getSensors}
+            disabled={!isUIActive || !selectedUnitId}
+            style={{ padding: '8px' }}
+          >
+            Load Sensors
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <select
+            id="sensors"
+            value={selectedSensorId}
+            onChange={(e) => setSelectedSensorId(e.target.value)}
+            style={{ padding: '8px', flexGrow: 1 }}
+            disabled={!isUIActive || sensors.length === 0}
+          >
+            <option value="">Select a sensor</option>
+            {sensors.map(sensor => (
+              <option key={sensor.id} value={sensor.id}>
+                {sensor.n}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={getSensorInfo}
+            disabled={!isUIActive || !selectedSensorId}
+            style={{ padding: '8px' }}
+          >
+            Get Sensor Value
+          </button>
+        </div>
+
+        <div style={{ marginTop: '16px' }}>
+          <button onClick={toggleActiveUI} style={{ padding: '8px', marginRight: '8px' }}>
+            {isUIActive ? 'Deactivate UI' : 'Activate UI'}
+          </button>
+        </div>
+      </div>
+
+      <div style={{ marginTop: '16px', borderTop: '1px solid #ccc', paddingTop: '16px' }}>
+        <h3>Log</h3>
+        <div id="log" style={{ maxHeight: '200px', overflowY: 'scroll', backgroundColor: '#f4f4f4', padding: '8px' }}>
+          {logMessages.map((msg, index) => (
+            <div key={index} style={{ marginBottom: '4px', borderBottom: '1px solid #eee' }}>
+              {msg}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default WailonTrackingDash;

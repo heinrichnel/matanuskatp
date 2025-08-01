@@ -24,16 +24,13 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
   const markersRef = useRef<google.maps.Marker[]>([]);
-  
-  // Use the googleMapsLoader hook to load the API
+
   const { isLoaded, isLoading, error } = useLoadGoogleMaps('places');
 
-  // Initialize the map once the API is loaded
   useEffect(() => {
     if (isLoaded && mapRef.current && !googleMapRef.current) {
       console.log('[GoogleMapComponent] Initializing map');
-      
-      // Create the map instance
+
       const mapOptions: google.maps.MapOptions = {
         center,
         zoom,
@@ -42,11 +39,10 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
         fullscreenControl: true,
         zoomControl: true,
       };
-      
+
       const map = new window.google.maps.Map(mapRef.current, mapOptions);
       googleMapRef.current = map;
-      
-      // Add markers if provided
+
       markers.forEach(marker => {
         const newMarker = new window.google.maps.Marker({
           position: marker.position,
@@ -55,15 +51,13 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
         });
         markersRef.current.push(newMarker);
       });
-      
-      // Call onMapLoad callback if provided
+
       if (onMapLoad) {
         onMapLoad(map);
       }
     }
   }, [isLoaded, center, zoom, markers, onMapLoad]);
-  
-  // Clean up markers when component unmounts or markers change
+
   useEffect(() => {
     return () => {
       markersRef.current.forEach(marker => marker.setMap(null));
@@ -71,14 +65,13 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
     };
   }, [markers]);
 
-  // Predefined styles for different states
   const containerStyle: React.CSSProperties = {
     width: '100%',
     height: '100%',
     minHeight: '400px',
     ...style,
   };
-  
+
   if (error) {
     return (
       <div className={`bg-red-50 border border-red-200 rounded p-4 ${className}`} style={containerStyle}>
@@ -103,8 +96,8 @@ const GoogleMapComponent: React.FC<GoogleMapProps> = ({
   }
 
   return (
-    <div 
-      ref={mapRef} 
+    <div
+      ref={mapRef}
       className={`google-map-container ${className}`}
       style={containerStyle}
       data-testid="google-map-container"

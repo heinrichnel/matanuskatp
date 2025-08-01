@@ -43,7 +43,16 @@ import { AlertTriangle, CalendarIcon, CheckCircle, Edit, FileText, Plus } from "
 // Create a placeholder component for missing pages
 const PlaceholderComponent = React.lazy(() =>
   Promise.resolve({
-    default: () => React.createElement("div", {}, "Page component is being developed"),
+    default: () => React.createElement("div", {
+      className: "p-8 border border-gray-200 rounded-lg bg-white shadow-sm"
+    }, [
+      React.createElement("h2", {
+        className: "text-xl font-semibold mb-4 text-gray-800"
+      }, "Page Under Development"),
+      React.createElement("p", {
+        className: "text-gray-600"
+      }, "This page component is currently being developed. Please check back later.")
+    ]),
   })
 );
 

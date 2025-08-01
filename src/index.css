@@ -206,11 +206,21 @@
 }
 
 @layer utilities {
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
+  /* Sidebar icon sizing */
+    .sidebar-icon,
+    aside svg,
+    aside [class^="w-"],
+    aside [class*=" w-"] {
+      width: 20px !important;
+      height: 20px !important;
+      flex-shrink: 0;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
 
   ::-webkit-scrollbar-track {
     background-color: #f3f4f6;

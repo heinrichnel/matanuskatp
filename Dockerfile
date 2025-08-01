@@ -1,30 +1,38 @@
-# Gebruik 'n slim Node-beeld om te bou
+# ====== Boufase ======
 FROM node:20-alpine AS builder
 
+# Stel werk gids in container
 WORKDIR /app
 
-# Kopieer package files en installeer dependencies
+# Kopieer package.json en package-lock.json vir caching
 COPY package*.json ./
+
+# Installeer dependencies
 RUN npm install
 
-# Kopieer res van jou app en bou dit
+# Kopieer al die res van jou projek in container
 COPY . .
+
+# Bou die app (Vite sal 'dist' folder maak)
 RUN npm run build
 
-# Gebruik 'n baie klein beeld om die geboude static site te bedien
+# ====== Prod bediener fase ======
 FROM nginx:alpine
+
+# Standaard werk gids vir Nginx se statiese lêers
 WORKDIR /usr/share/nginx/html
 
-# Verwyder default nginx statiese inhoud
+# Verwyder default inhoud van Nginx
 RUN rm -rf ./*
 
-# Kopieer die geboude site uit die 'builder' stage
+# Kopieer geboude lêers vanaf builder image
 COPY --from=builder /app/dist .
 
-# Kopieer jou eie nginx konfig indien nodig (opsioneel)
+# (Opsioneel) Voeg jou eie nginx config by
 # COPY nginx.conf /etc/nginx/nginx.conf
 
-# Standaardpoort
+# Stel poort 80 bloot (Nginx luister hier)
 EXPOSE 80
 
+# Begin Nginx in foreground mode
 CMD ["nginx", "-g", "daemon off;"]
