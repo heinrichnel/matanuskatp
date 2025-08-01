@@ -18,30 +18,72 @@ let emulatorConnected = false;
 let networkRetryCount = 0;
 const MAX_RETRY_ATTEMPTS = 3;
 
-// --- HEALTH CHECK HELPERS (leave as-is) ---
+// --- HEALTH CHECK HELPERS ---
 const checkEmulatorHealth = async (
   host: string = "127.0.0.1",
   port: number = 8081
 ): Promise<boolean> => {
   try {
-    // We don't need the response as we're just checking if the request succeeds
-    await fetch(`http://${host}:${port}`, {
-      method: "GET",
-      mode: "no-cors",
-      cache: "no-cache",
-    });
-    return true;
+    // Add timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
+    try {
+      // We don't need the response as we're just checking if the request succeeds
+      await fetch(`http://${host}:${port}`, {
+        method: "GET",
+        mode: "no-cors",
+        cache: "no-cache",
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      return true;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error; // Re-throw to be caught by outer try-catch
+    }
   } catch (error) {
-    console.warn(`⚠️ Emulator health check failed: ${error}`);
+    // Only log the first few attempts to reduce console noise
+    if (emulatorConnectionAttempts <= MAX_EMULATOR_CONNECTION_ATTEMPTS) {
+      console.warn(`⚠️ Emulator health check failed: ${error}`);
+    }
     return false;
   }
 };
+
+// Track emulator connection attempts to avoid excessive retries
+let emulatorConnectionAttempts = 0;
+const MAX_EMULATOR_CONNECTION_ATTEMPTS = 2;
+const EMULATOR_CONNECTION_COOLDOWN = 60000; // 1 minute between attempts
+let lastEmulatorConnectionAttempt = 0;
 
 // --- CONNECT TO EMULATOR (keep fallback, don't break prod) ---
 export const connectToEmulator = async (): Promise<boolean> => {
   if (!import.meta.env.DEV || emulatorConnected) {
     return emulatorConnected;
   }
+
+  // Check if we've exceeded the maximum number of attempts or if we're in cooldown
+  const now = Date.now();
+  if (emulatorConnectionAttempts >= MAX_EMULATOR_CONNECTION_ATTEMPTS) {
+    // Only log once when we've reached max attempts
+    if (emulatorConnectionAttempts === MAX_EMULATOR_CONNECTION_ATTEMPTS) {
+      console.info("ℹ️ Maximum Firestore emulator connection attempts reached. Using production Firestore.");
+      emulatorConnectionAttempts++; // Increment to avoid logging again
+    }
+    setConnectionStatus("connected"); // Continue to prod
+    return false;
+  }
+
+  // Check if we're in cooldown period
+  if (now - lastEmulatorConnectionAttempt < EMULATOR_CONNECTION_COOLDOWN && lastEmulatorConnectionAttempt > 0) {
+    return false; // Skip attempt during cooldown
+  }
+
+  // Update last attempt timestamp
+  lastEmulatorConnectionAttempt = now;
+  emulatorConnectionAttempts++;
 
   try {
     console.log("🔄 Checking Firestore emulator availability...");
