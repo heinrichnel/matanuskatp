@@ -1,5 +1,5 @@
-import type { WialonPosition, WialonUnit } from "../../../types/wialon";
-import { ErrorCategory, ErrorSeverity, logError } from "../../../utils/errorHandling";
+import type { WialonPosition, WialonUnit } from "@/types/wialon";
+import { ErrorCategory, ErrorSeverity, logError } from "@/utils/errorHandling";
 
 // Wialon configuration
 export const WIALON_LOGIN_URL = "https://hst-api.wialon.com/oauth.html";

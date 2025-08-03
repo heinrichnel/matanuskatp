@@ -1,22 +1,34 @@
 import React, { useState } from "react";
-import WialonUnitsList from "./wialon/WialonUnitsList";
+import WialonUnitsList from "../../components/wialon/WialonUnitsList";
 
 /**
- * WialonUnitsPage Component
+ * WialonUnitsPage
  *
- * Page that displays and manages Wialon units/vehicles.
- * Allows viewing, filtering, and selecting units.
+ * Main page for displaying, filtering, and selecting Wialon fleet units.
+ * Features:
+ *  - List of all units.
+ *  - View and select unit to see more details.
+ *  - Handles status, sensors, and quick actions.
+ *
+ * Usage:
+ *  Place this page under your routes, e.g. <Route path="/wialon-units" element={<WialonUnitsPage />} />
  */
 const WialonUnitsPage: React.FC = () => {
   const [selectedUnit, setSelectedUnit] = useState<any>(null);
 
-  const handleSelectUnit = (unitId: number, unitInfo: any) => {
+  /**
+   * Handles selection of a unit from the list.
+   * @param unitId Unit ID
+   * @param unitInfo Full unit info object
+   */
+  const handleSelectUnit = (_unitId: number, unitInfo: any) => {
     setSelectedUnit(unitInfo);
   };
 
-  const handleCloseDetails = () => {
-    setSelectedUnit(null);
-  };
+  /**
+   * Closes the unit details panel.
+   */
+  const handleCloseDetails = () => setSelectedUnit(null);
 
   return (
     <div className="p-4">
@@ -25,6 +37,7 @@ const WialonUnitsPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Units List Section */}
         <div className={`lg:col-span-${selectedUnit ? "2" : "3"}`}>
           <div className="bg-white p-4 rounded shadow">
             <h3 className="font-medium text-gray-900 mb-4">Available Units</h3>
@@ -32,104 +45,124 @@ const WialonUnitsPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Selected Unit Details */}
         {selectedUnit && (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium text-gray-900">Unit Details</h3>
-              <button
-                onClick={handleCloseDetails}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Close
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-lg font-medium text-gray-800">{selectedUnit.name}</h4>
-                {selectedUnit.hw_id && (
-                  <p className="text-sm text-gray-500">Hardware ID: {selectedUnit.hw_id}</p>
-                )}
+          <div className="lg:col-span-1">
+            <div className="bg-white p-4 rounded shadow sticky top-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-medium text-gray-900">Unit Details</h3>
+                <button
+                  onClick={handleCloseDetails}
+                  className="text-sm text-gray-500 hover:text-gray-700"
+                  aria-label="Close details"
+                >
+                  Close
+                </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 border-t border-gray-200 pt-4">
+              <div className="space-y-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Status</p>
-                  <p
-                    className={`text-sm font-medium ${selectedUnit.connection_state === 1 ? "text-green-600" : "text-red-600"}`}
-                  >
-                    {selectedUnit.connection_state === 1 ? "Online" : "Offline"}
-                  </p>
+                  <h4 className="text-lg font-medium text-gray-800">{selectedUnit.name}</h4>
+                  {selectedUnit.hw_id && (
+                    <p className="text-sm text-gray-500">Hardware ID: {selectedUnit.hw_id}</p>
+                  )}
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">Type</p>
-                  <p className="text-sm">{selectedUnit.type || `Class ${selectedUnit.cls_id}`}</p>
-                </div>
-              </div>
 
-              {selectedUnit.position && (
-                <div className="border-t border-gray-200 pt-4">
-                  <p className="text-sm font-medium text-gray-500 mb-1">Last Position</p>
-                  <div className="text-sm">
-                    <p>
-                      <span className="font-medium">Latitude:</span>{" "}
-                      {selectedUnit.position.y.toFixed(6)}
+                <div className="grid grid-cols-2 gap-4 border-t border-gray-200 pt-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Status</p>
+                    <p
+                      className={`text-sm font-medium ${
+                        selectedUnit.connection_state === 1
+                          ? "text-green-600"
+                          : "text-red-600"
+                      }`}
+                    >
+                      {selectedUnit.connection_state === 1 ? "Online" : "Offline"}
                     </p>
-                    <p>
-                      <span className="font-medium">Longitude:</span>{" "}
-                      {selectedUnit.position.x.toFixed(6)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-500">Type</p>
+                    <p className="text-sm">
+                      {selectedUnit.type || `Class ${selectedUnit.cls_id}`}
                     </p>
-                    {selectedUnit.position.t && (
-                      <p>
-                        <span className="font-medium">Time:</span>{" "}
-                        {new Date(selectedUnit.position.t * 1000).toLocaleString()}
-                      </p>
-                    )}
-                    {selectedUnit.position.s !== undefined && (
-                      <p>
-                        <span className="font-medium">Speed:</span> {selectedUnit.position.s} km/h
-                      </p>
-                    )}
                   </div>
                 </div>
-              )}
 
-              <div className="border-t border-gray-200 pt-4">
-                <h4 className="text-sm font-medium text-gray-500 mb-2">Actions</h4>
-                <div className="flex flex-wrap gap-2">
-                  <a
-                    href={`https://hosting.wialon.com/track.html?unit=${selectedUnit.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                  >
-                    Track Unit
-                  </a>
-                  <button className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200">
-                    View History
-                  </button>
-                </div>
-              </div>
+                {/* Position Details */}
+                {selectedUnit.position && (
+                  <div className="border-t border-gray-200 pt-4">
+                    <p className="text-sm font-medium text-gray-500 mb-1">
+                      Last Position
+                    </p>
+                    <div className="text-sm">
+                      <p>
+                        <span className="font-medium">Latitude:</span>{" "}
+                        {selectedUnit.position.y?.toFixed(6)}
+                      </p>
+                      <p>
+                        <span className="font-medium">Longitude:</span>{" "}
+                        {selectedUnit.position.x?.toFixed(6)}
+                      </p>
+                      {selectedUnit.position.t && (
+                        <p>
+                          <span className="font-medium">Time:</span>{" "}
+                          {new Date(selectedUnit.position.t * 1000).toLocaleString()}
+                        </p>
+                      )}
+                      {selectedUnit.position.s !== undefined && (
+                        <p>
+                          <span className="font-medium">Speed:</span> {selectedUnit.position.s} km/h
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-              {selectedUnit.sensors && selectedUnit.sensors.length > 0 && (
+                {/* Quick Actions */}
                 <div className="border-t border-gray-200 pt-4">
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">Sensors</h4>
-                  <ul className="text-sm divide-y divide-gray-100">
-                    {selectedUnit.sensors.slice(0, 5).map((sensor: any) => (
-                      <li key={sensor.id} className="py-1">
-                        <div className="flex justify-between">
-                          <span className="font-medium">{sensor.name}</span>
-                          <span>{sensor.value !== undefined ? sensor.value : "N/A"}</span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Actions</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <a
+                      href={`https://hosting.wialon.com/track.html?unit=${selectedUnit.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                    >
+                      Track Unit
+                    </a>
+                    <button
+                      className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200"
+                      // Add onClick handler for history here
+                    >
+                      View History
+                    </button>
+                  </div>
                 </div>
-              )}
+
+                {/* Sensors List */}
+                {selectedUnit.sensors && selectedUnit.sensors.length > 0 && (
+                  <div className="border-t border-gray-200 pt-4">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Sensors</h4>
+                    <ul className="text-sm divide-y divide-gray-100">
+                      {selectedUnit.sensors.slice(0, 5).map((sensor: any) => (
+                        <li key={sensor.id} className="py-1">
+                          <div className="flex justify-between">
+                            <span className="font-medium">{sensor.name}</span>
+                            <span>{sensor.value !== undefined ? sensor.value : "N/A"}</span>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
       </div>
 
+      {/* Info Footer */}
       <div className="mt-6 bg-blue-50 border-l-4 border-blue-500 p-4 text-sm">
         <h3 className="font-medium text-blue-700">Wialon Units Integration</h3>
         <p className="mt-1 text-blue-600">

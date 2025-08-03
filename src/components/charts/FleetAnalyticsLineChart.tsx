@@ -1,6 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
-import { useFleetAnalytics } from "@/context/FleetAnalyticsContext";
-import React from "react";
+// Import using the React 19 style
 import {
   CartesianGrid,
   Legend,
@@ -12,6 +10,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui";
+import { useFleetAnalytics } from "../../context/FleetAnalyticsContext";
 
 // Define chart configuration
 const chartConfig = {
@@ -54,9 +60,12 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<any, any>) => {
   return null;
 };
 
+// Import useState from react
+import { useState } from "react";
+
 export function FleetAnalyticsLineChart() {
   const { fleetAnalytics, isLoading } = useFleetAnalytics();
-  const [activeCharts, setActiveCharts] = React.useState<ChartType[]>(["fuel", "maintenance"]);
+  const [activeCharts, setActiveCharts] = useState<ChartType[]>(["fuel", "maintenance"]);
 
   const toggleChart = (chart: ChartType) => {
     if (activeCharts.includes(chart)) {
@@ -118,7 +127,7 @@ export function FleetAnalyticsLineChart() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
                   dataKey="date"
-                  tickFormatter={(value) => {
+                  tickFormatter={(value: string | number) => {
                     const date = new Date(value);
                     return date.toLocaleDateString("en-US", {
                       month: "short",

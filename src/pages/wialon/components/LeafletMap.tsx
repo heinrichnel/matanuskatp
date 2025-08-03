@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from "react";
 import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import "leaflet-control-geocoder/dist/Control.Geocoder.css";
 import "leaflet-control-geocoder";
+import "leaflet-control-geocoder/dist/Control.Geocoder.css";
+import "leaflet/dist/leaflet.css";
+import { useEffect, useRef } from "react";
 
 export default function LeafletMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -13,13 +13,14 @@ export default function LeafletMap() {
     const map = L.map(mapRef.current).setView([-25.7479, 28.2293], 13);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      attribution:
+        '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
     // Voeg Geocoder Control by
     // @ts-ignore - want leaflet-control-geocoder het soms tipe issues
     const geocoder = L.Control.geocoder({
-      defaultMarkGeocode: false
+      defaultMarkGeocode: false,
     })
       .on("markgeocode", function (e: any) {
         const bbox = e.geocode.bbox;

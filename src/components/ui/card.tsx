@@ -6,8 +6,9 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  heading?: React.ReactNode;      // ← Gebruik nou heading, nie title nie!
+interface CardHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'title'> {
+  heading?: React.ReactNode;      // Use heading instead of title
+  title?: React.ReactNode;        // Added for backward compatibility with Card.tsx
   subtitle?: React.ReactNode;
   icon?: React.ReactNode;
   action?: React.ReactNode;
@@ -38,18 +39,18 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
-  ({ heading, subtitle, icon, action, className, children, ...props }, ref) => (
+  ({ heading, title, subtitle, icon, action, className, children, ...props }, ref) => (
     <div
       ref={ref}
       className={cn("flex flex-col gap-0.5 px-6 py-4 border-b border-slate-200", className)}
       {...props}
     >
-      {(icon || heading || action) && (
+      {(icon || heading || title || action) && (
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             {icon && <span className="text-xl">{icon}</span>}
-            {heading && (
-              <h3 className="text-xl font-semibold text-slate-800">{heading}</h3>
+            {(title || heading) && (
+              <h3 className="text-xl font-semibold text-slate-800">{title || heading}</h3>
             )}
           </div>
           {action && <div>{action}</div>}

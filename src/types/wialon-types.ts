@@ -1,39 +1,80 @@
-// wialon-types.ts
-export interface WialonSession {
-  initSession(apiUrl: string): void;
-  loginToken(token: string, flags: string, callback: (code: number) => void): void;
-  updateDataFlags(specs: any[], callback: (code: number) => void): void;
-  getItems(itemType: string): WialonUnit[];
-  getItem(itemId: number): WialonUnit;
-  loadLibrary(libraryName: string): void;
-}
+// Minimal definitions for all missing types.
+// Expand each as your data model requires!
 
 export interface WialonPosition {
-  x: number; // longitude
-  y: number; // latitude
-  z: number; // altitude
-  s: number; // speed
-  c: number; // course
-  t: number; // timestamp
-  sc: number; // satellites
+  x: number; // Longitude
+  y: number; // Latitude
+  s?: number; // Speed
+  t?: number; // Timestamp
+  c?: number; // Course
+  sc?: number; // Satellites count
 }
 
-export interface WialonSensor {
+export interface WialonSensorDefinition {
   id: number;
-  n: string; // name
-  t: string; // type
-  m: string; // unit of measure
+  name: string;
+  type?: string;
+  // Add any extra sensor fields as needed
+}
+
+export interface WialonSensorStatus {
+  [sensorId: string]: any; // Or define a stricter structure if you know it
+}
+
+export interface WialonHealthCheckFlags {
+  [flag: string]: boolean; // Adjust as needed
+}
+
+export interface WialonDrivingBehaviorSettings {
+  [key: string]: any; // Define fields as needed
+}
+
+export interface WialonCounters {
+  [counter: string]: number; // Or refine if you know structure
 }
 
 export interface WialonUnit {
-  getId(): number;
-  getName(): string;
-  getSensors(): { [key: string]: WialonSensor };
-  getSensor(sensorId: number): WialonSensor | undefined;
-  calculateSensorValue(sensor: WialonSensor, message: any): number | string;
-  getLastMessage(): any;
-  getPosition(): WialonPosition | null;
-  getIconUrl(size?: number): string;
-  addListener(eventName: string, callback: (event: any) => void): number;
-  removeListenerById(eventId: number): void;
+  // Properties
+  id?: number;
+  name?: string;
+  uid?: string;
+  phone?: string;
+  hardwareType?: string;
+  iconUrl?: string;
+  lastPosition?: WialonPosition;
+
+  // Methods (indien nodig, anders verwyder dit om verwarring te voorkom)
+  getId?: () => number;
+  getName?: () => string;
+  getUID?: () => string;
+  getPosition?: () => WialonPosition | undefined;
+  getIconUrl?: () => string;
+
+  profile: {
+    vehicle_class?: string;
+    brand?: string;
+    model?: string;
+    year?: string;
+    color?: string;
+    engine_model?: string;
+    registration_plate?: string;
+    primary_fuel_type?: string;
+    cargo_type?: string;
+    carrying_capacity?: string;
+    axles?: string;
+    effective_capacity?: string;
+  };
+
+  sensors_definitions?: WialonSensorDefinition[];
+  sensor_status?: WialonSensorStatus;
+  health_check?: WialonHealthCheckFlags;
+  driving_behavior_settings?: WialonDrivingBehaviorSettings;
+  counters?: WialonCounters;
+
+  general?: {
+    n: string;
+    uid: string;
+    ph?: string;
+    hw?: string;
+  };
 }

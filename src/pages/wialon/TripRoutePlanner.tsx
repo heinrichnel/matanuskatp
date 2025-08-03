@@ -1,4 +1,4 @@
-import React from "react";
+import { FC } from "react";
 import LeafletMap from "./components/LeafletMap";
 
 /**
@@ -6,7 +6,7 @@ import LeafletMap from "./components/LeafletMap";
  *
  * Handles route planning functionality for trips
  */
-const TripRoutePlanner: React.FC = () => {
+const TripRoutePlanner: FC = () => {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-6">Trip Route Planner</h1>
