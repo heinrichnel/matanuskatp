@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { getUnits, initializeWialon, isWialonInitialized } from "../api/wialon";
+import { getWialonUnits, initializeWialon } from "../api/wialon";
 import { getEnvVar } from "../utils/envUtils";
 
 // Define Wialon context type
@@ -96,7 +96,7 @@ export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
 
           if (success) {
             // Load units automatically
-            const unitsList = await getUnits();
+            const unitsList = await getWialonUnits();
             setUnits(unitsList);
             console.log(`Wialon auto-initialized with ${unitsList.length} units`);
           }
@@ -121,7 +121,7 @@ export const WialonProvider = ({ children }: { children: React.ReactNode }) => {
 
   const refreshUnits = async () => {
     try {
-      const unitsList = await getUnits();
+      const unitsList = await getWialonUnits();
       setUnits(unitsList);
       return unitsList;
     } catch (err) {

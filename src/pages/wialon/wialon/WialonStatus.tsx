@@ -1,5 +1,5 @@
 import React from "react";
-import { useWialonUnits } from "../hooks/useWialonUnits"; // fixed import path
+import { useWialonFleetUnits as useWialonUnits } from "../hooks/useWialonUnits"; // import with alias
 import useWialonConnection from "../hooks/useWialonConnection";
 
 interface WialonStatusProps {

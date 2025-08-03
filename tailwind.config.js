@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
@@ -73,6 +73,9 @@ module.exports = {
     },
   },
   plugins: [
-    require("tailwindcss-animate"),
+    // Import tailwindcss-animate as ES module
+    // This assumes the package supports ES modules
+    // If it doesn't, you may need to use dynamic import() or change back to .cjs extension
+    (await import("tailwindcss-animate")).default,
   ],
 };

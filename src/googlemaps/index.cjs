@@ -1,4 +1,4 @@
-// index.js of app.js - Basiese Express backend met health endpoint
+// index.cjs - Basiese Express backend met health endpoint
 
 const express = require('express');
 const cors = require('cors');

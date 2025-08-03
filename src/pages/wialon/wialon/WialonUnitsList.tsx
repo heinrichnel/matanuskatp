@@ -121,7 +121,7 @@ interface UseWialonUnitsResult {
 }
 
 // Use the locally defined useWialonUnits hook
-function FleetUnitsList() {
+export function FleetUnitsList() {
   const { units, loading, error, refreshUnits, getUnitByUID } = useWialonUnits();
   if (loading) return <p>Loading units...</p>;
   if (error) return <p>Error loading units: {error}</p>;
@@ -292,3 +292,6 @@ export function useWialonUnits(): UseWialonUnitsResult {
     safeGetUnitPosition
   };
 }
+
+// Export the FleetUnitsList component as default
+export default FleetUnitsList;
