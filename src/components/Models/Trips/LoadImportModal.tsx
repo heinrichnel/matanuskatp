@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState } from "react";
 import { useAppContext } from "../../../context/AppContext";
-import Modal from "../../ui/modal";
+import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
 import {
   Upload,

@@ -1,5 +1,5 @@
 import React from "react";
-import Modals from "@/components/ui/Modals";
+import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { FileUp, CheckCircle, AlertTriangle, X, Download, FileText, Edit } from "lucide-react";
 
@@ -99,7 +99,7 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({
   };
 
   return (
-    <Modals
+    <Modal
       isOpen={isOpen}
       onClose={onClose}
       title={`CAR Report: ${report.reportNumber}`}
@@ -366,7 +366,7 @@ const CARReportDetails: React.FC<CARReportDetailsProps> = ({
           </Button>
         </div>
       </div>
-    </Modals>
+    </Modal>
   );
 };
 

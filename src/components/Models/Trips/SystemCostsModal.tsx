@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Modal from "../../ui/modal";
+import Modal from "../../ui/Modal";
 import { Button } from "../../ui/Button";
 import { Check, AlertCircle } from "lucide-react";
 import { Trip, CostEntry } from "../../../types";

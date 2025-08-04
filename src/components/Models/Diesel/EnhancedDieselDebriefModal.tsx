@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Modal from "../../ui/modal";
+import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
 import { Select, TextArea } from "../../ui/FormElements";
 import { useAppContext } from "../../../context/AppContext";
