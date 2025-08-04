@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from "../../ui/modal";
+import { Modal } from "../../ui/Modal";
 import Button from "../../ui/Button";
 import { Card, CardContent, CardHeader } from "@/components/ui/consolidated/Card";
 import { Input } from "../../ui/FormElements";
