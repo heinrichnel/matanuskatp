@@ -1,9 +1,9 @@
+import { Save, X } from "lucide-react";
 import React, { useState } from "react";
-import { Trip, TripEditRecord, TRIP_EDIT_REASONS } from "../../../types";
-import Modal from "../../ui/Modal";
+import { Trip, TRIP_EDIT_REASONS, TripEditRecord } from "../../../types";
 import Button from "../../ui/Button";
 import { Input, Select, TextArea } from "../../ui/FormElements";
-import { Save, X } from "lucide-react";
+import Modal from "../../ui/Modal";
 
 interface CompletedTripEditModalProps {
   isOpen: boolean;
@@ -87,38 +87,27 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
         });
       }
     });
+    // Create a single comprehensive edit record for all changes
     const editRecord: Omit<TripEditRecord, "id"> = {
       tripId: trip.id,
       editedBy: "Current User", // Replace with actual user
       editedAt: new Date().toISOString(),
       reason: finalReason,
-      fieldChanged: "manual update",
-      oldValue: "",
-      newValue: "",
+      fieldChanged: changes.map((c) => c.field).join(", "),
+      oldValue: changes.map((c) => `${c.field}: ${c.oldValue}`).join("; "),
+      newValue: changes.map((c) => `${c.field}: ${c.newValue}`).join("; "),
       changeType: "update",
     };
-    onSave(updatedTrip, editRecord);
-    // Create edit records for each change
-    changes.forEach((change) => {
-      const editRecord: Omit<TripEditRecord, "id"> = {
-        tripId: trip.id,
-        editedBy: "Current User", // In real app, use actual user
-        editedAt: new Date().toISOString(),
-        reason: finalReason,
-        fieldChanged: change.field,
-        oldValue: change.oldValue,
-        newValue: change.newValue,
-        changeType: "update",
-      };
-      const updatedTrip: Trip = {
-        ...trip,
-        ...formData,
-        baseRevenue: Number(formData.baseRevenue),
-        distanceKm: formData.distanceKm ? Number(formData.distanceKm) : undefined,
-        editHistory: [...(trip.editHistory || []), editRecord],
-      };
-      onSave(updatedTrip, editRecord);
-    });
+
+    // Only update the trip once with all changes
+    const updatedWithHistory: Trip = {
+      ...updatedTrip,
+      // Don't add the editRecord directly to editHistory here
+      // The parent component should handle adding it with an ID
+    };
+
+    // Let the parent component handle the edit record and trip update
+    onSave(updatedWithHistory, editRecord);
     onClose();
   };
 
@@ -129,52 +118,52 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
         <Input
           label="Fleet Number"
           value={formData.fleetNumber}
-          onChange={(val) => handleChange("fleetNumber", val)}
+          onChange={(e) => handleChange("fleetNumber", e.target.value)}
         />
         <Input
           label="Driver Name"
           value={formData.driverName}
-          onChange={(val) => handleChange("driverName", val)}
+          onChange={(e) => handleChange("driverName", e.target.value)}
         />
         <Input
           label="Client Name"
           value={formData.clientName}
-          onChange={(val) => handleChange("clientName", val)}
+          onChange={(e) => handleChange("clientName", e.target.value)}
         />
         <Input
           label="Start Date"
           value={formData.startDate}
-          onChange={(val) => handleChange("startDate", val)}
+          onChange={(e) => handleChange("startDate", e.target.value)}
         />
         <Input
           label="End Date"
           value={formData.endDate}
-          onChange={(val) => handleChange("endDate", val)}
+          onChange={(e) => handleChange("endDate", e.target.value)}
         />
         <Input
           label="Route"
           value={formData.route}
-          onChange={(val) => handleChange("route", val)}
+          onChange={(e) => handleChange("route", e.target.value)}
         />
         <TextArea
           label="Description"
           value={formData.description}
-          onChange={(val) => handleChange("description", val)}
+          onChange={(e) => handleChange("description", e.target.value)}
         />
         <Input
           label="Base Revenue"
           value={formData.baseRevenue}
-          onChange={(val) => handleChange("baseRevenue", val)}
+          onChange={(e) => handleChange("baseRevenue", e.target.value)}
         />
         <Input
           label="Revenue Currency"
           value={formData.revenueCurrency}
-          onChange={(val) => handleChange("revenueCurrency", val)}
+          onChange={(e) => handleChange("revenueCurrency", e.target.value)}
         />
         <Input
           label="Distance (km)"
           value={formData.distanceKm}
-          onChange={(val) => handleChange("distanceKm", val)}
+          onChange={(e) => handleChange("distanceKm", e.target.value)}
         />
         {/* Edit Reason - Required */}
         <div className="space-y-4 border-t pt-4">
@@ -192,7 +181,7 @@ const CompletedTripEditModal: React.FC<CompletedTripEditModalProps> = ({
           <Input
             label="Custom Reason"
             value={customReason}
-            onChange={(val) => setCustomReason(val)}
+            onChange={(e) => setCustomReason(e.target.value)}
           />
           {errors.editReason && <div className="text-red-500">{errors.editReason}</div>}
         </div>

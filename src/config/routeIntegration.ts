@@ -7,7 +7,7 @@
  * 3. Actual component files in the codebase
  */
 
-import { SidebarItem, sidebarConfig } from "./sidebarConfig";
+import { SidebarItem, sidebarConfig } from "../sidebarConfig";
 
 interface ValidatedRoute {
   path: string;

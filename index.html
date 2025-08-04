@@ -39,16 +39,39 @@
 
     <!-- Google Maps is loaded dynamically from /src/utils/googleMapsLoader.ts -->
 
-    <!-- Firebase App (the core Firebase SDK) -->
+    <!-- Firebase App (the core Firebase SDK) - CDN for faster loading -->
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
-      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
-      import { getAuth } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
-      import { getStorage } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-analytics.js";
+      // In production, this would use CDN. In development, we'll let Vite handle it through imports
+      try {
+        const isProduction =
+          window.location.hostname !== "localhost" &&
+          !window.location.hostname.startsWith("127.0.");
 
-      // Your Firebase configuration will be injected during build
-      window.Firebase = { initializeApp, getFirestore, getAuth, getStorage, getAnalytics };
+        if (isProduction) {
+          // Production mode - use CDN
+          const [
+            { initializeApp },
+            { getFirestore },
+            { getAuth },
+            { getStorage },
+            { getAnalytics },
+          ] = await Promise.all([
+            import("https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js"),
+            import("https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js"),
+            import("https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js"),
+            import("https://www.gstatic.com/firebasejs/10.1.0/firebase-storage.js"),
+            import("https://www.gstatic.com/firebasejs/10.1.0/firebase-analytics.js"),
+          ]);
+
+          window.Firebase = { initializeApp, getFirestore, getAuth, getStorage, getAnalytics };
+          console.log("Firebase SDK loaded from CDN");
+        } else {
+          // Development mode - let Vite handle the imports
+          console.log("Development mode: Firebase will be loaded through Vite");
+        }
+      } catch (err) {
+        console.error("Failed to load Firebase from CDN:", err);
+      }
     </script>
 
     <!-- Styles from Vite build (auto-injected in dev, inlined or linked in production) -->
@@ -64,6 +87,8 @@
           return { Provider: function () {}, Consumer: function () {} };
         };
     </script>
+    <!-- Assets are dynamically injected by Vite in development mode -->
+    <!-- When building for production, Vite will inject the proper script and link tags here -->
   </head>
 
   <body class="bg-gray-50 dark:bg-gray-900 font-sans antialiased">
@@ -71,6 +96,6 @@
     <div id="root"></div>
 
     <!-- Main React Entry Point -->
-    <script type="module" src="./src/main.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

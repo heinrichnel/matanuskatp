@@ -2,7 +2,6 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import { defineConfig } from "vite";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
@@ -19,7 +18,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
-      // Handle case sensitivity for TyreManagement/Tyremanagement
       "@/components/TyreManagement": resolve(__dirname, "src/components/Tyremanagement"),
     },
   },
@@ -43,20 +41,14 @@ export default defineConfig({
     emptyOutDir: true,
     assetsDir: "assets",
     rollupOptions: {
-      external: ["/src/components/TyreManagement/TyreReports"],
+      // Remove or comment out 'external' if not building a library
       output: {
         manualChunks: {
-          // Core vendor libraries
           "react-vendor": ["react", "react-dom", "react-router-dom"],
-          // Firebase modules - grouped to prevent mixed import issues
           "firebase-core": ["firebase/app", "firebase/auth", "firebase/firestore"],
-          // Scanning/barcode functionality
           scanner: ["@capacitor-community/barcode-scanner", "@capacitor/core"],
-          // Document generation libraries
           "document-tools": ["jspdf", "jspdf-autotable", "xlsx"],
-          // Date handling
           "date-utils": ["date-fns"],
-          // UI components and icons
           "ui-components": [
             "lucide-react",
             "tailwindcss",

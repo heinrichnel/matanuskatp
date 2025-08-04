@@ -1,9 +1,9 @@
+import { AlertCircle, Check } from "lucide-react";
 import React, { useState } from "react";
-import Modal from "../../ui/Modal";
-import { Button } from "../../ui/Button";
-import { Check, AlertCircle } from "lucide-react";
-import { Trip, CostEntry } from "../../../types";
+import { CostEntry, Trip } from "../../../types";
 import { formatCurrency } from "../../../utils/formatters";
+import { Button } from "../../ui/Button";
+import Modal from "../../ui/Modal";
 
 interface SystemCostsModalProps {
   isOpen: boolean;
@@ -19,7 +19,7 @@ const SystemCostsModal: React.FC<SystemCostsModalProps> = ({
   onGenerateCosts,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rateInfo, setRateInfo] = useState({
+  const [rateInfo] = useState({
     currency: "ZAR",
     effectiveDate: new Date().toISOString().split("T")[0],
     lastUpdated: new Date().toISOString().split("T")[0],
@@ -82,27 +82,31 @@ const SystemCostsModal: React.FC<SystemCostsModalProps> = ({
         // Per-kilometer costs
         ...perKmCosts.map((cost) => ({
           category: "System Generated",
+          subCategory: "Per-Kilometer Costs", // Add missing required field
           subType: cost.type,
-          currency: rateInfo.currency,
+          currency: rateInfo.currency as "ZAR" | "USD",
           amount: cost.total,
           referenceNumber: `SYS-KM-${new Date().getTime()}`,
           date: new Date().toISOString().split("T")[0],
           notes: `System generated per-kilometer cost (${cost.rate} per km × ${distance} km)`,
           isSystemGenerated: true,
           tripId: tripData.id,
+          isFlagged: false, // Add missing required field
         })),
 
         // Per-day costs
         ...perDayCosts.map((cost) => ({
           category: "System Generated",
+          subCategory: "Per-Day Fixed Costs", // Add missing required field
           subType: cost.type,
-          currency: rateInfo.currency,
+          currency: rateInfo.currency as "ZAR" | "USD",
           amount: cost.total,
           referenceNumber: `SYS-DAY-${new Date().getTime()}`,
           date: new Date().toISOString().split("T")[0],
           notes: `System generated per-day cost (${cost.ratePerDay} per day × ${tripDuration} days)`,
           isSystemGenerated: true,
           tripId: tripData.id,
+          isFlagged: false, // Add missing required field
         })),
       ];
 

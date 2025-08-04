@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { useTyreReferenceData } from "@/context/TyreReferenceDataContext";
+import { Tyre, TyreStoreLocation } from "@/components/Models/Tyre/TyreModel";
+import VehiclePositionDiagram from "@/components/tyres/VehiclePositionDiagram";
 import { Button } from "@/components/ui/Button";
 import { Input, Select, Textarea } from "@/components/ui/FormElements";
-import VehiclePositionDiagram from "@/components/tyres/VehiclePositionDiagram";
-import { Tyre, TyreStoreLocation } from "@/components/Models/Tyre/TyreModel";
+import { useTyreReferenceData } from "@/context/TyreReferenceDataContext";
+import React, { useEffect, useState } from "react";
 
 interface TyreFormProps {
   initialData?: Partial<Tyre>;
@@ -238,7 +238,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
               <Input
                 label="Serial Number / ID"
                 name="serialNumber"
-                value={formData.serialNumber}
+                value={formData.serialNumber || ""}
                 onChange={handleChange}
                 error={errors.serialNumber}
                 disabled={editMode} // Can't change serial number in edit mode
@@ -246,7 +246,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
               <Input
                 label="DOT Code"
                 name="dotCode"
-                value={formData.dotCode}
+                value={formData.dotCode || ""}
                 onChange={handleChange}
                 error={errors.dotCode}
               />
@@ -257,14 +257,14 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 label="Manufacturing Date"
                 name="manufacturingDate"
                 type="date"
-                value={formData.manufacturingDate}
+                value={formData.manufacturingDate || ""}
                 onChange={handleChange}
                 error={errors.manufacturingDate}
               />
               <Select
                 label="Tyre Brand"
                 name="brand"
-                value={formData.brand}
+                value={formData.brand || ""}
                 onChange={handleChange}
                 error={errors.brand}
                 options={[
@@ -289,7 +289,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
               <Select
                 label="Tyre Pattern"
                 name="pattern"
-                value={formData.pattern}
+                value={(formData.pattern || "") as string}
                 onChange={handleChange}
                 error={errors.pattern}
                 options={[
@@ -301,7 +301,12 @@ const TyreForm: React.FC<TyreFormProps> = ({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input label="Model" name="model" value={formData.model} onChange={handleChange} />
+              <Input
+                label="Model"
+                name="model"
+                value={formData.model || ""}
+                onChange={handleChange}
+              />
               <Select
                 label="Type"
                 name="type"
@@ -327,13 +332,13 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 label="Load Index"
                 name="loadIndex"
                 type="number"
-                value={formData.loadIndex}
+                value={(formData.loadIndex || 0) as number}
                 onChange={handleNumberChange}
               />
               <Input
                 label="Speed Rating"
                 name="speedRating"
-                value={formData.speedRating}
+                value={(formData.speedRating || "") as string}
                 onChange={handleChange}
               />
             </div>
@@ -343,7 +348,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 label="Purchase Date"
                 name="purchaseDetails.date"
                 type="date"
-                value={formData.purchaseDetails?.date}
+                value={formData.purchaseDetails?.date || ""}
                 onChange={handleChange}
                 error={errors["purchaseDetails.date"]}
               />
@@ -351,7 +356,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 label="Purchase Cost"
                 name="purchaseDetails.cost"
                 type="number"
-                value={formData.purchaseDetails?.cost}
+                value={formData.purchaseDetails?.cost ?? 0}
                 onChange={handleNumberChange}
                 error={errors["purchaseDetails.cost"]}
               />
@@ -361,13 +366,13 @@ const TyreForm: React.FC<TyreFormProps> = ({
               <Input
                 label="Supplier"
                 name="purchaseDetails.supplier"
-                value={formData.purchaseDetails?.supplier}
+                value={formData.purchaseDetails?.supplier || ""}
                 onChange={handleChange}
               />
               <Input
                 label="Invoice Number"
                 name="purchaseDetails.invoiceNumber"
-                value={formData.purchaseDetails?.invoiceNumber}
+                value={formData.purchaseDetails?.invoiceNumber || ""}
                 onChange={handleChange}
               />
             </div>
@@ -376,7 +381,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
               <Input
                 label="Warranty Information"
                 name="purchaseDetails.warranty"
-                value={formData.purchaseDetails?.warranty}
+                value={formData.purchaseDetails?.warranty || ""}
                 onChange={handleChange}
               />
             </div>
@@ -419,7 +424,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 <Input
                   label="Vehicle ID/Registration"
                   name="installation.vehicleId"
-                  value={formData.installation?.vehicleId}
+                  value={(formData.installation?.vehicleId || "") as string}
                   onChange={handleChange}
                   error={errors["installation.vehicleId"]}
                 />
@@ -459,14 +464,14 @@ const TyreForm: React.FC<TyreFormProps> = ({
                     label="Installation Date"
                     name="installation.installationDate"
                     type="date"
-                    value={formData.installation?.installationDate}
+                    value={formData.installation?.installationDate || ""}
                     onChange={handleChange}
                   />
                   <Input
                     label="Mileage at Installation"
                     name="installation.mileageAtInstallation"
                     type="number"
-                    value={formData.installation?.mileageAtInstallation}
+                    value={(formData.installation?.mileageAtInstallation ?? 0) as number}
                     onChange={handleNumberChange}
                   />
                 </div>
@@ -474,7 +479,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 <Input
                   label="Installed By"
                   name="installation.installedBy"
-                  value={formData.installation?.installedBy}
+                  value={formData.installation?.installedBy || ""}
                   onChange={handleChange}
                 />
 
@@ -524,7 +529,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 label="Tread Depth (mm)"
                 name="condition.treadDepth"
                 type="number"
-                value={formData.condition?.treadDepth}
+                value={formData.condition?.treadDepth ?? 0}
                 onChange={handleNumberChange}
               />
             </div>
@@ -534,7 +539,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 label="Pressure (kPa)"
                 name="condition.pressure"
                 type="number"
-                value={formData.condition?.pressure}
+                value={formData.condition?.pressure ?? 0}
                 onChange={handleNumberChange}
               />
               <Select
@@ -556,14 +561,14 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 label="Last Inspection Date"
                 name="condition.lastInspectionDate"
                 type="date"
-                value={formData.condition?.lastInspectionDate}
+                value={formData.condition?.lastInspectionDate || ""}
                 onChange={handleChange}
               />
               <Input
                 label="Next Inspection Due"
                 name="condition.nextInspectionDue"
                 type="date"
-                value={formData.condition?.nextInspectionDue}
+                value={formData.condition?.nextInspectionDue || ""}
                 onChange={handleChange}
               />
             </div>
@@ -571,7 +576,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
             <Textarea
               label="Notes"
               name="notes"
-              value={formData.notes}
+              value={formData.notes || ""}
               onChange={handleChange}
               rows={4}
             />
@@ -702,7 +707,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 Cancel
               </Button>
             )}
-            <Button onClick={handleSubmit} loading={isSubmitting}>
+            <Button onClick={handleSubmit} isLoading={isSubmitting}>
               {editMode ? "Update Tyre" : "Save Tyre"}
             </Button>
           </>

@@ -1,7 +1,13 @@
 import * as React from "react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
-import {  Card, CardContent, CardDescription, CardHeader, CardTitle  } from '@/components/ui/consolidated/Card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/consolidated/Card";
 
 import {
   ChartConfig,
@@ -46,15 +52,18 @@ const chartData = [
 const chartConfig = {
   utilization: {
     label: "Vehicle Utilization",
-    color: "#4299e1", // Added color property
+    color: "#1a5a9d", // Further darkened for better contrast
+    bgColor: "#e6f0fa", // Light background color for text
   },
   idleTime: {
     label: "Idle Time (hours)",
-    color: "#8884d8",
+    color: "#4030a0", // Further darkened for better contrast
+    bgColor: "#eceafe", // Light background color for text
   },
   activeTime: {
     label: "Active Time (hours)",
-    color: "#82ca9d",
+    color: "#157540", // Further darkened for better contrast
+    bgColor: "#e6f5ee", // Light background color for text
   },
 } satisfies ChartConfig;
 
@@ -85,9 +94,19 @@ export function VehicleUtilizationChart() {
                 data-active={activeChart === chart}
                 className="data-[active=true]:bg-blue-50 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
                 onClick={() => setActiveChart(chart)}
+                aria-pressed={activeChart === chart}
+                aria-label={`Show ${chartConfig[chart].label}`}
               >
-                <span className="text-gray-500 text-xs">{chartConfig[chart].label}</span>
-                <span className="text-lg leading-none font-bold sm:text-3xl">
+                <span className="text-gray-700 text-xs font-medium">
+                  {chartConfig[chart].label}
+                </span>
+                <span
+                  className="text-lg leading-none font-bold sm:text-3xl px-2 py-1 rounded-md"
+                  style={{
+                    color: chartConfig[chart].color,
+                    backgroundColor: chartConfig[chart].bgColor,
+                  }}
+                >
                   {total[key as keyof typeof total].toLocaleString()} hrs
                 </span>
               </button>
@@ -111,7 +130,7 @@ export function VehicleUtilizationChart() {
               axisLine={false}
               tickMargin={8}
               minTickGap={32}
-              tickFormatter={(value) => {
+              tickFormatter={(value: string | number) => {
                 const date = new Date(value);
                 return date.toLocaleDateString("en-US", {
                   month: "short",

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Wifi, WifiOff, AlertTriangle, RefreshCw, WifiLow } from 'lucide-react';
-import { 
-  onConnectionStatusChanged, 
-  getConnectionStatus, 
+import { AlertTriangle, RefreshCw, Wifi, WifiLow, WifiOff } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import useNetworkStatus from "../../hooks/useNetworkStatus";
+import {
   ConnectionStatus,
-  attemptReconnect
-} from '../../utils/firebaseConnectionHandler';
-import useNetworkStatus from '../../hooks/useNetworkStatus';
+  attemptReconnect,
+  getConnectionStatus,
+  onConnectionStatusChanged,
+} from "../../utils/firebaseConnectionHandler";
 
 interface ConnectionStatusIndicatorProps {
   showText?: boolean;
@@ -30,7 +30,7 @@ interface ConnectionStatusIndicatorProps {
  */
 const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
   showText = false,
-  className = ''
+  className = "",
 }) => {
   const [status, setStatus] = useState<ConnectionStatus>(getConnectionStatus().status);
   const [error, setError] = useState<Error | null>(getConnectionStatus().error);
@@ -43,7 +43,7 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
       setStatus(newStatus);
       setError(newError || null);
     });
-    
+
     return unsubscribe;
   }, []);
 
@@ -52,7 +52,7 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
     try {
       // Check network connectivity first
       await networkStatus.checkConnection();
-      
+
       if (networkStatus.isOnline) {
         await attemptReconnect();
       }
@@ -60,6 +60,25 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
       setIsReconnecting(false);
     }
   };
+
+  // Accessibility-enhanced button for reconnection
+  const ReconnectButton = () => (
+    <button
+      onClick={handleReconnect}
+      className="ml-2 p-2 rounded hover:bg-gray-100"
+      disabled={isReconnecting}
+      title="Try to reconnect"
+      style={{
+        minWidth: "36px",
+        minHeight: "36px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <RefreshCw className={`w-4 h-4 ${isReconnecting ? "animate-spin" : ""}`} />
+    </button>
+  );
 
   // Render different indicators based on status and network quality
   const renderIndicator = () => {
@@ -79,14 +98,7 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
         <div className="flex items-center text-amber-600">
           <WifiLow className="w-4 h-4" />
           {showText && <span className="ml-2 text-sm">Limited Connectivity</span>}
-          <button 
-            onClick={handleReconnect} 
-            className="ml-2 p-1 rounded hover:bg-gray-100"
-            disabled={isReconnecting}
-            title="Try to reconnect"
-          >
-            <RefreshCw className={`w-3 h-3 text-amber-600 ${isReconnecting ? 'animate-spin' : ''}`} />
-          </button>
+          <ReconnectButton />
         </div>
       );
     }
@@ -97,60 +109,44 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
         <div className="flex items-center text-amber-600">
           <WifiOff className="w-4 h-4" />
           {showText && <span className="ml-2 text-sm">Offline Mode</span>}
-          <button 
-            onClick={handleReconnect} 
-            className="ml-2 p-1 rounded hover:bg-gray-100"
-            disabled={isReconnecting}
-            title="Try to reconnect"
-          >
-            <RefreshCw className={`w-3 h-3 text-amber-600 ${isReconnecting ? 'animate-spin' : ''}`} />
-          </button>
+          <ReconnectButton />
         </div>
       );
     }
 
     // If Firestore status is used for the rest
     switch (status) {
-      case 'connected':
+      case "connected":
         return (
           <div className="flex items-center text-green-600">
             <Wifi className="w-4 h-4" />
             {showText && (
               <span className="ml-2 text-sm">
                 Connected
-                {networkStatus.quality === 'poor' && 
-                  <span className="text-xs ml-1">(Slow)</span>
-                }
+                {networkStatus.quality === "poor" && <span className="text-xs ml-1">(Slow)</span>}
               </span>
             )}
           </div>
         );
-      
-      case 'disconnected':
+
+      case "disconnected":
         return (
           <div className="flex items-center text-amber-600">
             <WifiOff className="w-4 h-4" />
             {showText && <span className="ml-2 text-sm">Offline Mode</span>}
-            <button 
-              onClick={handleReconnect} 
-              className="ml-2 p-1 rounded hover:bg-gray-100"
-              disabled={isReconnecting}
-              title="Try to reconnect"
-            >
-              <RefreshCw className={`w-3 h-3 text-amber-600 ${isReconnecting ? 'animate-spin' : ''}`} />
-            </button>
+            <ReconnectButton />
           </div>
         );
-      
-      case 'connecting':
+
+      case "connecting":
         return (
           <div className="flex items-center text-blue-600">
             <RefreshCw className="w-4 h-4 animate-spin" />
             {showText && <span className="ml-2 text-sm">Connecting...</span>}
           </div>
         );
-      
-      case 'error':
+
+      case "error":
         return (
           <div className="flex items-center text-red-600">
             <AlertTriangle className="w-4 h-4" />
@@ -160,27 +156,16 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
                 {error && <span className="hidden md:inline"> - {error.message}</span>}
               </span>
             )}
-            <button 
-              onClick={handleReconnect} 
-              className="ml-2 p-1 rounded hover:bg-gray-100"
-              disabled={isReconnecting}
-              title="Try to reconnect"
-            >
-              <RefreshCw className={`w-3 h-3 text-red-600 ${isReconnecting ? 'animate-spin' : ''}`} />
-            </button>
+            <ReconnectButton />
           </div>
         );
-      
+
       default:
         return null;
     }
   };
 
-  return (
-    <div className={`inline-flex items-center ${className}`}>
-      {renderIndicator()}
-    </div>
-  );
+  return <div className={`inline-flex items-center ${className}`}>{renderIndicator()}</div>;
 };
 
 export default ConnectionStatusIndicator;

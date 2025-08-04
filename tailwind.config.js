@@ -1,3 +1,6 @@
+// tailwind.config.js
+import animate from "tailwindcss-animate";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
@@ -47,7 +50,6 @@ export default {
         "2xl": "1rem",
         full: "9999px",
       },
-      // You do not need to redefine colors here if using CSS variables!
       ring: {
         opacity: {
           0: "0",
@@ -72,10 +74,5 @@ export default {
       },
     },
   },
-  plugins: [
-    // Import tailwindcss-animate as ES module
-    // This assumes the package supports ES modules
-    // If it doesn't, you may need to use dynamic import() or change back to .cjs extension
-    (await import("tailwindcss-animate")).default,
-  ],
+  plugins: [animate],
 };

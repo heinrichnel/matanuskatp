@@ -10,28 +10,25 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui";
 import { useFleetAnalytics } from "../../context/FleetAnalyticsContext";
 
 // Define chart configuration
 const chartConfig = {
   fuel: {
     label: "Fuel Cost (K)",
-    color: "#8884d8",
+    color: "#4030a0", // Further darkened for better contrast
+    bgColor: "#eceafe", // Light background color for text
   },
   maintenance: {
     label: "Maintenance Cost (K)",
-    color: "#82ca9d",
+    color: "#157540", // Further darkened for better contrast
+    bgColor: "#e6f5ee", // Light background color for text
   },
   roi: {
     label: "ROI %",
-    color: "#ff7300",
+    color: "#a63c00", // Further darkened for better contrast
+    bgColor: "#fff1e6", // Light background color for text
   },
 };
 
@@ -82,18 +79,23 @@ export function FleetAnalyticsLineChart() {
           <CardTitle>Fleet Cost Analytics</CardTitle>
           <CardDescription>Cost metrics and ROI over the last 6 months</CardDescription>
         </div>
-        <div className="flex">
+        <div className="flex" role="group" aria-label="Chart metrics">
           {(Object.keys(chartConfig) as ChartType[]).map((key) => (
             <button
               key={key}
               data-active={activeCharts.includes(key)}
               className="data-[active=true]:bg-blue-50 flex flex-1 flex-col justify-center gap-1 border-t px-4 py-3 text-left even:border-l sm:border-t-0 sm:border-l sm:px-6 sm:py-4"
               onClick={() => toggleChart(key)}
+              aria-pressed={activeCharts.includes(key)}
+              aria-label={`Toggle ${chartConfig[key].label} chart ${activeCharts.includes(key) ? "off" : "on"}`}
             >
-              <span className="text-gray-500 text-xs">{chartConfig[key].label}</span>
+              <span className="text-gray-700 text-xs font-medium">{chartConfig[key].label}</span>
               <span
-                className="text-lg leading-none font-bold sm:text-xl"
-                style={{ color: chartConfig[key].color }}
+                className="text-lg leading-none font-bold sm:text-xl px-2 py-1 rounded-md"
+                style={{
+                  color: chartConfig[key].color,
+                  backgroundColor: chartConfig[key].bgColor,
+                }}
               >
                 {fleetAnalytics.length > 0 &&
                 fleetAnalytics[fleetAnalytics.length - 1] &&

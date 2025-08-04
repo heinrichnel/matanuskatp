@@ -6,6 +6,7 @@ export type ChartConfig = Record<
   {
     label: string;
     color?: string;
+    bgColor?: string; // Added for accessibility contrast
     formatter?: (value: number) => string;
   }
 >;
@@ -16,7 +17,8 @@ interface ChartContainerProps {
   children: React.ReactNode;
 }
 
-export function ChartContainer({ config, className, children }: ChartContainerProps) {
+export function ChartContainer({ className, children }: ChartContainerProps) {
+  // config param removed since it's not currently used
   return (
     <div
       className={className}

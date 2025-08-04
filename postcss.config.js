@@ -1,22 +1,10 @@
 // postcss.config.js
-
-/**
- * PostCSS config for Vite + Tailwind CSS v4+
- * - Handles imports and nesting
- * - Uses the new @tailwindcss/postcss plugin (required for Tailwind 4.x+)
- * - Adds autoprefixer for cross-browser support
- * - Adds cssnano for production minification
- */
-
-const plugins = {
-  "postcss-import": {},          // Enables @import in CSS
-  "postcss-nesting": {},         // Enables CSS nesting
-  "@tailwindcss/postcss": {},    // Tailwind v4+ official PostCSS plugin
-  autoprefixer: {},              // Adds vendor prefixes
+export default {
+  plugins: {
+    "postcss-import": {},
+    "postcss-nesting": {},
+    tailwindcss: {}, // Correct plugin
+    autoprefixer: {},
+    ...(process.env.NODE_ENV === "production" ? { cssnano: { preset: "default" } } : {}),
+  },
 };
-
-if (process.env.NODE_ENV === "production") {
-  plugins.cssnano = { preset: "default" }; // Minify CSS only in production
-}
-
-export default { plugins };

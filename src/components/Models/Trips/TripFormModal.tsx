@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import Modal from "../../ui/Modal";
-import TripForm from "../../forms/TripForm";
-import { Trip } from "../../../types";
-import { useAppContext } from "../../../context/AppContext";
 import { AlertTriangle } from "lucide-react";
+import React, { useState } from "react";
+import { useAppContext } from "../../../context/AppContext";
+import { Trip } from "../../../types";
+import TripForm from "../../forms/TripForm";
+import Modal from "../../ui/Modal";
 
 interface TripFormModalProps {
   isOpen: boolean;
@@ -12,10 +12,11 @@ interface TripFormModalProps {
 }
 
 const TripFormModal: React.FC<TripFormModalProps> = ({ isOpen, onClose, editingTrip }) => {
-  const { addTrip, updateTrip, isLoading } = useAppContext();
+  const { addTrip, updateTrip } = useAppContext();
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (
+  // Original handler expecting Trip data
+  const handleTripData = async (
     tripData: Omit<Trip, "id" | "costs" | "status" | "additionalCosts">
   ) => {
     try {
@@ -43,6 +44,34 @@ const TripFormModal: React.FC<TripFormModalProps> = ({ isOpen, onClose, editingT
     }
   };
 
+  // Adapter function to convert FormData to Trip format
+  const handleSubmit = async (formData: any) => {
+    try {
+      // Map FormData to Trip format
+      const tripData: Omit<Trip, "id" | "costs" | "status" | "additionalCosts"> = {
+        fleetNumber: formData.vehicle || "",
+        driverName: formData.driver || "",
+        clientName: formData.origin || "", // Using origin as client for this example
+        clientType: "external", // Default client type
+        startDate: formData.startDate || new Date().toISOString(),
+        endDate: formData.endDate || new Date().toISOString(),
+        route: `${formData.origin} to ${formData.destination}`,
+        description: formData.notes || "",
+        baseRevenue: parseFloat(formData.estimatedCost) || 0,
+        revenueCurrency: "ZAR", // Default currency
+        distanceKm: parseFloat(formData.distance) || 0,
+        paymentStatus: "unpaid", // Default payment status
+        followUpHistory: [], // Initialize with empty array
+      };
+
+      // Call the original handler with converted data
+      await handleTripData(tripData);
+    } catch (error) {
+      console.error("Error in form adapter:", error);
+      setError(error instanceof Error ? error.message : "Failed to process form data.");
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -57,10 +86,27 @@ const TripFormModal: React.FC<TripFormModalProps> = ({ isOpen, onClose, editingT
         </div>
       )}
       <TripForm
-        trip={editingTrip}
+        initialData={
+          editingTrip
+            ? {
+                tripNumber: editingTrip.id,
+                origin: editingTrip.route.split(" to ")[0] || "",
+                destination: editingTrip.route.split(" to ")[1] || "",
+                driver: editingTrip.driverName,
+                vehicle: editingTrip.fleetNumber,
+                startDate: editingTrip.startDate.split("T")[0],
+                startTime: "08:00",
+                endDate: editingTrip.endDate.split("T")[0],
+                endTime: "17:00",
+                distance: editingTrip.distanceKm?.toString() || "",
+                estimatedCost: editingTrip.baseRevenue.toString(),
+                notes: editingTrip.description || "",
+                priority: "normal",
+              }
+            : undefined
+        }
         onSubmit={handleSubmit}
         onCancel={onClose}
-        isSubmitting={isLoading?.addTrip || isLoading?.[`updateTrip-${editingTrip?.id}`]}
       />
     </Modal>
   );

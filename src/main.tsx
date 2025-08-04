@@ -2,13 +2,13 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { TyreProvider } from "./context/TyreContext";
 import { TyreStoresProvider } from "./context/TyreStoresContext";
 import "./index.css";
 import "./styles/theme.css"; // Import our new professional theme
 import { getEnvVar, initBrowserEnv } from "./utils/envUtils";
 import { initializeConnectionMonitoring } from "./utils/firebaseConnectionHandler";
-import ErrorBoundary from "./components/ErrorBoundary";
 
 // Initialize global environment variables for safer access
 // This prevents "import.meta" errors in non-module contexts
@@ -73,10 +73,11 @@ const initializeApp = async () => {
   const isDev = getEnvVar("MODE", "") === "development" || process.env.NODE_ENV === "development";
 
   try {
-    // Import Firebase after ensuring proper initialization
+    // Import Firebase core services after ensuring proper initialization
     try {
-      await import("./firebase");
-      console.log("🔥 Firebase initialized successfully");
+      // Import only core Firebase services initially
+      await import("./firebase/core");
+      console.log("🔥 Firebase core services initialized successfully");
 
       // Initialize connection monitoring
       try {

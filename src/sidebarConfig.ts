@@ -43,16 +43,29 @@ import { AlertTriangle, CalendarIcon, CheckCircle, Edit, FileText, Plus } from "
 // Create a placeholder component for missing pages
 const PlaceholderComponent = React.lazy(() =>
   Promise.resolve({
-    default: () => React.createElement("div", {
-      className: "p-8 border border-gray-200 rounded-lg bg-white shadow-sm"
-    }, [
-      React.createElement("h2", {
-        className: "text-xl font-semibold mb-4 text-gray-800"
-      }, "Page Under Development"),
-      React.createElement("p", {
-        className: "text-gray-600"
-      }, "This page component is currently being developed. Please check back later.")
-    ]),
+    default: () =>
+      React.createElement(
+        "div",
+        {
+          className: "p-8 border border-gray-200 rounded-lg bg-white shadow-sm",
+        },
+        [
+          React.createElement(
+            "h2",
+            {
+              className: "text-xl font-semibold mb-4 text-gray-800",
+            },
+            "Page Under Development"
+          ),
+          React.createElement(
+            "p",
+            {
+              className: "text-gray-600",
+            },
+            "This page component is currently being developed. Please check back later."
+          ),
+        ]
+      ),
   })
 );
 
@@ -66,30 +79,30 @@ const InspectionManagement = PlaceholderComponent;
 const ReportNewIncidentPage = PlaceholderComponent;
 const FlagsInvestigationsPage = PlaceholderComponent;
 const QAReviewPanel = PlaceholderComponent; // Assuming this is a page
-const ActionLog = React.lazy(() => import("../pages/Compliance/ActionLog")); // From pages/Compliance
-const CARReportDetails = React.lazy(() => import("../pages/Compliance/CARReportDetails")); // From pages/Compliance
-const ActionItemDetails = React.lazy(() => import("../pages/Compliance/ActionItemDetails")); // From pages/Compliance
+const ActionLog = React.lazy(() => import("./pages/Compliance/ActionLog")); // From pages/Compliance
+const CARReportDetails = React.lazy(() => import("./pages/Compliance/CARReportDetails")); // From pages/Compliance
+const ActionItemDetails = React.lazy(() => import("./pages/Compliance/ActionItemDetails")); // From pages/Compliance
 
 // Clients Module Pages
-const ClientManagementPage = React.lazy(() => import("../pages/clients/ClientManagementPage"));
+const ClientManagementPage = React.lazy(() => import("./pages/clients/ClientManagementPage"));
 const AddNewCustomer = PlaceholderComponent;
-const ActiveCustomers = React.lazy(() => import("../pages/clients/ActiveCustomers"));
-const CustomerReports = React.lazy(() => import("../pages/clients/CustomerReports"));
-const RetentionMetrics = React.lazy(() => import("../pages/clients/RetentionMetrics"));
-const ClientNetworkMap = React.lazy(() => import("../pages/clients/ClientNetworkMap"));
+const ActiveCustomers = React.lazy(() => import("./pages/clients/ActiveCustomers"));
+const CustomerReports = React.lazy(() => import("./pages/clients/CustomerReports"));
+const RetentionMetrics = React.lazy(() => import("./pages/clients/RetentionMetrics"));
+const ClientNetworkMap = React.lazy(() => import("./pages/clients/ClientNetworkMap"));
 const ClientDetail = PlaceholderComponent; // From pages/ClientDetail.tsx
 
 // Invoices Module Pages
-const InvoiceManagementPage = React.lazy(() => import("../pages/invoices/InvoiceManagementPage")); // Main page
-const CreateInvoicePage = React.lazy(() => import("../pages/invoices/CreateInvoicePage"));
-const CreateQuotePage = React.lazy(() => import("../pages/invoices/CreateQuotePage"));
-const InvoiceApprovalFlow = React.lazy(() => import("../pages/invoices/InvoiceApprovalFlow"));
-const InvoiceBuilder = React.lazy(() => import("../pages/invoices/InvoiceBuilder"));
-const InvoiceDashboard = React.lazy(() => import("../pages/invoices/InvoiceDashboard"));
-const InvoiceTemplatesPage = React.lazy(() => import("../pages/invoices/InvoiceTemplatesPage"));
-const PaidInvoicesPage = React.lazy(() => import("../pages/invoices/PaidInvoicesPage")); // From pages/invoices
-const PendingInvoicesPage = React.lazy(() => import("../pages/invoices/PendingInvoicesPage")); // From pages/invoices
-const TaxReportExport = React.lazy(() => import("../pages/invoices/TaxReportExport"));
+const InvoiceManagementPage = React.lazy(() => import("./pages/invoices/InvoiceManagementPage")); // Main page
+const CreateInvoicePage = React.lazy(() => import("./pages/invoices/CreateInvoicePage"));
+const CreateQuotePage = React.lazy(() => import("./pages/invoices/CreateQuotePage"));
+const InvoiceApprovalFlow = React.lazy(() => import("./pages/invoices/InvoiceApprovalFlow"));
+const InvoiceBuilder = React.lazy(() => import("./pages/invoices/InvoiceBuilder"));
+const InvoiceDashboard = React.lazy(() => import("./pages/invoices/InvoiceDashboard"));
+const InvoiceTemplatesPage = React.lazy(() => import("./pages/invoices/InvoiceTemplatesPage"));
+const PaidInvoicesPage = React.lazy(() => import("./pages/invoices/PaidInvoicesPage")); // From pages/invoices
+const PendingInvoicesPage = React.lazy(() => import("./pages/invoices/PendingInvoicesPage")); // From pages/invoices
+const TaxReportExport = React.lazy(() => import("./pages/invoices/TaxReportExport"));
 const POApprovalSummary = PlaceholderComponent; // From pages/POApprovalSummary.tsx
 const PurchaseOrderDetailView = PlaceholderComponent; // From pages/PurchaseOrderDetailView.tsx
 const PurchaseOrderTracker = PlaceholderComponent; // From pages/PurchaseOrderTracker.tsx
@@ -97,20 +110,21 @@ const IndirectCostBreakdown = PlaceholderComponent; // From pages/IndirectCostBr
 const CashManagerRequestPage = PlaceholderComponent; // From pages/CashManagerRequestPage.tsx
 
 // Diesel Module Pages
-const DieselManagementPage = React.lazy(() => import("../pages/diesel/DieselManagementPage")); // Main page
+const DieselManagementPage = React.lazy(() => import("./pages/diesel/DieselManagementPage")); // Main page
 const AddFuelEntryPage = PlaceholderComponent;
-const BudgetPlanning = React.lazy(() => import("../pages/diesel/BudgetPlanning"));
-const CarbonFootprintCalc = React.lazy(() => import("../pages/diesel/CarbonFootprintCalc"));
-const DieselDashboardComponent = React.lazy(
-  () => import("../pages/diesel/DieselDashboardComponent")
+const BudgetPlanning = React.lazy(() => import("./pages/diesel/BudgetPlanning"));
+const CarbonFootprintCalc = React.lazy(() => import("./pages/diesel/CarbonFootprintCalc"));
+// Used in sidebar configuration
+export const DieselDashboardComponent = React.lazy(
+  () => import("./pages/diesel/DieselDashboardComponent")
 ); // From pages/diesel
-const DriverFuelBehaviorDiesel = React.lazy(() => import("../pages/diesel/DriverFuelBehavior")); // Renamed to avoid conflict
-const FuelCardManager = React.lazy(() => import("../pages/diesel/FuelCardManager"));
-const FuelEfficiencyReport = React.lazy(() => import("../pages/diesel/FuelEfficiencyReport"));
-const FuelLogs = React.lazy(() => import("../pages/diesel/FuelLogs"));
-const FuelStations = React.lazy(() => import("../pages/diesel/FuelStations"));
-const FuelTheftDetection = React.lazy(() => import("../pages/diesel/FuelTheftDetection"));
-const DieselAnalysis = React.lazy(() => import("../pages/diesel/DieselAnalysis")); // From pages/diesel
+const DriverFuelBehaviorDiesel = React.lazy(() => import("./pages/diesel/DriverFuelBehavior")); // Renamed to avoid conflict
+const FuelCardManager = React.lazy(() => import("./pages/diesel/FuelCardManager"));
+const FuelEfficiencyReport = React.lazy(() => import("./pages/diesel/FuelEfficiencyReport"));
+const FuelLogs = React.lazy(() => import("./pages/diesel/FuelLogs"));
+const FuelStations = React.lazy(() => import("./pages/diesel/FuelStations"));
+const FuelTheftDetection = React.lazy(() => import("./pages/diesel/FuelTheftDetection"));
+const DieselAnalysis = React.lazy(() => import("./pages/diesel/DieselAnalysis")); // From pages/diesel
 const DieselDashboard = PlaceholderComponent; // From pages/DieselDashboard.tsx
 
 // Inventory Module Pages
@@ -121,74 +135,74 @@ const PartsInventoryPage = PlaceholderComponent;
 const PartsOrderingPage = PlaceholderComponent;
 const ReceivePartsPage = PlaceholderComponent;
 const VendorScorecard = PlaceholderComponent; // From pages/VendorScorecard.tsx
-const VendorPage = React.lazy(() => import("../pages/workshop/VendorPage")); // Re-used from workshop
+const VendorPage = React.lazy(() => import("./pages/workshop/VendorPage")); // Re-used from workshop
 
 // Mobile Module Pages
-const TyreMobilePage = React.lazy(() => import("../pages/mobile/TyreMobilePage"));
+const TyreMobilePage = React.lazy(() => import("./pages/mobile/TyreMobilePage"));
 
 // Drivers Module Pages
-const DriverManagementPage = React.lazy(() => import("../pages/drivers/DriverManagementPage")); // Main page
-const AddNewDriver = React.lazy(() => import("../pages/drivers/AddNewDriver"));
-const DriverDashboard = React.lazy(() => import("../pages/drivers/DriverDashboard")); // From pages/drivers
-const DriverBehaviorPage = React.lazy(() => import("../pages/drivers/DriverBehaviorPage"));
-const DriverProfiles = React.lazy(() => import("../pages/drivers/DriverProfiles"));
-const DriverRewards = React.lazy(() => import("../pages/drivers/DriverRewards"));
-const DriverScheduling = React.lazy(() => import("../pages/drivers/DriverScheduling"));
-const DriverViolations = React.lazy(() => import("../pages/drivers/DriverViolations"));
-const EditDriver = React.lazy(() => import("../pages/drivers/EditDriver"));
-const HoursOfService = React.lazy(() => import("../pages/drivers/HoursOfService"));
-const LicenseManagement = React.lazy(() => import("../pages/drivers/LicenseManagement"));
-const PerformanceAnalytics = React.lazy(() => import("../pages/drivers/PerformanceAnalytics"));
-const SafetyScores = React.lazy(() => import("../pages/drivers/SafetyScores"));
-const TrainingRecords = React.lazy(() => import("../pages/drivers/TrainingRecords"));
-const DriverDetailsPage = React.lazy(() => import("../pages/drivers/DriverDetailsPage"));
+const DriverManagementPage = React.lazy(() => import("./pages/drivers/DriverManagementPage")); // Main page
+const AddNewDriver = React.lazy(() => import("./pages/drivers/AddNewDriver"));
+const DriverDashboard = React.lazy(() => import("./pages/drivers/DriverDashboard")); // From pages/drivers
+const DriverBehaviorPage = React.lazy(() => import("./pages/drivers/DriverBehaviorPage"));
+const DriverProfiles = React.lazy(() => import("./pages/drivers/DriverProfiles"));
+const DriverRewards = React.lazy(() => import("./pages/drivers/DriverRewards"));
+const DriverScheduling = React.lazy(() => import("./pages/drivers/DriverScheduling"));
+const DriverViolations = React.lazy(() => import("./pages/drivers/DriverViolations"));
+const EditDriver = React.lazy(() => import("./pages/drivers/EditDriver"));
+const HoursOfService = React.lazy(() => import("./pages/drivers/HoursOfService"));
+const LicenseManagement = React.lazy(() => import("./pages/drivers/LicenseManagement"));
+export const PerformanceAnalytics = React.lazy(
+  () => import("./pages/drivers/PerformanceAnalytics")
+); // Exported for use in routes
+const SafetyScores = React.lazy(() => import("./pages/drivers/SafetyScores"));
+const TrainingRecords = React.lazy(() => import("./pages/drivers/TrainingRecords"));
+const DriverDetailsPage = React.lazy(() => import("./pages/drivers/DriverDetailsPage"));
 
 // Wialon Module Pages
 const WialonDashboard = PlaceholderComponent; // Main page
 const WialonUnitsPage = PlaceholderComponent;
 const WialonConfigPage = PlaceholderComponent;
-const WialonMapComponent = React.lazy(() => import("../components/Map/WialonMapComponent")); // Component, but can be a route target
+export const WialonMapComponent = React.lazy(() => import("./components/Map/WialonMapComponent")); // Component, but can be a route target
 // Import TripRoutePlannerPage for Wialon routes
-const TripRoutePlannerPage = React.lazy(() => import('../pages/wialon/TripRoutePlannerPage'));
-const WialonLiveMapPage = React.lazy(() => import('../pages/wialon/pages/WialonLiveMapPage'));
+const TripRoutePlannerPage = React.lazy(() => import("./pages/wialon/TripRoutePlannerPage"));
+const WialonLiveMapPage = React.lazy(() => import("./pages/wialon/pages/WialonLiveMapPage"));
 // ...
 
 // Tyres Module Pages
-const TyreManagementPage = React.lazy(() => import("../pages/tyres/TyreManagementPage")); // Main page
+const TyreManagementPage = React.lazy(() => import("./pages/tyres/TyreManagementPage")); // Main page
 const TyreFleetMap = PlaceholderComponent;
 const TyreHistoryPage = PlaceholderComponent;
 const TyrePerformanceDashboard = PlaceholderComponent;
-const TyreReferenceManagerPage = React.lazy(
-  () => import("../pages/tyres/TyreReferenceManagerPage")
-);
+const TyreReferenceManagerPage = React.lazy(() => import("./pages/tyres/TyreReferenceManagerPage"));
 const TyreStores = PlaceholderComponent; // From pages/TyreStores.tsx
 const VehicleTyreView = PlaceholderComponent; // From pages/VehicleTyreView.tsx
-const AddNewTyrePage = React.lazy(() => import("../pages/tyres/AddNewTyrePage"));
+const AddNewTyrePage = React.lazy(() => import("./pages/tyres/AddNewTyrePage"));
 
 // Analytics Module Pages
 const YearToDateKPIs = PlaceholderComponent;
 const WorkshopAnalytics = PlaceholderComponent;
-const PredictiveModels = React.lazy(() => import("../components/Models/Driver/PredictiveModels")); // Component, not a page. If it needs a route, wrap it.
+const PredictiveModels = React.lazy(() => import("./components/Models/Driver/PredictiveModels")); // Component, not a page. If it needs a route, wrap it.
 const AnalyticsPerformanceAnalytics = PlaceholderComponent; // Re-used from Drivers
 const FleetAnalyticsPage = PlaceholderComponent; // Re-used from Fleet
-const AnalyticsDashboardPage = PlaceholderComponent; // Re-used from Dashboard
+export const AnalyticsDashboardPage = PlaceholderComponent; // Re-used from Dashboard
 const AnalyticsDashboard = PlaceholderComponent; // Re-used from Dashboard
 
 // Trips Module Pages (already imported above)
 // MissedLoadsTracker already imported above
 
 // Workshop Module Pages
-const WorkshopPage = React.lazy(() => import("../pages/workshop/WorkshopPage")); // Main page
-const JobCardManagement = PlaceholderComponent; // From pages/JobCardManagement.tsx
-const WorkOrderManagement = PlaceholderComponent; // From pages/WorkOrderManagement.tsx
-const StockInventoryPage = React.lazy(() => import("../pages/workshop/StockInventoryPage"));
-const QRGenerator = React.lazy(() => import("../pages/workshop/QRGenerator"));
-const QRScannerPage = React.lazy(() => import("../pages/workshop/QRScannerPage"));
+export const WorkshopPage = React.lazy(() => import("./pages/workshop/WorkshopPage")); // Main page
+export const JobCardManagement = PlaceholderComponent; // From pages/JobCardManagement.tsx
+export const WorkOrderManagement = PlaceholderComponent; // From pages/WorkOrderManagement.tsx
+export const StockInventoryPage = React.lazy(() => import("./pages/workshop/StockInventoryPage"));
+export const QRGenerator = React.lazy(() => import("./pages/workshop/QRGenerator"));
+export const QRScannerPage = React.lazy(() => import("./pages/workshop/QRScannerPage"));
 
 // Testing & Demo Pages (Development Only)
 const SidebarTester = PlaceholderComponent; // Use placeholder instead of missing file
-const UIComponentsDemo = React.lazy(() => import("../components/ui/UIComponentsDemo"));
-const GoogleMapsTest = React.lazy(() => import("../components/testing/GoogleMapsTest"));
+const UIComponentsDemo = React.lazy(() => import("./components/ui/UIComponentsDemo"));
+const GoogleMapsTest = React.lazy(() => import("./components/testing/GoogleMapsTest"));
 const TestRouting = PlaceholderComponent; // Use placeholder instead of missing file
 
 // Define the structure of a sidebar item
@@ -860,35 +874,35 @@ export const sidebarConfig: SidebarItem[] = [
         label: "Tyre Performance Report",
         path: "/tyres/performance-report",
         icon: DocumentTextIcon,
-        component: React.lazy(() => import("../pages/tyres/TyrePerformanceReport")),
+        component: React.lazy(() => import("./pages/tyres/TyrePerformanceReport")),
       },
       {
         id: "tyre-cost-analysis",
         label: "Tyre Cost Analysis",
         path: "/tyres/cost-analysis",
         icon: CurrencyDollarIcon,
-        component: React.lazy(() => import("../pages/tyres/TyreCostAnalysis")),
+        component: React.lazy(() => import("./pages/tyres/TyreCostAnalysis")),
       },
       {
         id: "tyre-dashboard",
         label: "Tyre Dashboard",
         path: "/tyres/dashboard",
         icon: HomeIcon,
-        component: React.lazy(() => import("../pages/tyres/TyreDashboard")),
+        component: React.lazy(() => import("./pages/tyres/TyreDashboard")),
       },
       {
         id: "tyre-management-view",
         label: "Tyre Management View",
         path: "/tyres/view",
         icon: DocumentMagnifyingGlassIcon,
-        component: React.lazy(() => import("../pages/tyres/TyreManagementView")),
+        component: React.lazy(() => import("./pages/tyres/TyreManagementView")),
       },
       {
         id: "tyre-reports",
         label: "Tyre Reports",
         path: "/tyres/reports",
         icon: ChartBarIcon,
-        component: React.lazy(() => import("../pages/tyres/TyreReports")),
+        component: React.lazy(() => import("./pages/tyres/TyreReports")),
       },
       {
         id: "vehicle-tyre-view",
@@ -1106,4 +1120,3 @@ export function getFlatRoutes(items: SidebarItem[]): SidebarItem[] {
   });
   return routes;
 }
-

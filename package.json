@@ -6,7 +6,7 @@
   "description": "Fleet Management (Vite React + Express API)",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"vite --host\" \"nodemon index.js\"",
+    "dev": "vite --host",
     "dev:enhanced": "concurrently \"vite --host\" \"nodemon server.js\"",
     "frontend": "vite --host",
     "analyze:unused": "madge --json --silent src > unused.json",
@@ -245,6 +245,7 @@
     "ts-prune": "^0.10.3",
     "ts-unused-exports": "^11.0.1",
     "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.37.0",
     "unimport": "^5.2.0",
