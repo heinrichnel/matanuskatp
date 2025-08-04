@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronRight, Users, X } from "lucide-react";
-import React, { FC, useState } from "react";
+import React, { FC, useState, useEffect } from "react";
 import { SidebarItem, sidebarConfig } from "../../sidebarConfig";
 import ConnectionStatusIndicator from "../ui/ConnectionStatusIndicator";
 import SyncIndicator from "../ui/SyncIndicator";
@@ -14,9 +14,31 @@ interface SidebarProps {
 const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate, isOpen, onClose }) => {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const currentPath = currentView;
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    // Check initial window size on the client side
+    setIsDesktop(window.innerWidth >= 768);
+
+    const handleResize = () => {
+      const newIsDesktop = window.innerWidth >= 768;
+      setIsDesktop(newIsDesktop);
+      // Close sidebar on mobile when window resizes and is open
+      if (!newIsDesktop && isOpen) {
+        onClose();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isOpen, onClose]);
 
   const handleNavigate = (route: string) => {
     onNavigate(route);
+    // Close sidebar on mobile after navigation
+    if (!isDesktop) {
+      onClose();
+    }
   };
 
   const toggleExpand = (id: string, e?: React.MouseEvent) => {
@@ -30,25 +52,6 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate, isOpen, onClose })
     }));
   };
 
-  // Fix for window.innerWidth on server (SSR/Next.js)
-  const [isClient, setIsClient] = React.useState(false);
-
-  React.useEffect(() => {
-    setIsClient(true);
-
-    // Add resize event listener to close sidebar on mobile when window resizes
-    const handleResize = () => {
-      if (window.innerWidth < 768 && isOpen) {
-        onClose();
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [isOpen, onClose]);
-
-  const isDesktop = isClient && window.innerWidth >= 768;
-
   const renderSidebarItems = (items: SidebarItem[], isChild: boolean = false) => {
     return (
       <ul className={`space-y-1 ${isChild ? "mt-1 pl-4" : ""}`}>
@@ -57,19 +60,21 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate, isOpen, onClose })
             ? currentPath === item.path ||
               (item.path.includes(":") && currentPath.startsWith(item.path.split(":")[0]))
             : false;
+
           const isParentActive = item.children && item.path && currentPath.startsWith(item.path);
+          const isExpanded = expandedItems[item.id] || isParentActive;
 
           if (item.children) {
             return (
               <li key={item.id} className="mb-2">
                 <button
                   className={`w-full flex items-center justify-between gap-3 px-6 py-2 rounded-lg transition-colors text-left ${
-                    expandedItems[item.id] || isParentActive
+                    isExpanded
                       ? "bg-blue-50 text-blue-600 font-medium"
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                   onClick={() => toggleExpand(item.id)}
-                  aria-expanded={!!expandedItems[item.id]}
+                  aria-expanded={isExpanded ? true : false}
                   aria-controls={`submenu-${item.id}`}
                 >
                   <div className="flex items-center gap-3 flex-grow text-left">
@@ -92,14 +97,14 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate, isOpen, onClose })
                       justifyContent: "center",
                     }}
                   >
-                    {expandedItems[item.id] ? (
+                    {isExpanded ? (
                       <ChevronDown className="w-5 h-5" />
                     ) : (
                       <ChevronRight className="w-5 h-5" />
                     )}
                   </span>
                 </button>
-                {isOpen && expandedItems[item.id] && (
+                {isExpanded && (
                   <div
                     id={`submenu-${item.id}`}
                     role="region"
@@ -168,22 +173,26 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate, isOpen, onClose })
         </div>
 
         {/* Navigation menu */}
-        <nav className="flex-1 overflow-y-auto py-4">
-          {renderSidebarItems(sidebarConfig)}
-        </nav>
+        <nav className="flex-1 overflow-y-auto py-4">{renderSidebarItems(sidebarConfig)}</nav>
 
-        {/* User area (hidden on mobile) */}
-        <div className="hidden md:block px-6 py-4 border-t">
+        {/* User and Status Area */}
+        <div className="px-6 py-4 border-t flex flex-col gap-2">
           <div className="flex items-center gap-3">
+            <ConnectionStatusIndicator />
+            <span>Connection Status</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <SyncIndicator />
+            <span>Sync Status</span>
+          </div>
+          {/* User details can go here */}
+          <div className="flex items-center gap-3 mt-2">
             <Users className="w-5 h-5 text-gray-400" />
             <span className="text-sm">User</span>
+          </div>
         </div>
-        <div className="flex items-center gap-3 mt-2">
-          <Users className="w-5 h-5 text-gray-400" />
-          {isOpen && <span className="text-sm text-gray-700">User</span>}
-        </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 };
 

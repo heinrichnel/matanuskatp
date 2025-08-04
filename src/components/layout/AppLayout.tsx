@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { SyncProvider } from "../../context/SyncContext";
 import Footer from "./Footer";
@@ -7,18 +7,26 @@ import Sidebar from "./Sidebar";
 /**
  * Application Layout Component
  *
- * Provides consistent layout with navigation and footer
- * for all application pages. Wraps content in SyncContext
+ * Provides a consistent layout with navigation and a footer for all application pages.
+ * It also includes a mobile-responsive sidebar and wraps content in `SyncProvider`
  * for online/offline functionality.
- *
- * Sidebar navigation is included, responsive for desktop and mobile.
  */
 const AppLayout: React.FC = () => {
-  // Routing and sidebar state
   const location = useLocation();
   const navigate = useNavigate();
-  // Sidebar open state (mobile responsive)
-  const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(true);
+
+  // State to manage the sidebar's open/close status, defaulting based on screen size
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
+
+  // Effect to handle window resizing for sidebar behavior
+  useEffect(() => {
+    const handleResize = () => {
+      setSidebarOpen(window.innerWidth >= 768);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <SyncProvider>
@@ -33,7 +41,7 @@ const AppLayout: React.FC = () => {
 
         {/* Main content and footer */}
         <div className="flex flex-col flex-1 min-h-screen">
-          {/* Optional top bar (can add a mobile hamburger here to open sidebar) */}
+          {/* Top bar for mobile */}
           <header className="md:hidden flex items-center justify-between px-4 py-2 bg-gray-100 border-b dark:bg-gray-900">
             <button
               className="p-2 rounded-md text-gray-700 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-800"

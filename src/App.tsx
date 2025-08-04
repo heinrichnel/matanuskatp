@@ -61,43 +61,10 @@ const App: React.FC = () => {
           context: { component: "App", operation: "syncOfflineOperations" },
           maxRetries: 3,
         });
-      } catch {}
-    };
-    window.addEventListener("online", handleOnline);
-
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      unregisterErrorHandler();
-    };
-  }, []);
-  const [editingTrip, setEditingTrip] = useState<any>();
-  const [showTripForm, setShowTripForm] = useState(false);
-
-  useEffect(() => {
-    const unregisterErrorHandler = registerErrorHandler((error) => {
-      if (error.severity === ErrorSeverity.FATAL) setConnectionError(error.originalError);
-    });
-
-    initializeConnectionMonitoring().catch((error) =>
-      setConnectionError(new Error(`Failed to initialize Firebase connection: ${error.message}`))
-    );
-    handleError(async () => await initOfflineCache(), {
-      category: ErrorCategory.DATABASE,
-      context: { component: "App", operation: "initOfflineCache" },
-      maxRetries: 3,
-    }).catch((error) =>
-      setConnectionError(new Error(`Failed to initialize offline cache: ${error.message}`))
-    );
-
-    startNetworkMonitoring(30000);
-    const handleOnline = async () => {
-      try {
-        await handleError(async () => await syncOfflineOperations(), {
-          category: ErrorCategory.NETWORK,
-          context: { component: "App", operation: "syncOfflineOperations" },
-          maxRetries: 3,
-        });
-      } catch {}
+      } catch {
+        // Error is already handled by handleError utility
+        // This empty catch prevents unhandled promise rejections
+      }
     };
     window.addEventListener("online", handleOnline);
 
