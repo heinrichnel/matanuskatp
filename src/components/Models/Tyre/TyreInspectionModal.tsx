@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import Modal from '../../ui/Modal';
-import Button from '../../ui/Button';
-import { Input } from '../../ui/FormElements';
-import { CheckCircle, X } from 'lucide-react';
+import React, { useState } from "react";
+import Modal from "../../ui/modal";
+import Button from "../../ui/Button";
+import { Input } from "../../ui/FormElements";
+import { CheckCircle, X } from "lucide-react";
 
 type TyreInspection = {
   fleetNumber: string;
@@ -12,7 +12,7 @@ type TyreInspection = {
   visualCondition: string;
   comments?: string;
   inspectedAt: string;
-}
+};
 
 type Props = {
   open: boolean;
@@ -27,12 +27,12 @@ const TyreInspectionModal: React.FC<Props> = ({
   onClose,
   onSubmit,
   tyrePosition,
-  fleetNumber
+  fleetNumber,
 }) => {
-  const [treadDepth, setTreadDepth] = useState('');
-  const [pressure, setPressure] = useState('');
-  const [visualCondition, setVisualCondition] = useState('');
-  const [comments, setComments] = useState('');
+  const [treadDepth, setTreadDepth] = useState("");
+  const [pressure, setPressure] = useState("");
+  const [visualCondition, setVisualCondition] = useState("");
+  const [comments, setComments] = useState("");
 
   const handleSubmit = () => {
     if (!treadDepth || !pressure || !visualCondition) return alert("All fields are required");
@@ -52,7 +52,12 @@ const TyreInspectionModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal isOpen={open} onClose={onClose} title={`Inspect Tyre: ${tyrePosition} on ${fleetNumber}`} size="md">
+    <Modal
+      isOpen={open}
+      onClose={onClose}
+      title={`Inspect Tyre: ${tyrePosition} on ${fleetNumber}`}
+      size="md"
+    >
       <div className="space-y-6">
         <Input
           label="Tread Depth (mm)"

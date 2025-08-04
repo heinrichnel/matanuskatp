@@ -73,11 +73,10 @@ VITE_GOOGLE_MAPS_ANDROID_API_KEY=AIzaSyDNk9iW1PTGM9hvcjJ0utBABs7ZiWCj3Xc
 # =======================
 # GOOGLE MAPS WEB APP
 # =======================
-VITE_GOOGLE_MAPS_IFRAME_URL=https://www.google.com/maps/embed/v1/place?key=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg&q=6+MT+Orville+Street+Midlands+Estate+Midstream+Gauteng
+VITE_GOOGLE_MAPS_IFRAME_URL=https://www.google.com/maps/embed/v1/place?key=AIzaSyDTHkrpqeH0nj-cpbYybjKcZYwKgDNf8z8&q=6+MT+Orville+Street+Midlands+Estate+Midstream+Gauteng
 
 VITE_GOOGLE_MAPS_API_KEY=AIzaSyDTHkrpqeH0nj-cpbYybjKcZYwKgDNf8z8
 VITE_GOOGLE_MAPS_JS_API_URL=https://maps.googleapis.com/maps/api/js?key=AIzaSyDTHkrpqeH0nj-cpbYybjKcZYwKgDNf8z8&loading=async&callback=initMap
-
 
 # === ADDED FOR APPLICATION CONSISTENCY ===
 
@@ -97,7 +96,7 @@ VITE_SAGE_OAUTH_REDIRECT_URI=
 VITE_SAGE_OAUTH_AUTH_URL=
 VITE_SAGE_OAUTH_TOKEN_URL=
 
-VITE_API_URL=
+
 
 VITE_WIALON_TOKEN=c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053
 

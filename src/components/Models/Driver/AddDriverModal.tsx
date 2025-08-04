@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import Modal from '../../ui/Modal';
+import React, { useState } from "react";
+import Modal from "../../ui/modal";
 
 interface AddDriverModalProps {
   isOpen: boolean;
@@ -9,22 +9,22 @@ interface AddDriverModalProps {
 
 const AddDriverModal: React.FC<AddDriverModalProps> = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    licenseNumber: '',
-    licenseExpiry: '',
-    licenseClass: '',
-    dateOfBirth: '',
-    dateOfHire: '',
-    emergencyContact: '',
-    emergencyPhone: ''
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    licenseNumber: "",
+    licenseExpiry: "",
+    licenseClass: "",
+    dateOfBirth: "",
+    dateOfHire: "",
+    emergencyContact: "",
+    emergencyPhone: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -40,7 +40,9 @@ const AddDriverModal: React.FC<AddDriverModalProps> = ({ isOpen, onClose, onSubm
             <h3 className="text-lg font-medium mb-4">Personal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name*</label>
+                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+                  First Name*
+                </label>
                 <input
                   type="text"
                   id="firstName"
@@ -52,7 +54,9 @@ const AddDriverModal: React.FC<AddDriverModalProps> = ({ isOpen, onClose, onSubm
                 />
               </div>
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name*</label>
+                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+                  Last Name*
+                </label>
                 <input
                   type="text"
                   id="lastName"
@@ -64,7 +68,9 @@ const AddDriverModal: React.FC<AddDriverModalProps> = ({ isOpen, onClose, onSubm
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email*
+                </label>
                 <input
                   type="email"
                   id="email"
@@ -76,7 +82,9 @@ const AddDriverModal: React.FC<AddDriverModalProps> = ({ isOpen, onClose, onSubm
                 />
               </div>
               <div>
-                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number*</label>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone Number*
+                </label>
                 <input
                   type="tel"
                   id="phone"
@@ -94,7 +102,12 @@ const AddDriverModal: React.FC<AddDriverModalProps> = ({ isOpen, onClose, onSubm
             <h3 className="text-lg font-medium mb-4">License Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label htmlFor="licenseNumber" className="block text-sm font-medium text-gray-700 mb-1">License Number*</label>
+                <label
+                  htmlFor="licenseNumber"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  License Number*
+                </label>
                 <input
                   type="text"
                   id="licenseNumber"
@@ -106,7 +119,12 @@ const AddDriverModal: React.FC<AddDriverModalProps> = ({ isOpen, onClose, onSubm
                 />
               </div>
               <div>
-                <label htmlFor="licenseExpiry" className="block text-sm font-medium text-gray-700 mb-1">Expiry Date*</label>
+                <label
+                  htmlFor="licenseExpiry"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Expiry Date*
+                </label>
                 <input
                   type="date"
                   id="licenseExpiry"
@@ -118,7 +136,12 @@ const AddDriverModal: React.FC<AddDriverModalProps> = ({ isOpen, onClose, onSubm
                 />
               </div>
               <div>
-                <label htmlFor="licenseClass" className="block text-sm font-medium text-gray-700 mb-1">License Class*</label>
+                <label
+                  htmlFor="licenseClass"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  License Class*
+                </label>
                 <select
                   id="licenseClass"
                   name="licenseClass"
@@ -139,15 +162,15 @@ const AddDriverModal: React.FC<AddDriverModalProps> = ({ isOpen, onClose, onSubm
           </div>
 
           <div className="flex justify-end space-x-3">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={onClose}
               className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200"
             >
               Cancel
             </button>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
               Save Driver

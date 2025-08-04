@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import Modal from '../../ui/Modal';
-import TripForm from '../../forms/TripForm';
-import { Trip } from '../../../types';
-import { useAppContext } from '../../../context/AppContext';
-import { AlertTriangle } from 'lucide-react';
-
+import React, { useState } from "react";
+import Modal from "../../ui/modal";
+import TripForm from "../../forms/TripForm";
+import { Trip } from "../../../types";
+import { useAppContext } from "../../../context/AppContext";
+import { AlertTriangle } from "lucide-react";
 
 interface TripFormModalProps {
   isOpen: boolean;
@@ -16,37 +15,39 @@ const TripFormModal: React.FC<TripFormModalProps> = ({ isOpen, onClose, editingT
   const { addTrip, updateTrip, isLoading } = useAppContext();
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (tripData: Omit<Trip, 'id' | 'costs' | 'status' | 'additionalCosts'>) => {
+  const handleSubmit = async (
+    tripData: Omit<Trip, "id" | "costs" | "status" | "additionalCosts">
+  ) => {
     try {
       setError(null);
       if (editingTrip) {
         // Update existing trip
         await updateTrip({
           ...editingTrip,
-          ...tripData
+          ...tripData,
         });
-        console.log('Trip updated successfully');
+        console.log("Trip updated successfully");
       } else {
         // Add new trip
         await addTrip({
           ...tripData,
-          additionalCosts: [] // Initialize additionalCosts as empty array
+          additionalCosts: [], // Initialize additionalCosts as empty array
         });
-        console.log('Trip added successfully');
+        console.log("Trip added successfully");
       }
       // Close the modal after successful submission
       onClose();
     } catch (error) {
-      console.error('Error saving trip:', error);
-      setError(error instanceof Error ? error.message : 'Failed to save trip. Please try again.');
+      console.error("Error saving trip:", error);
+      setError(error instanceof Error ? error.message : "Failed to save trip. Please try again.");
     }
   };
 
   return (
-    <Modal 
-      isOpen={isOpen} 
+    <Modal
+      isOpen={isOpen}
       onClose={onClose}
-      title={editingTrip ? 'Edit Trip' : 'Add New Trip'}
+      title={editingTrip ? "Edit Trip" : "Add New Trip"}
       maxWidth="lg"
     >
       {error && (

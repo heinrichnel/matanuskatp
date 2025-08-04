@@ -1,27 +1,20 @@
 // ─── React ───────────────────────────────────────────────────────
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────
-import { CostEntry } from '../../../types';
+import { CostEntry } from "../../../types";
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from '../../ui/Modal';
-import Button from '../../ui/Button';
-import { Input, TextArea } from '../../ui/FormElements';
-import { FileUpload } from '../../ui/FormElements';
+import Modal from "../../ui/modal";
+import Button from "../../ui/Button";
+import { Input, TextArea } from "../../ui/FormElements";
+import { FileUpload } from "../../ui/FormElements";
 
 // ─── Icons ───────────────────────────────────────────────────────
-import {
-  X,
-  Upload,
-  CheckCircle,
-  AlertTriangle,
-  FileText
-} from 'lucide-react';
+import { X, Upload, CheckCircle, AlertTriangle, FileText } from "lucide-react";
 
 // ─── Utilities ───────────────────────────────────────────────────
-import { formatCurrency, formatDate } from '../../../utils/helpers';
-
+import { formatCurrency, formatDate } from "../../../utils/helpers";
 
 interface FlagResolutionModalProps {
   isOpen: boolean;
@@ -34,12 +27,12 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
   isOpen,
   cost,
   onClose,
-  onResolve
+  onResolve,
 }) => {
   const [formData, setFormData] = useState({
-    amount: '',
-    notes: '',
-    resolutionComment: ''
+    amount: "",
+    notes: "",
+    resolutionComment: "",
   });
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -49,8 +42,8 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
     if (cost) {
       setFormData({
         amount: cost.amount.toString(),
-        notes: cost.notes || '',
-        resolutionComment: ''
+        notes: cost.notes || "",
+        resolutionComment: "",
       });
       setSelectedFiles(null);
       setErrors({});
@@ -58,9 +51,9 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
   }, [cost]);
 
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
@@ -68,13 +61,13 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (!formData.amount || isNaN(Number(formData.amount))) {
-      newErrors.amount = 'Amount must be a valid number';
+      newErrors.amount = "Amount must be a valid number";
     }
     if (Number(formData.amount) <= 0) {
-      newErrors.amount = 'Amount must be greater than 0';
+      newErrors.amount = "Amount must be greater than 0";
     }
     if (!formData.resolutionComment.trim()) {
-      newErrors.resolutionComment = 'Resolution comment is required for audit purposes';
+      newErrors.resolutionComment = "Resolution comment is required for audit purposes";
     }
 
     setErrors(newErrors);
@@ -95,7 +88,7 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
             fileUrl: URL.createObjectURL(file), // TODO: Replace with actual upload URL
             fileType: file.type,
             fileSize: file.size,
-            uploadedAt: new Date().toISOString()
+            uploadedAt: new Date().toISOString(),
           }))
         : [];
 
@@ -104,25 +97,25 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
         amount: Number(formData.amount),
         notes: formData.notes,
         attachments: [...cost.attachments, ...newAttachments],
-        investigationStatus: 'resolved',
+        investigationStatus: "resolved",
         investigationNotes: cost.investigationNotes
           ? `${cost.investigationNotes}\n\nResolution: ${formData.resolutionComment}`
           : `Resolution: ${formData.resolutionComment}`,
         resolvedAt: new Date().toISOString(),
-        resolvedBy: 'Current User' // Replace with actual user context
+        resolvedBy: "Current User", // Replace with actual user context
       };
 
       onResolve(updatedCost, formData.resolutionComment);
     } catch (error) {
-      console.error('Error resolving flag:', error);
-      alert(`Error resolving flag: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("Error resolving flag:", error);
+      alert(`Error resolving flag: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleClose = () => {
-    setFormData({ amount: '', notes: '', resolutionComment: '' });
+    setFormData({ amount: "", notes: "", resolutionComment: "" });
     setSelectedFiles(null);
     setErrors({});
     onClose();
@@ -131,7 +124,7 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
   if (!cost) return null;
 
   const hasAmountChange = Number(formData.amount) !== cost.amount;
-  const hasNotesChange = formData.notes !== (cost.notes || '');
+  const hasNotesChange = formData.notes !== (cost.notes || "");
   const hasFileUpload = selectedFiles && selectedFiles.length > 0;
 
   return (
@@ -156,8 +149,16 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
                 <p>
                   <strong>Reference:</strong> {cost.referenceNumber}
                 </p>
-                {cost.flagReason && <p><strong>Flag Reason:</strong> {cost.flagReason}</p>}
-                {cost.noDocumentReason && <p><strong>Missing Document Reason:</strong> {cost.noDocumentReason}</p>}
+                {cost.flagReason && (
+                  <p>
+                    <strong>Flag Reason:</strong> {cost.flagReason}
+                  </p>
+                )}
+                {cost.noDocumentReason && (
+                  <p>
+                    <strong>Missing Document Reason:</strong> {cost.noDocumentReason}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -173,7 +174,11 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
                   <FileText className="w-4 h-4 text-gray-500" />
                   <span className="text-gray-700">{attachment.filename}</span>
                   <span className="text-gray-500">
-                    ({attachment.fileSize ? `${(attachment.fileSize / 1024).toFixed(1)} KB` : 'Unknown size'})
+                    (
+                    {attachment.fileSize
+                      ? `${(attachment.fileSize / 1024).toFixed(1)} KB`
+                      : "Unknown size"}
+                    )
                   </span>
                 </div>
               ))}
@@ -193,16 +198,18 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
               step="0.01"
               min="0.01"
               value={formData.amount}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('amount', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange("amount", e.target.value)
+              }
               error={errors.amount}
             />
             {hasAmountChange && (
               <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded text-sm">
                 <p className="text-blue-800">
-                  <strong>Amount Change:</strong> {formatCurrency(cost.amount, cost.currency)} →{' '}
+                  <strong>Amount Change:</strong> {formatCurrency(cost.amount, cost.currency)} →{" "}
                   {formatCurrency(Number(formData.amount) || 0, cost.currency)}
                   <span className="ml-2">
-                    {(Number(formData.amount) || 0) > cost.amount ? '+' : ''}
+                    {(Number(formData.amount) || 0) > cost.amount ? "+" : ""}
                     {formatCurrency((Number(formData.amount) || 0) - cost.amount, cost.currency)}
                   </span>
                 </p>
@@ -215,7 +222,9 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
             <TextArea
               label="Updated Notes"
               value={formData.notes}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange('notes', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                handleChange("notes", e.target.value)
+              }
               placeholder="Add or update notes for this cost entry..."
               rows={3}
             />
@@ -256,7 +265,9 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
             <TextArea
               label="Resolution Comment (Required) *"
               value={formData.resolutionComment}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => handleChange('resolutionComment', e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                handleChange("resolutionComment", e.target.value)
+              }
               placeholder="Explain what was corrected and why..."
               rows={3}
               error={errors.resolutionComment}
@@ -272,7 +283,10 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
           <h4 className="text-sm font-medium text-green-800 mb-2">Resolution Summary</h4>
           <div className="text-sm text-green-700 space-y-1">
             {hasAmountChange && (
-              <p>• Amount will be corrected from {formatCurrency(cost.amount, cost.currency)} to {formatCurrency(Number(formData.amount) || 0, cost.currency)}</p>
+              <p>
+                • Amount will be corrected from {formatCurrency(cost.amount, cost.currency)} to{" "}
+                {formatCurrency(Number(formData.amount) || 0, cost.currency)}
+              </p>
             )}
             {hasNotesChange && <p>• Notes will be updated</p>}
             {hasFileUpload && <p>• {selectedFiles!.length} document(s) will be uploaded</p>}
@@ -282,9 +296,7 @@ const FlagResolutionModal: React.FC<FlagResolutionModalProps> = ({
         </div>
 
         {errors.general && (
-          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">
-            {errors.general}
-          </div>
+          <div className="text-sm text-red-600 bg-red-50 p-3 rounded-md">{errors.general}</div>
         )}
 
         {/* Actions */}

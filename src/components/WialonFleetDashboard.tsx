@@ -1,10 +1,10 @@
 import React from "react";
 import { useWialon, useWialonUnitPosition } from "../hooks/useWialon";
 
-// Icon components for better visual appeal
+// Icon components for better visual appeal with className support
 const Icons = {
-  Truck: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Truck: ({ className = "" }: { className?: string }) => (
+    <svg className={`w-5 h-5 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -13,8 +13,8 @@ const Icons = {
       />
     </svg>
   ),
-  Location: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Location: ({ className = "" }: { className?: string }) => (
+    <svg className={`w-5 h-5 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -29,8 +29,8 @@ const Icons = {
       />
     </svg>
   ),
-  Gauge: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Gauge: ({ className = "" }: { className?: string }) => (
+    <svg className={`w-5 h-5 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -39,8 +39,8 @@ const Icons = {
       />
     </svg>
   ),
-  Refresh: () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Refresh: ({ className = "" }: { className?: string }) => (
+    <svg className={`w-4 h-4 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -49,8 +49,8 @@ const Icons = {
       />
     </svg>
   ),
-  Satellite: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Satellite: ({ className = "" }: { className?: string }) => (
+    <svg className={`w-5 h-5 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -59,8 +59,8 @@ const Icons = {
       />
     </svg>
   ),
-  Speed: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Speed: ({ className = "" }: { className?: string }) => (
+    <svg className={`w-5 h-5 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -69,8 +69,8 @@ const Icons = {
       />
     </svg>
   ),
-  Compass: () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Compass: ({ className = "" }: { className?: string }) => (
+    <svg className={`w-5 h-5 ${className}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -166,125 +166,165 @@ const WialonFleetDashboard: React.FC = () => {
   const sensors = selectedUnitId ? getSensors(selectedUnitId) : [];
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-4">
+    <div className="p-6 space-y-8">
+      <div className="card-enhanced">
+        <div className="card-header-enhanced flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Fleet Dashboard</h2>
           <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-sm text-gray-600">Connected ({units.length} units)</span>
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium" style={{ color: "hsl(var(--primary))" }}>
+              Connected ({units.length} units)
+            </span>
           </div>
         </div>
-
-        {/* Unit Selector */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Select Unit:</label>
-          <select
-            value={selectedUnitId || ""}
-            onChange={(e) => setSelectedUnitId(Number(e.target.value) || null)}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Select a unit...</option>
-            {units.map((unit) => (
-              <option key={unit.getId?.()} value={unit.getId?.()}>
-                {unit.getName?.()} (ID: {unit.getId?.()})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Selected Unit Details */}
-        {selectedUnit && position && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Unit Information</h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Name:</span>
-                  <span className="font-medium">{position.name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">ID:</span>
-                  <span className="font-medium">{position.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Last Update:</span>
-                  <span className="font-medium">
-                    {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : "N/A"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Position</h3>
-              {position.position ? (
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Latitude:</span>
-                    <span className="font-medium">{position.position.latitude.toFixed(6)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Longitude:</span>
-                    <span className="font-medium">{position.position.longitude.toFixed(6)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Speed:</span>
-                    <span className="font-medium">{position.position.speed} km/h</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Course:</span>
-                    <span className="font-medium">{position.position.course}°</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Satellites:</span>
-                    <span className="font-medium">{position.position.satellites}</span>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-gray-500">No position data available</p>
-              )}
-              <button
-                onClick={refreshPosition}
-                className="mt-3 w-full bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
-              >
-                Refresh Position
-              </button>
-            </div>
+        <div className="card-content-enhanced">
+          {/* Unit Selector */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2" style={{ color: "hsl(var(--primary))" }}>Select Unit:</label>
+            <select
+              value={selectedUnitId || ""}
+              onChange={(e) => setSelectedUnitId(Number(e.target.value) || null)}
+              className="block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none"
+              style={{ 
+                borderColor: "hsl(var(--border))", 
+                boxShadow: "var(--shadow-sm)",
+                color: "hsl(var(--foreground))",
+                backgroundColor: "hsl(var(--card))"
+              }}
+            >
+              <option value="">Select a unit...</option>
+              {units.map((unit) => (
+                <option key={unit.getId?.()} value={unit.getId?.()}>
+                  {unit.getName?.()} (ID: {unit.getId?.()})
+                </option>
+              ))}
+            </select>
           </div>
-        )}
 
-        {/* Sensors */}
-        {selectedUnitId && sensors.length > 0 && (
-          <div className="mt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Sensors</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {sensors.slice(0, 6).map((sensor, index) => {
-                const value = getSensorVal(selectedUnitId, sensor.id || index);
-                return (
-                  <div key={sensor.id || index} className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600 truncate">
-                        {sensor.n || `Sensor ${index + 1}`}
+          {/* Selected Unit Details */}
+          {selectedUnit && position && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="card-enhanced">
+                <div className="card-header-enhanced">
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <Icons.Truck />
+                    <span className="ml-2">Unit Information</span>
+                  </h3>
+                </div>
+                <div className="card-content-enhanced">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                      <span style={{ color: "hsl(var(--muted-foreground))" }} className="flex items-center">
+                        <span className="mr-2">Name:</span>
                       </span>
-                      <span className="font-medium text-sm">
-                        {value !== null ? value : "N/A"}
-                        {sensor.m && value !== "N/A" && ` ${sensor.m}`}
+                      <span className="font-medium badge-enhanced badge-info">{position.name}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                      <span style={{ color: "hsl(var(--muted-foreground))" }}>ID:</span>
+                      <span className="font-medium">{position.id}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span style={{ color: "hsl(var(--muted-foreground))" }}>Last Update:</span>
+                      <span className="font-medium">
+                        {lastUpdate ? new Date(lastUpdate).toLocaleTimeString() : "N/A"}
                       </span>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                </div>
+              </div>
 
-        {/* No Units */}
-        {units.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No units available</p>
-          </div>
-        )}
+              <div className="card-enhanced">
+                <div className="card-header-enhanced">
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <Icons.Location />
+                    <span className="ml-2">Position</span>
+                  </h3>
+                </div>
+                <div className="card-content-enhanced">
+                  {position.position ? (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <span style={{ color: "hsl(var(--muted-foreground))" }}>Latitude:</span>
+                        <span className="font-medium">{position.position.latitude.toFixed(6)}</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <span style={{ color: "hsl(var(--muted-foreground))" }}>Longitude:</span>
+                        <span className="font-medium">{position.position.longitude.toFixed(6)}</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <span style={{ color: "hsl(var(--muted-foreground))" }} className="flex items-center">
+                          <Icons.Speed className="mr-1 w-4 h-4" />
+                          <span>Speed:</span>
+                        </span>
+                        <span className="font-medium badge-enhanced badge-success">{position.position.speed} km/h</span>
+                      </div>
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <span style={{ color: "hsl(var(--muted-foreground))" }} className="flex items-center">
+                          <Icons.Compass className="mr-1 w-4 h-4" />
+                          <span>Course:</span>
+                        </span>
+                        <span className="font-medium">{position.position.course}°</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span style={{ color: "hsl(var(--muted-foreground))" }} className="flex items-center">
+                          <Icons.Satellite className="mr-1 w-4 h-4" />
+                          <span>Satellites:</span>
+                        </span>
+                        <span className="font-medium">{position.position.satellites}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p style={{ color: "hsl(var(--muted-foreground))" }}>No position data available</p>
+                  )}
+                  <button
+                    onClick={refreshPosition}
+                    className="btn-enhanced btn-primary-enhanced mt-4 w-full flex items-center justify-center"
+                  >
+                    <Icons.Refresh className="mr-2" />
+                    Refresh Position
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sensors */}
+          {selectedUnitId && sensors.length > 0 && (
+            <div className="mt-6">
+              <div className="card-header-enhanced mb-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <Icons.Gauge />
+                  <span className="ml-2">Sensors</span>
+                </h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {sensors.slice(0, 6).map((sensor, index) => {
+                  const value = getSensorVal(selectedUnitId, sensor.id || index);
+                  return (
+                    <div key={sensor.id || index} className="card-enhanced">
+                      <div className="p-3 flex justify-between items-center">
+                        <span className="text-sm truncate" style={{ color: "hsl(var(--muted-foreground))" }}>
+                          {sensor.n || `Sensor ${index + 1}`}
+                        </span>
+                        <span className="font-medium text-sm badge-enhanced badge-info">
+                          {value !== null ? value : "N/A"}
+                          {sensor.m && value !== "N/A" && ` ${sensor.m}`}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* No Units */}
+          {units.length === 0 && (
+            <div className="text-center py-8 card-enhanced p-6">
+              <p style={{ color: "hsl(var(--muted-foreground))" }}>No units available</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

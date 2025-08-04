@@ -1,10 +1,10 @@
 // ─── React & Context ─────────────────────────────────────────────
-import React, { useState } from 'react';
-import { useAppContext } from '../../../context/AppContext';
+import React, { useState } from "react";
+import { useAppContext } from "../../../context/AppContext";
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from '../../ui/Modal';
-import Button from '../../ui/Button';
+import Modal from "../../ui/modal";
+import Button from "../../ui/Button";
 
 // ─── Icons ───────────────────────────────────────────────────────
 import {
@@ -15,12 +15,11 @@ import {
   CheckCircle,
   Download,
   Wifi,
-  WifiOff
-} from 'lucide-react';
+  WifiOff,
+} from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────
-import { FLEETS_WITH_PROBES, DieselConsumptionRecord } from '../../../types';
-
+import { FLEETS_WITH_PROBES, DieselConsumptionRecord } from "../../../types";
 
 interface DieselImportModalProps {
   isOpen: boolean;
@@ -51,15 +50,12 @@ interface ImportedDieselRecord {
   probeDiscrepancy?: number;
 }
 
-const DieselImportModal: React.FC<DieselImportModalProps> = ({
-  isOpen,
-  onClose
-}) => {
+const DieselImportModal: React.FC<DieselImportModalProps> = ({ isOpen, onClose }) => {
   // Removed importDieselRecords, since diesel import is not supported in context
   const { connectionStatus } = useAppContext();
   const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState<string>('');
-  const [success, setSuccess] = useState<string>('');
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
   const [previewData, setPreviewData] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -68,22 +64,22 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
     setFile(selectedFile);
 
     if (selectedFile) {
-      const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase();
-      if (fileExtension !== 'csv') {
-        setError('Only CSV files are allowed.');
+      const fileExtension = selectedFile.name.split(".").pop()?.toLowerCase();
+      if (fileExtension !== "csv") {
+        setError("Only CSV files are allowed.");
         setFile(null);
         setPreviewData([]);
       } else {
-        setError('');
-        
+        setError("");
+
         // Generate preview
         try {
           const text = await selectedFile.text();
           const data = parseCSV(text);
           setPreviewData(data.slice(0, 3)); // Show first 3 rows
         } catch (error) {
-          console.error('Failed to parse CSV for preview:', error);
-          setError('Failed to parse CSV file. Please check the format.');
+          console.error("Failed to parse CSV for preview:", error);
+          setError("Failed to parse CSV file. Please check the format.");
         }
       }
     } else {
@@ -92,76 +88,87 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
   };
 
   const parseCSV = (text: string) => {
-    const lines = text.split('\n');
-    const headers = lines[0].split(',').map(h => h.trim());
+    const lines = text.split("\n");
+    const headers = lines[0].split(",").map((h) => h.trim());
     const data: any[] = [];
-    
+
     for (let i = 1; i < lines.length; i++) {
       if (lines[i].trim()) {
-        const values = lines[i].split(',').map(v => v.trim());
+        const values = lines[i].split(",").map((v) => v.trim());
         const row: any = {};
         headers.forEach((header, index) => {
-          row[header] = values[index] || '';
+          row[header] = values[index] || "";
         });
         data.push(row);
       }
     }
-    
+
     return data;
   };
 
   const handleUpload = async () => {
     if (!file) return;
-    
+
     setIsProcessing(true);
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
       const text = await file.text();
       const data = parseCSV(text);
-      
+
       // Convert to diesel records
       const dieselRecords: ImportedDieselRecord[] = data.map((row: any) => {
-        const isReeferUnit = row.isReeferUnit === 'true' || row.isReeferUnit === true || ['4F', '5F', '6F', '7F', '8F'].includes(row.fleetNumber);
-        
+        const isReeferUnit =
+          row.isReeferUnit === "true" ||
+          row.isReeferUnit === true ||
+          ["4F", "5F", "6F", "7F", "8F"].includes(row.fleetNumber);
+
         return {
           id: `diesel-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-          fleetNumber: row.fleetNumber || '',
-          date: row.date || new Date().toISOString().split('T')[0],
-          kmReading: isReeferUnit ? 0 : parseFloat(row.kmReading || '0'),
-          previousKmReading: isReeferUnit ? undefined : (row.previousKmReading ? parseFloat(row.previousKmReading) : undefined),
-          litresFilled: parseFloat(row.litresFilled || '0'),
+          fleetNumber: row.fleetNumber || "",
+          date: row.date || new Date().toISOString().split("T")[0],
+          kmReading: isReeferUnit ? 0 : parseFloat(row.kmReading || "0"),
+          previousKmReading: isReeferUnit
+            ? undefined
+            : row.previousKmReading
+              ? parseFloat(row.previousKmReading)
+              : undefined,
+          litresFilled: parseFloat(row.litresFilled || "0"),
           costPerLitre: row.costPerLitre ? parseFloat(row.costPerLitre) : undefined,
-          totalCost: parseFloat(row.totalCost || '0'),
-          fuelStation: row.fuelStation || '',
-          driverName: row.driverName || '',
-          notes: row.notes || '',
-          currency: row.currency || 'ZAR',
-          probeReading: FLEETS_WITH_PROBES.includes(row.fleetNumber) && row.probeReading ? parseFloat(row.probeReading) : undefined,
+          totalCost: parseFloat(row.totalCost || "0"),
+          fuelStation: row.fuelStation || "",
+          driverName: row.driverName || "",
+          notes: row.notes || "",
+          currency: row.currency || "ZAR",
+          probeReading:
+            FLEETS_WITH_PROBES.includes(row.fleetNumber) && row.probeReading
+              ? parseFloat(row.probeReading)
+              : undefined,
           isReeferUnit,
-          hoursOperated: isReeferUnit && row.hoursOperated ? parseFloat(row.hoursOperated) : undefined
+          hoursOperated:
+            isReeferUnit && row.hoursOperated ? parseFloat(row.hoursOperated) : undefined,
           // Derived fields will be added below
         };
       });
 
       // Calculate derived values
-      dieselRecords.forEach(record => {
+      dieselRecords.forEach((record) => {
         // Skip distance calculations for reefer units
         if (!record.isReeferUnit) {
           if (record.previousKmReading !== undefined && record.kmReading) {
             record.distanceTravelled = record.kmReading - record.previousKmReading;
           }
-          
+
           if (record.distanceTravelled && record.litresFilled) {
             record.kmPerLitre = record.distanceTravelled / record.litresFilled;
           }
         }
-        
+
         if (!record.costPerLitre && record.totalCost && record.litresFilled) {
           record.costPerLitre = record.totalCost / record.litresFilled;
         }
-        
+
         if (record.probeReading !== undefined) {
           record.probeDiscrepancy = record.litresFilled - record.probeReading;
         }
@@ -169,8 +176,8 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
 
       // Create FormData for upload
       const formData = new FormData();
-      formData.append('records', JSON.stringify(dieselRecords));
-      
+      formData.append("records", JSON.stringify(dieselRecords));
+
       // TODO: The `importDieselRecords` function from AppContext was removed.
       // You need to implement the actual upload logic here, for example,
       // by calling a Firebase Function with the `formData`.
@@ -180,14 +187,14 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
       setSuccess(`Successfully imported ${dieselRecords.length} diesel records.`);
       setFile(null);
       setPreviewData([]);
-      
+
       // Close modal after a short delay
       setTimeout(() => {
         onClose();
       }, 2000);
     } catch (err) {
-      console.error('Failed to import diesel records:', err);
-      setError('Error importing records. Please check the file format and try again.');
+      console.error("Failed to import diesel records:", err);
+      setError("Error importing records. Please check the file format and try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -210,28 +217,24 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Import Diesel Records"
-      maxWidth="md"
-    >
+    <Modal isOpen={isOpen} onClose={onClose} title="Import Diesel Records" maxWidth="md">
       <div className="space-y-6">
         {/* Connection Status Warning */}
-        {connectionStatus !== 'connected' && (
+        {connectionStatus !== "connected" && (
           <div className="bg-amber-50 border border-amber-200 rounded-md p-4">
             <div className="flex items-start space-x-3">
-              {connectionStatus === 'disconnected' ? (
+              {connectionStatus === "disconnected" ? (
                 <WifiOff className="w-5 h-5 text-amber-600 mt-0.5" />
               ) : (
                 <Wifi className="w-5 h-5 text-amber-600 mt-0.5" />
               )}
               <div>
                 <h4 className="text-sm font-medium text-amber-800">
-                  {connectionStatus === 'disconnected' ? 'Working Offline' : 'Reconnecting...'}
+                  {connectionStatus === "disconnected" ? "Working Offline" : "Reconnecting..."}
                 </h4>
                 <p className="text-sm text-amber-700 mt-1">
-                  You can still import diesel records while offline. Your data will be stored locally and synced with the server when your connection is restored.
+                  You can still import diesel records while offline. Your data will be stored
+                  locally and synced with the server when your connection is restored.
                 </p>
               </div>
             </div>
@@ -281,15 +284,14 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
             <Upload className="w-6 h-6 text-gray-500 mr-3" />
             <div className="flex-1">
               <p className="text-sm text-gray-700">
-                Select a CSV file containing your diesel records. The first row should contain column headers.
+                Select a CSV file containing your diesel records. The first row should contain
+                column headers.
               </p>
             </div>
           </div>
 
           <div className="flex flex-col space-y-2">
-            <label className="text-sm font-medium text-gray-700">
-              Select CSV File
-            </label>
+            <label className="text-sm font-medium text-gray-700">Select CSV File</label>
             <input
               type="file"
               accept=".csv"
@@ -313,16 +315,23 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
           {/* Data Preview */}
           {previewData.length > 0 && (
             <div className="mt-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Data Preview (First 3 rows):</h4>
+              <h4 className="text-sm font-medium text-gray-700 mb-2">
+                Data Preview (First 3 rows):
+              </h4>
               <div className="bg-gray-50 p-3 rounded border overflow-x-auto">
                 <table className="min-w-full text-xs">
                   <thead>
                     <tr className="border-b">
-                      {Object.keys(previewData[0]).slice(0, 6).map((header) => (
-                        <th key={header} className="px-2 py-1 text-left font-medium text-gray-700">
-                          {header}
-                        </th>
-                      ))}
+                      {Object.keys(previewData[0])
+                        .slice(0, 6)
+                        .map((header) => (
+                          <th
+                            key={header}
+                            className="px-2 py-1 text-left font-medium text-gray-700"
+                          >
+                            {header}
+                          </th>
+                        ))}
                       {Object.keys(previewData[0]).length > 6 && (
                         <th className="px-2 py-1 text-left font-medium text-gray-700">...</th>
                       )}
@@ -331,11 +340,13 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
                   <tbody>
                     {previewData.map((row, rowIndex) => (
                       <tr key={rowIndex} className="border-b">
-                        {Object.entries(row).slice(0, 6).map(([, value], colIndex) => (
-                          <td key={`${rowIndex}-${colIndex}`} className="px-2 py-1 text-gray-600">
-                            {String(value)}
-                          </td>
-                        ))}
+                        {Object.entries(row)
+                          .slice(0, 6)
+                          .map(([, value], colIndex) => (
+                            <td key={`${rowIndex}-${colIndex}`} className="px-2 py-1 text-gray-600">
+                              {String(value)}
+                            </td>
+                          ))}
                         {Object.keys(row).length > 6 && (
                           <td className="px-2 py-1 text-gray-600">...</td>
                         )}
@@ -362,7 +373,7 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({
               isLoading={isProcessing}
               icon={<Upload className="w-4 h-4" />}
             >
-              {isProcessing ? 'Importing...' : 'Upload and Import'}
+              {isProcessing ? "Importing..." : "Upload and Import"}
             </Button>
           </div>
         </div>
