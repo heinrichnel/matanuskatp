@@ -25,9 +25,7 @@ The application uses a modern app shell layout with these key components:
     </aside>
 
     {/* Main content area */}
-    <main className="flex-1 p-8">
-      {/* Page content */}
-    </main>
+    <main className="flex-1 p-8">{/* Page content */}</main>
   </div>
 </div>
 ```
@@ -44,17 +42,13 @@ Each page should follow this basic structure:
       <h1 className="text-2xl font-bold">Page Title</h1>
       <p className="text-sm text-gray-500">Page subtitle or description</p>
     </div>
-    <div className="flex items-center gap-2">
-      {/* Action buttons */}
-    </div>
+    <div className="flex items-center gap-2">{/* Action buttons */}</div>
   </div>
-  
+
   {/* Content sections */}
   <Card>
     <CardHeader heading="Section Title" />
-    <CardContent>
-      {/* Section content */}
-    </CardContent>
+    <CardContent>{/* Section content */}</CardContent>
   </Card>
 </div>
 ```
@@ -69,17 +63,10 @@ Use the Card component family for all content sections:
 import { Card, CardHeader, CardContent, CardFooter } from "../ui/Card";
 
 <Card className="border border-gray-200">
-  <CardHeader 
-    heading="Section Title" 
-    subtitle="Optional section description" 
-  />
-  <CardContent>
-    {/* Content goes here */}
-  </CardContent>
-  <CardFooter>
-    {/* Optional footer actions */}
-  </CardFooter>
-</Card>
+  <CardHeader heading="Section Title" subtitle="Optional section description" />
+  <CardContent>{/* Content goes here */}</CardContent>
+  <CardFooter>{/* Optional footer actions */}</CardFooter>
+</Card>;
 ```
 
 ### Filter Controls
@@ -98,11 +85,11 @@ const [filterOptions, setFilterOptions] = useState([
 
 // Render:
 <>
-  <FilterButton 
+  <FilterButton
     isExpanded={isFilterExpanded}
-    onClick={() => setIsFilterExpanded(!isFilterExpanded)} 
+    onClick={() => setIsFilterExpanded(!isFilterExpanded)}
   />
-  
+
   {isFilterExpanded && (
     <FilterControls
       title="Filters"
@@ -112,7 +99,7 @@ const [filterOptions, setFilterOptions] = useState([
       onClose={() => setIsFilterExpanded(false)}
     />
   )}
-</>
+</>;
 ```
 
 ## Grid Layouts
@@ -120,15 +107,17 @@ const [filterOptions, setFilterOptions] = useState([
 Use responsive grid layouts for arranging content:
 
 ```tsx
-{/* For cards/widgets */}
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {/* Cards go here */}
-</div>
+{
+  /* For cards/widgets */
+}
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">{/* Cards go here */}</div>;
 
-{/* For stats/small info cards */}
+{
+  /* For stats/small info cards */
+}
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
   {/* Stats cards go here */}
-</div>
+</div>;
 ```
 
 ## Typography
@@ -151,6 +140,7 @@ Use consistent button styles:
 - Danger action: `px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg`
 
 For icon buttons:
+
 ```tsx
 <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
   <IconComponent size={16} />
@@ -200,12 +190,17 @@ Use this structure for data tables:
 Use consistent status indicators:
 
 ```tsx
-<span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-  status === 'Active' ? 'bg-green-100 text-green-800' : 
-  status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-  status === 'Error' ? 'bg-red-100 text-red-800' :
-  'bg-gray-100 text-gray-800'
-}`}>
+<span
+  className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+    status === "Active"
+      ? "bg-green-100 text-green-800"
+      : status === "Pending"
+        ? "bg-yellow-100 text-yellow-800"
+        : status === "Error"
+          ? "bg-red-100 text-red-800"
+          : "bg-gray-100 text-gray-800"
+  }`}
+>
   {status}
 </span>
 ```

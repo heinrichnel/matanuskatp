@@ -1,11 +1,5 @@
-import React from "react";
-import { Filter, Calendar } from "lucide-react";
-import { 
-  Card, 
-  CardHeader, 
-  CardContent, 
-  CardFooter 
-} from "./Card";
+import { Calendar, Filter } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader } from "./Card";
 
 export interface FilterOption {
   id: string;
@@ -32,7 +26,7 @@ interface FilterControlsProps {
 
 /**
  * FilterControls
- * 
+ *
  * A reusable component for filter controls that can be used across the application
  * for consistent UI and behavior.
  */
@@ -51,7 +45,7 @@ export function FilterControls({
     <Card className={`border border-gray-200 ${className}`}>
       <CardHeader heading={title} subtitle={subtitle}>
         {onClose && (
-          <button 
+          <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
             aria-label="Close filters"
@@ -60,14 +54,14 @@ export function FilterControls({
           </button>
         )}
       </CardHeader>
-      
+
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filterOptions.length > 0 && (
             <div className="space-y-4">
               <h3 className="text-sm font-medium text-gray-500 uppercase">Metrics</h3>
               <div className="space-y-2">
-                {filterOptions.map(option => (
+                {filterOptions.map((option) => (
                   <label key={option.id} className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
@@ -81,7 +75,7 @@ export function FilterControls({
               </div>
             </div>
           )}
-          
+
           {dateRange && onDateRangeChange && (
             <div>
               <h3 className="text-sm font-medium text-gray-500 uppercase mb-4">Date Range</h3>
@@ -104,9 +98,9 @@ export function FilterControls({
                     ))}
                   </select>
                 </div>
-                
+
                 <span className="text-gray-500">to</span>
-                
+
                 <select
                   className="border rounded-md p-2"
                   value={dateRange.end.getMonth()}
@@ -127,18 +121,18 @@ export function FilterControls({
           )}
         </div>
       </CardContent>
-      
+
       {onApply && (
         <CardFooter className="justify-end">
           {onClose && (
-            <button 
+            <button
               className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md mr-2"
               onClick={onClose}
             >
               Cancel
             </button>
           )}
-          <button 
+          <button
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
             onClick={onApply}
           >
@@ -152,13 +146,13 @@ export function FilterControls({
 
 /**
  * FilterButton
- * 
+ *
  * A button component for toggling filter visibility
  */
-export function FilterButton({ 
-  isExpanded, 
-  onClick, 
-  className = "" 
+export function FilterButton({
+  isExpanded,
+  onClick,
+  className = "",
 }: {
   isExpanded: boolean;
   onClick: () => void;

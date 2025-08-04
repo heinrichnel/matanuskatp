@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronRight, Users, X } from "lucide-react";
-import React, { FC, useState, useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { SidebarItem, sidebarConfig } from "../../sidebarConfig";
 import ConnectionStatusIndicator from "../ui/ConnectionStatusIndicator";
 import SyncIndicator from "../ui/SyncIndicator";
@@ -74,7 +74,7 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate, isOpen, onClose })
                       : "text-gray-700 hover:bg-gray-50"
                   }`}
                   onClick={() => toggleExpand(item.id)}
-                  aria-expanded={isExpanded ? true : false}
+                  aria-expanded={Boolean(isExpanded)}
                   aria-controls={`submenu-${item.id}`}
                 >
                   <div className="flex items-center gap-3 flex-grow text-left">
