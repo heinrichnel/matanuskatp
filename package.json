@@ -248,7 +248,7 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.37.0",
     "unimport": "^5.2.0",
-    "vercel": "^44.6.5",
+    "vercel": "^44.7.0",
     "vite": "^7.0.6",
     "vitest": "^3.2.4"
   },
