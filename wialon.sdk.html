@@ -1,177 +1,376 @@
-// Token for login
-const TOKEN = "c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Wialon Fleet Dashboard</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
 
-// Map and markers
-let map, marker, unitMarkers = {}, markerByUnit = {};
-let areUnitsLoaded = false;
-let currentPos = null, currentUnit = null;
-let isUIActive = true;
+        #sidebar {
+            width: 350px;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+            overflow-y: auto;
+            padding: 15px;
+        }
 
-// Utility: show message
-function msg(text) {
-  const logDiv = document.getElementById('log');
-  if (logDiv) {
-    logDiv.innerHTML = text + '<br/>' + logDiv.innerHTML;
-  } else {
-    console.log(text);
-  }
-}
+        #map-container {
+            flex: 1;
+            height: 100vh;
+        }
 
-// Initialize map
-function initMap() {
-  map = L.map('map', { doubleClickZoom: false }).setView([52.33745, 9.81056], 12);
-  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
+        #map {
+            height: 100%;
+            width: 100%;
+        }
 
-  map.on('dblclick', (e) => {
-    if (!isUIActive) return;
-    document.getElementById('usage-hint').style.display = 'none';
-    findAndShowNearestUnitsByPos({ lat: e.latlng.lat, lon: e.latlng.lng });
-  });
-}
+        .unit-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
 
-// Start session, login, load units
-function start() {
-  const sess = wialon.core.Session.getInstance();
-  sess.initSession("https://hst-api.wialon.com");
-  sess.loginToken(TOKEN, "", (code) => {
-    if (code) {
-      msg(wialon.core.Errors.getErrorText(code));
-      return;
-    }
-    msg("Logged successfully");
-    initMap();
-    init();
-  });
-}
+        .unit-item:hover {
+            background: #e9ecef;
+        }
 
-// Load units and setup UI
-function init() {
-  const sess = wialon.core.Session.getInstance();
-  const flags = wialon.item.Item.dataFlag.base | wialon.item.Unit.dataFlag.sensors | wialon.item.Unit.dataFlag.lastMessage;
-  sess.loadLibrary("itemIcon");
-  sess.updateDataFlags(
-    [{ type: "type", data: "avl_unit", flags, mode: 0 }],
-    (error) => {
-      if (error) {
-        msg(wialon.core.Errors.getErrorText(error));
-        return;
-      }
-      areUnitsLoaded = true;
-      const units = sess.getItems("avl_unit");
-      if (!units || units.length === 0) {
-        msg("No units found");
-        return;
-      }
-      // populate units select
-      const unitsSelect = document.getElementById("units");
-      units.forEach(unit => {
-        const option = document.createElement("option");
-        option.value = unit.getId();
-        option.textContent = unit.getName();
-        unitsSelect.appendChild(option);
-      });
-      // Setup change handler
-      document.getElementById("units").addEventListener("change", getSensors);
-      // Optionally, load sensors for first unit
-      // if (units.length > 0) { getSensors(); }
-    }
-  );
-}
+        .unit-title {
+            font-weight: bold;
+            display: block;
+        }
 
-// Get sensors for selected unit
-function getSensors() {
-  const unitId = document.getElementById('units').value;
-  const sensorSelect = document.getElementById('sensors');
-  sensorSelect.innerHTML = '<option></option>';
+        .unit-badge {
+            font-size: 0.8em;
+            padding: 2px 5px;
+            border-radius: 3px;
+            color: white;
+            float: right;
+        }
 
-  if (!unitId) {
-    msg("Select unit");
-    return;
-  }
+        .unit-badge.onroad {
+            background: #28a745;
+        }
 
-  const session = wialon.core.Session.getInstance();
-  const unit = session.getItem(unitId);
-  if (!unit) {
-    msg("Unit not found");
-    return;
-  }
+        .unit-badge.pause {
+            background: #ffc107;
+        }
 
-  const sens = unit.getSensors();
-  for (const key in sens) {
-    if (sens.hasOwnProperty(key)) {
-      const option = document.createElement('option');
-      option.value = sens[key].id;
-      option.textContent = sens[key].n;
-      sensorSelect.appendChild(option);
-    }
-  }
-}
+        .unit-badge.failure {
+            background: #dc3545;
+        }
 
-// Get sensor value
-function getSensorInfo() {
-  const unitId = document.getElementById('units').value;
-  const sensId = document.getElementById('sensors').value;
+        .unit-meta {
+            font-size: 0.8em;
+            color: #6c757d;
+            display: block;
+            margin-top: 3px;
+        }
 
-  if (!unitId) {
-    msg("Select unit");
-    return;
-  }
-  if (!sensId) {
-    return;
-  }
+        #info-panel {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-top: 15px;
+            display: none;
+        }
 
-  const session = wialon.core.Session.getInstance();
-  const unit = session.getItem(unitId);
-  if (!unit) {
-    msg("Unit not found");
-    return;
-  }
+        #panel-unit-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
 
-  const sens = unit.getSensor(sensId);
-  if (!sens) {
-    msg("Sensor not found");
-    return;
-  }
+        #panel-unit-meta {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
 
-  const result = unit.calculateSensorValue(sens, unit.getLastMessage());
-  const displayResult = (result === -348201.3876) ? "N/A" : result;
+        .route-details {
+            margin-top: 10px;
+            font-weight: bold;
+        }
 
-  msg(`Value of ${unit.getName()} <b>'${sens.n}'</b> sensor (${sens.t}): ${displayResult} (${sens.m})`);
-}
+        .timeline {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0 0 0;
+        }
 
-// Find and show nearest units by position
-function findAndShowNearestUnitsByPos(pos) {
-  // store position
-  currentPos = pos;
-  // update marker
-  if (marker) {
-    marker.setLatLng([pos.lat, pos.lon]);
-  } else {
-    marker = L.marker([pos.lat, pos.lon]).addTo(map);
-  }
-  map.setView([pos.lat, pos.lon], 12);
-  // TODO: your logic to find nearest units
-  msg(`Searching nearest units to (${pos.lat}, ${pos.lon})`);
-}
+        .timeline li {
+            margin-bottom: 5px;
+            padding-left: 15px;
+            position: relative;
+        }
 
-// Utility: display position
-function displayPosition(lat, lon) {
-  const latStr = Math.round(lat * 100000) / 100000;
-  const lonStr = Math.round(lon * 100000) / 100000;
-  document.getElementById('latlng').value = latStr + ', ' + lonStr;
-  document.getElementById('latlng').classList.remove('invalid');
-}
+        .timeline li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #007bff;
+        }
 
-// Toggle UI buttons
-function toggleActiveUI(toggle) {
-  isUIActive = toggle;
-  document.getElementById('find-by-location-button').disabled = !toggle;
-  document.getElementById('find-by-unit-button').disabled = !toggle;
-}
+        #log {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 0.9em;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="sidebar">
+        <h2>Fleet Units</h2>
+        <div id="unit-list"></div>
+        <div id="info-panel">
+            <div id="panel-unit-name"></div>
+            <div id="panel-unit-meta"></div>
+            <div id="panel-details"></div>
+        </div>
+        <div id="log"></div>
+    </div>
 
-// DOM ready
-document.addEventListener("DOMContentLoaded", () => {
-  start();
-});
+    <div id="map-container">
+        <div id="map"></div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://hst-api.wialon.com/wsdk/script/wialon.js"></script>
+
+    <script>
+        // Configuration
+        const TOKEN = "c1099bc37c906fd0832d8e783b60ae0dD9D1A721B294486AC08F8AA3ACAC2D2FD45FF053";
+        const WIALON_API_URL = "https://hst-api.wialon.com";
+
+        // Global variables
+        let map;
+        let unitMarkers = {};
+        let currentUnit = null;
+
+        // Utility functions
+        function msg(text) {
+            const timestamp = new Date().toLocaleTimeString();
+            $('#log').prepend(`<div>${timestamp}: ${text}</div>`);
+        }
+
+        // Map initialization
+        function initMap() {
+            map = L.map('map', {
+                center: [-26.21, 28.04],
+                zoom: 11
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+
+        // Unit list rendering
+        function renderUnitsList() {
+            const session = wialon.core.Session.getInstance();
+            const units = session.getItems('avl_unit');
+            const $unitList = $('#unit-list');
+            $unitList.empty(); // Clear old list
+
+            units.forEach(unit => {
+                const $item = $('<div>').addClass('unit-item').attr('data-id', unit.getId());
+                const name = unit.getName();
+                const uid = unit.getUniqueId();
+                const pos = unit.getPosition();
+
+                const status = pos ? (pos.s > 5 ? 'onroad' : 'pause') : 'failure';
+                const statusText = pos ? (pos.s > 5 ? 'On Road' : 'Parked') : 'Offline';
+
+                $item.html(`
+                    <span class="unit-title">${name} <span class="unit-badge ${status}">${statusText}</span></span>
+                    <span class="unit-meta">UID: ${uid}</span>
+                `);
+
+                // Add click handler
+                $item.click(() => {
+                    currentUnit = unit;
+                    focusMapOnUnit(unit);
+                    showUnitDetails(unit);
+                    highlightUnitMarker(unit);
+                });
+
+                $unitList.append($item);
+            });
+        }
+
+        function renderUnitMarkers() {
+            const session = wialon.core.Session.getInstance();
+            const units = session.getItems('avl_unit');
+
+            // Clear existing markers
+            Object.values(unitMarkers).forEach(marker => map.removeLayer(marker));
+            unitMarkers = {};
+
+            units.forEach(unit => {
+                const unitMarker = getUnitMarker(unit);
+                if (unitMarker) {
+                    unitMarker.addTo(map);
+                    unitMarkers[unit.getId()] = unitMarker;
+                }
+            });
+        }
+
+        function getUnitMarker(unit) {
+            const unitPos = unit.getPosition();
+            if (!unitPos) return null;
+
+            const marker = L.marker([unitPos.y, unitPos.x], {
+                icon: L.icon({
+                    iconUrl: unit.getIconUrl(32),
+                    iconAnchor: [16, 16]
+                })
+            });
+
+            marker.bindPopup(`
+                <b>${unit.getName()}</b><br>
+                Speed: ${unitPos.s} km/h<br>
+                Last update: ${wialon.util.DateTime.formatTime(unitPos.t)}
+            `);
+
+            marker.on('click', () => {
+                currentUnit = unit;
+                showUnitDetails(unit);
+                highlightUnitMarker(unit);
+            });
+
+            return marker;
+        }
+
+        function highlightUnitMarker(unit) {
+            // Reset all markers to default
+            Object.values(unitMarkers).forEach(marker => {
+                marker.setZIndexOffset(0);
+            });
+
+            // Highlight the selected unit's marker
+            if (unitMarkers[unit.getId()]) {
+                unitMarkers[unit.getId()].setZIndexOffset(1000);
+                unitMarkers[unit.getId()].openPopup();
+            }
+        }
+
+        function focusMapOnUnit(unit) {
+            const pos = unit.getPosition();
+            if (pos) {
+                map.setView([pos.y, pos.x], 15, {
+                    animate: true,
+                    duration: 0.5
+                });
+            }
+        }
+
+        function showUnitDetails(unit) {
+            const $panel = $('#info-panel');
+            const $name = $('#panel-unit-name');
+            const $meta = $('#panel-unit-meta');
+            const $details = $('#panel-details');
+
+            $name.text(unit.getName());
+            $meta.text(`UID: ${unit.getUniqueId()}`);
+
+            let detailsHtml = `
+                <div class="route-details"><b>Last Position:</b></div>
+                <ul class="timeline">
+                    <li><b>Speed:</b> ${unit.getPosition()?.s || 'N/A'} km/h</li>
+                    <li><b>Time:</b> ${unit.getPosition() ? wialon.util.DateTime.formatTime(unit.getPosition().t) : 'N/A'}</li>
+                    <li><b>Registration:</b> ${unit.getCustomProperty('registration_plate') || 'N/A'}</li>
+                </ul>
+            `;
+            $details.html(detailsHtml);
+
+            $panel.show();
+        }
+
+        function initWialonData() {
+            const session = wialon.core.Session.getInstance();
+
+            // Load required libraries
+            session.loadLibrary('itemIcon');
+
+            // Update data flags for units
+            session.updateDataFlags(
+                [{
+                    type: 'type',
+                    data: 'avl_unit',
+                    flags: wialon.item.Item.dataFlag.base |
+                           wialon.item.Unit.dataFlag.lastPosition |
+                           wialon.item.Unit.dataFlag.sensors,
+                    mode: 0
+                }],
+                function(error) {
+                    if (error) {
+                        msg("Error loading unit data: " + wialon.core.Errors.getErrorText(error));
+                        return;
+                    }
+
+                    // Render the UI
+                    renderUnitsList();
+                    renderUnitMarkers();
+
+                    // Set up listeners for position updates
+                    const units = session.getItems('avl_unit');
+                    units.forEach(unit => {
+                        unit.addListener('changePosition', function(evt) {
+                            const pos = evt.getData();
+                            if (pos && unitMarkers[unit.getId()]) {
+                                // Update marker position
+                                unitMarkers[unit.getId()].setLatLng([pos.y, pos.x]);
+
+                                // Update popup content
+                                unitMarkers[unit.getId()].setPopupContent(`
+                                    <b>${unit.getName()}</b><br>
+                                    Speed: ${pos.s} km/h<br>
+                                    Last update: ${wialon.util.DateTime.formatTime(pos.t)}
+                                `);
+
+                                // Update unit list status if needed
+                                if (currentUnit && currentUnit.getId() === unit.getId()) {
+                                    showUnitDetails(unit);
+                                }
+                            }
+                        });
+                    });
+
+                    msg("Unit data loaded successfully");
+                }
+            );
+        }
+
+        // --- Main Execution ---
+        $(document).ready(function () {
+            initMap();
+            wialon.core.Session.getInstance().initSession(WIALON_API_URL);
+
+            wialon.core.Session.getInstance().loginToken(TOKEN, "", function (code) {
+                if (code) {
+                    msg("Error logging in: " + wialon.core.Errors.getErrorText(code));
+                    return;
+                }
+                msg('Logged successfully');
+                initWialonData();
+            });
+        });
+    </script>
+</body>
+</html>
