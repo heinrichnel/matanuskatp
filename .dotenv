@@ -75,9 +75,8 @@ VITE_GOOGLE_MAPS_ANDROID_API_KEY=AIzaSyDNk9iW1PTGM9hvcjJ0utBABs7ZiWCj3Xc
 # =======================
 VITE_GOOGLE_MAPS_IFRAME_URL=https://www.google.com/maps/embed/v1/place?key=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg&q=6+MT+Orville+Street+Midlands+Estate+Midstream+Gauteng
 
-VITE_GOOGLE_MAPS_API_KEY=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg
-
-VITE_GOOGLE_MAPS_JS_API_URL=https://maps.googleapis.com/maps/api/js?key=AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg&loading=async&callback=initMap
+VITE_GOOGLE_MAPS_API_KEY=AIzaSyDTHkrpqeH0nj-cpbYybjKcZYwKgDNf8z8
+VITE_GOOGLE_MAPS_JS_API_URL=https://maps.googleapis.com/maps/api/js?key=AIzaSyDTHkrpqeH0nj-cpbYybjKcZYwKgDNf8z8&loading=async&callback=initMap
 
 
 # === ADDED FOR APPLICATION CONSISTENCY ===

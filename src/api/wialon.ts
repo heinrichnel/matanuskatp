@@ -2,7 +2,7 @@ import type { WialonPosition, WialonSensor, WialonUnit } from "../types/wialon-t
 import { ErrorCategory, ErrorSeverity, logError } from "../utils/errorHandling";
 
 // Import the Wialon SDK type definitions
-import "../types/wialon-sdk";
+import "../types/wialon-sdk.d.ts";
 
 // Wialon SDK is exposed on the window object
 declare global {

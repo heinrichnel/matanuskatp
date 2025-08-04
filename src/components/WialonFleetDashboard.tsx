@@ -184,7 +184,7 @@ const WialonFleetDashboard: React.FC = () => {
                   <div key={sensor.id || index} className="bg-gray-50 rounded-lg p-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600 truncate">
-                        {sensor.name || `Sensor ${index + 1}`}
+                        {sensor.n || `Sensor ${index + 1}`}
                       </span>
                       <span className="font-medium text-sm">
                         {value !== null ? value : "N/A"}
