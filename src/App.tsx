@@ -14,7 +14,6 @@ import { WorkshopProvider } from "./context/WorkshopContext";
 
 // Error Handling
 import ErrorBoundary from "./components/ErrorBoundary";
-import ConnectionStatusIndicator from "./components/ui/ConnectionStatusIndicator";
 import FirestoreConnectionError from "./components/ui/FirestoreConnectionError";
 import OfflineBanner from "./components/ui/OfflineBanner";
 import {
@@ -119,18 +118,18 @@ const App: React.FC = () => {
                   <WorkshopProvider>
                     <FleetAnalyticsProvider>
                       <TyreReferenceDataProvider>
+                        {/* Application alerts and notifications */}
                         <div className="fixed top-0 left-0 right-0 z-50 p-4">
                           <FirestoreConnectionError />
                           {connectionError && <FirestoreConnectionError error={connectionError} />}
                         </div>
 
                         <OfflineBanner />
-                        <ConnectionStatusIndicator
-                          showText={true}
-                          className="fixed bottom-4 right-4 z-40"
-                        />
 
-                        <AppRoutes />
+                        {/* Main application routes and layout */}
+                        <div className="min-h-screen bg-slate-50 dark:bg-gray-900 flex flex-col">
+                          <AppRoutes />
+                        </div>
                       </TyreReferenceDataProvider>
                     </FleetAnalyticsProvider>
                   </WorkshopProvider>

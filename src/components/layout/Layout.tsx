@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAppContext } from "../../context/AppContext";
 import { Trip } from "../../types";
+import ConnectionStatusIndicator from "../ui/ConnectionStatusIndicator";
+import SyncIndicator from "../ui/SyncIndicator";
 import Sidebar from "./Sidebar";
 
 interface LayoutProps {
@@ -63,31 +65,43 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
   };
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-      <Sidebar
-        currentView={currentView}
-        onNavigate={handleNavigate}
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
-      <main
-        className={`transition-all duration-300 p-6 pt-8 w-full max-w-screen-2xl mx-auto ${sidebarOpen ? "md:ml-64" : "ml-0"}`}
-      >
-        {/* Sidebar toggle button */}
-        <button
-          className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-md"
-          onClick={toggleSidebar}
-          aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
-        >
-          <Menu size={24} />
-        </button>
-        <div className="flex justify-between items-center mb-4">
-          {/* The title should be rendered by the page component instead of here */}
-          <div></div>
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
+      {/* Top header bar */}
+      <header className="bg-white dark:bg-gray-800 shadow p-4 flex items-center justify-between">
+        <div className="flex items-center">
+          {/* Mobile menu button */}
+          <button
+            className="md:hidden mr-4 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+            onClick={toggleSidebar}
+            aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+          >
+            <Menu size={24} />
+          </button>
+          <span className="font-bold text-lg">MATANUSKA TRANSPORT</span>
         </div>
-        {/* Outlet renders the active route component */}
-        <Outlet context={outletContext} />
-      </main>
+        <div className="flex items-center gap-2">
+          <ConnectionStatusIndicator showText={false} className="mr-2" />
+          <SyncIndicator />
+        </div>
+      </header>
+
+      <div className="flex flex-1">
+        {/* Sidebar - fixed on desktop, slide-over on mobile */}
+        <Sidebar
+          currentView={currentView}
+          onNavigate={handleNavigate}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+
+        {/* Main content area */}
+        <main className="flex-1 p-4 md:p-8 transition-all duration-300">
+          <div className="container mx-auto max-w-screen-2xl">
+            {/* Outlet renders the active route component */}
+            <Outlet context={outletContext} />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

@@ -32,9 +32,21 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate, isOpen, onClose })
 
   // Fix for window.innerWidth on server (SSR/Next.js)
   const [isClient, setIsClient] = React.useState(false);
+
   React.useEffect(() => {
     setIsClient(true);
-  }, []);
+
+    // Add resize event listener to close sidebar on mobile when window resizes
+    const handleResize = () => {
+      if (window.innerWidth < 768 && isOpen) {
+        onClose();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isOpen, onClose]);
+
   const isDesktop = isClient && window.innerWidth >= 768;
 
   const renderSidebarItems = (items: SidebarItem[], isChild: boolean = false) => {
@@ -126,38 +138,45 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate, isOpen, onClose })
   };
 
   return (
-    <aside
-      className={`fixed left-0 top-0 h-screen bg-gray-100 border-r shadow flex flex-col z-30 transition-all duration-300 ${isOpen ? "translate-x-0 w-64" : "-translate-x-full w-64 md:translate-x-0 md:w-16"}`}
-    >
-      {/* Close button (visible on mobile) */}
-      <button
-        className="md:hidden absolute top-4 right-4 p-3 rounded-full hover:bg-gray-200"
-        onClick={onClose}
-        aria-label="Close sidebar"
-        style={{
-          minWidth: "44px",
-          minHeight: "44px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+    <>
+      {/* Backdrop overlay (mobile only) */}
+      {isOpen && !isDesktop && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={`fixed md:static h-screen md:h-auto bg-white dark:bg-gray-800 border-r shadow-lg flex flex-col z-40 transition-all duration-300 w-64 ${
+          isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
       >
-        <X size={24} />
-      </button>
-      <div className="flex items-center justify-center px-6 py-4 border-b bg-gray-100">
-        {isOpen || isDesktop ? (
-          <h1 className="font-bold text-black text-lg">MATANUSKA TRANSPORT</h1>
-        ) : (
-          <h1 className="font-bold text-black text-lg">MT</h1>
-        )}
-      </div>
-      <nav className="flex-1 overflow-y-auto py-2 max-h-[calc(100vh-160px)]">
-        {renderSidebarItems(sidebarConfig)}
-      </nav>
-      <div className={`px-6 py-4 border-t ${isOpen ? "" : "hidden md:block"}`}>
-        <div className="flex flex-col space-y-2 mb-3">
-          <ConnectionStatusIndicator showText={isOpen} />
-          <SyncIndicator showText={isOpen} className="mt-1" />
+        {/* Close button (visible on mobile) */}
+        <button
+          className="md:hidden absolute top-4 right-4 p-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+          onClick={onClose}
+          aria-label="Close sidebar"
+        >
+          <X size={20} />
+        </button>
+
+        {/* Logo area hidden on mobile since we have it in the header */}
+        <div className="hidden md:flex items-center px-6 py-4 border-b">
+          <h1 className="font-bold text-lg">MATANUSKA</h1>
+        </div>
+
+        {/* Navigation menu */}
+        <nav className="flex-1 overflow-y-auto py-4">
+          {renderSidebarItems(sidebarConfig)}
+        </nav>
+
+        {/* User area (hidden on mobile) */}
+        <div className="hidden md:block px-6 py-4 border-t">
+          <div className="flex items-center gap-3">
+            <Users className="w-5 h-5 text-gray-400" />
+            <span className="text-sm">User</span>
         </div>
         <div className="flex items-center gap-3 mt-2">
           <Users className="w-5 h-5 text-gray-400" />

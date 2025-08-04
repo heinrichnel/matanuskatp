@@ -49,12 +49,7 @@ export default defineConfig({
           scanner: ["@capacitor-community/barcode-scanner", "@capacitor/core"],
           "document-tools": ["jspdf", "jspdf-autotable", "xlsx"],
           "date-utils": ["date-fns"],
-          "ui-components": [
-            "lucide-react",
-            "tailwindcss",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-label",
-          ],
+          "ui-components": ["lucide-react", "@radix-ui/react-tabs", "@radix-ui/react-label"],
         },
       },
     },
