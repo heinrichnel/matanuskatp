@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useAppContext } from "../../../context/AppContext";
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from "../../ui/modal";
+import { Modal } from "../../ui/Modal";
 import Button from "../../ui/Button";
 
 // ─── Icons ───────────────────────────────────────────────────────
@@ -269,7 +269,7 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({ isOpen, onClose }
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={onClick}
+                  onClick={downloadTemplate}
                   icon={<Download className="w-4 h-4" />}
                 >
                   Download Template
@@ -361,14 +361,14 @@ const DieselImportModal: React.FC<DieselImportModalProps> = ({ isOpen, onClose }
           <div className="flex justify-end space-x-3">
             <Button
               variant="outline"
-              onClick={onClick}
+              onClick={onClose}
               disabled={isProcessing}
               icon={<X className="w-4 h-4" />}
             >
               Cancel
             </Button>
             <Button
-              onClick={onClick}
+              onClick={handleUpload}
               disabled={!file || isProcessing}
               isLoading={isProcessing}
               icon={<Upload className="w-4 h-4" />}
