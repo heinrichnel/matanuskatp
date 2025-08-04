@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Modal from "../../ui/modal";
+import Modal from "../../ui/Modal";
 import TripForm from "../../forms/TripForm";
 import { Trip } from "../../../types";
 import { useAppContext } from "../../../context/AppContext";

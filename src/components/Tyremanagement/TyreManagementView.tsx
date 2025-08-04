@@ -16,7 +16,7 @@ import {
 import React, { useState } from "react";
 import Button from "../ui/Button";
 import Card, {  CardContent, CardHeader  } from '../ui/consolidated/Card';
-import Modal from "../ui/modal";
+import Modal from "../ui/Modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
 
 // Import type utilities from the tyreConstants file

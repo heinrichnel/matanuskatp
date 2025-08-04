@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Modal from "../../ui/modal";
+import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
 import { Input } from "../../ui/FormElements";
 import { CheckCircle, X } from "lucide-react";

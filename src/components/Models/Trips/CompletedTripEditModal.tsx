@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Trip, TripEditRecord, TRIP_EDIT_REASONS } from "../../../types";
-import Modal from "../../ui/modal";
+import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
 import { Input, Select, TextArea } from "../../ui/FormElements";
 import { Save, X } from "lucide-react";

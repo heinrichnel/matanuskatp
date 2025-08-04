@@ -1,19 +1,19 @@
-import React, { useState, useEffect, ChangeEvent } from "react";
-import Modal from "../../ui/modal";
-import Button from "../../ui/Button";
-import { Input, TextArea } from "../../ui/FormElements";
+import { AlertTriangle, CheckCircle, Database, Info, RefreshCw, Save, X } from "lucide-react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { useAppContext } from "../../../context/AppContext";
-import { formatCurrency, formatDate } from "../../../utils/helpers";
-import { CheckCircle, X, Save, AlertTriangle, Info, RefreshCw, Database } from "lucide-react";
-import { FLEETS_WITH_PROBES } from "../../../types";
 import { addAuditLogToFirebase } from "../../../firebase";
+import { FLEETS_WITH_PROBES } from "../../../types";
+import { formatCurrency, formatDate } from "../../../utils/helpers";
 import {
-  getVehicleSensorData,
-  getTotalFuelLevel,
-  isSensorDataRecent,
   FuelTankData,
+  getTotalFuelLevel,
+  getVehicleSensorData,
+  isSensorDataRecent,
   VehicleSensorData,
 } from "../../../utils/wialonSensorData";
+import Button from "../../ui/Button";
+import { Input, TextArea } from "../../ui/FormElements";
+import Modal from "../../ui/Modal";
 
 interface AutomaticProbeVerificationModalProps {
   isOpen: boolean;
@@ -113,7 +113,7 @@ Fuel tanks: ${sensorData.fuelTanks
             </div>
           </div>
           <div className="flex justify-end">
-            <Button onClick={onClick}>Close</Button>
+            <Button onClick={onClose}>Close</Button>
           </div>
         </div>
       </Modal>
@@ -467,7 +467,7 @@ Data timestamp: ${sensorData.lastUpdated.toLocaleString()}`;
               <Button
                 size="sm"
                 variant="outline"
-                onClick={onClick}
+                onClick={fetchSensorData}
                 icon={<RefreshCw className="w-4 h-4" />}
                 isLoading={isFetchingSensorData}
                 disabled={isFetchingSensorData}
@@ -620,14 +620,14 @@ Data timestamp: ${sensorData.lastUpdated.toLocaleString()}`;
         <div className="flex justify-end space-x-3 pt-6 border-t">
           <Button
             variant="outline"
-            onClick={onClick}
+            onClick={onClose}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
           >
             Cancel
           </Button>
           <Button
-            onClick={onClick}
+            onClick={handleSubmit}
             icon={<Save className="w-4 h-4" />}
             isLoading={isSubmitting}
             disabled={isSubmitting || !probeReading}

@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 import { CostEntry } from "../../../types";
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from "../../ui/modal";
+import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
 import { Input, TextArea } from "../../ui/FormElements";
 import { FileUpload } from "../../ui/FormElements";

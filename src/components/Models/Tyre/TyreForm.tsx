@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useTyreReferenceData } from '@/context/TyreReferenceDataContext';
-import { Button } from '@/components/ui/Button';
-import { Input, Select, Textarea } from '@/components/ui/FormElements';
-import VehiclePositionDiagram from '@/components/tyres/VehiclePositionDiagram';
-import { Tyre } from '@/components/Models/Tyre/TyreModel';
+import React, { useEffect, useState } from "react";
+import { useTyreReferenceData } from "@/context/TyreReferenceDataContext";
+import { Button } from "@/components/ui/Button";
+import { Input, Select, Textarea } from "@/components/ui/FormElements";
+import VehiclePositionDiagram from "@/components/tyres/VehiclePositionDiagram";
+import { Tyre, TyreStoreLocation } from "@/components/Models/Tyre/TyreModel";
 
 interface TyreFormProps {
   initialData?: Partial<Tyre>;
@@ -18,74 +18,71 @@ const TyreForm: React.FC<TyreFormProps> = ({
   onSubmit,
   onCancel,
   editMode = false,
-  inline = false
+  inline = false,
 }) => {
   // Use the reference data context for brands, sizes, patterns
-  const {
-    brands,
-    sizes,
-    getPositionsForVehicleType,
-    getPatternsForBrand
-  } = useTyreReferenceData();
+  const { brands, sizes, getPositionsForVehicleType, getPatternsForBrand } = useTyreReferenceData();
 
   // Form state
   const [formData, setFormData] = useState<Partial<Tyre>>({
     serialNumber: initialData.serialNumber || `TY-${Math.floor(1000 + Math.random() * 9000)}`,
-    dotCode: initialData.dotCode || '',
-    manufacturingDate: initialData.manufacturingDate || new Date().toISOString().split('T')[0],
-    brand: initialData.brand || '',
-    model: initialData.model || '',
-    pattern: initialData.pattern || '',
+    dotCode: initialData.dotCode || "",
+    manufacturingDate: initialData.manufacturingDate || new Date().toISOString().split("T")[0],
+    brand: initialData.brand || "",
+    model: initialData.model || "",
+    pattern: initialData.pattern || "",
     size: initialData.size || { width: 0, aspectRatio: 0, rimDiameter: 0 },
     loadIndex: initialData.loadIndex || 0,
-    speedRating: initialData.speedRating || '',
-    type: initialData.type || 'standard',
+    speedRating: initialData.speedRating || "",
+    type: initialData.type || "standard",
     purchaseDetails: initialData.purchaseDetails || {
-      date: new Date().toISOString().split('T')[0],
+      date: new Date().toISOString().split("T")[0],
       cost: 0,
-      supplier: '',
-      warranty: '',
-      invoiceNumber: ''
+      supplier: "",
+      warranty: "",
+      invoiceNumber: "",
     },
     installation: initialData.installation || {
-      vehicleId: '',
-      position: 'front_left',
+      vehicleId: "",
+      position: "front_left",
       mileageAtInstallation: 0,
-      installationDate: '',
-      installedBy: ''
+      installationDate: "",
+      installedBy: "",
     },
     condition: initialData.condition || {
       treadDepth: 20, // New tyre typical depth
       pressure: 0,
       temperature: 0,
-      status: 'good',
-      lastInspectionDate: new Date().toISOString().split('T')[0],
-      nextInspectionDue: ''
+      status: "good",
+      lastInspectionDate: new Date().toISOString().split("T")[0],
+      nextInspectionDue: "",
     },
-    status: initialData.status || 'new',
-    mountStatus: initialData.mountStatus || 'unmounted',
+    status: initialData.status || "new",
+    mountStatus: initialData.mountStatus || "unmounted",
     maintenanceHistory: initialData.maintenanceHistory || {
       rotations: [],
       repairs: [],
-      inspections: []
+      inspections: [],
     },
-    milesRun: initialData.milesRun || 0,
+    kmRun: initialData.kmRun || 0,
     kmRunLimit: initialData.kmRunLimit || 60000,
-    notes: initialData.notes || '',
-    location: initialData.location || { storeId: '', position: '' }
+    notes: initialData.notes || "",
+    location: initialData.location || TyreStoreLocation.HOLDING_BAY,
   });
 
   // Form section management - used for inline forms and step navigation
   const [activeSection, setActiveSection] = useState<
-    'basic' | 'technical' | 'installation' | 'condition'
-  >('basic');
+    "basic" | "technical" | "installation" | "condition"
+  >("basic");
 
   // Derived state
   const [availablePatterns, setAvailablePatterns] = useState<string[]>([]);
-  const [vehicleTypePositions, setVehicleTypePositions] = useState<{ id: string; name: string; }[]>([]);
+  const [vehicleTypePositions, setVehicleTypePositions] = useState<{ id: string; name: string }[]>(
+    []
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedSize, setSelectedSize] = useState<string>("");
 
   // Load initial size string from initialData
   useEffect(() => {
@@ -98,7 +95,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
   useEffect(() => {
     if (formData.brand) {
       const patterns = getPatternsForBrand(formData.brand)
-        .map(p => p.pattern)
+        .map((p) => p.pattern)
         .filter((v, i, a) => a.indexOf(v) === i); // Unique values
       setAvailablePatterns(patterns);
     } else {
@@ -121,37 +118,39 @@ const TyreForm: React.FC<TyreFormProps> = ({
       const parts = selectedSize.match(/^(\d+)\/(\d+)R(\d+\.?\d*)$/);
       if (parts) {
         const [, width, aspectRatio, rimDiameter] = parts;
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           size: {
             width: parseInt(width),
             aspectRatio: parseInt(aspectRatio),
             rimDiameter: parseFloat(rimDiameter),
-            displayString: selectedSize
-          }
+            displayString: selectedSize,
+          },
         }));
       }
     }
   }, [selectedSize]);
 
   // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    
+
     // Handle nested properties
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
         ...prev,
         [parent]: {
           ...(prev[parent as keyof typeof prev] as Record<string, any>),
-          [child]: value
-        }
+          [child]: value,
+        },
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
+        [name]: value,
       }));
     }
   };
@@ -160,21 +159,21 @@ const TyreForm: React.FC<TyreFormProps> = ({
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     const numValue = parseFloat(value);
-    
+
     // Handle nested properties
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
+    if (name.includes(".")) {
+      const [parent, child] = name.split(".");
+      setFormData((prev) => ({
         ...prev,
         [parent]: {
           ...(prev[parent as keyof typeof prev] as Record<string, any>),
-          [child]: isNaN(numValue) ? 0 : numValue
-        }
+          [child]: isNaN(numValue) ? 0 : numValue,
+        },
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: isNaN(numValue) ? 0 : numValue
+        [name]: isNaN(numValue) ? 0 : numValue,
       }));
     }
   };
@@ -184,17 +183,21 @@ const TyreForm: React.FC<TyreFormProps> = ({
     const newErrors: Record<string, string> = {};
 
     // Basic validation
-    if (!formData.serialNumber) newErrors.serialNumber = 'Serial number is required';
-    if (!formData.brand) newErrors.brand = 'Brand is required';
-    if (!formData.pattern) newErrors.pattern = 'Pattern is required';
-    if (!selectedSize) newErrors.size = 'Size is required';
-    if (!formData.purchaseDetails?.date) newErrors['purchaseDetails.date'] = 'Purchase date is required';
-    if (formData.purchaseDetails?.cost === 0) newErrors['purchaseDetails.cost'] = 'Cost is required';
-    
+    if (!formData.serialNumber) newErrors.serialNumber = "Serial number is required";
+    if (!formData.brand) newErrors.brand = "Brand is required";
+    if (!formData.pattern) newErrors.pattern = "Pattern is required";
+    if (!selectedSize) newErrors.size = "Size is required";
+    if (!formData.purchaseDetails?.date)
+      newErrors["purchaseDetails.date"] = "Purchase date is required";
+    if (formData.purchaseDetails?.cost === 0)
+      newErrors["purchaseDetails.cost"] = "Cost is required";
+
     // Additional validation for mounted tyres
-    if (formData.mountStatus === 'mounted') {
-      if (!formData.installation?.vehicleId) newErrors['installation.vehicleId'] = 'Vehicle ID is required for mounted tyres';
-      if (!formData.installation?.position) newErrors['installation.position'] = 'Position is required for mounted tyres';
+    if (formData.mountStatus === "mounted") {
+      if (!formData.installation?.vehicleId)
+        newErrors["installation.vehicleId"] = "Vehicle ID is required for mounted tyres";
+      if (!formData.installation?.position)
+        newErrors["installation.position"] = "Position is required for mounted tyres";
     }
 
     setErrors(newErrors);
@@ -205,7 +208,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
     try {
       await onSubmit(formData);
@@ -215,11 +218,11 @@ const TyreForm: React.FC<TyreFormProps> = ({
           serialNumber: `TY-${Math.floor(1000 + Math.random() * 9000)}`,
           // Reset other fields...
         });
-        setActiveSection('basic');
+        setActiveSection("basic");
       }
     } catch (error) {
-      console.error('Error saving tyre:', error);
-      setErrors({ submit: 'Failed to save tyre. Please try again.' });
+      console.error("Error saving tyre:", error);
+      setErrors({ submit: "Failed to save tyre. Please try again." });
     } finally {
       setIsSubmitting(false);
     }
@@ -227,8 +230,8 @@ const TyreForm: React.FC<TyreFormProps> = ({
 
   // Render form based on activeSection
   const renderFormSection = () => {
-    switch(activeSection) {
-      case 'basic':
+    switch (activeSection) {
+      case "basic":
         return (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -265,8 +268,8 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 onChange={handleChange}
                 error={errors.brand}
                 options={[
-                  { label: 'Select brand...', value: '' },
-                  ...brands.map(brand => ({ label: brand.name, value: brand.name }))
+                  { label: "Select brand...", value: "" },
+                  ...brands.map((brand) => ({ label: brand.name, value: brand.name })),
                 ]}
               />
             </div>
@@ -279,8 +282,8 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 onChange={(e) => setSelectedSize(e.target.value)}
                 error={errors.size}
                 options={[
-                  { label: 'Select size...', value: '' },
-                  ...sizes.map(size => ({ label: size.size, value: size.size }))
+                  { label: "Select size...", value: "" },
+                  ...sizes.map((size) => ({ label: size.size, value: size.size })),
                 ]}
               />
               <Select
@@ -290,38 +293,33 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 onChange={handleChange}
                 error={errors.pattern}
                 options={[
-                  { label: 'Select pattern...', value: '' },
-                  ...availablePatterns.map(pattern => ({ label: pattern, value: pattern }))
+                  { label: "Select pattern...", value: "" },
+                  ...availablePatterns.map((pattern) => ({ label: pattern, value: pattern })),
                 ]}
                 disabled={!formData.brand}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Model"
-                name="model"
-                value={formData.model}
-                onChange={handleChange}
-              />
+              <Input label="Model" name="model" value={formData.model} onChange={handleChange} />
               <Select
                 label="Type"
                 name="type"
                 value={formData.type as string}
                 onChange={handleChange}
                 options={[
-                  { label: 'Standard', value: 'standard' },
-                  { label: 'Winter', value: 'winter' },
-                  { label: 'All Season', value: 'all_season' },
-                  { label: 'Mud Terrain', value: 'mud_terrain' },
-                  { label: 'All Terrain', value: 'all_terrain' }
+                  { label: "Standard", value: "standard" },
+                  { label: "Winter", value: "winter" },
+                  { label: "All Season", value: "all_season" },
+                  { label: "Mud Terrain", value: "mud_terrain" },
+                  { label: "All Terrain", value: "all_terrain" },
                 ]}
               />
             </div>
           </div>
         );
-      
-      case 'technical':
+
+      case "technical":
         return (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -347,7 +345,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 type="date"
                 value={formData.purchaseDetails?.date}
                 onChange={handleChange}
-                error={errors['purchaseDetails.date']}
+                error={errors["purchaseDetails.date"]}
               />
               <Input
                 label="Purchase Cost"
@@ -355,7 +353,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 type="number"
                 value={formData.purchaseDetails?.cost}
                 onChange={handleNumberChange}
-                error={errors['purchaseDetails.cost']}
+                error={errors["purchaseDetails.cost"]}
               />
             </div>
 
@@ -386,23 +384,23 @@ const TyreForm: React.FC<TyreFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Distance Run (km)"
-                name="milesRun"
+                name="kmRun"
                 type="number"
-                value={formData.milesRun}
+                value={formData.kmRun || 0}
                 onChange={handleNumberChange}
               />
               <Input
                 label="Distance Limit (km)"
                 name="kmRunLimit"
                 type="number"
-                value={formData.kmRunLimit}
+                value={formData.kmRunLimit || 0}
                 onChange={handleNumberChange}
               />
             </div>
           </div>
         );
-        
-      case 'installation':
+
+      case "installation":
         return (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -412,23 +410,23 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 value={formData.mountStatus as string}
                 onChange={handleChange}
                 options={[
-                  { label: 'Unmounted', value: 'unmounted' },
-                  { label: 'Mounted', value: 'mounted' },
-                  { label: 'In Storage', value: 'in_storage' }
+                  { label: "Unmounted", value: "unmounted" },
+                  { label: "Mounted", value: "mounted" },
+                  { label: "In Storage", value: "in_storage" },
                 ]}
               />
-              {formData.mountStatus === 'mounted' && (
+              {formData.mountStatus === "mounted" && (
                 <Input
                   label="Vehicle ID/Registration"
                   name="installation.vehicleId"
                   value={formData.installation?.vehicleId}
                   onChange={handleChange}
-                  error={errors['installation.vehicleId']}
+                  error={errors["installation.vehicleId"]}
                 />
               )}
             </div>
 
-            {formData.mountStatus === 'mounted' && (
+            {formData.mountStatus === "mounted" && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Select
@@ -437,10 +435,10 @@ const TyreForm: React.FC<TyreFormProps> = ({
                     value={formData.type as string}
                     onChange={handleChange}
                     options={[
-                      { label: 'Standard', value: 'standard' },
-                      { label: 'Reefer', value: 'reefer' },
-                      { label: 'Horse', value: 'horse' },
-                      { label: 'Interlink', value: 'interlink' }
+                      { label: "Standard", value: "standard" },
+                      { label: "Reefer", value: "reefer" },
+                      { label: "Horse", value: "horse" },
+                      { label: "Interlink", value: "interlink" },
                     ]}
                   />
                   <Select
@@ -448,10 +446,10 @@ const TyreForm: React.FC<TyreFormProps> = ({
                     name="installation.position"
                     value={formData.installation?.position as string}
                     onChange={handleChange}
-                    error={errors['installation.position']}
+                    error={errors["installation.position"]}
                     options={[
-                      { label: 'Select position...', value: '' },
-                      ...vehicleTypePositions.map(pos => ({ label: pos.name, value: pos.id }))
+                      { label: "Select position...", value: "" },
+                      ...vehicleTypePositions.map((pos) => ({ label: pos.name, value: pos.id })),
                     ]}
                   />
                 </div>
@@ -482,17 +480,20 @@ const TyreForm: React.FC<TyreFormProps> = ({
 
                 {/* Vehicle Position Diagram */}
                 <div className="mt-4 bg-gray-50 border border-gray-200 rounded-md p-4">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Vehicle Position Diagram</h3>
-                  <VehiclePositionDiagram 
-                    vehicleType={formData.type as 'standard' | 'reefer' | 'horse' | 'interlink'} 
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    Vehicle Position Diagram
+                  </h3>
+                  <VehiclePositionDiagram
+                    vehicleType={formData.type as string}
+                    positions={vehicleTypePositions}
                     selectedPosition={formData.installation?.position as string}
-                    onPositionSelect={(position) => {
-                      setFormData(prev => ({
+                    onPositionClick={(position: string) => {
+                      setFormData((prev) => ({
                         ...prev,
                         installation: {
                           ...prev.installation!,
-                          position
-                        }
+                          position,
+                        },
                       }));
                     }}
                   />
@@ -501,8 +502,8 @@ const TyreForm: React.FC<TyreFormProps> = ({
             )}
           </div>
         );
-        
-      case 'condition':
+
+      case "condition":
         return (
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -512,11 +513,11 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 value={formData.status as string}
                 onChange={handleChange}
                 options={[
-                  { label: 'New', value: 'new' },
-                  { label: 'In Service', value: 'in_service' },
-                  { label: 'Spare', value: 'spare' },
-                  { label: 'Retreaded', value: 'retreaded' },
-                  { label: 'Scrapped', value: 'scrapped' }
+                  { label: "New", value: "new" },
+                  { label: "In Service", value: "in_service" },
+                  { label: "Spare", value: "spare" },
+                  { label: "Retreaded", value: "retreaded" },
+                  { label: "Scrapped", value: "scrapped" },
                 ]}
               />
               <Input
@@ -542,10 +543,10 @@ const TyreForm: React.FC<TyreFormProps> = ({
                 value={formData.condition?.status as string}
                 onChange={handleChange}
                 options={[
-                  { label: 'Good', value: 'good' },
-                  { label: 'Warning', value: 'warning' },
-                  { label: 'Critical', value: 'critical' },
-                  { label: 'Needs Replacement', value: 'needs_replacement' }
+                  { label: "Good", value: "good" },
+                  { label: "Warning", value: "warning" },
+                  { label: "Critical", value: "critical" },
+                  { label: "Needs Replacement", value: "needs_replacement" },
                 ]}
               />
             </div>
@@ -576,7 +577,7 @@ const TyreForm: React.FC<TyreFormProps> = ({
             />
           </div>
         );
-      
+
       default:
         return null;
     }
@@ -585,35 +586,40 @@ const TyreForm: React.FC<TyreFormProps> = ({
   // For inline mode, render as a card with sections
   if (inline) {
     return (
-      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
         {/* Section Tabs */}
         <div className="mb-6">
           <div className="flex space-x-1 border-b">
             <button
               type="button"
-              className={`px-4 py-2 ${activeSection === 'basic' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
-              onClick={() => setActiveSection('basic')}
+              className={`px-4 py-2 ${activeSection === "basic" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
+              onClick={() => setActiveSection("basic")}
             >
               Basic Info
             </button>
             <button
               type="button"
-              className={`px-4 py-2 ${activeSection === 'technical' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
-              onClick={() => setActiveSection('technical')}
+              className={`px-4 py-2 ${activeSection === "technical" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
+              onClick={() => setActiveSection("technical")}
             >
               Technical Details
             </button>
             <button
               type="button"
-              className={`px-4 py-2 ${activeSection === 'installation' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
-              onClick={() => setActiveSection('installation')}
+              className={`px-4 py-2 ${activeSection === "installation" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
+              onClick={() => setActiveSection("installation")}
             >
               Installation
             </button>
             <button
               type="button"
-              className={`px-4 py-2 ${activeSection === 'condition' ? 'border-b-2 border-blue-500 text-blue-600 font-medium' : 'text-gray-500'}`}
-              onClick={() => setActiveSection('condition')}
+              className={`px-4 py-2 ${activeSection === "condition" ? "border-b-2 border-blue-500 text-blue-600 font-medium" : "text-gray-500"}`}
+              onClick={() => setActiveSection("condition")}
             >
               Condition & Status
             </button>
@@ -641,11 +647,8 @@ const TyreForm: React.FC<TyreFormProps> = ({
               Cancel
             </Button>
           )}
-          <Button
-            type="submit"
-            loading={isSubmitting}
-          >
-            {editMode ? 'Update Tyre' : 'Save Tyre'}
+          <Button type="submit" isLoading={isSubmitting}>
+            {editMode ? "Update Tyre" : "Save Tyre"}
           </Button>
         </div>
       </form>
@@ -659,12 +662,16 @@ const TyreForm: React.FC<TyreFormProps> = ({
 
       {/* Step Navigation */}
       <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-        {activeSection !== 'basic' && (
+        {activeSection !== "basic" && (
           <Button
             variant="outline"
             onClick={() => {
-              const sections: Array<'basic' | 'technical' | 'installation' | 'condition'> = 
-                ['basic', 'technical', 'installation', 'condition'];
+              const sections: Array<"basic" | "technical" | "installation" | "condition"> = [
+                "basic",
+                "technical",
+                "installation",
+                "condition",
+              ];
               const currentIndex = sections.indexOf(activeSection);
               setActiveSection(sections[currentIndex - 1]);
             }}
@@ -673,11 +680,15 @@ const TyreForm: React.FC<TyreFormProps> = ({
           </Button>
         )}
 
-        {activeSection !== 'condition' ? (
+        {activeSection !== "condition" ? (
           <Button
             onClick={() => {
-              const sections: Array<'basic' | 'technical' | 'installation' | 'condition'> = 
-                ['basic', 'technical', 'installation', 'condition'];
+              const sections: Array<"basic" | "technical" | "installation" | "condition"> = [
+                "basic",
+                "technical",
+                "installation",
+                "condition",
+              ];
               const currentIndex = sections.indexOf(activeSection);
               setActiveSection(sections[currentIndex + 1]);
             }}
@@ -687,19 +698,12 @@ const TyreForm: React.FC<TyreFormProps> = ({
         ) : (
           <>
             {onCancel && (
-              <Button
-                variant="outline"
-                onClick={onCancel}
-                disabled={isSubmitting}
-              >
+              <Button variant="outline" onClick={onCancel} disabled={isSubmitting}>
                 Cancel
               </Button>
             )}
-            <Button
-              onClick={handleSubmit}
-              loading={isSubmitting}
-            >
-              {editMode ? 'Update Tyre' : 'Save Tyre'}
+            <Button onClick={handleSubmit} loading={isSubmitting}>
+              {editMode ? "Update Tyre" : "Save Tyre"}
             </Button>
           </>
         )}

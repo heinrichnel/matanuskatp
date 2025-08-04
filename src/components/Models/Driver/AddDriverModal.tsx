@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Modal from "../../ui/modal";
+import Modal from "../../ui/Modal";
 
 interface AddDriverModalProps {
   isOpen: boolean;
