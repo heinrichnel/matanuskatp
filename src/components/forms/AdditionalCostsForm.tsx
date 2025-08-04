@@ -6,7 +6,7 @@ import { ADDITIONAL_COST_TYPES, AdditionalCost } from "../../types/index";
 
 // ─── UI Components ───────────────────────────────────────────────
 import Button from "../ui/Button";
-import Card, { CardContent, CardHeader } from "../ui/Card";
+import Card, {  CardContent, CardHeader  } from '../ui/consolidated/Card';
 import { FileUpload, Input, Select, TextArea } from "../ui/FormElements";
 
 // ─── Icons ───────────────────────────────────────────────────────

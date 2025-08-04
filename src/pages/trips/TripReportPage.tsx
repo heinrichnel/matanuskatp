@@ -1,7 +1,7 @@
 import { BarChart, DownloadCloud, FileText, Filter } from "lucide-react";
 import React from "react";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import SyncIndicator from "../../components/ui/SyncIndicator";
 import { useAppContext } from "../../context/AppContext";
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Card, { CardContent, CardHeader } from '../../ui/Card';
+import { Card, CardContent, CardHeader } from '../../ui/consolidated';
 import Button from '../../ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/Tabs';
 import { FileText, ShoppingCart, Check, Package, Store, Plus, RefreshCw } from 'lucide-react';
@@ -12,7 +12,7 @@ interface PurchaseOrderModuleProps {
 const PurchaseOrderModule: React.FC<PurchaseOrderModuleProps> = ({ onCreatePO }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('orders');
-  
+
   const handleCreatePO = () => {
     if (onCreatePO) {
       onCreatePO();
@@ -20,7 +20,7 @@ const PurchaseOrderModule: React.FC<PurchaseOrderModuleProps> = ({ onCreatePO })
       navigate('/workshop/purchase-orders/new');
     }
   };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

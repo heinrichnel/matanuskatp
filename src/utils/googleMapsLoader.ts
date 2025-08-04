@@ -169,7 +169,7 @@ export const loadGoogleMapsScript = async (libraries: string = "places"): Promis
       console.log(`[Maps Loader] Loading Google Maps via proxy: ${url}`);
       scriptElement.src = url;
     } else if (GOOGLE_MAPS_API_KEY) {
-      const url = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&loading=async&libraries=${libraries}`;
+      const url = `https://maps.googleapis.com/maps/api/js?key=$AIzaSyAgScPnzBI-6vKoL7Cn1_1mkhvCI54chDg&loading=async&libraries=${libraries}`;
       console.log("[Maps Loader] Loading Google Maps directly with API key");
       scriptElement.src = url;
     } else {

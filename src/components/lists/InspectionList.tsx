@@ -3,7 +3,7 @@ import { AlertTriangle, CheckCircle, Clock, Edit, Eye } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { db } from "../../firebase";
 import Button from "../ui/Button";
-import Card, { CardContent, CardHeader } from "../ui/Card";
+import Card, {  CardContent, CardHeader  } from '../ui/consolidated/Card';
 import { Select } from "../ui/FormElements";
 import { Input } from "../ui/input";
 

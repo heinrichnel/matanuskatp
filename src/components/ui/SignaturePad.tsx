@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import SignaturePadBase from "signature_pad";
 import Button from "./Button";
-import { Card, CardContent, CardHeader } from "./Card";
+import {  Card, CardContent, CardHeader  } from './consolidated/Card';
 
 interface SignaturePadProps {
   onChange?: (signatureData: string) => void;
@@ -17,6 +17,30 @@ interface SignaturePadProps {
   id?: string;
 }
 
+/**
+ * SignaturePad
+ *
+ * A SignaturePad component
+ *
+ * @example
+ * ```tsx
+ * <SignaturePad onChange="example" value="example" title="example" width={42} height={42} readOnly={true} penColor="example" backgroundColor="example" className="example" required={true} id="example" />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.onChange - onChange of the component
+ * @param props.value - value of the component
+ * @param props.title - title of the component
+ * @param props.width - width of the component
+ * @param props.height - height of the component
+ * @param props.readOnly - readOnly of the component
+ * @param props.penColor - penColor of the component
+ * @param props.backgroundColor - backgroundColor of the component
+ * @param props.className - className of the component
+ * @param props.required - required of the component
+ * @param props.id - id of the component
+ * @returns React component
+ */
 const SignaturePad: React.FC<SignaturePadProps> = ({
   onChange,
   value,

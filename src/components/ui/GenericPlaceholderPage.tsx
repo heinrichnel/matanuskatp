@@ -11,6 +11,24 @@ interface GenericPlaceholderPageProps {
   actionButtonLink?: string;
 }
 
+/**
+ * GenericPlaceholderPage
+ *
+ * A GenericPlaceholderPage component
+ *
+ * @example
+ * ```tsx
+ * <GenericPlaceholderPage title="example" description="example" showActionButton={true} actionButtonText="example" actionButtonLink="example" />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.title - title of the component
+ * @param props.description - description of the component
+ * @param props.showActionButton - showActionButton of the component
+ * @param props.actionButtonText - actionButtonText of the component
+ * @param props.actionButtonLink - actionButtonLink of the component
+ * @returns React component
+ */
 const GenericPlaceholderPage: React.FC<GenericPlaceholderPageProps> = ({
   title,
   description,

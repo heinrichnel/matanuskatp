@@ -1,4 +1,14 @@
 import {
+  addDoc,
+  collection,
+  doc,
+  getDocs,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import {
   AlertCircle,
   CheckCircle,
   Clock,
@@ -18,11 +28,12 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import { Input, Select } from "../../components/ui/FormElements";
 import Modal from "../../components/ui/Modal";
 import PageWrapper from "../../components/ui/PageWrapper";
 import { Badge } from "../../components/ui/badge";
+import { firestore } from "../../utils/firebaseConnectionHandler";
 // Firebase will be dynamically imported when needed
 
 // Import related forms
@@ -245,12 +256,8 @@ const PartsOrderingPage: React.FC = () => {
         })),
       };
 
-      // Dynamically import Firebase modules
-      const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
-      const { db } = await import("../../firebase");
-
       // Save to Firestore
-      const docRef = await addDoc(collection(db, "partOrders"), {
+      const docRef = await addDoc(collection(firestore, "partOrders"), {
         ...newOrder,
         timestamp: serverTimestamp(),
         createdAt: new Date().toISOString(),
@@ -303,13 +310,8 @@ const PartsOrderingPage: React.FC = () => {
           updatedOrder.status = "PARTIALLY_RECEIVED";
         }
 
-        // Dynamically import Firebase modules
-        const { doc, updateDoc, collection, query, where, getDocs, addDoc, serverTimestamp } =
-          await import("firebase/firestore");
-        const { db } = await import("../../firebase");
-
         // Update in Firestore
-        await updateDoc(doc(db, "partOrders", updatedOrder.id), {
+        await updateDoc(doc(firestore, "partOrders", updatedOrder.id), {
           parts: updatedOrder.parts,
           status: updatedOrder.status,
           updatedAt: new Date().toISOString(),
@@ -318,7 +320,10 @@ const PartsOrderingPage: React.FC = () => {
         // Update parts inventory quantities
         for (const receivedPart of receivedParts) {
           // Query for existing part in inventory
-          const partsQuery = query(collection(db, "parts"), where("sku", "==", receivedPart.sku));
+          const partsQuery = query(
+            collection(firestore, "parts"),
+            where("sku", "==", receivedPart.sku)
+          );
 
           const partsSnapshot = await getDocs(partsQuery);
 
@@ -326,13 +331,13 @@ const PartsOrderingPage: React.FC = () => {
             // Update existing part quantity
             const partDoc = partsSnapshot.docs[0];
             const currentQuantity = partDoc.data().quantity || 0;
-            await updateDoc(doc(db, "parts", partDoc.id), {
+            await updateDoc(doc(firestore, "parts", partDoc.id), {
               quantity: parseInt(currentQuantity) + receivedPart.receivingQuantity,
               lastUpdated: serverTimestamp(),
             });
           } else {
             // Add new part to inventory
-            await addDoc(collection(db, "parts"), {
+            await addDoc(collection(firestore, "parts"), {
               sku: receivedPart.sku,
               description: receivedPart.description,
               quantity: receivedPart.receivingQuantity,
@@ -646,7 +651,9 @@ const PartsOrderingPage: React.FC = () => {
                             variant="outline"
                             onClick={() => handleViewOrder(order)}
                             icon={<Eye className="w-4 h-4" />}
-                          ></Button>
+                          >
+                            View
+                          </Button>
 
                           {(order.status === "ORDERED" ||
                             order.status === "PARTIALLY_RECEIVED") && (
@@ -673,7 +680,9 @@ const PartsOrderingPage: React.FC = () => {
                               variant="outline"
                               onClick={() => handleEditOrder(order)}
                               icon={<Edit className="w-4 h-4" />}
-                            ></Button>
+                            >
+                              Edit
+                            </Button>
                           )}
 
                           {order.status !== "CANCELLED" && order.status !== "RECEIVED" && (
@@ -682,7 +691,9 @@ const PartsOrderingPage: React.FC = () => {
                               variant="danger"
                               onClick={() => handleCancelOrder(order.id)}
                               icon={<Trash2 className="w-4 h-4" />}
-                            ></Button>
+                            >
+                              Cancel
+                            </Button>
                           )}
                         </div>
                       </td>

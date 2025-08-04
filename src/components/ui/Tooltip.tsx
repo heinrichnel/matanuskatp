@@ -6,7 +6,22 @@ interface TooltipProps {
   position?: 'top' | 'bottom' | 'left' | 'right';
 }
 
-export const Tooltip: React.FC<TooltipProps> = ({ text, position = 'top' }) => {
+export /**
+ * Tooltip
+ *
+ * A Tooltip component
+ *
+ * @example
+ * ```tsx
+ * <Tooltip text="example" />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.text - text of the component
+ * @param props.position - position of the component
+ * @returns React component
+ */
+const Tooltip: React.FC<TooltipProps> = ({ text, position = 'top' }) => {
   return (
     <span className="relative group inline-flex items-center">
       <Info className="w-4 h-4 text-gray-400 ml-1" />

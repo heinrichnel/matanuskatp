@@ -8,6 +8,24 @@ interface FileUploadProps {
   className?: string;
 }
 
+/**
+ * FileUpload
+ *
+ * A FileUpload component
+ *
+ * @example
+ * ```tsx
+ * <FileUpload label="example" accept="example" multiple={true} className="example" />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.label - label of the component
+ * @param props.accept - accept of the component
+ * @param props.multiple - multiple of the component
+ * @param props.onFileSelect - onFileSelect of the component
+ * @param props.className - className of the component
+ * @returns React component
+ */
 const FileUpload: React.FC<FileUploadProps> = ({ label, accept, multiple, onFileSelect, className }) => {
   return (
     <div className={`flex flex-col space-y-2 ${className || ''}`}>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Card, { CardContent, CardHeader } from '../ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import Button from '../ui/Button';
 import { AlertTriangle, Search, Filter, Plus, ArrowUpDown, Calendar, Truck, User, CheckCircle, Flag } from 'lucide-react';
 import { formatDate } from '../../utils/helpers';

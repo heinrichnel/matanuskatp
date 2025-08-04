@@ -3,7 +3,7 @@
 # Project ID
 PROJECT_ID="mat1-9e6b3"
 
-echo "Enabling required Google APIs for project: $PROJECT_ID..."
+echo "Enabling required Google APIs for project: $mat1-9e6b"
 
 # Enable Google Maps APIs
 gcloud services enable \
@@ -29,6 +29,6 @@ gcloud services enable \
   firebasedatabase.googleapis.com \
   fcm.googleapis.com \
   identitytoolkit.googleapis.com \
-  --project=$PROJECT_ID
+  --project=$mat1-9e6b
 
 echo "All required APIs have been enabled successfully."

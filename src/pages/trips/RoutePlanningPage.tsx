@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronUp, Clock, MapPin, Navigation, RotateCw, Route, Save, TrendingDown
 } from "lucide-react";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import LoadingIndicator from "../../components/ui/LoadingIndicator";
 import { useAppContext } from "../../context/AppContext";
 import { isGoogleMapsAPILoaded, useLoadGoogleMaps } from "../../utils/googleMapsLoader";

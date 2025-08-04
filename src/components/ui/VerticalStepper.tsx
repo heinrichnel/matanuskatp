@@ -1,7 +1,7 @@
 
 
 import React, { useState } from "react";
-import { Card, CardContent } from "./Card";
+import {  Card, CardContent  } from './consolidated/Card';
 import Button from "./Button";
 
 interface Step {

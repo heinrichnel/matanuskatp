@@ -8,7 +8,7 @@ import {
   Shield,
   Info
 } from 'lucide-react';
-import { Card, CardHeader, CardContent } from '../../components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/consolidated/Card';
 import { Button } from '../../components/ui/button';
 
 // Mock data for driver safety scores

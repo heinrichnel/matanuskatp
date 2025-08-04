@@ -4,7 +4,7 @@ import { inspectionTemplates } from "../../data/inspectionTemplates";
 import { DRIVERS } from "../../types";
 import FleetSelector from "../common/FleetSelector";
 import Button from "../ui/Button";
-import Card, { CardContent, CardHeader } from "../ui/Card";
+import Card, {  CardContent, CardHeader  } from '../ui/consolidated/Card';
 import { Select } from "../ui/FormElements";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/Tabs";
 import InspectionItemCard from "./InspectionItemCard";

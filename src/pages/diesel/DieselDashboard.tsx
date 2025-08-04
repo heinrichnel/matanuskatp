@@ -27,7 +27,7 @@ import DieselNormsModal from "../../components/Models/Diesel/DieselNormsModal";
 import ManualDieselEntryModal from "../../components/Models/Diesel/ManualDieselEntryModal";
 import TripLinkageModal from "../../components/Models/Trips/TripLinkageModal";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import { Select } from "../../components/ui/FormElements";
 import { useAppContext } from "../../context/AppContext";
 import { FLEETS_WITH_PROBES } from "../../types";

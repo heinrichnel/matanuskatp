@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
-import { Card, CardContent } from '../ui/Card';
+import { Card, CardContent } from '@/components/ui/consolidated/Card';
 
 interface TyreInspectionModalProps {
   open: boolean;

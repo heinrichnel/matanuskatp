@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trip, TripFinancialAnalysis } from '../../types';
 import { useAppContext } from '../../context/AppContext';
-import Card, { CardContent, CardHeader } from '../ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import Button from '../ui/Button';
 import { BarChart3, DollarSign, TrendingUp, TrendingDown, RefreshCw, Download, Calculator, Landmark, Fuel } from 'lucide-react';
 import { formatCurrency } from '../../utils/helpers';

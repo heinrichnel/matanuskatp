@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import Modal from '../../ui/Modal';
+import React, { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { firestore } from "../../../utils/firebaseConnectionHandler";
+import Modal from "../../ui/Modal";
 
+// Interface definitions from your original code
 interface AddTripModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -11,7 +13,7 @@ interface AddTripModalProps {
 interface Client {
   id: string;
   client: string;
-  type?: 'Internal' | 'External';
+  type?: "Internal" | "External";
 }
 
 interface Driver {
@@ -34,19 +36,19 @@ interface Route {
 
 const AddTripModal: React.FC<AddTripModalProps> = ({ isOpen, onClose, onSubmit }) => {
   // Form state
-  const [clientType, setClientType] = useState<'Internal' | 'External'>('Internal');
-  const [fleetNumber, setFleetNumber] = useState('');
-  const [externalClient, setExternalClient] = useState('');
-  const [client, setClient] = useState('');
-  const [driver, setDriver] = useState('');
-  const [route, setRoute] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [clientType, setClientType] = useState<"Internal" | "External">("Internal");
+  const [fleetNumber, setFleetNumber] = useState("");
+  const [externalClient, setExternalClient] = useState("");
+  const [client, setClient] = useState("");
+  const [driver, setDriver] = useState("");
+  const [route, setRoute] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [distance, setDistance] = useState(0);
-  const [baseRevenue, setBaseRevenue] = useState('');
-  const [tripNotes, setTripNotes] = useState('');
-  const [revenueCurrency, setRevenueCurrency] = useState('ZAR');
-  const [tripDescription, setTripDescription] = useState('');
+  const [baseRevenue, setBaseRevenue] = useState("");
+  const [tripNotes, setTripNotes] = useState("");
+  const [revenueCurrency, setRevenueCurrency] = useState("ZAR");
+  const [tripDescription, setTripDescription] = useState("");
 
   // Data from Firestore
   const [clients, setClients] = useState<Client[]>([]);
@@ -60,59 +62,58 @@ const AddTripModal: React.FC<AddTripModalProps> = ({ isOpen, onClose, onSubmit }
     const fetchData = async () => {
       try {
         setLoading(true);
-        const db = getFirestore();
 
         // Fetch clients
-        const clientsSnapshot = await getDocs(collection(db, 'clients'));
-        const clientsData = clientsSnapshot.docs.map(doc => {
+        const clientsSnapshot = await getDocs(collection(firestore, "clients"));
+        const clientsData = clientsSnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
             id: doc.id,
-            client: data.client || '',
-            type: data.type as 'Internal' | 'External' || 'Internal'
+            client: data.client || "",
+            type: (data.type as "Internal" | "External") || "Internal",
           };
         });
         setClients(clientsData);
 
         // Fetch drivers
-        const driversSnapshot = await getDocs(collection(db, 'drivers'));
-        const driversData = driversSnapshot.docs.map(doc => {
+        const driversSnapshot = await getDocs(collection(firestore, "drivers"));
+        const driversData = driversSnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
             idNo: data.idNo || doc.id,
-            name: data.name || '',
-            surname: data.surname || ''
+            name: data.name || "",
+            surname: data.surname || "",
           };
         });
         setDrivers(driversData);
 
         // Fetch fleet
-        const fleetSnapshot = await getDocs(collection(db, 'fleet'));
-        const fleetData = fleetSnapshot.docs.map(doc => {
+        const fleetSnapshot = await getDocs(collection(firestore, "fleet"));
+        const fleetData = fleetSnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
-            fleetNumber: data.fleetNumber || '',
-            registration: data.registration || '',
-            make: data.make || '',
-            model: data.model || ''
+            fleetNumber: data.fleetNumber || "",
+            registration: data.registration || "",
+            make: data.make || "",
+            model: data.model || "",
           };
         });
         setFleets(fleetData);
 
         // Fetch routes
-        const routesSnapshot = await getDocs(collection(db, 'routeDistances'));
-        const routesData = routesSnapshot.docs.map(doc => {
+        const routesSnapshot = await getDocs(collection(firestore, "routeDistances"));
+        const routesData = routesSnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
-            route: data.route || '',
-            distance: data.distance || 0
+            route: data.route || "",
+            distance: data.distance || 0,
           };
         });
         setRoutes(routesData);
 
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
         setLoading(false);
       }
     };
@@ -125,7 +126,7 @@ const AddTripModal: React.FC<AddTripModalProps> = ({ isOpen, onClose, onSubmit }
   // Update distance when route changes
   useEffect(() => {
     if (route) {
-      const selectedRoute = routes.find(r => r.route === route);
+      const selectedRoute = routes.find((r) => r.route === route);
       if (selectedRoute) {
         setDistance(selectedRoute.distance);
       }
@@ -138,7 +139,7 @@ const AddTripModal: React.FC<AddTripModalProps> = ({ isOpen, onClose, onSubmit }
     const tripData = {
       clientType,
       fleetNumber,
-      externalClient: clientType === 'External' ? externalClient : null,
+      externalClient: clientType === "External" ? externalClient : null,
       client,
       driver,
       route,
@@ -149,7 +150,7 @@ const AddTripModal: React.FC<AddTripModalProps> = ({ isOpen, onClose, onSubmit }
       tripNotes,
       revenueCurrency,
       tripDescription,
-      status: 'Active',
+      status: "Active",
       createdAt: new Date().toISOString(),
     };
 
@@ -169,7 +170,7 @@ const AddTripModal: React.FC<AddTripModalProps> = ({ isOpen, onClose, onSubmit }
               <select
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={clientType}
-                onChange={(e) => setClientType(e.target.value as 'Internal' | 'External')}
+                onChange={(e) => setClientType(e.target.value as "Internal" | "External")}
                 required
               >
                 <option value="Internal">Internal</option>
@@ -198,7 +199,7 @@ const AddTripModal: React.FC<AddTripModalProps> = ({ isOpen, onClose, onSubmit }
             </div>
 
             {/* External Client - Only show if client type is External */}
-            {clientType === 'External' && (
+            {clientType === "External" && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   External Client
@@ -302,9 +303,7 @@ const AddTripModal: React.FC<AddTripModalProps> = ({ isOpen, onClose, onSubmit }
 
             {/* Distance (KM) - Auto-populated based on route selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Distance (KM)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Distance (KM)</label>
               <input
                 type="number"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
@@ -346,9 +345,7 @@ const AddTripModal: React.FC<AddTripModalProps> = ({ isOpen, onClose, onSubmit }
 
           {/* Trip Notes */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Trip Notes
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Trip Notes</label>
             <textarea
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={3}
@@ -385,7 +382,7 @@ const AddTripModal: React.FC<AddTripModalProps> = ({ isOpen, onClose, onSubmit }
               className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               disabled={loading}
             >
-              {loading ? 'Loading...' : 'Create Trip'}
+              {loading ? "Loading..." : "Create Trip"}
             </button>
           </div>
         </form>

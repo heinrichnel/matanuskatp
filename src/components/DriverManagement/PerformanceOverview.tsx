@@ -1,5 +1,5 @@
 import React from 'react';
-import Card, { CardHeader, CardContent } from '../ui/Card';
+import Card, { CardHeader, CardContent } from '@/components/ui/consolidated/Card';
 import Button from '../ui/Button';
 import { Calendar, Download, Filter, Plus, Eye, Edit, RefreshCw } from 'lucide-react';
 import { DriverBehaviorEvent } from '../../types';

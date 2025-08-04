@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent } from '../ui/Card';
+import { Card, CardContent } from '@/components/ui/consolidated/Card';
 import Button from '../ui/Button';
 import { Save, X, Truck, Calendar, Ruler, Plus } from 'lucide-react';
 import VehiclePositionDiagram from '../tyres/VehiclePositionDiagram';

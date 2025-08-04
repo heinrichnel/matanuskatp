@@ -4,7 +4,7 @@ import 'react-calendar-timeline/dist/style.css';
 import { format, addWeeks, subWeeks, parseISO, isValid, startOfWeek, endOfWeek } from 'date-fns';
 import { collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { firestore as db } from "../../utils/firebaseConnectionHandler";
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/consolidated/Card';
 import Button from '@/components/ui/Button';
 import {
   ChevronLeft, ChevronRight, Truck, Flag, AlertTriangle,

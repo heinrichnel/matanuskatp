@@ -1,6 +1,6 @@
 import { BarChart, Calendar, TrendingUp, Truck } from "lucide-react";
 import React from "react";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import { useAppContext } from "../../context/AppContext";
 
 const TripDashboard: React.FC = () => {

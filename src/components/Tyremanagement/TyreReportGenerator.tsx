@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/consolidated/Card';
 import { Button } from '@/components/ui/Button';
 import { Select } from '@/components/ui/FormElements';
 import { FileText, Download } from 'lucide-react';

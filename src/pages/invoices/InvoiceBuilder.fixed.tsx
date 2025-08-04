@@ -1,7 +1,7 @@
 import { Download, Eye, FileCheck, Plus, Save, Send, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import Button from "../../components/ui/Button";
-import { Card, CardContent } from "../../components/ui/Card";
+import {  Card, CardContent  } from '../../components/ui/consolidated/Card';
 import SyncIndicator from "../../components/ui/SyncIndicator";
 
 interface InvoiceItem {

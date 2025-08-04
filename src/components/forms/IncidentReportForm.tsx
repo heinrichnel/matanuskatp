@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '../ui/Card';
+import { Card, CardContent } from '@/components/ui/consolidated/Card';
 import Button from '../ui/Button';
 import { AlertTriangle, Calendar, Map, Upload, Truck, Cloud, Save } from 'lucide-react';
 

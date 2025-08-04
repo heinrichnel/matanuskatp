@@ -1,7 +1,7 @@
 
 
 import React from "react";
-import { Card, CardContent } from "./Card";
+import {  Card, CardContent  } from './consolidated/Card';
 
 interface Stat {
   label: string;
@@ -41,6 +41,21 @@ interface StatsCardGroupProps {
   className?: string;
 }
 
+/**
+ * StatsCardGroup
+ *
+ * A StatsCardGroup component
+ *
+ * @example
+ * ```tsx
+ * <StatsCardGroup className="example" />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.cards - cards of the component
+ * @param props.className - className of the component
+ * @returns React component
+ */
 const StatsCardGroup: React.FC<StatsCardGroupProps> = ({ cards, className }) => {
   return (
     <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${className || ""}`}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Card, { CardContent } from '../ui/Card';
+import Card, { CardContent } from '@/components/ui/consolidated/Card';
 import Button from '../ui/Button';
 import { format } from 'date-fns';
 import { Download, X, Check, Plus, Trash2 } from 'lucide-react';

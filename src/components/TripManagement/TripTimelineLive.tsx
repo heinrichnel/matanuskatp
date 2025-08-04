@@ -1,6 +1,6 @@
 import React from "react";
 import { useRealtimeTrips, Trip } from "../../hooks/useRealtimeTrips";
-import { Card, CardContent, CardHeader } from "../ui/Card";
+import {  Card, CardContent, CardHeader  } from '../ui/consolidated/Card';
 import { Calendar, Clock, MapPin } from "lucide-react";
 
 // This is an example component showing how to use the real-time trips 

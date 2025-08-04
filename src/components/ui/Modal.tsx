@@ -12,6 +12,28 @@ interface ModalProps {
   className?: string; // Added className prop
 }
 
+/**
+ * Modal
+ *
+ * A modal dialog component for displaying content in a layer above the page
+ *
+ * @example
+ * ```tsx
+ * <Modal isOpen={true} onClose={() => {}} title="example" className="example">
+ *   Content
+ * </Modal>
+ * ```
+ *
+ * @param props - Component props
+ * @param props.isOpen - isOpen of the component
+ * @param props.onClose - onClose of the component
+ * @param props.title - title of the component
+ * @param props.children - children of the component
+ * @param props.maxWidth - maxWidth of the component
+ * @param props.size - size of the component
+ * @param props.className - Added className prop
+ * @returns React component
+ */
 const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,

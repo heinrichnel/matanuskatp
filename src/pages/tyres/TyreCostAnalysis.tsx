@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import {  Card, CardContent, CardHeader, CardTitle  } from '@/components/ui/consolidated/Card';
 import { Select } from "@/components/ui/FormElements";
 import { Badge } from "@/components/ui/badge";
 import {

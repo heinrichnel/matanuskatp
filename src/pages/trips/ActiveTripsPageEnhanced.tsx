@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader } from "../../components/ui/Card";
+import {  Card, CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import Modal from "../../components/ui/Modal";
 import { useRealtimeTrips } from "../../hooks/useRealtimeTrips";
 import { formatCurrency, SupportedCurrency } from "../../lib/currency";

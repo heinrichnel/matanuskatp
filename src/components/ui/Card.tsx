@@ -25,6 +25,19 @@ interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
+/**
+ * Card
+ *
+ * A versatile card component with various styling options and subcomponents
+ *
+ * @example
+ * ```tsx
+ * <Card />
+ * ```
+ *
+ * @param props - Component props
+ * @returns React component
+ */
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, children, ...props }, ref) => (
     <div

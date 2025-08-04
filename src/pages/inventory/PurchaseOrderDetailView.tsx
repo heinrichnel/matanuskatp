@@ -1,7 +1,7 @@
 import { Box, Clock, Download, FileText, Link, MapPin, ShoppingBag, User } from "lucide-react";
 import React from "react";
 import Button from "../../components/ui/Button";
-import { Card, CardContent } from "../../components/ui/Card";
+import {  Card, CardContent  } from '../../components/ui/consolidated/Card';
 
 interface POItem {
   sku: string;

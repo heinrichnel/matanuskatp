@@ -6,7 +6,7 @@ import { MissedLoad, MISSED_LOAD_REASONS } from '../../types';
 import { formatCurrency, formatDate } from '../../utils/helpers';
 
 // ─── UI Components ───────────────────────────────────────────────
-import { Card, CardContent, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import Button from '../../components/ui/Button';
 import Modal from '../../components/ui/Modal';
 import { Select } from '../../components/ui/FormElements';

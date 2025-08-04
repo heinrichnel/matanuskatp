@@ -13,7 +13,7 @@ import {
 import React, { useMemo, useState } from "react";
 import FlagResolutionModal from "../../components/Models/Flags/FlagResolutionModal";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import { Select } from "../../components/ui/FormElements";
 import { useAppContext } from "../../context/AppContext";
 import { CostEntry, Trip } from "../../types";

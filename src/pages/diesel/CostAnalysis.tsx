@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import { BarChart, PieChart, TrendingDown, TrendingUp, Filter, Download } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import { useAppContext } from '../../context/AppContext';

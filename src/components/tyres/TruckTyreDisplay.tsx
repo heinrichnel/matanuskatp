@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Tyre, TyrePosition, FleetTyreMapping } from '@/types/tyre';
 import { useTyres } from '@/context/TyreContext';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import { Button } from '@/components/ui/Button';
 import { CircleDot, Info, AlertTriangle, Truck, TruckIcon } from 'lucide-react';
 import LoadingIndicator from '@/components/ui/LoadingIndicator';

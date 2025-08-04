@@ -4,7 +4,7 @@ import { useAppContext } from '../../context/AppContext';
 import DieselDashboard from './DieselDashboardComponent';
 import { formatCurrency } from '../../utils/helpers';
 import Button from '../../components/ui/Button';
-import { Card, CardContent, CardHeader } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/Tabs';
 import { 
   Fuel,

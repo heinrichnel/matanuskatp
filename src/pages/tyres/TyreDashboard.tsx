@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import { Button } from '@/components/ui/Button';
 import { Tyre } from '@/types/tyre';
 import { useFleetList } from '@/hooks/useFleetList';

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Trip, CustomerPerformance } from '../../types';
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import Button from '../../components/ui/Button';
 import { Input, Select } from '../../components/ui/FormElements';
 import {

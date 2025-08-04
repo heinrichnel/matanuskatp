@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Card, { CardHeader, CardContent } from '../../components/ui/Card';
+import Card, { CardHeader, CardContent } from '@/components/ui/consolidated/Card';
 import Button from '../../components/ui/Button';
 import { FileText, Plus, Upload, Download, Filter, Edit, Trash2, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 

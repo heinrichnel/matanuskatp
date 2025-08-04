@@ -8,7 +8,7 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
+import {  Card, CardContent, CardHeader, CardTitle  } from '../../components/ui/consolidated/Card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/Tabs";
 
 // Import all workshop components

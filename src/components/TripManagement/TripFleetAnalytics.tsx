@@ -4,7 +4,7 @@ import { ROIBarChart } from "@/components/charts/ROIBarChart";
 import { useFleetAnalytics } from "@/context/FleetAnalyticsContext";
 import { BarChart, ChevronRight, TrendingUp, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Card, CardContent, CardHeader } from "../../components/ui/Card";
+import {  Card, CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 
 interface TripFleetAnalyticsProps {
   tripCount?: number;

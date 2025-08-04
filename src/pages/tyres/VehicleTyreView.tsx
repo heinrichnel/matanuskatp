@@ -4,7 +4,7 @@ import { useTyres } from '@/context/TyreContext';
 import { getPositionsByFleet } from '@/utils/tyreConstants';
 import { useFleetList } from '@/hooks/useFleetList';
 import { CircleDot, Info, AlertTriangle } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '@/components/ui/Card';
+import { Card, CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import { Button } from '@/components/ui/Button';
 import LoadingIndicator from '@/components/ui/LoadingIndicator';
 

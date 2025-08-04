@@ -11,7 +11,20 @@ interface ChartFilterProps {
   onChange: (selected: string[]) => void;
 }
 
-export function ChartFilters({ filters, selectedFilters, onChange }: ChartFilterProps) {
+export /**
+ * ChartFilters
+ *
+ * A ChartFilters component
+ *
+ * @example
+ * ```tsx
+ * <ChartFilters />
+ * ```
+ *
+ * @param props - Component props
+ * @returns React component
+ */
+function ChartFilters({ filters, selectedFilters, onChange }: ChartFilterProps) {
   const handleFilterChange = (id: string, checked: boolean) => {
     if (checked) {
       onChange([...selectedFilters, id]);

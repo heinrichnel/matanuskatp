@@ -8,6 +8,21 @@ interface SyncIndicatorProps {
   showText?: boolean;
 }
 
+/**
+ * SyncIndicator
+ *
+ * A SyncIndicator component
+ *
+ * @example
+ * ```tsx
+ * <SyncIndicator className="example" showText={true} />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.className - className of the component
+ * @param props.showText - showText of the component
+ * @returns React component
+ */
 const SyncIndicator: React.FC<SyncIndicatorProps> = ({
   className = '',
   showText = true 

@@ -9,6 +9,19 @@ import type { StepperItem } from '@/components/ui/ProgressStepper';
 import type { VerticalStepItem } from '@/components/ui/VerticalStepper';
 import type { StatItem } from '@/components/ui/StatsCardGroup';
 
+/**
+ * UIComponentsDemo
+ *
+ * A UIComponentsDemo component
+ *
+ * @example
+ * ```tsx
+ * <UIComponentsDemo />
+ * ```
+ *
+ * @param props - Component props
+ * @returns React component
+ */
 const UIComponentsDemo = () => {
   const [activeStep, setActiveStep] = useState('form');
 

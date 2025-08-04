@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Card, { CardContent, CardHeader } from '../../ui/Card';
+import Card, { CardContent, CardHeader } from '../../ui/consolidated/Card";
 import Button from '../../ui/Button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/Tabs';
 import { Wrench, AlertTriangle, Plus, RefreshCw } from 'lucide-react';

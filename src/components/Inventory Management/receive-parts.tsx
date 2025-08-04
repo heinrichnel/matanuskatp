@@ -1,6 +1,6 @@
 import React from 'react';
 import PageWrapper from '../../components/ui/PageWrapper';
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import Button from '../../components/ui/Button';
 import { Input, Select, TextArea } from '../../components/ui/FormElements';
 import { AlertTriangle, CheckCircle, Package, Save, X } from 'lucide-react';

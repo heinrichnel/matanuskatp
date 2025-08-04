@@ -27,6 +27,19 @@ const sizeClasses: Record<ButtonSize, string> = {
   lg: "px-6 py-3 text-lg rounded-lg",
 };
 
+/**
+ * Button
+ *
+ * A customizable button component with various variants and sizes
+ *
+ * @example
+ * ```tsx
+ * <Button />
+ * ```
+ *
+ * @param props - Component props
+ * @returns React component
+ */
 const Button: React.FC<ButtonProps> = ({
   variant = "primary",
   size = "md",

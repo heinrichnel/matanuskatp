@@ -1,7 +1,7 @@
 import React from "react";
 import { ChevronRight, Layers, Package, Plus, RefreshCw } from "lucide-react";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import { useAppContext } from "../../context/AppContext";
 
 // Mock Data - vervang later met API data of props

@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Button from "../../components/ui/Button";
-import { Card, CardContent } from "../../components/ui/Card";
+import {  Card, CardContent  } from '../../components/ui/consolidated/Card';
 import SyncIndicator from "../../components/ui/SyncIndicator";
 import { useAppContext } from "../../context/AppContext";
 

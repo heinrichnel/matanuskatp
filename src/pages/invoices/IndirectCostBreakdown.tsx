@@ -13,7 +13,7 @@ import {
   YAxis,
 } from "recharts";
 import Button from "../../components/ui/Button";
-import { Card, CardContent, CardHeader } from "../../components/ui/Card";
+import {  Card, CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import SyncIndicator from "../../components/ui/SyncIndicator";
 import { useAppContext } from "../../context/AppContext";
 

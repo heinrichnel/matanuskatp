@@ -6,7 +6,7 @@ import { useAppContext } from '../../context/AppContext';
 import { Trip, TripDeletionRecord } from '../../types';
 
 // ─── UI Components ───────────────────────────────────────────────
-import Card, { CardContent, CardHeader } from '../ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import Button from '../ui/Button';
 import { Input, Select } from '../ui/FormElements';
 import SyncIndicator from '../ui/SyncIndicator';

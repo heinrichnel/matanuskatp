@@ -6,7 +6,7 @@ import { CostEntry } from "../../types/trip";
 
 // ─── UI Components ───────────────────────────────────────────────
 import Button from "../../components/ui/Button";
-import Card from "../../components/ui/Card";
+import Card from '../../components/ui/consolidated/Card';
 
 interface CostEntryFormProps {
   onSubmit: (cost: CostEntry) => void;

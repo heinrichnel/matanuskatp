@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {  Card, CardContent, CardHeader, CardTitle  } from '@/components/ui/consolidated/Card';
 import { Checkbox } from "@/components/ui/checkbox";
 import { useFleetAnalytics } from "@/context/FleetAnalyticsContext";
 

@@ -18,7 +18,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "types": ["react", "react-dom", "node"],
+    "types": ["vite/client", "node", "jest", "@testing-library/jest-dom"],
     "moduleDetection": "force",
     "baseUrl": ".",
     "paths": {
@@ -42,7 +42,9 @@
     "sidebar-validator.cjs",
     "find-form-usage.js",
     ".github/examples",
-    "src/types/*.d.ts"
+    "src/types/*.d.ts",
+    "src/types/react19.d.ts",
+    "setupTests.ts"
   ],
   "exclude": ["node_modules", "dist", "build", ".netlify"],
   "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]

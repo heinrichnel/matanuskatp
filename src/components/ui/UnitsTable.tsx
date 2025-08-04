@@ -1,6 +1,19 @@
 import { useWialonUnits } from "../hooks/useWialonUnits";
 
-export default function UnitsTable({ sdkReady }: { sdkReady: boolean }) {
+export default /**
+ * UnitsTable
+ *
+ * A UnitsTable component
+ *
+ * @example
+ * ```tsx
+ * <UnitsTable />
+ * ```
+ *
+ * @param props - Component props
+ * @returns React component
+ */
+function UnitsTable({ sdkReady }: { sdkReady: boolean }) {
   const { units, loading, error } = useWialonUnits(sdkReady);
 
   return (

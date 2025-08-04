@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useWebBookTrips, WebBookTrip } from "../../hooks/useWebBookTrips";
 import { useAppContext } from "../../context/AppContext";
-import Card, { CardContent, CardHeader } from "../ui/Card";
+import Card, {  CardContent, CardHeader  } from '../ui/consolidated/Card';
 import LoadingIndicator from "../ui/LoadingIndicator";
 import ErrorMessage from "../ui/ErrorMessage";
 import Button from "../ui/Button";

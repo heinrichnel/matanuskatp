@@ -1,6 +1,6 @@
 import React from 'react';
 import TyreReferenceManager from '../../components/tyres/TyreReferenceManager';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/consolidated/Card';
 
 /**
  * Page component for managing tyre reference data

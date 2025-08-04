@@ -5,6 +5,23 @@ interface PageWrapperProps {
   children: React.ReactNode;
 }
 
+/**
+ * PageWrapper
+ *
+ * A PageWrapper component
+ *
+ * @example
+ * ```tsx
+ * <PageWrapper title="example">
+ *   Content
+ * </PageWrapper>
+ * ```
+ *
+ * @param props - Component props
+ * @param props.title - title of the component
+ * @param props.children - children of the component
+ * @returns React component
+ */
 const PageWrapper: React.FC<PageWrapperProps> = ({ title, children }) => {
   return (
     <div className="container mx-auto px-6 py-8">

@@ -20,7 +20,7 @@ import React, { useEffect, useMemo, useState } from "react"; // Added useMemo
 import { Link } from "react-router-dom";
 import TyreFormModal from "../../components/Models/Tyre/TyreFormModal";
 import { Button } from "../../components/ui/Button";
-import { Card, CardContent, CardHeader } from "../../components/ui/Card";
+import {  Card, CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 // Using the Tyre type directly from tyreData.ts instead of TyreModel
 import { useTyreReferenceData } from "@/context/TyreReferenceDataContext";
 

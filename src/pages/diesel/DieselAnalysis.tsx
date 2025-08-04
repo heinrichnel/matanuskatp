@@ -1,7 +1,7 @@
 import { BarChart3, Calendar, Download, TrendingDown, TrendingUp, Truck } from "lucide-react";
 import React, { useState } from "react";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import { DieselConsumptionRecord } from "../../types";
 import { formatCurrency } from "../../utils/helpers";
 

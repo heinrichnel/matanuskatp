@@ -1,31 +1,26 @@
-
 {
-
   "extends": "./tsconfig.json",
-
   "compilerOptions": {
-
-    "outDir": "./lib",
-
-    "rootDir": "./functions/src",
-
-    "module": "commonjs",
-
-    "target": "es2020",
-
-    "esModuleInterop": true,
-
-    "strict": true,
-
+    "types": [
+      "vite/client",
+      "node"
+    ],
     "skipLibCheck": true
-
   },
-
   "include": [
-
-    "functions/src/**/*.ts"
-
+    "src",
+    "tests",
+    "scripts",
+    "functions",
+    "public",
+    "vite.config.ts",
+    "index.ts",
+    "index.js",
+    "route-component-map.cjs",
+    "sidebar-validator.cjs",
+    "find-form-usage.js",
+    ".github/examples",
+    "src/types/*.d.ts",
+    "src/types/react19.d.ts"
   ]
-
 }
-

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Card, { CardHeader, CardContent } from '../../components/ui/Card';
+import Card, { CardHeader, CardContent } from '@/components/ui/consolidated/Card';
 import Button from '../../components/ui/Button';
 import { Save, ArrowLeft, Upload, Trash2, AlertTriangle } from 'lucide-react';
 

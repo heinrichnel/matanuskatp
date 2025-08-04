@@ -4,7 +4,7 @@ import { db } from "@/firebase"; // Pas aan as jou firebase config elders is
 
 import { BarChart2, PieChart, Download, Filter, Plus, Search, CheckCircle2, XCircle, Truck, Circle, CircleDot, Loader2 } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { Card, CardContent } from "@/components/ui/Card";
+import {  Card, CardContent  } from '@/components/ui/consolidated/Card';
 import SyncIndicator from "@/components/ui/SyncIndicator";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Pie, PieChart as PieChartC, Cell, ResponsiveContainer, Legend } from "recharts";
 

@@ -1,7 +1,7 @@
 // src/pages/wialon/pages/WialonUnitsPage.tsx
 import React from "react";
 import { useWialonUnits } from "../hooks/useWialonUnits";
-import Card, { CardContent, CardHeader } from "../../../components/ui/Card";
+import Card, { CardContent, CardHeader } from "../../../components/ui/consolidated/Card";
 import Button from "../../../components/ui/Button";
 import LoadingIndicator from "../../../components/ui/LoadingIndicator";
 import ErrorMessage from "../../../components/ui/ErrorMessage";

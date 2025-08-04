@@ -6,6 +6,22 @@ interface LoadingIndicatorProps {
   text?: string;
 }
 
+/**
+ * LoadingIndicator
+ *
+ * A LoadingIndicator component
+ *
+ * @example
+ * ```tsx
+ * <LoadingIndicator className="example" text="example" />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.size - size of the component
+ * @param props.className - className of the component
+ * @param props.text - text of the component
+ * @returns React component
+ */
 const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
   size = 'md',
   className = '',

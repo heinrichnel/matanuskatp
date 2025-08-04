@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, Users } from "lucide-react";
+import { ChevronDown, ChevronRight, X, Users } from "lucide-react";
 import React, { FC, useState } from "react";
 import { sidebarConfig, SidebarItem } from "../../config/sidebarConfig";
 import ConnectionStatusIndicator from "../ui/ConnectionStatusIndicator";
@@ -28,9 +28,11 @@ const Truck = (props: React.SVGProps<SVGSVGElement>) => (
 interface SidebarProps {
   currentView: string;
   onNavigate: (route: string) => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
+const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate, isOpen, onClose }) => {
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
   const currentPath = currentView; // Use currentView as the current path
 
@@ -93,7 +95,7 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
                     )}
                   </button>
                 </div>
-                {expandedItems[item.id] && renderSidebarItems(item.children, true)}
+                {isOpen && expandedItems[item.id] && renderSidebarItems(item.children, true)}
               </li>
             );
           }
@@ -120,22 +122,34 @@ const Sidebar: FC<SidebarProps> = ({ currentView, onNavigate }) => {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 !w-64 bg-gray-100 border-r shadow flex flex-col z-30" style={{ width: '16rem' }}>
+    <aside className={`fixed left-0 top-0 h-screen bg-gray-100 border-r shadow flex flex-col z-30 transition-all duration-300 ${isOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 md:translate-x-0 md:w-16'}` }>
+      {/* Close button (visible on mobile) */}
+      <button 
+        className="md:hidden absolute top-4 right-4 p-1 rounded-full hover:bg-gray-200"
+        onClick={onClose}
+        aria-label="Close sidebar"
+      >
+        <X size={20} />
+      </button>
       <div className="flex items-center justify-center px-6 py-4 border-b bg-gray-100">
-        <h1 className="font-bold text-black text-lg">MATANUSKA TRANSPORT</h1>
+        {isOpen || window.innerWidth >= 768 ? (
+          <h1 className="font-bold text-black text-lg">MATANUSKA TRANSPORT</h1>
+        ) : (
+          <h1 className="font-bold text-black text-lg">MT</h1>
+        )}
       </div>
       <nav className="flex-1 overflow-y-auto py-2 max-h-[calc(100vh-160px)]">
         {/* Render all sidebar items directly from sidebarConfig */}
         {renderSidebarItems(sidebarConfig)}
       </nav>
-      <div className="px-6 py-4 border-t">
+      <div className={`px-6 py-4 border-t ${isOpen ? '' : 'hidden md:block'}` }>
         <div className="flex flex-col space-y-2 mb-3">
-          <ConnectionStatusIndicator showText={true} />
-          <SyncIndicator showText={true} className="mt-1" />
+          <ConnectionStatusIndicator showText={isOpen} />
+          <SyncIndicator showText={isOpen} className="mt-1" />
         </div>
         <div className="flex items-center gap-3 mt-2">
           <Users className="w-5 h-5 text-gray-400" />
-          <span className="text-sm text-gray-700">User</span> {/* Replace with actual user name */}
+          {isOpen && <span className="text-sm text-gray-700">User</span>} {/* Replace with actual user name */}
         </div>
       </div>
     </aside>

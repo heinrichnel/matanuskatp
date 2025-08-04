@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Card, { CardContent, CardHeader } from '../ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import { Copy, Plus, Edit, Trash2, Search } from 'lucide-react';
 import Button from '../ui/Button';
 import { useAppContext } from '../../context/AppContext';

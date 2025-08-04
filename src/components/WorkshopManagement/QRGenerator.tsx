@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Card, { CardContent, CardHeader } from '../ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import Button from '../ui/Button';
 import { Input, Select } from '../ui/FormElements';
 import { QrCode, Save, Truck, Wrench, Clipboard, ExternalLink, List, Download, PenTool as Tool } from 'lucide-react';

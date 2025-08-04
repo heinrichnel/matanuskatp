@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardContent } from '../ui/Card';
+import { Card, CardHeader, CardContent } from '@/components/ui/consolidated/Card';
 import Button from '../ui/Button';
 import SyncIndicator from '../ui/SyncIndicator';
 import { useAppContext } from '../../context/AppContext';

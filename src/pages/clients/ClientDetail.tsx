@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import { Badge } from "../../components/ui/badge";
 import { useAppContext } from "../../context/AppContext";
 import { Client, CLIENT_STATUSES, CLIENT_TYPES } from "../../types/client";

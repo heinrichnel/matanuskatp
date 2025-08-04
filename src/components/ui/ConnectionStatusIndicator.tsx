@@ -13,6 +13,21 @@ interface ConnectionStatusIndicatorProps {
   className?: string;
 }
 
+/**
+ * ConnectionStatusIndicator
+ *
+ * A ConnectionStatusIndicator component
+ *
+ * @example
+ * ```tsx
+ * <ConnectionStatusIndicator showText={true} className="example" />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.showText - showText of the component
+ * @param props.className - className of the component
+ * @returns React component
+ */
 const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
   showText = false,
   className = ''

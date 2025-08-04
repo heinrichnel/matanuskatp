@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { LoadPlan, Trip, LOAD_CATEGORIES } from "../../types";
 import { useAppContext } from "../../context/AppContext";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import Button from "../../components/ui/Button";
 import { Input, Select, Textarea } from "../../components/ui/FormElements";
 import {

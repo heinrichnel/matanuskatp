@@ -20,7 +20,24 @@ interface JobCardTableProps {
   onView: (id: string) => void;
 }
 
-export const JobCardTable: React.FC<JobCardTableProps> = ({ data, onAction, onView }) => (
+export /**
+ * JobCardTable
+ *
+ * A JobCardTable component
+ *
+ * @example
+ * ```tsx
+ * <JobCardTable onAction="example" onView="example" />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.data - data of the component
+ * @param props.onAction - onAction of the component
+ * @param props.action - action of the component
+ * @param props.onView - onView of the component
+ * @returns React component
+ */
+const JobCardTable: React.FC<JobCardTableProps> = ({ data, onAction, onView }) => (
   <div className="overflow-x-auto">
     <table className="w-full text-sm border">
       <thead>

@@ -15,7 +15,27 @@ interface DataUpdateNotificationProps {
   onDismiss?: () => void;
 }
 
-export function DataUpdateNotification({
+export /**
+ * DataUpdateNotification
+ *
+ * A DataUpdateNotification component
+ *
+ * @example
+ * ```tsx
+ * <DataUpdateNotification title="example" message="example" duration={42} onAction={() => {}} actionLabel="example" onDismiss={() => {}} />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.type - type of the component
+ * @param props.title - title of the component
+ * @param props.message - message of the component
+ * @param props.duration - Auto-dismiss duration in ms, 0 means don't auto-dismiss
+ * @param props.onAction - onAction of the component
+ * @param props.actionLabel - actionLabel of the component
+ * @param props.onDismiss - onDismiss of the component
+ * @returns React component
+ */
+function DataUpdateNotification({
   type = "info",
   title,
   message,

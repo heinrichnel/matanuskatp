@@ -1,46 +1,15 @@
 {
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["DOM", "DOM.Iterable", "ES2020"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true,
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "skipLibCheck": true,
-    "emitDeclarationOnly": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
     "composite": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
-    "types": ["react", "react-dom", "node"],
-    "baseUrl": "./",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "jsx": "react-jsx",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "moduleResolution": "bundler",
     "paths": {
-      "@/*": ["src/*"]
-    }
+      "@/*": ["./src/*"]
+    },
+    "types": ["react/jsx-runtime", "react", "react-dom"]
   },
-  "include": [
-    "src",
-    ".github",
-    "scripts",
-    "functions",
-    "public",
-    "src/types/*.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.json",
-    "route-component-map.cjs",
-    "sidebar-validator.cjs",
-    "find-form-usage.js",
-    "index.js",
-    ".github/examples"
-  ],
-  "exclude": []
+  "include": ["src", "setupTests.ts"]
 }

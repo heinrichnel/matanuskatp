@@ -38,7 +38,7 @@ const TyreInspectionMobile: React.FC<TyreInspectionMobileProps> = ({
 }) => {
   const [showScanner, setShowScanner] = useState(!tyreId);
   const [saving, setSaving] = useState(false);
-  
+
   const [formData, setFormData] = useState<TyreInspectionData>({
     tyreId: tyreId || '',
     tyreNumber: tyreNumber || '',
@@ -74,14 +74,14 @@ const TyreInspectionMobile: React.FC<TyreInspectionMobileProps> = ({
         tyreNumber: scanData.barcode
       }));
     }
-    
+
     if (scanData.photo) {
       setFormData(prev => ({
         ...prev,
         photos: [...prev.photos, scanData.photo!]
       }));
     }
-    
+
     setShowScanner(false);
   };
 

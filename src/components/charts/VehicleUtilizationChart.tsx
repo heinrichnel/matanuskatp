@@ -1,7 +1,7 @@
 import * as React from "react";
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {  Card, CardContent, CardDescription, CardHeader, CardTitle  } from '@/components/ui/consolidated/Card';
 
 import {
   ChartConfig,

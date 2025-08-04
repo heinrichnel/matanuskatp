@@ -13,6 +13,25 @@ interface CardHeaderProps {
   [key: string]: any; // For other props
 }
 
+/**
+ * CardHeader
+ *
+ * A CardHeader component
+ *
+ * @example
+ * ```tsx
+ * <CardHeader title={<div />} subheader={<div />} avatar={<div />} action={<div />} sx="example" key="example" />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.title - title of the component
+ * @param props.subheader - subheader of the component
+ * @param props.avatar - avatar of the component
+ * @param props.action - action of the component
+ * @param props.sx - sx of the component
+ * @param props.key - For other props
+ * @returns React component
+ */
 function CardHeader(props: CardHeaderProps) {
   const { title, subheader, avatar, action, sx, ...other } = props;
 

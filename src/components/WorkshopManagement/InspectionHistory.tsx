@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, orderBy, getDocs, where } from 'firebase/firestore';
 import { firestore } from '../../firebase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import Button from '../../components/ui/Button';
 import { ClipboardList, ArrowLeft, FileSearch, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 

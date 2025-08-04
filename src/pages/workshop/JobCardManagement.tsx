@@ -2,7 +2,7 @@ import { ClipboardCheck, FileText, Filter, Plus, Search, Wrench } from "lucide-r
 import React, { useState } from "react";
 import JobCard from "../../components/Models/Workshop/JobCard";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import Modal from "../../components/ui/Modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/Tabs";
 

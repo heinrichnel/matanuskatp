@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Button from "../../components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
+import {  Card, CardContent, CardHeader, CardTitle  } from '../../components/ui/consolidated/Card';
 import { Input } from "../../components/ui/FormElements";
 // Remove Label import as we'll use a simple label element
 import { ArrowRightLeft } from "lucide-react";

@@ -16,6 +16,28 @@ interface ErrorMessageProps {
   showDetails?: boolean;
 }
 
+/**
+ * ErrorMessage
+ *
+ * A ErrorMessage component
+ *
+ * @example
+ * ```tsx
+ * <ErrorMessage title="example" message="example" details="example" onRetry={() => {}} onClose={() => {}} className="example" showDetails={true} />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.title - title of the component
+ * @param props.message - message of the component
+ * @param props.details - details of the component
+ * @param props.severity - severity of the component
+ * @param props.timestamp - timestamp of the component
+ * @param props.onRetry - onRetry of the component
+ * @param props.onClose - onClose of the component
+ * @param props.className - className of the component
+ * @param props.showDetails - showDetails of the component
+ * @returns React component
+ */
 const ErrorMessage: React.FC<ErrorMessageProps> = ({
   title,
   message,

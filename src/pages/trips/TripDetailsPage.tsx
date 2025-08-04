@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import { Trip, CostEntry, Attachment } from '../../types';
-import { Card, CardHeader, CardContent } from '../../components/ui/Card';
+import { Card, CardHeader, CardContent } from '@/components/ui/consolidated/Card';
 import { Button } from '../../components/ui/Button';
 import {
   ArrowLeft,

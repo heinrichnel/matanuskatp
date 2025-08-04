@@ -21,6 +21,21 @@ interface FirestoreConnectionErrorProps {
  * - Provides retry functionality
  * - Shows custom event-based errors
  */
+/**
+ * FirestoreConnectionError
+ *
+ * A FirestoreConnectionError component
+ *
+ * @example
+ * ```tsx
+ * <FirestoreConnectionError showAlways={true} />
+ * ```
+ *
+ * @param props - Component props
+ * @param props.error - error of the component
+ * @param props.showAlways - showAlways of the component
+ * @returns React component
+ */
 const FirestoreConnectionError: React.FC<FirestoreConnectionErrorProps> = ({
   error: propError,
   showAlways = false,

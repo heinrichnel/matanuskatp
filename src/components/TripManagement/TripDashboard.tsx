@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
-import { Card, CardHeader, CardContent } from '../ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/consolidated/Card';
 import Button from '../ui/Button';
 import { Calendar, BarChart3, TrendingUp, Truck, AlertTriangle, DollarSign, Clock } from 'lucide-react';
 

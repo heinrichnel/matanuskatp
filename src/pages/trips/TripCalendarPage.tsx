@@ -10,7 +10,7 @@ import {
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import Button from "../../components/ui/Button";
-import { Card, CardContent, CardHeader } from "../../components/ui/card";
+import {  Card, CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import LoadingIndicator from "../../components/ui/LoadingIndicator";
 import ErrorMessage from "../../components/ui/ErrorMessage"; // Assuming you have this
 import { useAppContext } from "../../context/AppContext";

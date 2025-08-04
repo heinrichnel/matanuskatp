@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from '../../components/ui/Card';
+import { Card, CardContent } from '@/components/ui/consolidated/Card';
 import Button from '../../components/ui/Button';
 import SyncIndicator from '../../components/ui/SyncIndicator';
 import { Download, Leaf, Truck, BarChart2, Calendar } from 'lucide-react';

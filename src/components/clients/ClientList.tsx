@@ -15,7 +15,7 @@ import { UIClient } from "../../utils/clientMapper";
 
 // --- UI Components ---
 import Button from "../ui/Button";
-import Card, { CardContent, CardHeader } from "../ui/Card";
+import Card, {  CardContent, CardHeader  } from '../ui/consolidated/Card';
 import ErrorMessage from "../ui/ErrorMessage";
 import { Input, Select } from "../ui/FormElements";
 import LoadingIndicator from "../ui/LoadingIndicator";

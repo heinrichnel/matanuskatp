@@ -1,7 +1,6 @@
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import { defineConfig } from "vite";
-import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -20,7 +19,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(__dirname, "src"),
-      // Add specific aliases to handle case sensitivity issues
+      // Handle case sensitivity for TyreManagement/Tyremanagement
       "@/components/TyreManagement": resolve(__dirname, "src/components/Tyremanagement"),
     },
   },
@@ -40,19 +39,12 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: true,
-    // Increase warning limit slightly to reduce noise while we optimize
     chunkSizeWarningLimit: 1800,
-    // Ensure the output directory is emptied before building
     emptyOutDir: true,
-    // Create output folder structure based on src
     assetsDir: "assets",
     rollupOptions: {
-      external: [
-        // Add the TyreReports file to handle the casing issue
-        "/src/components/TyreManagement/TyreReports",
-      ],
+      external: ["/src/components/TyreManagement/TyreReports"],
       output: {
-        // Create more granular chunks to optimize loading
         manualChunks: {
           // Core vendor libraries
           "react-vendor": ["react", "react-dom", "react-router-dom"],

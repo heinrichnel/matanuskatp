@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Menu } from 'lucide-react';
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useAppContext } from '../../context/AppContext';
@@ -17,6 +18,10 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
 
   // State for outlet context
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Toggle sidebar function
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   // Use the props for editingTrip and showTripForm
   const handleSetEditingTrip = (trip: Trip | undefined) => {
@@ -62,8 +67,18 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
       <Sidebar
         currentView={currentView}
         onNavigate={handleNavigate}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
-      <main className="ml-64 !ml-64 p-6 pt-8 w-full max-w-screen-2xl mx-auto" style={{ marginLeft: '16rem' }}>
+      <main className={`transition-all duration-300 p-6 pt-8 w-full max-w-screen-2xl mx-auto ${sidebarOpen ? 'md:ml-64' : 'ml-0'}`}>
+        {/* Sidebar toggle button */}
+        <button 
+          className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-md shadow-md"
+          onClick={toggleSidebar}
+          aria-label={sidebarOpen ? "Close sidebar" : "Open sidebar"}
+        >
+          <Menu size={24} />
+        </button>
         <div className="flex justify-between items-center mb-4">
           {/* The title should be rendered by the page component instead of here */}
           <div></div>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card } from '../../components/ui/Card';
+import { Card } from '@/components/ui/consolidated/Card';
 import { Button } from '../../components/ui/Button';
 
 interface Trip {

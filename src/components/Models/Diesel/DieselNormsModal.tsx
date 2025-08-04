@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 // ─── UI Components ───────────────────────────────────────────────
 import Modal from '../../ui/Modal';
 import Button from '../../ui/Button';
-import Card, { CardContent, CardHeader } from '../../ui/Card';
+import { Card, CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import { Input } from '../../ui/FormElements';
 
 // ─── Utilities ───────────────────────────────────────────────────
@@ -147,7 +147,7 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
 
     // Save to localStorage for persistence
     localStorage.setItem('dieselNorms', JSON.stringify(editedNorms));
-    
+
     onUpdateNorms(editedNorms);
     alert('Fleet efficiency norms updated successfully!\n\nNew tolerance ranges will be applied to all future diesel records.');
     onClose();
@@ -177,7 +177,7 @@ const DieselNormsModal: React.FC<DieselNormsModalProps> = ({
         }))
       ];
       setEditedNorms(defaultNorms);
-      
+
       // Clear localStorage
       localStorage.removeItem('dieselNorms');
     }

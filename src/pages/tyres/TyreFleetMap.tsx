@@ -1,7 +1,7 @@
 import { AlertCircle, CheckCircle, Circle, MapPin, Search, Truck } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Button } from "../../components/ui/Button";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/Card";
+import {  Card, CardContent, CardHeader, CardTitle  } from '../../components/ui/consolidated/Card';
 import { Badge } from "../../components/ui/badge";
 import { buildVehicleTyreStore, mappingData, TyreMappingRow } from "../../data/tyreMappingData";
 

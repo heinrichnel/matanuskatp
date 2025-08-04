@@ -1,6 +1,6 @@
 import React from 'react';
 import { Truck, Bike, TruckIcon } from 'lucide-react';
-import { Card, CardContent } from '../ui/Card';
+import { Card, CardContent } from '@/components/ui/consolidated/Card';
 
 interface Position {
   id: string;

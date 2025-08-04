@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { ActionItem, RESPONSIBLE_PERSONS } from '../../types/index';
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import Button from '../../components/ui/Button';
 import { Input, Select, TextArea } from '../../components/ui/FormElements';
 import Modal from '../../components/ui/Modal_TEMP';

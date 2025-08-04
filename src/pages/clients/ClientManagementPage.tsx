@@ -17,7 +17,7 @@ import { useClients } from "../../hooks/useClients";
 import { exportToCSV } from "../../utils/csvUtils";
 
 // Types
-import { CardContent, CardHeader } from "../../components/ui/Card";
+import {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import ErrorMessage from "../../components/ui/ErrorMessage";
 import { Input, Select } from "../../components/ui/FormElements";
 import LoadingIndicator from "../../components/ui/LoadingIndicator";

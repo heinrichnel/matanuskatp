@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Clipboard, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 import { useFleetData, Vehicle } from '../../hooks/useFleetData';
 import Button from '../../components/ui/Button';
-import Card, { CardContent, CardHeader } from '../../components/ui/Card';
+import Card, { CardContent, CardHeader } from '@/components/ui/consolidated/Card';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { firestore } from '../../firebase';
 

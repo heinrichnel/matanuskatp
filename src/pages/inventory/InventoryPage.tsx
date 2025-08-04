@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import PageWrapper from "../../components/ui/PageWrapper";
 import { Badge } from "../../components/ui/badge";
 

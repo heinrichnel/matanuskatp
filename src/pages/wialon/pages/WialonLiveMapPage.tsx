@@ -4,7 +4,7 @@ import WialonUnitMap from '../../../pages/maps/WialonUnitMap'; // Import the map
 import { WialonUnit } from '../../../types/wialon'; // Import your WialonUnit type
 import LoadingIndicator from '../../../components/ui/LoadingIndicator';
 import ErrorMessage from '../../../components/ui/ErrorMessage';
-import Card, { CardContent } from '../../../components/ui/Card';
+import Card, { CardContent } from '@/components/ui/consolidated/Card';
 import { MapPinIcon, TruckIcon } from '@heroicons/react/24/outline';
 import { formatDate } from '../../../utils/helpers';
 import { getUnitById, initializeWialon } from '../../../api/wialon';

@@ -15,6 +15,26 @@ const sizeClasses = {
   xl: "max-w-2xl",
 };
 
+/**
+ * Modals
+ *
+ * A Modals component
+ *
+ * @example
+ * ```tsx
+ * <Modals isOpen={true} onClose={() => {}} title="example">
+ *   Content
+ * </Modals>
+ * ```
+ *
+ * @param props - Component props
+ * @param props.isOpen - isOpen of the component
+ * @param props.onClose - onClose of the component
+ * @param props.title - title of the component
+ * @param props.size - size of the component
+ * @param props.children - children of the component
+ * @returns React component
+ */
 const Modals: React.FC<ModalsProps> = ({
   isOpen,
   onClose,

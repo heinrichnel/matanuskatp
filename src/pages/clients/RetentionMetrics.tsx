@@ -1,7 +1,7 @@
 import { Building, Link as LinkIcon, Network, Plus, Save, Trash2, Users, X } from "lucide-react";
 import React, { useState } from "react";
 import Button from "../../components/ui/Button";
-import Card, { CardContent, CardHeader } from "../../components/ui/Card";
+import Card, {  CardContent, CardHeader  } from '../../components/ui/consolidated/Card';
 import { Select, TextArea } from "../../components/ui/FormElements";
 import Modal from "../../components/ui/Modal";
 import { useAppContext } from "../../context/AppContext";

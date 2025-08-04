@@ -159,6 +159,7 @@ export function getSensorValue(unitId: number, sensorId: number): number | strin
   const lastMessage = unit.getLastMessage?.();
   if (!lastMessage) return "N/A";
   const result = unit.calculateSensorValue?.(sensor, lastMessage);
+  if (result === undefined) return null;
   return result === -348201.3876 ? "N/A" : result;
 }
 

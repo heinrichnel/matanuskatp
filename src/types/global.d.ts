@@ -6,6 +6,9 @@
 // Keeping this reference here for backward compatibility if needed
 // For Google Maps types, see googleMaps.d.ts
 
+// Reference to React 19 type definitions
+/// <reference path="./react19.d.ts" />
+
 // Global window declarations
 declare global {
   interface Window {
@@ -13,3 +16,5 @@ declare global {
     // For Google Maps, use the types in googleMaps.d.ts
   }
 }
+
+export {};
