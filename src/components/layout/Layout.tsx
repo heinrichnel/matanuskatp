@@ -26,18 +26,12 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
   const toggleSidebar = () => setSidebarOpen((open) => !open);
 
   // Use the props for editingTrip and showTripForm
-  const handleSetEditingTrip = (trip: Trip | undefined) => {
-    setEditingTrip(trip);
-  };
-
-  const handleShowTripForm = (show: boolean) => {
-    setShowTripForm(show);
-  };
+  const handleSetEditingTrip = (trip: Trip | undefined) => setEditingTrip(trip);
+  const handleShowTripForm = (show: boolean) => setShowTripForm(show);
 
   // Get current path from location to determine active menu item
   const currentView = (() => {
     const path = location.pathname.split("/")[1] || "dashboard";
-    // Special handling for workshop with tabs
     if (path === "workshop") {
       const tab = searchParams.get("tab");
       if (tab) return `workshop-${tab}`;
@@ -48,7 +42,6 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
 
   // Navigate to a new route
   const handleNavigate = (view: string) => {
-    // Handle special cases like workshop?tab=tyres
     if (view.includes("?")) {
       const [path, query] = view.split("?");
       navigate(`/${path}?${query}`);
@@ -86,7 +79,7 @@ const Layout: React.FC<LayoutProps> = ({ setShowTripForm, setEditingTrip }) => {
       </header>
 
       <div className="flex flex-1">
-        {/* Sidebar - fixed on desktop, slide-over on mobile */}
+        {/* Sidebar */}
         <Sidebar
           currentView={currentView}
           onNavigate={handleNavigate}

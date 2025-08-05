@@ -1,10 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-@import "leaflet/dist/leaflet.css";
-@import "leaflet.markercluster/dist/MarkerCluster.css";
-@import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* * The following imports have been removed. They should be imported in your
+ * JavaScript entry file (e.g., main.tsx) to prevent compilation errors.
+ * * @import "leaflet/dist/leaflet.css";
+ * @import "leaflet.markercluster/dist/MarkerCluster.css";
+ * @import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+ */
 
 @layer base {
   :root {

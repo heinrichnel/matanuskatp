@@ -1,9 +1,18 @@
 import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import { defineConfig } from "vite";
+import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    visualizer({
+      filename: "./dist/bundle-visualizer.html",
+      open: true, // opens in browser after build – remove if you don’t want this
+      gzipSize: true,
+      brotliSize: true,
+    }),
+  ],
   server: {
     host: true,
     port: 5173,
@@ -41,7 +50,6 @@ export default defineConfig({
     emptyOutDir: true,
     assetsDir: "assets",
     rollupOptions: {
-      // Remove or comment out 'external' if not building a library
       output: {
         manualChunks: {
           "react-vendor": ["react", "react-dom", "react-router-dom"],

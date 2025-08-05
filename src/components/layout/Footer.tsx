@@ -1,5 +1,5 @@
-// src/components/layout/Footer.tsx
 import React from "react";
+import { Link } from "react-router-dom";
 
 /**
  * Footer Component
@@ -26,24 +26,24 @@ const Footer: React.FC = () => {
             <h3 className="text-lg font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/dashboard" className="text-gray-400 hover:text-white">
+                <Link to="/dashboard" className="text-gray-400 hover:text-white">
                   Dashboard
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/forms" className="text-gray-400 hover:text-white">
+                <Link to="/forms" className="text-gray-400 hover:text-white">
                   Forms
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/fleet" className="text-gray-400 hover:text-white">
+                <Link to="/fleet" className="text-gray-400 hover:text-white">
                   Fleet Management
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="/trips" className="text-gray-400 hover:text-white">
+                <Link to="/trips" className="text-gray-400 hover:text-white">
                   Trip Planning
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -52,7 +52,12 @@ const Footer: React.FC = () => {
             <h3 className="text-lg font-bold mb-4">Resources</h3>
             <ul className="space-y-2">
               <li>
-                <a href="/help" className="text-gray-400 hover:text-white">
+                <a
+                  href="https://help.matanuskatransport.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white"
+                >
                   Help Center
                 </a>
               </li>
@@ -77,26 +82,27 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-lg font-bold mb-4">Contact</h3>
             <ul className="space-y-2">
-              <li className="text-gray-400">Email: support@fleetmanager.com</li>
-              <li className="text-gray-400">Phone: +1 (555) 123-4567</li>
+              <li className="text-gray-400">Email: support@matanuskatransport.com</li>
+              <li className="text-gray-400">Phone: +27 21 123 4567</li>
               <li className="text-gray-400">Hours: Mon-Fri, 8am-6pm</li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-gray-700 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400">&copy; {currentYear} Fleet Manager. All rights reserved.</p>
-
+          <p className="text-gray-400">
+            &copy; {currentYear} Matanuska Transport. All rights reserved.
+          </p>
           <div className="flex space-x-4 mt-4 md:mt-0">
-            <a href="/terms" className="text-gray-400 hover:text-white">
+            <Link to="/terms" className="text-gray-400 hover:text-white">
               Terms of Service
-            </a>
-            <a href="/privacy" className="text-gray-400 hover:text-white">
+            </Link>
+            <Link to="/privacy" className="text-gray-400 hover:text-white">
               Privacy Policy
-            </a>
-            <a href="/cookies" className="text-gray-400 hover:text-white">
+            </Link>
+            <Link to="/cookies" className="text-gray-400 hover:text-white">
               Cookie Policy
-            </a>
+            </Link>
           </div>
         </div>
       </div>

@@ -8,19 +8,12 @@ interface NavigationItem {
   icon: React.ReactNode;
 }
 
-/**
- * Main Navigation Component
- *
- * Provides consistent navigation across the application,
- * connecting all major features and forms.
- */
 const Navigation: React.FC = () => {
   const location = useLocation();
   const syncContext = useSyncContext();
 
   const navigationItems: NavigationItem[] = [
-    // ... your nav items unchanged ...
-    // For brevity, not pasting SVGs again
+    // ... your nav items with SVG icons as in your example ...
   ];
 
   return (
@@ -33,7 +26,6 @@ const Navigation: React.FC = () => {
               <span className="ml-2">Fleet Manager</span>
             </Link>
           </div>
-
           <div className="flex items-center space-x-4">
             {/* Connection status indicator */}
             <div
@@ -43,32 +35,21 @@ const Navigation: React.FC = () => {
             >
               {syncContext.isOnline ? "Online" : "Offline"}
             </div>
-
-            {/* User profile button */}
+            {/* Profile button */}
             <button
               className="p-3 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              style={{
-                minWidth: "44px",
-                minHeight: "44px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              aria-label="Profile"
+              style={{ minWidth: 44, minHeight: 44 }}
             >
-              {/* profile svg here */}
+              {/* profile svg */}
             </button>
             {/* Settings button */}
             <button
               className="p-3 rounded-full hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              style={{
-                minWidth: "44px",
-                minHeight: "44px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              aria-label="Settings"
+              style={{ minWidth: 44, minHeight: 44 }}
             >
-              {/* settings svg here */}
+              {/* settings svg */}
             </button>
           </div>
         </div>

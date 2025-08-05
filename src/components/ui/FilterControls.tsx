@@ -1,5 +1,5 @@
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/Card";
 import { Calendar, Filter } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader } from "./Card";
 
 export interface FilterOption {
   id: string;

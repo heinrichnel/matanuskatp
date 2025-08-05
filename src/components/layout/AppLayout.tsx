@@ -1,29 +1,24 @@
+// src/components/layout/AppLayout.tsx
 import React, { useState, useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { SyncProvider } from "../../context/SyncContext";
-import Footer from "./Footer";
 import Sidebar from "./Sidebar";
+import Footer from "./Footer";
 
 /**
- * Application Layout Component
+ * Main Application Layout
  *
- * Provides a consistent layout with navigation and a footer for all application pages.
- * It also includes a mobile-responsive sidebar and wraps content in `SyncProvider`
- * for online/offline functionality.
+ * Provides responsive sidebar, mobile header, and wraps all content in SyncProvider.
  */
 const AppLayout: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
-  // State to manage the sidebar's open/close status, defaulting based on screen size
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
 
-  // Effect to handle window resizing for sidebar behavior
   useEffect(() => {
     const handleResize = () => {
       setSidebarOpen(window.innerWidth >= 768);
     };
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -31,7 +26,7 @@ const AppLayout: React.FC = () => {
   return (
     <SyncProvider>
       <div className="flex min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-        {/* Sidebar navigation */}
+        {/* Sidebar */}
         <Sidebar
           currentView={location.pathname}
           onNavigate={navigate}
@@ -39,9 +34,9 @@ const AppLayout: React.FC = () => {
           onClose={() => setSidebarOpen(false)}
         />
 
-        {/* Main content and footer */}
+        {/* Main content area */}
         <div className="flex flex-col flex-1 min-h-screen">
-          {/* Top bar for mobile */}
+          {/* Mobile header */}
           <header className="md:hidden flex items-center justify-between px-4 py-2 bg-gray-100 border-b dark:bg-gray-900">
             <button
               className="p-2 rounded-md text-gray-700 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-800"

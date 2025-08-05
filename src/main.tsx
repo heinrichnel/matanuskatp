@@ -1,22 +1,28 @@
-import React from "react";
+import React, { lazy, Suspense, useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
 import App from "./App";
+import { AppProviders } from "./components/AppProviders";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { TyreProvider } from "./context/TyreContext";
-import { TyreStoresProvider } from "./context/TyreStoresContext";
 import "./index.css";
-import "./styles/theme.css"; // Import our new professional theme
+import "./styles/theme.css";
 import { getEnvVar, initBrowserEnv } from "./utils/envUtils";
 import { initializeConnectionMonitoring } from "./utils/firebaseConnectionHandler";
 
-// Initialize global environment variables for safer access
-// This prevents "import.meta" errors in non-module contexts
-try {
-  // Handle potential import.meta errors by using a try-catch approach
-  const envVars: Record<string, string> = {};
+// Import Leaflet and MarkerCluster CSS here to avoid build errors from local CSS files
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "leaflet/dist/leaflet.css";
 
-  // Safely access environment variables
+// The core logic of a React application's entry point is to render the root component.
+// All business logic, like API initialization, should be handled within React components or hooks.
+// This refactored file separates concerns, making it cleaner and more predictable.
+
+/**
+ * Initializes and validates environment variables globally.
+ * This is performed once before the app renders to ensure consistent access.
+ */
+function initializeEnv() {
+  const envVars: Record<string, string> = {};
   const envKeys = [
     "VITE_WIALON_SESSION_TOKEN",
     "VITE_WIALON_LOGIN_URL",
@@ -28,106 +34,96 @@ try {
     "VITE_USE_EMULATOR",
   ];
 
-  // Safely access each environment variable
   envKeys.forEach((key) => {
-    try {
-      envVars[key] = getEnvVar(key, "");
-    } catch {
-      console.warn(`Could not access ${key} from import.meta.env`);
+    // We use a guard to prevent errors if import.meta.env is not available
+    if (typeof import.meta !== "undefined" && import.meta.env) {
+      envVars[key] = import.meta.env[key] as string;
     }
   });
 
   initBrowserEnv(envVars);
-} catch (error) {
-  console.warn("Failed to initialize environment variables globally:", error);
 }
 
-// Function to render the application
-const renderApp = (isDev: boolean) => {
-  // Import AntDesignProvider lazily to ensure React is fully initialized
-  const AntDesignProvider = React.lazy(() => import("./components/ui/AntDesignProvider"));
+/**
+ * Handles the asynchronous initialization of Firebase and other services.
+ * This component will manage the loading state and render the main App once ready.
+ */
+const AppInitializer: React.FC = () => {
+  const [isFirebaseInitialized, setIsFirebaseInitialized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  ReactDOM.createRoot(document.getElementById("root")!).render(
+  useEffect(() => {
+    async function initServices() {
+      try {
+        // Dynamically import Firebase core services
+        await import("./firebase/core");
+        console.log("🔥 Firebase core services initialized successfully");
+
+        // Initialize connection monitoring
+        await initializeConnectionMonitoring();
+        console.log("🔄 Firebase connection monitoring initialized");
+
+        // Check for emulators in development mode
+        const isDev =
+          getEnvVar("MODE", "") === "development" || process.env.NODE_ENV === "development";
+        if (isDev) {
+          const { checkEmulatorsStatus } = await import("./firebaseEmulators");
+          const status = await checkEmulatorsStatus();
+          if (status.firestore && status.storage) {
+            console.log("✅ Firebase emulators are running and accessible");
+          } else {
+            console.warn("⚠️ Firebase emulators not detected - using production configuration");
+          }
+        }
+
+        setIsFirebaseInitialized(true);
+      } catch (err) {
+        console.error("❌ Failed to initialize application services:", err);
+        setError("Failed to initialize core services. Please check the console for details.");
+      }
+    }
+
+    initializeEnv();
+    initServices();
+  }, []);
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-red-500">
+        <div className="p-8 border border-red-300 rounded-lg shadow-lg">
+          <p className="text-lg font-semibold">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isFirebaseInitialized) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-700 dark:text-gray-300">
+        <p className="text-lg">Initializing application...</p>
+      </div>
+    );
+  }
+
+  // AntDesignProvider is now lazy-loaded, so we wrap it in Suspense
+  const AntDesignProvider = lazy(() => import("./components/ui/AntDesignProvider"));
+  const isDev = getEnvVar("MODE", "") === "development" || process.env.NODE_ENV === "development";
+
+  return (
     <React.StrictMode>
       <ErrorBoundary>
-        <React.Suspense fallback={<div>Loading UI components...</div>}>
+        <Suspense fallback={<div>Loading UI components...</div>}>
           <AntDesignProvider>
-            <TyreStoresProvider>
-              <TyreProvider>
-                {/* This is the single, correct top-level Router for the entire app */}
-                <BrowserRouter>
-                  {isDev && <div className="dev-indicator">Development Mode</div>}
-                  <App />
-                </BrowserRouter>
-              </TyreProvider>
-            </TyreStoresProvider>
+            <AppProviders>
+              {isDev && <div className="dev-indicator">Development Mode</div>}
+              <App />
+            </AppProviders>
           </AntDesignProvider>
-        </React.Suspense>
+        </Suspense>
       </ErrorBoundary>
     </React.StrictMode>
   );
 };
 
-// Initialize Firebase and check emulator status
-const initializeApp = async () => {
-  const isDev = getEnvVar("MODE", "") === "development" || process.env.NODE_ENV === "development";
-
-  try {
-    // Import Firebase core services after ensuring proper initialization
-    try {
-      // Import only core Firebase services initially
-      await import("./firebase/core");
-      console.log("🔥 Firebase core services initialized successfully");
-
-      // Initialize connection monitoring
-      try {
-        await initializeConnectionMonitoring();
-        console.log("🔄 Firebase connection monitoring initialized");
-      } catch (connError) {
-        console.warn("⚠️ Could not initialize connection monitoring:", connError);
-      }
-    } catch (firebaseError) {
-      console.error("❌ Failed to initialize Firebase:", firebaseError);
-    }
-
-    // Validate environment variables
-    const requiredEnvVars = [
-      "VITE_FIREBASE_API_KEY",
-      "VITE_FIREBASE_AUTH_DOMAIN",
-      "VITE_FIREBASE_PROJECT_ID",
-    ];
-
-    const missingVars = requiredEnvVars.filter((key) => !getEnvVar(key, ""));
-    const isValid = missingVars.length === 0;
-
-    console.log(
-      "Environment validation:",
-      isValid ? "✅ Valid" : "❌ Issues found",
-      missingVars.length > 0 ? `Missing: ${missingVars.join(", ")}` : ""
-    );
-
-    // Check emulator status in development - but handle any errors
-    if (isDev) {
-      try {
-        const { checkEmulatorsStatus } = await import("./firebaseEmulators");
-        const status = await checkEmulatorsStatus();
-
-        if (status.firestore && status.storage) {
-          console.log("✅ Firebase emulators are running and accessible");
-        } else {
-          console.log("⚠️ Firebase emulators not detected - using production configuration");
-        }
-      } catch (emulatorError) {
-        console.warn("⚠️ Could not check emulator status:", emulatorError);
-      }
-    }
-  } catch (error) {
-    console.error("❌ Failed to initialize application:", error);
-  } finally {
-    // Always render the application, even if initialization fails
-    renderApp(isDev);
-  }
-};
-
-// Initialize the application
-initializeApp();
+// Render the AppInitializer component as the entry point
+ReactDOM.createRoot(document.getElementById("root")!).render(<AppInitializer />);
