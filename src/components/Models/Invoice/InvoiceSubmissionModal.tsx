@@ -1,10 +1,5 @@
-import React, { useState, useRef } from "react";
-import Modal from "../../ui/modal";
-import Button from "../../ui/Button";
-import { Input, Select, Textarea } from "../../ui/FormElements";
-import { Trip } from "../../../types";
-import { formatCurrency, formatDate } from "../../../utils/helpers";
 import {
+  AlertTriangle,
   ArrowRight,
   Calendar,
   CheckCircle,
@@ -12,12 +7,15 @@ import {
   DollarSign,
   File,
   FileText,
-  Plus,
-  Upload,
   X,
-  AlertTriangle,
 } from "lucide-react";
-import FileUpload from "../ui/FileUpload";
+import React, { useState } from "react";
+import { Trip } from "../../../types";
+import { formatCurrency, formatDate } from "../../../utils/helpers";
+import Button from "../../ui/Button";
+import FileUpload from "../../ui/FileUpload";
+import { Input, Textarea } from "../../ui/FormElements";
+import Modal from "../../ui/Modal";
 
 interface InvoiceSubmissionModalProps {
   isOpen: boolean;
@@ -312,14 +310,17 @@ const InvoiceSubmissionModal: React.FC<InvoiceSubmissionModalProps> = ({
 
           <div className="space-y-4">
             <div>
-              <FileUpload
-                label="Proof of Delivery (POD) *"
-                accept=".pdf,.jpg,.jpeg,.png"
-                multiple
-                onFileSelect={setProofOfDeliveryFiles}
-                error={formErrors.proofOfDelivery}
-                disabled={isSubmitting}
-              />
+              <div>
+                <FileUpload
+                  label="Proof of Delivery (POD) *"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  multiple
+                  onFileSelect={setProofOfDeliveryFiles}
+                />
+                {formErrors.proofOfDelivery && (
+                  <p className="text-sm text-red-600 mt-1">{formErrors.proofOfDelivery}</p>
+                )}
+              </div>
               {proofOfDeliveryFiles && proofOfDeliveryFiles.length > 0 && (
                 <div className="mt-2 bg-green-50 border border-green-200 rounded p-2">
                   <p className="text-sm text-green-800 font-medium">
@@ -344,8 +345,7 @@ const InvoiceSubmissionModal: React.FC<InvoiceSubmissionModalProps> = ({
                 label="Signed Invoice (Optional)"
                 accept=".pdf,.jpg,.jpeg,.png"
                 multiple
-                onFileSelect={setSignedInvoiceFiles}
-                disabled={isSubmitting}
+                onFileSelect={!isSubmitting ? setSignedInvoiceFiles : () => {}}
               />
               {signedInvoiceFiles && signedInvoiceFiles.length > 0 && (
                 <div className="mt-2 bg-green-50 border border-green-200 rounded p-2">
@@ -396,7 +396,7 @@ const InvoiceSubmissionModal: React.FC<InvoiceSubmissionModalProps> = ({
         {/* Submit Buttons */}
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
-            onClick={onClick}
+            onClick={onClose}
             icon={<X className="w-4 h-4" />}
             disabled={isSubmitting}
             variant="outline"
@@ -404,7 +404,7 @@ const InvoiceSubmissionModal: React.FC<InvoiceSubmissionModalProps> = ({
             Cancel
           </Button>
           <Button
-            onClick={onClick}
+            onClick={handleSubmit}
             icon={<FileText className="w-4 h-4" />}
             isLoading={isSubmitting}
             disabled={isSubmitting}

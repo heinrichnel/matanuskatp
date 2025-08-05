@@ -1,6 +1,6 @@
-import { useFleetAnalytics } from "@/context/FleetAnalyticsContext";
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from "chart.js";
 import { Doughnut } from "react-chartjs-2";
+import { useFleetAnalytics } from "../../context/FleetAnalyticsContext";
 
 // Register ChartJS components
 ChartJS.register(ArcElement, Tooltip, Legend);

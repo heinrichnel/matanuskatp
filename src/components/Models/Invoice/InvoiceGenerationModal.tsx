@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import Modal from "../../ui/modal";
-import Button from "../../ui/Button";
-import { DollarSign, X, FileText, Send, AlertTriangle } from "lucide-react";
+import { FileText, Send, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import { formatCurrency } from "../../../utils/helpers";
+import Button from "../../ui/Button";
+import Modal from "../../ui/Modal";
 
 interface InvoiceItem {
   id: string;
@@ -307,13 +307,13 @@ const InvoiceGenerationModal: React.FC<InvoiceGenerationModalProps> = ({
         <div className="flex justify-end space-x-3 pt-4 border-t">
           <Button
             variant="outline"
-            onClick={onClick}
+            onClick={onClose}
             icon={<X className="w-4 h-4" />}
             disabled={isLoading}
           >
             Cancel
           </Button>
-          <Button onClick={onClick} icon={<Send className="w-4 h-4" />} isLoading={isLoading}>
+          <Button onClick={handleSubmit} icon={<Send className="w-4 h-4" />} isLoading={isLoading}>
             Generate Invoice
           </Button>
         </div>

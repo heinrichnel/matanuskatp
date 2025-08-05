@@ -2,15 +2,15 @@
 import React, { useState } from "react";
 
 // ─── Types ───────────────────────────────────────────────────────
-import { Trip, FollowUpRecord } from "../../../types";
+import { FollowUpRecord, Trip } from "../../../types";
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
 import { Input, Select, Textarea } from "../../ui/FormElements";
+import Modal from "../../ui/Modal";
 
 // ─── Icons ───────────────────────────────────────────────────────
-import { Save, X, CheckCircle, AlertTriangle } from "lucide-react";
+import { AlertTriangle, CheckCircle, Save, X } from "lucide-react";
 
 // ─── Utils ───────────────────────────────────────────────────────
 import { formatCurrency, formatDate } from "../../../utils/helpers";
