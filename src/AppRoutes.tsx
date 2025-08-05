@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import AppLayout from "./components/layout/AppLayout";
 import { TripProvider } from "./context/TripContext";
@@ -182,7 +182,14 @@ export const AppRoutes: React.FC = () => {
         <Route path="incident/new" element={withSuspense(ReportNewIncidentPage)} />
 
         {/* Trips */}
-          <Route path="trips" element={<TripProvider />}>
+        <Route
+          path="trips"
+          element={
+            <TripProvider>
+              <Outlet />
+            </TripProvider>
+          }
+        >
           <Route index element={withSuspense(TripDashboardPage)} />
           <Route path="dashboard" element={withSuspense(TripDashboardPage)} />
           <Route path="manage" element={withSuspense(TripManagementPage)} />

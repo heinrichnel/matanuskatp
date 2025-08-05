@@ -1,20 +1,15 @@
-/**
- * React 19 JSX type definitions
- * These type definitions help TypeScript understand the new React 19 JSX structure
- */
-
 import React from "react";
 
 declare global {
   namespace JSX {
-    interface Element extends React.ReactElement<any, any> {}
+    type Element = React.ReactElement<any, any>;
     interface ElementAttributesProperty {
-      props: {};
+      props: object;
     }
     interface ElementChildrenAttribute {
-      children: {};
+      children: object;
     }
-    interface IntrinsicElements extends React.JSX.IntrinsicElements {}
+    // interface IntrinsicElements extends React.JSX.IntrinsicElements {} // REMOVE THIS LINE
   }
 }
 

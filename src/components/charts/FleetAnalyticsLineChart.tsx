@@ -116,7 +116,7 @@ export function FleetAnalyticsLineChart() {
           <div className="w-full h-[300px] flex items-center justify-center">Loading...</div>
         ) : (
           <div className="aspect-auto h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={300} minHeight={250}>
               <LineChart
                 data={fleetAnalytics}
                 margin={{

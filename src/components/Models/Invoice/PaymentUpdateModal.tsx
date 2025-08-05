@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { Trip, FollowUpRecord } from "../../../types";
 
 // ─── UI Components ───────────────────────────────────────────────
-import Modal from "../../ui/modal";
+import Modal from "../../ui/Modal";
 import Button from "../../ui/Button";
 import { Input, Select, Textarea } from "../../ui/FormElements";
 
@@ -362,10 +362,10 @@ const PaymentUpdateModal: React.FC<PaymentUpdateModalProps> = ({
 
         {/* Actions */}
         <div className="flex justify-end space-x-3 pt-4 border-t">
-          <Button variant="outline" onClick={onClick} icon={<X className="w-4 h-4" />}>
+          <Button variant="outline" onClick={onClose} icon={<X className="w-4 h-4" />}>
             Cancel
           </Button>
-          <Button onClick={onClick} icon={<Save className="w-4 h-4" />}>
+          <Button onClick={handleSubmit} icon={<Save className="w-4 h-4" />}>
             Update Payment Status
           </Button>
         </div>

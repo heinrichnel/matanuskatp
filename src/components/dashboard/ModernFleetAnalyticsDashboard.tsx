@@ -1,13 +1,13 @@
-import { FleetAnalyticsLineChart } from "@/components/charts/FleetAnalyticsLineChart";
-import { FleetCostAreaChart } from "@/components/charts/FleetCostAreaChart";
-import { FleetStatusDoughnut } from "@/components/charts/FleetStatusDoughnut";
-import { FleetUtilizationLine } from "@/components/charts/FleetUtilizationLine";
-import { ROIBarChart } from "@/components/charts/ROIBarChart";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/Card";
-import { FilterButton, FilterControls } from "@/components/ui/FilterControls";
-import { useFleetAnalytics } from "@/context/FleetAnalyticsContext";
 import { Download, RefreshCw } from "lucide-react";
 import { useState } from "react";
+import { FleetAnalyticsLineChart } from "../../components/charts/FleetAnalyticsLineChart";
+import { FleetCostAreaChart } from "../../components/charts/FleetCostAreaChart";
+import { FleetStatusDoughnut } from "../../components/charts/FleetStatusDoughnut";
+import { FleetUtilizationLine } from "../../components/charts/FleetUtilizationLine";
+import { ROIBarChart } from "../../components/charts/ROIBarChart";
+import { Card, CardContent, CardFooter, CardHeader } from "../../components/ui";
+import { FilterButton, FilterControls } from "../../components/ui/FilterControls";
+import { useFleetAnalytics } from "../../context/FleetAnalyticsContext";
 
 interface FilterOption {
   id: string;

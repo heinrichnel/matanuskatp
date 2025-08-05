@@ -25,10 +25,11 @@ export function FleetStatusDoughnut() {
   }
 
   return (
-    <div className="w-full max-w-xs mx-auto">
+    <div className="w-full max-w-xs mx-auto" style={{ height: "250px" }}>
       <Doughnut
         data={data}
         options={{
+          maintainAspectRatio: false,
           plugins: {
             legend: {
               display: true,

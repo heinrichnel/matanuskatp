@@ -1,13 +1,5 @@
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart } from "recharts/es6/chart/AreaChart";
 
 const data = [
   { date: "2025-01", operations: 6800, maintenance: 2400 },
@@ -23,7 +15,7 @@ export function FleetCostAreaChart() {
   return (
     <div className="w-full h-96">
       <h3 className="text-lg font-medium mb-3">Fleet Cost Analysis</h3>
-      <ResponsiveContainer width="100%" height="90%">
+      <ResponsiveContainer width="100%" height="90%" minWidth={300} minHeight={250}>
         <AreaChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="colorOperations" x1="0" y1="0" x2="0" y2="1">
@@ -37,18 +29,18 @@ export function FleetCostAreaChart() {
           </defs>
           <XAxis
             dataKey="date"
-            tickFormatter={(value) => {
+            tickFormatter={(value: string) => {
               const date = new Date(value);
               return date.toLocaleDateString("en-US", {
                 month: "short",
               });
             }}
           />
-          <YAxis tickFormatter={(value) => `$${value}`} />
+          <YAxis tickFormatter={(value: number) => `$${value}`} />
           <CartesianGrid strokeDasharray="3 3" />
           <Tooltip
             formatter={(value: number) => [`$${value}`, undefined]}
-            labelFormatter={(label) => {
+            labelFormatter={(label: string) => {
               const date = new Date(label);
               return date.toLocaleDateString("en-US", {
                 month: "long",

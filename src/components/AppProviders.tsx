@@ -1,4 +1,5 @@
 import React, { ReactNode } from "react";
+import { BrowserRouter } from "react-router-dom";
 import { SyncProvider } from "../context/SyncContext";
 
 interface AppProvidersProps {
@@ -7,7 +8,7 @@ interface AppProvidersProps {
 
 /**
  * AppProviders component
- * 
+ *
  * This component centralizes all application-level context providers
  * to ensure they're consistently applied throughout the application.
  * Wrap the root App component with this to provide context to all components.
@@ -15,7 +16,7 @@ interface AppProvidersProps {
 export const AppProviders: React.FC<AppProvidersProps> = ({ children }) => {
   return (
     <SyncProvider>
-      {children}
+      <BrowserRouter>{children}</BrowserRouter>
     </SyncProvider>
   );
 };

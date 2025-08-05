@@ -1,20 +1,13 @@
 {
   "firestore": {
-    "rules": "firestore.rules",
     "indexes": "firestore.indexes.json",
     "database": "(default)",
     "location": "nam5"
   },
-  "storage": {
-    "rules": "storage.rules"
-  },
+  "storage": {},
   "hosting": {
     "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
       {
         "source": "**",
@@ -26,16 +19,8 @@
     {
       "source": "functions",
       "codebase": "default",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run lint"
-      ]
+      "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local"],
+      "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run lint"]
     }
   ],
   "emulators": {
@@ -74,7 +59,7 @@
       "port": 9099
     },
     "database": {
-      "port": 900
+      "port": 1900
     },
     "dataconnect": {
       "port": 9399,
