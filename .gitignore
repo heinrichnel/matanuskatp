@@ -7,6 +7,11 @@ node_modules/
 dist/
 build/
 
+# ───────── Large Files ─────────────────────
+*.zip
+commit-files.zip
+my-repo-with-git.zip
+
 # ───────── Environment Files (Secrets) ─────
 .env*
 !.env.example
